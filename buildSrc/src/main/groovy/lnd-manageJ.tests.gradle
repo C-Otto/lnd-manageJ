@@ -4,8 +4,11 @@ plugins {
 }
 
 dependencies {
-    testImplementation 'nl.jqno.equalsverifier:equalsverifier:3.6'
+    testImplementation 'nl.jqno.equalsverifier:equalsverifier:3.7.2'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'uk.org.lidalia:slf4j-test:1.2.0'
+//    configurations.getByName('integrationTestRuntimeOnly').exclude group: 'ch.qos.logback', module: 'logback-classic'
+//    configurations.getByName('integrationTestRuntimeOnly').exclude group: 'org.slf4j', module: 'slf4j-nop'
 }
 
 tasks.withType(Test).configureEach {

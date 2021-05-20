@@ -18,7 +18,7 @@ In short, lnd-manageJ helps you understand and manage the inner workings of your
 
 ## How can I run lnd-manageJ?
 
-Install Java 16 and run `./start.sh`.
+Install Java 17 and run `./start.sh`.
 
 ## Disclaimer
 This project is not related to bitromortac's Python based [lndmanage](https://github.com/bitromortac/lndmanage).

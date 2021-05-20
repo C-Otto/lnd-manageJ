@@ -58,13 +58,12 @@
             <property name="minimum" value="2" />
         </properties>
     </rule>
-    <rule ref="category/java/codestyle.xml/AtLeastOneConstructor">
+    <rule ref="category/java/codestyle.xml/ShortClassName">
         <properties>
-            <property name="violationSuppressXPath"
-                      value="//ClassOrInterfaceDeclaration[ends-with(@SimpleName, 'Test') or ends-with(@SimpleName, 'IT')]"/>
+            <property name="minimum" value="4" />
         </properties>
     </rule>
-    <rule ref="category/java/codestyle.xml/DefaultPackage">
+    <rule ref="category/java/codestyle.xml/AtLeastOneConstructor">
         <properties>
             <property name="violationSuppressXPath"
                       value="//ClassOrInterfaceDeclaration[ends-with(@SimpleName, 'Test') or ends-with(@SimpleName, 'IT')]"/>
@@ -134,7 +133,9 @@
         <exclude name="UseConcurrentHashMap"/>
     </rule>
 
-    <rule ref="category/java/performance.xml"/>
+    <rule ref="category/java/performance.xml">
+        <exclude name="AvoidInstantiatingObjectsInLoops"/>
+    </rule>
 
     <rule ref="category/java/security.xml"/>
 </ruleset>

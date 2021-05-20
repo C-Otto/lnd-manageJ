@@ -3,16 +3,9 @@ plugins {
     id 'net.ltgt.nullaway'
 }
 
-tasks.withType(JavaCompile).configureEach {
-    options.errorprone.nullaway {
-        excludedFieldAnnotations.add('org.mockito.Mock')
-        excludedFieldAnnotations.add('org.mockito.InjectMocks')
-    }
-}
-
 dependencies {
-    errorprone 'com.google.errorprone:error_prone_core:2.7.1'
-    errorprone 'com.uber.nullaway:nullaway:0.9.1'
+    errorprone 'com.google.errorprone:error_prone_core:2.9.0'
+    errorprone 'com.uber.nullaway:nullaway:0.9.2'
 }
 
 nullaway {
@@ -21,9 +14,11 @@ nullaway {
 
 tasks.withType(JavaCompile).configureEach {
     options.errorprone.disable('EqualsGetClass')
+    options.errorprone.excludedPaths = ".*/generated/.*"
     options.errorprone.nullaway {
         severity = net.ltgt.gradle.errorprone.CheckSeverity.ERROR
         excludedFieldAnnotations.add('org.mockito.Mock')
+        excludedFieldAnnotations.add('org.springframework.beans.factory.annotation.Value')
         excludedFieldAnnotations.add('org.mockito.InjectMocks')
         excludedFieldAnnotations.add('org.junit.jupiter.api.io.TempDir')
         excludedFieldAnnotations.add('org.springframework.beans.factory.annotation.Autowired')
