@@ -1,0 +1,25 @@
+plugins {
+    id 'java'
+    id 'com.adarshr.test-logger'
+}
+
+dependencies {
+    testImplementation 'nl.jqno.equalsverifier:equalsverifier:3.6'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+    afterTest { descriptor, result ->
+        if (result.resultType == TestResult.ResultType.SKIPPED) {
+            throw new GradleException('Do not ignore test cases')
+        }
+    }
+}
+
+testlogger {
+    theme 'standard-parallel'
+    slowThreshold 1000
+    showPassed false
+    showSimpleNames true
+}

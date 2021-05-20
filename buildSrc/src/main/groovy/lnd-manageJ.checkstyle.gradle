@@ -1,0 +1,8 @@
+plugins {
+    id 'checkstyle'
+}
+
+checkstyle {
+    toolVersion '8.42'
+    maxWarnings = 0
+}

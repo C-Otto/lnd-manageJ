@@ -1,0 +1,140 @@
+<?xml version="1.0"?>
+
+<ruleset name="Custom Rules"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+
+    <description>
+        Custom rules
+    </description>
+
+    <rule ref="category/java/bestpractices.xml">
+        <exclude name="JUnitAssertionsShouldIncludeMessage"/>
+        <exclude name="JUnitTestsShouldIncludeAssert"/>
+        <exclude name="GuardLogStatement"/>
+    </rule>
+    <rule ref="category/java/bestpractices.xml/JUnitTestContainsTooManyAsserts">
+        <properties>
+            <property name="maximumAsserts" value="2"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/bestpractices.xml/UnusedPrivateField">
+        <properties>
+            <property name="ignoredAnnotations" value="org.mockito.Mock|lombok.Setter|lombok.Getter|lombok.Builder|lombok.Data|lombok.RequiredArgsConstructor|lombok.AllArgsConstructor|lombok.Value|lombok.NoArgsConstructor|java.lang.Deprecated|javafx.fxml.FXML|lombok.experimental.Delegate" />
+        </properties>
+    </rule>
+
+    <rule ref="category/java/codestyle.xml">
+        <exclude name="MethodArgumentCouldBeFinal"/>
+        <exclude name="OnlyOneReturn"/>
+        <exclude name="LocalVariableCouldBeFinal"/>
+        <exclude name="UnnecessaryConstructor"/>
+        <exclude name="CommentDefaultAccessModifier"/>
+        <exclude name="TooManyStaticImports"/>
+    </rule>
+    <rule ref="category/java/codestyle.xml/MethodNamingConventions">
+        <properties>
+            <property name="methodPattern" value="[a-z][a-zA-Z0-9]*" />
+            <property name="staticPattern" value="[a-z][a-zA-Z0-9]*" />
+            <property name="nativePattern" value="[a-z][a-zA-Z0-9]*" />
+            <property name="junit3TestPattern" value="test[A-Z0-9][_a-zA-Z0-9]*" />
+            <property name="junit4TestPattern" value="[a-z][_a-zA-Z0-9]*" />
+            <property name="junit5TestPattern" value="[a-z][_a-zA-Z0-9]*" />
+        </properties>
+    </rule>
+    <rule ref="category/java/codestyle.xml/ClassNamingConventions">
+        <properties>
+            <property name="classPattern" value="[A-Z][a-zA-Z0-9]*" />
+            <property name="abstractClassPattern" value="[A-Z][a-zA-Z0-9]*" />
+            <property name="interfacePattern" value="[A-Z][a-zA-Z0-9]*" />
+            <property name="enumPattern" value="[A-Z][a-zA-Z0-9]*" />
+            <property name="annotationPattern" value="[A-Z][a-zA-Z0-9]*" />
+            <property name="utilityClassPattern" value="[A-Z][a-zA-Z0-9]*" />
+        </properties>
+    </rule>
+    <rule ref="category/java/codestyle.xml/ShortMethodName">
+        <properties>
+            <property name="minimum" value="2" />
+        </properties>
+    </rule>
+    <rule ref="category/java/codestyle.xml/AtLeastOneConstructor">
+        <properties>
+            <property name="violationSuppressXPath"
+                      value="//ClassOrInterfaceDeclaration[ends-with(@SimpleName, 'Test') or ends-with(@SimpleName, 'IT')]"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/codestyle.xml/DefaultPackage">
+        <properties>
+            <property name="violationSuppressXPath"
+                      value="//ClassOrInterfaceDeclaration[ends-with(@SimpleName, 'Test') or ends-with(@SimpleName, 'IT')]"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/codestyle.xml/LongVariable">
+        <properties>
+            <property name="minimum" value="35"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/codestyle.xml/LinguisticNaming">
+        <properties>
+            <property name="ignoredAnnotations" value="java.lang.Override|org.junit.jupiter.api.Test"/>
+        </properties>
+    </rule>
+
+    <rule ref="category/java/design.xml">
+        <exclude name="LoosePackageCoupling"/>
+        <exclude name="LawOfDemeter"/>
+    </rule>
+    <rule ref="category/java/design.xml/ExcessiveImports">
+        <properties>
+            <property name="violationSuppressXPath"
+                value="//ClassOrInterfaceDeclaration[ends-with(@SimpleName, 'Test') or ends-with(@SimpleName, 'IT')]"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/design.xml/UseUtilityClass">
+        <properties>
+            <property name="ignoredAnnotations" value="org.springframework.boot.autoconfigure.SpringBootApplication" />
+        </properties>
+    </rule>
+    <rule ref="category/java/design.xml/TooManyMethods">
+        <properties>
+            <property name="violationSuppressXPath"
+                      value="//ClassOrInterfaceDeclaration[ends-with(@SimpleName, 'Test') or ends-with(@SimpleName, 'IT')]"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/design.xml/SignatureDeclareThrowsException">
+        <properties>
+            <property name="IgnoreJUnitCompletely" value="true"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/design.xml/DataClass">
+        <properties>
+            <property name="violationSuppressXPath"
+                      value="//ClassOrInterfaceDeclaration[ends-with(@SimpleName, 'Dto') or ends-with(@SimpleName, 'DTO')]"/>
+        </properties>
+    </rule>
+
+    <rule ref="category/java/documentation.xml">
+        <exclude name="CommentRequired"/>
+    </rule>
+    <rule ref="category/java/documentation.xml/CommentSize">
+        <properties>
+            <property name="maxLineLength" value="120" />
+        </properties>
+    </rule>
+
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="BeanMembersShouldSerialize"/>
+        <exclude name="DataflowAnomalyAnalysis"/>
+        <exclude name="MissingSerialVersionUID"/>
+    </rule>
+
+    <rule ref="category/java/multithreading.xml">
+        <exclude name="DoNotUseThreads"/>
+        <exclude name="UseConcurrentHashMap"/>
+    </rule>
+
+    <rule ref="category/java/performance.xml"/>
+
+    <rule ref="category/java/security.xml"/>
+</ruleset>

@@ -1,0 +1,17 @@
+plugins {
+    id 'groovy-gradle-plugin'
+}
+
+repositories {
+    gradlePluginPortal()
+}
+
+dependencies {
+    implementation 'de.aaschmid:gradle-cpd-plugin:3.2'
+    implementation 'net.ltgt.gradle:gradle-errorprone-plugin:2.0.1'
+    implementation 'net.ltgt.gradle:gradle-nullaway-plugin:1.1.0'
+    implementation 'gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.7.1'
+    implementation 'org.springframework.boot:spring-boot-gradle-plugin:2.4.5'
+    implementation 'com.adarshr:gradle-test-logger-plugin:3.0.0'
+    implementation 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.6.0'
+}

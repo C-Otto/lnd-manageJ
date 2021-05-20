@@ -1,0 +1,27 @@
+plugins {
+    id 'com.github.spotbugs'
+}
+
+spotbugsMain.reports.configure {
+    xml.enabled = false
+    html.enabled = true
+}
+spotbugsTest.reports.configure {
+    xml.enabled = false
+    html.enabled = true
+}
+spotbugs {
+    excludeFilter = file("${rootDir}/config/spotbugs-exclude.xml")
+}
+
+tasks.withType(Test).forEach { testTask ->
+    tasks.withType(com.github.spotbugs.snom.SpotBugsTask).forEach { spotbugsTask ->
+        String expected = ("spotbugs" + testTask.getName()).toLowerCase()
+        if (expected == spotbugsTask.getName().toLowerCase()) {
+            testTask.shouldRunAfter(spotbugsTask)
+        }
+        if (spotbugsTask.getName() == "spotbugsMain") {
+            testTask.shouldRunAfter(spotbugsTask)
+        }
+    }
+}

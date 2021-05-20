@@ -1,0 +1,11 @@
+plugins {
+    id 'lnd-manageJ.java-conventions'
+}
+
+dependencies {
+    implementation 'org.flywaydb:flyway-core'
+}
+
+bootJar {
+    archiveClassifier.set('boot')
+}

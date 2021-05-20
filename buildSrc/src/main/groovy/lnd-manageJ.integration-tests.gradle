@@ -1,0 +1,37 @@
+plugins {
+    id 'lnd-manageJ.tests'
+}
+
+sourceSets {
+    integrationTest {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+
+configurations {
+    integrationTestImplementation.extendsFrom testImplementation
+    integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+task integrationTest(type: Test) {
+    description = 'Runs integration tests.'
+    group = 'verification'
+
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    shouldRunAfter test
+}
+check.dependsOn integrationTest
+
+dependencies {
+    testImplementation 'com.tngtech.archunit:archunit:0.18.0'
+    testImplementation 'org.awaitility:awaitility:4.1.0'
+
+}
+
+integrationTest {
+    testlogger {
+        slowThreshold 2000
+    }
+}

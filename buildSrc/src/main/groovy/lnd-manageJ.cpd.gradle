@@ -1,0 +1,8 @@
+plugins {
+    id 'de.aaschmid.cpd'
+}
+check.dependsOn cpdCheck
+
+cpd {
+    toolVersion = '6.34.0'
+}

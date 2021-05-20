@@ -1,0 +1,53 @@
+plugins {
+    id 'jacoco'
+}
+
+check.dependsOn jacocoTestCoverageVerification
+jacocoTestCoverageVerification.dependsOn jacocoTestReport
+
+tasks.withType(Test).configureEach {
+    jacocoTestCoverageVerification.dependsOn it
+    jacocoTestReport.mustRunAfter it
+}
+
+jacocoTestReport {
+    getExecutionData().setFrom(fileTree(buildDir).include('/jacoco/*.exec'))
+}
+jacocoTestCoverageVerification {
+    getExecutionData().setFrom(fileTree(buildDir).include('/jacoco/*.exec'))
+
+    violationRules {
+        rule {
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 0.99
+            }
+        }
+        rule {
+            limit {
+                counter = 'CLASS'
+                value = 'COVEREDRATIO'
+                minimum = 1.0
+            }
+        }
+        rule {
+            limit {
+                counter = 'INSTRUCTION'
+                value = 'COVEREDRATIO'
+                minimum = 0.99
+            }
+        }
+        rule {
+            limit {
+                counter = 'METHOD'
+                value = 'COVEREDRATIO'
+                minimum = 0.99
+            }
+        }
+    }
+}
+
+jacoco {
+    toolVersion = '0.8.7'
+}

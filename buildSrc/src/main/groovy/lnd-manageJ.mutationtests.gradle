@@ -1,0 +1,20 @@
+plugins {
+    id 'lnd-manageJ.tests'
+    id 'info.solidsoft.pitest'
+}
+
+pitest {
+    targetClasses = ['de.cotto.*']
+    pitestVersion = '1.6.6'
+    junit5PluginVersion = '0.14'
+    outputFormats = ['XML', 'HTML']
+    timestampedReports = false
+    failWhenNoMutations = false
+    excludedMethods = ['hashCode']
+    threads = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+    testStrengthThreshold = 100
+}
+
+tasks.withType(info.solidsoft.gradle.pitest.PitestTask).configureEach {
+    dependsOn test
+}
