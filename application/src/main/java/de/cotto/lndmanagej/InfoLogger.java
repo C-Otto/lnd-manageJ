@@ -15,18 +15,20 @@ public class InfoLogger {
         this.grpcGetInfo = grpcGetInfo;
     }
 
-    @Scheduled(fixedRate = 60_000)
-    public void logAlias() {
+    @Scheduled(fixedRate = 10_000)
+    public void logDetails() {
         logger.info("Alias: {}", grpcGetInfo.getAlias());
-    }
-
-    @Scheduled(fixedRate = 60_000)
-    public void logPubkey() {
         logger.info("Pubkey: {}", grpcGetInfo.getPubkey());
-    }
-
-    @Scheduled(fixedRate = 5_000)
-    public void logBlockHeight() {
         logger.info("Block Height: {}", grpcGetInfo.getBlockHeight());
+        logger.info("Block: {}", grpcGetInfo.getBlockHash());
+        logger.info("Best Header Timestamp: {}", grpcGetInfo.getBestHeaderTimestamp());
+        logger.info("Active Channels: {}", grpcGetInfo.getNumberOfActiveChannels());
+        logger.info("Inactive Channels: {}", grpcGetInfo.getNumberOfInactiveChannels());
+        logger.info("Pending Channels: {}", grpcGetInfo.getNumberOfPendingChannels());
+        logger.info("Peers: {}", grpcGetInfo.getNumberOfPeers());
+        logger.info("Version: {}", grpcGetInfo.getVersion());
+        logger.info("Commit: {}", grpcGetInfo.getCommitHash());
+        logger.info("Synced to graph: {}", grpcGetInfo.isSyncedToGraph());
+        logger.info("Synced to chain: {}", grpcGetInfo.isSyncedToChain());
     }
 }

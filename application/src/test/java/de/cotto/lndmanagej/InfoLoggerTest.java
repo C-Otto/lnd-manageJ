@@ -10,7 +10,6 @@ import uk.org.lidalia.slf4jtest.TestLogger;
 import uk.org.lidalia.slf4jtest.TestLoggerFactory;
 
 import static de.cotto.lndmanagej.graph.model.NodeFixtures.ALIAS;
-import static de.cotto.lndmanagej.graph.model.NodeFixtures.PUBKEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static uk.org.lidalia.slf4jtest.LoggingEvent.info;
@@ -27,23 +26,9 @@ class InfoLoggerTest {
     private GrpcGetInfo grpcGetInfo;
 
     @Test
-    void logAlias() {
+    void logDetails() {
         when(grpcGetInfo.getAlias()).thenReturn(ALIAS);
-        infoLogger.logAlias();
+        infoLogger.logDetails();
         assertThat(logger.getLoggingEvents()).contains(info("Alias: {}", ALIAS));
-    }
-
-    @Test
-    void logPubkey() {
-        when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY);
-        infoLogger.logPubkey();
-        assertThat(logger.getLoggingEvents()).contains(info("Pubkey: {}", PUBKEY));
-    }
-
-    @Test
-    void logBlockHeight() {
-        when(grpcGetInfo.getBlockHeight()).thenReturn(123);
-        infoLogger.logBlockHeight();
-        assertThat(logger.getLoggingEvents()).contains(info("Block Height: {}", 123));
     }
 }
