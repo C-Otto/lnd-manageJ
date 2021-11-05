@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.model;
 
-import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -22,8 +21,8 @@ class HtlcDetailsTest {
     @Test
     void builder_with_all_arguments() {
         HtlcDetails htlcDetails = HtlcDetails.builder()
-                .withIncomingChannelId(CHANNEL_ID.getShortChannelId())
-                .withOutgoingChannelId(CHANNEL_ID_2.getShortChannelId())
+                .withIncomingChannelId(CHANNEL_ID.shortChannelId())
+                .withOutgoingChannelId(CHANNEL_ID_2.shortChannelId())
                 .withTimestamp(789)
                 .withIncomingHtlcId(1)
                 .withOutgoingHtlcId(2)
@@ -32,30 +31,32 @@ class HtlcDetailsTest {
     }
 
     @Test
-    void getTimestamp() {
-        assertThat(HTLC_DETAILS.getTimestamp()).isEqualTo(Instant.ofEpochSecond(0, 789));
-    }
-
-    @Test
     void withoutTimestamp() {
-        assertThat(HTLC_DETAILS.withoutTimestamp().getTimestamp()).isEqualTo(Instant.ofEpochSecond(0));
+        assertThat(HTLC_DETAILS.withoutTimestamp().timestamp()).isEqualTo(Instant.ofEpochSecond(0));
     }
 
     @Test
-    void testToString() {
-        assertThat(HTLC_DETAILS).hasToString(
-                "HtlcDetails{" +
-                        "incomingChannelId=783231610496155649" +
-                        ", outgoingChannelId=879608202739056642" +
-                        ", incomingHtlcId=1" +
-                        ", outgoingHtlcId=2" +
-                        ", timestamp=1970-01-01T00:00:00.000000789Z" +
-                        "}"
-        );
+    void timestamp() {
+        assertThat(HTLC_DETAILS.timestamp()).isEqualTo(Instant.ofEpochSecond(0, 789));
     }
 
     @Test
-    void testEquals() {
-        EqualsVerifier.forClass(HtlcDetails.class).usingGetClass().verify();
+    void incomingHtlcId() {
+        assertThat(HTLC_DETAILS.incomingHtlcId()).isEqualTo(1);
+    }
+
+    @Test
+    void outgoingHtlcId() {
+        assertThat(HTLC_DETAILS.outgoingHtlcId()).isEqualTo(2);
+    }
+
+    @Test
+    void incomingChannelId() {
+        assertThat(HTLC_DETAILS.incomingChannelId()).isEqualTo(CHANNEL_ID);
+    }
+
+    @Test
+    void outgoingChannelId() {
+        assertThat(HTLC_DETAILS.outgoingChannelId()).isEqualTo(CHANNEL_ID_2);
     }
 }

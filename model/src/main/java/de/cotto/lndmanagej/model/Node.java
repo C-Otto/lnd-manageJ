@@ -5,36 +5,15 @@ import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 
-public class Node implements Comparable<Node> {
-    private final String alias;
-    private final long lastUpdate;
-    private final String pubkey;
-
-    private Node(String alias, long lastUpdate, String pubkey) {
-        this.alias = alias;
-        this.lastUpdate = lastUpdate;
-        this.pubkey = pubkey;
-    }
+public record Node(String alias, long lastUpdate, String pubkey) implements Comparable<Node> {
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public String getAlias() {
-        return alias;
-    }
-
     @Override
     public String toString() {
         return alias;
-    }
-
-    public String getPubkey() {
-        return pubkey;
-    }
-
-    public long getLastUpdate() {
-        return lastUpdate;
     }
 
     @Override

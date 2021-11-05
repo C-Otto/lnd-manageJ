@@ -106,20 +106,20 @@ class CoinsTest {
     @Test
     void getSatoshis() {
         long satoshis = 1_234L;
-        assertThat(Coins.ofSatoshis(satoshis).getSatoshis()).isEqualTo(satoshis);
+        assertThat(Coins.ofSatoshis(satoshis).satoshis()).isEqualTo(satoshis);
     }
 
     @Test
     void getMilliSatoshis() {
         long milliSatoshis = 1_234L;
-        assertThat(Coins.ofMilliSatoshis(milliSatoshis).getMilliSatoshis()).isEqualTo(milliSatoshis);
+        assertThat(Coins.ofMilliSatoshis(milliSatoshis).milliSatoshis()).isEqualTo(milliSatoshis);
     }
 
     @Test
     void getSatoshis_with_fraction() {
         long milliSatoshis = 1_234L;
         assertThatExceptionOfType(IllegalStateException.class).isThrownBy(
-                () -> Coins.ofMilliSatoshis(milliSatoshis).getSatoshis()
+                () -> Coins.ofMilliSatoshis(milliSatoshis).satoshis()
         );
     }
 

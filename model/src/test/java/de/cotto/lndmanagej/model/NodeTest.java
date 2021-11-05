@@ -37,7 +37,7 @@ class NodeTest {
     @Test
     void builder_without_last_update() {
         Node node = Node.builder().withPubkey(PUBKEY).withAlias(ALIAS).build();
-        assertThat(node.getLastUpdate()).isEqualTo(0);
+        assertThat(node.lastUpdate()).isEqualTo(0);
     }
 
     @Test
@@ -100,17 +100,17 @@ class NodeTest {
 
     @Test
     void getAlias() {
-        assertThat(NODE.getAlias()).isEqualTo(NodeFixtures.ALIAS);
+        assertThat(NODE.alias()).isEqualTo(NodeFixtures.ALIAS);
     }
 
     @Test
     void getPubkey() {
-        assertThat(NODE.getPubkey()).isEqualTo(NodeFixtures.PUBKEY);
+        assertThat(NODE.pubkey()).isEqualTo(NodeFixtures.PUBKEY);
     }
 
     @Test
     void getLastUpdate() {
-        assertThat(NODE.getLastUpdate()).isEqualTo(NodeFixtures.LAST_UPDATE);
+        assertThat(NODE.lastUpdate()).isEqualTo(NodeFixtures.LAST_UPDATE);
     }
 
     private Node forPubkey(String pubkey) {

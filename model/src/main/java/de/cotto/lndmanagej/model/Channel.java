@@ -15,7 +15,7 @@ public class Channel {
 
     private Channel(ChannelId channelId, Coins capacity, Node node1, Node node2) {
         this.channelId = channelId;
-        this.capacity = Coins.ofMilliSatoshis(capacity.getMilliSatoshis());
+        this.capacity = Coins.ofMilliSatoshis(capacity.milliSatoshis());
         nodes.add(node1);
         nodes.add(node2);
     }

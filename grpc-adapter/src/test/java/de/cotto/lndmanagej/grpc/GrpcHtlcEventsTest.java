@@ -33,14 +33,14 @@ class GrpcHtlcEventsTest {
     @SuppressWarnings("unused")
     private GrpcService grpcService;
 
-    private final HtlcEvent attemptEvent = getAttempt(CHANNEL_ID.getShortChannelId(), CHANNEL_ID_2.getShortChannelId());
+    private final HtlcEvent attemptEvent = getAttempt(CHANNEL_ID.shortChannelId(), CHANNEL_ID_2.shortChannelId());
 
     @Nested
     class GetForwardFailures {
 
         private final HtlcEvent failEvent = getFailEvent(
-                CHANNEL_ID.getShortChannelId(),
-                CHANNEL_ID_2.getShortChannelId()
+                CHANNEL_ID.shortChannelId(),
+                CHANNEL_ID_2.shortChannelId()
         );
 
         @Test
@@ -75,21 +75,21 @@ class GrpcHtlcEventsTest {
 
         @Test
         void with_other_attempt_and_fail_event() {
-            HtlcEvent attemptEvent = getAttempt(CHANNEL_ID.getShortChannelId(), CHANNEL_ID_3.getShortChannelId());
+            HtlcEvent attemptEvent = getAttempt(CHANNEL_ID.shortChannelId(), CHANNEL_ID_3.shortChannelId());
             when(grpcService.getHtlcEvents()).thenReturn(List.of(attemptEvent, failEvent).iterator());
             assertThat(grpcHtlcEvents.getForwardFailures()).isEmpty();
         }
 
         @Test
         void ignores_failure_event_with_zero_incoming_channel_id() {
-            HtlcEvent failEvent = getFailEvent(0, CHANNEL_ID_2.getShortChannelId());
+            HtlcEvent failEvent = getFailEvent(0, CHANNEL_ID_2.shortChannelId());
             when(grpcService.getHtlcEvents()).thenReturn(List.of(failEvent).iterator());
             assertThat(grpcHtlcEvents.getForwardFailures()).isEmpty();
         }
 
         @Test
         void ignores_failure_event_with_zero_outgoing_channel_id() {
-            HtlcEvent failEvent = getFailEvent(CHANNEL_ID.getShortChannelId(), 0);
+            HtlcEvent failEvent = getFailEvent(CHANNEL_ID.shortChannelId(), 0);
             when(grpcService.getHtlcEvents()).thenReturn(List.of(failEvent).iterator());
             assertThat(grpcHtlcEvents.getForwardFailures()).isEmpty();
         }
@@ -106,8 +106,8 @@ class GrpcHtlcEventsTest {
     class GetSettledForwards {
 
         private final HtlcEvent settleEvent = getSettleEvent(
-                CHANNEL_ID.getShortChannelId(),
-                CHANNEL_ID_2.getShortChannelId()
+                CHANNEL_ID.shortChannelId(),
+                CHANNEL_ID_2.shortChannelId()
         );
 
         @Test
@@ -142,35 +142,35 @@ class GrpcHtlcEventsTest {
 
         @Test
         void with_other_attempt_and_settle_event() {
-            HtlcEvent attemptEvent = getAttempt(CHANNEL_ID.getShortChannelId(), CHANNEL_ID_3.getShortChannelId());
+            HtlcEvent attemptEvent = getAttempt(CHANNEL_ID.shortChannelId(), CHANNEL_ID_3.shortChannelId());
             when(grpcService.getHtlcEvents()).thenReturn(List.of(attemptEvent, settleEvent).iterator());
             assertThat(grpcHtlcEvents.getSettledForwards()).isEmpty();
         }
 
         @Test
         void ignores_attempt_with_zero_incoming_channel_id() {
-            HtlcEvent attemptEvent = getAttempt(0, CHANNEL_ID_2.getShortChannelId());
+            HtlcEvent attemptEvent = getAttempt(0, CHANNEL_ID_2.shortChannelId());
             when(grpcService.getHtlcEvents()).thenReturn(List.of(attemptEvent).iterator());
             assertThat(grpcHtlcEvents.getSettledForwards()).isEmpty();
         }
 
         @Test
         void ignores_attempt_with_zero_outgoing_channel_id() {
-            HtlcEvent attemptEvent = getAttempt(CHANNEL_ID.getShortChannelId(), 0);
+            HtlcEvent attemptEvent = getAttempt(CHANNEL_ID.shortChannelId(), 0);
             when(grpcService.getHtlcEvents()).thenReturn(List.of(attemptEvent).iterator());
             assertThat(grpcHtlcEvents.getSettledForwards()).isEmpty();
         }
 
         @Test
         void ignores_settle_event_with_zero_incoming_channel_id() {
-            HtlcEvent settleEvent = getSettleEvent(0, CHANNEL_ID_2.getShortChannelId());
+            HtlcEvent settleEvent = getSettleEvent(0, CHANNEL_ID_2.shortChannelId());
             when(grpcService.getHtlcEvents()).thenReturn(List.of(settleEvent).iterator());
             assertThat(grpcHtlcEvents.getSettledForwards()).isEmpty();
         }
 
         @Test
         void ignores_settle_event_with_zero_outgoing_channel_id() {
-            HtlcEvent settleEvent = getSettleEvent(CHANNEL_ID.getShortChannelId(), 0);
+            HtlcEvent settleEvent = getSettleEvent(CHANNEL_ID.shortChannelId(), 0);
             when(grpcService.getHtlcEvents()).thenReturn(List.of(settleEvent).iterator());
             assertThat(grpcHtlcEvents.getSettledForwards()).isEmpty();
         }

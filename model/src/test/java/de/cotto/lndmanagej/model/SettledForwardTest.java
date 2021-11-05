@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.model;
 
-import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.model.ForwardAttemptFixtures.FORWARD_ATTEMPT;
@@ -10,17 +9,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class SettledForwardTest {
     @Test
-    void testToString() {
-        assertThat(SETTLED_FORWARD).hasToString(
-                "SettledForward{" +
-                        "htlcDetails=" + HTLC_DETAILS +
-                        ", attempt=" + FORWARD_ATTEMPT +
-                        "}"
-        );
+    void htlcDetails() {
+        assertThat(SETTLED_FORWARD.htlcDetails()).isEqualTo(HTLC_DETAILS);
     }
 
     @Test
-    void testEquals() {
-        EqualsVerifier.forClass(SettledForward.class).usingGetClass().verify();
+    void forwardAttempt() {
+        assertThat(SETTLED_FORWARD.forwardAttempt()).isEqualTo(FORWARD_ATTEMPT);
     }
 }

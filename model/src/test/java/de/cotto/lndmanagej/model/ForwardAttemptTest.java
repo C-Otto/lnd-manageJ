@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.model;
 
-import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.model.ForwardAttemptFixtures.FORWARD_ATTEMPT;
@@ -29,20 +28,27 @@ class ForwardAttemptTest {
     }
 
     @Test
-    void testToString() {
-        assertThat(FORWARD_ATTEMPT).hasToString(
-                "ForwardAttempt{" +
-                        "htlcDetails=" + HTLC_DETAILS +
-                        ", incomingTimelock=1" +
-                        ", outgoingTimelock=2" +
-                        ", incomingAmount=0.100" +
-                        ", outgoingAmount=0.200" +
-                        "}"
-        );
+    void htlcDetails() {
+        assertThat(FORWARD_ATTEMPT.htlcDetails()).isEqualTo(HTLC_DETAILS);
     }
 
     @Test
-    void testEquals() {
-        EqualsVerifier.forClass(ForwardAttempt.class).usingGetClass().verify();
+    void incomingTimelock() {
+        assertThat(FORWARD_ATTEMPT.incomingTimelock()).isEqualTo(1);
+    }
+
+    @Test
+    void outgoingTimelock() {
+        assertThat(FORWARD_ATTEMPT.outgoingTimelock()).isEqualTo(2);
+    }
+
+    @Test
+    void incomingAmount() {
+        assertThat(FORWARD_ATTEMPT.incomingAmount()).isEqualTo(Coins.ofMilliSatoshis(100));
+    }
+
+    @Test
+    void outgoingAmount() {
+        assertThat(FORWARD_ATTEMPT.outgoingAmount()).isEqualTo(Coins.ofMilliSatoshis(200));
     }
 }

@@ -3,15 +3,9 @@ package de.cotto.lndmanagej.model;
 import java.math.BigDecimal;
 import java.util.Locale;
 
-public class Coins implements Comparable<Coins> {
+public record Coins(long milliSatoshis) implements Comparable<Coins> {
     private static final int SCALE = 3;
     public static final Coins NONE = Coins.ofSatoshis(0);
-
-    private final long milliSatoshis;
-
-    protected Coins(long milliSatoshis) {
-        this.milliSatoshis = milliSatoshis;
-    }
 
     public static Coins ofSatoshis(long satoshis) {
         return new Coins(satoshis * 1_000);
@@ -21,15 +15,11 @@ public class Coins implements Comparable<Coins> {
         return new Coins(milliSatoshis);
     }
 
-    public long getSatoshis() {
+    public long satoshis() {
         if (milliSatoshis % 1_000 != 0) {
             throw new IllegalStateException();
         }
         return milliSatoshis / 1_000;
-    }
-
-    public long getMilliSatoshis() {
-        return milliSatoshis;
     }
 
     public Coins add(Coins summand) {
@@ -69,24 +59,5 @@ public class Coins implements Comparable<Coins> {
     public String toString() {
         double coins = BigDecimal.valueOf(milliSatoshis, SCALE).doubleValue();
         return String.format(Locale.ENGLISH, "%,.3f", coins);
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (other == null || getClass() != other.getClass()) {
-            return false;
-        }
-
-        Coins coins = (Coins) other;
-
-        return milliSatoshis == coins.milliSatoshis;
-    }
-
-    @Override
-    public int hashCode() {
-        return (int) (milliSatoshis ^ (milliSatoshis >>> 32));
     }
 }

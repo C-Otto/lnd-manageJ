@@ -32,7 +32,7 @@ class ChannelIdTest {
         @Test
         void january_2016() {
             ChannelId channelId = ChannelId.fromCompactForm("391177:0:0");
-            assertThat(channelId.getShortChannelId()).isEqualTo(430_103_660_018_532_352L);
+            assertThat(channelId.shortChannelId()).isEqualTo(430_103_660_018_532_352L);
         }
 
         @Test
@@ -45,19 +45,19 @@ class ChannelIdTest {
         @Test
         void with_x() {
             ChannelId channelId = ChannelId.fromCompactForm("704776x2087x1");
-            assertThat(channelId.getShortChannelId()).isEqualTo(774_909_407_114_231_809L);
+            assertThat(channelId.shortChannelId()).isEqualTo(774_909_407_114_231_809L);
         }
 
         @Test
         void large_output() {
             ChannelId channelId = ChannelId.fromCompactForm("704776x2087x123");
-            assertThat(channelId.getShortChannelId()).isEqualTo(774_909_407_114_231_931L);
+            assertThat(channelId.shortChannelId()).isEqualTo(774_909_407_114_231_931L);
         }
 
         @Test
         void with_colon() {
             ChannelId channelId = ChannelId.fromCompactForm("704776:2087:1");
-            assertThat(channelId.getShortChannelId()).isEqualTo(774_909_407_114_231_809L);
+            assertThat(channelId.shortChannelId()).isEqualTo(774_909_407_114_231_809L);
         }
     }
 
@@ -88,19 +88,19 @@ class ChannelIdTest {
         @Test
         void january_2016() {
             ChannelId channelId = ChannelId.fromShortChannelId(774_909_407_114_231_809L);
-            assertThat(channelId.getShortChannelId()).isEqualTo(774_909_407_114_231_809L);
+            assertThat(channelId.shortChannelId()).isEqualTo(774_909_407_114_231_809L);
         }
 
         @Test
         void short_channel_id() {
             ChannelId channelId = ChannelId.fromShortChannelId(774_909_407_114_231_809L);
-            assertThat(channelId.getShortChannelId()).isEqualTo(774_909_407_114_231_809L);
+            assertThat(channelId.shortChannelId()).isEqualTo(774_909_407_114_231_809L);
         }
 
         @Test
         void large_output() {
             ChannelId channelId = ChannelId.fromShortChannelId(774_909_407_114_231_931L);
-            assertThat(channelId.getShortChannelId()).isEqualTo(774_909_407_114_231_931L);
+            assertThat(channelId.shortChannelId()).isEqualTo(774_909_407_114_231_931L);
         }
     }
 
@@ -111,7 +111,7 @@ class ChannelIdTest {
 
     @Test
     void testToString() {
-        String expectedString = String.valueOf(ChannelIdFixtures.CHANNEL_ID.getShortChannelId());
+        String expectedString = String.valueOf(ChannelIdFixtures.CHANNEL_ID.shortChannelId());
         assertThat(ChannelIdFixtures.CHANNEL_ID).hasToString(expectedString);
     }
 }
