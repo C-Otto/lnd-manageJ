@@ -149,4 +149,12 @@ class GrpcGetInfoTest {
         grpcGetInfo.refreshInfo();
         assertThat(grpcGetInfo.getBlockHeight()).isEqualTo(BLOCK_HEIGHT);
     }
+
+    @Test
+    void refreshesAfterFailure() {
+        GetInfoResponse response = createResponse(BLOCK_HEIGHT, false, true);
+        when(grpcService.getInfo()).thenReturn(Optional.empty()).thenReturn(Optional.of(response));
+        grpcGetInfo = new GrpcGetInfo(grpcService);
+        assertThat(grpcGetInfo.getBlockHeight()).isEqualTo(BLOCK_HEIGHT);
+    }
 }

@@ -84,6 +84,9 @@ public class GrpcGetInfo {
     }
 
     private GetInfoResponseOrBuilder getInfo() {
+        if (info == null) {
+            refreshInfo();
+        }
         return Objects.requireNonNull(info);
     }
 }

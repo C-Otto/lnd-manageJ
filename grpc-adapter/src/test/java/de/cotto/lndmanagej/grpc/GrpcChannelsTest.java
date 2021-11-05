@@ -1,9 +1,9 @@
 package de.cotto.lndmanagej.grpc;
 
 import lnrpc.Channel;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class GrpcChannelsTest {
+    @InjectMocks
     private GrpcChannels grpcChannels;
 
     @Mock
@@ -30,12 +31,6 @@ class GrpcChannelsTest {
     @Mock
     private GrpcNodeInfo grpcNodeInfo;
 
-    @BeforeEach
-    void setUp() {
-        when(grpcGetInfo.getNode()).thenReturn(NODE);
-        grpcChannels = new GrpcChannels(grpcService, grpcGetInfo, grpcNodeInfo);
-    }
-
     @Test
     void no_channels() {
         assertThat(grpcChannels.getChannels()).isEmpty();
@@ -43,6 +38,7 @@ class GrpcChannelsTest {
 
     @Test
     void one_channel() {
+        when(grpcGetInfo.getNode()).thenReturn(NODE);
         when(grpcService.getChannels()).thenReturn(List.of(channel()));
         when(grpcNodeInfo.getNode(NODE_2.pubkey())).thenReturn(NODE_2);
         assertThat(grpcChannels.getChannels()).containsExactly(CHANNEL);
