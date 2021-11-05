@@ -4,10 +4,13 @@ import de.cotto.lndmanagej.model.ForwardAttempt;
 import de.cotto.lndmanagej.model.ForwardFailure;
 import de.cotto.lndmanagej.model.HtlcDetails;
 import de.cotto.lndmanagej.model.SettledForward;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import routerrpc.RouterOuterClass;
 import routerrpc.RouterOuterClass.HtlcEvent;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
@@ -106,4 +109,9 @@ public class GrpcHtlcEvents {
                 .build();
     }
 
+    @Scheduled(fixedDelay = 360_000)
+    public void removeOldEvents() {
+        Instant threshold = Instant.now().minus(1, ChronoUnit.DAYS);
+        previousAttempts.values().removeIf(event -> event.htlcDetails().timestamp().isBefore(threshold));
+    }
 }

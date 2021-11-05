@@ -12,6 +12,8 @@ import routerrpc.RouterOuterClass.ForwardFailEvent;
 import routerrpc.RouterOuterClass.HtlcEvent;
 import routerrpc.RouterOuterClass.SettleEvent;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -32,6 +34,15 @@ class GrpcHtlcEventsTest {
     @Mock
     @SuppressWarnings("unused")
     private GrpcService grpcService;
+
+    private final ForwardEvent forwardEvent = ForwardEvent.newBuilder()
+            .setInfo(RouterOuterClass.HtlcInfo.newBuilder()
+                    .setIncomingTimelock(1)
+                    .setOutgoingTimelock(2)
+                    .setIncomingAmtMsat(100)
+                    .setOutgoingAmtMsat(200)
+                    .build())
+            .build();
 
     private final HtlcEvent attemptEvent = getAttempt(CHANNEL_ID.shortChannelId(), CHANNEL_ID_2.shortChannelId());
 
@@ -91,6 +102,33 @@ class GrpcHtlcEventsTest {
         void ignores_failure_event_with_zero_outgoing_channel_id() {
             HtlcEvent failEvent = getFailEvent(CHANNEL_ID.shortChannelId(), 0);
             when(grpcService.getHtlcEvents()).thenReturn(List.of(failEvent).iterator());
+            assertThat(grpcHtlcEvents.getForwardFailures()).isEmpty();
+        }
+
+        @Test
+        void removeOldEvents() {
+            long timestamp = Instant.now().minus(1, ChronoUnit.DAYS).toEpochMilli() * 1_000_000;
+            createAndProcessOldEvent(timestamp);
+            grpcHtlcEvents.removeOldEvents();
+            when(grpcService.getHtlcEvents()).thenReturn(List.of(failEvent).iterator());
+            assertThat(grpcHtlcEvents.getForwardFailures()).isEmpty();
+        }
+
+        @Test
+        void removeOldEvents_not_old_enough() {
+            long timestamp = Instant.now().minus(23, ChronoUnit.HOURS).toEpochMilli() * 1_000_000;
+            createAndProcessOldEvent(timestamp);
+            grpcHtlcEvents.removeOldEvents();
+            when(grpcService.getHtlcEvents()).thenReturn(List.of(failEvent).iterator());
+            assertThat(grpcHtlcEvents.getForwardFailures()).isNotEmpty();
+        }
+
+        private void createAndProcessOldEvent(long timestamp) {
+            HtlcEvent oldAttempt = getBuilderWithDefaults(CHANNEL_ID.shortChannelId(), CHANNEL_ID_2.shortChannelId())
+                    .setTimestampNs(timestamp)
+                    .setForwardEvent(forwardEvent)
+                    .build();
+            when(grpcService.getHtlcEvents()).thenReturn(List.of(oldAttempt).iterator());
             assertThat(grpcHtlcEvents.getForwardFailures()).isEmpty();
         }
 
@@ -185,14 +223,7 @@ class GrpcHtlcEventsTest {
 
     private HtlcEvent getAttempt(long incomingChannelId, long outgoingChannelId) {
         return getBuilderWithDefaults(incomingChannelId, outgoingChannelId)
-                .setForwardEvent(ForwardEvent.newBuilder()
-                        .setInfo(RouterOuterClass.HtlcInfo.newBuilder()
-                                .setIncomingTimelock(1)
-                                .setOutgoingTimelock(2)
-                                .setIncomingAmtMsat(100)
-                                .setOutgoingAmtMsat(200)
-                                .build())
-                        .build())
+                .setForwardEvent(forwardEvent)
                 .build();
     }
 
