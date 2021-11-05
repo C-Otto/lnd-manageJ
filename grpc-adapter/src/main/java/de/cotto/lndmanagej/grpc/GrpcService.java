@@ -66,7 +66,8 @@ public class GrpcService {
     }
 
     public List<Channel> getChannels() {
-        return lightningStub.listChannels(ListChannelsRequest.getDefaultInstance()).getChannelsList();
+        return get(() -> lightningStub.listChannels(ListChannelsRequest.getDefaultInstance()).getChannelsList())
+                .orElse(List.of());
     }
 
     public NodeInfo getNodeInfo(String pubkey) {
