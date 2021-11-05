@@ -12,7 +12,7 @@ class NodeTest {
 
     private static final String PUBKEY = NodeFixtures.PUBKEY;
     private static final String ALIAS = NodeFixtures.ALIAS;
-    private static final long LAST_UPDATE = NodeFixtures.LAST_UPDATE;
+    private static final int LAST_UPDATE = NodeFixtures.LAST_UPDATE;
 
     @Test
     void builder_without_arguments() {

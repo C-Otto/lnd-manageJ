@@ -27,10 +27,13 @@ class GrpcChannelsTest {
     @Mock
     private GrpcGetInfo grpcGetInfo;
 
+    @Mock
+    private GrpcNodeInfo grpcNodeInfo;
+
     @BeforeEach
     void setUp() {
         when(grpcGetInfo.getNode()).thenReturn(NODE);
-        grpcChannels = new GrpcChannels(grpcService, grpcGetInfo);
+        grpcChannels = new GrpcChannels(grpcService, grpcGetInfo, grpcNodeInfo);
     }
 
     @Test
@@ -41,6 +44,7 @@ class GrpcChannelsTest {
     @Test
     void one_channel() {
         when(grpcService.getChannels()).thenReturn(List.of(channel()));
+        when(grpcNodeInfo.getNode(NODE_2.pubkey())).thenReturn(NODE_2);
         assertThat(grpcChannels.getChannels()).containsExactly(CHANNEL);
     }
 

@@ -5,7 +5,7 @@ import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 
-public record Node(String alias, long lastUpdate, String pubkey) implements Comparable<Node> {
+public record Node(String alias, int lastUpdate, String pubkey) implements Comparable<Node> {
 
     public static Builder builder() {
         return new Builder();
@@ -42,7 +42,7 @@ public record Node(String alias, long lastUpdate, String pubkey) implements Comp
         @Nullable
         private String alias;
 
-        private long lastUpdate;
+        private int lastUpdate;
 
         @Nullable
         private String pubkey;
@@ -52,7 +52,7 @@ public record Node(String alias, long lastUpdate, String pubkey) implements Comp
             return this;
         }
 
-        public Builder withLastUpdate(long lastUpdate) {
+        public Builder withLastUpdate(int lastUpdate) {
             this.lastUpdate = lastUpdate;
             return this;
         }

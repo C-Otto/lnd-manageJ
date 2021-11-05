@@ -7,7 +7,7 @@ public class NodeFixtures {
     public static final String PUBKEY_2 = "03fff0000000000000000000000000000000000000000000000000000000000000";
     public static final String ALIAS = "Node";
     public static final String ALIAS_2 = "Another Node";
-    public static final long LAST_UPDATE = Instant.now().toEpochMilli() / 1_000;
+    public static final int LAST_UPDATE = (int) Instant.now().getEpochSecond();
 
     public static final Node NODE = Node.builder()
             .withPubkey(PUBKEY)

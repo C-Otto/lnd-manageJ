@@ -12,10 +12,15 @@ import java.util.stream.Collectors;
 @Component
 public class GrpcChannels {
     private final GrpcService grpcService;
+    private final GrpcNodeInfo grpcNodeInfo;
     private final Node ownNode;
 
-    public GrpcChannels(GrpcService grpcService, GrpcGetInfo grpcGetInfo) {
+    public GrpcChannels(
+            GrpcService grpcService,
+            GrpcGetInfo grpcGetInfo, GrpcNodeInfo grpcNodeInfo
+    ) {
         this.grpcService = grpcService;
+        this.grpcNodeInfo = grpcNodeInfo;
         ownNode = grpcGetInfo.getNode();
     }
 
@@ -28,7 +33,8 @@ public class GrpcChannels {
                 .withChannelId(ChannelId.fromShortChannelId(lndChannel.getChanId()))
                 .withCapacity(Coins.ofSatoshis(lndChannel.getCapacity()))
                 .withNode1(ownNode)
-                .withNode2(Node.builder().withPubkey(lndChannel.getRemotePubkey()).build())
+                .withNode2(grpcNodeInfo.getNode(lndChannel.getRemotePubkey()))
                 .build();
     }
+
 }

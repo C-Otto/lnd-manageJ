@@ -6,6 +6,8 @@ import lnrpc.Channel;
 import lnrpc.GetInfoResponse;
 import lnrpc.LightningGrpc;
 import lnrpc.ListChannelsRequest;
+import lnrpc.NodeInfo;
+import lnrpc.NodeInfoRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -65,5 +67,9 @@ public class GrpcService {
 
     public List<Channel> getChannels() {
         return lightningStub.listChannels(ListChannelsRequest.getDefaultInstance()).getChannelsList();
+    }
+
+    public NodeInfo getNodeInfo(String pubkey) {
+        return lightningStub.getNodeInfo(NodeInfoRequest.newBuilder().setPubKey(pubkey).build());
     }
 }
