@@ -4,9 +4,9 @@ plugins {
 
 dependencies {
     implementation project(':grpc-adapter')
-    implementation project(':graph')
+    implementation project(':model')
     runtimeOnly 'org.postgresql:postgresql'
-    testImplementation testFixtures(project(':graph'))
+    testImplementation testFixtures(project(':model'))
 }
 
 bootJar {
@@ -18,13 +18,13 @@ jacocoTestCoverageVerification {
         rules.forEach {rule ->
             rule.limits.forEach {limit ->
                 if (limit.counter == 'CLASS') {
-                    limit.minimum = 0.5
+                    limit.minimum = 0.6
                 }
                 if (limit.counter == 'INSTRUCTION') {
-                    limit.minimum = 0.81
+                    limit.minimum = 0.94
                 }
                 if (limit.counter == 'METHOD') {
-                    limit.minimum = 0.5
+                    limit.minimum = 0.7
                 }
             }
         }

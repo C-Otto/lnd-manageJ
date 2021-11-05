@@ -1,5 +1,5 @@
 rootProject.name = 'lnd-manageJ'
 include 'application'
-include 'graph'
+include 'model'
 include 'grpc-client'
 include 'grpc-adapter'

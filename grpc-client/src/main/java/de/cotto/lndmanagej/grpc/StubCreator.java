@@ -5,6 +5,7 @@ import io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.NettyChannelBuilder;
 import io.netty.handler.ssl.SslContext;
 import lnrpc.LightningGrpc;
+import routerrpc.RouterGrpc;
 
 import javax.net.ssl.SSLException;
 import java.io.File;
@@ -14,6 +15,7 @@ public class StubCreator {
     private static final int FIFTY_MEGA_BYTE = 50 * 1024 * 1024;
 
     private final LightningGrpc.LightningBlockingStub stub;
+    private final RouterGrpc.RouterBlockingStub routerStub;
     private final ManagedChannel channel;
     private final File macaroonFile;
     private final File certFile;
@@ -27,10 +29,15 @@ public class StubCreator {
         this.host = host;
         channel = getChannel();
         stub = createLightningStub();
+        routerStub = createRouterStub();
     }
 
     public LightningGrpc.LightningBlockingStub getLightningStub() {
         return stub;
+    }
+
+    public RouterGrpc.RouterBlockingStub getRouterStub() {
+        return routerStub;
     }
 
     public void shutdown() {
@@ -44,6 +51,13 @@ public class StubCreator {
 
     private LightningGrpc.LightningBlockingStub createLightningStub() throws IOException {
         return LightningGrpc
+                .newBlockingStub(channel)
+                .withMaxInboundMessageSize(FIFTY_MEGA_BYTE)
+                .withCallCredentials(new MacaroonCallCredential(macaroonFile));
+    }
+
+    private RouterGrpc.RouterBlockingStub createRouterStub() throws IOException {
+        return RouterGrpc
                 .newBlockingStub(channel)
                 .withMaxInboundMessageSize(FIFTY_MEGA_BYTE)
                 .withCallCredentials(new MacaroonCallCredential(macaroonFile));

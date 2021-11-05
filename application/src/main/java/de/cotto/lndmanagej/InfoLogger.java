@@ -15,7 +15,7 @@ public class InfoLogger {
         this.grpcGetInfo = grpcGetInfo;
     }
 
-    @Scheduled(fixedRate = 10_000)
+    @Scheduled(fixedRate = 60_000)
     public void logDetails() {
         logger.info("Alias: {}", grpcGetInfo.getAlias());
         logger.info("Pubkey: {}", grpcGetInfo.getPubkey());
