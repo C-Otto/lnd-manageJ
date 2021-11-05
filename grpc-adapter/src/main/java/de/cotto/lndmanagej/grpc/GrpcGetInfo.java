@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.grpc;
 
 import lnrpc.GetInfoResponse;
+import lnrpc.GetInfoResponseOrBuilder;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -21,59 +22,63 @@ public class GrpcGetInfo {
     }
 
     public String getPubkey() {
-        return Objects.requireNonNull(info).getIdentityPubkey();
+        return getInfo().getIdentityPubkey();
     }
 
     public String getAlias() {
-        return Objects.requireNonNull(info).getAlias();
+        return getInfo().getAlias();
     }
 
     public int getBlockHeight() {
-        return Objects.requireNonNull(info).getBlockHeight();
+        return getInfo().getBlockHeight();
     }
 
     public String getBlockHash() {
-        return Objects.requireNonNull(info).getBlockHash();
+        return getInfo().getBlockHash();
     }
 
     public Instant getBestHeaderTimestamp() {
-        return Instant.ofEpochSecond(Objects.requireNonNull(info).getBestHeaderTimestamp());
+        return Instant.ofEpochSecond(getInfo().getBestHeaderTimestamp());
     }
 
     public String getVersion() {
-        return Objects.requireNonNull(info).getVersion();
+        return getInfo().getVersion();
     }
 
     public String getCommitHash() {
-        return Objects.requireNonNull(info).getCommitHash();
+        return getInfo().getCommitHash();
     }
 
     public int getNumberOfActiveChannels() {
-        return Objects.requireNonNull(info).getNumActiveChannels();
+        return getInfo().getNumActiveChannels();
     }
 
     public int getNumberOfInactiveChannels() {
-        return Objects.requireNonNull(info).getNumInactiveChannels();
+        return getInfo().getNumInactiveChannels();
     }
 
     public int getNumberOfPendingChannels() {
-        return Objects.requireNonNull(info).getNumPendingChannels();
+        return getInfo().getNumPendingChannels();
     }
 
     public int getNumberOfPeers() {
-        return Objects.requireNonNull(info).getNumPeers();
+        return getInfo().getNumPeers();
     }
 
     public boolean isSyncedToChain() {
-        return Objects.requireNonNull(info).getSyncedToChain();
+        return getInfo().getSyncedToChain();
     }
 
     public boolean isSyncedToGraph() {
-        return Objects.requireNonNull(info).getSyncedToGraph();
+        return getInfo().getSyncedToGraph();
     }
 
     @Scheduled(fixedDelay = 60_000)
     final void refreshInfo() {
         grpcService.getInfo().ifPresent(newInfo -> info = newInfo);
+    }
+
+    private GetInfoResponseOrBuilder getInfo() {
+        return Objects.requireNonNull(info);
     }
 }
