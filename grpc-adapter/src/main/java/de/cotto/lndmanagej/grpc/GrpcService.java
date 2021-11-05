@@ -70,7 +70,7 @@ public class GrpcService {
                 .orElse(List.of());
     }
 
-    public NodeInfo getNodeInfo(String pubkey) {
-        return lightningStub.getNodeInfo(NodeInfoRequest.newBuilder().setPubKey(pubkey).build());
+    public Optional<NodeInfo> getNodeInfo(String pubkey) {
+        return get(() -> lightningStub.getNodeInfo(NodeInfoRequest.newBuilder().setPubKey(pubkey).build()));
     }
 }
