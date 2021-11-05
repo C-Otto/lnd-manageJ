@@ -22,7 +22,6 @@ class InfoLoggerTest {
     private InfoLogger infoLogger;
 
     @Mock
-    @SuppressWarnings("unused")
     private GrpcGetInfo grpcGetInfo;
 
     @Test

@@ -97,4 +97,13 @@ public class Channel {
     public int hashCode() {
         return Objects.hash(channelId, capacity, nodes);
     }
+
+    @Override
+    public String toString() {
+        return "Channel[" +
+                "channelId=" + channelId +
+                ", capacity=" + capacity +
+                ", nodes=" + nodes +
+                ']';
+    }
 }

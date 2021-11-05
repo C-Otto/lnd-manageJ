@@ -2,8 +2,10 @@ package de.cotto.lndmanagej.grpc;
 
 import de.cotto.lndmanagej.LndConfiguration;
 import io.grpc.StatusRuntimeException;
+import lnrpc.Channel;
 import lnrpc.GetInfoResponse;
 import lnrpc.LightningGrpc;
+import lnrpc.ListChannelsRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -15,6 +17,7 @@ import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -58,5 +61,9 @@ public class GrpcService {
             logger.warn("Exception while connecting to lnd: ", exception);
             return Optional.empty();
         }
+    }
+
+    public List<Channel> getChannels() {
+        return lightningStub.listChannels(ListChannelsRequest.getDefaultInstance()).getChannelsList();
     }
 }

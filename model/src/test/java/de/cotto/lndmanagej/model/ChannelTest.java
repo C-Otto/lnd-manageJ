@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CHANNEL;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_2;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,7 +34,7 @@ class ChannelTest {
     void builder_without_capacity() {
         assertThatNullPointerException().isThrownBy(
                 () -> Channel.builder()
-                        .withChannelId(ChannelIdFixtures.CHANNEL_ID)
+                        .withChannelId(CHANNEL_ID)
                         .withNode1(NODE)
                         .withNode2(NODE_2)
                         .build()
@@ -44,7 +45,7 @@ class ChannelTest {
     void builder_without_node1() {
         assertThatNullPointerException().isThrownBy(
                 () -> Channel.builder()
-                        .withChannelId(ChannelIdFixtures.CHANNEL_ID)
+                        .withChannelId(CHANNEL_ID)
                         .withCapacity(CAPACITY)
                         .withNode2(NODE_2)
                         .build()
@@ -55,7 +56,7 @@ class ChannelTest {
     void builder_without_node2() {
         assertThatNullPointerException().isThrownBy(
                 () -> Channel.builder()
-                        .withChannelId(ChannelIdFixtures.CHANNEL_ID)
+                        .withChannelId(CHANNEL_ID)
                         .withCapacity(CAPACITY)
                         .withNode1(NODE)
                         .build()
@@ -65,7 +66,7 @@ class ChannelTest {
     @Test
     void builder_with_all_arguments() {
         Channel channel = Channel.builder()
-                .withChannelId(ChannelIdFixtures.CHANNEL_ID)
+                .withChannelId(CHANNEL_ID)
                 .withCapacity(CAPACITY)
                 .withNode1(NODE)
                 .withNode2(NODE_2)
@@ -75,7 +76,7 @@ class ChannelTest {
 
     @Test
     void getId() {
-        assertThat(CHANNEL.getId()).isEqualTo(ChannelIdFixtures.CHANNEL_ID);
+        assertThat(CHANNEL.getId()).isEqualTo(CHANNEL_ID);
     }
 
     @Test
@@ -96,11 +97,22 @@ class ChannelTest {
     @Test
     void testEquals_reversed_nodes() {
         Channel channel = Channel.builder()
-                .withChannelId(ChannelIdFixtures.CHANNEL_ID)
+                .withChannelId(CHANNEL_ID)
                 .withCapacity(CAPACITY)
                 .withNode1(NODE_2)
                 .withNode2(NODE)
                 .build();
         assertThat(CHANNEL).isEqualTo(channel);
+    }
+
+    @Test
+    void testToString() {
+        assertThat(CHANNEL).hasToString(
+                "Channel[" +
+                        "channelId=" + CHANNEL_ID +
+                        ", capacity=" + CAPACITY +
+                        ", nodes=[" + NODE.toString() + ", " + NODE_2.toString() + "]" +
+                        "]"
+        );
     }
 }

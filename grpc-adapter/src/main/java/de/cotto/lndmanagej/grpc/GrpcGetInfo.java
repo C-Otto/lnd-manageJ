@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.grpc;
 
+import de.cotto.lndmanagej.model.Node;
 import lnrpc.GetInfoResponse;
 import lnrpc.GetInfoResponseOrBuilder;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,6 +20,10 @@ public class GrpcGetInfo {
     public GrpcGetInfo(GrpcService grpcService) {
         this.grpcService = grpcService;
         refreshInfo();
+    }
+
+    public Node getNode() {
+        return Node.builder().withPubkey(getPubkey()).withAlias(getAlias()).build();
     }
 
     public String getPubkey() {

@@ -32,7 +32,6 @@ class GrpcHtlcEventsTest {
     private GrpcHtlcEvents grpcHtlcEvents;
 
     @Mock
-    @SuppressWarnings("unused")
     private GrpcService grpcService;
 
     private final ForwardEvent forwardEvent = ForwardEvent.newBuilder()

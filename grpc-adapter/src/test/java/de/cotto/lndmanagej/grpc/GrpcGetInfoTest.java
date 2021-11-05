@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.grpc;
 
+import de.cotto.lndmanagej.model.Node;
 import lnrpc.GetInfoResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,6 +54,11 @@ class GrpcGetInfoTest {
                 .setSyncedToChain(syncedToChain)
                 .setSyncedToGraph(syncedToGraph)
                 .build();
+    }
+
+    @Test
+    void getNode() {
+        assertThat(grpcGetInfo.getNode()).isEqualTo(Node.builder().withPubkey(PUBKEY).withAlias(ALIAS).build());
     }
 
     @Test
