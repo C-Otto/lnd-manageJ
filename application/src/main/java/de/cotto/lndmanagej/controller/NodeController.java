@@ -1,23 +1,34 @@
 package de.cotto.lndmanagej.controller;
 
-import de.cotto.lndmanagej.grpc.GrpcNodeInfo;
+import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.service.NodeService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
-@RequestMapping("/api/node/")
-public class NodeController {
-    private final GrpcNodeInfo grpcNodeInfo;
+import java.util.List;
+import java.util.stream.Collectors;
 
-    public NodeController(GrpcNodeInfo grpcNodeInfo) {
-        this.grpcNodeInfo = grpcNodeInfo;
+@RestController
+@RequestMapping("/api/node/{pubkey}/")
+public class NodeController {
+    private final NodeService nodeService;
+
+    public NodeController(NodeService nodeService) {
+        this.nodeService = nodeService;
     }
 
-    @GetMapping("/{pubkey}/alias")
+    @GetMapping("/alias")
     public String getAlias(@PathVariable Pubkey pubkey) {
-        return grpcNodeInfo.getNode(pubkey).alias();
+        return nodeService.getAlias(pubkey);
+    }
+
+    @GetMapping("/open-channels")
+    public List<Long> getOpenChannelIds(@PathVariable Pubkey pubkey) {
+        return nodeService.getOpenChannelIds(pubkey).stream()
+                .map(ChannelId::shortChannelId)
+                .collect(Collectors.toList());
     }
 }

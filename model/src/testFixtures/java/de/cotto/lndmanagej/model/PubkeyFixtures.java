@@ -5,4 +5,6 @@ public class PubkeyFixtures {
             Pubkey.create("027abc123abc123abc123abc123123abc123abc123abc123abc123abc123abc123");
     public static final Pubkey PUBKEY_2 =
             Pubkey.create("03fff0000000000000000000000000000000000000000000000000000000000000");
+    public static final Pubkey PUBKEY_3 =
+            Pubkey.create("03fff1111111111111111111111111111111111111111111111111111111111111");
 }

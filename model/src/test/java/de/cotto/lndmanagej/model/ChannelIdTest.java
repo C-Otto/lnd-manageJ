@@ -105,6 +105,27 @@ class ChannelIdTest {
     }
 
     @Test
+    void testComparable_smaller() {
+        ChannelId channelId1 = ChannelId.fromShortChannelId(774_909_407_114_231_931L);
+        ChannelId channelId2 = ChannelId.fromShortChannelId(774_909_407_114_231_932L);
+        assertThat(channelId1.compareTo(channelId2)).isLessThan(0);
+    }
+
+    @Test
+    void testComparable_same() {
+        ChannelId channelId1 = ChannelId.fromShortChannelId(774_909_407_114_231_931L);
+        ChannelId channelId2 = ChannelId.fromShortChannelId(774_909_407_114_231_931L);
+        assertThat(channelId1.compareTo(channelId2)).isEqualTo(0);
+    }
+
+    @Test
+    void testComparable_larger() {
+        ChannelId channelId1 = ChannelId.fromShortChannelId(774_909_407_114_231_932L);
+        ChannelId channelId2 = ChannelId.fromShortChannelId(774_909_407_114_231_931L);
+        assertThat(channelId1.compareTo(channelId2)).isGreaterThan(0);
+    }
+
+    @Test
     void testEquals() {
         EqualsVerifier.forClass(ChannelId.class).verify();
     }

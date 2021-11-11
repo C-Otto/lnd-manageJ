@@ -1,6 +1,6 @@
 package de.cotto.lndmanagej.model;
 
-public record ChannelId(long shortChannelId) {
+public record ChannelId(long shortChannelId) implements Comparable<ChannelId> {
     private static final int EXPECTED_NUMBER_OF_SEGMENTS = 3;
     private static final long NOT_BEFORE = 430_103_660_018_532_352L; // January 1st 2016
 
@@ -27,5 +27,10 @@ public record ChannelId(long shortChannelId) {
     @Override
     public String toString() {
         return String.valueOf(shortChannelId);
+    }
+
+    @Override
+    public int compareTo(ChannelId other) {
+        return Long.compare(shortChannelId, other.shortChannelId);
     }
 }

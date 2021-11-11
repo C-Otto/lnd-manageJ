@@ -19,14 +19,11 @@ jacocoTestCoverageVerification {
     violationRules {
         rules.forEach {rule ->
             rule.limits.forEach {limit ->
-                if (limit.counter == 'CLASS') {
-                    limit.minimum = 0.6
-                }
                 if (limit.counter == 'INSTRUCTION') {
-                    limit.minimum = 0.94
+                    limit.minimum = 0.97
                 }
                 if (limit.counter == 'METHOD') {
-                    limit.minimum = 0.7
+                    limit.minimum = 0.95
                 }
             }
         }

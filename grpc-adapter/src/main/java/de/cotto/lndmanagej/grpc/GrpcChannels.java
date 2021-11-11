@@ -7,7 +7,8 @@ import de.cotto.lndmanagej.model.Pubkey;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toSet;
 
 @Component
 public class GrpcChannels {
@@ -26,7 +27,9 @@ public class GrpcChannels {
     }
 
     public Set<Channel> getChannels() {
-        return grpcService.getChannels().stream().map(this::toChannel).collect(Collectors.toSet());
+        return grpcService.getChannels().stream()
+                .map(this::toChannel)
+                .collect(toSet());
     }
 
     private Channel toChannel(lnrpc.Channel lndChannel) {
