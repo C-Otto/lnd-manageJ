@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE;
@@ -26,5 +27,10 @@ class NodeControllerIT {
     void getAlias() throws Exception {
         when(grpcNodeInfo.getNode(PUBKEY)).thenReturn(NODE);
         mockMvc.perform(get("/api/node/" + PUBKEY + "/alias")).andExpect(content().string(ALIAS));
+    }
+
+    @Test
+    void getAlias_error() throws Exception {
+        mockMvc.perform(get("/api/node/xxx/alias")).andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 }
