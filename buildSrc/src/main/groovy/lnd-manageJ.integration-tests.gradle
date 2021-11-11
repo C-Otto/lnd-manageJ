@@ -27,7 +27,8 @@ check.dependsOn integrationTest
 dependencies {
     testImplementation 'com.tngtech.archunit:archunit:0.21.0'
     testImplementation 'org.awaitility:awaitility:4.1.0'
-
+    configurations.getByName('integrationTestRuntimeOnly').exclude group: 'ch.qos.logback', module: 'logback-classic'
+    configurations.getByName('integrationTestRuntimeOnly').exclude group: 'org.slf4j', module: 'slf4j-nop'
 }
 
 integrationTest {

@@ -3,6 +3,8 @@ plugins {
 }
 
 dependencies {
+    implementation('org.springframework.boot:spring-boot-starter-web')
+    implementation('org.springframework.boot:spring-boot-starter-actuator')
     implementation project(':grpc-adapter')
     implementation project(':model')
     runtimeOnly 'org.postgresql:postgresql'
