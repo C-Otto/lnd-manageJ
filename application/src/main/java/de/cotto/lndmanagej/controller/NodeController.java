@@ -26,9 +26,9 @@ public class NodeController {
     }
 
     @GetMapping("/open-channels")
-    public List<Long> getOpenChannelIds(@PathVariable Pubkey pubkey) {
+    public List<String> getOpenChannelIds(@PathVariable Pubkey pubkey) {
         return nodeService.getOpenChannelIds(pubkey).stream()
-                .map(ChannelId::shortChannelId)
+                .map(ChannelId::toString)
                 .collect(Collectors.toList());
     }
 }

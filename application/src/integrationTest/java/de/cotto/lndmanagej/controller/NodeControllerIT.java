@@ -43,7 +43,7 @@ class NodeControllerIT {
     void getOpenChannelIds() throws Exception {
         when(nodeService.getOpenChannelIds(PUBKEY)).thenReturn(List.of(CHANNEL_ID, CHANNEL_ID_3));
         mockMvc.perform(get("/api/node/" + PUBKEY + "/open-channels"))
-                .andExpect(jsonPath("$[0]", is(CHANNEL_ID.shortChannelId())))
-                .andExpect(jsonPath("$[1]", is(CHANNEL_ID_3.shortChannelId())));
+                .andExpect(jsonPath("$[0]", is(CHANNEL_ID.toString())))
+                .andExpect(jsonPath("$[1]", is(CHANNEL_ID_3.toString())));
     }
 }
