@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.grpc;
 
 import de.cotto.lndmanagej.model.Node;
+import de.cotto.lndmanagej.model.Pubkey;
 import lnrpc.GetInfoResponse;
 import lnrpc.GetInfoResponseOrBuilder;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -26,8 +27,8 @@ public class GrpcGetInfo {
         return Node.builder().withPubkey(getPubkey()).withAlias(getAlias()).build();
     }
 
-    public String getPubkey() {
-        return getInfo().getIdentityPubkey();
+    public Pubkey getPubkey() {
+        return Pubkey.create(getInfo().getIdentityPubkey());
     }
 
     public String getAlias() {

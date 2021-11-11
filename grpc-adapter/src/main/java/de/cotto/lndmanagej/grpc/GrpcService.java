@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.grpc;
 
 import de.cotto.lndmanagej.LndConfiguration;
+import de.cotto.lndmanagej.model.Pubkey;
 import io.grpc.StatusRuntimeException;
 import lnrpc.Channel;
 import lnrpc.GetInfoResponse;
@@ -70,7 +71,7 @@ public class GrpcService {
                 .orElse(List.of());
     }
 
-    public Optional<NodeInfo> getNodeInfo(String pubkey) {
-        return get(() -> lightningStub.getNodeInfo(NodeInfoRequest.newBuilder().setPubKey(pubkey).build()));
+    public Optional<NodeInfo> getNodeInfo(Pubkey pubkey) {
+        return get(() -> lightningStub.getNodeInfo(NodeInfoRequest.newBuilder().setPubKey(pubkey.toString()).build()));
     }
 }

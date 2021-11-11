@@ -8,13 +8,12 @@ import org.junit.jupiter.api.Test;
 import java.time.Instant;
 import java.util.Optional;
 
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class GrpcGetInfoTest {
-
-    private static final String PUBKEY = "pubkey";
     private static final String ALIAS = "alias";
     private static final String VERSION = "version";
     private static final String COMMIT_HASH = "commit";
@@ -40,7 +39,7 @@ class GrpcGetInfoTest {
 
     private GetInfoResponse createResponse(int blockHeight, boolean syncedToChain, boolean syncedToGraph) {
         return GetInfoResponse.newBuilder()
-                .setIdentityPubkey(PUBKEY)
+                .setIdentityPubkey(PUBKEY.toString())
                 .setAlias(ALIAS)
                 .setNumActiveChannels(NUMBER_OF_ACTIVE_CHANNELS)
                 .setNumInactiveChannels(NUMBER_OF_INACTIVE_CHANNELS)

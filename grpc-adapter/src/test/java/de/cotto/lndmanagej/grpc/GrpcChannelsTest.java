@@ -48,7 +48,7 @@ class GrpcChannelsTest {
         return Channel.newBuilder()
                 .setChanId(CHANNEL_ID.shortChannelId())
                 .setCapacity(CAPACITY.satoshis())
-                .setRemotePubkey(NODE_2.pubkey())
+                .setRemotePubkey(NODE_2.pubkey().toString())
                 .build();
     }
 }

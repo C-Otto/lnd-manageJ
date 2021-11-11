@@ -4,6 +4,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import de.cotto.lndmanagej.model.Node;
+import de.cotto.lndmanagej.model.Pubkey;
 import lnrpc.LightningNode;
 import lnrpc.NodeInfo;
 import org.springframework.stereotype.Component;
@@ -17,13 +18,13 @@ public class GrpcNodeInfo {
     private static final int CACHE_EXPIRY_MINUTES = 30;
 
     private final GrpcService grpcService;
-    private final LoadingCache<String, Node> cache;
+    private final LoadingCache<Pubkey, Node> cache;
 
     public GrpcNodeInfo(GrpcService grpcService) {
         this.grpcService = grpcService;
-        CacheLoader<String, Node> loader = new CacheLoader<>() {
+        CacheLoader<Pubkey, Node> loader = new CacheLoader<>() {
             @Override
-            public Node load(@Nonnull String pubkey) {
+            public Node load(@Nonnull Pubkey pubkey) {
                 return getNodeWithoutCache(pubkey);
             }
         };
@@ -33,11 +34,11 @@ public class GrpcNodeInfo {
                 .build(loader);
     }
 
-    public Node getNode(String pubkey) {
+    public Node getNode(Pubkey pubkey) {
         return cache.getUnchecked(pubkey);
     }
 
-    private Node getNodeWithoutCache(String pubkey) {
+    private Node getNodeWithoutCache(Pubkey pubkey) {
         NodeInfo nodeInfo = grpcService.getNodeInfo(pubkey).orElse(null);
         if (nodeInfo == null) {
             return Node.builder().withPubkey(pubkey).build();

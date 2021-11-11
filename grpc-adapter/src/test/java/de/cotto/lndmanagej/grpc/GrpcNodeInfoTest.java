@@ -50,6 +50,6 @@ class GrpcNodeInfoTest {
     @Test
     void getNode_error() {
         when(grpcService.getNodeInfo(NODE.pubkey())).thenReturn(Optional.empty());
-        assertThat(grpcNodeInfo.getNode(NODE.pubkey()).alias()).isEqualTo(NODE.pubkey());
+        assertThat(grpcNodeInfo.getNode(NODE.pubkey()).alias()).isEqualTo(NODE.pubkey().toString());
     }
 }

@@ -2,9 +2,10 @@ package de.cotto.lndmanagej.model;
 
 import java.time.Instant;
 
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
+
 public class NodeFixtures {
-    public static final String PUBKEY = "027abc123abc123abc123abc123123abc123abc123abc123abc123abc123abc123";
-    public static final String PUBKEY_2 = "03fff0000000000000000000000000000000000000000000000000000000000000";
     public static final String ALIAS = "Node";
     public static final String ALIAS_2 = "Another Node";
     public static final int LAST_UPDATE = (int) Instant.now().getEpochSecond();

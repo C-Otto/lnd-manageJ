@@ -3,17 +3,15 @@ package de.cotto.lndmanagej.model;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
+import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
+import static de.cotto.lndmanagej.model.NodeFixtures.LAST_UPDATE;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_WITHOUT_ALIAS;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 class NodeTest {
-
-    private static final String PUBKEY = NodeFixtures.PUBKEY;
-    private static final String ALIAS = NodeFixtures.ALIAS;
-    private static final int LAST_UPDATE = NodeFixtures.LAST_UPDATE;
-
     @Test
     void builder_without_arguments() {
         assertThatNullPointerException().isThrownBy(
@@ -79,42 +77,42 @@ class NodeTest {
 
     @Test
     void compareTo_by_pubkey_same() {
-        Node node1 = forPubkey("pubkey");
-        Node node2 = forPubkey("pubkey");
+        Node node1 = forPubkey("aaa000aaa000abc000abc000abc000abc000abc000abc000abc000abc000abc000");
+        Node node2 = forPubkey("aaa000aaa000abc000abc000abc000abc000abc000abc000abc000abc000abc000");
         assertThat(node1.compareTo(node2)).isEqualTo(0);
     }
 
     @Test
     void compareTo_by_pubkey_smaller() {
-        Node node1 = forPubkey("aaa");
-        Node node2 = forPubkey("zzz");
+        Node node1 = forPubkey("aaa00abc000abc000abc000abc000abc000abc000abc000abc000abc000abc000a");
+        Node node2 = forPubkey("fff00abc000abc000abc000abc000abc000abc000abc000abc000abc000abc000a");
         assertThat(node1.compareTo(node2)).isLessThan(0);
     }
 
     @Test
     void compareTo_by_pubkey_larger() {
-        Node node1 = forPubkey("0c123");
-        Node node2 = forPubkey("0b123");
+        Node node1 = forPubkey("0c123abc000abc000abc000abc000abc000abc000abc000abc000abc000abc000a");
+        Node node2 = forPubkey("0b123abc000abc000abc000abc000abc000abc000abc000abc000abc000abc000a");
         assertThat(node1.compareTo(node2)).isGreaterThan(0);
     }
 
     @Test
     void getAlias() {
-        assertThat(NODE.alias()).isEqualTo(NodeFixtures.ALIAS);
+        assertThat(NODE.alias()).isEqualTo(ALIAS);
     }
 
     @Test
     void getPubkey() {
-        assertThat(NODE.pubkey()).isEqualTo(NodeFixtures.PUBKEY);
+        assertThat(NODE.pubkey()).isEqualTo(PUBKEY);
     }
 
     @Test
     void getLastUpdate() {
-        assertThat(NODE.lastUpdate()).isEqualTo(NodeFixtures.LAST_UPDATE);
+        assertThat(NODE.lastUpdate()).isEqualTo(LAST_UPDATE);
     }
 
     private Node forPubkey(String pubkey) {
-        return Node.builder().withPubkey(pubkey).withAlias(ALIAS).withLastUpdate(LAST_UPDATE).build();
+        return Node.builder().withPubkey(Pubkey.create(pubkey)).withAlias(ALIAS).withLastUpdate(LAST_UPDATE).build();
     }
 }
 
