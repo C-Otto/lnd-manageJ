@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.service.ChannelService;
+import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.OwnNodeService;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,9 @@ class LegacyControllerIT {
     @MockBean
     private OwnNodeService ownNodeService;
 
+    @MockBean
+    private FeeService feeService;
+
     @Test
     void getAlias() throws Exception {
         when(nodeService.getAlias(PUBKEY)).thenReturn(ALIAS);
@@ -74,5 +78,19 @@ class LegacyControllerIT {
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_CHANNEL, LOCAL_CHANNEL_TO_NODE_3));
         mockMvc.perform(get("/legacy/peer-pubkeys"))
                 .andExpect(content().string(PUBKEY_2 + "\n" + PUBKEY_3));
+    }
+
+    @Test
+    void getIncomingFeeRate() throws Exception {
+        when(feeService.getIncomingFeeRate(CHANNEL_ID)).thenReturn(123L);
+        mockMvc.perform(get("/legacy/channel/" + CHANNEL_ID + "/incoming-fee-rate"))
+                .andExpect(content().string("123"));
+    }
+
+    @Test
+    void getOutgoingFeeRate() throws Exception {
+        when(feeService.getOutgoingFeeRate(CHANNEL_ID)).thenReturn(123L);
+        mockMvc.perform(get("/legacy/channel/" + CHANNEL_ID + "/outgoing-fee-rate"))
+                .andExpect(content().string("123"));
     }
 }

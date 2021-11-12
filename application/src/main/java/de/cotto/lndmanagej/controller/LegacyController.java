@@ -5,6 +5,7 @@ import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.ChannelService;
+import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.OwnNodeService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,11 +22,18 @@ public class LegacyController {
     private final NodeService nodeService;
     private final ChannelService channelService;
     private final OwnNodeService ownNodeService;
+    private final FeeService feeService;
 
-    public LegacyController(NodeService nodeService, ChannelService channelService, OwnNodeService ownNodeService) {
+    public LegacyController(
+            NodeService nodeService,
+            ChannelService channelService,
+            OwnNodeService ownNodeService,
+            FeeService feeService
+    ) {
         this.nodeService = nodeService;
         this.channelService = channelService;
         this.ownNodeService = ownNodeService;
+        this.feeService = feeService;
     }
 
     @GetMapping("/node/{pubkey}/alias")
@@ -55,5 +63,15 @@ public class LegacyController {
     @GetMapping("/synced-to-chain")
     public boolean syncedToChain() {
         return ownNodeService.isSyncedToChain();
+    }
+
+    @GetMapping("/channel/{channelId}/incoming-fee-rate")
+    public long getIncomingFeeRate(@PathVariable ChannelId channelId) {
+        return feeService.getIncomingFeeRate(channelId);
+    }
+
+    @GetMapping("/channel/{channelId}/outgoing-fee-rate")
+    public long getOutgoingFeeRate(@PathVariable ChannelId channelId) {
+        return feeService.getOutgoingFeeRate(channelId);
     }
 }

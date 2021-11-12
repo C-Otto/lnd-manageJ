@@ -55,7 +55,14 @@ class GrpcGetInfoTest {
 
     @Test
     void getPubkey() {
-        assertThat(grpcGetInfo.getPubkey()).contains(PUBKEY);
+        assertThat(grpcGetInfo.getPubkey()).isEqualTo(PUBKEY);
+    }
+
+    @Test
+    void getPubkey_cached() {
+        grpcGetInfo.getPubkey();
+        when(grpcService.getInfo()).thenReturn(Optional.empty());
+        assertThat(grpcGetInfo.getPubkey()).isEqualTo(PUBKEY);
     }
 
     @Test

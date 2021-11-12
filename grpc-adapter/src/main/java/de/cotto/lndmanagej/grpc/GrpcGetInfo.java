@@ -4,19 +4,27 @@ import de.cotto.lndmanagej.model.Pubkey;
 import lnrpc.GetInfoResponse;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.Optional;
 
 @Component
 public class GrpcGetInfo {
     private final GrpcService grpcService;
 
+    @Nullable
+    private Pubkey pubkey;
+
     public GrpcGetInfo(GrpcService grpcService) {
         this.grpcService = grpcService;
     }
 
-    public Optional<Pubkey> getPubkey() {
-        return grpcService.getInfo().map(GetInfoResponse::getIdentityPubkey).map(Pubkey::create);
+    public Pubkey getPubkey() {
+        if (pubkey == null) {
+            pubkey = grpcService.getInfo().map(GetInfoResponse::getIdentityPubkey).map(Pubkey::create).orElseThrow();
+        }
+        return Objects.requireNonNull(pubkey);
     }
 
     public Optional<String> getAlias() {

@@ -25,7 +25,7 @@ public class GrpcChannels {
     }
 
     public Set<LocalChannel> getChannels() {
-        Pubkey ownPubkey = grpcGetInfo.getPubkey().orElseThrow();
+        Pubkey ownPubkey = grpcGetInfo.getPubkey();
         return grpcService.getChannels().stream()
                 .map(lndChannel -> toChannel(lndChannel, ownPubkey))
                 .collect(toSet());

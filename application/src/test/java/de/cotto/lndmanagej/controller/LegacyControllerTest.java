@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.controller;
 import de.cotto.lndmanagej.model.ChannelFixtures;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.service.ChannelService;
+import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.OwnNodeService;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,9 @@ class LegacyControllerTest {
 
     @Mock
     private OwnNodeService ownNodeService;
+
+    @Mock
+    private FeeService feeService;
 
     @Test
     void getAlias() {
@@ -92,5 +96,17 @@ class LegacyControllerTest {
     void getPeerPubkeys_without_duplicates() {
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_CHANNEL, LOCAL_CHANNEL_2));
         assertThat(legacyController.getPeerPubkeys()).isEqualTo(PUBKEY_2.toString());
+    }
+
+    @Test
+    void getIncomingFeeRate() {
+        when(feeService.getIncomingFeeRate(CHANNEL_ID)).thenReturn(123L);
+        assertThat(legacyController.getIncomingFeeRate(CHANNEL_ID)).isEqualTo(123);
+    }
+
+    @Test
+    void getOutgoingFeeRate() {
+        when(feeService.getOutgoingFeeRate(CHANNEL_ID)).thenReturn(123L);
+        assertThat(legacyController.getOutgoingFeeRate(CHANNEL_ID)).isEqualTo(123);
     }
 }

@@ -9,7 +9,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
@@ -32,7 +31,7 @@ class GrpcChannelsTest {
 
     @BeforeEach
     void setUp() {
-        when(grpcGetInfo.getPubkey()).thenReturn(Optional.of(PUBKEY));
+        when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY);
     }
 
     @Test

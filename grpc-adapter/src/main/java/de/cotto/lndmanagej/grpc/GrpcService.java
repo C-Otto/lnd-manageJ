@@ -1,9 +1,12 @@
 package de.cotto.lndmanagej.grpc;
 
 import de.cotto.lndmanagej.LndConfiguration;
+import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
 import io.grpc.StatusRuntimeException;
+import lnrpc.ChanInfoRequest;
 import lnrpc.Channel;
+import lnrpc.ChannelEdge;
 import lnrpc.GetInfoResponse;
 import lnrpc.LightningGrpc;
 import lnrpc.ListChannelsRequest;
@@ -73,5 +76,10 @@ public class GrpcService {
 
     public Optional<NodeInfo> getNodeInfo(Pubkey pubkey) {
         return get(() -> lightningStub.getNodeInfo(NodeInfoRequest.newBuilder().setPubKey(pubkey.toString()).build()));
+    }
+
+    public Optional<ChannelEdge> getChannelEdge(ChannelId channelId) {
+        ChanInfoRequest build = ChanInfoRequest.newBuilder().setChanId(channelId.shortChannelId()).build();
+        return get(() -> lightningStub.getChanInfo(build));
     }
 }
