@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Set;
 
+import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
@@ -137,7 +138,7 @@ class LegacyControllerTest {
     @Test
     void getPeerPubkeys() {
         Channel channel = ChannelFixtures.create(PUBKEY, PUBKEY_3, CHANNEL_ID_2);
-        LocalChannel channel2 = new LocalChannel(channel, PUBKEY, Coins.NONE, Coins.NONE);
+        LocalChannel channel2 = new LocalChannel(channel, PUBKEY, BALANCE_INFORMATION);
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_CHANNEL, channel2));
         assertThat(legacyController.getPeerPubkeys()).isEqualTo(PUBKEY_2 + "\n" + PUBKEY_3);
     }
@@ -145,7 +146,7 @@ class LegacyControllerTest {
     @Test
     void getPeerPubkeys_sorted() {
         Channel channel = ChannelFixtures.create(PUBKEY, PUBKEY_3, CHANNEL_ID_2);
-        LocalChannel channel2 = new LocalChannel(channel, PUBKEY, Coins.NONE, Coins.NONE);
+        LocalChannel channel2 = new LocalChannel(channel, PUBKEY, BALANCE_INFORMATION);
         when(channelService.getOpenChannels()).thenReturn(Set.of(channel2, LOCAL_CHANNEL));
         assertThat(legacyController.getPeerPubkeys()).isEqualTo(PUBKEY_2 + "\n" + PUBKEY_3);
     }
@@ -184,5 +185,11 @@ class LegacyControllerTest {
     void getAvailableLocalBalance() {
         when(balanceService.getAvailableLocalBalance(CHANNEL_ID)).thenReturn(Coins.ofSatoshis(123L));
         assertThat(legacyController.getAvailableLocalBalance(CHANNEL_ID)).isEqualTo(123);
+    }
+
+    @Test
+    void getAvailableRemoteBalance() {
+        when(balanceService.getAvailableRemoteBalance(CHANNEL_ID)).thenReturn(Coins.ofSatoshis(123L));
+        assertThat(legacyController.getAvailableRemoteBalance(CHANNEL_ID)).isEqualTo(123);
     }
 }

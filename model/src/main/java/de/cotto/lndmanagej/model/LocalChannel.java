@@ -4,13 +4,10 @@ import java.util.Set;
 
 public class LocalChannel extends Channel {
     private final Pubkey remotePubkey;
-    private final Coins localBalance;
-    private final Coins localReserve;
+    private final BalanceInformation balanceInformation;
 
-    public LocalChannel(Channel channel, Pubkey ownPubkey, Coins localBalance, Coins localReserve) {
+    public LocalChannel(Channel channel, Pubkey ownPubkey, BalanceInformation balanceInformation) {
         super(channel.getId(), channel.getCapacity(), channel.getPubkeys());
-        this.localBalance = localBalance;
-        this.localReserve = localReserve;
         Set<Pubkey> pubkeys = channel.getPubkeys();
         remotePubkey = pubkeys.stream()
                 .filter(pubkey -> !ownPubkey.equals(pubkey))
@@ -19,17 +16,14 @@ public class LocalChannel extends Channel {
         if (!pubkeys.contains(ownPubkey)) {
             throw new IllegalArgumentException("Channel must have given pubkey as peer");
         }
+        this.balanceInformation = balanceInformation;
     }
 
     public Pubkey getRemotePubkey() {
         return remotePubkey;
     }
 
-    public Coins getLocalBalance() {
-        return localBalance;
-    }
-
-    public Coins getLocalReserve() {
-        return localReserve;
+    public BalanceInformation getBalanceInformation() {
+        return balanceInformation;
     }
 }

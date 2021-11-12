@@ -120,8 +120,13 @@ public class LegacyController {
     }
 
     @GetMapping("/channel/{channelId}/available-local-balance")
-    public long getAvailableLocalBalance(ChannelId channelId) {
+    public long getAvailableLocalBalance(@PathVariable ChannelId channelId) {
         return balanceService.getAvailableLocalBalance(channelId).satoshis();
+    }
+
+    @GetMapping("/channel/{channelId}/available-remote-balance")
+    public long getAvailableRemoteBalance(@PathVariable ChannelId channelId) {
+        return balanceService.getAvailableRemoteBalance(channelId).satoshis();
     }
 
     private Stream<ChannelId> getOpenChannelIdsSorted() {

@@ -148,4 +148,12 @@ class LegacyControllerIT {
         mockMvc.perform(get(CHANNEL_BASE + "/available-local-balance"))
                 .andExpect(content().string(String.valueOf(availableBalance.satoshis())));
     }
+
+    @Test
+    void getAvailableRemoteBalance() throws Exception {
+        Coins availableBalance = Coins.ofSatoshis(999);
+        when(balanceService.getAvailableRemoteBalance(CHANNEL_ID)).thenReturn(availableBalance);
+        mockMvc.perform(get(CHANNEL_BASE + "/available-remote-balance"))
+                .andExpect(content().string(String.valueOf(availableBalance.satoshis())));
+    }
 }

@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.grpc.GrpcChannels;
+import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.LocalChannel;
@@ -14,21 +15,17 @@ public class BalanceService {
         this.grpcChannels = grpcChannels;
     }
 
-    public Coins getLocalBalance(ChannelId channelId) {
-        return grpcChannels.getChannel(channelId).map(LocalChannel::getLocalBalance).orElse(Coins.NONE);
-    }
-
-    public Coins getLocalReserve(ChannelId channelId) {
-        return grpcChannels.getChannel(channelId).map(LocalChannel::getLocalReserve).orElse(Coins.NONE);
-    }
-
     public Coins getAvailableLocalBalance(ChannelId channelId) {
-        Coins available = grpcChannels.getChannel(channelId)
-                .map(c -> c.getLocalBalance().subtract(c.getLocalReserve()))
+        return grpcChannels.getChannel(channelId)
+                .map(LocalChannel::getBalanceInformation)
+                .map(BalanceInformation::availableLocalBalance)
                 .orElse(Coins.NONE);
-        if (available.isNegative()) {
-            return Coins.NONE;
-        }
-        return available;
+    }
+
+    public Coins getAvailableRemoteBalance(ChannelId channelId) {
+        return grpcChannels.getChannel(channelId)
+                .map(LocalChannel::getBalanceInformation)
+                .map(BalanceInformation::availableRemoteBalance)
+                .orElse(Coins.NONE);
     }
 }

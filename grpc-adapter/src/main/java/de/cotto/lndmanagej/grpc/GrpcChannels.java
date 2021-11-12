@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.grpc;
 
+import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
@@ -48,9 +49,13 @@ public class GrpcChannels {
                 .withNode1(ownPubkey)
                 .withNode2(Pubkey.create(lndChannel.getRemotePubkey()))
                 .build();
-        Coins localBalance = Coins.ofSatoshis(lndChannel.getLocalBalance());
-        Coins localReserve = Coins.ofSatoshis(lndChannel.getLocalConstraints().getChanReserveSat());
-        return new LocalChannel(channel, ownPubkey, localBalance, localReserve);
+        BalanceInformation balanceInformation = new BalanceInformation(
+                Coins.ofSatoshis(lndChannel.getLocalBalance()),
+                Coins.ofSatoshis(lndChannel.getLocalConstraints().getChanReserveSat()),
+                Coins.ofSatoshis(lndChannel.getRemoteBalance()),
+                Coins.ofSatoshis(lndChannel.getRemoteConstraints().getChanReserveSat())
+        );
+        return new LocalChannel(channel, ownPubkey, balanceInformation);
     }
 
 }
