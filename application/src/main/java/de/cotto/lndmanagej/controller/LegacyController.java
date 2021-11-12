@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Comparator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -62,6 +63,20 @@ public class LegacyController {
     public String getOpenChannelIdsCompact() {
         return getOpenChannelIdsSorted()
                 .map(ChannelId::getCompactForm)
+                .collect(Collectors.joining(NEWLINE));
+    }
+
+    @GetMapping("/open-channels/pretty")
+    public String getOpenChannelIdsPretty() {
+        return channelService.getOpenChannels().stream()
+                .sorted(Comparator.comparing(LocalChannel::getId))
+                .map(localChannel -> {
+                    Pubkey pubkey = localChannel.getRemotePubkey();
+                    return localChannel.getId().getCompactForm() +
+                            "\t" + pubkey +
+                            "\t" + localChannel.getCapacity() +
+                            "\t" + nodeService.getAlias(pubkey);
+                })
                 .collect(Collectors.joining(NEWLINE));
     }
 

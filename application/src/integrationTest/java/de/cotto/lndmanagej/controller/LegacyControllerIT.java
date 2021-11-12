@@ -84,6 +84,13 @@ class LegacyControllerIT {
     }
 
     @Test
+    void getOpenChannelIdsPretty() throws Exception {
+        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_CHANNEL, LOCAL_CHANNEL_3));
+        mockMvc.perform(get("/legacy/open-channels/pretty"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void isSyncedToChain_true() throws Exception {
         when(ownNodeService.isSyncedToChain()).thenReturn(true);
         mockMvc.perform(get("/legacy/synced-to-chain")).andExpect(content().string("true"));
