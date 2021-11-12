@@ -17,9 +17,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith({MockitoExtension.class})
-class NodeControllerTest {
+class LegacyControllerTest {
     @InjectMocks
-    private NodeController nodeController;
+    private LegacyController legacyController;
 
     @Mock
     private NodeService nodeService;
@@ -27,14 +27,14 @@ class NodeControllerTest {
     @Test
     void getAlias() {
         when(nodeService.getAlias(PUBKEY)).thenReturn(ALIAS);
-        assertThat(nodeController.getAlias(PUBKEY)).isEqualTo(ALIAS);
+        assertThat(legacyController.getAlias(PUBKEY)).isEqualTo(ALIAS);
     }
 
     @Test
     void getOpenChannelIds() {
         // jq is confused by large numbers, return string instead
         when(nodeService.getOpenChannelIds(PUBKEY)).thenReturn(List.of(CHANNEL_ID, CHANNEL_ID_3));
-        assertThat(nodeController.getOpenChannelIds(PUBKEY)).containsExactly(
+        assertThat(legacyController.getOpenChannelIds(PUBKEY)).containsExactly(
                 CHANNEL_ID.toString(),
                 CHANNEL_ID_3.toString()
         );

@@ -20,8 +20,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-@WebMvcTest(controllers = NodeController.class)
-class NodeControllerIT {
+@WebMvcTest(controllers = LegacyController.class)
+class LegacyControllerIT {
     @Autowired
     private MockMvc mockMvc;
 

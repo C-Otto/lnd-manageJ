@@ -13,10 +13,10 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/node/{pubkey}/")
-public class NodeController {
+public class LegacyController {
     private final NodeService nodeService;
 
-    public NodeController(NodeService nodeService) {
+    public LegacyController(NodeService nodeService) {
         this.nodeService = nodeService;
     }
 
