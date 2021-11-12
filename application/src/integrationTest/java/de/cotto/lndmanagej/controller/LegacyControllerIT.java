@@ -29,18 +29,18 @@ class LegacyControllerIT {
     @Test
     void getAlias() throws Exception {
         when(nodeService.getAlias(PUBKEY)).thenReturn(ALIAS);
-        mockMvc.perform(get("/api/node/" + PUBKEY + "/alias")).andExpect(content().string(ALIAS));
+        mockMvc.perform(get("/legacy/node/" + PUBKEY + "/alias")).andExpect(content().string(ALIAS));
     }
 
     @Test
     void getAlias_error() throws Exception {
-        mockMvc.perform(get("/api/node/xxx/alias")).andExpect(MockMvcResultMatchers.status().isBadRequest());
+        mockMvc.perform(get("/legacy/node/xxx/alias")).andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
     @Test
     void getOpenChannelIds() throws Exception {
         when(nodeService.getOpenChannelIds(PUBKEY)).thenReturn(List.of(CHANNEL_ID, CHANNEL_ID_3));
-        mockMvc.perform(get("/api/node/" + PUBKEY + "/open-channels"))
+        mockMvc.perform(get("/legacy/node/" + PUBKEY + "/open-channels"))
                 .andExpect(content().string(CHANNEL_ID + "\n" + CHANNEL_ID_3));
     }
 }

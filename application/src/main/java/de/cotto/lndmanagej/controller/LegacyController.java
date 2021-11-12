@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/node/{pubkey}/")
+@RequestMapping("/legacy/node/{pubkey}/")
 public class LegacyController {
     private static final String NEWLINE = "\n";
     private final NodeService nodeService;
