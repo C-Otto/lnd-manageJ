@@ -17,6 +17,7 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.LocalChannelFixtures.LOCAL_CHANNEL;
+import static de.cotto.lndmanagej.model.LocalChannelFixtures.LOCAL_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalChannelFixtures.LOCAL_CHANNEL_3;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
@@ -78,5 +79,18 @@ class LegacyControllerTest {
         LocalChannel channel2 = new LocalChannel(ChannelFixtures.create(PUBKEY, PUBKEY_3, CHANNEL_ID_2), PUBKEY);
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_CHANNEL, channel2));
         assertThat(legacyController.getPeerPubkeys()).isEqualTo(PUBKEY_2 + "\n" + PUBKEY_3);
+    }
+
+    @Test
+    void getPeerPubkeys_sorted() {
+        LocalChannel channel2 = new LocalChannel(ChannelFixtures.create(PUBKEY, PUBKEY_3, CHANNEL_ID_2), PUBKEY);
+        when(channelService.getOpenChannels()).thenReturn(Set.of(channel2, LOCAL_CHANNEL));
+        assertThat(legacyController.getPeerPubkeys()).isEqualTo(PUBKEY_2 + "\n" + PUBKEY_3);
+    }
+
+    @Test
+    void getPeerPubkeys_without_duplicates() {
+        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_CHANNEL, LOCAL_CHANNEL_2));
+        assertThat(legacyController.getPeerPubkeys()).isEqualTo(PUBKEY_2.toString());
     }
 }

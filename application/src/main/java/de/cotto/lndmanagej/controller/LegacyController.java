@@ -48,6 +48,7 @@ public class LegacyController {
                 .map(LocalChannel::getRemotePubkey)
                 .map(Pubkey::toString)
                 .sorted()
+                .distinct()
                 .collect(Collectors.joining(NEWLINE));
     }
 
