@@ -15,6 +15,8 @@ import java.util.Set;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_COMPACT;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_COMPACT_3;
 import static de.cotto.lndmanagej.model.LocalChannelFixtures.LOCAL_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalChannelFixtures.LOCAL_CHANNEL_3;
 import static de.cotto.lndmanagej.model.LocalChannelFixtures.LOCAL_CHANNEL_TO_NODE_3;
@@ -72,6 +74,13 @@ class LegacyControllerIT {
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_CHANNEL, LOCAL_CHANNEL_3));
         mockMvc.perform(get("/legacy/open-channels"))
                 .andExpect(content().string(CHANNEL_ID + "\n" + CHANNEL_ID_3));
+    }
+
+    @Test
+    void getOpenChannelIdsCompact() throws Exception {
+        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_CHANNEL, LOCAL_CHANNEL_3));
+        mockMvc.perform(get("/legacy/open-channels/compact"))
+                .andExpect(content().string(CHANNEL_ID_COMPACT + "\n" + CHANNEL_ID_COMPACT_3));
     }
 
     @Test

@@ -4,6 +4,8 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_COMPACT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
@@ -126,13 +128,18 @@ class ChannelIdTest {
     }
 
     @Test
+    void getCompactForm() {
+        assertThat(CHANNEL_ID.getCompactForm()).isEqualTo(CHANNEL_ID_COMPACT);
+    }
+
+    @Test
     void testEquals() {
         EqualsVerifier.forClass(ChannelId.class).verify();
     }
 
     @Test
     void testToString() {
-        String expectedString = String.valueOf(ChannelIdFixtures.CHANNEL_ID.shortChannelId());
-        assertThat(ChannelIdFixtures.CHANNEL_ID).hasToString(expectedString);
+        String expectedString = String.valueOf(CHANNEL_ID.shortChannelId());
+        assertThat(CHANNEL_ID).hasToString(expectedString);
     }
 }

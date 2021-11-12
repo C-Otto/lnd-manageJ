@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/legacy")
@@ -52,10 +53,15 @@ public class LegacyController {
 
     @GetMapping("/open-channels")
     public String getOpenChannelIds() {
-        return channelService.getOpenChannels().stream()
-                .map(Channel::getId)
-                .sorted()
+        return getOpenChannelIdsSorted()
                 .map(ChannelId::toString)
+                .collect(Collectors.joining(NEWLINE));
+    }
+
+    @GetMapping("/open-channels/compact")
+    public String getOpenChannelIdsCompact() {
+        return getOpenChannelIdsSorted()
+                .map(ChannelId::getCompactForm)
                 .collect(Collectors.joining(NEWLINE));
     }
 
@@ -92,5 +98,11 @@ public class LegacyController {
     @GetMapping("/channel/{channelId}/outgoing-base-fee")
     public long getOutgoingBaseFee(@PathVariable ChannelId channelId) {
         return feeService.getOutgoingBaseFee(channelId).milliSatoshis();
+    }
+
+    private Stream<ChannelId> getOpenChannelIdsSorted() {
+        return channelService.getOpenChannels().stream()
+                .map(Channel::getId)
+                .sorted();
     }
 }

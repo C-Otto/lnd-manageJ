@@ -24,6 +24,13 @@ public record ChannelId(long shortChannelId) implements Comparable<ChannelId> {
         return fromShortChannelId(shortChannelId);
     }
 
+    public String getCompactForm() {
+        long block = shortChannelId >> 40;
+        long transaction = shortChannelId >> 16 & 0xFFFFFF;
+        long output = shortChannelId & 0xFFFF;
+        return block + ":" + transaction + ":" + output;
+    }
+
     @Override
     public String toString() {
         return String.valueOf(shortChannelId);
