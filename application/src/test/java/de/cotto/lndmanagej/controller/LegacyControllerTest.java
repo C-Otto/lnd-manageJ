@@ -16,7 +16,7 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-@ExtendWith({MockitoExtension.class})
+@ExtendWith(MockitoExtension.class)
 class LegacyControllerTest {
     @InjectMocks
     private LegacyController legacyController;

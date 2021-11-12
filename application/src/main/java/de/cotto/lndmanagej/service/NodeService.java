@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.service;
 
-import de.cotto.lndmanagej.grpc.GrpcChannels;
 import de.cotto.lndmanagej.grpc.GrpcNodeInfo;
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
@@ -14,17 +13,16 @@ import java.util.stream.Collectors;
 @Component
 public class NodeService {
     private final GrpcNodeInfo grpcNodeInfo;
-    private final GrpcChannels grpcChannels;
+    private final ChannelService channelService;
 
-    public NodeService(GrpcNodeInfo grpcNodeInfo, GrpcChannels grpcChannels) {
+    public NodeService(GrpcNodeInfo grpcNodeInfo, ChannelService channelService) {
         this.grpcNodeInfo = grpcNodeInfo;
-        this.grpcChannels = grpcChannels;
+        this.channelService = channelService;
     }
 
     public List<ChannelId> getOpenChannelIds(Pubkey pubkey) {
         Node node = getNode(pubkey);
-        return grpcChannels.getChannels().stream()
-                .filter(c -> c.getNodes().contains(node))
+        return channelService.getOpenChannelsWith(node).stream()
                 .map(Channel::getId)
                 .sorted()
                 .collect(Collectors.toList());
