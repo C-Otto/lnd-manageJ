@@ -1,6 +1,8 @@
 package de.cotto.lndmanagej.controller;
 
+import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
@@ -34,7 +36,18 @@ public class LegacyController {
     @GetMapping("/node/{pubkey}/open-channels")
     public String getOpenChannelIds(@PathVariable Pubkey pubkey) {
         return channelService.getOpenChannelsWith(pubkey).stream()
+                .map(Channel::getId)
+                .sorted()
                 .map(ChannelId::toString)
+                .collect(Collectors.joining(NEWLINE));
+    }
+
+    @GetMapping("/peer-pubkeys")
+    public String getPeerPubkeys() {
+        return channelService.getOpenChannels().stream()
+                .map(LocalChannel::getRemotePubkey)
+                .map(Pubkey::toString)
+                .sorted()
                 .collect(Collectors.joining(NEWLINE));
     }
 

@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
-import static de.cotto.lndmanagej.model.ChannelFixtures.CHANNEL;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.LocalChannelFixtures.LOCAL_CHANNEL;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,7 +43,7 @@ class GrpcChannelsTest {
     @Test
     void one_channel() {
         when(grpcService.getChannels()).thenReturn(List.of(channel()));
-        assertThat(grpcChannels.getChannels()).containsExactly(CHANNEL);
+        assertThat(grpcChannels.getChannels()).containsExactly(LOCAL_CHANNEL);
     }
 
     private Channel channel() {

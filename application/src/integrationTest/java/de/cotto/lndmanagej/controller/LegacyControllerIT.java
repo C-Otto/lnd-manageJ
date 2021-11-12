@@ -9,12 +9,17 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.List;
+import java.util.Set;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
+import static de.cotto.lndmanagej.model.LocalChannelFixtures.LOCAL_CHANNEL;
+import static de.cotto.lndmanagej.model.LocalChannelFixtures.LOCAL_CHANNEL_3;
+import static de.cotto.lndmanagej.model.LocalChannelFixtures.LOCAL_CHANNEL_TO_NODE_3;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -47,7 +52,7 @@ class LegacyControllerIT {
 
     @Test
     void getOpenChannelIds() throws Exception {
-        when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(List.of(CHANNEL_ID, CHANNEL_ID_3));
+        when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_CHANNEL, LOCAL_CHANNEL_3));
         mockMvc.perform(get("/legacy/node/" + PUBKEY + "/open-channels"))
                 .andExpect(content().string(CHANNEL_ID + "\n" + CHANNEL_ID_3));
     }
@@ -62,5 +67,12 @@ class LegacyControllerIT {
     void isSyncedToChain_false() throws Exception {
         when(ownNodeService.isSyncedToChain()).thenReturn(false);
         mockMvc.perform(get("/legacy/synced-to-chain")).andExpect(content().string("false"));
+    }
+
+    @Test
+    void getPeerPubkeys() throws Exception {
+        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_CHANNEL, LOCAL_CHANNEL_TO_NODE_3));
+        mockMvc.perform(get("/legacy/peer-pubkeys"))
+                .andExpect(content().string(PUBKEY_2 + "\n" + PUBKEY_3));
     }
 }

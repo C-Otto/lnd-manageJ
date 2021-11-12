@@ -2,7 +2,9 @@ package de.cotto.lndmanagej.model;
 
 import org.springframework.lang.Nullable;
 
+import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -11,13 +13,16 @@ import static java.util.Objects.requireNonNull;
 public class Channel {
     private final ChannelId channelId;
     private final Coins capacity;
-    private final Set<Pubkey> pubkeys = new LinkedHashSet<>();
+    private final Set<Pubkey> pubkeys;
 
     private Channel(ChannelId channelId, Coins capacity, Pubkey pubkey1, Pubkey pubkey2) {
+        this(channelId, capacity, List.of(pubkey1, pubkey2));
+    }
+
+    protected Channel(ChannelId channelId, Coins capacity, Collection<Pubkey> pubkeys) {
         this.channelId = channelId;
         this.capacity = Coins.ofMilliSatoshis(capacity.milliSatoshis());
-        pubkeys.add(pubkey1);
-        pubkeys.add(pubkey2);
+        this.pubkeys = new LinkedHashSet<>(pubkeys);
     }
 
     public static Builder builder() {
@@ -70,6 +75,9 @@ public class Channel {
         }
 
         public Channel build() {
+            if (requireNonNull(pubkey1).equals(requireNonNull(pubkey2))) {
+                throw new IllegalArgumentException("Pubkeys must not be the same");
+            }
             return new Channel(
                     requireNonNull(channelId),
                     requireNonNull(capacity),

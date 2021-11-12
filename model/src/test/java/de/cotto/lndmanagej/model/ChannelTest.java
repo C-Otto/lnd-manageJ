@@ -9,6 +9,7 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 class ChannelTest {
@@ -61,6 +62,18 @@ class ChannelTest {
                         .withNode1(PUBKEY)
                         .build()
         );
+    }
+
+    @Test
+    void builder_identical_pubkeys() {
+        assertThatIllegalArgumentException().isThrownBy(
+                () -> Channel.builder()
+                        .withChannelId(CHANNEL_ID)
+                        .withCapacity(CAPACITY)
+                        .withNode1(PUBKEY)
+                        .withNode2(PUBKEY)
+                        .build()
+        ).withMessage("Pubkeys must not be the same");
     }
 
     @Test
