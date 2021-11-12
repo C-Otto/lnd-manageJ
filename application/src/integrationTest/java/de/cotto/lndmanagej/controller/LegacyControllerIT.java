@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.controller;
 
+import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ class LegacyControllerIT {
     @MockBean
     private NodeService nodeService;
 
+    @MockBean
+    private ChannelService channelService;
+
     @Test
     void getAlias() throws Exception {
         when(nodeService.getAlias(PUBKEY)).thenReturn(ALIAS);
@@ -39,7 +43,7 @@ class LegacyControllerIT {
 
     @Test
     void getOpenChannelIds() throws Exception {
-        when(nodeService.getOpenChannelIds(PUBKEY)).thenReturn(List.of(CHANNEL_ID, CHANNEL_ID_3));
+        when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(List.of(CHANNEL_ID, CHANNEL_ID_3));
         mockMvc.perform(get("/legacy/node/" + PUBKEY + "/open-channels"))
                 .andExpect(content().string(CHANNEL_ID + "\n" + CHANNEL_ID_3));
     }

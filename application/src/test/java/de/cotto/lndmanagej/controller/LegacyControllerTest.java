@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.controller;
 
+import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +25,9 @@ class LegacyControllerTest {
     @Mock
     private NodeService nodeService;
 
+    @Mock
+    private ChannelService channelService;
+
     @Test
     void getAlias() {
         when(nodeService.getAlias(PUBKEY)).thenReturn(ALIAS);
@@ -32,7 +36,7 @@ class LegacyControllerTest {
 
     @Test
     void getOpenChannelIds() {
-        when(nodeService.getOpenChannelIds(PUBKEY)).thenReturn(List.of(CHANNEL_ID, CHANNEL_ID_3));
+        when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(List.of(CHANNEL_ID, CHANNEL_ID_3));
         assertThat(legacyController.getOpenChannelIds(PUBKEY)).isEqualTo(
                 CHANNEL_ID + "\n" + CHANNEL_ID_3
         );
