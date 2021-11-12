@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.controller;
 
+import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
@@ -28,6 +29,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = LegacyController.class)
 class LegacyControllerIT {
+    private static final String PUBKEY_BASE = "/legacy/node/" + PUBKEY;
+    private static final String CHANNEL_BASE = "/legacy/channel/" + CHANNEL_ID;
+    private static final long FEE_RATE = 123L;
+    private static final Coins BASE_FEE = Coins.ofMilliSatoshis(10L);
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -46,7 +52,7 @@ class LegacyControllerIT {
     @Test
     void getAlias() throws Exception {
         when(nodeService.getAlias(PUBKEY)).thenReturn(ALIAS);
-        mockMvc.perform(get("/legacy/node/" + PUBKEY + "/alias")).andExpect(content().string(ALIAS));
+        mockMvc.perform(get(PUBKEY_BASE + "/alias")).andExpect(content().string(ALIAS));
     }
 
     @Test
@@ -57,7 +63,7 @@ class LegacyControllerIT {
     @Test
     void getOpenChannelIds() throws Exception {
         when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_CHANNEL, LOCAL_CHANNEL_3));
-        mockMvc.perform(get("/legacy/node/" + PUBKEY + "/open-channels"))
+        mockMvc.perform(get(PUBKEY_BASE + "/open-channels"))
                 .andExpect(content().string(CHANNEL_ID + "\n" + CHANNEL_ID_3));
     }
 
@@ -82,15 +88,29 @@ class LegacyControllerIT {
 
     @Test
     void getIncomingFeeRate() throws Exception {
-        when(feeService.getIncomingFeeRate(CHANNEL_ID)).thenReturn(123L);
-        mockMvc.perform(get("/legacy/channel/" + CHANNEL_ID + "/incoming-fee-rate"))
-                .andExpect(content().string("123"));
+        when(feeService.getIncomingFeeRate(CHANNEL_ID)).thenReturn(FEE_RATE);
+        mockMvc.perform(get(CHANNEL_BASE + "/incoming-fee-rate"))
+                .andExpect(content().string(Long.toString(FEE_RATE)));
     }
 
     @Test
     void getOutgoingFeeRate() throws Exception {
-        when(feeService.getOutgoingFeeRate(CHANNEL_ID)).thenReturn(123L);
-        mockMvc.perform(get("/legacy/channel/" + CHANNEL_ID + "/outgoing-fee-rate"))
-                .andExpect(content().string("123"));
+        when(feeService.getOutgoingFeeRate(CHANNEL_ID)).thenReturn(FEE_RATE);
+        mockMvc.perform(get(CHANNEL_BASE + "/outgoing-fee-rate"))
+                .andExpect(content().string(Long.toString(FEE_RATE)));
+    }
+
+    @Test
+    void getIncomingBaseFee() throws Exception {
+        when(feeService.getIncomingBaseFee(CHANNEL_ID)).thenReturn(BASE_FEE);
+        mockMvc.perform(get(CHANNEL_BASE + "/incoming-base-fee"))
+                .andExpect(content().string(String.valueOf(BASE_FEE.milliSatoshis())));
+    }
+
+    @Test
+    void getOutgoingBaseFee() throws Exception {
+        when(feeService.getOutgoingBaseFee(CHANNEL_ID)).thenReturn(BASE_FEE);
+        mockMvc.perform(get(CHANNEL_BASE + "/outgoing-base-fee"))
+                .andExpect(content().string(String.valueOf(BASE_FEE.milliSatoshis())));
     }
 }

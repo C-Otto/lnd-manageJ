@@ -74,4 +74,14 @@ public class LegacyController {
     public long getOutgoingFeeRate(@PathVariable ChannelId channelId) {
         return feeService.getOutgoingFeeRate(channelId);
     }
+
+    @GetMapping("/channel/{channelId}/incoming-base-fee")
+    public long getIncomingBaseFee(@PathVariable ChannelId channelId) {
+        return feeService.getIncomingBaseFee(channelId).milliSatoshis();
+    }
+
+    @GetMapping("/channel/{channelId}/outgoing-base-fee")
+    public long getOutgoingBaseFee(@PathVariable ChannelId channelId) {
+        return feeService.getOutgoingBaseFee(channelId).milliSatoshis();
+    }
 }

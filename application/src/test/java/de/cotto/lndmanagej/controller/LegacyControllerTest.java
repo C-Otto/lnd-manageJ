@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.model.ChannelFixtures;
+import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
@@ -108,5 +109,17 @@ class LegacyControllerTest {
     void getOutgoingFeeRate() {
         when(feeService.getOutgoingFeeRate(CHANNEL_ID)).thenReturn(123L);
         assertThat(legacyController.getOutgoingFeeRate(CHANNEL_ID)).isEqualTo(123);
+    }
+
+    @Test
+    void getIncomingBaseFee() {
+        when(feeService.getIncomingBaseFee(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(10L));
+        assertThat(legacyController.getIncomingBaseFee(CHANNEL_ID)).isEqualTo(10);
+    }
+
+    @Test
+    void getOutgoingBaseFee() {
+        when(feeService.getOutgoingBaseFee(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(10L));
+        assertThat(legacyController.getOutgoingBaseFee(CHANNEL_ID)).isEqualTo(10);
     }
 }
