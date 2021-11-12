@@ -4,9 +4,9 @@ plugins {
 
 dependencies {
     implementation('org.springframework.boot:spring-boot-starter-web')
-    implementation('com.google.guava:guava:31.0.1-jre')
     implementation project(':grpc-adapter')
     implementation project(':model')
+    implementation project(':caching')
     runtimeOnly 'org.postgresql:postgresql'
     testImplementation testFixtures(project(':model'))
 }

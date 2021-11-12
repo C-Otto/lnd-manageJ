@@ -5,6 +5,7 @@ plugins {
 dependencies {
     implementation project(':grpc-client')
     implementation project(':model')
+    implementation project(':caching')
     testImplementation testFixtures(project(':model'))
 }
 

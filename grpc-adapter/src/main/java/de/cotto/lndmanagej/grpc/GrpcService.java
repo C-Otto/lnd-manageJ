@@ -1,6 +1,8 @@
 package de.cotto.lndmanagej.grpc;
 
+import com.google.common.cache.LoadingCache;
 import de.cotto.lndmanagej.LndConfiguration;
+import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
 import io.grpc.StatusRuntimeException;
@@ -29,11 +31,16 @@ import java.util.function.Supplier;
 
 @Component
 public class GrpcService {
+    private static final int CACHE_EXPIRY_MILLISECONDS = 200;
+
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final StubCreator stubCreator;
     private final LightningGrpc.LightningBlockingStub lightningStub;
     private final RouterGrpc.RouterBlockingStub routerStub;
+    private final LoadingCache<Object, List<Channel>> channelsCache = new CacheBuilder()
+            .withExpiryMilliseconds(CACHE_EXPIRY_MILLISECONDS)
+            .build(this::getChannelsWithoutCache);
 
     public GrpcService(LndConfiguration lndConfiguration) throws IOException {
         stubCreator = new StubCreator(
@@ -56,7 +63,7 @@ public class GrpcService {
     }
 
     Iterator<RouterOuterClass.HtlcEvent> getHtlcEvents() {
-        return get(() -> routerStub.subscribeHtlcEvents(SubscribeHtlcEventsRequest.newBuilder().build()))
+        return get(() -> routerStub.subscribeHtlcEvents(SubscribeHtlcEventsRequest.getDefaultInstance()))
                 .orElse(Collections.emptyIterator());
     }
 
@@ -70,6 +77,10 @@ public class GrpcService {
     }
 
     public List<Channel> getChannels() {
+        return channelsCache.getUnchecked("");
+    }
+
+    private List<Channel> getChannelsWithoutCache() {
         return get(() -> lightningStub.listChannels(ListChannelsRequest.getDefaultInstance()).getChannelsList())
                 .orElse(List.of());
     }
