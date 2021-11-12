@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.grpc;
 
 import lnrpc.Channel;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -8,12 +9,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CHANNEL;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
-import static de.cotto.lndmanagej.model.NodeFixtures.NODE;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_2;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -28,8 +30,10 @@ class GrpcChannelsTest {
     @Mock
     private GrpcGetInfo grpcGetInfo;
 
-    @Mock
-    private GrpcNodeInfo grpcNodeInfo;
+    @BeforeEach
+    void setUp() {
+        when(grpcGetInfo.getPubkey()).thenReturn(Optional.of(PUBKEY));
+    }
 
     @Test
     void no_channels() {
@@ -38,9 +42,7 @@ class GrpcChannelsTest {
 
     @Test
     void one_channel() {
-        when(grpcGetInfo.getNode()).thenReturn(NODE);
         when(grpcService.getChannels()).thenReturn(List.of(channel()));
-        when(grpcNodeInfo.getNode(NODE_2.pubkey())).thenReturn(NODE_2);
         assertThat(grpcChannels.getChannels()).containsExactly(CHANNEL);
     }
 

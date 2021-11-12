@@ -21,14 +21,14 @@ public class ChannelService {
     private static final int CACHE_EXPIRY_MINUTES = 5;
 
     private final GrpcChannels grpcChannels;
-    private final LoadingCache<Node, List<ChannelId>> channelsWithPeerCache;
+    private final LoadingCache<Pubkey, List<ChannelId>> channelsWithPeerCache;
 
     public ChannelService(GrpcChannels grpcChannels) {
         this.grpcChannels = grpcChannels;
-        CacheLoader<Node, List<ChannelId>> loader = new CacheLoader<>() {
+        CacheLoader<Pubkey, List<ChannelId>> loader = new CacheLoader<>() {
             @Nonnull
             @Override
-            public List<ChannelId> load(@Nonnull Node peer) {
+            public List<ChannelId> load(@Nonnull Pubkey peer) {
                 return getOpenChannelsWithWithoutCache(peer);
             }
         };
@@ -39,17 +39,16 @@ public class ChannelService {
     }
 
     public List<ChannelId> getOpenChannelsWith(Pubkey peer) {
-        Node peerNode = Node.forPubkey(peer);
-        return getOpenChannelsWith(peerNode);
-    }
-
-    public List<ChannelId> getOpenChannelsWith(Node peer) {
         return channelsWithPeerCache.getUnchecked(peer);
     }
 
-    public List<ChannelId> getOpenChannelsWithWithoutCache(Node peer) {
+    public List<ChannelId> getOpenChannelsWith(Node peer) {
+        return getOpenChannelsWith(peer.pubkey());
+    }
+
+    public List<ChannelId> getOpenChannelsWithWithoutCache(Pubkey peer) {
         return grpcChannels.getChannels().stream()
-                .filter(c -> c.getNodes().contains(peer))
+                .filter(c -> c.getPubkeys().contains(peer))
                 .map(Channel::getId)
                 .sorted()
                 .collect(Collectors.toList());

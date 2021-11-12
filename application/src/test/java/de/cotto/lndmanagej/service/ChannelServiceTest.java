@@ -16,10 +16,10 @@ import static de.cotto.lndmanagej.model.ChannelFixtures.CHANNEL_3;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
-import static de.cotto.lndmanagej.model.NodeFixtures.NODE;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_2;
-import static de.cotto.lndmanagej.model.NodeFixtures.NODE_3;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -45,7 +45,7 @@ class ChannelServiceTest {
 
     @Test
     void getOpenChannelsWith_ignores_channel_to_other_node() {
-        Channel channel2 = ChannelFixtures.create(NODE, NODE_3, CHANNEL_ID_2);
+        Channel channel2 = ChannelFixtures.create(PUBKEY, PUBKEY_3, CHANNEL_ID_2);
         when(grpcChannels.getChannels()).thenReturn(Set.of(CHANNEL, channel2, CHANNEL_3));
         assertThat(channelService.getOpenChannelsWith(NODE_2)).containsExactly(CHANNEL_ID, CHANNEL_ID_3);
     }

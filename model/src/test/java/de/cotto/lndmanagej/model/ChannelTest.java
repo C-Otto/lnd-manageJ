@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CHANNEL;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
-import static de.cotto.lndmanagej.model.NodeFixtures.NODE;
-import static de.cotto.lndmanagej.model.NodeFixtures.NODE_2;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
@@ -24,8 +24,8 @@ class ChannelTest {
         assertThatNullPointerException().isThrownBy(
                 () -> Channel.builder()
                         .withCapacity(CAPACITY)
-                        .withNode1(NODE)
-                        .withNode2(NODE_2)
+                        .withNode1(PUBKEY)
+                        .withNode2(PUBKEY_2)
                         .build()
         );
     }
@@ -35,8 +35,8 @@ class ChannelTest {
         assertThatNullPointerException().isThrownBy(
                 () -> Channel.builder()
                         .withChannelId(CHANNEL_ID)
-                        .withNode1(NODE)
-                        .withNode2(NODE_2)
+                        .withNode1(PUBKEY)
+                        .withNode2(PUBKEY_2)
                         .build()
         );
     }
@@ -47,7 +47,7 @@ class ChannelTest {
                 () -> Channel.builder()
                         .withChannelId(CHANNEL_ID)
                         .withCapacity(CAPACITY)
-                        .withNode2(NODE_2)
+                        .withNode2(PUBKEY_2)
                         .build()
         );
     }
@@ -58,7 +58,7 @@ class ChannelTest {
                 () -> Channel.builder()
                         .withChannelId(CHANNEL_ID)
                         .withCapacity(CAPACITY)
-                        .withNode1(NODE)
+                        .withNode1(PUBKEY)
                         .build()
         );
     }
@@ -68,8 +68,8 @@ class ChannelTest {
         Channel channel = Channel.builder()
                 .withChannelId(CHANNEL_ID)
                 .withCapacity(CAPACITY)
-                .withNode1(NODE)
-                .withNode2(NODE_2)
+                .withNode1(PUBKEY)
+                .withNode2(PUBKEY_2)
                 .build();
         assertThat(channel).isEqualTo(CHANNEL);
     }
@@ -81,7 +81,7 @@ class ChannelTest {
 
     @Test
     void getNodes() {
-        assertThat(CHANNEL.getNodes()).containsExactlyInAnyOrder(NODE, NODE_2);
+        assertThat(CHANNEL.getPubkeys()).containsExactlyInAnyOrder(PUBKEY, PUBKEY_2);
     }
 
     @Test
@@ -99,8 +99,8 @@ class ChannelTest {
         Channel channel = Channel.builder()
                 .withChannelId(CHANNEL_ID)
                 .withCapacity(CAPACITY)
-                .withNode1(NODE_2)
-                .withNode2(NODE)
+                .withNode1(PUBKEY_2)
+                .withNode2(PUBKEY)
                 .build();
         assertThat(CHANNEL).isEqualTo(channel);
     }
@@ -111,7 +111,7 @@ class ChannelTest {
                 "Channel[" +
                         "channelId=" + CHANNEL_ID +
                         ", capacity=" + CAPACITY +
-                        ", nodes=[" + NODE.toString() + ", " + NODE_2.toString() + "]" +
+                        ", pubkeys=[" + PUBKEY + ", " + PUBKEY_2 + "]" +
                         "]"
         );
     }

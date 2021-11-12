@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.grpc;
 
-import de.cotto.lndmanagej.model.Node;
 import lnrpc.GetInfoResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,13 +30,12 @@ class GrpcGetInfoTest {
     @BeforeEach
     void setUp() {
         grpcService = mock(GrpcService.class);
-        GetInfoResponse response1 = createResponse(BLOCK_HEIGHT, false, true);
-        GetInfoResponse response2 = createResponse(BLOCK_HEIGHT + 1, true, false);
-        when(grpcService.getInfo()).thenReturn(Optional.of(response1)).thenReturn(Optional.of(response2));
+        GetInfoResponse response = createResponse(false, true);
+        when(grpcService.getInfo()).thenReturn(Optional.of(response));
         grpcGetInfo = new GrpcGetInfo(grpcService);
     }
 
-    private GetInfoResponse createResponse(int blockHeight, boolean syncedToChain, boolean syncedToGraph) {
+    private GetInfoResponse createResponse(boolean syncedToChain, boolean syncedToGraph) {
         return GetInfoResponse.newBuilder()
                 .setIdentityPubkey(PUBKEY.toString())
                 .setAlias(ALIAS)
@@ -49,111 +47,95 @@ class GrpcGetInfoTest {
                 .setCommitHash(COMMIT_HASH)
                 .setVersion(VERSION)
                 .setBlockHash(BLOCK_HASH)
-                .setBlockHeight(blockHeight)
+                .setBlockHeight(BLOCK_HEIGHT)
                 .setSyncedToChain(syncedToChain)
                 .setSyncedToGraph(syncedToGraph)
                 .build();
     }
 
     @Test
-    void getNode() {
-        assertThat(grpcGetInfo.getNode()).isEqualTo(Node.builder().withPubkey(PUBKEY).withAlias(ALIAS).build());
-    }
-
-    @Test
     void getPubkey() {
-        assertThat(grpcGetInfo.getPubkey()).isEqualTo(PUBKEY);
+        assertThat(grpcGetInfo.getPubkey()).contains(PUBKEY);
     }
 
     @Test
     void getAlias() {
-        assertThat(grpcGetInfo.getAlias()).isEqualTo(ALIAS);
+        assertThat(grpcGetInfo.getAlias()).contains(ALIAS);
     }
 
     @Test
     void getBlockHeight() {
-        assertThat(grpcGetInfo.getBlockHeight()).isEqualTo(BLOCK_HEIGHT);
+        assertThat(grpcGetInfo.getBlockHeight()).contains(BLOCK_HEIGHT);
     }
 
     @Test
     void getBlockHash() {
-        assertThat(grpcGetInfo.getBlockHash()).isEqualTo(BLOCK_HASH);
+        assertThat(grpcGetInfo.getBlockHash()).contains(BLOCK_HASH);
     }
 
     @Test
     void getNumberOfPeers() {
-        assertThat(grpcGetInfo.getNumberOfPeers()).isEqualTo(NUMBER_OF_PEERS);
+        assertThat(grpcGetInfo.getNumberOfPeers()).contains(NUMBER_OF_PEERS);
     }
 
     @Test
     void getNumberOfActiveChannels() {
-        assertThat(grpcGetInfo.getNumberOfActiveChannels()).isEqualTo(NUMBER_OF_ACTIVE_CHANNELS);
+        assertThat(grpcGetInfo.getNumberOfActiveChannels()).contains(NUMBER_OF_ACTIVE_CHANNELS);
     }
 
     @Test
     void getNumberOfInactiveChannels() {
-        assertThat(grpcGetInfo.getNumberOfInactiveChannels()).isEqualTo(NUMBER_OF_INACTIVE_CHANNELS);
+        assertThat(grpcGetInfo.getNumberOfInactiveChannels()).contains(NUMBER_OF_INACTIVE_CHANNELS);
     }
 
     @Test
     void getNumberOfPendingChannels() {
-        assertThat(grpcGetInfo.getNumberOfPendingChannels()).isEqualTo(NUMBER_OF_PENDING_CHANNELS);
+        assertThat(grpcGetInfo.getNumberOfPendingChannels()).contains(NUMBER_OF_PENDING_CHANNELS);
     }
 
     @Test
     void getVersion() {
-        assertThat(grpcGetInfo.getVersion()).isEqualTo(VERSION);
+        assertThat(grpcGetInfo.getVersion()).contains(VERSION);
     }
 
     @Test
     void getCommitHash() {
-        assertThat(grpcGetInfo.getCommitHash()).isEqualTo(COMMIT_HASH);
+        assertThat(grpcGetInfo.getCommitHash()).contains(COMMIT_HASH);
     }
 
     @Test
     void getBestHeaderTimestamp() {
-        assertThat(grpcGetInfo.getBestHeaderTimestamp()).isEqualTo(BEST_HEADER_INSTANT);
+        assertThat(grpcGetInfo.getBestHeaderTimestamp()).contains(BEST_HEADER_INSTANT);
     }
 
     @Test
-    void isSyncedToChain() {
-        assertThat(grpcGetInfo.isSyncedToChain()).isFalse();
-        grpcGetInfo.refreshInfo();
-        assertThat(grpcGetInfo.isSyncedToChain()).isTrue();
+    void isSyncedToChain_true() {
+        when(grpcService.getInfo()).thenReturn(Optional.of(createResponse(true, true)));
+        assertThat(grpcGetInfo.isSyncedToChain()).contains(true);
+    }
+
+    @Test
+    void isSyncedToChain_false() {
+        when(grpcService.getInfo()).thenReturn(Optional.of(createResponse(false, true)));
+        assertThat(grpcGetInfo.isSyncedToChain()).contains(false);
     }
 
     @Test
     void isSyncedToGraph_true() {
-        assertThat(grpcGetInfo.isSyncedToGraph()).isTrue();
-        grpcGetInfo.refreshInfo();
-        assertThat(grpcGetInfo.isSyncedToGraph()).isFalse();
+        when(grpcService.getInfo()).thenReturn(Optional.of(createResponse(true, true)));
+        assertThat(grpcGetInfo.isSyncedToGraph()).contains(true);
     }
 
     @Test
-    void caches_response() {
-        assertThat(grpcGetInfo.getBlockHeight()).isEqualTo(BLOCK_HEIGHT);
-        assertThat(grpcGetInfo.getBlockHeight()).isEqualTo(BLOCK_HEIGHT);
+    void isSyncedToGraph_false() {
+        when(grpcService.getInfo()).thenReturn(Optional.of(createResponse(true, false)));
+        assertThat(grpcGetInfo.isSyncedToGraph()).contains(false);
     }
 
     @Test
-    void updates_response() {
-        assertThat(grpcGetInfo.getBlockHeight()).isEqualTo(BLOCK_HEIGHT);
-        grpcGetInfo.refreshInfo();
-        assertThat(grpcGetInfo.getBlockHeight()).isEqualTo(BLOCK_HEIGHT + 1);
-    }
-
-    @Test
-    void does_not_update_response_on_failure() {
+    void failure() {
         when(grpcService.getInfo()).thenReturn(Optional.empty());
-        grpcGetInfo.refreshInfo();
-        assertThat(grpcGetInfo.getBlockHeight()).isEqualTo(BLOCK_HEIGHT);
-    }
-
-    @Test
-    void refreshesAfterFailure() {
-        GetInfoResponse response = createResponse(BLOCK_HEIGHT, false, true);
-        when(grpcService.getInfo()).thenReturn(Optional.empty()).thenReturn(Optional.of(response));
         grpcGetInfo = new GrpcGetInfo(grpcService);
-        assertThat(grpcGetInfo.getBlockHeight()).isEqualTo(BLOCK_HEIGHT);
+        assertThat(grpcGetInfo.getBlockHeight()).isEmpty();
     }
 }

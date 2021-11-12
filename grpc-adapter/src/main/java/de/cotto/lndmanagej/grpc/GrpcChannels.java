@@ -14,30 +14,28 @@ import static java.util.stream.Collectors.toSet;
 public class GrpcChannels {
     private final GrpcService grpcService;
     private final GrpcGetInfo grpcGetInfo;
-    private final GrpcNodeInfo grpcNodeInfo;
 
     public GrpcChannels(
             GrpcService grpcService,
-            GrpcGetInfo grpcGetInfo,
-            GrpcNodeInfo grpcNodeInfo
+            GrpcGetInfo grpcGetInfo
     ) {
         this.grpcService = grpcService;
         this.grpcGetInfo = grpcGetInfo;
-        this.grpcNodeInfo = grpcNodeInfo;
     }
 
     public Set<Channel> getChannels() {
+        Pubkey ownPubkey = grpcGetInfo.getPubkey().orElseThrow();
         return grpcService.getChannels().stream()
-                .map(this::toChannel)
+                .map(lndChannel -> toChannel(lndChannel, ownPubkey))
                 .collect(toSet());
     }
 
-    private Channel toChannel(lnrpc.Channel lndChannel) {
+    private Channel toChannel(lnrpc.Channel lndChannel, Pubkey ownPubkey) {
         return Channel.builder()
                 .withChannelId(ChannelId.fromShortChannelId(lndChannel.getChanId()))
                 .withCapacity(Coins.ofSatoshis(lndChannel.getCapacity()))
-                .withNode1(grpcGetInfo.getNode())
-                .withNode2(grpcNodeInfo.getNode(Pubkey.create(lndChannel.getRemotePubkey())))
+                .withNode1(ownPubkey)
+                .withNode2(Pubkey.create(lndChannel.getRemotePubkey()))
                 .build();
     }
 

@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
+import de.cotto.lndmanagej.service.OwnNodeService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,6 +29,9 @@ class LegacyControllerTest {
     @Mock
     private ChannelService channelService;
 
+    @Mock
+    private OwnNodeService ownNodeService;
+
     @Test
     void getAlias() {
         when(nodeService.getAlias(PUBKEY)).thenReturn(ALIAS);
@@ -40,5 +44,17 @@ class LegacyControllerTest {
         assertThat(legacyController.getOpenChannelIds(PUBKEY)).isEqualTo(
                 CHANNEL_ID + "\n" + CHANNEL_ID_3
         );
+    }
+
+    @Test
+    void syncedToChain() {
+        when(ownNodeService.isSyncedToChain()).thenReturn(true);
+        assertThat(legacyController.syncedToChain()).isTrue();
+    }
+
+    @Test
+    void syncedToChain_false() {
+        when(ownNodeService.isSyncedToChain()).thenReturn(false);
+        assertThat(legacyController.syncedToChain()).isFalse();
     }
 }

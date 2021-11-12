@@ -1,93 +1,72 @@
 package de.cotto.lndmanagej.grpc;
 
-import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.Pubkey;
 import lnrpc.GetInfoResponse;
-import lnrpc.GetInfoResponseOrBuilder;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Nullable;
 import java.time.Instant;
-import java.util.Objects;
+import java.util.Optional;
 
 @Component
 public class GrpcGetInfo {
     private final GrpcService grpcService;
 
-    @Nullable
-    private GetInfoResponse info;
-
     public GrpcGetInfo(GrpcService grpcService) {
         this.grpcService = grpcService;
-        refreshInfo();
     }
 
-    public Node getNode() {
-        return Node.builder().withPubkey(getPubkey()).withAlias(getAlias()).build();
+    public Optional<Pubkey> getPubkey() {
+        return grpcService.getInfo().map(GetInfoResponse::getIdentityPubkey).map(Pubkey::create);
     }
 
-    public Pubkey getPubkey() {
-        return Pubkey.create(getInfo().getIdentityPubkey());
+    public Optional<String> getAlias() {
+        return grpcService.getInfo().map(GetInfoResponse::getAlias);
     }
 
-    public String getAlias() {
-        return getInfo().getAlias();
+    public Optional<Integer> getBlockHeight() {
+        return grpcService.getInfo().map(GetInfoResponse::getBlockHeight);
     }
 
-    public int getBlockHeight() {
-        return getInfo().getBlockHeight();
+    public Optional<String> getBlockHash() {
+        return grpcService.getInfo().map(GetInfoResponse::getBlockHash);
     }
 
-    public String getBlockHash() {
-        return getInfo().getBlockHash();
+    public Optional<Instant> getBestHeaderTimestamp() {
+        return grpcService.getInfo().map(GetInfoResponse::getBestHeaderTimestamp).map(Instant::ofEpochSecond);
     }
 
-    public Instant getBestHeaderTimestamp() {
-        return Instant.ofEpochSecond(getInfo().getBestHeaderTimestamp());
+    public Optional<String> getVersion() {
+        return grpcService.getInfo().map(GetInfoResponse::getVersion);
     }
 
-    public String getVersion() {
-        return getInfo().getVersion();
+    public Optional<String> getCommitHash() {
+        return grpcService.getInfo().map(GetInfoResponse::getCommitHash);
     }
 
-    public String getCommitHash() {
-        return getInfo().getCommitHash();
+    public Optional<Integer> getNumberOfActiveChannels() {
+        return grpcService.getInfo().map(GetInfoResponse::getNumActiveChannels);
     }
 
-    public int getNumberOfActiveChannels() {
-        return getInfo().getNumActiveChannels();
+    public Optional<Integer> getNumberOfInactiveChannels() {
+        return grpcService.getInfo().map(GetInfoResponse::getNumInactiveChannels);
     }
 
-    public int getNumberOfInactiveChannels() {
-        return getInfo().getNumInactiveChannels();
+    public Optional<Integer> getNumberOfPendingChannels() {
+        return grpcService.getInfo().map(GetInfoResponse::getNumPendingChannels);
     }
 
-    public int getNumberOfPendingChannels() {
-        return getInfo().getNumPendingChannels();
+    public Optional<Integer> getNumberOfPeers() {
+        return grpcService.getInfo().map(GetInfoResponse::getNumPeers);
     }
 
-    public int getNumberOfPeers() {
-        return getInfo().getNumPeers();
+    @SuppressWarnings("PMD.LinguisticNaming")
+    public Optional<Boolean> isSyncedToChain() {
+        return grpcService.getInfo().map(GetInfoResponse::getSyncedToChain);
     }
 
-    public boolean isSyncedToChain() {
-        return getInfo().getSyncedToChain();
+    @SuppressWarnings("PMD.LinguisticNaming")
+    public Optional<Boolean> isSyncedToGraph() {
+        return grpcService.getInfo().map(GetInfoResponse::getSyncedToGraph);
     }
 
-    public boolean isSyncedToGraph() {
-        return getInfo().getSyncedToGraph();
-    }
-
-    @Scheduled(fixedDelay = 60_000)
-    final void refreshInfo() {
-        grpcService.getInfo().ifPresent(newInfo -> info = newInfo);
-    }
-
-    private GetInfoResponseOrBuilder getInfo() {
-        if (info == null) {
-            refreshInfo();
-        }
-        return Objects.requireNonNull(info);
-    }
 }
