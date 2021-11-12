@@ -33,6 +33,11 @@ class NodeTest {
     }
 
     @Test
+    void forPubkey() {
+        assertThat(Node.forPubkey(PUBKEY)).isEqualTo(Node.builder().withPubkey(PUBKEY).build());
+    }
+
+    @Test
     void builder_without_arguments() {
         assertThatNullPointerException().isThrownBy(
                 () -> Node.builder().build()
@@ -97,22 +102,22 @@ class NodeTest {
 
     @Test
     void compareTo_by_pubkey_same() {
-        Node node1 = forPubkey("aaa000aaa000abc000abc000abc000abc000abc000abc000abc000abc000abc000");
-        Node node2 = forPubkey("aaa000aaa000abc000abc000abc000abc000abc000abc000abc000abc000abc000");
+        Node node1 = createFor("aaa000aaa000abc000abc000abc000abc000abc000abc000abc000abc000abc000");
+        Node node2 = createFor("aaa000aaa000abc000abc000abc000abc000abc000abc000abc000abc000abc000");
         assertThat(node1.compareTo(node2)).isEqualTo(0);
     }
 
     @Test
     void compareTo_by_pubkey_smaller() {
-        Node node1 = forPubkey("aaa00abc000abc000abc000abc000abc000abc000abc000abc000abc000abc000a");
-        Node node2 = forPubkey("fff00abc000abc000abc000abc000abc000abc000abc000abc000abc000abc000a");
+        Node node1 = createFor("aaa00abc000abc000abc000abc000abc000abc000abc000abc000abc000abc000a");
+        Node node2 = createFor("fff00abc000abc000abc000abc000abc000abc000abc000abc000abc000abc000a");
         assertThat(node1.compareTo(node2)).isLessThan(0);
     }
 
     @Test
     void compareTo_by_pubkey_larger() {
-        Node node1 = forPubkey("0c123abc000abc000abc000abc000abc000abc000abc000abc000abc000abc000a");
-        Node node2 = forPubkey("0b123abc000abc000abc000abc000abc000abc000abc000abc000abc000abc000a");
+        Node node1 = createFor("0c123abc000abc000abc000abc000abc000abc000abc000abc000abc000abc000a");
+        Node node2 = createFor("0b123abc000abc000abc000abc000abc000abc000abc000abc000abc000abc000a");
         assertThat(node1.compareTo(node2)).isGreaterThan(0);
     }
 
@@ -131,8 +136,8 @@ class NodeTest {
         assertThat(NODE.lastUpdate()).isEqualTo(LAST_UPDATE);
     }
 
-    private Node forPubkey(String pubkey) {
-        return Node.builder().withPubkey(Pubkey.create(pubkey)).withAlias(ALIAS).withLastUpdate(LAST_UPDATE).build();
+    private Node createFor(String pubkey) {
+        return Node.forPubkey(Pubkey.create(pubkey));
     }
 }
 

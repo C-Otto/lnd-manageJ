@@ -40,9 +40,8 @@ public class NodeService {
                 .build(loader);
     }
 
-    public List<ChannelId> getOpenChannelIds(Pubkey pubkey) {
-        Node node = getNode(pubkey);
-        return channelService.getOpenChannelsWith(node).stream()
+    public List<ChannelId> getOpenChannelIds(Pubkey peer) {
+        return channelService.getOpenChannelsWith(peer).stream()
                 .map(Channel::getId)
                 .sorted()
                 .collect(Collectors.toList());

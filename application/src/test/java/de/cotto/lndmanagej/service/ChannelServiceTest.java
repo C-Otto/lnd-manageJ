@@ -17,6 +17,7 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_2;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_3;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -29,7 +30,13 @@ class ChannelServiceTest {
     private GrpcChannels grpcChannels;
 
     @Test
-    void getOpenChannelsWith() {
+    void getOpenChannelsWith_by_pubkey() {
+        when(grpcChannels.getChannels()).thenReturn(Set.of(CHANNEL, CHANNEL_3));
+        assertThat(channelService.getOpenChannelsWith(PUBKEY_2)).containsExactlyInAnyOrder(CHANNEL, CHANNEL_3);
+    }
+
+    @Test
+    void getOpenChannelsWith_by_node() {
         when(grpcChannels.getChannels()).thenReturn(Set.of(CHANNEL, CHANNEL_3));
         assertThat(channelService.getOpenChannelsWith(NODE_2)).containsExactlyInAnyOrder(CHANNEL, CHANNEL_3);
     }

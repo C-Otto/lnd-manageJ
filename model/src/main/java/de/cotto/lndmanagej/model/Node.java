@@ -23,6 +23,10 @@ public record Node(@Nonnull String alias, int lastUpdate, @Nonnull Pubkey pubkey
         return new Builder();
     }
 
+    public static Node forPubkey(Pubkey pubkey) {
+        return Node.builder().withPubkey(pubkey).build();
+    }
+
     @Override
     public String toString() {
         return alias;

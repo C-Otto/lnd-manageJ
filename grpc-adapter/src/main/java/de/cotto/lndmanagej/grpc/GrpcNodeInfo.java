@@ -17,7 +17,7 @@ public class GrpcNodeInfo {
     public Node getNode(Pubkey pubkey) {
         NodeInfo nodeInfo = grpcService.getNodeInfo(pubkey).orElse(null);
         if (nodeInfo == null) {
-            return Node.builder().withPubkey(pubkey).build();
+            return Node.forPubkey(pubkey);
         }
         LightningNode node = nodeInfo.getNode();
         return Node.builder()

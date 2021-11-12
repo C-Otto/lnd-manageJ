@@ -15,8 +15,8 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE;
-import static de.cotto.lndmanagej.model.NodeFixtures.NODE_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -39,15 +39,13 @@ class NodeServiceTest {
 
     @Test
     void getOpenChannelIds() {
-        when(grpcNodeInfo.getNode(PUBKEY)).thenReturn(NODE_2);
-        when(channelService.getOpenChannelsWith(NODE_2)).thenReturn(Set.of(CHANNEL, CHANNEL_3));
-        assertThat(nodeService.getOpenChannelIds(PUBKEY)).containsExactly(CHANNEL_ID, CHANNEL_ID_3);
+        when(channelService.getOpenChannelsWith(PUBKEY_2)).thenReturn(Set.of(CHANNEL, CHANNEL_3));
+        assertThat(nodeService.getOpenChannelIds(PUBKEY_2)).containsExactly(CHANNEL_ID, CHANNEL_ID_3);
     }
 
     @Test
     void getOpenChannelIds_ordered() {
-        when(grpcNodeInfo.getNode(PUBKEY)).thenReturn(NODE_2);
-        when(channelService.getOpenChannelsWith(NODE_2)).thenReturn(Set.of(CHANNEL_3, CHANNEL));
-        assertThat(nodeService.getOpenChannelIds(PUBKEY)).containsExactly(CHANNEL_ID, CHANNEL_ID_3);
+        when(channelService.getOpenChannelsWith(PUBKEY_2)).thenReturn(Set.of(CHANNEL_3, CHANNEL));
+        assertThat(nodeService.getOpenChannelIds(PUBKEY_2)).containsExactly(CHANNEL_ID, CHANNEL_ID_3);
     }
 }
