@@ -50,6 +50,15 @@ public class LegacyController {
                 .collect(Collectors.joining(NEWLINE));
     }
 
+    @GetMapping("/open-channels")
+    public String getOpenChannelIds() {
+        return channelService.getOpenChannels().stream()
+                .map(Channel::getId)
+                .sorted()
+                .map(ChannelId::toString)
+                .collect(Collectors.joining(NEWLINE));
+    }
+
     @GetMapping("/peer-pubkeys")
     public String getPeerPubkeys() {
         return channelService.getOpenChannels().stream()
