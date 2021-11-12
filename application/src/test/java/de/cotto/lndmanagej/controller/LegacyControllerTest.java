@@ -32,11 +32,9 @@ class LegacyControllerTest {
 
     @Test
     void getOpenChannelIds() {
-        // jq is confused by large numbers, return string instead
         when(nodeService.getOpenChannelIds(PUBKEY)).thenReturn(List.of(CHANNEL_ID, CHANNEL_ID_3));
-        assertThat(legacyController.getOpenChannelIds(PUBKEY)).containsExactly(
-                CHANNEL_ID.toString(),
-                CHANNEL_ID_3.toString()
+        assertThat(legacyController.getOpenChannelIds(PUBKEY)).isEqualTo(
+                CHANNEL_ID + "\n" + CHANNEL_ID_3
         );
     }
 }

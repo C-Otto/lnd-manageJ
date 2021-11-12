@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/node/{pubkey}/")
 public class LegacyController {
+    private static final String NEWLINE = "\n";
     private final NodeService nodeService;
 
     public LegacyController(NodeService nodeService) {
@@ -26,9 +26,9 @@ public class LegacyController {
     }
 
     @GetMapping("/open-channels")
-    public List<String> getOpenChannelIds(@PathVariable Pubkey pubkey) {
+    public String getOpenChannelIds(@PathVariable Pubkey pubkey) {
         return nodeService.getOpenChannelIds(pubkey).stream()
                 .map(ChannelId::toString)
-                .collect(Collectors.toList());
+                .collect(Collectors.joining(NEWLINE));
     }
 }

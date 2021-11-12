@@ -14,11 +14,9 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
-import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @WebMvcTest(controllers = LegacyController.class)
 class LegacyControllerIT {
@@ -43,7 +41,6 @@ class LegacyControllerIT {
     void getOpenChannelIds() throws Exception {
         when(nodeService.getOpenChannelIds(PUBKEY)).thenReturn(List.of(CHANNEL_ID, CHANNEL_ID_3));
         mockMvc.perform(get("/api/node/" + PUBKEY + "/open-channels"))
-                .andExpect(jsonPath("$[0]", is(CHANNEL_ID.toString())))
-                .andExpect(jsonPath("$[1]", is(CHANNEL_ID_3.toString())));
+                .andExpect(content().string(CHANNEL_ID + "\n" + CHANNEL_ID_3));
     }
 }
