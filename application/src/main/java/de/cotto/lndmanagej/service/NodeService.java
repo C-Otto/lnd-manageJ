@@ -22,7 +22,7 @@ public class NodeService {
 
     private final GrpcNodeInfo grpcNodeInfo;
     private final ChannelService channelService;
-    private final LoadingCache<Pubkey, String> cache;
+    private final LoadingCache<Pubkey, String> aliasCache;
 
     public NodeService(GrpcNodeInfo grpcNodeInfo, ChannelService channelService) {
         this.grpcNodeInfo = grpcNodeInfo;
@@ -34,7 +34,7 @@ public class NodeService {
                 return getNode(pubkey).alias();
             }
         };
-        cache = CacheBuilder.newBuilder()
+        aliasCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(CACHE_EXPIRY_MINUTES, TimeUnit.MINUTES)
                 .maximumSize(MAXIMUM_SIZE)
                 .build(loader);
@@ -49,7 +49,7 @@ public class NodeService {
     }
 
     public String getAlias(Pubkey pubkey) {
-        return cache.getUnchecked(pubkey);
+        return aliasCache.getUnchecked(pubkey);
     }
 
     private Node getNode(Pubkey pubkey) {
