@@ -4,6 +4,7 @@ import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
@@ -25,17 +26,20 @@ public class LegacyController {
     private final ChannelService channelService;
     private final OwnNodeService ownNodeService;
     private final FeeService feeService;
+    private final BalanceService balanceService;
 
     public LegacyController(
             NodeService nodeService,
             ChannelService channelService,
             OwnNodeService ownNodeService,
-            FeeService feeService
+            FeeService feeService,
+            BalanceService balanceService
     ) {
         this.nodeService = nodeService;
         this.channelService = channelService;
         this.ownNodeService = ownNodeService;
         this.feeService = feeService;
+        this.balanceService = balanceService;
     }
 
     @GetMapping("/node/{pubkey}/alias")
@@ -113,6 +117,11 @@ public class LegacyController {
     @GetMapping("/channel/{channelId}/outgoing-base-fee")
     public long getOutgoingBaseFee(@PathVariable ChannelId channelId) {
         return feeService.getOutgoingBaseFee(channelId).milliSatoshis();
+    }
+
+    @GetMapping("/channel/{channelId}/available-local-balance")
+    public long getAvailableLocalBalance(ChannelId channelId) {
+        return balanceService.getAvailableLocalBalance(channelId).satoshis();
     }
 
     private Stream<ChannelId> getOpenChannelIdsSorted() {

@@ -1,7 +1,9 @@
 package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.grpc.GrpcChannels;
+import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelFixtures;
+import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.LocalChannel;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,7 +39,8 @@ class ChannelServiceTest {
 
     @Test
     void getOpenChannelsWith_ignores_channel_to_other_node() {
-        LocalChannel localChannel2 = new LocalChannel(ChannelFixtures.create(PUBKEY, PUBKEY_3, CHANNEL_ID_2), PUBKEY);
+        Channel channel = ChannelFixtures.create(PUBKEY, PUBKEY_3, CHANNEL_ID_2);
+        LocalChannel localChannel2 = new LocalChannel(channel, PUBKEY, Coins.NONE, Coins.NONE);
         when(grpcChannels.getChannels()).thenReturn(Set.of(LOCAL_CHANNEL, localChannel2, LOCAL_CHANNEL_3));
         assertThat(channelService.getOpenChannelsWith(PUBKEY_2))
                 .containsExactlyInAnyOrder(LOCAL_CHANNEL, LOCAL_CHANNEL_3);

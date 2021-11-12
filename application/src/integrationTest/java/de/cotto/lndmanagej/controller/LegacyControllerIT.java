@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
@@ -50,6 +51,9 @@ class LegacyControllerIT {
 
     @MockBean
     private FeeService feeService;
+
+    @MockBean
+    private BalanceService balanceService;
 
     @Test
     void getAlias() throws Exception {
@@ -135,5 +139,13 @@ class LegacyControllerIT {
         when(feeService.getOutgoingBaseFee(CHANNEL_ID)).thenReturn(BASE_FEE);
         mockMvc.perform(get(CHANNEL_BASE + "/outgoing-base-fee"))
                 .andExpect(content().string(String.valueOf(BASE_FEE.milliSatoshis())));
+    }
+
+    @Test
+    void getAvailableLocalBalance() throws Exception {
+        Coins availableBalance = Coins.ofSatoshis(999);
+        when(balanceService.getAvailableLocalBalance(CHANNEL_ID)).thenReturn(availableBalance);
+        mockMvc.perform(get(CHANNEL_BASE + "/available-local-balance"))
+                .andExpect(content().string(String.valueOf(availableBalance.satoshis())));
     }
 }

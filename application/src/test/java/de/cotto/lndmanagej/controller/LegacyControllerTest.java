@@ -1,8 +1,10 @@
 package de.cotto.lndmanagej.controller;
 
+import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelFixtures;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.LocalChannel;
+import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
@@ -52,6 +54,9 @@ class LegacyControllerTest {
 
     @Mock
     private FeeService feeService;
+
+    @Mock
+    private BalanceService balanceService;
 
     @Test
     void getAlias() {
@@ -131,14 +136,16 @@ class LegacyControllerTest {
 
     @Test
     void getPeerPubkeys() {
-        LocalChannel channel2 = new LocalChannel(ChannelFixtures.create(PUBKEY, PUBKEY_3, CHANNEL_ID_2), PUBKEY);
+        Channel channel = ChannelFixtures.create(PUBKEY, PUBKEY_3, CHANNEL_ID_2);
+        LocalChannel channel2 = new LocalChannel(channel, PUBKEY, Coins.NONE, Coins.NONE);
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_CHANNEL, channel2));
         assertThat(legacyController.getPeerPubkeys()).isEqualTo(PUBKEY_2 + "\n" + PUBKEY_3);
     }
 
     @Test
     void getPeerPubkeys_sorted() {
-        LocalChannel channel2 = new LocalChannel(ChannelFixtures.create(PUBKEY, PUBKEY_3, CHANNEL_ID_2), PUBKEY);
+        Channel channel = ChannelFixtures.create(PUBKEY, PUBKEY_3, CHANNEL_ID_2);
+        LocalChannel channel2 = new LocalChannel(channel, PUBKEY, Coins.NONE, Coins.NONE);
         when(channelService.getOpenChannels()).thenReturn(Set.of(channel2, LOCAL_CHANNEL));
         assertThat(legacyController.getPeerPubkeys()).isEqualTo(PUBKEY_2 + "\n" + PUBKEY_3);
     }
@@ -171,5 +178,11 @@ class LegacyControllerTest {
     void getOutgoingBaseFee() {
         when(feeService.getOutgoingBaseFee(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(10L));
         assertThat(legacyController.getOutgoingBaseFee(CHANNEL_ID)).isEqualTo(10);
+    }
+
+    @Test
+    void getAvailableLocalBalance() {
+        when(balanceService.getAvailableLocalBalance(CHANNEL_ID)).thenReturn(Coins.ofSatoshis(123L));
+        assertThat(legacyController.getAvailableLocalBalance(CHANNEL_ID)).isEqualTo(123);
     }
 }

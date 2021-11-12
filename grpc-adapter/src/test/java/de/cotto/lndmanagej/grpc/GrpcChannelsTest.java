@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.grpc;
 
+import de.cotto.lndmanagej.model.ChannelId;
 import lnrpc.Channel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import java.util.List;
 
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.LocalChannelFixtures.LOCAL_CHANNEL;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
@@ -35,19 +37,30 @@ class GrpcChannelsTest {
     }
 
     @Test
-    void no_channels() {
+    void getChannels_no_channels() {
         assertThat(grpcChannels.getChannels()).isEmpty();
     }
 
     @Test
-    void one_channel() {
-        when(grpcService.getChannels()).thenReturn(List.of(channel()));
+    void getChannels_one_channel() {
+        when(grpcService.getChannels()).thenReturn(List.of(channel(CHANNEL_ID)));
         assertThat(grpcChannels.getChannels()).containsExactly(LOCAL_CHANNEL);
     }
 
-    private Channel channel() {
+    @Test
+    void getChannel() {
+        when(grpcService.getChannels()).thenReturn(List.of(channel(CHANNEL_ID_2), channel(CHANNEL_ID)));
+        assertThat(grpcChannels.getChannel(CHANNEL_ID)).contains(LOCAL_CHANNEL);
+    }
+
+    @Test
+    void getChannel_empty() {
+        assertThat(grpcChannels.getChannel(CHANNEL_ID)).isEmpty();
+    }
+
+    private Channel channel(ChannelId channelId) {
         return Channel.newBuilder()
-                .setChanId(CHANNEL_ID.shortChannelId())
+                .setChanId(channelId.shortChannelId())
                 .setCapacity(CAPACITY.satoshis())
                 .setRemotePubkey(NODE_2.pubkey().toString())
                 .build();
