@@ -1,11 +1,14 @@
 package de.cotto.lndmanagej.grpc;
 
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.LoadingCache;
 import de.cotto.lndmanagej.LndConfiguration;
 import de.cotto.lndmanagej.caching.CacheBuilder;
+import de.cotto.lndmanagej.metrics.MetricsBuilder;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
-import io.grpc.StatusRuntimeException;
 import lnrpc.ChanInfoRequest;
 import lnrpc.Channel;
 import lnrpc.ChannelEdge;
@@ -14,43 +17,33 @@ import lnrpc.LightningGrpc;
 import lnrpc.ListChannelsRequest;
 import lnrpc.NodeInfo;
 import lnrpc.NodeInfoRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import routerrpc.RouterGrpc;
-import routerrpc.RouterOuterClass;
-import routerrpc.RouterOuterClass.SubscribeHtlcEventsRequest;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 @Component
-public class GrpcService {
+public class GrpcService extends GrpcBase {
     private static final int CACHE_EXPIRY_MILLISECONDS = 200;
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Map<String, Meter> meters;
 
-    private final StubCreator stubCreator;
     private final LightningGrpc.LightningBlockingStub lightningStub;
-    private final RouterGrpc.RouterBlockingStub routerStub;
     private final LoadingCache<Object, List<Channel>> channelsCache = new CacheBuilder()
             .withExpiryMilliseconds(CACHE_EXPIRY_MILLISECONDS)
             .build(this::getChannelsWithoutCache);
 
-    public GrpcService(LndConfiguration lndConfiguration) throws IOException {
-        stubCreator = new StubCreator(
-                lndConfiguration.getMacaroonFile(),
-                lndConfiguration.getCertFile(),
-                lndConfiguration.getPort(),
-                lndConfiguration.getHost()
-        );
+    public GrpcService(LndConfiguration lndConfiguration, MetricsBuilder metricsBuilder) throws IOException {
+        super(lndConfiguration);
         lightningStub = stubCreator.getLightningStub();
-        routerStub = stubCreator.getRouterStub();
+        meters = createMeters(metricsBuilder,
+                "getInfo", "subscribeHtlcEvents", "getNodeInfo", "getChanInfo", "listChannels"
+        );
     }
 
     @PreDestroy
@@ -59,21 +52,19 @@ public class GrpcService {
     }
 
     Optional<GetInfoResponse> getInfo() {
+        mark("getInfo");
         return get(() -> lightningStub.getInfo(lnrpc.GetInfoRequest.getDefaultInstance()));
     }
 
-    Iterator<RouterOuterClass.HtlcEvent> getHtlcEvents() {
-        return get(() -> routerStub.subscribeHtlcEvents(SubscribeHtlcEventsRequest.getDefaultInstance()))
-                .orElse(Collections.emptyIterator());
+    public Optional<NodeInfo> getNodeInfo(Pubkey pubkey) {
+        mark("getNodeInfo");
+        return get(() -> lightningStub.getNodeInfo(NodeInfoRequest.newBuilder().setPubKey(pubkey.toString()).build()));
     }
 
-    private <X> Optional<X> get(Supplier<X> supplier) {
-        try {
-            return Optional.ofNullable(supplier.get());
-        } catch (StatusRuntimeException exception) {
-            logger.warn("Exception while connecting to lnd: ", exception);
-            return Optional.empty();
-        }
+    public Optional<ChannelEdge> getChannelEdge(ChannelId channelId) {
+        mark("getChanInfo");
+        ChanInfoRequest build = ChanInfoRequest.newBuilder().setChanId(channelId.shortChannelId()).build();
+        return get(() -> lightningStub.getChanInfo(build));
     }
 
     public List<Channel> getChannels() {
@@ -81,16 +72,21 @@ public class GrpcService {
     }
 
     private List<Channel> getChannelsWithoutCache() {
+        mark("listChannels");
         return get(() -> lightningStub.listChannels(ListChannelsRequest.getDefaultInstance()).getChannelsList())
                 .orElse(List.of());
     }
 
-    public Optional<NodeInfo> getNodeInfo(Pubkey pubkey) {
-        return get(() -> lightningStub.getNodeInfo(NodeInfoRequest.newBuilder().setPubKey(pubkey.toString()).build()));
+    @VisibleForTesting
+    protected void mark(String name) {
+        Objects.requireNonNull(meters.get(name)).mark();
     }
 
-    public Optional<ChannelEdge> getChannelEdge(ChannelId channelId) {
-        ChanInfoRequest build = ChanInfoRequest.newBuilder().setChanId(channelId.shortChannelId()).build();
-        return get(() -> lightningStub.getChanInfo(build));
+    private Map<String, Meter> createMeters(MetricsBuilder metricsBuilder, String... names) {
+        LinkedHashMap<String, Meter> result = new LinkedHashMap<>();
+        for (String name : names) {
+            result.put(name, metricsBuilder.getMetric(MetricRegistry.name(getClass(), name)));
+        }
+        return result;
     }
 }

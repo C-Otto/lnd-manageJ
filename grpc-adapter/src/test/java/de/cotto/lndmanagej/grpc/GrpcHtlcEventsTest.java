@@ -32,7 +32,7 @@ class GrpcHtlcEventsTest {
     private GrpcHtlcEvents grpcHtlcEvents;
 
     @Mock
-    private GrpcService grpcService;
+    private GrpcRouterService grpcRouterService;
 
     private final ForwardEvent forwardEvent = ForwardEvent.newBuilder()
             .setInfo(RouterOuterClass.HtlcInfo.newBuilder()
@@ -55,52 +55,52 @@ class GrpcHtlcEventsTest {
 
         @Test
         void empty() {
-            when(grpcService.getHtlcEvents()).thenReturn(Collections.emptyIterator());
+            when(grpcRouterService.getHtlcEvents()).thenReturn(Collections.emptyIterator());
             assertThat(grpcHtlcEvents.getForwardFailures()).isEmpty();
         }
 
         @Test
         void with_other_event() {
-            when(grpcService.getHtlcEvents()).thenReturn(Set.of(HtlcEvent.getDefaultInstance()).iterator());
+            when(grpcRouterService.getHtlcEvents()).thenReturn(Set.of(HtlcEvent.getDefaultInstance()).iterator());
             assertThat(grpcHtlcEvents.getForwardFailures()).isEmpty();
         }
 
         @Test
         void with_fail_event() {
-            when(grpcService.getHtlcEvents()).thenReturn(Set.of(failEvent).iterator());
+            when(grpcRouterService.getHtlcEvents()).thenReturn(Set.of(failEvent).iterator());
             assertThat(grpcHtlcEvents.getForwardFailures()).isEmpty();
         }
 
         @Test
         void with_attempt_and_fail_event() {
-            when(grpcService.getHtlcEvents()).thenReturn(List.of(attemptEvent, failEvent).iterator());
+            when(grpcRouterService.getHtlcEvents()).thenReturn(List.of(attemptEvent, failEvent).iterator());
             assertThat(grpcHtlcEvents.getForwardFailures()).containsExactly(FORWARD_FAILURE);
         }
 
         @Test
         void attempt_is_deleted_when_used() {
-            when(grpcService.getHtlcEvents()).thenReturn(List.of(attemptEvent, failEvent, failEvent).iterator());
+            when(grpcRouterService.getHtlcEvents()).thenReturn(List.of(attemptEvent, failEvent, failEvent).iterator());
             assertThat(grpcHtlcEvents.getForwardFailures()).hasSize(1);
         }
 
         @Test
         void with_other_attempt_and_fail_event() {
             HtlcEvent attemptEvent = getAttempt(CHANNEL_ID.shortChannelId(), CHANNEL_ID_3.shortChannelId());
-            when(grpcService.getHtlcEvents()).thenReturn(List.of(attemptEvent, failEvent).iterator());
+            when(grpcRouterService.getHtlcEvents()).thenReturn(List.of(attemptEvent, failEvent).iterator());
             assertThat(grpcHtlcEvents.getForwardFailures()).isEmpty();
         }
 
         @Test
         void ignores_failure_event_with_zero_incoming_channel_id() {
             HtlcEvent failEvent = getFailEvent(0, CHANNEL_ID_2.shortChannelId());
-            when(grpcService.getHtlcEvents()).thenReturn(List.of(failEvent).iterator());
+            when(grpcRouterService.getHtlcEvents()).thenReturn(List.of(failEvent).iterator());
             assertThat(grpcHtlcEvents.getForwardFailures()).isEmpty();
         }
 
         @Test
         void ignores_failure_event_with_zero_outgoing_channel_id() {
             HtlcEvent failEvent = getFailEvent(CHANNEL_ID.shortChannelId(), 0);
-            when(grpcService.getHtlcEvents()).thenReturn(List.of(failEvent).iterator());
+            when(grpcRouterService.getHtlcEvents()).thenReturn(List.of(failEvent).iterator());
             assertThat(grpcHtlcEvents.getForwardFailures()).isEmpty();
         }
 
@@ -109,7 +109,7 @@ class GrpcHtlcEventsTest {
             long timestamp = Instant.now().minus(1, ChronoUnit.DAYS).toEpochMilli() * 1_000_000;
             createAndProcessOldEvent(timestamp);
             grpcHtlcEvents.removeOldEvents();
-            when(grpcService.getHtlcEvents()).thenReturn(List.of(failEvent).iterator());
+            when(grpcRouterService.getHtlcEvents()).thenReturn(List.of(failEvent).iterator());
             assertThat(grpcHtlcEvents.getForwardFailures()).isEmpty();
         }
 
@@ -118,7 +118,7 @@ class GrpcHtlcEventsTest {
             long timestamp = Instant.now().minus(23, ChronoUnit.HOURS).toEpochMilli() * 1_000_000;
             createAndProcessOldEvent(timestamp);
             grpcHtlcEvents.removeOldEvents();
-            when(grpcService.getHtlcEvents()).thenReturn(List.of(failEvent).iterator());
+            when(grpcRouterService.getHtlcEvents()).thenReturn(List.of(failEvent).iterator());
             assertThat(grpcHtlcEvents.getForwardFailures()).isNotEmpty();
         }
 
@@ -127,7 +127,7 @@ class GrpcHtlcEventsTest {
                     .setTimestampNs(timestamp)
                     .setForwardEvent(forwardEvent)
                     .build();
-            when(grpcService.getHtlcEvents()).thenReturn(List.of(oldAttempt).iterator());
+            when(grpcRouterService.getHtlcEvents()).thenReturn(List.of(oldAttempt).iterator());
             assertThat(grpcHtlcEvents.getForwardFailures()).isEmpty();
         }
 
@@ -149,66 +149,68 @@ class GrpcHtlcEventsTest {
 
         @Test
         void empty() {
-            when(grpcService.getHtlcEvents()).thenReturn(Collections.emptyIterator());
+            when(grpcRouterService.getHtlcEvents()).thenReturn(Collections.emptyIterator());
             assertThat(grpcHtlcEvents.getSettledForwards()).isEmpty();
         }
 
         @Test
         void with_other_event() {
-            when(grpcService.getHtlcEvents()).thenReturn(Set.of(HtlcEvent.getDefaultInstance()).iterator());
+            when(grpcRouterService.getHtlcEvents()).thenReturn(Set.of(HtlcEvent.getDefaultInstance()).iterator());
             assertThat(grpcHtlcEvents.getSettledForwards()).isEmpty();
         }
 
         @Test
         void with_settle_event() {
-            when(grpcService.getHtlcEvents()).thenReturn(Set.of(settleEvent).iterator());
+            when(grpcRouterService.getHtlcEvents()).thenReturn(Set.of(settleEvent).iterator());
             assertThat(grpcHtlcEvents.getSettledForwards()).isEmpty();
         }
 
         @Test
         void with_attempt_and_settle_event() {
-            when(grpcService.getHtlcEvents()).thenReturn(List.of(attemptEvent, settleEvent).iterator());
+            when(grpcRouterService.getHtlcEvents()).thenReturn(List.of(attemptEvent, settleEvent).iterator());
             assertThat(grpcHtlcEvents.getSettledForwards()).containsExactly(SETTLED_FORWARD);
         }
 
         @Test
         void attempt_is_deleted_when_used() {
-            when(grpcService.getHtlcEvents()).thenReturn(List.of(attemptEvent, settleEvent, settleEvent).iterator());
+            when(grpcRouterService.getHtlcEvents()).thenReturn(
+                    List.of(attemptEvent, settleEvent, settleEvent).iterator()
+            );
             assertThat(grpcHtlcEvents.getSettledForwards()).hasSize(1);
         }
 
         @Test
         void with_other_attempt_and_settle_event() {
             HtlcEvent attemptEvent = getAttempt(CHANNEL_ID.shortChannelId(), CHANNEL_ID_3.shortChannelId());
-            when(grpcService.getHtlcEvents()).thenReturn(List.of(attemptEvent, settleEvent).iterator());
+            when(grpcRouterService.getHtlcEvents()).thenReturn(List.of(attemptEvent, settleEvent).iterator());
             assertThat(grpcHtlcEvents.getSettledForwards()).isEmpty();
         }
 
         @Test
         void ignores_attempt_with_zero_incoming_channel_id() {
             HtlcEvent attemptEvent = getAttempt(0, CHANNEL_ID_2.shortChannelId());
-            when(grpcService.getHtlcEvents()).thenReturn(List.of(attemptEvent).iterator());
+            when(grpcRouterService.getHtlcEvents()).thenReturn(List.of(attemptEvent).iterator());
             assertThat(grpcHtlcEvents.getSettledForwards()).isEmpty();
         }
 
         @Test
         void ignores_attempt_with_zero_outgoing_channel_id() {
             HtlcEvent attemptEvent = getAttempt(CHANNEL_ID.shortChannelId(), 0);
-            when(grpcService.getHtlcEvents()).thenReturn(List.of(attemptEvent).iterator());
+            when(grpcRouterService.getHtlcEvents()).thenReturn(List.of(attemptEvent).iterator());
             assertThat(grpcHtlcEvents.getSettledForwards()).isEmpty();
         }
 
         @Test
         void ignores_settle_event_with_zero_incoming_channel_id() {
             HtlcEvent settleEvent = getSettleEvent(0, CHANNEL_ID_2.shortChannelId());
-            when(grpcService.getHtlcEvents()).thenReturn(List.of(settleEvent).iterator());
+            when(grpcRouterService.getHtlcEvents()).thenReturn(List.of(settleEvent).iterator());
             assertThat(grpcHtlcEvents.getSettledForwards()).isEmpty();
         }
 
         @Test
         void ignores_settle_event_with_zero_outgoing_channel_id() {
             HtlcEvent settleEvent = getSettleEvent(CHANNEL_ID.shortChannelId(), 0);
-            when(grpcService.getHtlcEvents()).thenReturn(List.of(settleEvent).iterator());
+            when(grpcRouterService.getHtlcEvents()).thenReturn(List.of(settleEvent).iterator());
             assertThat(grpcHtlcEvents.getSettledForwards()).isEmpty();
         }
 

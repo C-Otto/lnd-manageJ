@@ -20,11 +20,11 @@ import java.util.stream.Stream;
 
 @Component
 public class GrpcHtlcEvents {
-    private final GrpcService grpcService;
+    private final GrpcRouterService grpcRouterService;
     private final Map<HtlcDetails, ForwardAttempt> previousAttempts;
 
-    public GrpcHtlcEvents(GrpcService grpcService) {
-        this.grpcService = grpcService;
+    public GrpcHtlcEvents(GrpcRouterService grpcRouterService) {
+        this.grpcRouterService = grpcRouterService;
         previousAttempts = new ConcurrentHashMap<>();
     }
 
@@ -43,7 +43,7 @@ public class GrpcHtlcEvents {
     }
 
     private Stream<HtlcEvent> getEventStream() {
-        return Stream.iterate(grpcService.getHtlcEvents(), Iterator::hasNext, UnaryOperator.identity())
+        return Stream.iterate(grpcRouterService.getHtlcEvents(), Iterator::hasNext, UnaryOperator.identity())
                 .map(Iterator::next)
                 .map(this::storeAttempt);
     }

@@ -6,6 +6,7 @@ dependencies {
     implementation project(':grpc-client')
     implementation project(':model')
     implementation project(':caching')
+    implementation project(':metrics')
     testImplementation testFixtures(project(':model'))
 }
 
