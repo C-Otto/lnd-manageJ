@@ -1,8 +1,7 @@
 package de.cotto.lndmanagej.grpc;
 
-import com.codahale.metrics.Meter;
 import de.cotto.lndmanagej.LndConfiguration;
-import de.cotto.lndmanagej.metrics.MetricsBuilder;
+import de.cotto.lndmanagej.metrics.Metrics;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,32 +9,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class GrpcServiceTest {
     private final StubCreator stubCreator = mock(StubCreator.class);
-    private final MetricsBuilder metricsBuilder = mock(MetricsBuilder.class);
+    private final Metrics metrics = mock(Metrics.class);
     private TestableGrpcService grpcService;
-    private Meter meter;
 
     @BeforeEach
     void setUp() throws IOException {
-        meter = mock(Meter.class);
-        when(metricsBuilder.getMetric(any())).thenReturn(meter);
-        grpcService = new TestableGrpcService(mock(LndConfiguration.class), metricsBuilder);
-    }
-
-    @Test
-    void createsMetrics() {
-        verify(metricsBuilder, times(5)).getMetric(anyString());
-        grpcService.mark("getInfo");
-        verify(meter).mark();
+        grpcService = new TestableGrpcService(mock(LndConfiguration.class), metrics);
     }
 
     @Test
@@ -47,9 +32,9 @@ class GrpcServiceTest {
     public class TestableGrpcService extends GrpcService {
         public TestableGrpcService(
                 LndConfiguration lndConfiguration,
-                MetricsBuilder metricsBuilder
+                Metrics metrics
         ) throws IOException {
-            super(lndConfiguration, metricsBuilder);
+            super(lndConfiguration, metrics);
         }
 
         @Override

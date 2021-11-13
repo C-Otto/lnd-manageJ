@@ -7,14 +7,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class MetricsBuilder {
+public class Metrics {
     private final MetricRegistry registry = new MetricRegistry();
     private final Slf4jReporter reporter;
+    private final Map<String, Meter> meters = new LinkedHashMap<>();
 
-    public MetricsBuilder() {
+    public Metrics() {
         reporter = Slf4jReporter.forRegistry(registry)
                 .outputTo(LoggerFactory.getLogger(getClass()))
                 .convertRatesTo(TimeUnit.SECONDS)
@@ -28,7 +31,7 @@ public class MetricsBuilder {
         reporter.close();
     }
 
-    public Meter getMetric(String name) {
-        return registry.meter(name);
+    public void mark(String name) {
+        meters.computeIfAbsent(name, registry::meter).mark();
     }
 }

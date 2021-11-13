@@ -1,7 +1,7 @@
 package de.cotto.lndmanagej.grpc;
 
 import de.cotto.lndmanagej.LndConfiguration;
-import de.cotto.lndmanagej.metrics.MetricsBuilder;
+import de.cotto.lndmanagej.metrics.Metrics;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,24 +9,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class GrpcRouterServiceTest {
     private final StubCreator stubCreator = mock(StubCreator.class);
-    private final MetricsBuilder metricsBuilder = mock(MetricsBuilder.class);
+    private final Metrics metrics = mock(Metrics.class);
     private TestableGrpcRouterService grpcRouterService;
 
     @BeforeEach
     void setUp() throws IOException {
-        grpcRouterService = new TestableGrpcRouterService(mock(LndConfiguration.class), metricsBuilder);
-    }
-
-    @Test
-    void createsMetric() {
-        verify(metricsBuilder).getMetric(anyString());
+        grpcRouterService = new TestableGrpcRouterService(mock(LndConfiguration.class), metrics);
     }
 
     @Test
@@ -38,9 +32,9 @@ class GrpcRouterServiceTest {
     public class TestableGrpcRouterService extends GrpcRouterService {
         public TestableGrpcRouterService(
                 LndConfiguration lndConfiguration,
-                MetricsBuilder metricsBuilder
+                Metrics metrics
         ) throws IOException {
-            super(lndConfiguration, metricsBuilder);
+            super(lndConfiguration, metrics);
         }
 
         @Override

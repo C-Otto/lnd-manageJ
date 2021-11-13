@@ -1,12 +1,10 @@
 package de.cotto.lndmanagej.grpc;
 
-import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.LoadingCache;
 import de.cotto.lndmanagej.LndConfiguration;
 import de.cotto.lndmanagej.caching.CacheBuilder;
-import de.cotto.lndmanagej.metrics.MetricsBuilder;
+import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
 import lnrpc.ChanInfoRequest;
@@ -21,29 +19,23 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 @Component
 public class GrpcService extends GrpcBase {
     private static final int CACHE_EXPIRY_MILLISECONDS = 200;
 
-    private final Map<String, Meter> meters;
-
     private final LightningGrpc.LightningBlockingStub lightningStub;
     private final LoadingCache<Object, List<Channel>> channelsCache = new CacheBuilder()
             .withExpiryMilliseconds(CACHE_EXPIRY_MILLISECONDS)
             .build(this::getChannelsWithoutCache);
+    private final Metrics metrics;
 
-    public GrpcService(LndConfiguration lndConfiguration, MetricsBuilder metricsBuilder) throws IOException {
+    public GrpcService(LndConfiguration lndConfiguration, Metrics metrics) throws IOException {
         super(lndConfiguration);
+        this.metrics = metrics;
         lightningStub = stubCreator.getLightningStub();
-        meters = createMeters(metricsBuilder,
-                "getInfo", "subscribeHtlcEvents", "getNodeInfo", "getChanInfo", "listChannels"
-        );
     }
 
     @PreDestroy
@@ -77,16 +69,7 @@ public class GrpcService extends GrpcBase {
                 .orElse(List.of());
     }
 
-    @VisibleForTesting
-    protected void mark(String name) {
-        Objects.requireNonNull(meters.get(name)).mark();
-    }
-
-    private Map<String, Meter> createMeters(MetricsBuilder metricsBuilder, String... names) {
-        LinkedHashMap<String, Meter> result = new LinkedHashMap<>();
-        for (String name : names) {
-            result.put(name, metricsBuilder.getMetric(MetricRegistry.name(getClass(), name)));
-        }
-        return result;
+    private void mark(String name) {
+        metrics.mark(MetricRegistry.name(getClass(), name));
     }
 }

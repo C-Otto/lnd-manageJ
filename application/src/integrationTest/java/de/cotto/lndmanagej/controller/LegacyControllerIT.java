@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.controller;
 
+import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
@@ -54,6 +55,10 @@ class LegacyControllerIT {
 
     @MockBean
     private BalanceService balanceService;
+
+    @MockBean
+    @SuppressWarnings("unused")
+    private Metrics metrics;
 
     @Test
     void getAlias() throws Exception {
