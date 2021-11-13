@@ -199,16 +199,30 @@ class LegacyControllerTest {
     }
 
     @Test
-    void getAvailableLocalBalance() {
+    void getAvailableLocalBalance_channel() {
         when(balanceService.getAvailableLocalBalance(CHANNEL_ID)).thenReturn(Coins.ofSatoshis(123L));
-        assertThat(legacyController.getAvailableLocalBalance(CHANNEL_ID)).isEqualTo(123);
-        verify(metrics).mark(argThat(name -> name.endsWith(".getAvailableLocalBalance")));
+        assertThat(legacyController.getAvailableLocalBalanceForChannel(CHANNEL_ID)).isEqualTo(123);
+        verify(metrics).mark(argThat(name -> name.endsWith(".getAvailableLocalBalanceForChannel")));
     }
 
     @Test
-    void getAvailableRemoteBalance() {
+    void getAvailableRemoteBalance_channel() {
         when(balanceService.getAvailableRemoteBalance(CHANNEL_ID)).thenReturn(Coins.ofSatoshis(123L));
-        assertThat(legacyController.getAvailableRemoteBalance(CHANNEL_ID)).isEqualTo(123);
-        verify(metrics).mark(argThat(name -> name.endsWith(".getAvailableRemoteBalance")));
+        assertThat(legacyController.getAvailableRemoteBalanceForChannel(CHANNEL_ID)).isEqualTo(123);
+        verify(metrics).mark(argThat(name -> name.endsWith(".getAvailableRemoteBalanceForChannel")));
+    }
+
+    @Test
+    void getAvailableLocalBalance_peer() {
+        when(balanceService.getAvailableLocalBalance(PUBKEY)).thenReturn(Coins.ofSatoshis(246L));
+        assertThat(legacyController.getAvailableLocalBalanceForPeer(PUBKEY)).isEqualTo(246);
+        verify(metrics).mark(argThat(name -> name.endsWith(".getAvailableLocalBalanceForPeer")));
+    }
+
+    @Test
+    void getAvailableRemoteBalance_peer() {
+        when(balanceService.getAvailableRemoteBalance(PUBKEY)).thenReturn(Coins.ofSatoshis(246L));
+        assertThat(legacyController.getAvailableRemoteBalanceForPeer(PUBKEY)).isEqualTo(246);
+        verify(metrics).mark(argThat(name -> name.endsWith(".getAvailableRemoteBalanceForPeer")));
     }
 }

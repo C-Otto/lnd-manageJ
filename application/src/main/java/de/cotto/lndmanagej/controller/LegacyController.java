@@ -136,15 +136,27 @@ public class LegacyController {
     }
 
     @GetMapping("/channel/{channelId}/available-local-balance")
-    public long getAvailableLocalBalance(@PathVariable ChannelId channelId) {
-        mark("getAvailableLocalBalance");
+    public long getAvailableLocalBalanceForChannel(@PathVariable ChannelId channelId) {
+        mark("getAvailableLocalBalanceForChannel");
         return balanceService.getAvailableLocalBalance(channelId).satoshis();
     }
 
     @GetMapping("/channel/{channelId}/available-remote-balance")
-    public long getAvailableRemoteBalance(@PathVariable ChannelId channelId) {
-        mark("getAvailableRemoteBalance");
+    public long getAvailableRemoteBalanceForChannel(@PathVariable ChannelId channelId) {
+        mark("getAvailableRemoteBalanceForChannel");
         return balanceService.getAvailableRemoteBalance(channelId).satoshis();
+    }
+
+    @GetMapping("/node/{pubkey}/available-local-balance")
+    public long getAvailableLocalBalanceForPeer(@PathVariable Pubkey pubkey) {
+        mark("getAvailableLocalBalanceForPeer");
+        return balanceService.getAvailableLocalBalance(pubkey).satoshis();
+    }
+
+    @GetMapping("/node/{pubkey}/available-remote-balance")
+    public long getAvailableRemoteBalanceForPeer(@PathVariable Pubkey pubkey) {
+        mark("getAvailableRemoteBalanceForPeer");
+        return balanceService.getAvailableRemoteBalance(pubkey).satoshis();
     }
 
     private Stream<ChannelId> getOpenChannelIdsSorted() {

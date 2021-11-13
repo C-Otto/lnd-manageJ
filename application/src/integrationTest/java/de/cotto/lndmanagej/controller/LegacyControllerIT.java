@@ -147,7 +147,7 @@ class LegacyControllerIT {
     }
 
     @Test
-    void getAvailableLocalBalance() throws Exception {
+    void getAvailableLocalBalance_channel() throws Exception {
         Coins availableBalance = Coins.ofSatoshis(999);
         when(balanceService.getAvailableLocalBalance(CHANNEL_ID)).thenReturn(availableBalance);
         mockMvc.perform(get(CHANNEL_BASE + "/available-local-balance"))
@@ -155,10 +155,26 @@ class LegacyControllerIT {
     }
 
     @Test
-    void getAvailableRemoteBalance() throws Exception {
+    void getAvailableRemoteBalance_channel() throws Exception {
         Coins availableBalance = Coins.ofSatoshis(999);
         when(balanceService.getAvailableRemoteBalance(CHANNEL_ID)).thenReturn(availableBalance);
         mockMvc.perform(get(CHANNEL_BASE + "/available-remote-balance"))
+                .andExpect(content().string(String.valueOf(availableBalance.satoshis())));
+    }
+
+    @Test
+    void getAvailableLocalBalance_peer() throws Exception {
+        Coins availableBalance = Coins.ofSatoshis(999);
+        when(balanceService.getAvailableLocalBalance(PUBKEY)).thenReturn(availableBalance);
+        mockMvc.perform(get(PUBKEY_BASE + "/available-local-balance"))
+                .andExpect(content().string(String.valueOf(availableBalance.satoshis())));
+    }
+
+    @Test
+    void getAvailableRemoteBalance_peer() throws Exception {
+        Coins availableBalance = Coins.ofSatoshis(999);
+        when(balanceService.getAvailableRemoteBalance(PUBKEY)).thenReturn(availableBalance);
+        mockMvc.perform(get(PUBKEY_BASE + "/available-remote-balance"))
                 .andExpect(content().string(String.valueOf(availableBalance.satoshis())));
     }
 }
