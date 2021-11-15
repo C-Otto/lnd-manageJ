@@ -4,6 +4,7 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_4;
+import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
@@ -29,6 +30,7 @@ public final class ChannelFixtures {
         return Channel.builder()
                 .withChannelId(channelId)
                 .withCapacity(capacity)
+                .withChannelPoint(CHANNEL_POINT)
                 .withNode1(pubkey1)
                 .withNode2(pubkey2)
                 .build();

@@ -13,15 +13,17 @@ import static java.util.Objects.requireNonNull;
 public class Channel {
     private final ChannelId channelId;
     private final Coins capacity;
+    private final ChannelPoint channelPoint;
     private final Set<Pubkey> pubkeys;
 
-    private Channel(ChannelId channelId, Coins capacity, Pubkey pubkey1, Pubkey pubkey2) {
-        this(channelId, capacity, List.of(pubkey1, pubkey2));
+    private Channel(ChannelId channelId, Coins capacity, ChannelPoint channelPoint, Pubkey pubkey1, Pubkey pubkey2) {
+        this(channelId, capacity, channelPoint, List.of(pubkey1, pubkey2));
     }
 
-    protected Channel(ChannelId channelId, Coins capacity, Collection<Pubkey> pubkeys) {
+    protected Channel(ChannelId channelId, Coins capacity, ChannelPoint channelPoint, Collection<Pubkey> pubkeys) {
         this.channelId = channelId;
         this.capacity = Coins.ofMilliSatoshis(capacity.milliSatoshis());
+        this.channelPoint = channelPoint;
         this.pubkeys = new LinkedHashSet<>(pubkeys);
     }
 
@@ -41,12 +43,19 @@ public class Channel {
         return pubkeys;
     }
 
+    public ChannelPoint getChannelPoint() {
+        return channelPoint;
+    }
+
     public static class Builder {
         @Nullable
         private ChannelId channelId;
 
         @Nullable
         private Coins capacity;
+
+        @Nullable
+        private ChannelPoint channelPoint;
 
         @Nullable
         private Pubkey pubkey1;
@@ -61,6 +70,11 @@ public class Channel {
 
         public Builder withCapacity(Coins capacity) {
             this.capacity = capacity;
+            return this;
+        }
+
+        public Builder withChannelPoint(ChannelPoint channelPoint) {
+            this.channelPoint = channelPoint;
             return this;
         }
 
@@ -81,6 +95,7 @@ public class Channel {
             return new Channel(
                     requireNonNull(channelId),
                     requireNonNull(capacity),
+                    requireNonNull(channelPoint),
                     requireNonNull(pubkey1),
                     requireNonNull(pubkey2)
             );
@@ -98,12 +113,13 @@ public class Channel {
         Channel channel = (Channel) other;
         return Objects.equals(channelId, channel.channelId)
                 && Objects.equals(capacity, channel.capacity)
+                && Objects.equals(channelPoint, channel.channelPoint)
                 && Objects.equals(pubkeys, channel.pubkeys);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(channelId, capacity, pubkeys);
+        return Objects.hash(channelId, capacity, channelPoint, pubkeys);
     }
 
     @Override
@@ -111,6 +127,7 @@ public class Channel {
         return "Channel[" +
                 "channelId=" + channelId +
                 ", capacity=" + capacity +
+                ", channelPoint=" + channelPoint +
                 ", pubkeys=" + pubkeys +
                 ']';
     }

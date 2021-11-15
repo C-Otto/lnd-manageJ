@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CHANNEL;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,6 +26,7 @@ class ChannelTest {
         assertThatNullPointerException().isThrownBy(
                 () -> Channel.builder()
                         .withCapacity(CAPACITY)
+                        .withChannelPoint(CHANNEL_POINT)
                         .withNode1(PUBKEY)
                         .withNode2(PUBKEY_2)
                         .build()
@@ -37,6 +39,19 @@ class ChannelTest {
                 () -> Channel.builder()
                         .withChannelId(CHANNEL_ID)
                         .withNode1(PUBKEY)
+                        .withChannelPoint(CHANNEL_POINT)
+                        .withNode2(PUBKEY_2)
+                        .build()
+        );
+    }
+
+    @Test
+    void builder_without_channel_point() {
+        assertThatNullPointerException().isThrownBy(
+                () -> Channel.builder()
+                        .withChannelId(CHANNEL_ID)
+                        .withNode1(PUBKEY)
+                        .withCapacity(CAPACITY)
                         .withNode2(PUBKEY_2)
                         .build()
         );
@@ -48,6 +63,7 @@ class ChannelTest {
                 () -> Channel.builder()
                         .withChannelId(CHANNEL_ID)
                         .withCapacity(CAPACITY)
+                        .withChannelPoint(CHANNEL_POINT)
                         .withNode2(PUBKEY_2)
                         .build()
         );
@@ -59,6 +75,7 @@ class ChannelTest {
                 () -> Channel.builder()
                         .withChannelId(CHANNEL_ID)
                         .withCapacity(CAPACITY)
+                        .withChannelPoint(CHANNEL_POINT)
                         .withNode1(PUBKEY)
                         .build()
         );
@@ -70,6 +87,7 @@ class ChannelTest {
                 () -> Channel.builder()
                         .withChannelId(CHANNEL_ID)
                         .withCapacity(CAPACITY)
+                        .withChannelPoint(CHANNEL_POINT)
                         .withNode1(PUBKEY)
                         .withNode2(PUBKEY)
                         .build()
@@ -83,6 +101,7 @@ class ChannelTest {
                 .withCapacity(CAPACITY)
                 .withNode1(PUBKEY)
                 .withNode2(PUBKEY_2)
+                .withChannelPoint(CHANNEL_POINT)
                 .build();
         assertThat(channel).isEqualTo(CHANNEL);
     }
@@ -103,6 +122,11 @@ class ChannelTest {
     }
 
     @Test
+    void getChannelPoint() {
+        assertThat(CHANNEL.getChannelPoint()).isEqualTo(CHANNEL_POINT);
+    }
+
+    @Test
     void testEquals() {
         EqualsVerifier.forClass(Channel.class).usingGetClass().verify();
     }
@@ -112,6 +136,7 @@ class ChannelTest {
         Channel channel = Channel.builder()
                 .withChannelId(CHANNEL_ID)
                 .withCapacity(CAPACITY)
+                .withChannelPoint(CHANNEL_POINT)
                 .withNode1(PUBKEY_2)
                 .withNode2(PUBKEY)
                 .build();
@@ -124,6 +149,7 @@ class ChannelTest {
                 "Channel[" +
                         "channelId=" + CHANNEL_ID +
                         ", capacity=" + CAPACITY +
+                        ", channelPoint=" + CHANNEL_POINT +
                         ", pubkeys=[" + PUBKEY + ", " + PUBKEY_2 + "]" +
                         "]"
         );

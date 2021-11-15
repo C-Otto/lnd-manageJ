@@ -15,6 +15,7 @@ import java.util.List;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
+import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
@@ -88,6 +89,7 @@ class GrpcChannelsTest {
                 .setChanId(channelId.shortChannelId())
                 .setCapacity(CAPACITY.satoshis())
                 .setRemotePubkey(PUBKEY_2.toString())
+                .setChannelPoint(CHANNEL_POINT.toString())
                 .build();
     }
 
@@ -96,6 +98,7 @@ class GrpcChannelsTest {
                 .setChanId(channelId)
                 .setRemotePubkey(PUBKEY_2.toString())
                 .setCapacity(CAPACITY.satoshis())
+                .setChannelPoint(CHANNEL_POINT.toString())
                 .build();
     }
 }

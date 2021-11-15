@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.grpc;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.ChannelPoint;
 import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
@@ -59,6 +60,7 @@ public class GrpcChannels {
         Channel channel = Channel.builder()
                 .withChannelId(ChannelId.fromShortChannelId(lndChannel.getChanId()))
                 .withCapacity(Coins.ofSatoshis(lndChannel.getCapacity()))
+                .withChannelPoint(ChannelPoint.create(lndChannel.getChannelPoint()))
                 .withNode1(ownPubkey)
                 .withNode2(Pubkey.create(lndChannel.getRemotePubkey()))
                 .build();
@@ -79,6 +81,7 @@ public class GrpcChannels {
         }
         Channel channel = Channel.builder()
                 .withChannelId(ChannelId.fromShortChannelId(chanId))
+                .withChannelPoint(ChannelPoint.create(channelCloseSummary.getChannelPoint()))
                 .withCapacity(Coins.ofSatoshis(channelCloseSummary.getCapacity()))
                 .withNode1(ownPubkey)
                 .withNode2(Pubkey.create(channelCloseSummary.getRemotePubkey()))
