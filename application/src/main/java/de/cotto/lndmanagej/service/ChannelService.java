@@ -3,9 +3,9 @@ package de.cotto.lndmanagej.service;
 import com.google.common.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.grpc.GrpcChannels;
-import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.model.UnresolvedClosedChannel;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -16,7 +16,7 @@ public class ChannelService {
     private static final int CACHE_EXPIRY_MINUTES = 1;
 
     private final LoadingCache<Object, Set<LocalOpenChannel>> channelsCache;
-    private final LoadingCache<Object, Set<ClosedChannel>> closedChannelsCache;
+    private final LoadingCache<Object, Set<UnresolvedClosedChannel>> closedChannelsCache;
 
     public ChannelService(GrpcChannels grpcChannels) {
         channelsCache = new CacheBuilder()
@@ -24,14 +24,14 @@ public class ChannelService {
                 .build(grpcChannels::getChannels);
         closedChannelsCache = new CacheBuilder()
                 .withExpiryMinutes(CACHE_EXPIRY_MINUTES)
-                .build(grpcChannels::getClosedChannels);
+                .build(grpcChannels::getUnresolvedClosedChannels);
     }
 
     public Set<LocalOpenChannel> getOpenChannels() {
         return channelsCache.getUnchecked("");
     }
 
-    public Set<ClosedChannel> getClosedChannels() {
+    public Set<UnresolvedClosedChannel> getClosedChannels() {
         return closedChannelsCache.getUnchecked("");
     }
 

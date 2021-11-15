@@ -4,13 +4,11 @@ import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ChannelPoint;
-import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.model.UnresolvedClosedChannel;
 import lnrpc.ChannelCloseSummary;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -22,7 +20,6 @@ import static java.util.stream.Collectors.toSet;
 public class GrpcChannels {
     private final GrpcService grpcService;
     private final GrpcGetInfo grpcGetInfo;
-    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     public GrpcChannels(
             GrpcService grpcService,
@@ -39,17 +36,16 @@ public class GrpcChannels {
                 .collect(toSet());
     }
 
-    public Set<ClosedChannel> getClosedChannels() {
+    public Set<UnresolvedClosedChannel> getUnresolvedClosedChannels() {
         Pubkey ownPubkey = grpcGetInfo.getPubkey();
         return grpcService.getClosedChannels().stream()
-                .map(channelCloseSummary -> toClosedChannel(channelCloseSummary, ownPubkey))
-                .flatMap(Optional::stream)
+                .map(channelCloseSummary -> toUnresolvedClosedChannel(channelCloseSummary, ownPubkey))
                 .collect(toSet());
     }
 
     public Optional<LocalOpenChannel> getChannel(ChannelId channelId) {
         Pubkey ownPubkey = grpcGetInfo.getPubkey();
-        long expectedChannelId = channelId.shortChannelId();
+        long expectedChannelId = channelId.getShortChannelId();
         return grpcService.getChannels().stream()
                 .filter(c -> c.getChanId() == expectedChannelId)
                 .map(lndChannel -> toLocalOpenChannel(lndChannel, ownPubkey))
@@ -73,19 +69,25 @@ public class GrpcChannels {
         return new LocalOpenChannel(channel, ownPubkey, balanceInformation);
     }
 
-    private Optional<ClosedChannel> toClosedChannel(ChannelCloseSummary channelCloseSummary, Pubkey ownPubkey) {
-        long chanId = channelCloseSummary.getChanId();
-        if (chanId == 0) {
-            logger.warn("Closed channel with unknown channel ID, ignoring: {}", channelCloseSummary);
-            return Optional.empty();
-        }
+    private UnresolvedClosedChannel toUnresolvedClosedChannel(
+            ChannelCloseSummary channelCloseSummary,
+            Pubkey ownPubkey
+    ) {
         Channel channel = Channel.builder()
-                .withChannelId(ChannelId.fromShortChannelId(chanId))
+                .withChannelId(getChannelId(channelCloseSummary))
                 .withChannelPoint(ChannelPoint.create(channelCloseSummary.getChannelPoint()))
                 .withCapacity(Coins.ofSatoshis(channelCloseSummary.getCapacity()))
                 .withNode1(ownPubkey)
                 .withNode2(Pubkey.create(channelCloseSummary.getRemotePubkey()))
                 .build();
-        return Optional.of(new ClosedChannel(channel, ownPubkey));
+        return new UnresolvedClosedChannel(channel, ownPubkey);
+    }
+
+    private ChannelId getChannelId(ChannelCloseSummary channelCloseSummary) {
+        long chanId = channelCloseSummary.getChanId();
+        if (chanId == 0) {
+            return ChannelId.UNRESOLVED;
+        }
+        return ChannelId.fromShortChannelId(chanId);
     }
 }

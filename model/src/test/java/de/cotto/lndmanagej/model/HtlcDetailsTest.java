@@ -21,8 +21,8 @@ class HtlcDetailsTest {
     @Test
     void builder_with_all_arguments() {
         HtlcDetails htlcDetails = HtlcDetails.builder()
-                .withIncomingChannelId(CHANNEL_ID.shortChannelId())
-                .withOutgoingChannelId(CHANNEL_ID_2.shortChannelId())
+                .withIncomingChannelId(CHANNEL_ID.getShortChannelId())
+                .withOutgoingChannelId(CHANNEL_ID_2.getShortChannelId())
                 .withTimestamp(789)
                 .withIncomingHtlcId(1)
                 .withOutgoingHtlcId(2)

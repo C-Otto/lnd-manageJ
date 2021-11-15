@@ -8,6 +8,7 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_COMPACT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 class ChannelIdTest {
 
@@ -34,7 +35,7 @@ class ChannelIdTest {
         @Test
         void january_2016() {
             ChannelId channelId = ChannelId.fromCompactForm("391177:0:0");
-            assertThat(channelId.shortChannelId()).isEqualTo(430_103_660_018_532_352L);
+            assertThat(channelId.getShortChannelId()).isEqualTo(430_103_660_018_532_352L);
         }
 
         @Test
@@ -47,19 +48,19 @@ class ChannelIdTest {
         @Test
         void with_x() {
             ChannelId channelId = ChannelId.fromCompactForm("704776x2087x1");
-            assertThat(channelId.shortChannelId()).isEqualTo(774_909_407_114_231_809L);
+            assertThat(channelId.getShortChannelId()).isEqualTo(774_909_407_114_231_809L);
         }
 
         @Test
         void large_output() {
             ChannelId channelId = ChannelId.fromCompactForm("704776x2087x123");
-            assertThat(channelId.shortChannelId()).isEqualTo(774_909_407_114_231_931L);
+            assertThat(channelId.getShortChannelId()).isEqualTo(774_909_407_114_231_931L);
         }
 
         @Test
         void with_colon() {
             ChannelId channelId = ChannelId.fromCompactForm("704776:2087:1");
-            assertThat(channelId.shortChannelId()).isEqualTo(774_909_407_114_231_809L);
+            assertThat(channelId.getShortChannelId()).isEqualTo(774_909_407_114_231_809L);
         }
     }
 
@@ -90,19 +91,19 @@ class ChannelIdTest {
         @Test
         void january_2016() {
             ChannelId channelId = ChannelId.fromShortChannelId(774_909_407_114_231_809L);
-            assertThat(channelId.shortChannelId()).isEqualTo(774_909_407_114_231_809L);
+            assertThat(channelId.getShortChannelId()).isEqualTo(774_909_407_114_231_809L);
         }
 
         @Test
         void short_channel_id() {
             ChannelId channelId = ChannelId.fromShortChannelId(774_909_407_114_231_809L);
-            assertThat(channelId.shortChannelId()).isEqualTo(774_909_407_114_231_809L);
+            assertThat(channelId.getShortChannelId()).isEqualTo(774_909_407_114_231_809L);
         }
 
         @Test
         void large_output() {
             ChannelId channelId = ChannelId.fromShortChannelId(774_909_407_114_231_931L);
-            assertThat(channelId.shortChannelId()).isEqualTo(774_909_407_114_231_931L);
+            assertThat(channelId.getShortChannelId()).isEqualTo(774_909_407_114_231_931L);
         }
     }
 
@@ -133,13 +134,63 @@ class ChannelIdTest {
     }
 
     @Test
+    void isUnresolved_true() {
+        assertThat(ChannelId.UNRESOLVED.isUnresolved()).isTrue();
+    }
+
+    @Test
+    void isUnresolved_false() {
+        assertThat(CHANNEL_ID.isUnresolved()).isFalse();
+    }
+
+    @Test
+    void getCompactForm_unresolved() {
+        assertThatIllegalStateException()
+                .isThrownBy(ChannelId.UNRESOLVED::getCompactForm)
+                .withMessage("Channel ID must be resolved");
+    }
+
+    @Test
+    void shortChannelId_unresolved() {
+        assertThatIllegalStateException()
+                .isThrownBy(ChannelId.UNRESOLVED::getShortChannelId)
+                .withMessage("Channel ID must be resolved");
+    }
+
+    @Test
+    void compareTo_unresolved_to_other() {
+        assertThatIllegalStateException()
+                .isThrownBy(() -> ChannelId.UNRESOLVED.compareTo(CHANNEL_ID))
+                .withMessage("Cannot compare with unresolved channel ID");
+    }
+
+    @Test
+    void compareTo_other_to_unresolved() {
+        assertThatIllegalStateException()
+                .isThrownBy(() -> CHANNEL_ID.compareTo(ChannelId.UNRESOLVED))
+                .withMessage("Cannot compare with unresolved channel ID");
+    }
+
+    @Test
+    @SuppressWarnings("SelfComparison")
+    void compareTo_unresolved() {
+        //noinspection EqualsWithItself
+        assertThat(ChannelId.UNRESOLVED.compareTo(ChannelId.UNRESOLVED)).isEqualTo(0);
+    }
+
+    @Test
+    void toString_unresolved() {
+        assertThat(ChannelId.UNRESOLVED).hasToString("UNRESOLVED_CHANNEL_ID");
+    }
+
+    @Test
     void testEquals() {
         EqualsVerifier.forClass(ChannelId.class).verify();
     }
 
     @Test
     void testToString() {
-        String expectedString = String.valueOf(CHANNEL_ID.shortChannelId());
+        String expectedString = String.valueOf(CHANNEL_ID.getShortChannelId());
         assertThat(CHANNEL_ID).hasToString(expectedString);
     }
 }

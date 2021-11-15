@@ -57,7 +57,7 @@ public class GrpcService extends GrpcBase {
 
     public Optional<ChannelEdge> getChannelEdge(ChannelId channelId) {
         mark("getChanInfo");
-        ChanInfoRequest build = ChanInfoRequest.newBuilder().setChanId(channelId.shortChannelId()).build();
+        ChanInfoRequest build = ChanInfoRequest.newBuilder().setChanId(channelId.getShortChannelId()).build();
         return get(() -> lightningStub.getChanInfo(build));
     }
 
