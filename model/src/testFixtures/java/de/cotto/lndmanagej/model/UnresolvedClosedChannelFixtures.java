@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.model;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CHANNEL;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CHANNEL_2;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CHANNEL_3;
+import static de.cotto.lndmanagej.model.ChannelFixtures.CHANNEL_TO_NODE_3;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CHANNEL_UNRESOLVED_ID;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 
@@ -15,4 +16,6 @@ public  class UnresolvedClosedChannelFixtures {
             new UnresolvedClosedChannel(CHANNEL_2, PUBKEY);
     public static final UnresolvedClosedChannel UNRESOLVED_CLOSED_CHANNEL_3 =
             new UnresolvedClosedChannel(CHANNEL_3, PUBKEY);
+    public static final UnresolvedClosedChannel UNRESOLVED_CLOSED_CHANNEL_TO_NODE_3 =
+            new UnresolvedClosedChannel(CHANNEL_TO_NODE_3, PUBKEY);
 }

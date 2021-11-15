@@ -12,4 +12,8 @@ public class UnresolvedClosedChannel extends LocalChannel {
     public LocalChannel getWithId(ChannelId channelId) {
         return new UnresolvedClosedChannel(super.getWithId(channelId), ownPubkey);
     }
+
+    public Pubkey getOwnPubkey() {
+        return ownPubkey;
+    }
 }

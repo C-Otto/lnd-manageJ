@@ -33,6 +33,12 @@ class ClosedChannelTest {
     }
 
     @Test
+    void create_with_explicit_channel_id_retains_remote_pubkey() {
+        ClosedChannel closedChannel = ClosedChannel.create(CLOSED_CHANNEL_UNRESOLVED_ID, CHANNEL_ID);
+        assertThat(closedChannel.getRemotePubkey()).isEqualTo(CLOSED_CHANNEL_UNRESOLVED_ID.getRemotePubkey());
+    }
+
+    @Test
     void create_with_explicit_unresolved_channel_id() {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> ClosedChannel.create(CLOSED_CHANNEL_UNRESOLVED_ID, ChannelId.UNRESOLVED))
@@ -46,7 +52,7 @@ class ClosedChannelTest {
 
     @Test
     void getRemotePubkey() {
-        assertThat(CLOSED_CHANNEL.getRemotePubkey()).isEqualTo(PUBKEY);
+        assertThat(CLOSED_CHANNEL.getRemotePubkey()).isEqualTo(PUBKEY_2);
     }
 
     @Test

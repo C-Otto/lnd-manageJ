@@ -40,4 +40,12 @@ class UnresolvedClosedChannelTest {
     void getWithId() {
         assertThat(CLOSED_CHANNEL_UNRESOLVED_ID.getWithId(CHANNEL_ID)).isEqualTo(UNRESOLVED_CLOSED_CHANNEL);
     }
+
+    @Test
+    void getOwnPubkey() {
+        Channel channel = ChannelFixtures.create(PUBKEY_3, PUBKEY_2, CHANNEL_ID);
+        UnresolvedClosedChannel unresolvedClosedChannel =
+                new UnresolvedClosedChannel(channel, PUBKEY_3);
+        assertThat(unresolvedClosedChannel.getOwnPubkey()).isEqualTo(PUBKEY_3);
+    }
 }

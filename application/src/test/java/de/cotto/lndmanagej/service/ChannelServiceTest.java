@@ -19,15 +19,19 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL_2;
+import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL_3;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_3;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_TO_NODE_3;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static de.cotto.lndmanagej.model.UnresolvedClosedChannelFixtures.CLOSED_CHANNEL_UNRESOLVED_ID;
 import static de.cotto.lndmanagej.model.UnresolvedClosedChannelFixtures.UNRESOLVED_CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.UnresolvedClosedChannelFixtures.UNRESOLVED_CLOSED_CHANNEL_2;
+import static de.cotto.lndmanagej.model.UnresolvedClosedChannelFixtures.UNRESOLVED_CLOSED_CHANNEL_3;
+import static de.cotto.lndmanagej.model.UnresolvedClosedChannelFixtures.UNRESOLVED_CLOSED_CHANNEL_TO_NODE_3;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -90,5 +94,14 @@ class ChannelServiceTest {
         when(grpcChannels.getUnresolvedClosedChannels())
                 .thenReturn(Set.of(UNRESOLVED_CLOSED_CHANNEL_2, CLOSED_CHANNEL_UNRESOLVED_ID));
         assertThat(channelService.getClosedChannels()).containsExactlyInAnyOrder(CLOSED_CHANNEL_2);
+    }
+
+    @Test
+    void getAllChannels_by_pubkey() {
+        when(grpcChannels.getChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_TO_NODE_3));
+        when(grpcChannels.getUnresolvedClosedChannels())
+                .thenReturn(Set.of(UNRESOLVED_CLOSED_CHANNEL_3, UNRESOLVED_CLOSED_CHANNEL_TO_NODE_3));
+        assertThat(channelService.getAllChannelsWith(PUBKEY_2))
+                .containsExactlyInAnyOrder(LOCAL_OPEN_CHANNEL, CLOSED_CHANNEL_3);
     }
 }

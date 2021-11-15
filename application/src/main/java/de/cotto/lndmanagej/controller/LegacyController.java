@@ -63,6 +63,16 @@ public class LegacyController {
                 .collect(Collectors.joining(NEWLINE));
     }
 
+    @GetMapping("/node/{pubkey}/all-channels")
+    public String getAllChannelIdsForPubkey(@PathVariable Pubkey pubkey) {
+        mark("getAllChannelIdsForPubkey");
+        return channelService.getAllChannelsWith(pubkey).stream()
+                .map(Channel::getId)
+                .sorted()
+                .map(ChannelId::toString)
+                .collect(Collectors.joining(NEWLINE));
+    }
+
     @GetMapping("/open-channels")
     public String getOpenChannelIds() {
         mark("getOpenChannelIds");

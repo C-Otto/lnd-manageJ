@@ -4,6 +4,7 @@ import com.google.common.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.grpc.GrpcChannels;
 import de.cotto.lndmanagej.model.ClosedChannel;
+import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.UnresolvedClosedChannel;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class ChannelService {
@@ -59,6 +61,14 @@ public class ChannelService {
     public Set<LocalOpenChannel> getOpenChannelsWith(Pubkey peer) {
         return getOpenChannels().stream()
                 .filter(c -> peer.equals(c.getRemotePubkey()))
+                .collect(Collectors.toSet());
+    }
+
+    public Set<LocalChannel> getAllChannelsWith(Pubkey pubkey) {
+        Stream<LocalOpenChannel> openChannels = getOpenChannelsWith(pubkey).stream();
+        Stream<ClosedChannel> closedChannels = getClosedChannels().stream()
+                .filter(c -> c.getRemotePubkey().equals(pubkey));
+        return Stream.concat(openChannels, closedChannels)
                 .collect(Collectors.toSet());
     }
 }
