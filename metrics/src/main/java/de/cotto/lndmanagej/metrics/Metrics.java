@@ -7,15 +7,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 @Component
 public class Metrics {
     private final MetricRegistry registry = new MetricRegistry();
     private final Slf4jReporter reporter;
-    private final Map<String, Meter> meters = new LinkedHashMap<>();
+    private final Map<String, Meter> meters = new ConcurrentHashMap<>();
 
     public Metrics() {
         reporter = Slf4jReporter.forRegistry(registry)
