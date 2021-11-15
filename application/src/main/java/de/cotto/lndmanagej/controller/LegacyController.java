@@ -4,7 +4,7 @@ import com.codahale.metrics.MetricRegistry;
 import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
-import de.cotto.lndmanagej.model.LocalChannel;
+import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
@@ -83,14 +83,22 @@ public class LegacyController {
     public String getOpenChannelIdsPretty() {
         mark("getOpenChannelIdsPretty");
         return channelService.getOpenChannels().stream()
-                .sorted(Comparator.comparing(LocalChannel::getId))
-                .map(localChannel -> {
-                    Pubkey pubkey = localChannel.getRemotePubkey();
-                    return localChannel.getId().getCompactForm() +
+                .sorted(Comparator.comparing(LocalOpenChannel::getId))
+                .map(localOpenChannel -> {
+                    Pubkey pubkey = localOpenChannel.getRemotePubkey();
+                    return localOpenChannel.getId().getCompactForm() +
                             "\t" + pubkey +
-                            "\t" + localChannel.getCapacity() +
+                            "\t" + localOpenChannel.getCapacity() +
                             "\t" + nodeService.getAlias(pubkey);
                 })
+                .collect(Collectors.joining(NEWLINE));
+    }
+
+    @GetMapping("/closed-channels")
+    public String getClosedChannelIds() {
+        mark("getClosedChannelIds");
+        return getClosedChannelIdsSorted()
+                .map(ChannelId::toString)
                 .collect(Collectors.joining(NEWLINE));
     }
 
@@ -98,7 +106,7 @@ public class LegacyController {
     public String getPeerPubkeys() {
         mark("getPeerPubkeys");
         return channelService.getOpenChannels().stream()
-                .map(LocalChannel::getRemotePubkey)
+                .map(LocalOpenChannel::getRemotePubkey)
                 .map(Pubkey::toString)
                 .sorted()
                 .distinct()
@@ -161,6 +169,12 @@ public class LegacyController {
 
     private Stream<ChannelId> getOpenChannelIdsSorted() {
         return channelService.getOpenChannels().stream()
+                .map(Channel::getId)
+                .sorted();
+    }
+
+    private Stream<ChannelId> getClosedChannelIdsSorted() {
+        return channelService.getClosedChannels().stream()
                 .map(Channel::getId)
                 .sorted();
     }

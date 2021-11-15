@@ -19,9 +19,11 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_COMPACT;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_COMPACT_3;
-import static de.cotto.lndmanagej.model.LocalChannelFixtures.LOCAL_CHANNEL;
-import static de.cotto.lndmanagej.model.LocalChannelFixtures.LOCAL_CHANNEL_3;
-import static de.cotto.lndmanagej.model.LocalChannelFixtures.LOCAL_CHANNEL_TO_NODE_3;
+import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL;
+import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL_3;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_3;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_TO_NODE_3;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
@@ -73,30 +75,37 @@ class LegacyControllerIT {
 
     @Test
     void getOpenChannelIds_for_peer() throws Exception {
-        when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_CHANNEL, LOCAL_CHANNEL_3));
+        when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_3));
         mockMvc.perform(get(PUBKEY_BASE + "/open-channels"))
                 .andExpect(content().string(CHANNEL_ID + "\n" + CHANNEL_ID_3));
     }
 
     @Test
     void getOpenChannelIds() throws Exception {
-        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_CHANNEL, LOCAL_CHANNEL_3));
+        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_3));
         mockMvc.perform(get("/legacy/open-channels"))
                 .andExpect(content().string(CHANNEL_ID + "\n" + CHANNEL_ID_3));
     }
 
     @Test
     void getOpenChannelIdsCompact() throws Exception {
-        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_CHANNEL, LOCAL_CHANNEL_3));
+        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_3));
         mockMvc.perform(get("/legacy/open-channels/compact"))
                 .andExpect(content().string(CHANNEL_ID_COMPACT + "\n" + CHANNEL_ID_COMPACT_3));
     }
 
     @Test
     void getOpenChannelIdsPretty() throws Exception {
-        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_CHANNEL, LOCAL_CHANNEL_3));
+        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_3));
         mockMvc.perform(get("/legacy/open-channels/pretty"))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void getClosedChannelIds() throws Exception {
+        when(channelService.getClosedChannels()).thenReturn(Set.of(CLOSED_CHANNEL, CLOSED_CHANNEL_3));
+        mockMvc.perform(get("/legacy/closed-channels"))
+                .andExpect(content().string(CHANNEL_ID + "\n" + CHANNEL_ID_3));
     }
 
     @Test
@@ -113,7 +122,7 @@ class LegacyControllerIT {
 
     @Test
     void getPeerPubkeys() throws Exception {
-        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_CHANNEL, LOCAL_CHANNEL_TO_NODE_3));
+        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_TO_NODE_3));
         mockMvc.perform(get("/legacy/peer-pubkeys"))
                 .andExpect(content().string(PUBKEY_2 + "\n" + PUBKEY_3));
     }

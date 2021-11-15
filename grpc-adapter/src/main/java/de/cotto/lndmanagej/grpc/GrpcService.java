@@ -9,7 +9,9 @@ import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
 import lnrpc.ChanInfoRequest;
 import lnrpc.Channel;
+import lnrpc.ChannelCloseSummary;
 import lnrpc.ChannelEdge;
+import lnrpc.ClosedChannelsRequest;
 import lnrpc.GetInfoResponse;
 import lnrpc.LightningGrpc;
 import lnrpc.ListChannelsRequest;
@@ -61,6 +63,12 @@ public class GrpcService extends GrpcBase {
 
     public List<Channel> getChannels() {
         return channelsCache.getUnchecked("");
+    }
+
+    public List<ChannelCloseSummary> getClosedChannels() {
+        mark("closedChannels");
+        return get(() -> lightningStub.closedChannels(ClosedChannelsRequest.getDefaultInstance()).getChannelsList())
+                .orElse(List.of());
     }
 
     private List<Channel> getChannelsWithoutCache() {

@@ -4,7 +4,7 @@ import de.cotto.lndmanagej.grpc.GrpcChannels;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
-import de.cotto.lndmanagej.model.LocalChannel;
+import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.Pubkey;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +22,7 @@ public class BalanceService {
 
     public Coins getAvailableLocalBalance(Pubkey peer) {
         return channelService.getOpenChannelsWith(peer).stream()
-                .map(LocalChannel::getId)
+                .map(LocalOpenChannel::getId)
                 .map(this::getAvailableLocalBalance)
                 .reduce(Coins.NONE, Coins::add);
     }
@@ -35,7 +35,7 @@ public class BalanceService {
 
     public Coins getAvailableRemoteBalance(Pubkey peer) {
         return channelService.getOpenChannelsWith(peer).stream()
-                .map(LocalChannel::getId)
+                .map(LocalOpenChannel::getId)
                 .map(this::getAvailableRemoteBalance)
                 .reduce(Coins.NONE, Coins::add);
     }
@@ -48,6 +48,6 @@ public class BalanceService {
 
     private Optional<BalanceInformation> getBalanceInformation(ChannelId channelId) {
         return grpcChannels.getChannel(channelId)
-                .map(LocalChannel::getBalanceInformation);
+                .map(LocalOpenChannel::getBalanceInformation);
     }
 }

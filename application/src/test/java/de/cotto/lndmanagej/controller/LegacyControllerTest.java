@@ -4,7 +4,7 @@ import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelFixtures;
 import de.cotto.lndmanagej.model.Coins;
-import de.cotto.lndmanagej.model.LocalChannel;
+import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
@@ -27,10 +27,12 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_COMPACT;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_COMPACT_3;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_COMPACT_4;
-import static de.cotto.lndmanagej.model.LocalChannelFixtures.LOCAL_CHANNEL;
-import static de.cotto.lndmanagej.model.LocalChannelFixtures.LOCAL_CHANNEL_2;
-import static de.cotto.lndmanagej.model.LocalChannelFixtures.LOCAL_CHANNEL_3;
-import static de.cotto.lndmanagej.model.LocalChannelFixtures.LOCAL_CHANNEL_TO_NODE_3;
+import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL;
+import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL_3;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_3;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_TO_NODE_3;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_3;
@@ -74,7 +76,7 @@ class LegacyControllerTest {
 
     @Test
     void getOpenChannelIds_for_peer() {
-        when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_CHANNEL, LOCAL_CHANNEL_3));
+        when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_3));
         assertThat(legacyController.getOpenChannelIdsForPubkey(PUBKEY)).isEqualTo(
                 CHANNEL_ID + "\n" + CHANNEL_ID_3
         );
@@ -83,7 +85,7 @@ class LegacyControllerTest {
 
     @Test
     void getOpenChannelIds_for_peer_ordered() {
-        when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_CHANNEL_3, LOCAL_CHANNEL));
+        when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL_3, LOCAL_OPEN_CHANNEL));
         assertThat(legacyController.getOpenChannelIdsForPubkey(PUBKEY)).isEqualTo(
                 CHANNEL_ID + "\n" + CHANNEL_ID_3
         );
@@ -91,7 +93,7 @@ class LegacyControllerTest {
 
     @Test
     void getOpenChannelIds() {
-        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_CHANNEL, LOCAL_CHANNEL_3));
+        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_3));
         assertThat(legacyController.getOpenChannelIds()).isEqualTo(
                 CHANNEL_ID + "\n" + CHANNEL_ID_3
         );
@@ -100,7 +102,7 @@ class LegacyControllerTest {
 
     @Test
     void getOpenChannelIds_ordered() {
-        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_CHANNEL_3, LOCAL_CHANNEL));
+        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL_3, LOCAL_OPEN_CHANNEL));
         assertThat(legacyController.getOpenChannelIds()).isEqualTo(
                 CHANNEL_ID + "\n" + CHANNEL_ID_3
         );
@@ -108,7 +110,7 @@ class LegacyControllerTest {
 
     @Test
     void getOpenChannelIdsCompact() {
-        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_CHANNEL, LOCAL_CHANNEL_3));
+        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_3));
         assertThat(legacyController.getOpenChannelIdsCompact()).isEqualTo(
                 CHANNEL_ID_COMPACT + "\n" + CHANNEL_ID_COMPACT_3
         );
@@ -119,7 +121,7 @@ class LegacyControllerTest {
     void getOpenChannelIdsPretty() {
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(nodeService.getAlias(PUBKEY_3)).thenReturn(ALIAS_3);
-        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_CHANNEL, LOCAL_CHANNEL_TO_NODE_3));
+        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_TO_NODE_3));
         assertThat(legacyController.getOpenChannelIdsPretty()).isEqualTo(
                 CHANNEL_ID_COMPACT + "\t" + PUBKEY_2 + "\t" + CAPACITY + "\t" + ALIAS_2 + "\n" +
                         CHANNEL_ID_COMPACT_4 + "\t" + PUBKEY_3 + "\t" + CAPACITY_2 + "\t" + ALIAS_3
@@ -128,10 +130,27 @@ class LegacyControllerTest {
     }
 
     @Test
-    void getOpenChannelIdsPretty_sorted() {
-        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_CHANNEL_TO_NODE_3, LOCAL_CHANNEL));
+    void getOpenChannelIdsPretty_ordered() {
+        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL_TO_NODE_3, LOCAL_OPEN_CHANNEL));
         assertThat(legacyController.getOpenChannelIdsPretty())
                 .matches(CHANNEL_ID_COMPACT + ".*\n" + CHANNEL_ID_COMPACT_4 + ".*");
+    }
+
+    @Test
+    void getClosedChannelIds() {
+        when(channelService.getClosedChannels()).thenReturn(Set.of(CLOSED_CHANNEL, CLOSED_CHANNEL_3));
+        assertThat(legacyController.getClosedChannelIds()).isEqualTo(
+                CHANNEL_ID + "\n" + CHANNEL_ID_3
+        );
+        verify(metrics).mark(argThat(name -> name.endsWith(".getClosedChannelIds")));
+    }
+
+    @Test
+    void getClosedChannelIds_ordered() {
+        when(channelService.getClosedChannels()).thenReturn(Set.of(CLOSED_CHANNEL_3, CLOSED_CHANNEL));
+        assertThat(legacyController.getClosedChannelIds()).isEqualTo(
+                CHANNEL_ID + "\n" + CHANNEL_ID_3
+        );
     }
 
     @Test
@@ -150,8 +169,8 @@ class LegacyControllerTest {
     @Test
     void getPeerPubkeys() {
         Channel channel = ChannelFixtures.create(PUBKEY, PUBKEY_3, CHANNEL_ID_2);
-        LocalChannel channel2 = new LocalChannel(channel, PUBKEY, BALANCE_INFORMATION);
-        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_CHANNEL, channel2));
+        LocalOpenChannel channel2 = new LocalOpenChannel(channel, PUBKEY, BALANCE_INFORMATION);
+        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, channel2));
         assertThat(legacyController.getPeerPubkeys()).isEqualTo(PUBKEY_2 + "\n" + PUBKEY_3);
         verify(metrics).mark(argThat(name -> name.endsWith(".getPeerPubkeys")));
     }
@@ -159,14 +178,14 @@ class LegacyControllerTest {
     @Test
     void getPeerPubkeys_sorted() {
         Channel channel = ChannelFixtures.create(PUBKEY, PUBKEY_3, CHANNEL_ID_2);
-        LocalChannel channel2 = new LocalChannel(channel, PUBKEY, BALANCE_INFORMATION);
-        when(channelService.getOpenChannels()).thenReturn(Set.of(channel2, LOCAL_CHANNEL));
+        LocalOpenChannel channel2 = new LocalOpenChannel(channel, PUBKEY, BALANCE_INFORMATION);
+        when(channelService.getOpenChannels()).thenReturn(Set.of(channel2, LOCAL_OPEN_CHANNEL));
         assertThat(legacyController.getPeerPubkeys()).isEqualTo(PUBKEY_2 + "\n" + PUBKEY_3);
     }
 
     @Test
     void getPeerPubkeys_without_duplicates() {
-        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_CHANNEL, LOCAL_CHANNEL_2));
+        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2));
         assertThat(legacyController.getPeerPubkeys()).isEqualTo(PUBKEY_2.toString());
     }
 

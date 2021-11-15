@@ -13,8 +13,8 @@ import java.util.Set;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
-import static de.cotto.lndmanagej.model.LocalChannelFixtures.LOCAL_CHANNEL;
-import static de.cotto.lndmanagej.model.LocalChannelFixtures.LOCAL_CHANNEL_2;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -32,7 +32,7 @@ class BalanceServiceTest {
 
     @Test
     void getAvailableLocalBalance_channel() {
-        when(grpcChannels.getChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_CHANNEL));
+        when(grpcChannels.getChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         assertThat(balanceService.getAvailableLocalBalance(CHANNEL_ID)).isEqualTo(Coins.ofSatoshis(900));
     }
 
@@ -43,7 +43,7 @@ class BalanceServiceTest {
 
     @Test
     void getAvailableRemoteBalance_channel() {
-        when(grpcChannels.getChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_CHANNEL));
+        when(grpcChannels.getChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         assertThat(balanceService.getAvailableRemoteBalance(CHANNEL_ID)).isEqualTo(Coins.ofSatoshis(113));
     }
 
@@ -75,8 +75,8 @@ class BalanceServiceTest {
     }
 
     private void mockChannels() {
-        when(grpcChannels.getChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_CHANNEL));
-        when(grpcChannels.getChannel(CHANNEL_ID_2)).thenReturn(Optional.of(LOCAL_CHANNEL_2));
-        when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_CHANNEL, LOCAL_CHANNEL_2));
+        when(grpcChannels.getChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+        when(grpcChannels.getChannel(CHANNEL_ID_2)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_2));
+        when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2));
     }
 }
