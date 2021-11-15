@@ -8,8 +8,10 @@ dependencies {
     implementation project(':model')
     implementation project(':caching')
     implementation project(':metrics')
+    implementation project(':transactions')
     runtimeOnly 'org.postgresql:postgresql'
     testImplementation testFixtures(project(':model'))
+    testImplementation testFixtures(project(':transactions'))
 }
 
 bootJar {

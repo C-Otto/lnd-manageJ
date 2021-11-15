@@ -4,7 +4,7 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
-import static de.cotto.lndmanagej.model.ChannelPointFixtures.INDEX;
+import static de.cotto.lndmanagej.model.ChannelPointFixtures.OUTPUT;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.TRANSACTION_HASH;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,12 +16,12 @@ class ChannelPointTest {
 
     @Test
     void getIndex() {
-        assertThat(CHANNEL_POINT.getIndex()).isEqualTo(INDEX);
+        assertThat(CHANNEL_POINT.getOutput()).isEqualTo(OUTPUT);
     }
 
     @Test
     void getIndex_more_than_one_digit() {
-        assertThat(ChannelPoint.create(TRANSACTION_HASH + ":123").getIndex()).isEqualTo(123);
+        assertThat(ChannelPoint.create(TRANSACTION_HASH + ":123").getOutput()).isEqualTo(123);
     }
 
     @Test

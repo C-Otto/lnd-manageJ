@@ -9,6 +9,7 @@ import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.UnresolvedClosedChannel;
 import lnrpc.ChannelCloseSummary;
+import lnrpc.ChannelCloseSummary.ClosureType;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -39,6 +40,7 @@ public class GrpcChannels {
     public Set<UnresolvedClosedChannel> getUnresolvedClosedChannels() {
         Pubkey ownPubkey = grpcGetInfo.getPubkey();
         return grpcService.getClosedChannels().stream()
+                .filter(this::shouldConsider)
                 .map(channelCloseSummary -> toUnresolvedClosedChannel(channelCloseSummary, ownPubkey))
                 .collect(toSet());
     }
@@ -89,5 +91,10 @@ public class GrpcChannels {
             return ChannelId.UNRESOLVED;
         }
         return ChannelId.fromShortChannelId(chanId);
+    }
+
+    private boolean shouldConsider(ChannelCloseSummary channelCloseSummary) {
+        ClosureType closeType = channelCloseSummary.getCloseType();
+        return closeType != ClosureType.ABANDONED && closeType != ClosureType.FUNDING_CANCELED;
     }
 }

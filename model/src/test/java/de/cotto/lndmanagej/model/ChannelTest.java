@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CHANNEL;
+import static de.cotto.lndmanagej.model.ChannelFixtures.CHANNEL_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
@@ -127,6 +129,11 @@ class ChannelTest {
     }
 
     @Test
+    void getWithId() {
+        assertThat(CHANNEL.getWithId(CHANNEL_ID_2)).isEqualTo(CHANNEL_2);
+    }
+
+    @Test
     void testEquals() {
         EqualsVerifier.forClass(Channel.class).usingGetClass().verify();
     }
@@ -141,17 +148,5 @@ class ChannelTest {
                 .withNode2(PUBKEY)
                 .build();
         assertThat(CHANNEL).isEqualTo(channel);
-    }
-
-    @Test
-    void testToString() {
-        assertThat(CHANNEL).hasToString(
-                "Channel[" +
-                        "channelId=" + CHANNEL_ID +
-                        ", capacity=" + CAPACITY +
-                        ", channelPoint=" + CHANNEL_POINT +
-                        ", pubkeys=[" + PUBKEY + ", " + PUBKEY_2 + "]" +
-                        "]"
-        );
     }
 }

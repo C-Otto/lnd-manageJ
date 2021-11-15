@@ -31,6 +31,10 @@ public class Channel {
         return new Builder();
     }
 
+    public Channel getWithId(ChannelId channelId) {
+        return new Channel(channelId, getCapacity(), getChannelPoint(), getPubkeys());
+    }
+
     public Coins getCapacity() {
         return capacity;
     }
@@ -120,15 +124,5 @@ public class Channel {
     @Override
     public int hashCode() {
         return Objects.hash(channelId, capacity, channelPoint, pubkeys);
-    }
-
-    @Override
-    public String toString() {
-        return "Channel[" +
-                "channelId=" + channelId +
-                ", capacity=" + capacity +
-                ", channelPoint=" + channelPoint +
-                ", pubkeys=" + pubkeys +
-                ']';
     }
 }

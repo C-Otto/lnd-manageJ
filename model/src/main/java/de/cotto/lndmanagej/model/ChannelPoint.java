@@ -9,11 +9,11 @@ public final class ChannelPoint {
     private static final Splitter SPLITTER = Splitter.on(":");
 
     private final String transactionHash;
-    private final int index;
+    private final int output;
 
-    private ChannelPoint(String transactionHash, Integer index) {
+    private ChannelPoint(String transactionHash, Integer output) {
         this.transactionHash = transactionHash;
-        this.index = index;
+        this.output = output;
     }
 
     public static ChannelPoint create(String channelPoint) {
@@ -25,8 +25,8 @@ public final class ChannelPoint {
         return transactionHash;
     }
 
-    public int getIndex() {
-        return index;
+    public int getOutput() {
+        return output;
     }
 
     @Override
@@ -38,16 +38,16 @@ public final class ChannelPoint {
             return false;
         }
         ChannelPoint that = (ChannelPoint) other;
-        return index == that.index && Objects.equals(transactionHash, that.transactionHash);
+        return output == that.output && Objects.equals(transactionHash, that.transactionHash);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(transactionHash, index);
+        return Objects.hash(transactionHash, output);
     }
 
     @Override
     public String toString() {
-        return transactionHash + ':' + index;
+        return transactionHash + ':' + output;
     }
 }

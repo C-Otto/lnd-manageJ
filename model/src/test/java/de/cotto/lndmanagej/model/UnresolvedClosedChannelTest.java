@@ -7,6 +7,8 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
+import static de.cotto.lndmanagej.model.UnresolvedClosedChannelFixtures.CLOSED_CHANNEL_UNRESOLVED_ID;
+import static de.cotto.lndmanagej.model.UnresolvedClosedChannelFixtures.UNRESOLVED_CLOSED_CHANNEL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
@@ -32,5 +34,10 @@ class UnresolvedClosedChannelTest {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> new UnresolvedClosedChannel(CHANNEL_2, PUBKEY_3))
                 .withMessage("Channel must have given pubkey as peer");
+    }
+
+    @Test
+    void getWithId() {
+        assertThat(CLOSED_CHANNEL_UNRESOLVED_ID.getWithId(CHANNEL_ID)).isEqualTo(UNRESOLVED_CLOSED_CHANNEL);
     }
 }

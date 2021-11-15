@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.model;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
@@ -56,5 +57,10 @@ class LocalOpenChannelTest {
     @Test
     void getRemoteReserve() {
         assertThat(LOCAL_OPEN_CHANNEL.getBalanceInformation().remoteReserve()).isEqualTo(REMOTE_RESERVE);
+    }
+
+    @Test
+    void testEquals() {
+        EqualsVerifier.forClass(LocalOpenChannel.class).usingGetClass().verify();
     }
 }
