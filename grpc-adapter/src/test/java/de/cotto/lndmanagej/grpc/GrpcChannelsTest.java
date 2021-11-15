@@ -59,9 +59,17 @@ class GrpcChannelsTest {
     @Test
     void getClosedChannels() {
         when(grpcService.getClosedChannels()).thenReturn(
-                List.of(closedChannel(CHANNEL_ID), closedChannel(CHANNEL_ID_2))
+                List.of(closedChannel(CHANNEL_ID.shortChannelId()), closedChannel(CHANNEL_ID_2.shortChannelId()))
         );
         assertThat(grpcChannels.getClosedChannels()).containsExactlyInAnyOrder(CLOSED_CHANNEL, CLOSED_CHANNEL_2);
+    }
+
+    @Test
+    void getClosedChannels_with_zero_channel_id() {
+        when(grpcService.getClosedChannels()).thenReturn(
+                List.of(closedChannel(CHANNEL_ID.shortChannelId()), closedChannel(0))
+        );
+        assertThat(grpcChannels.getClosedChannels()).containsExactlyInAnyOrder(CLOSED_CHANNEL);
     }
 
     @Test
@@ -83,9 +91,9 @@ class GrpcChannelsTest {
                 .build();
     }
 
-    private ChannelCloseSummary closedChannel(ChannelId channelId) {
+    private ChannelCloseSummary closedChannel(long channelId) {
         return ChannelCloseSummary.newBuilder()
-                .setChanId(channelId.shortChannelId())
+                .setChanId(channelId)
                 .setRemotePubkey(PUBKEY_2.toString())
                 .setCapacity(CAPACITY.satoshis())
                 .build();
