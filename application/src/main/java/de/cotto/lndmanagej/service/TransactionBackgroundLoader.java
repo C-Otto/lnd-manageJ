@@ -6,7 +6,7 @@ import de.cotto.lndmanagej.transactions.service.TransactionService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.TimeUnit;
+import static java.util.concurrent.TimeUnit.MINUTES;
 
 @Component
 public class TransactionBackgroundLoader {
@@ -18,7 +18,7 @@ public class TransactionBackgroundLoader {
         this.transactionService = transactionService;
     }
 
-    @Scheduled(fixedDelay = 5, timeUnit = TimeUnit.MINUTES)
+    @Scheduled(fixedDelay = 5, timeUnit = MINUTES)
     public void loadTransactionForOneChannel() {
         channelService.getOpenChannels().stream()
                 .map(Channel::getChannelPoint)
