@@ -35,6 +35,8 @@ import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHAN
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
+import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
+import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL_2;
 import static lnrpc.ChannelCloseSummary.ClosureType.ABANDONED;
 import static lnrpc.ChannelCloseSummary.ClosureType.FUNDING_CANCELED;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -106,6 +108,26 @@ class GrpcChannelsTest {
                 List.of(forceClosingChannel(CHANNEL_POINT), forceClosingChannel(CHANNEL_POINT_3))
         );
         assertThat(grpcChannels.getForceClosingChannels()).containsExactlyInAnyOrder(FORCE_CLOSING_CHANNEL);
+    }
+
+    @Test
+    void getWaitingCloseChannels_both_resolved() {
+        when(channelIdResolver.resolveFromChannelPoint(CHANNEL_POINT)).thenReturn(Optional.of(CHANNEL_ID));
+        when(channelIdResolver.resolveFromChannelPoint(CHANNEL_POINT_2)).thenReturn(Optional.of(CHANNEL_ID_2));
+        when(grpcService.getWaitingCloseChannels()).thenReturn(
+                List.of(waitingCloseChannel(CHANNEL_POINT), waitingCloseChannel(CHANNEL_POINT_2))
+        );
+        assertThat(grpcChannels.getWaitingCloseChannels())
+                .containsExactlyInAnyOrder(WAITING_CLOSE_CHANNEL, WAITING_CLOSE_CHANNEL_2);
+    }
+
+    @Test
+    void getWaitingCloseChannels_just_one_resolved() {
+        when(channelIdResolver.resolveFromChannelPoint(CHANNEL_POINT)).thenReturn(Optional.of(CHANNEL_ID));
+        when(grpcService.getWaitingCloseChannels()).thenReturn(
+                List.of(waitingCloseChannel(CHANNEL_POINT), waitingCloseChannel(CHANNEL_POINT_3))
+        );
+        assertThat(grpcChannels.getWaitingCloseChannels()).containsExactlyInAnyOrder(WAITING_CLOSE_CHANNEL);
     }
 
     @Test
@@ -185,11 +207,21 @@ class GrpcChannelsTest {
 
     private ForceClosedChannel forceClosingChannel(ChannelPoint channelPoint) {
         return ForceClosedChannel.newBuilder()
-                .setChannel(PendingChannelsResponse.PendingChannel.newBuilder()
-                        .setRemoteNodePub(PUBKEY_2.toString())
-                        .setCapacity(CAPACITY.satoshis())
-                        .setChannelPoint(channelPoint.toString())
-                        .build())
+                .setChannel(pendingChannel(channelPoint))
+                .build();
+    }
+
+    private PendingChannelsResponse.WaitingCloseChannel waitingCloseChannel(ChannelPoint channelPoint) {
+        return PendingChannelsResponse.WaitingCloseChannel.newBuilder()
+                .setChannel(pendingChannel(channelPoint))
+                .build();
+    }
+
+    private PendingChannelsResponse.PendingChannel pendingChannel(ChannelPoint channelPoint) {
+        return PendingChannelsResponse.PendingChannel.newBuilder()
+                .setRemoteNodePub(PUBKEY_2.toString())
+                .setCapacity(CAPACITY.satoshis())
+                .setChannelPoint(channelPoint.toString())
                 .build();
     }
 

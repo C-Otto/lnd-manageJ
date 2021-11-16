@@ -9,8 +9,10 @@ import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.ForceClosingChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.model.WaitingCloseChannel;
 import lnrpc.ChannelCloseSummary;
 import lnrpc.ChannelCloseSummary.ClosureType;
+import lnrpc.PendingChannelsResponse;
 import lnrpc.PendingChannelsResponse.ForceClosedChannel;
 import lnrpc.PendingChannelsResponse.PendingChannel;
 import org.springframework.stereotype.Component;
@@ -60,16 +62,44 @@ public class GrpcChannels {
                 .collect(toSet());
     }
 
+    public Set<WaitingCloseChannel> getWaitingCloseChannels() {
+        Pubkey ownPubkey = grpcGetInfo.getPubkey();
+        return grpcService.getWaitingCloseChannels().stream()
+                .map(waitingCloseChannel -> toWaitingCloseChannel(waitingCloseChannel, ownPubkey))
+                .flatMap(Optional::stream)
+                .collect(toSet());
+    }
+
+    private Optional<WaitingCloseChannel> toWaitingCloseChannel(
+            PendingChannelsResponse.WaitingCloseChannel waitingCloseChannel,
+            Pubkey ownPubkey
+    ) {
+        PendingChannel pendingChannel = waitingCloseChannel.getChannel();
+        ChannelPoint channelPoint = ChannelPoint.create(pendingChannel.getChannelPoint());
+        return channelIdResolver.resolveFromChannelPoint(channelPoint)
+                .map(id -> new WaitingCloseChannel(
+                        id,
+                        channelPoint,
+                        Coins.ofSatoshis(pendingChannel.getCapacity()),
+                        ownPubkey,
+                        Pubkey.create(pendingChannel.getRemoteNodePub())
+                ));
+    }
+
     private Optional<ForceClosingChannel> toForceClosingChannel(
             ForceClosedChannel forceClosedChannel,
             Pubkey ownPubkey
     ) {
         PendingChannel pendingChannel = forceClosedChannel.getChannel();
         ChannelPoint channelPoint = ChannelPoint.create(pendingChannel.getChannelPoint());
-        Coins capacity = Coins.ofSatoshis(pendingChannel.getCapacity());
-        Pubkey remotePubkey = Pubkey.create(pendingChannel.getRemoteNodePub());
         return channelIdResolver.resolveFromChannelPoint(channelPoint)
-                .map(id -> new ForceClosingChannel(id, channelPoint, capacity, ownPubkey, remotePubkey));
+                .map(id -> new ForceClosingChannel(
+                        id,
+                        channelPoint,
+                        Coins.ofSatoshis(pendingChannel.getCapacity()),
+                        ownPubkey,
+                        Pubkey.create(pendingChannel.getRemoteNodePub())
+                ));
     }
 
     public Optional<LocalOpenChannel> getChannel(ChannelId channelId) {

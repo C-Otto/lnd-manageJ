@@ -18,6 +18,7 @@ import lnrpc.ListChannelsRequest;
 import lnrpc.NodeInfo;
 import lnrpc.NodeInfoRequest;
 import lnrpc.PendingChannelsRequest;
+import lnrpc.PendingChannelsResponse;
 import lnrpc.PendingChannelsResponse.ForceClosedChannel;
 import org.springframework.stereotype.Component;
 
@@ -30,11 +31,14 @@ import java.util.Optional;
 public class GrpcService extends GrpcBase {
     private static final int CACHE_EXPIRY_MILLISECONDS = 200;
 
+    private final Metrics metrics;
     private final LightningGrpc.LightningBlockingStub lightningStub;
     private final LoadingCache<Object, List<Channel>> channelsCache = new CacheBuilder()
             .withExpiryMilliseconds(CACHE_EXPIRY_MILLISECONDS)
             .build(this::getChannelsWithoutCache);
-    private final Metrics metrics;
+    private final LoadingCache<Object, Optional<PendingChannelsResponse>> pendingChannelsCache = new CacheBuilder()
+            .withExpiryMilliseconds(CACHE_EXPIRY_MILLISECONDS)
+            .build(this::getPendingChannelsWithoutCache);
 
     public GrpcService(LndConfiguration lndConfiguration, Metrics metrics) throws IOException {
         super(lndConfiguration);
@@ -67,6 +71,10 @@ public class GrpcService extends GrpcBase {
         return channelsCache.getUnchecked("");
     }
 
+    private Optional<PendingChannelsResponse> getPendingChannels() {
+        return pendingChannelsCache.getUnchecked("");
+    }
+
     public List<ChannelCloseSummary> getClosedChannels() {
         mark("closedChannels");
         return get(() -> lightningStub.closedChannels(ClosedChannelsRequest.getDefaultInstance()).getChannelsList())
@@ -74,11 +82,20 @@ public class GrpcService extends GrpcBase {
     }
 
     public List<ForceClosedChannel> getForceClosingChannels() {
-        mark("closedChannels");
-        return get(() ->
-                lightningStub.pendingChannels(PendingChannelsRequest.getDefaultInstance())
-                        .getPendingForceClosingChannelsList()
-        ).orElse(List.of());
+        return getPendingChannels()
+                .map(PendingChannelsResponse::getPendingForceClosingChannelsList)
+                .orElse(List.of());
+    }
+
+    public List<PendingChannelsResponse.WaitingCloseChannel> getWaitingCloseChannels() {
+        return getPendingChannels()
+                .map(PendingChannelsResponse::getWaitingCloseChannelsList)
+                .orElse(List.of());
+    }
+
+    private Optional<PendingChannelsResponse> getPendingChannelsWithoutCache() {
+        mark("pendingChannels");
+        return get(() -> lightningStub.pendingChannels(PendingChannelsRequest.getDefaultInstance()));
     }
 
     private List<Channel> getChannelsWithoutCache() {

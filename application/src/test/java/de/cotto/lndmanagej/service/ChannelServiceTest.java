@@ -21,6 +21,9 @@ import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHAN
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_3;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_TO_NODE_3;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
+import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
+import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL_2;
+import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL_TO_NODE_3;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -72,13 +75,28 @@ class ChannelServiceTest {
     }
 
     @Test
+    void getWaitingCloseChannels() {
+        when(grpcChannels.getWaitingCloseChannels())
+                .thenReturn(Set.of(WAITING_CLOSE_CHANNEL, WAITING_CLOSE_CHANNEL_2));
+        assertThat(channelService.getWaitingCloseChannels())
+                .containsExactlyInAnyOrder(WAITING_CLOSE_CHANNEL, WAITING_CLOSE_CHANNEL_2);
+    }
+
+    @Test
     void getAllChannels_by_pubkey() {
+        when(grpcChannels.getWaitingCloseChannels())
+                .thenReturn(Set.of(WAITING_CLOSE_CHANNEL, WAITING_CLOSE_CHANNEL_TO_NODE_3));
         when(grpcChannels.getChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_TO_NODE_3));
         when(grpcChannels.getForceClosingChannels())
                 .thenReturn(Set.of(FORCE_CLOSING_CHANNEL, FORCE_CLOSING_CHANNEL_TO_NODE_3));
         when(grpcChannels.getClosedChannels())
                 .thenReturn(Set.of(CLOSED_CHANNEL_3, CLOSED_CHANNEL_TO_NODE_3));
-        assertThat(channelService.getAllChannelsWith(PUBKEY_2))
-                .containsExactlyInAnyOrder(LOCAL_OPEN_CHANNEL, CLOSED_CHANNEL_3, FORCE_CLOSING_CHANNEL);
+
+        assertThat(channelService.getAllChannelsWith(PUBKEY_2)).containsExactlyInAnyOrder(
+                LOCAL_OPEN_CHANNEL,
+                CLOSED_CHANNEL_3,
+                FORCE_CLOSING_CHANNEL,
+                WAITING_CLOSE_CHANNEL
+        );
     }
 }
