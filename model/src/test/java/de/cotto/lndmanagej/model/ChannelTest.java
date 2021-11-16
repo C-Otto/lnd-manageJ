@@ -4,108 +4,22 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
-import static de.cotto.lndmanagej.model.ChannelFixtures.CHANNEL;
-import static de.cotto.lndmanagej.model.ChannelFixtures.CHANNEL_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
-import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 class ChannelTest {
-    @Test
-    void builder_without_arguments() {
-        assertThatNullPointerException().isThrownBy(
-                () -> Channel.builder().build()
-        );
-    }
+
+    private static final Channel CHANNEL = new TestableChannel(CHANNEL_ID, CAPACITY, CHANNEL_POINT, PUBKEY_2, PUBKEY);
 
     @Test
-    void builder_without_channelId() {
-        assertThatNullPointerException().isThrownBy(
-                () -> Channel.builder()
-                        .withCapacity(CAPACITY)
-                        .withChannelPoint(CHANNEL_POINT)
-                        .withNode1(PUBKEY)
-                        .withNode2(PUBKEY_2)
-                        .build()
-        );
-    }
-
-    @Test
-    void builder_without_capacity() {
-        assertThatNullPointerException().isThrownBy(
-                () -> Channel.builder()
-                        .withChannelId(CHANNEL_ID)
-                        .withNode1(PUBKEY)
-                        .withChannelPoint(CHANNEL_POINT)
-                        .withNode2(PUBKEY_2)
-                        .build()
-        );
-    }
-
-    @Test
-    void builder_without_channel_point() {
-        assertThatNullPointerException().isThrownBy(
-                () -> Channel.builder()
-                        .withChannelId(CHANNEL_ID)
-                        .withNode1(PUBKEY)
-                        .withCapacity(CAPACITY)
-                        .withNode2(PUBKEY_2)
-                        .build()
-        );
-    }
-
-    @Test
-    void builder_without_node1() {
-        assertThatNullPointerException().isThrownBy(
-                () -> Channel.builder()
-                        .withChannelId(CHANNEL_ID)
-                        .withCapacity(CAPACITY)
-                        .withChannelPoint(CHANNEL_POINT)
-                        .withNode2(PUBKEY_2)
-                        .build()
-        );
-    }
-
-    @Test
-    void builder_without_node2() {
-        assertThatNullPointerException().isThrownBy(
-                () -> Channel.builder()
-                        .withChannelId(CHANNEL_ID)
-                        .withCapacity(CAPACITY)
-                        .withChannelPoint(CHANNEL_POINT)
-                        .withNode1(PUBKEY)
-                        .build()
-        );
-    }
-
-    @Test
-    void builder_identical_pubkeys() {
+    void identical_pubkeys() {
         assertThatIllegalArgumentException().isThrownBy(
-                () -> Channel.builder()
-                        .withChannelId(CHANNEL_ID)
-                        .withCapacity(CAPACITY)
-                        .withChannelPoint(CHANNEL_POINT)
-                        .withNode1(PUBKEY)
-                        .withNode2(PUBKEY)
-                        .build()
+                () -> new TestableChannel(CHANNEL_ID, CAPACITY, CHANNEL_POINT, PUBKEY, PUBKEY)
         ).withMessage("Pubkeys must not be the same");
-    }
-
-    @Test
-    void builder_with_all_arguments() {
-        Channel channel = Channel.builder()
-                .withChannelId(CHANNEL_ID)
-                .withCapacity(CAPACITY)
-                .withNode1(PUBKEY)
-                .withNode2(PUBKEY_2)
-                .withChannelPoint(CHANNEL_POINT)
-                .build();
-        assertThat(channel).isEqualTo(CHANNEL);
     }
 
     @Test
@@ -129,24 +43,25 @@ class ChannelTest {
     }
 
     @Test
-    void getWithId() {
-        assertThat(CHANNEL.getWithId(CHANNEL_ID_2)).isEqualTo(CHANNEL_2);
-    }
-
-    @Test
     void testEquals() {
         EqualsVerifier.forClass(Channel.class).usingGetClass().verify();
     }
 
     @Test
     void testEquals_reversed_nodes() {
-        Channel channel = Channel.builder()
-                .withChannelId(CHANNEL_ID)
-                .withCapacity(CAPACITY)
-                .withChannelPoint(CHANNEL_POINT)
-                .withNode1(PUBKEY_2)
-                .withNode2(PUBKEY)
-                .build();
-        assertThat(CHANNEL).isEqualTo(channel);
+        Channel channel2 = new TestableChannel(CHANNEL_ID, CAPACITY, CHANNEL_POINT, PUBKEY, PUBKEY_2);
+        assertThat(CHANNEL).isEqualTo(channel2);
+    }
+
+    private static class TestableChannel extends Channel {
+        public TestableChannel(
+                ChannelId channelId,
+                Coins capacity,
+                ChannelPoint channelPoint,
+                Pubkey pubkey1,
+                Pubkey pubkey2
+        ) {
+            super(channelId, channelPoint, Coins.ofMilliSatoshis(capacity.milliSatoshis()), pubkey1, pubkey2);
+        }
     }
 }

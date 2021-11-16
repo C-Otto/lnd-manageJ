@@ -8,7 +8,6 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_COMPACT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 class ChannelIdTest {
 
@@ -131,56 +130,6 @@ class ChannelIdTest {
     @Test
     void getCompactForm() {
         assertThat(CHANNEL_ID.getCompactForm()).isEqualTo(CHANNEL_ID_COMPACT);
-    }
-
-    @Test
-    void isUnresolved_true() {
-        assertThat(ChannelId.UNRESOLVED.isUnresolved()).isTrue();
-    }
-
-    @Test
-    void isUnresolved_false() {
-        assertThat(CHANNEL_ID.isUnresolved()).isFalse();
-    }
-
-    @Test
-    void getCompactForm_unresolved() {
-        assertThatIllegalStateException()
-                .isThrownBy(ChannelId.UNRESOLVED::getCompactForm)
-                .withMessage("Channel ID must be resolved");
-    }
-
-    @Test
-    void shortChannelId_unresolved() {
-        assertThatIllegalStateException()
-                .isThrownBy(ChannelId.UNRESOLVED::getShortChannelId)
-                .withMessage("Channel ID must be resolved");
-    }
-
-    @Test
-    void compareTo_unresolved_to_other() {
-        assertThatIllegalStateException()
-                .isThrownBy(() -> ChannelId.UNRESOLVED.compareTo(CHANNEL_ID))
-                .withMessage("Cannot compare with unresolved channel ID");
-    }
-
-    @Test
-    void compareTo_other_to_unresolved() {
-        assertThatIllegalStateException()
-                .isThrownBy(() -> CHANNEL_ID.compareTo(ChannelId.UNRESOLVED))
-                .withMessage("Cannot compare with unresolved channel ID");
-    }
-
-    @Test
-    @SuppressWarnings("SelfComparison")
-    void compareTo_unresolved() {
-        //noinspection EqualsWithItself
-        assertThat(ChannelId.UNRESOLVED.compareTo(ChannelId.UNRESOLVED)).isEqualTo(0);
-    }
-
-    @Test
-    void toString_unresolved() {
-        assertThat(ChannelId.UNRESOLVED).hasToString("UNRESOLVED_CHANNEL_ID");
     }
 
     @Test

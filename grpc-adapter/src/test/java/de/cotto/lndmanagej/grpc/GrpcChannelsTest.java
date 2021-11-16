@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.grpc;
 
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.ChannelIdResolver;
 import lnrpc.Channel;
 import lnrpc.ChannelCloseSummary;
 import lnrpc.ChannelConstraints;
@@ -12,22 +13,27 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
+import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL;
+import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL_2;
+import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL_3;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
-import static de.cotto.lndmanagej.model.UnresolvedClosedChannelFixtures.CLOSED_CHANNEL_UNRESOLVED_ID;
-import static de.cotto.lndmanagej.model.UnresolvedClosedChannelFixtures.UNRESOLVED_CLOSED_CHANNEL;
-import static de.cotto.lndmanagej.model.UnresolvedClosedChannelFixtures.UNRESOLVED_CLOSED_CHANNEL_2;
 import static lnrpc.ChannelCloseSummary.ClosureType.ABANDONED;
 import static lnrpc.ChannelCloseSummary.ClosureType.FUNDING_CANCELED;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,6 +46,9 @@ class GrpcChannelsTest {
 
     @Mock
     private GrpcGetInfo grpcGetInfo;
+
+    @Mock
+    private ChannelIdResolver channelIdResolver;
 
     @BeforeEach
     void setUp() {
@@ -58,48 +67,54 @@ class GrpcChannelsTest {
     }
 
     @Test
-    void getUnresolvedClosedChannels_empty() {
-        assertThat(grpcChannels.getUnresolvedClosedChannels()).isEmpty();
+    void getClosedChannels_empty() {
+        assertThat(grpcChannels.getClosedChannels()).isEmpty();
     }
 
     @Test
-    void getUnresolvedClosedChannels() {
+    void getClosedChannels() {
         when(grpcService.getClosedChannels()).thenReturn(
                 List.of(closedChannel(CHANNEL_ID.getShortChannelId()), closedChannel(CHANNEL_ID_2.getShortChannelId()))
         );
-        assertThat(grpcChannels.getUnresolvedClosedChannels())
-                .containsExactlyInAnyOrder(UNRESOLVED_CLOSED_CHANNEL, UNRESOLVED_CLOSED_CHANNEL_2);
+        assertThat(grpcChannels.getClosedChannels())
+                .containsExactlyInAnyOrder(CLOSED_CHANNEL, CLOSED_CHANNEL_2);
+        verify(channelIdResolver, never()).resolveFromChannelPoint(any());
     }
 
     @Test
-    void getUnresolvedClosedChannels_with_zero_channel_id() {
+    void getClosedChannels_with_zero_channel_id_not_resolved() {
         when(grpcService.getClosedChannels()).thenReturn(
                 List.of(closedChannel(CHANNEL_ID.getShortChannelId()), closedChannel(0))
         );
-        assertThat(grpcChannels.getUnresolvedClosedChannels()).containsExactlyInAnyOrder(
-                UNRESOLVED_CLOSED_CHANNEL,
-                CLOSED_CHANNEL_UNRESOLVED_ID
-        );
+        assertThat(grpcChannels.getClosedChannels()).containsExactlyInAnyOrder(CLOSED_CHANNEL);
+        verify(channelIdResolver).resolveFromChannelPoint(CHANNEL_POINT);
     }
 
     @Test
-    void getUnresolvedClosedChannels_ignores_abandoned() {
+    void getClosedChannels_with_zero_channel_id_resolved() {
+        when(channelIdResolver.resolveFromChannelPoint(CHANNEL_POINT)).thenReturn(Optional.of(CHANNEL_ID_3));
+        when(grpcService.getClosedChannels()).thenReturn(
+                List.of(closedChannel(CHANNEL_ID.getShortChannelId()), closedChannel(0))
+        );
+        assertThat(grpcChannels.getClosedChannels()).containsExactlyInAnyOrder(CLOSED_CHANNEL, CLOSED_CHANNEL_3);
+    }
+
+    @Test
+    void getClosedChannels_ignores_abandoned() {
         when(grpcService.getClosedChannels()).thenReturn(
                 List.of(closedChannel(CHANNEL_ID.getShortChannelId()), closedChannelWithType(ABANDONED))
         );
-        assertThat(grpcChannels.getUnresolvedClosedChannels()).containsExactlyInAnyOrder(
-                UNRESOLVED_CLOSED_CHANNEL
-        );
+        assertThat(grpcChannels.getClosedChannels()).containsExactlyInAnyOrder(CLOSED_CHANNEL);
+        verify(channelIdResolver, never()).resolveFromChannelPoint(any());
     }
 
     @Test
-    void getUnresolvedClosedChannels_ignores_funding_canceled() {
+    void getClosedChannels_ignores_funding_canceled() {
         when(grpcService.getClosedChannels()).thenReturn(
                 List.of(closedChannel(CHANNEL_ID.getShortChannelId()), closedChannelWithType(FUNDING_CANCELED))
         );
-        assertThat(grpcChannels.getUnresolvedClosedChannels()).containsExactlyInAnyOrder(
-                UNRESOLVED_CLOSED_CHANNEL
-        );
+        assertThat(grpcChannels.getClosedChannels()).containsExactlyInAnyOrder(CLOSED_CHANNEL);
+        verify(channelIdResolver, never()).resolveFromChannelPoint(any());
     }
 
     @Test

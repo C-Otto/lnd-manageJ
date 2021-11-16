@@ -5,8 +5,15 @@ import java.util.Objects;
 public class LocalOpenChannel extends LocalChannel {
     private final BalanceInformation balanceInformation;
 
-    public LocalOpenChannel(Channel channel, Pubkey ownPubkey, BalanceInformation balanceInformation) {
-        super(channel, ownPubkey);
+    public LocalOpenChannel(
+            ChannelId channelId,
+            ChannelPoint channelPoint,
+            Coins capacity,
+            Pubkey ownPubkey,
+            Pubkey remotePubkey,
+            BalanceInformation balanceInformation
+    ) {
+        super(channelId, channelPoint, capacity, ownPubkey, remotePubkey);
         this.balanceInformation = balanceInformation;
     }
 
@@ -15,7 +22,6 @@ public class LocalOpenChannel extends LocalChannel {
     }
 
     @Override
-    @SuppressWarnings("CPD-START")
     public boolean equals(Object other) {
         if (this == other) {
             return true;

@@ -12,6 +12,7 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql'
     testImplementation testFixtures(project(':model'))
     testImplementation testFixtures(project(':transactions'))
+    testRuntimeOnly 'com.h2database:h2'
 }
 
 bootJar {

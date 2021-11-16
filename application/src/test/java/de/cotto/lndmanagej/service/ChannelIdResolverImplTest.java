@@ -20,9 +20,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ChannelIdResolverTest {
+class ChannelIdResolverImplTest {
     @InjectMocks
-    private ChannelIdResolver channelIdResolver;
+    private ChannelIdResolverImpl channelIdResolver;
 
     @Mock
     private TransactionService transactionService;
@@ -30,13 +30,13 @@ class ChannelIdResolverTest {
     @Test
     void unknown() {
         when(transactionService.getTransaction(TRANSACTION_HASH)).thenReturn(Optional.empty());
-        assertThat(channelIdResolver.resolve(CHANNEL_POINT)).isEmpty();
+        assertThat(channelIdResolver.resolveFromChannelPoint(CHANNEL_POINT)).isEmpty();
     }
 
     @Test
     void known() {
         ChannelId expectedChannelId = ChannelId.fromCompactForm(BLOCK_HEIGHT + ":" + POSITION_IN_BLOCK + ":" + OUTPUT);
         when(transactionService.getTransaction(TRANSACTION_HASH)).thenReturn(Optional.of(TRANSACTION));
-        assertThat(channelIdResolver.resolve(CHANNEL_POINT)).contains(expectedChannelId);
+        assertThat(channelIdResolver.resolveFromChannelPoint(CHANNEL_POINT)).contains(expectedChannelId);
     }
 }

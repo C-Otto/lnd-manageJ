@@ -1,10 +1,7 @@
 package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.metrics.Metrics;
-import de.cotto.lndmanagej.model.Channel;
-import de.cotto.lndmanagej.model.ChannelFixtures;
 import de.cotto.lndmanagej.model.Coins;
-import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
@@ -18,11 +15,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Set;
 
-import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
-import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_COMPACT;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_COMPACT_3;
@@ -185,18 +180,14 @@ class LegacyControllerTest {
 
     @Test
     void getPeerPubkeys() {
-        Channel channel = ChannelFixtures.create(PUBKEY, PUBKEY_3, CHANNEL_ID_2);
-        LocalOpenChannel channel2 = new LocalOpenChannel(channel, PUBKEY, BALANCE_INFORMATION);
-        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, channel2));
+        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_TO_NODE_3));
         assertThat(legacyController.getPeerPubkeys()).isEqualTo(PUBKEY_2 + "\n" + PUBKEY_3);
         verify(metrics).mark(argThat(name -> name.endsWith(".getPeerPubkeys")));
     }
 
     @Test
     void getPeerPubkeys_sorted() {
-        Channel channel = ChannelFixtures.create(PUBKEY, PUBKEY_3, CHANNEL_ID_2);
-        LocalOpenChannel channel2 = new LocalOpenChannel(channel, PUBKEY, BALANCE_INFORMATION);
-        when(channelService.getOpenChannels()).thenReturn(Set.of(channel2, LOCAL_OPEN_CHANNEL));
+        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL_TO_NODE_3, LOCAL_OPEN_CHANNEL));
         assertThat(legacyController.getPeerPubkeys()).isEqualTo(PUBKEY_2 + "\n" + PUBKEY_3);
     }
 

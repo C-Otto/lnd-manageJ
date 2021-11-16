@@ -9,40 +9,12 @@ import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
-import static de.cotto.lndmanagej.model.UnresolvedClosedChannelFixtures.CLOSED_CHANNEL_UNRESOLVED_ID;
-import static de.cotto.lndmanagej.model.UnresolvedClosedChannelFixtures.UNRESOLVED_CLOSED_CHANNEL;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 class ClosedChannelTest {
     @Test
-    void create_with_implicit_channel_id() {
-        assertThat(ClosedChannel.create(UNRESOLVED_CLOSED_CHANNEL)).isEqualTo(CLOSED_CHANNEL);
-    }
-
-    @Test
-    void create_with_unresolved_channel_id() {
-        assertThatIllegalArgumentException()
-                .isThrownBy(() -> ClosedChannel.create(CLOSED_CHANNEL_UNRESOLVED_ID))
-                .withMessage("Channel ID must be resolved");
-    }
-
-    @Test
-    void create_with_explicit_channel_id() {
-        assertThat(ClosedChannel.create(CLOSED_CHANNEL_UNRESOLVED_ID, CHANNEL_ID)).isEqualTo(CLOSED_CHANNEL);
-    }
-
-    @Test
-    void create_with_explicit_channel_id_retains_remote_pubkey() {
-        ClosedChannel closedChannel = ClosedChannel.create(CLOSED_CHANNEL_UNRESOLVED_ID, CHANNEL_ID);
-        assertThat(closedChannel.getRemotePubkey()).isEqualTo(CLOSED_CHANNEL_UNRESOLVED_ID.getRemotePubkey());
-    }
-
-    @Test
-    void create_with_explicit_unresolved_channel_id() {
-        assertThatIllegalArgumentException()
-                .isThrownBy(() -> ClosedChannel.create(CLOSED_CHANNEL_UNRESOLVED_ID, ChannelId.UNRESOLVED))
-                .withMessage("Channel ID must be resolved");
+    void create() {
+        assertThat(new ClosedChannel(CHANNEL_ID, CHANNEL_POINT, CAPACITY, PUBKEY, PUBKEY_2)).isEqualTo(CLOSED_CHANNEL);
     }
 
     @Test

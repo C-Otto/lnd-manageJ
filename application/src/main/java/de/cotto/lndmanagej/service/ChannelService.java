@@ -7,10 +7,8 @@ import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.Pubkey;
-import de.cotto.lndmanagej.model.UnresolvedClosedChannel;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,32 +20,15 @@ public class ChannelService {
     private final LoadingCache<Object, Set<LocalOpenChannel>> channelsCache;
     private final LoadingCache<Object, Set<ClosedChannel>> closedChannelsCache;
     private final GrpcChannels grpcChannels;
-    private final ChannelIdResolver channelIdResolver;
 
-    public ChannelService(GrpcChannels grpcChannels, ChannelIdResolver channelIdResolver) {
+    public ChannelService(GrpcChannels grpcChannels) {
         this.grpcChannels = grpcChannels;
-        this.channelIdResolver = channelIdResolver;
         channelsCache = new CacheBuilder()
                 .withExpiryMinutes(CACHE_EXPIRY_MINUTES)
                 .build(this.grpcChannels::getChannels);
         closedChannelsCache = new CacheBuilder()
                 .withExpiryMinutes(CACHE_EXPIRY_MINUTES)
                 .build(this::getClosedChannelsWithoutCache);
-    }
-
-    private Set<ClosedChannel> getClosedChannelsWithoutCache() {
-        return grpcChannels.getUnresolvedClosedChannels().stream()
-                .map(this::toClosedChannel)
-                .flatMap(Optional::stream)
-                .collect(Collectors.toSet());
-    }
-
-    private Optional<ClosedChannel> toClosedChannel(UnresolvedClosedChannel unresolvedClosedChannel) {
-        if (unresolvedClosedChannel.getId().isUnresolved()) {
-            return channelIdResolver.resolve(unresolvedClosedChannel.getChannelPoint())
-                    .map(channelId -> ClosedChannel.create(unresolvedClosedChannel, channelId));
-        }
-        return Optional.of(ClosedChannel.create(unresolvedClosedChannel));
     }
 
     public Set<LocalOpenChannel> getOpenChannels() {
@@ -68,7 +49,11 @@ public class ChannelService {
         Stream<LocalOpenChannel> openChannels = getOpenChannelsWith(pubkey).stream();
         Stream<ClosedChannel> closedChannels = getClosedChannels().stream()
                 .filter(c -> c.getRemotePubkey().equals(pubkey));
-        return Stream.concat(openChannels, closedChannels)
+        return Stream.of(openChannels, closedChannels).flatMap(s -> s)
                 .collect(Collectors.toSet());
+    }
+
+    private Set<ClosedChannel> getClosedChannelsWithoutCache() {
+        return grpcChannels.getClosedChannels();
     }
 }

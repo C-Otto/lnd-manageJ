@@ -1,21 +1,19 @@
 package de.cotto.lndmanagej.model;
 
 import java.util.Objects;
-import java.util.Set;
 
 public class LocalChannel extends Channel {
     private final Pubkey remotePubkey;
 
-    protected LocalChannel(Channel channel, Pubkey ownPubkey) {
-        super(channel.getId(), channel.getCapacity(), channel.getChannelPoint(), channel.getPubkeys());
-        Set<Pubkey> pubkeys = channel.getPubkeys();
-        remotePubkey = pubkeys.stream()
-                .filter(pubkey -> !ownPubkey.equals(pubkey))
-                .findFirst()
-                .orElseThrow();
-        if (!pubkeys.contains(ownPubkey)) {
-            throw new IllegalArgumentException("Channel must have given pubkey as peer");
-        }
+    protected LocalChannel(
+            ChannelId channelId,
+            ChannelPoint channelPoint,
+            Coins capacity,
+            Pubkey ownPubkey,
+            Pubkey remotePubkey
+    ) {
+        super(channelId, channelPoint, capacity, ownPubkey, remotePubkey);
+        this.remotePubkey = remotePubkey;
     }
 
     public Pubkey getRemotePubkey() {
@@ -23,6 +21,7 @@ public class LocalChannel extends Channel {
     }
 
     @Override
+    @SuppressWarnings("CPD-START")
     public boolean equals(Object other) {
         if (this == other) {
             return true;
