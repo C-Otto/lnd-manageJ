@@ -20,16 +20,18 @@ public class ChannelService {
 
     private final LoadingCache<Object, Set<LocalOpenChannel>> channelsCache;
     private final LoadingCache<Object, Set<ClosedChannel>> closedChannelsCache;
-    private final GrpcChannels grpcChannels;
+    private final LoadingCache<Object, Set<ForceClosingChannel>> forceClosingChannelsCache;
 
     public ChannelService(GrpcChannels grpcChannels) {
-        this.grpcChannels = grpcChannels;
         channelsCache = new CacheBuilder()
                 .withExpiryMinutes(CACHE_EXPIRY_MINUTES)
-                .build(this.grpcChannels::getChannels);
+                .build(grpcChannels::getChannels);
         closedChannelsCache = new CacheBuilder()
                 .withExpiryMinutes(CACHE_EXPIRY_MINUTES)
-                .build(this::getClosedChannelsWithoutCache);
+                .build(grpcChannels::getClosedChannels);
+        forceClosingChannelsCache = new CacheBuilder()
+                .withExpiryMinutes(CACHE_EXPIRY_MINUTES)
+                .build(grpcChannels::getForceClosingChannels);
     }
 
     public Set<LocalOpenChannel> getOpenChannels() {
@@ -41,7 +43,7 @@ public class ChannelService {
     }
 
     public Set<ForceClosingChannel> getForceClosingChannels() {
-        return grpcChannels.getForceClosingChannels();
+        return forceClosingChannelsCache.getUnchecked("");
     }
 
     public Set<LocalOpenChannel> getOpenChannelsWith(Pubkey peer) {
@@ -60,7 +62,4 @@ public class ChannelService {
                 .collect(Collectors.toSet());
     }
 
-    private Set<ClosedChannel> getClosedChannelsWithoutCache() {
-        return grpcChannels.getClosedChannels();
-    }
 }
