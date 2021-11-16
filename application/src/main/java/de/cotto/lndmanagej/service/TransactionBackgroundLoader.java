@@ -2,7 +2,7 @@ package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelPoint;
-import de.cotto.lndmanagej.model.ClosedChannel;
+import de.cotto.lndmanagej.model.ClosedOrClosingChannel;
 import de.cotto.lndmanagej.transactions.service.TransactionService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -51,7 +51,7 @@ public class TransactionBackgroundLoader {
     private Stream<String> getCloseTransactionHashes() {
         return Stream.of(channelService.getClosedChannels(), channelService.getForceClosingChannels())
                 .flatMap(Collection::stream)
-                .map(ClosedChannel::getCloseTransactionHash);
+                .map(ClosedOrClosingChannel::getCloseTransactionHash);
     }
 
 }

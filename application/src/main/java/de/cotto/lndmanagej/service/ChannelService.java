@@ -3,7 +3,7 @@ package de.cotto.lndmanagej.service;
 import com.google.common.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.grpc.GrpcChannels;
-import de.cotto.lndmanagej.model.CoopClosedChannel;
+import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.ForceClosingChannel;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
@@ -21,7 +21,7 @@ public class ChannelService {
     private static final int CACHE_EXPIRY_MINUTES = 1;
 
     private final LoadingCache<Object, Set<LocalOpenChannel>> channelsCache;
-    private final LoadingCache<Object, Set<CoopClosedChannel>> closedChannelsCache;
+    private final LoadingCache<Object, Set<ClosedChannel>> closedChannelsCache;
     private final LoadingCache<Object, Set<ForceClosingChannel>> forceClosingChannelsCache;
     private final LoadingCache<Object, Set<WaitingCloseChannel>> waitingCloseChannelsCache;
 
@@ -44,7 +44,7 @@ public class ChannelService {
         return channelsCache.getUnchecked("");
     }
 
-    public Set<CoopClosedChannel> getClosedChannels() {
+    public Set<ClosedChannel> getClosedChannels() {
         return closedChannelsCache.getUnchecked("");
     }
 
@@ -66,8 +66,8 @@ public class ChannelService {
         Set<LocalOpenChannel> openChannels = getOpenChannelsWith(pubkey);
         Set<WaitingCloseChannel> waitingCloseChannels = getWaitingCloseChannels();
         Set<ForceClosingChannel> forceClosingChannels = getForceClosingChannels();
-        Set<CoopClosedChannel> coopClosedChannels = getClosedChannels();
-        return Stream.of(openChannels, coopClosedChannels, waitingCloseChannels, forceClosingChannels)
+        Set<ClosedChannel> closedChannels = getClosedChannels();
+        return Stream.of(openChannels, closedChannels, waitingCloseChannels, forceClosingChannels)
                 .flatMap(Collection::stream)
                 .filter(c -> c.getRemotePubkey().equals(pubkey))
                 .collect(Collectors.toSet());

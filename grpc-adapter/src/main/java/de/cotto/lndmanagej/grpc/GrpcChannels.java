@@ -5,7 +5,7 @@ import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.ChannelPoint;
 import de.cotto.lndmanagej.model.Coins;
-import de.cotto.lndmanagej.model.CoopClosedChannel;
+import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.ForceClosingChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.Pubkey;
@@ -45,7 +45,7 @@ public class GrpcChannels {
                 .collect(toSet());
     }
 
-    public Set<CoopClosedChannel> getClosedChannels() {
+    public Set<ClosedChannel> getClosedChannels() {
         Pubkey ownPubkey = grpcGetInfo.getPubkey();
         return grpcService.getClosedChannels().stream()
                 .filter(this::hasSupportedCloseType)
@@ -126,7 +126,7 @@ public class GrpcChannels {
         return new LocalOpenChannel(channelId, channelPoint, capacity, ownPubkey, remotePubkey, balanceInformation);
     }
 
-    private Optional<CoopClosedChannel> toClosedChannel(
+    private Optional<ClosedChannel> toClosedChannel(
             ChannelCloseSummary channelCloseSummary,
             Pubkey ownPubkey
     ) {
@@ -135,7 +135,7 @@ public class GrpcChannels {
         Coins capacity = Coins.ofSatoshis(channelCloseSummary.getCapacity());
         return getChannelId(channelCloseSummary)
                 .or(() -> channelIdResolver.resolveFromChannelPoint(channelPoint))
-                .map(id -> new CoopClosedChannel(
+                .map(id -> new ClosedChannel(
                         id,
                         channelPoint,
                         capacity,

@@ -1,6 +1,6 @@
 package de.cotto.lndmanagej.model;
 
-public final class ForceClosingChannel extends ClosedChannel {
+public final class ForceClosingChannel extends ClosedOrClosingChannel {
     public ForceClosingChannel(
             ChannelId channelId,
             ChannelPoint channelPoint,
