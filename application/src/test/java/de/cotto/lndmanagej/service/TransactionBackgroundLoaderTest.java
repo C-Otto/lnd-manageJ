@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.service;
 
+import de.cotto.lndmanagej.model.ChannelPoint;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.transactions.service.TransactionService;
 import org.junit.jupiter.api.Test;
@@ -95,8 +96,9 @@ class TransactionBackgroundLoaderTest {
     @Test
     void update_from_force_closing_channels() {
         String transactionHash = FORCE_CLOSING_CHANNEL.getChannelPoint().getTransactionHash();
-        when(channelService.getForceClosingChannels()).thenReturn(Set.of(FORCE_CLOSING_CHANNEL));
         when(transactionService.isUnknown(transactionHash)).thenReturn(true);
+
+        when(channelService.getForceClosingChannels()).thenReturn(Set.of(FORCE_CLOSING_CHANNEL));
         transactionBackgroundLoader.loadTransactionForOneChannel();
         verify(transactionService).getTransaction(transactionHash);
     }
@@ -104,12 +106,31 @@ class TransactionBackgroundLoaderTest {
     @Test
     void update_from_force_closing_channels_close_transaction() {
         String closeTransactionHash = FORCE_CLOSING_CHANNEL.getCloseTransactionHash();
-        String openTransactionHash = FORCE_CLOSING_CHANNEL.getChannelPoint().getTransactionHash();
-        when(channelService.getForceClosingChannels()).thenReturn(Set.of(FORCE_CLOSING_CHANNEL));
-        when(transactionService.isUnknown(openTransactionHash)).thenReturn(false);
         when(transactionService.isUnknown(closeTransactionHash)).thenReturn(true);
+
+        String openTransactionHash = FORCE_CLOSING_CHANNEL.getChannelPoint().getTransactionHash();
+        when(transactionService.isUnknown(openTransactionHash)).thenReturn(false);
+
+        when(channelService.getForceClosingChannels()).thenReturn(Set.of(FORCE_CLOSING_CHANNEL));
         transactionBackgroundLoader.loadTransactionForOneChannel();
         verify(transactionService).getTransaction(closeTransactionHash);
+    }
+
+    @Test
+    void update_from_force_closing_channels_pending_htlc_output() {
+        String htlcOutpointHash = FORCE_CLOSING_CHANNEL.getHtlcOutpoints().stream()
+                .map(ChannelPoint::getTransactionHash)
+                .findFirst()
+                .orElseThrow();
+        when(transactionService.isUnknown(htlcOutpointHash)).thenReturn(true);
+
+        String openTransactionHash = FORCE_CLOSING_CHANNEL.getChannelPoint().getTransactionHash();
+        when(transactionService.isUnknown(openTransactionHash)).thenReturn(false);
+        when(transactionService.isUnknown(FORCE_CLOSING_CHANNEL.getCloseTransactionHash())).thenReturn(false);
+
+        when(channelService.getForceClosingChannels()).thenReturn(Set.of(FORCE_CLOSING_CHANNEL));
+        transactionBackgroundLoader.loadTransactionForOneChannel();
+        verify(transactionService).getTransaction(htlcOutpointHash);
     }
 
     @Test

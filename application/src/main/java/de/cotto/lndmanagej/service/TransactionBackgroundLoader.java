@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.service;
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelPoint;
 import de.cotto.lndmanagej.model.ClosedOrClosingChannel;
+import de.cotto.lndmanagej.model.ForceClosingChannel;
 import de.cotto.lndmanagej.transactions.service.TransactionService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -33,7 +34,9 @@ public class TransactionBackgroundLoader {
     private Stream<String> getTransactionHashes() {
         Stream<String> openTransactionHashes = getOpenTransactionHashes();
         Stream<String> closeTransactionHashes = getCloseTransactionHashes();
-        return Stream.concat(openTransactionHashes, closeTransactionHashes);
+        Stream<String> htlcOutpointHashes = getHtlcOutpointHashes();
+        return Stream.of(openTransactionHashes, closeTransactionHashes, htlcOutpointHashes)
+                .flatMap(s -> s);
     }
 
     private Stream<String> getOpenTransactionHashes() {
@@ -52,6 +55,13 @@ public class TransactionBackgroundLoader {
         return Stream.of(channelService.getClosedChannels(), channelService.getForceClosingChannels())
                 .flatMap(Collection::stream)
                 .map(ClosedOrClosingChannel::getCloseTransactionHash);
+    }
+
+    private Stream<String> getHtlcOutpointHashes() {
+        return channelService.getForceClosingChannels().stream()
+                .map(ForceClosingChannel::getHtlcOutpoints)
+                .flatMap(Collection::stream)
+                .map(ChannelPoint::getTransactionHash);
     }
 
 }

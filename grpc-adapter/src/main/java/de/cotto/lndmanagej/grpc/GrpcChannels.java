@@ -4,8 +4,8 @@ import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.ChannelPoint;
-import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.ClosedChannel;
+import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.ForceClosingChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.Pubkey;
@@ -15,6 +15,7 @@ import lnrpc.ChannelCloseSummary.ClosureType;
 import lnrpc.PendingChannelsResponse;
 import lnrpc.PendingChannelsResponse.ForceClosedChannel;
 import lnrpc.PendingChannelsResponse.PendingChannel;
+import lnrpc.PendingHTLC;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -99,8 +100,16 @@ public class GrpcChannels {
                         Coins.ofSatoshis(pendingChannel.getCapacity()),
                         ownPubkey,
                         Pubkey.create(pendingChannel.getRemoteNodePub()),
-                        forceClosedChannel.getClosingTxid()
+                        forceClosedChannel.getClosingTxid(),
+                        getHtlcOutpoints(forceClosedChannel)
                 ));
+    }
+
+    private Set<ChannelPoint> getHtlcOutpoints(ForceClosedChannel forceClosedChannel) {
+        return forceClosedChannel.getPendingHtlcsList().stream()
+                .map(PendingHTLC::getOutpoint)
+                .map(ChannelPoint::create)
+                .collect(toSet());
     }
 
     public Optional<LocalOpenChannel> getChannel(ChannelId channelId) {

@@ -8,6 +8,7 @@ import lnrpc.ChannelCloseSummary;
 import lnrpc.ChannelConstraints;
 import lnrpc.PendingChannelsResponse;
 import lnrpc.PendingChannelsResponse.ForceClosedChannel;
+import lnrpc.PendingHTLC;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +34,7 @@ import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL_2;
 import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL_3;
 import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL;
 import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL_2;
+import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.HTLC_OUTPOINT;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
@@ -212,6 +214,7 @@ class GrpcChannelsTest {
         return ForceClosedChannel.newBuilder()
                 .setChannel(pendingChannel(channelPoint))
                 .setClosingTxid(TRANSACTION_HASH_3)
+                .addPendingHtlcs(PendingHTLC.newBuilder().setOutpoint(HTLC_OUTPOINT.toString()).build())
                 .build();
     }
 
