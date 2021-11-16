@@ -112,6 +112,16 @@ public class LegacyController {
                 .collect(Collectors.joining(NEWLINE));
     }
 
+    @GetMapping("/force-closing-channels")
+    public String getForceClosingChannelIds() {
+        mark("getForceClosingChannelIds");
+        return channelService.getForceClosingChannels().stream()
+                .map(Channel::getId)
+                .sorted()
+                .map(ChannelId::toString)
+                .collect(Collectors.joining(NEWLINE));
+    }
+
     @GetMapping("/peer-pubkeys")
     public String getPeerPubkeys() {
         mark("getPeerPubkeys");

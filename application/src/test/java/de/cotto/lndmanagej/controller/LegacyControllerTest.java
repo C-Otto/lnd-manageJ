@@ -24,6 +24,8 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_COMPACT_3;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_COMPACT_4;
 import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL_3;
+import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL;
+import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL_3;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_3;
@@ -161,6 +163,25 @@ class LegacyControllerTest {
     void getClosedChannelIds_ordered() {
         when(channelService.getClosedChannels()).thenReturn(Set.of(CLOSED_CHANNEL_3, CLOSED_CHANNEL));
         assertThat(legacyController.getClosedChannelIds()).isEqualTo(
+                CHANNEL_ID + "\n" + CHANNEL_ID_3
+        );
+    }
+
+    @Test
+    void getForceClosingChannelIds() {
+        when(channelService.getForceClosingChannels())
+                .thenReturn(Set.of(FORCE_CLOSING_CHANNEL, FORCE_CLOSING_CHANNEL_3));
+        assertThat(legacyController.getForceClosingChannelIds()).isEqualTo(
+                CHANNEL_ID + "\n" + CHANNEL_ID_3
+        );
+        verify(metrics).mark(argThat(name -> name.endsWith(".getForceClosingChannelIds")));
+    }
+
+    @Test
+    void getForceClosingChannelIds_ordered() {
+        when(channelService.getForceClosingChannels())
+                .thenReturn(Set.of(FORCE_CLOSING_CHANNEL_3, FORCE_CLOSING_CHANNEL));
+        assertThat(legacyController.getForceClosingChannelIds()).isEqualTo(
                 CHANNEL_ID + "\n" + CHANNEL_ID_3
         );
     }

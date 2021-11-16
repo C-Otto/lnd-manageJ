@@ -2,9 +2,12 @@ package de.cotto.lndmanagej.grpc;
 
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
+import de.cotto.lndmanagej.model.ChannelPoint;
 import lnrpc.Channel;
 import lnrpc.ChannelCloseSummary;
 import lnrpc.ChannelConstraints;
+import lnrpc.PendingChannelsResponse;
+import lnrpc.PendingChannelsResponse.ForceClosedChannel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,9 +24,13 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
+import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT_2;
+import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT_3;
 import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL_2;
 import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL_3;
+import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL;
+import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
@@ -79,6 +86,26 @@ class GrpcChannelsTest {
         assertThat(grpcChannels.getClosedChannels())
                 .containsExactlyInAnyOrder(CLOSED_CHANNEL, CLOSED_CHANNEL_2);
         verify(channelIdResolver, never()).resolveFromChannelPoint(any());
+    }
+
+    @Test
+    void getForceClosingChannels_both_resolved() {
+        when(channelIdResolver.resolveFromChannelPoint(CHANNEL_POINT)).thenReturn(Optional.of(CHANNEL_ID));
+        when(channelIdResolver.resolveFromChannelPoint(CHANNEL_POINT_2)).thenReturn(Optional.of(CHANNEL_ID_2));
+        when(grpcService.getForceClosingChannels()).thenReturn(
+                List.of(forceClosingChannel(CHANNEL_POINT), forceClosingChannel(CHANNEL_POINT_2))
+        );
+        assertThat(grpcChannels.getForceClosingChannels())
+                .containsExactlyInAnyOrder(FORCE_CLOSING_CHANNEL, FORCE_CLOSING_CHANNEL_2);
+    }
+
+    @Test
+    void getForceClosingChannels_just_one_resolved() {
+        when(channelIdResolver.resolveFromChannelPoint(CHANNEL_POINT)).thenReturn(Optional.of(CHANNEL_ID));
+        when(grpcService.getForceClosingChannels()).thenReturn(
+                List.of(forceClosingChannel(CHANNEL_POINT), forceClosingChannel(CHANNEL_POINT_3))
+        );
+        assertThat(grpcChannels.getForceClosingChannels()).containsExactlyInAnyOrder(FORCE_CLOSING_CHANNEL);
     }
 
     @Test
@@ -153,6 +180,16 @@ class GrpcChannelsTest {
                 .setRemotePubkey(PUBKEY_2.toString())
                 .setCapacity(CAPACITY.satoshis())
                 .setChannelPoint(CHANNEL_POINT.toString())
+                .build();
+    }
+
+    private ForceClosedChannel forceClosingChannel(ChannelPoint channelPoint) {
+        return ForceClosedChannel.newBuilder()
+                .setChannel(PendingChannelsResponse.PendingChannel.newBuilder()
+                        .setRemoteNodePub(PUBKEY_2.toString())
+                        .setCapacity(CAPACITY.satoshis())
+                        .setChannelPoint(channelPoint.toString())
+                        .build())
                 .build();
     }
 

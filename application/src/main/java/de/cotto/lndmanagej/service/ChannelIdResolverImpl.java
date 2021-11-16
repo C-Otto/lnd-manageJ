@@ -5,6 +5,8 @@ import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.ChannelPoint;
 import de.cotto.lndmanagej.transactions.model.Transaction;
 import de.cotto.lndmanagej.transactions.service.TransactionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -12,6 +14,7 @@ import java.util.Optional;
 @Component
 public class ChannelIdResolverImpl implements ChannelIdResolver {
     private final TransactionService transactionService;
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     public ChannelIdResolverImpl(TransactionService transactionService) {
         this.transactionService = transactionService;
@@ -19,8 +22,12 @@ public class ChannelIdResolverImpl implements ChannelIdResolver {
 
     @Override
     public Optional<ChannelId> resolveFromChannelPoint(ChannelPoint channelPoint) {
-        return transactionService.getTransaction(channelPoint.getTransactionHash())
-                .map(transaction -> getChannelId(transaction, channelPoint));
+        String transactionHash = channelPoint.getTransactionHash();
+        Optional<Transaction> transactionOptional = transactionService.getTransaction(transactionHash);
+        if (transactionOptional.isEmpty()) {
+            logger.warn("Unable resolve transaction ID for {}", transactionHash);
+        }
+        return transactionOptional.map(transaction -> getChannelId(transaction, channelPoint));
     }
 
     private ChannelId getChannelId(Transaction transaction, ChannelPoint channelPoint) {

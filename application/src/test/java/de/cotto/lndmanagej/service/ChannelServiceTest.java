@@ -13,6 +13,9 @@ import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL_2;
 import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL_3;
 import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL_TO_NODE_3;
+import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL;
+import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL_2;
+import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL_TO_NODE_3;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_3;
@@ -61,11 +64,21 @@ class ChannelServiceTest {
     }
 
     @Test
+    void getForceClosingChannels() {
+        when(grpcChannels.getForceClosingChannels())
+                .thenReturn(Set.of(FORCE_CLOSING_CHANNEL, FORCE_CLOSING_CHANNEL_2));
+        assertThat(channelService.getForceClosingChannels())
+                .containsExactlyInAnyOrder(FORCE_CLOSING_CHANNEL, FORCE_CLOSING_CHANNEL_2);
+    }
+
+    @Test
     void getAllChannels_by_pubkey() {
         when(grpcChannels.getChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_TO_NODE_3));
+        when(grpcChannels.getForceClosingChannels())
+                .thenReturn(Set.of(FORCE_CLOSING_CHANNEL, FORCE_CLOSING_CHANNEL_TO_NODE_3));
         when(grpcChannels.getClosedChannels())
                 .thenReturn(Set.of(CLOSED_CHANNEL_3, CLOSED_CHANNEL_TO_NODE_3));
         assertThat(channelService.getAllChannelsWith(PUBKEY_2))
-                .containsExactlyInAnyOrder(LOCAL_OPEN_CHANNEL, CLOSED_CHANNEL_3);
+                .containsExactlyInAnyOrder(LOCAL_OPEN_CHANNEL, CLOSED_CHANNEL_3, FORCE_CLOSING_CHANNEL);
     }
 }

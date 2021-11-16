@@ -4,6 +4,7 @@ import com.google.common.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.grpc.GrpcChannels;
 import de.cotto.lndmanagej.model.ClosedChannel;
+import de.cotto.lndmanagej.model.ForceClosingChannel;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.Pubkey;
@@ -39,6 +40,10 @@ public class ChannelService {
         return closedChannelsCache.getUnchecked("");
     }
 
+    public Set<ForceClosingChannel> getForceClosingChannels() {
+        return grpcChannels.getForceClosingChannels();
+    }
+
     public Set<LocalOpenChannel> getOpenChannelsWith(Pubkey peer) {
         return getOpenChannels().stream()
                 .filter(c -> peer.equals(c.getRemotePubkey()))
@@ -47,9 +52,11 @@ public class ChannelService {
 
     public Set<LocalChannel> getAllChannelsWith(Pubkey pubkey) {
         Stream<LocalOpenChannel> openChannels = getOpenChannelsWith(pubkey).stream();
+        Stream<ForceClosingChannel> forceClosingChannels = getForceClosingChannels().stream()
+                .filter(c -> c.getRemotePubkey().equals(pubkey));
         Stream<ClosedChannel> closedChannels = getClosedChannels().stream()
                 .filter(c -> c.getRemotePubkey().equals(pubkey));
-        return Stream.of(openChannels, closedChannels).flatMap(s -> s)
+        return Stream.of(openChannels, closedChannels, forceClosingChannels).flatMap(s -> s)
                 .collect(Collectors.toSet());
     }
 

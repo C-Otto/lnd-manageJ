@@ -17,6 +17,8 @@ import lnrpc.LightningGrpc;
 import lnrpc.ListChannelsRequest;
 import lnrpc.NodeInfo;
 import lnrpc.NodeInfoRequest;
+import lnrpc.PendingChannelsRequest;
+import lnrpc.PendingChannelsResponse.ForceClosedChannel;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
@@ -69,6 +71,14 @@ public class GrpcService extends GrpcBase {
         mark("closedChannels");
         return get(() -> lightningStub.closedChannels(ClosedChannelsRequest.getDefaultInstance()).getChannelsList())
                 .orElse(List.of());
+    }
+
+    public List<ForceClosedChannel> getForceClosingChannels() {
+        mark("closedChannels");
+        return get(() ->
+                lightningStub.pendingChannels(PendingChannelsRequest.getDefaultInstance())
+                        .getPendingForceClosingChannelsList()
+        ).orElse(List.of());
     }
 
     private List<Channel> getChannelsWithoutCache() {
