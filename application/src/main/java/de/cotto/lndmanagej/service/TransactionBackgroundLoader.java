@@ -2,9 +2,13 @@ package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelPoint;
+import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.transactions.service.TransactionService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import java.util.Collection;
+import java.util.stream.Stream;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
 
@@ -20,11 +24,34 @@ public class TransactionBackgroundLoader {
 
     @Scheduled(fixedDelay = 5, timeUnit = MINUTES)
     public void loadTransactionForOneChannel() {
-        channelService.getOpenChannels().stream()
-                .map(Channel::getChannelPoint)
-                .map(ChannelPoint::getTransactionHash)
+        getTransactionHashes()
                 .filter(transactionService::isUnknown)
                 .findAny()
                 .ifPresent(transactionService::getTransaction);
     }
+
+    private Stream<String> getTransactionHashes() {
+        Stream<String> openTransactionHashes = getOpenTransactionHashes();
+        Stream<String> closeTransactionHashes = getCloseTransactionHashes();
+        return Stream.concat(openTransactionHashes, closeTransactionHashes);
+    }
+
+    private Stream<String> getOpenTransactionHashes() {
+        return Stream.of(
+                        channelService.getOpenChannels(),
+                        channelService.getClosedChannels(),
+                        channelService.getForceClosingChannels(),
+                        channelService.getWaitingCloseChannels()
+                )
+                .flatMap(Collection::stream)
+                .map(Channel::getChannelPoint)
+                .map(ChannelPoint::getTransactionHash);
+    }
+
+    private Stream<String> getCloseTransactionHashes() {
+        return Stream.of(channelService.getClosedChannels(), channelService.getForceClosingChannels())
+                .flatMap(Collection::stream)
+                .map(ClosedChannel::getCloseTransactionHash);
+    }
+
 }

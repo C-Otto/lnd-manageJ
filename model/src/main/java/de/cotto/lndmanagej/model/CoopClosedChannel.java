@@ -1,7 +1,7 @@
 package de.cotto.lndmanagej.model;
 
-public final class ForceClosingChannel extends ClosedChannel {
-    public ForceClosingChannel(
+public class CoopClosedChannel extends ClosedChannel {
+    public CoopClosedChannel(
             ChannelId channelId,
             ChannelPoint channelPoint,
             Coins capacity,

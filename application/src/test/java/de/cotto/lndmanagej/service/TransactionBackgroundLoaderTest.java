@@ -18,10 +18,13 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT_2;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT_3;
+import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
+import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
+import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -46,7 +49,7 @@ class TransactionBackgroundLoaderTest {
     }
 
     @Test
-    void update_all_known() {
+    void update_from_open_channels_all_known() {
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2));
         when(transactionService.isUnknown(any())).thenReturn(false);
         transactionBackgroundLoader.loadTransactionForOneChannel();
@@ -54,11 +57,59 @@ class TransactionBackgroundLoaderTest {
     }
 
     @Test
-    void update_all_unknown() {
+    void update_from_open_channels_all_unknown() {
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2));
         when(transactionService.isUnknown(any())).thenReturn(true);
         transactionBackgroundLoader.loadTransactionForOneChannel();
         verify(transactionService, times(1)).getTransaction(any());
+    }
+
+    @Test
+    void update_from_closed_channels() {
+        String transactionHash = CLOSED_CHANNEL.getChannelPoint().getTransactionHash();
+        when(channelService.getClosedChannels()).thenReturn(Set.of(CLOSED_CHANNEL));
+        when(transactionService.isUnknown(transactionHash)).thenReturn(true);
+        transactionBackgroundLoader.loadTransactionForOneChannel();
+        verify(transactionService).getTransaction(transactionHash);
+    }
+
+    @Test
+    void update_from_closed_channels_close_transaction() {
+        String closeTransactionHash = CLOSED_CHANNEL.getCloseTransactionHash();
+        when(channelService.getClosedChannels()).thenReturn(Set.of(CLOSED_CHANNEL));
+        when(transactionService.isUnknown(CLOSED_CHANNEL.getChannelPoint().getTransactionHash())).thenReturn(false);
+        when(transactionService.isUnknown(closeTransactionHash)).thenReturn(true);
+        transactionBackgroundLoader.loadTransactionForOneChannel();
+        verify(transactionService).getTransaction(closeTransactionHash);
+    }
+
+    @Test
+    void update_from_waiting_close_channels() {
+        String transactionHash = WAITING_CLOSE_CHANNEL.getChannelPoint().getTransactionHash();
+        when(channelService.getWaitingCloseChannels()).thenReturn(Set.of(WAITING_CLOSE_CHANNEL));
+        when(transactionService.isUnknown(transactionHash)).thenReturn(true);
+        transactionBackgroundLoader.loadTransactionForOneChannel();
+        verify(transactionService).getTransaction(transactionHash);
+    }
+
+    @Test
+    void update_from_force_closing_channels() {
+        String transactionHash = FORCE_CLOSING_CHANNEL.getChannelPoint().getTransactionHash();
+        when(channelService.getForceClosingChannels()).thenReturn(Set.of(FORCE_CLOSING_CHANNEL));
+        when(transactionService.isUnknown(transactionHash)).thenReturn(true);
+        transactionBackgroundLoader.loadTransactionForOneChannel();
+        verify(transactionService).getTransaction(transactionHash);
+    }
+
+    @Test
+    void update_from_force_closing_channels_close_transaction() {
+        String closeTransactionHash = FORCE_CLOSING_CHANNEL.getCloseTransactionHash();
+        String openTransactionHash = FORCE_CLOSING_CHANNEL.getChannelPoint().getTransactionHash();
+        when(channelService.getForceClosingChannels()).thenReturn(Set.of(FORCE_CLOSING_CHANNEL));
+        when(transactionService.isUnknown(openTransactionHash)).thenReturn(false);
+        when(transactionService.isUnknown(closeTransactionHash)).thenReturn(true);
+        transactionBackgroundLoader.loadTransactionForOneChannel();
+        verify(transactionService).getTransaction(closeTransactionHash);
     }
 
     @Test
@@ -71,10 +122,11 @@ class TransactionBackgroundLoaderTest {
                 new LocalOpenChannel(CHANNEL_ID_3, CHANNEL_POINT_3, CAPACITY, PUBKEY, PUBKEY_2, BALANCE_INFORMATION);
         when(channelService.getOpenChannels()).thenReturn(Set.of(channel1, channel2, channel3));
         String unknownHash = CHANNEL_POINT_3.getTransactionHash();
+        when(transactionService.isUnknown(any())).thenReturn(false);
         when(transactionService.isUnknown(unknownHash)).thenReturn(true);
 
         transactionBackgroundLoader.loadTransactionForOneChannel();
 
-        verify(transactionService, times(1)).getTransaction(unknownHash);
+        verify(transactionService).getTransaction(unknownHash);
     }
 }
