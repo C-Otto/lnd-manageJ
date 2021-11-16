@@ -57,4 +57,18 @@ class TransactionServiceTest {
         assertThat(transactionService.getTransaction(TRANSACTION_HASH)).isEmpty();
         verify(transactionDao, never()).saveTransaction(any());
     }
+
+    @Test
+    void isKnown_false() {
+        when(transactionDao.getTransaction(TRANSACTION_HASH)).thenReturn(Optional.empty());
+        assertThat(transactionService.isKnown(TRANSACTION_HASH)).isFalse();
+        assertThat(transactionService.isUnknown(TRANSACTION_HASH)).isTrue();
+    }
+
+    @Test
+    void isKnown_true() {
+        when(transactionDao.getTransaction(TRANSACTION_HASH)).thenReturn(Optional.of(TRANSACTION));
+        assertThat(transactionService.isKnown(TRANSACTION_HASH)).isTrue();
+        assertThat(transactionService.isUnknown(TRANSACTION_HASH)).isFalse();
+    }
 }

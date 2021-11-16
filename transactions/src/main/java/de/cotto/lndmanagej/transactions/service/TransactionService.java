@@ -28,6 +28,14 @@ public class TransactionService {
         return downloadAndPersist(transactionHash);
     }
 
+    public boolean isKnown(String transactionHash) {
+        return transactionDao.getTransaction(transactionHash).isPresent();
+    }
+
+    public boolean isUnknown(String transactionHash) {
+        return !isKnown(transactionHash);
+    }
+
     private Optional<Transaction> downloadAndPersist(String transactionHash) {
         Optional<Transaction> optionalTransaction = transactionProvider.get(transactionHash);
         optionalTransaction.ifPresent(transactionDao::saveTransaction);
