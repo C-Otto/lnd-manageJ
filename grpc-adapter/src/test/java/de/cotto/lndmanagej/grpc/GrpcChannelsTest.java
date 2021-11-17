@@ -29,9 +29,12 @@ import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT_2;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT_3;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.TRANSACTION_HASH_2;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.TRANSACTION_HASH_3;
-import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL;
-import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL_2;
-import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSED_CHANNEL_3;
+import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
+import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_2;
+import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_3;
+import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL_BREACH;
+import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL_LOCAL;
+import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL_REMOTE;
 import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL;
 import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL_2;
 import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.HTLC_OUTPOINT;
@@ -42,7 +45,11 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL_2;
 import static lnrpc.ChannelCloseSummary.ClosureType.ABANDONED;
+import static lnrpc.ChannelCloseSummary.ClosureType.BREACH_CLOSE;
+import static lnrpc.ChannelCloseSummary.ClosureType.COOPERATIVE_CLOSE;
 import static lnrpc.ChannelCloseSummary.ClosureType.FUNDING_CANCELED;
+import static lnrpc.ChannelCloseSummary.ClosureType.LOCAL_FORCE_CLOSE;
+import static lnrpc.ChannelCloseSummary.ClosureType.REMOTE_FORCE_CLOSE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -87,11 +94,38 @@ class GrpcChannelsTest {
     @Test
     void getClosedChannels() {
         when(grpcService.getClosedChannels()).thenReturn(
-                List.of(closedChannel(CHANNEL_ID.getShortChannelId()), closedChannel(CHANNEL_ID_2.getShortChannelId()))
+                List.of(
+                        closedChannel(CHANNEL_ID.getShortChannelId(), COOPERATIVE_CLOSE),
+                        closedChannel(CHANNEL_ID_2.getShortChannelId(), COOPERATIVE_CLOSE)
+                )
         );
         assertThat(grpcChannels.getClosedChannels())
                 .containsExactlyInAnyOrder(CLOSED_CHANNEL, CLOSED_CHANNEL_2);
         verify(channelIdResolver, never()).resolveFromChannelPoint(any());
+    }
+
+    @Test
+    void getClosedChannels_force_closed_local() {
+        when(grpcService.getClosedChannels())
+                .thenReturn(List.of(closedChannel(CHANNEL_ID.getShortChannelId(), LOCAL_FORCE_CLOSE)));
+        assertThat(grpcChannels.getClosedChannels())
+                .containsExactlyInAnyOrder(FORCE_CLOSED_CHANNEL_LOCAL);
+    }
+
+    @Test
+    void getClosedChannels_force_closed_remote() {
+        when(grpcService.getClosedChannels())
+                .thenReturn(List.of(closedChannel(CHANNEL_ID.getShortChannelId(), REMOTE_FORCE_CLOSE)));
+        assertThat(grpcChannels.getClosedChannels())
+                .containsExactlyInAnyOrder(FORCE_CLOSED_CHANNEL_REMOTE);
+    }
+
+    @Test
+    void getClosedChannels_force_closed_breach_detected() {
+        when(grpcService.getClosedChannels())
+                .thenReturn(List.of(closedChannel(CHANNEL_ID.getShortChannelId(), BREACH_CLOSE)));
+        assertThat(grpcChannels.getClosedChannels())
+                .containsExactlyInAnyOrder(FORCE_CLOSED_CHANNEL_BREACH);
     }
 
     @Test
@@ -136,9 +170,10 @@ class GrpcChannelsTest {
 
     @Test
     void getClosedChannels_with_zero_channel_id_not_resolved() {
-        when(grpcService.getClosedChannels()).thenReturn(
-                List.of(closedChannel(CHANNEL_ID.getShortChannelId()), closedChannel(0))
-        );
+        when(grpcService.getClosedChannels()).thenReturn(List.of(
+                closedChannel(CHANNEL_ID.getShortChannelId(), COOPERATIVE_CLOSE),
+                closedChannel(0, COOPERATIVE_CLOSE)
+        ));
         assertThat(grpcChannels.getClosedChannels()).containsExactlyInAnyOrder(CLOSED_CHANNEL);
         verify(channelIdResolver).resolveFromChannelPoint(CHANNEL_POINT);
     }
@@ -146,26 +181,29 @@ class GrpcChannelsTest {
     @Test
     void getClosedChannels_with_zero_channel_id_resolved() {
         when(channelIdResolver.resolveFromChannelPoint(CHANNEL_POINT)).thenReturn(Optional.of(CHANNEL_ID_3));
-        when(grpcService.getClosedChannels()).thenReturn(
-                List.of(closedChannel(CHANNEL_ID.getShortChannelId()), closedChannel(0))
-        );
+        when(grpcService.getClosedChannels()).thenReturn(List.of(
+                closedChannel(CHANNEL_ID.getShortChannelId(), COOPERATIVE_CLOSE),
+                closedChannel(0, COOPERATIVE_CLOSE)
+        ));
         assertThat(grpcChannels.getClosedChannels()).containsExactlyInAnyOrder(CLOSED_CHANNEL, CLOSED_CHANNEL_3);
     }
 
     @Test
     void getClosedChannels_ignores_abandoned() {
-        when(grpcService.getClosedChannels()).thenReturn(
-                List.of(closedChannel(CHANNEL_ID.getShortChannelId()), closedChannelWithType(ABANDONED))
-        );
+        when(grpcService.getClosedChannels()).thenReturn(List.of(
+                closedChannel(CHANNEL_ID.getShortChannelId(),
+                        COOPERATIVE_CLOSE), closedChannelWithType(ABANDONED)
+        ));
         assertThat(grpcChannels.getClosedChannels()).containsExactlyInAnyOrder(CLOSED_CHANNEL);
         verify(channelIdResolver, never()).resolveFromChannelPoint(any());
     }
 
     @Test
     void getClosedChannels_ignores_funding_canceled() {
-        when(grpcService.getClosedChannels()).thenReturn(
-                List.of(closedChannel(CHANNEL_ID.getShortChannelId()), closedChannelWithType(FUNDING_CANCELED))
-        );
+        when(grpcService.getClosedChannels()).thenReturn(List.of(
+                closedChannel(CHANNEL_ID.getShortChannelId(), COOPERATIVE_CLOSE),
+                closedChannelWithType(FUNDING_CANCELED)
+        ));
         assertThat(grpcChannels.getClosedChannels()).containsExactlyInAnyOrder(CLOSED_CHANNEL);
         verify(channelIdResolver, never()).resolveFromChannelPoint(any());
     }
@@ -200,13 +238,14 @@ class GrpcChannelsTest {
                 .build();
     }
 
-    private ChannelCloseSummary closedChannel(long channelId) {
+    private ChannelCloseSummary closedChannel(long channelId, ChannelCloseSummary.ClosureType closeType) {
         return ChannelCloseSummary.newBuilder()
                 .setChanId(channelId)
                 .setRemotePubkey(PUBKEY_2.toString())
                 .setCapacity(CAPACITY.satoshis())
                 .setChannelPoint(CHANNEL_POINT.toString())
                 .setClosingTxHash(TRANSACTION_HASH_2)
+                .setCloseType(closeType)
                 .build();
     }
 

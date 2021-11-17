@@ -4,8 +4,11 @@ import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.ChannelPoint;
+import de.cotto.lndmanagej.model.CloseType;
 import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.CoopClosedChannel;
+import de.cotto.lndmanagej.model.ForceClosedChannel;
 import de.cotto.lndmanagej.model.ForceClosingChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.Pubkey;
@@ -13,7 +16,6 @@ import de.cotto.lndmanagej.model.WaitingCloseChannel;
 import lnrpc.ChannelCloseSummary;
 import lnrpc.ChannelCloseSummary.ClosureType;
 import lnrpc.PendingChannelsResponse;
-import lnrpc.PendingChannelsResponse.ForceClosedChannel;
 import lnrpc.PendingChannelsResponse.PendingChannel;
 import lnrpc.PendingHTLC;
 import org.springframework.stereotype.Component;
@@ -88,7 +90,7 @@ public class GrpcChannels {
     }
 
     private Optional<ForceClosingChannel> toForceClosingChannel(
-            ForceClosedChannel forceClosedChannel,
+            PendingChannelsResponse.ForceClosedChannel forceClosedChannel,
             Pubkey ownPubkey
     ) {
         PendingChannel pendingChannel = forceClosedChannel.getChannel();
@@ -105,7 +107,7 @@ public class GrpcChannels {
                 ));
     }
 
-    private Set<ChannelPoint> getHtlcOutpoints(ForceClosedChannel forceClosedChannel) {
+    private Set<ChannelPoint> getHtlcOutpoints(PendingChannelsResponse.ForceClosedChannel forceClosedChannel) {
         return forceClosedChannel.getPendingHtlcsList().stream()
                 .map(PendingHTLC::getOutpoint)
                 .map(ChannelPoint::create)
@@ -142,16 +144,44 @@ public class GrpcChannels {
         ChannelPoint channelPoint = ChannelPoint.create(channelCloseSummary.getChannelPoint());
         Pubkey remotePubkey = Pubkey.create(channelCloseSummary.getRemotePubkey());
         Coins capacity = Coins.ofSatoshis(channelCloseSummary.getCapacity());
-        return getChannelId(channelCloseSummary)
-                .or(() -> channelIdResolver.resolveFromChannelPoint(channelPoint))
-                .map(id -> new ClosedChannel(
+        Optional<ChannelId> optionalChannelId = getChannelId(channelCloseSummary)
+                .or(() -> channelIdResolver.resolveFromChannelPoint(channelPoint));
+        ClosureType closureType = channelCloseSummary.getCloseType();
+        if (closureType.equals(ClosureType.COOPERATIVE_CLOSE)) {
+            return optionalChannelId
+                    .map(id -> new CoopClosedChannel(
+                            id,
+                            channelPoint,
+                            capacity,
+                            ownPubkey,
+                            remotePubkey,
+                            channelCloseSummary.getClosingTxHash()
+                    ));
+        }
+        return optionalChannelId
+                .map(id -> new ForceClosedChannel(
                         id,
                         channelPoint,
                         capacity,
                         ownPubkey,
                         remotePubkey,
-                        channelCloseSummary.getClosingTxHash()
+                        channelCloseSummary.getClosingTxHash(),
+                        getCloseType(closureType)
                 ));
+    }
+
+    private CloseType getCloseType(ClosureType closureType) {
+        CloseType closeType;
+        if (closureType.equals(ClosureType.REMOTE_FORCE_CLOSE)) {
+            closeType = CloseType.REMOTE;
+        } else if (closureType.equals(ClosureType.LOCAL_FORCE_CLOSE)) {
+            closeType = CloseType.LOCAL;
+        } else if  (closureType.equals(ClosureType.BREACH_CLOSE)) {
+            closeType = CloseType.BREACH;
+        } else {
+            throw new IllegalStateException("unexpected close type: " + closureType);
+        }
+        return closeType;
     }
 
     private Optional<ChannelId> getChannelId(ChannelCloseSummary channelCloseSummary) {
