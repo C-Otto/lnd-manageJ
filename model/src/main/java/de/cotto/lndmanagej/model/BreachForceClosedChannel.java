@@ -1,15 +1,14 @@
 package de.cotto.lndmanagej.model;
 
-public class CoopClosedChannel extends ClosedChannel {
-    public CoopClosedChannel(
+public class BreachForceClosedChannel extends ForceClosedChannel {
+    public BreachForceClosedChannel(
             ChannelId channelId,
             ChannelPoint channelPoint,
             Coins capacity,
             Pubkey ownPubkey,
             Pubkey remotePubkey,
             String closeTransactionHash,
-            OpenInitiator openInitiator,
-            CloseInitiator closeInitiator
+            OpenInitiator openInitiator
     ) {
         super(
                 channelId,
@@ -19,7 +18,7 @@ public class CoopClosedChannel extends ClosedChannel {
                 remotePubkey,
                 closeTransactionHash,
                 openInitiator,
-                closeInitiator
+                CloseInitiator.REMOTE
         );
     }
 }

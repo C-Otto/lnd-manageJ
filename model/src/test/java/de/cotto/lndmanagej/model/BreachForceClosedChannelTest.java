@@ -7,16 +7,15 @@ import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.TRANSACTION_HASH_2;
-import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
+import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL_BREACH;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class CoopClosedChannelTest {
+class BreachForceClosedChannelTest {
     @Test
     void create() {
-        // CPD-OFF
-        assertThat(new CoopClosedChannelBuilder()
+        assertThat(new BreachForceClosedChannelBuilder()
                 .withChannelId(CHANNEL_ID)
                 .withChannelPoint(CHANNEL_POINT)
                 .withCapacity(CAPACITY)
@@ -24,54 +23,52 @@ class CoopClosedChannelTest {
                 .withRemotePubkey(PUBKEY_2)
                 .withCloseTransactionHash(TRANSACTION_HASH_2)
                 .withOpenInitiator(OpenInitiator.LOCAL)
-                .withCloseInitiator(CloseInitiator.REMOTE)
                 .build()
-        ).isEqualTo(CLOSED_CHANNEL);
-        // CPD-ON
+        ).isEqualTo(FORCE_CLOSED_CHANNEL_BREACH);
     }
 
     @Test
     void getId() {
-        assertThat(CLOSED_CHANNEL.getId()).isEqualTo(CHANNEL_ID);
+        assertThat(FORCE_CLOSED_CHANNEL_BREACH.getId()).isEqualTo(CHANNEL_ID);
     }
 
     @Test
     void getRemotePubkey() {
-        assertThat(CLOSED_CHANNEL.getRemotePubkey()).isEqualTo(PUBKEY_2);
+        assertThat(FORCE_CLOSED_CHANNEL_BREACH.getRemotePubkey()).isEqualTo(PUBKEY_2);
     }
 
     @Test
     void getCapacity() {
-        assertThat(CLOSED_CHANNEL.getCapacity()).isEqualTo(CAPACITY);
+        assertThat(FORCE_CLOSED_CHANNEL_BREACH.getCapacity()).isEqualTo(CAPACITY);
     }
 
     @Test
     void getChannelPoint() {
-        assertThat(CLOSED_CHANNEL.getChannelPoint()).isEqualTo(CHANNEL_POINT);
+        assertThat(FORCE_CLOSED_CHANNEL_BREACH.getChannelPoint()).isEqualTo(CHANNEL_POINT);
     }
 
     @Test
     void getPubkeys() {
-        assertThat(CLOSED_CHANNEL.getPubkeys()).containsExactlyInAnyOrder(PUBKEY, PUBKEY_2);
+        assertThat(FORCE_CLOSED_CHANNEL_BREACH.getPubkeys()).containsExactlyInAnyOrder(PUBKEY, PUBKEY_2);
     }
 
     @Test
     void getCloseTransactionHash() {
-        assertThat(CLOSED_CHANNEL.getCloseTransactionHash()).isEqualTo(TRANSACTION_HASH_2);
+        assertThat(FORCE_CLOSED_CHANNEL_BREACH.getCloseTransactionHash()).isEqualTo(TRANSACTION_HASH_2);
     }
 
     @Test
     void getOpenInitiator() {
-        assertThat(CLOSED_CHANNEL.getOpenInitiator()).isEqualTo(OpenInitiator.LOCAL);
+        assertThat(FORCE_CLOSED_CHANNEL_BREACH.getOpenInitiator()).isEqualTo(OpenInitiator.LOCAL);
     }
 
     @Test
     void getCloseInitiator() {
-        assertThat(CLOSED_CHANNEL.getCloseInitiator()).isEqualTo(CloseInitiator.REMOTE);
+        assertThat(FORCE_CLOSED_CHANNEL_BREACH.getCloseInitiator()).isEqualTo(CloseInitiator.REMOTE);
     }
 
     @Test
     void testEquals() {
-        EqualsVerifier.forClass(CoopClosedChannel.class).usingGetClass().verify();
+        EqualsVerifier.forClass(BreachForceClosedChannel.class).usingGetClass().verify();
     }
 }

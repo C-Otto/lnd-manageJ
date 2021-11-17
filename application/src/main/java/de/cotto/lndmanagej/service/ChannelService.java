@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.service;
 import com.google.common.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.grpc.GrpcChannels;
+import de.cotto.lndmanagej.grpc.GrpcClosedChannels;
 import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.ForceClosingChannel;
 import de.cotto.lndmanagej.model.LocalChannel;
@@ -25,13 +26,13 @@ public class ChannelService {
     private final LoadingCache<Object, Set<ForceClosingChannel>> forceClosingChannelsCache;
     private final LoadingCache<Object, Set<WaitingCloseChannel>> waitingCloseChannelsCache;
 
-    public ChannelService(GrpcChannels grpcChannels) {
+    public ChannelService(GrpcChannels grpcChannels, GrpcClosedChannels grpcClosedChannels) {
         channelsCache = new CacheBuilder()
                 .withExpiryMinutes(CACHE_EXPIRY_MINUTES)
                 .build(grpcChannels::getChannels);
         closedChannelsCache = new CacheBuilder()
                 .withExpiryMinutes(CACHE_EXPIRY_MINUTES)
-                .build(grpcChannels::getClosedChannels);
+                .build(grpcClosedChannels::getClosedChannels);
         forceClosingChannelsCache = new CacheBuilder()
                 .withExpiryMinutes(CACHE_EXPIRY_MINUTES)
                 .build(grpcChannels::getForceClosingChannels);

@@ -11,9 +11,10 @@ public class LocalOpenChannel extends LocalChannel {
             Coins capacity,
             Pubkey ownPubkey,
             Pubkey remotePubkey,
-            BalanceInformation balanceInformation
+            BalanceInformation balanceInformation,
+            OpenInitiator openInitiator
     ) {
-        super(channelId, channelPoint, capacity, ownPubkey, remotePubkey);
+        super(channelId, channelPoint, capacity, ownPubkey, remotePubkey, openInitiator);
         this.balanceInformation = balanceInformation;
     }
 
@@ -22,6 +23,7 @@ public class LocalOpenChannel extends LocalChannel {
     }
 
     @Override
+    @SuppressWarnings("CPD-START")
     public boolean equals(Object other) {
         if (this == other) {
             return true;

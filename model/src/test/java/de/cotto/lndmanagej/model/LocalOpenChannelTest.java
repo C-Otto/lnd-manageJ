@@ -12,6 +12,7 @@ import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
+import static de.cotto.lndmanagej.model.OpenInitiator.LOCAL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,7 +26,7 @@ class LocalOpenChannelTest {
     @Test
     void getRemotePubkey_swapped() {
         LocalOpenChannel localOpenChannel =
-                new LocalOpenChannel(CHANNEL_ID, CHANNEL_POINT, CAPACITY, PUBKEY_2, PUBKEY, BALANCE_INFORMATION);
+                new LocalOpenChannel(CHANNEL_ID, CHANNEL_POINT, CAPACITY, PUBKEY_2, PUBKEY, BALANCE_INFORMATION, LOCAL);
         assertThat(localOpenChannel.getRemotePubkey()).isEqualTo(PUBKEY);
     }
 
@@ -47,6 +48,11 @@ class LocalOpenChannelTest {
     @Test
     void getRemoteReserve() {
         assertThat(LOCAL_OPEN_CHANNEL.getBalanceInformation().remoteReserve()).isEqualTo(REMOTE_RESERVE);
+    }
+
+    @Test
+    void getOpenInitiator() {
+        assertThat(LOCAL_OPEN_CHANNEL.getOpenInitiator()).isEqualTo(LOCAL);
     }
 
     @Test

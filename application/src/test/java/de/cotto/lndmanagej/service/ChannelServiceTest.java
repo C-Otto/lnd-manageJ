@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.grpc.GrpcChannels;
+import de.cotto.lndmanagej.grpc.GrpcClosedChannels;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,6 +36,9 @@ class ChannelServiceTest {
     @Mock
     private GrpcChannels grpcChannels;
 
+    @Mock
+    private GrpcClosedChannels grpcClosedChannels;
+
     @Test
     void getOpenChannelsWith_by_pubkey() {
         when(grpcChannels.getChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_3));
@@ -60,7 +64,7 @@ class ChannelServiceTest {
 
     @Test
     void getClosedChannels() {
-        when(grpcChannels.getClosedChannels())
+        when(grpcClosedChannels.getClosedChannels())
                 .thenReturn(Set.of(CLOSED_CHANNEL, CLOSED_CHANNEL_2));
         assertThat(channelService.getClosedChannels())
                 .containsExactlyInAnyOrder(CLOSED_CHANNEL, CLOSED_CHANNEL_2);
@@ -89,7 +93,7 @@ class ChannelServiceTest {
         when(grpcChannels.getChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_TO_NODE_3));
         when(grpcChannels.getForceClosingChannels())
                 .thenReturn(Set.of(FORCE_CLOSING_CHANNEL, FORCE_CLOSING_CHANNEL_TO_NODE_3));
-        when(grpcChannels.getClosedChannels())
+        when(grpcClosedChannels.getClosedChannels())
                 .thenReturn(Set.of(CLOSED_CHANNEL_3, CLOSED_CHANNEL_TO_NODE_3));
 
         assertThat(channelService.getAllChannelsWith(PUBKEY_2)).containsExactlyInAnyOrder(

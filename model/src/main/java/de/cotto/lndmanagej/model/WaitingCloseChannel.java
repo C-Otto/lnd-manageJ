@@ -6,8 +6,9 @@ public class WaitingCloseChannel extends LocalChannel {
             ChannelPoint channelPoint,
             Coins capacity,
             Pubkey ownPubkey,
-            Pubkey remotePubkey
+            Pubkey remotePubkey,
+            OpenInitiator openInitiator
     ) {
-        super(channelId, channelPoint, capacity, ownPubkey, remotePubkey);
+        super(channelId, channelPoint, capacity, ownPubkey, remotePubkey, openInitiator);
     }
 }

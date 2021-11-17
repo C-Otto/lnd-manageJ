@@ -23,6 +23,7 @@ import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL
 import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
+import static de.cotto.lndmanagej.model.OpenInitiator.LOCAL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
@@ -135,12 +136,33 @@ class TransactionBackgroundLoaderTest {
 
     @Test
     void update_one_unknown() {
-        LocalOpenChannel channel1 =
-                new LocalOpenChannel(CHANNEL_ID, CHANNEL_POINT, CAPACITY, PUBKEY, PUBKEY_2, BALANCE_INFORMATION);
-        LocalOpenChannel channel2 =
-                new LocalOpenChannel(CHANNEL_ID_2, CHANNEL_POINT_2, CAPACITY, PUBKEY, PUBKEY_2, BALANCE_INFORMATION);
-        LocalOpenChannel channel3 =
-                new LocalOpenChannel(CHANNEL_ID_3, CHANNEL_POINT_3, CAPACITY, PUBKEY, PUBKEY_2, BALANCE_INFORMATION);
+        LocalOpenChannel channel1 = new LocalOpenChannel(
+                CHANNEL_ID,
+                CHANNEL_POINT,
+                CAPACITY,
+                PUBKEY,
+                PUBKEY_2,
+                BALANCE_INFORMATION,
+                LOCAL
+        );
+        LocalOpenChannel channel2 = new LocalOpenChannel(
+                CHANNEL_ID_2,
+                CHANNEL_POINT_2,
+                CAPACITY,
+                PUBKEY,
+                PUBKEY_2,
+                BALANCE_INFORMATION,
+                LOCAL
+        );
+        LocalOpenChannel channel3 = new LocalOpenChannel(
+                CHANNEL_ID_3,
+                CHANNEL_POINT_3,
+                CAPACITY,
+                PUBKEY,
+                PUBKEY_2,
+                BALANCE_INFORMATION,
+                LOCAL
+        );
         when(channelService.getOpenChannels()).thenReturn(Set.of(channel1, channel2, channel3));
         String unknownHash = CHANNEL_POINT_3.getTransactionHash();
         when(transactionService.isUnknown(any())).thenReturn(false);

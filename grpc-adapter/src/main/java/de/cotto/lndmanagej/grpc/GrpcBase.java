@@ -15,7 +15,7 @@ public class GrpcBase {
     protected final StubCreator stubCreator;
 
     @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
-    public GrpcBase(LndConfiguration lndConfiguration) throws IOException {
+    protected GrpcBase(LndConfiguration lndConfiguration) throws IOException {
         stubCreator = getStubCreator(lndConfiguration);
     }
 
