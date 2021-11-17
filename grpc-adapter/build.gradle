@@ -23,6 +23,9 @@ jacocoTestCoverageVerification {
                 if (limit.counter == 'METHOD') {
                     limit.minimum = 0.78
                 }
+                if (limit.counter == 'BRANCH') {
+                    limit.minimum = 0.95
+                }
             }
         }
     }

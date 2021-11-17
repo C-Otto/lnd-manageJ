@@ -7,6 +7,8 @@ import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import lnrpc.ChanInfoRequest;
 import lnrpc.Channel;
 import lnrpc.ChannelCloseSummary;
@@ -58,7 +60,17 @@ public class GrpcService extends GrpcBase {
 
     public Optional<NodeInfo> getNodeInfo(Pubkey pubkey) {
         mark("getNodeInfo");
-        return get(() -> lightningStub.getNodeInfo(NodeInfoRequest.newBuilder().setPubKey(pubkey.toString()).build()));
+        return get(() -> {
+            try {
+                return lightningStub.getNodeInfo(NodeInfoRequest.newBuilder().setPubKey(pubkey.toString()).build());
+            } catch (StatusRuntimeException exception) {
+                if (Status.NOT_FOUND.equals(exception.getStatus())) {
+                    // ignore
+                    return null;
+                }
+                throw exception;
+            }
+        });
     }
 
     public Optional<ChannelEdge> getChannelEdge(ChannelId channelId) {
