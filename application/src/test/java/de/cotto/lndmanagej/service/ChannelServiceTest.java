@@ -10,10 +10,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Set;
 
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_2;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_3;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_TO_NODE_3;
+import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL;
+import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL_2;
 import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL;
 import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL_2;
 import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL_TO_NODE_3;
@@ -102,5 +105,40 @@ class ChannelServiceTest {
                 FORCE_CLOSING_CHANNEL,
                 WAITING_CLOSE_CHANNEL
         );
+    }
+
+    @Test
+    void getLocalChannel_unknown() {
+        assertThat(channelService.getLocalChannel(CHANNEL_ID)).isEmpty();
+    }
+
+    @Test
+    void getLocalChannel_local_open_channel() {
+        when(grpcChannels.getChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL_2, LOCAL_OPEN_CHANNEL));
+        assertThat(channelService.getLocalChannel(CHANNEL_ID)).contains(LOCAL_OPEN_CHANNEL);
+    }
+
+    @Test
+    void getLocalChannel_waiting_close_channel() {
+        when(grpcChannels.getWaitingCloseChannels()).thenReturn(Set.of(WAITING_CLOSE_CHANNEL, WAITING_CLOSE_CHANNEL_2));
+        assertThat(channelService.getLocalChannel(CHANNEL_ID)).contains(WAITING_CLOSE_CHANNEL);
+    }
+
+    @Test
+    void getLocalChannel_coop_closed_channel() {
+        when(grpcClosedChannels.getClosedChannels()).thenReturn(Set.of(CLOSED_CHANNEL, CLOSED_CHANNEL_2));
+        assertThat(channelService.getLocalChannel(CHANNEL_ID)).contains(CLOSED_CHANNEL);
+    }
+
+    @Test
+    void getLocalChannel_force_closing_channel() {
+        when(grpcChannels.getForceClosingChannels()).thenReturn(Set.of(FORCE_CLOSING_CHANNEL, FORCE_CLOSING_CHANNEL_2));
+        assertThat(channelService.getLocalChannel(CHANNEL_ID)).contains(FORCE_CLOSING_CHANNEL);
+    }
+
+    @Test
+    void getLocalChannel_force_closed_channel() {
+        when(grpcClosedChannels.getClosedChannels()).thenReturn(Set.of(FORCE_CLOSED_CHANNEL, FORCE_CLOSED_CHANNEL_2));
+        assertThat(channelService.getLocalChannel(CHANNEL_ID)).contains(FORCE_CLOSED_CHANNEL);
     }
 }

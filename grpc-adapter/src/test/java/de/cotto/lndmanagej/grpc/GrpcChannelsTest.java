@@ -76,9 +76,10 @@ class GrpcChannelsTest {
     void getForceClosingChannels_both_resolved() {
         when(channelIdResolver.resolveFromChannelPoint(CHANNEL_POINT)).thenReturn(Optional.of(CHANNEL_ID));
         when(channelIdResolver.resolveFromChannelPoint(CHANNEL_POINT_2)).thenReturn(Optional.of(CHANNEL_ID_2));
-        when(grpcService.getForceClosingChannels()).thenReturn(
-                List.of(forceClosingChannel(CHANNEL_POINT), forceClosingChannel(CHANNEL_POINT_2))
-        );
+        when(grpcService.getForceClosingChannels()).thenReturn(List.of(
+                forceClosingChannel(CHANNEL_POINT, Initiator.INITIATOR_LOCAL),
+                forceClosingChannel(CHANNEL_POINT_2, Initiator.INITIATOR_REMOTE)
+        ));
         assertThat(grpcChannels.getForceClosingChannels())
                 .containsExactlyInAnyOrder(FORCE_CLOSING_CHANNEL, FORCE_CLOSING_CHANNEL_2);
     }
@@ -86,9 +87,10 @@ class GrpcChannelsTest {
     @Test
     void getForceClosingChannels_just_one_resolved() {
         when(channelIdResolver.resolveFromChannelPoint(CHANNEL_POINT)).thenReturn(Optional.of(CHANNEL_ID));
-        when(grpcService.getForceClosingChannels()).thenReturn(
-                List.of(forceClosingChannel(CHANNEL_POINT), forceClosingChannel(CHANNEL_POINT_3))
-        );
+        when(grpcService.getForceClosingChannels()).thenReturn(List.of(
+                forceClosingChannel(CHANNEL_POINT, Initiator.INITIATOR_LOCAL),
+                forceClosingChannel(CHANNEL_POINT_3, Initiator.INITIATOR_LOCAL)
+        ));
         assertThat(grpcChannels.getForceClosingChannels()).containsExactlyInAnyOrder(FORCE_CLOSING_CHANNEL);
     }
 
@@ -96,9 +98,10 @@ class GrpcChannelsTest {
     void getWaitingCloseChannels_both_resolved() {
         when(channelIdResolver.resolveFromChannelPoint(CHANNEL_POINT)).thenReturn(Optional.of(CHANNEL_ID));
         when(channelIdResolver.resolveFromChannelPoint(CHANNEL_POINT_2)).thenReturn(Optional.of(CHANNEL_ID_2));
-        when(grpcService.getWaitingCloseChannels()).thenReturn(
-                List.of(waitingCloseChannel(CHANNEL_POINT), waitingCloseChannel(CHANNEL_POINT_2))
-        );
+        when(grpcService.getWaitingCloseChannels()).thenReturn(List.of(
+                waitingCloseChannel(CHANNEL_POINT, Initiator.INITIATOR_LOCAL),
+                waitingCloseChannel(CHANNEL_POINT_2, Initiator.INITIATOR_REMOTE)
+        ));
         assertThat(grpcChannels.getWaitingCloseChannels())
                 .containsExactlyInAnyOrder(WAITING_CLOSE_CHANNEL, WAITING_CLOSE_CHANNEL_2);
     }
@@ -106,9 +109,10 @@ class GrpcChannelsTest {
     @Test
     void getWaitingCloseChannels_just_one_resolved() {
         when(channelIdResolver.resolveFromChannelPoint(CHANNEL_POINT)).thenReturn(Optional.of(CHANNEL_ID));
-        when(grpcService.getWaitingCloseChannels()).thenReturn(
-                List.of(waitingCloseChannel(CHANNEL_POINT), waitingCloseChannel(CHANNEL_POINT_3))
-        );
+        when(grpcService.getWaitingCloseChannels()).thenReturn(List.of(
+                waitingCloseChannel(CHANNEL_POINT, Initiator.INITIATOR_LOCAL),
+                waitingCloseChannel(CHANNEL_POINT_3, Initiator.INITIATOR_REMOTE)
+        ));
         assertThat(grpcChannels.getWaitingCloseChannels()).containsExactlyInAnyOrder(WAITING_CLOSE_CHANNEL);
     }
 
@@ -146,26 +150,29 @@ class GrpcChannelsTest {
                 .build();
     }
 
-    private ForceClosedChannel forceClosingChannel(ChannelPoint channelPoint) {
+    private ForceClosedChannel forceClosingChannel(ChannelPoint channelPoint, Initiator initiator) {
         return ForceClosedChannel.newBuilder()
-                .setChannel(pendingChannel(channelPoint))
+                .setChannel(pendingChannel(channelPoint, initiator))
                 .setClosingTxid(TRANSACTION_HASH_3)
                 .addPendingHtlcs(PendingHTLC.newBuilder().setOutpoint(HTLC_OUTPOINT.toString()).build())
                 .build();
     }
 
-    private PendingChannelsResponse.WaitingCloseChannel waitingCloseChannel(ChannelPoint channelPoint) {
+    private PendingChannelsResponse.WaitingCloseChannel waitingCloseChannel(
+            ChannelPoint channelPoint,
+            Initiator initiator
+    ) {
         return PendingChannelsResponse.WaitingCloseChannel.newBuilder()
-                .setChannel(pendingChannel(channelPoint))
+                .setChannel(pendingChannel(channelPoint, initiator))
                 .build();
     }
 
-    private PendingChannelsResponse.PendingChannel pendingChannel(ChannelPoint channelPoint) {
+    private PendingChannelsResponse.PendingChannel pendingChannel(ChannelPoint channelPoint, Initiator initiator) {
         return PendingChannelsResponse.PendingChannel.newBuilder()
                 .setRemoteNodePub(PUBKEY_2.toString())
                 .setCapacity(CAPACITY.satoshis())
                 .setChannelPoint(channelPoint.toString())
-                .setInitiator(Initiator.INITIATOR_LOCAL)
+                .setInitiator(initiator)
                 .build();
     }
 }

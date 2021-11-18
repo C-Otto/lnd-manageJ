@@ -4,6 +4,7 @@ import com.google.common.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.grpc.GrpcChannels;
 import de.cotto.lndmanagej.grpc.GrpcClosedChannels;
+import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.ForceClosingChannel;
 import de.cotto.lndmanagej.model.LocalChannel;
@@ -13,6 +14,7 @@ import de.cotto.lndmanagej.model.WaitingCloseChannel;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -64,13 +66,27 @@ public class ChannelService {
     }
 
     public Set<LocalChannel> getAllChannelsWith(Pubkey pubkey) {
-        Set<LocalOpenChannel> openChannels = getOpenChannelsWith(pubkey);
+        return getAllLocalChannels()
+                .filter(c -> c.getRemotePubkey().equals(pubkey))
+                .collect(Collectors.toSet());
+    }
+
+    public Optional<LocalChannel> getLocalChannel(ChannelId channelId) {
+        return getAllLocalChannels()
+                .filter(c -> c.getId().equals(channelId))
+                .findFirst();
+    }
+
+    public Stream<LocalChannel> getAllLocalChannels() {
+        Set<LocalOpenChannel> openChannels = getOpenChannels();
         Set<WaitingCloseChannel> waitingCloseChannels = getWaitingCloseChannels();
         Set<ForceClosingChannel> forceClosingChannels = getForceClosingChannels();
         Set<ClosedChannel> closedChannels = getClosedChannels();
-        return Stream.of(openChannels, closedChannels, waitingCloseChannels, forceClosingChannels)
-                .flatMap(Collection::stream)
-                .filter(c -> c.getRemotePubkey().equals(pubkey))
-                .collect(Collectors.toSet());
+        return Stream.of(
+                openChannels,
+                closedChannels,
+                waitingCloseChannels,
+                forceClosingChannels
+        ).flatMap(Collection::stream);
     }
 }

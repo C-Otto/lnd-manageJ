@@ -82,7 +82,7 @@ public class GrpcClosedChannels extends GrpcChannelsBase {
                 );
     }
 
-    CloseInitiator getCloseInitiator(ChannelCloseSummary channelCloseSummary) {
+    private CloseInitiator getCloseInitiator(ChannelCloseSummary channelCloseSummary) {
         Initiator closeInitiator = channelCloseSummary.getCloseInitiator();
         ChannelCloseSummary.ClosureType closureType = channelCloseSummary.getCloseType();
         if (closeInitiator.equals(INITIATOR_LOCAL) || closureType.equals(LOCAL_FORCE_CLOSE)) {

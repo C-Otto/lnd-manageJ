@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.model;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
+import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT_3;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 
 public class CoopClosedChannelFixtures {
@@ -13,13 +14,14 @@ public class CoopClosedChannelFixtures {
             ClosedChannelFixtures.getWithDefaults(new CoopClosedChannelBuilder())
                     .withChannelId(CHANNEL_ID_2)
                     .withOpenInitiator(OpenInitiator.UNKNOWN)
-                    .withCloseInitiator(CloseInitiator.LOCAL)
+                    .withCloseInitiator(CloseInitiator.UNKNOWN)
                     .build();
 
     public static final CoopClosedChannel CLOSED_CHANNEL_3 =
             ClosedChannelFixtures.getWithDefaults(new CoopClosedChannelBuilder())
+                    .withChannelPoint(CHANNEL_POINT_3)
                     .withChannelId(CHANNEL_ID_3)
-                    .withCloseInitiator(CloseInitiator.UNKNOWN)
+                    .withOpenInitiator(OpenInitiator.REMOTE)
                     .build();
 
     public static final CoopClosedChannel CLOSED_CHANNEL_TO_NODE_3 =

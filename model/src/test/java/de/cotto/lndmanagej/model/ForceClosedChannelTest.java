@@ -7,6 +7,7 @@ import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.TRANSACTION_HASH_2;
+import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL_REMOTE;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
@@ -25,7 +26,7 @@ class ForceClosedChannelTest {
                 .withOpenInitiator(OpenInitiator.LOCAL)
                 .withCloseInitiator(CloseInitiator.REMOTE)
                 .build()
-        ).isEqualTo(FORCE_CLOSED_CHANNEL_REMOTE);
+        ).isEqualTo(FORCE_CLOSED_CHANNEL);
     }
 
     @Test
