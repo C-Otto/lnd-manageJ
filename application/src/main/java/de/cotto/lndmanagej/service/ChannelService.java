@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -100,15 +101,15 @@ public class ChannelService {
     }
 
     public Stream<LocalChannel> getAllLocalChannels() {
-        Set<LocalOpenChannel> openChannels = getOpenChannels();
-        Set<WaitingCloseChannel> waitingCloseChannels = getWaitingCloseChannels();
-        Set<ForceClosingChannel> forceClosingChannels = getForceClosingChannels();
-        Set<ClosedChannel> closedChannels = getClosedChannels();
+        Supplier<Set<LocalOpenChannel>> openChannels = this::getOpenChannels;
+        Supplier<Set<ClosedChannel>> closedChannels = this::getClosedChannels;
+        Supplier<Set<WaitingCloseChannel>> waitingCloseChannels = this::getWaitingCloseChannels;
+        Supplier<Set<ForceClosingChannel>> forceClosingChannels = this::getForceClosingChannels;
         return Stream.of(
                 openChannels,
                 closedChannels,
                 waitingCloseChannels,
                 forceClosingChannels
-        ).flatMap(Collection::stream);
+        ).map(Supplier::get).flatMap(Collection::stream);
     }
 }
