@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.service;
 import com.google.common.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.grpc.GrpcNodeInfo;
+import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.Pubkey;
 import org.springframework.stereotype.Component;
 
@@ -25,8 +26,12 @@ public class NodeService {
         return aliasCache.getUnchecked(pubkey);
     }
 
+    public Node getNode(Pubkey pubkey) {
+        return grpcNodeInfo.getNode(pubkey);
+    }
+
     private String getAliasWithoutCache(Pubkey pubkey) {
-        return grpcNodeInfo.getNode(pubkey).alias();
+        return getNode(pubkey).alias();
     }
 
 }

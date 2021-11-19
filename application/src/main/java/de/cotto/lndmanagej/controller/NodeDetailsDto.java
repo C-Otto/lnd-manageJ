@@ -6,6 +6,7 @@ import de.cotto.lndmanagej.model.Pubkey;
 
 public record NodeDetailsDto(
         @JsonSerialize(using = ToStringSerializer.class) Pubkey pubkey,
-        String alias
+        String alias,
+        boolean online
 ) {
 }

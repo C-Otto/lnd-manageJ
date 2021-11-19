@@ -26,4 +26,10 @@ class NodeServiceTest {
         when(grpcNodeInfo.getNode(PUBKEY)).thenReturn(NODE);
         assertThat(nodeService.getAlias(PUBKEY)).isEqualTo(ALIAS);
     }
+
+    @Test
+    void getNode() {
+        when(grpcNodeInfo.getNode(PUBKEY)).thenReturn(NODE);
+        assertThat(nodeService.getNode(PUBKEY)).isEqualTo(NODE);
+    }
 }

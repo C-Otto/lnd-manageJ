@@ -7,13 +7,19 @@ import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 
-public record Node(@Nonnull String alias, int lastUpdate, @Nonnull Pubkey pubkey) implements Comparable<Node> {
+public record Node(
+        @Nonnull Pubkey pubkey,
+        @Nonnull String alias,
+        int lastUpdate,
+        boolean online
+) implements Comparable<Node> {
     private static final Map<Pubkey, String> HARDCODED_ALIASES = Map.of(
             Pubkey.create("02f72978d40efeffca537139ad6ac9f09970c000a2dbc0d7aa55a71327c4577a80"), "Chivo IBEX_a0",
             Pubkey.create("037cc5f9f1da20ac0d60e83989729a204a33cc2d8e80438969fadf35c1c5f1233b"), "BlueWallet"
     );
 
-    public Node(String alias, int lastUpdate, Pubkey pubkey) {
+    public Node(Pubkey pubkey, String alias, int lastUpdate, boolean online) {
+        this.online = online;
         this.alias = HARDCODED_ALIASES.getOrDefault(pubkey, alias);
         this.lastUpdate = lastUpdate;
         this.pubkey = pubkey;
@@ -62,6 +68,8 @@ public record Node(@Nonnull String alias, int lastUpdate, @Nonnull Pubkey pubkey
         @Nullable
         private Pubkey pubkey;
 
+        private boolean online;
+
         public Builder withAlias(String alias) {
             this.alias = alias;
             return this;
@@ -80,9 +88,13 @@ public record Node(@Nonnull String alias, int lastUpdate, @Nonnull Pubkey pubkey
             return this;
         }
 
-        public Node build() {
-            return new Node(requireNonNull(alias), lastUpdate, requireNonNull(pubkey));
+        public Builder withOnlineStatus(boolean online) {
+            this.online = online;
+            return this;
         }
 
+        public Node build() {
+            return new Node(requireNonNull(pubkey), requireNonNull(alias), lastUpdate, online);
+        }
     }
 }

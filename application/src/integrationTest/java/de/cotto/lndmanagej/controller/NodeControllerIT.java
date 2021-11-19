@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.metrics.Metrics;
+import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.service.NodeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,9 +40,10 @@ class NodeControllerIT {
 
     @Test
     void getDetails() throws Exception {
-        when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
+        when(nodeService.getNode(PUBKEY_2)).thenReturn(new Node(PUBKEY_2, ALIAS_2, 0, true));
         mockMvc.perform(get(NODE_PREFIX + "/details"))
                 .andExpect(jsonPath("$.pubkey", is(PUBKEY_2.toString())))
-                .andExpect(jsonPath("$.alias", is(ALIAS_2)));
+                .andExpect(jsonPath("$.alias", is(ALIAS_2)))
+                .andExpect(jsonPath("$.online", is(true)));
     }
 }

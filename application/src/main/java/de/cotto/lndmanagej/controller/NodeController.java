@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.controller;
 
 import com.codahale.metrics.MetricRegistry;
 import de.cotto.lndmanagej.metrics.Metrics;
+import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.NodeService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +30,7 @@ public class NodeController {
     @GetMapping("/details")
     public NodeDetailsDto getDetails(@PathVariable Pubkey pubkey) {
         metrics.mark(MetricRegistry.name(getClass(), "getDetails"));
-        return new NodeDetailsDto(pubkey, getAlias(pubkey));
+        Node node = nodeService.getNode(pubkey);
+        return new NodeDetailsDto(pubkey, node.alias(), node.online());
     }
 }

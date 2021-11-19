@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.grpc;
 
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.cache.LoadingCache;
 import de.cotto.lndmanagej.LndConfiguration;
 import de.cotto.lndmanagej.caching.CacheBuilder;
@@ -18,6 +17,7 @@ import lnrpc.GetInfoResponse;
 import lnrpc.GetTransactionsRequest;
 import lnrpc.LightningGrpc;
 import lnrpc.ListChannelsRequest;
+import lnrpc.ListPeersRequest;
 import lnrpc.NodeInfo;
 import lnrpc.NodeInfoRequest;
 import lnrpc.PendingChannelsRequest;
@@ -35,7 +35,6 @@ import java.util.Optional;
 public class GrpcService extends GrpcBase {
     private static final int CACHE_EXPIRY_MILLISECONDS = 200;
 
-    private final Metrics metrics;
     private final LightningGrpc.LightningBlockingStub lightningStub;
     private final LoadingCache<Object, List<Channel>> channelsCache = new CacheBuilder()
             .withExpiryMilliseconds(CACHE_EXPIRY_MILLISECONDS)
@@ -45,8 +44,7 @@ public class GrpcService extends GrpcBase {
             .build(this::getPendingChannelsWithoutCache);
 
     public GrpcService(LndConfiguration lndConfiguration, Metrics metrics) throws IOException {
-        super(lndConfiguration);
-        this.metrics = metrics;
+        super(lndConfiguration, metrics);
         lightningStub = stubCreator.getLightningStub();
     }
 
@@ -58,6 +56,13 @@ public class GrpcService extends GrpcBase {
     Optional<GetInfoResponse> getInfo() {
         mark("getInfo");
         return get(() -> lightningStub.getInfo(lnrpc.GetInfoRequest.getDefaultInstance()));
+    }
+
+    public List<lnrpc.Peer> listPeers() {
+        mark("listPeers");
+        return get(
+                () -> lightningStub.listPeers(ListPeersRequest.getDefaultInstance()).getPeersList()
+        ).orElse(List.of());
     }
 
     public Optional<NodeInfo> getNodeInfo(Pubkey pubkey) {
@@ -125,9 +130,5 @@ public class GrpcService extends GrpcBase {
         mark("listChannels");
         return get(() -> lightningStub.listChannels(ListChannelsRequest.getDefaultInstance()).getChannelsList())
                 .orElse(List.of());
-    }
-
-    private void mark(String name) {
-        metrics.mark(MetricRegistry.name(getClass(), name));
     }
 }

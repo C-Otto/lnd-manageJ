@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.metrics.Metrics;
+import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.service.NodeService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,8 +37,8 @@ class NodeControllerTest {
 
     @Test
     void getNodeDetails() {
-        NodeDetailsDto expectedDetails = new NodeDetailsDto(PUBKEY_2, ALIAS_2);
-        when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
+        NodeDetailsDto expectedDetails = new NodeDetailsDto(PUBKEY_2, ALIAS_2, true);
+        when(nodeService.getNode(PUBKEY_2)).thenReturn(new Node(PUBKEY_2, ALIAS_2, 0, true));
 
         assertThat(nodeController.getDetails(PUBKEY_2)).isEqualTo(expectedDetails);
         verify(metrics).mark(argThat(name -> name.endsWith(".getDetails")));

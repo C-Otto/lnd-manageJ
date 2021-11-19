@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.NodeFixtures.LAST_UPDATE;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE;
+import static de.cotto.lndmanagej.model.NodeFixtures.NODE_PEER;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_WITHOUT_ALIAS;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,44 +47,65 @@ class NodeTest {
 
     @Test
     void builder_without_alias_uses_pubkey() {
-        Node node = Node.builder().withPubkey(PUBKEY).withLastUpdate(LAST_UPDATE).build();
+        Node node = Node.builder().withPubkey(PUBKEY).withLastUpdate(LAST_UPDATE).withOnlineStatus(false).build();
         assertThat(node).isEqualTo(NODE_WITHOUT_ALIAS);
     }
 
     @Test
     void builder_without_pubkey() {
         assertThatNullPointerException().isThrownBy(
-                () -> Node.builder().withAlias(ALIAS).withLastUpdate(LAST_UPDATE).build()
+                () -> Node.builder().withAlias(ALIAS).withLastUpdate(LAST_UPDATE).withOnlineStatus(false).build()
         );
     }
 
     @Test
     void builder_without_last_update() {
-        Node node = Node.builder().withPubkey(PUBKEY).withAlias(ALIAS).build();
+        Node node = Node.builder().withPubkey(PUBKEY).withAlias(ALIAS).withOnlineStatus(false).build();
         assertThat(node.lastUpdate()).isEqualTo(0);
     }
 
     @Test
-    void builder_with_all_arguments_pubkey_first() {
+    void builder_without_online_status() {
         Node node = Node.builder().withPubkey(PUBKEY).withAlias(ALIAS).withLastUpdate(LAST_UPDATE).build();
+        assertThat(node).isEqualTo(NODE);
+    }
+
+    @Test
+    void builder_with_all_arguments_pubkey_first() {
+        Node node = Node.builder()
+                .withPubkey(PUBKEY)
+                .withAlias(ALIAS)
+                .withOnlineStatus(false)
+                .withLastUpdate(LAST_UPDATE)
+                .build();
         assertThat(node).isEqualTo(NODE);
     }
 
     @Test
     void builder_with_all_arguments_alias_first() {
-        Node node = Node.builder().withAlias(ALIAS).withPubkey(PUBKEY).withLastUpdate(LAST_UPDATE).build();
-        assertThat(node).isEqualTo(NODE);
+        Node node = Node.builder()
+                .withAlias(ALIAS)
+                .withPubkey(PUBKEY)
+                .withLastUpdate(LAST_UPDATE)
+                .withOnlineStatus(true)
+                .build();
+        assertThat(node).isEqualTo(NODE_PEER);
     }
 
     @Test
     void testToString() {
-        Node node = Node.builder().withPubkey(PUBKEY).withAlias(ALIAS).withLastUpdate(LAST_UPDATE).build();
+        Node node = Node.builder()
+                .withPubkey(PUBKEY)
+                .withAlias(ALIAS)
+                .withLastUpdate(LAST_UPDATE)
+                .withOnlineStatus(false)
+                .build();
         assertThat(node).hasToString(ALIAS);
     }
 
     @Test
     void testEquals_only_by_pubkey() {
-        EqualsVerifier.forClass(Node.class).usingGetClass().withIgnoredFields("alias", "lastUpdate").verify();
+        EqualsVerifier.forClass(Node.class).usingGetClass().withIgnoredFields("alias", "lastUpdate", "online").verify();
     }
 
     @Test
@@ -134,6 +156,12 @@ class NodeTest {
     @Test
     void getLastUpdate() {
         assertThat(NODE.lastUpdate()).isEqualTo(LAST_UPDATE);
+    }
+
+    @Test
+    void online() {
+        assertThat(NODE.online()).isFalse();
+        assertThat(NODE_PEER.online()).isTrue();
     }
 
     private Node createFor(String pubkey) {

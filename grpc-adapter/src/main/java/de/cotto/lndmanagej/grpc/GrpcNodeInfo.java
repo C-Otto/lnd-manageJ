@@ -4,6 +4,7 @@ import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.Pubkey;
 import lnrpc.LightningNode;
 import lnrpc.NodeInfo;
+import lnrpc.Peer;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,10 +21,15 @@ public class GrpcNodeInfo {
             return Node.forPubkey(pubkey);
         }
         LightningNode node = nodeInfo.getNode();
+        boolean isPeer = grpcService.listPeers().stream()
+                .map(Peer::getPubKey)
+                .map(Pubkey::create)
+                .anyMatch(pubkey::equals);
         return Node.builder()
                 .withPubkey(pubkey)
                 .withAlias(node.getAlias())
                 .withLastUpdate(node.getLastUpdate())
+                .withOnlineStatus(isPeer)
                 .build();
     }
 }
