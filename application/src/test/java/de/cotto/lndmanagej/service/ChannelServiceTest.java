@@ -91,6 +91,12 @@ class ChannelServiceTest {
     }
 
     @Test
+    void getClosedChannel_not_closed() {
+        when(grpcClosedChannels.getClosedChannels()).thenReturn(Set.of(CLOSED_CHANNEL));
+        assertThat(channelService.getClosedChannel(CHANNEL_ID_2)).isEmpty();
+    }
+
+    @Test
     void getForceClosingChannels() {
         when(grpcChannels.getForceClosingChannels())
                 .thenReturn(Set.of(FORCE_CLOSING_CHANNEL, FORCE_CLOSING_CHANNEL_2));
