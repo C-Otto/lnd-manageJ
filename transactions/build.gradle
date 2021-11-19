@@ -14,6 +14,7 @@ dependencies {
     implementation 'io.github.resilience4j:resilience4j-spring-boot2:1.7.1'
     implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation project(':model')
+    implementation project(':caching')
     implementation project(':grpc-adapter')
     testFixturesApi testFixtures(project(':model'))
 }

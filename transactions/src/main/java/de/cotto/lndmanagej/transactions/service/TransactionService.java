@@ -1,5 +1,7 @@
 package de.cotto.lndmanagej.transactions.service;
 
+import com.google.common.cache.LoadingCache;
+import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.grpc.GrpcTransactions;
 import de.cotto.lndmanagej.transactions.TransactionDao;
 import de.cotto.lndmanagej.transactions.download.TransactionProvider;
@@ -14,6 +16,7 @@ public class TransactionService {
     private final TransactionDao transactionDao;
     private final TransactionProvider transactionProvider;
     private final GrpcTransactions grpcTransactions;
+    private final LoadingCache<String, Optional<Boolean>> hashIsKnownCache;
 
     public TransactionService(
             TransactionDao transactionDao,
@@ -23,10 +26,19 @@ public class TransactionService {
         this.transactionDao = transactionDao;
         this.transactionProvider = transactionProvider;
         this.grpcTransactions = grpcTransactions;
+        hashIsKnownCache = new CacheBuilder()
+                .withExpiryMinutes(1)
+                .withMaximumSize(1_000)
+                .build(this::isKnownByLndWithoutCache);
     }
 
     @SuppressWarnings("PMD.LinguisticNaming")
     public Optional<Boolean> isKnownByLnd(String transactionHash) {
+        return hashIsKnownCache.getUnchecked(transactionHash);
+    }
+
+    @SuppressWarnings("PMD.LinguisticNaming")
+    public Optional<Boolean> isKnownByLndWithoutCache(String transactionHash) {
         Transaction transaction = getTransaction(transactionHash).orElse(null);
         if (transaction == null) {
             return Optional.empty();
