@@ -32,6 +32,7 @@ import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSIN
 import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.HTLC_OUTPOINT;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
@@ -66,10 +67,18 @@ class GrpcChannelsTest {
     @Test
     void getChannels() {
         when(grpcService.getChannels()).thenReturn(List.of(
-                channel(CHANNEL_ID, true),
-                channel(CHANNEL_ID_2, false)
+                channel(CHANNEL_ID, true, false),
+                channel(CHANNEL_ID_2, false, false)
         ));
         assertThat(grpcChannels.getChannels()).containsExactlyInAnyOrder(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2);
+    }
+
+    @Test
+    void getChannels_private() {
+        when(grpcService.getChannels()).thenReturn(List.of(
+                channel(CHANNEL_ID, true, true)
+        ));
+        assertThat(grpcChannels.getChannels()).containsExactlyInAnyOrder(LOCAL_OPEN_CHANNEL_PRIVATE);
     }
 
     @Test
@@ -119,8 +128,8 @@ class GrpcChannelsTest {
     @Test
     void getChannel() {
         when(grpcService.getChannels()).thenReturn(List.of(
-                channel(CHANNEL_ID_2, false),
-                channel(CHANNEL_ID, true)
+                channel(CHANNEL_ID_2, false, false),
+                channel(CHANNEL_ID, true, false)
         ));
         assertThat(grpcChannels.getChannel(CHANNEL_ID)).contains(LOCAL_OPEN_CHANNEL);
     }
@@ -130,7 +139,7 @@ class GrpcChannelsTest {
         assertThat(grpcChannels.getChannel(CHANNEL_ID)).isEmpty();
     }
 
-    private Channel channel(ChannelId channelId, boolean isInitiator) {
+    private Channel channel(ChannelId channelId, boolean isInitiator, boolean isPrivate) {
         ChannelConstraints localConstraints = ChannelConstraints.newBuilder()
                 .setChanReserveSat(BALANCE_INFORMATION.localReserve().satoshis())
                 .build();
@@ -147,6 +156,7 @@ class GrpcChannelsTest {
                 .setLocalConstraints(localConstraints)
                 .setRemoteConstraints(remoteConstraints)
                 .setInitiator(isInitiator)
+                .setPrivate(isPrivate)
                 .build();
     }
 

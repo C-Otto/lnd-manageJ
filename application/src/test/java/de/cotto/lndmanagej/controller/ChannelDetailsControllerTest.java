@@ -13,6 +13,7 @@ import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,9 +44,19 @@ class ChannelDetailsControllerTest {
 
     @Test
     void getDetails() throws NotFoundException {
-        ChannelDetailsDto expectedDetails = new ChannelDetailsDto(CHANNEL_ID, PUBKEY_2, ALIAS_2);
+        ChannelDetailsDto expectedDetails = new ChannelDetailsDto(CHANNEL_ID, PUBKEY_2, ALIAS_2, false);
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+
+        assertThat(channelDetailsController.getDetails(CHANNEL_ID)).isEqualTo(expectedDetails);
+        verify(metrics).mark(argThat(name -> name.endsWith(".getDetails")));
+    }
+
+    @Test
+    void getDetails_private() throws NotFoundException {
+        ChannelDetailsDto expectedDetails = new ChannelDetailsDto(CHANNEL_ID, PUBKEY_2, ALIAS_2, true);
+        when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
+        when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_PRIVATE));
 
         assertThat(channelDetailsController.getDetails(CHANNEL_ID)).isEqualTo(expectedDetails);
         verify(metrics).mark(argThat(name -> name.endsWith(".getDetails")));

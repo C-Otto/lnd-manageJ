@@ -34,6 +34,7 @@ public class ChannelDetailsController {
         }
         Pubkey remotePubkey = localChannel.getRemotePubkey();
         String remoteAlias = nodeService.getAlias(remotePubkey);
-        return new ChannelDetailsDto(localChannel.getId(), remotePubkey, remoteAlias);
+        boolean privateChannel = localChannel.isPrivateChannel();
+        return new ChannelDetailsDto(localChannel.getId(), remotePubkey, remoteAlias, privateChannel);
     }
 }

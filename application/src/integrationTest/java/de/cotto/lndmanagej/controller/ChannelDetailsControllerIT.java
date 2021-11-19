@@ -12,7 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
-import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.hamcrest.core.Is.is;
@@ -47,10 +47,11 @@ class ChannelDetailsControllerIT {
     @Test
     void getChannelDetails() throws Exception {
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
-        when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+        when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_PRIVATE));
         mockMvc.perform(get(CHANNEL_PREFIX + "/details"))
                 .andExpect(jsonPath("$.channelId", is(String.valueOf(CHANNEL_ID.getShortChannelId()))))
                 .andExpect(jsonPath("$.remotePubkey", is(PUBKEY_2.toString())))
-                .andExpect(jsonPath("$.remoteAlias", is(ALIAS_2)));
+                .andExpect(jsonPath("$.remoteAlias", is(ALIAS_2)))
+                .andExpect(jsonPath("$.private", is(true)));
     }
 }

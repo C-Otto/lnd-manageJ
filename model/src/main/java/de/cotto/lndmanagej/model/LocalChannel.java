@@ -5,6 +5,7 @@ import java.util.Objects;
 public class LocalChannel extends Channel {
     private final Pubkey remotePubkey;
     private final OpenInitiator openInitiator;
+    private final boolean privateChannel;
 
     protected LocalChannel(
             ChannelId channelId,
@@ -12,15 +13,25 @@ public class LocalChannel extends Channel {
             Coins capacity,
             Pubkey ownPubkey,
             Pubkey remotePubkey,
-            OpenInitiator openInitiator
+            OpenInitiator openInitiator,
+            boolean privateChannel
     ) {
         super(channelId, channelPoint, capacity, ownPubkey, remotePubkey);
         this.remotePubkey = remotePubkey;
         this.openInitiator = openInitiator;
+        this.privateChannel = privateChannel;
     }
 
     public Pubkey getRemotePubkey() {
         return remotePubkey;
+    }
+
+    public OpenInitiator getOpenInitiator() {
+        return openInitiator;
+    }
+
+    public boolean isPrivateChannel() {
+        return privateChannel;
     }
 
     @Override
@@ -36,15 +47,13 @@ public class LocalChannel extends Channel {
             return false;
         }
         LocalChannel that = (LocalChannel) other;
-        return Objects.equals(remotePubkey, that.remotePubkey) && openInitiator == that.openInitiator;
+        return privateChannel == that.privateChannel
+                && Objects.equals(remotePubkey, that.remotePubkey)
+                && openInitiator == that.openInitiator;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), remotePubkey, openInitiator);
-    }
-
-    public OpenInitiator getOpenInitiator() {
-        return openInitiator;
+        return Objects.hash(super.hashCode(), remotePubkey, openInitiator, privateChannel);
     }
 }

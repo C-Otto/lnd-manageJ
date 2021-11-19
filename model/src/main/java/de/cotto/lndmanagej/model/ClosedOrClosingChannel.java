@@ -14,7 +14,7 @@ public class ClosedOrClosingChannel extends LocalChannel {
             String closeTransactionHash,
             OpenInitiator openInitiator
     ) {
-        super(channelId, channelPoint, capacity, ownPubkey, remotePubkey, openInitiator);
+        super(channelId, channelPoint, capacity, ownPubkey, remotePubkey, openInitiator, false);
         this.closeTransactionHash = closeTransactionHash;
     }
 

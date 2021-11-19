@@ -12,9 +12,10 @@ public class LocalOpenChannel extends LocalChannel {
             Pubkey ownPubkey,
             Pubkey remotePubkey,
             BalanceInformation balanceInformation,
-            OpenInitiator openInitiator
+            OpenInitiator openInitiator,
+            boolean isPrivate
     ) {
-        super(channelId, channelPoint, capacity, ownPubkey, remotePubkey, openInitiator);
+        super(channelId, channelPoint, capacity, ownPubkey, remotePubkey, openInitiator, isPrivate);
         this.balanceInformation = balanceInformation;
     }
 

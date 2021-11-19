@@ -25,8 +25,16 @@ class LocalOpenChannelTest {
 
     @Test
     void getRemotePubkey_swapped() {
-        LocalOpenChannel localOpenChannel =
-                new LocalOpenChannel(CHANNEL_ID, CHANNEL_POINT, CAPACITY, PUBKEY_2, PUBKEY, BALANCE_INFORMATION, LOCAL);
+        LocalOpenChannel localOpenChannel = new LocalOpenChannel(
+                CHANNEL_ID,
+                CHANNEL_POINT,
+                CAPACITY,
+                PUBKEY_2,
+                PUBKEY,
+                BALANCE_INFORMATION,
+                LOCAL,
+                false
+        );
         assertThat(localOpenChannel.getRemotePubkey()).isEqualTo(PUBKEY);
     }
 

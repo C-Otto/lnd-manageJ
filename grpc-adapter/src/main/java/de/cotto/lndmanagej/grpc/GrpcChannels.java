@@ -123,7 +123,8 @@ public class GrpcChannels extends GrpcChannelsBase {
                 ownPubkey,
                 Pubkey.create(lndChannel.getRemotePubkey()),
                 balanceInformation,
-                getOpenInitiator(lndChannel)
+                getOpenInitiator(lndChannel),
+                lndChannel.getPrivate()
         );
     }
 
