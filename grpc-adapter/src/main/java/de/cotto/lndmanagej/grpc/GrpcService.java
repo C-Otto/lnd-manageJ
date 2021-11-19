@@ -20,6 +20,7 @@ import lnrpc.ListChannelsRequest;
 import lnrpc.ListPeersRequest;
 import lnrpc.NodeInfo;
 import lnrpc.NodeInfoRequest;
+import lnrpc.Peer;
 import lnrpc.PendingChannelsRequest;
 import lnrpc.PendingChannelsResponse;
 import lnrpc.PendingChannelsResponse.ForceClosedChannel;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
+@SuppressWarnings("PMD.ExcessiveImports")
 public class GrpcService extends GrpcBase {
     private static final int CACHE_EXPIRY_MILLISECONDS = 200;
 
@@ -42,6 +44,9 @@ public class GrpcService extends GrpcBase {
     private final LoadingCache<Object, Optional<PendingChannelsResponse>> pendingChannelsCache = new CacheBuilder()
             .withExpiryMilliseconds(CACHE_EXPIRY_MILLISECONDS)
             .build(this::getPendingChannelsWithoutCache);
+    private final LoadingCache<Object, List<Peer>> listPeersCache = new CacheBuilder()
+            .withExpiryMilliseconds(CACHE_EXPIRY_MILLISECONDS)
+            .build(this::listPeersWithoutCache);
 
     public GrpcService(LndConfiguration lndConfiguration, Metrics metrics) throws IOException {
         super(lndConfiguration, metrics);
@@ -58,7 +63,11 @@ public class GrpcService extends GrpcBase {
         return get(() -> lightningStub.getInfo(lnrpc.GetInfoRequest.getDefaultInstance()));
     }
 
-    public List<lnrpc.Peer> listPeers() {
+    public List<Peer> listPeers() {
+        return listPeersCache.getUnchecked("");
+    }
+
+    private List<Peer> listPeersWithoutCache() {
         mark("listPeers");
         return get(
                 () -> lightningStub.listPeers(ListPeersRequest.getDefaultInstance()).getPeersList()
