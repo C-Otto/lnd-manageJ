@@ -51,6 +51,12 @@ public class ChannelService {
         return closedChannelsCache.getUnchecked("");
     }
 
+    public Optional<ClosedChannel> getClosedChannel(ChannelId channelId) {
+        return getClosedChannels().stream()
+                .filter(c -> channelId.equals(c.getId()))
+                .findFirst();
+    }
+
     public Set<ForceClosingChannel> getForceClosingChannels() {
         return forceClosingChannelsCache.getUnchecked("");
     }

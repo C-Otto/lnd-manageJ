@@ -19,6 +19,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = OnChainCostsController.class)
 class OnChainCostsControllerIT {
+    private static final String CHANNEL_PREFIX = "/api/channel/" + CHANNEL_ID.getShortChannelId();
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -32,14 +34,28 @@ class OnChainCostsControllerIT {
     @Test
     void open_costs_for_channel() throws Exception {
         when(onChainCostService.getOpenCosts(CHANNEL_ID)).thenReturn(Optional.of(Coins.ofSatoshis(123)));
-        mockMvc.perform(get("/api/channel/" + CHANNEL_ID.getShortChannelId() + "/open-costs"))
+        mockMvc.perform(get(CHANNEL_PREFIX + "/open-costs"))
                 .andExpect(content().string("123"));
     }
 
     @Test
     void open_costs_for_channel_unknown() throws Exception {
-        mockMvc.perform(get("/api/channel/" + CHANNEL_ID.getShortChannelId() + "/open-costs"))
+        mockMvc.perform(get(CHANNEL_PREFIX + "/open-costs"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Unable to get open costs for channel with ID " + CHANNEL_ID));
+    }
+
+    @Test
+    void close_costs_for_channel() throws Exception {
+        when(onChainCostService.getCloseCosts(CHANNEL_ID)).thenReturn(Optional.of(Coins.ofSatoshis(123)));
+        mockMvc.perform(get(CHANNEL_PREFIX + "/close-costs"))
+                .andExpect(content().string("123"));
+    }
+
+    @Test
+    void close_costs_for_channel_unknown() throws Exception {
+        mockMvc.perform(get(CHANNEL_PREFIX + "/close-costs"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Unable to get close costs for channel with ID " + CHANNEL_ID));
     }
 }

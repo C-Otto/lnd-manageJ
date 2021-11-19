@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Set;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_2;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_3;
@@ -67,10 +68,14 @@ class ChannelServiceTest {
 
     @Test
     void getClosedChannels() {
-        when(grpcClosedChannels.getClosedChannels())
-                .thenReturn(Set.of(CLOSED_CHANNEL, CLOSED_CHANNEL_2));
-        assertThat(channelService.getClosedChannels())
-                .containsExactlyInAnyOrder(CLOSED_CHANNEL, CLOSED_CHANNEL_2);
+        when(grpcClosedChannels.getClosedChannels()).thenReturn(Set.of(CLOSED_CHANNEL, CLOSED_CHANNEL_2));
+        assertThat(channelService.getClosedChannels()).containsExactlyInAnyOrder(CLOSED_CHANNEL, CLOSED_CHANNEL_2);
+    }
+
+    @Test
+    void getClosedChannel() {
+        when(grpcClosedChannels.getClosedChannels()).thenReturn(Set.of(CLOSED_CHANNEL, CLOSED_CHANNEL_2));
+        assertThat(channelService.getClosedChannel(CHANNEL_ID_2)).contains(CLOSED_CHANNEL_2);
     }
 
     @Test

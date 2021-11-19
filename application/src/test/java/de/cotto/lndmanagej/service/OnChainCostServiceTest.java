@@ -34,9 +34,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class OnChainCostServiceTest {
-    private static final Coins OPEN_COSTS = TRANSACTION.fees();
-    private static final Coins CLOSE_COSTS = TRANSACTION_2.fees();
-
     @InjectMocks
     private OnChainCostService onChainCostService;
 
@@ -48,6 +45,7 @@ class OnChainCostServiceTest {
 
     @Nested
     class GetOpenCosts {
+        private static final Coins OPEN_COSTS = TRANSACTION.fees();
 
         @Test
         void getOpenCosts_by_channel_id_not_resolved() {
@@ -170,6 +168,20 @@ class OnChainCostServiceTest {
 
     @Nested
     class GetCloseCosts {
+        private static final Coins CLOSE_COSTS = TRANSACTION_2.fees();
+
+        @Test
+        void getCloseCosts_by_channel_id_not_resolved() {
+            assertThat(onChainCostService.getCloseCosts(CHANNEL_ID)).isEmpty();
+        }
+
+        @Test
+        void getCloseCosts_by_channel_id_resolved() {
+            mockCloseTransaction(CLOSED_CHANNEL);
+            when(channelService.getClosedChannel(CHANNEL_ID)).thenReturn(Optional.of(CLOSED_CHANNEL));
+            assertThat(onChainCostService.getCloseCosts(CHANNEL_ID)).contains(CLOSE_COSTS);
+        }
+
         @Test
         void getOpenCosts_for_coop_closed_channel_initiator_local_transaction_not_found() {
             assertThat(onChainCostService.getCloseCosts(CLOSED_CHANNEL)).isEmpty();
