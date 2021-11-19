@@ -36,18 +36,18 @@ class ChannelDetailsControllerTest {
     private Metrics metrics;
 
     @Test
-    void getChannelDetails_channel_not_found() {
+    void getDetails_channel_not_found() {
         assertThatExceptionOfType(NotFoundException.class)
-                .isThrownBy(() -> channelDetailsController.getChannelDetails(CHANNEL_ID));
+                .isThrownBy(() -> channelDetailsController.getDetails(CHANNEL_ID));
     }
 
     @Test
-    void getChannelDetails() throws NotFoundException {
+    void getDetails() throws NotFoundException {
         ChannelDetailsDto expectedDetails = new ChannelDetailsDto(CHANNEL_ID, PUBKEY_2, ALIAS_2);
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
 
-        assertThat(channelDetailsController.getChannelDetails(CHANNEL_ID)).isEqualTo(expectedDetails);
-        verify(metrics).mark(argThat(name -> name.endsWith(".getChannelDetails")));
+        assertThat(channelDetailsController.getDetails(CHANNEL_ID)).isEqualTo(expectedDetails);
+        verify(metrics).mark(argThat(name -> name.endsWith(".getDetails")));
     }
 }

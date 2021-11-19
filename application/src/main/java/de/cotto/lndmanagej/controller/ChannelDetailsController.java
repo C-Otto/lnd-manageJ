@@ -26,8 +26,8 @@ public class ChannelDetailsController {
     }
 
     @GetMapping("/details")
-    public ChannelDetailsDto getChannelDetails(@PathVariable ChannelId channelId) throws NotFoundException {
-        metrics.mark(MetricRegistry.name(getClass(), "getChannelDetails"));
+    public ChannelDetailsDto getDetails(@PathVariable ChannelId channelId) throws NotFoundException {
+        metrics.mark(MetricRegistry.name(getClass(), "getDetails"));
         LocalChannel localChannel = channelService.getLocalChannel(channelId).orElse(null);
         if (localChannel == null) {
             throw new NotFoundException();
