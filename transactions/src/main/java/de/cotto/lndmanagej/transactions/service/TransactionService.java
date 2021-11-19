@@ -1,23 +1,43 @@
 package de.cotto.lndmanagej.transactions.service;
 
+import de.cotto.lndmanagej.grpc.GrpcTransactions;
 import de.cotto.lndmanagej.transactions.TransactionDao;
 import de.cotto.lndmanagej.transactions.download.TransactionProvider;
 import de.cotto.lndmanagej.transactions.model.Transaction;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Component
 public class TransactionService {
     private final TransactionDao transactionDao;
     private final TransactionProvider transactionProvider;
+    private final GrpcTransactions grpcTransactions;
 
     public TransactionService(
             TransactionDao transactionDao,
-            TransactionProvider transactionProvider
+            TransactionProvider transactionProvider,
+            GrpcTransactions grpcTransactions
     ) {
         this.transactionDao = transactionDao;
         this.transactionProvider = transactionProvider;
+        this.grpcTransactions = grpcTransactions;
+    }
+
+    @SuppressWarnings("PMD.LinguisticNaming")
+    public Optional<Boolean> isKnownByLnd(String transactionHash) {
+        Transaction transaction = getTransaction(transactionHash).orElse(null);
+        if (transaction == null) {
+            return Optional.empty();
+        }
+        int blockHeight = transaction.blockHeight();
+        Set<String> knownTransactionsInBlock = grpcTransactions.getKnownTransactionHashesInBlock(blockHeight)
+                .orElse(null);
+        if (knownTransactionsInBlock == null) {
+            return Optional.empty();
+        }
+        return Optional.of(knownTransactionsInBlock.contains(transactionHash));
     }
 
     public Optional<Transaction> getTransaction(String transactionHash) {

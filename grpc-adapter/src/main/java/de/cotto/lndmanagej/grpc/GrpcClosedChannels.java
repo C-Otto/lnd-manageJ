@@ -9,6 +9,8 @@ import de.cotto.lndmanagej.model.ClosedChannelBuilder;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.CoopClosedChannelBuilder;
 import de.cotto.lndmanagej.model.ForceClosedChannelBuilder;
+import de.cotto.lndmanagej.model.OpenInitiator;
+import de.cotto.lndmanagej.model.OpenInitiatorResolver;
 import de.cotto.lndmanagej.model.Pubkey;
 import lnrpc.ChannelCloseSummary;
 import lnrpc.ChannelCloseSummary.ClosureType;
@@ -29,15 +31,18 @@ import static lnrpc.Initiator.INITIATOR_UNKNOWN;
 public class GrpcClosedChannels extends GrpcChannelsBase {
     private final GrpcService grpcService;
     private final GrpcGetInfo grpcGetInfo;
+    private final OpenInitiatorResolver openInitiatorResolver;
 
     public GrpcClosedChannels(
             GrpcService grpcService,
             GrpcGetInfo grpcGetInfo,
-            ChannelIdResolver channelIdResolver
+            ChannelIdResolver channelIdResolver,
+            OpenInitiatorResolver openInitiatorResolver
     ) {
         super(channelIdResolver);
         this.grpcService = grpcService;
         this.grpcGetInfo = grpcGetInfo;
+        this.openInitiatorResolver = openInitiatorResolver;
     }
 
     public Set<ClosedChannel> getClosedChannels() {
@@ -69,6 +74,10 @@ public class GrpcClosedChannels extends GrpcChannelsBase {
             builder = new ForceClosedChannelBuilder().withCloseInitiator(closeInitiator);
         }
         ChannelPoint channelPoint = ChannelPoint.create(channelCloseSummary.getChannelPoint());
+        OpenInitiator openInitiator = getOpenInitiator(
+                channelCloseSummary.getOpenInitiator(),
+                channelPoint.getTransactionHash()
+        );
         return getChannelId(channelCloseSummary.getChanId(), channelPoint)
                 .map(channelId -> builder
                         .withChannelId(channelId)
@@ -77,9 +86,17 @@ public class GrpcClosedChannels extends GrpcChannelsBase {
                         .withOwnPubkey(ownPubkey)
                         .withRemotePubkey(Pubkey.create(channelCloseSummary.getRemotePubkey()))
                         .withCloseTransactionHash(channelCloseSummary.getClosingTxHash())
-                        .withOpenInitiator(getOpenInitiator(channelCloseSummary.getOpenInitiator()))
+                        .withOpenInitiator(openInitiator)
                         .build()
                 );
+    }
+
+    private OpenInitiator getOpenInitiator(Initiator initiator, String transactionHash) {
+        OpenInitiator openInitiator = getOpenInitiator(initiator);
+        if (openInitiator.equals(OpenInitiator.UNKNOWN)) {
+            return openInitiatorResolver.resolveFromOpenTransactionHash(transactionHash);
+        }
+        return openInitiator;
     }
 
     private CloseInitiator getCloseInitiator(ChannelCloseSummary channelCloseSummary) {

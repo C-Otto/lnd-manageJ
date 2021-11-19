@@ -15,6 +15,7 @@ import lnrpc.ChannelCloseSummary;
 import lnrpc.ChannelEdge;
 import lnrpc.ClosedChannelsRequest;
 import lnrpc.GetInfoResponse;
+import lnrpc.GetTransactionsRequest;
 import lnrpc.LightningGrpc;
 import lnrpc.ListChannelsRequest;
 import lnrpc.NodeInfo;
@@ -22,6 +23,7 @@ import lnrpc.NodeInfoRequest;
 import lnrpc.PendingChannelsRequest;
 import lnrpc.PendingChannelsResponse;
 import lnrpc.PendingChannelsResponse.ForceClosedChannel;
+import lnrpc.TransactionDetails;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
@@ -103,6 +105,15 @@ public class GrpcService extends GrpcBase {
         return getPendingChannels()
                 .map(PendingChannelsResponse::getWaitingCloseChannelsList)
                 .orElse(List.of());
+    }
+
+    public Optional<TransactionDetails> getTransactionsInBlock(int blockHeight) {
+        mark("getTransactions");
+        GetTransactionsRequest request = GetTransactionsRequest.newBuilder()
+                .setStartHeight(blockHeight)
+                .setEndHeight(blockHeight)
+                .build();
+        return get(() -> lightningStub.getTransactions(request));
     }
 
     private Optional<PendingChannelsResponse> getPendingChannelsWithoutCache() {

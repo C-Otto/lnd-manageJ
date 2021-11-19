@@ -5,6 +5,7 @@ import de.cotto.lndmanagej.model.CloseInitiator;
 import de.cotto.lndmanagej.model.ClosedChannelFixtures;
 import de.cotto.lndmanagej.model.ForceClosedChannelBuilder;
 import de.cotto.lndmanagej.model.OpenInitiator;
+import de.cotto.lndmanagej.model.OpenInitiatorResolver;
 import lnrpc.ChannelCloseSummary;
 import lnrpc.Initiator;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +23,7 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2_SHORT;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_SHORT;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
+import static de.cotto.lndmanagej.model.ChannelPointFixtures.TRANSACTION_HASH;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.TRANSACTION_HASH_2;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_2;
@@ -41,6 +43,7 @@ import static lnrpc.Initiator.INITIATOR_REMOTE;
 import static lnrpc.Initiator.INITIATOR_UNKNOWN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -59,9 +62,14 @@ class GrpcClosedChannelsTest {
     @Mock
     private ChannelIdResolver channelIdResolver;
 
+    @Mock
+    private OpenInitiatorResolver openInitiatorResolver;
+
     @BeforeEach
     void setUp() {
         when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY);
+        lenient().when(openInitiatorResolver.resolveFromOpenTransactionHash(TRANSACTION_HASH))
+                .thenReturn(OpenInitiator.UNKNOWN);
     }
 
     @Test
@@ -75,6 +83,15 @@ class GrpcClosedChannelsTest {
         assertThat(grpcClosedChannels.getClosedChannels())
                 .containsExactlyInAnyOrder(CLOSED_CHANNEL, CLOSED_CHANNEL_2);
         verify(channelIdResolver, never()).resolveFromChannelPoint(any());
+    }
+
+    @Test
+    void getClosedChannels_resolves_initiator_from_chain_transactions() {
+        when(openInitiatorResolver.resolveFromOpenTransactionHash(TRANSACTION_HASH)).thenReturn(OpenInitiator.LOCAL);
+        when(grpcService.getClosedChannels()).thenReturn(List.of(
+                closedChannel(CHANNEL_ID_SHORT, COOPERATIVE_CLOSE, INITIATOR_UNKNOWN, INITIATOR_REMOTE)
+        ));
+        assertThat(grpcClosedChannels.getClosedChannels()).containsExactlyInAnyOrder(CLOSED_CHANNEL);
     }
 
     @Test
@@ -110,6 +127,7 @@ class GrpcClosedChannelsTest {
         ));
         assertThat(grpcClosedChannels.getClosedChannels())
                 .containsExactlyInAnyOrder(FORCE_CLOSED_CHANNEL_LOCAL);
+        verify(openInitiatorResolver, never()).resolveFromOpenTransactionHash(any());
     }
 
     @Test

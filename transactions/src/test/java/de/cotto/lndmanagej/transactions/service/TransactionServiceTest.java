@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.transactions.service;
 
+import de.cotto.lndmanagej.grpc.GrpcTransactions;
 import de.cotto.lndmanagej.transactions.TransactionDao;
 import de.cotto.lndmanagej.transactions.download.TransactionProvider;
 import org.junit.jupiter.api.Test;
@@ -9,11 +10,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+import java.util.Set;
 
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.TRANSACTION_HASH;
+import static de.cotto.lndmanagej.model.ChannelPointFixtures.TRANSACTION_HASH_2;
 import static de.cotto.lndmanagej.transactions.model.TransactionFixtures.TRANSACTION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,6 +32,47 @@ class TransactionServiceTest {
 
     @Mock
     private TransactionProvider transactionProvider;
+
+    @Mock
+    private GrpcTransactions grpcTransactions;
+
+    @Test
+    void isKnownByLnd_unable_to_retrieve_transaction_details() {
+        when(transactionDao.getTransaction(TRANSACTION_HASH)).thenReturn(Optional.empty());
+        assertThat(transactionService.isKnownByLnd(TRANSACTION_HASH)).isEmpty();
+        verify(grpcTransactions, never()).getKnownTransactionHashesInBlock(anyInt());
+    }
+
+    @Test
+    void isKnownByLnd_unable_to_retrieve_lnd_transaction_list() {
+        when(transactionDao.getTransaction(TRANSACTION_HASH)).thenReturn(Optional.of(TRANSACTION));
+        assertThat(transactionService.isKnownByLnd(TRANSACTION_HASH)).isEmpty();
+    }
+
+    @Test
+    void isKnownByLnd_no_transaction_in_block() {
+        when(transactionDao.getTransaction(TRANSACTION_HASH)).thenReturn(Optional.of(TRANSACTION));
+        when(grpcTransactions.getKnownTransactionHashesInBlock(TRANSACTION.blockHeight()))
+                .thenReturn(Optional.of(Set.of()));
+        assertThat(transactionService.isKnownByLnd(TRANSACTION_HASH)).contains(false);
+    }
+
+    @Test
+    void isKnownByLnd_only_other_transactions_in_block() {
+        when(transactionDao.getTransaction(TRANSACTION_HASH)).thenReturn(Optional.of(TRANSACTION));
+        when(grpcTransactions.getKnownTransactionHashesInBlock(TRANSACTION.blockHeight()))
+                .thenReturn(Optional.of(Set.of(TRANSACTION_HASH_2)));
+        assertThat(transactionService.isKnownByLnd(TRANSACTION_HASH)).contains(false);
+    }
+
+    @Test
+    void isKnownByLnd() {
+        when(transactionDao.getTransaction(TRANSACTION_HASH)).thenReturn(Optional.of(TRANSACTION));
+        when(grpcTransactions.getKnownTransactionHashesInBlock(TRANSACTION.blockHeight())).thenReturn(
+                Optional.of(Set.of(TRANSACTION_HASH_2, TRANSACTION_HASH))
+        );
+        assertThat(transactionService.isKnownByLnd(TRANSACTION_HASH)).contains(true);
+    }
 
     @Test
     void getTransaction_empty() {
