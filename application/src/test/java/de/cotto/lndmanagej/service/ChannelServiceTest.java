@@ -44,6 +44,18 @@ class ChannelServiceTest {
     private GrpcClosedChannels grpcClosedChannels;
 
     @Test
+    void isClosed_false() {
+        when(grpcClosedChannels.getClosedChannels()).thenReturn(Set.of(CLOSED_CHANNEL_2));
+        assertThat(channelService.isClosed(CHANNEL_ID)).isFalse();
+    }
+
+    @Test
+    void isClosed() {
+        when(grpcClosedChannels.getClosedChannels()).thenReturn(Set.of(CLOSED_CHANNEL_2, CLOSED_CHANNEL));
+        assertThat(channelService.isClosed(CHANNEL_ID)).isTrue();
+    }
+
+    @Test
     void getOpenChannelsWith_by_pubkey() {
         when(grpcChannels.getChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_3));
         assertThat(channelService.getOpenChannelsWith(PUBKEY_2))

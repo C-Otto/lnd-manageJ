@@ -4,6 +4,7 @@ import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.transactions.service.TransactionService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -170,9 +171,20 @@ class OnChainCostServiceTest {
     class GetCloseCosts {
         private static final Coins CLOSE_COSTS = TRANSACTION_2.fees();
 
+        @BeforeEach
+        void setUp() {
+            lenient().when(channelService.isClosed(CHANNEL_ID)).thenReturn(true);
+        }
+
         @Test
         void getCloseCosts_by_channel_id_not_resolved() {
             assertThat(onChainCostService.getCloseCosts(CHANNEL_ID)).isEmpty();
+        }
+
+        @Test
+        void getCloseCosts_by_channel_id_not_closed() {
+            when(channelService.isClosed(CHANNEL_ID)).thenReturn(false);
+            assertThat(onChainCostService.getCloseCosts(CHANNEL_ID)).contains(Coins.NONE);
         }
 
         @Test

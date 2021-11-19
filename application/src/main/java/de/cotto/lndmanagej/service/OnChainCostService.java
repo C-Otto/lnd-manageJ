@@ -44,7 +44,10 @@ public class OnChainCostService {
     }
 
     public Optional<Coins> getCloseCosts(ChannelId channelId) {
-        return channelService.getClosedChannel(channelId).flatMap(this::getCloseCosts);
+        if (channelService.isClosed(channelId)) {
+            return channelService.getClosedChannel(channelId).flatMap(this::getCloseCosts);
+        }
+        return Optional.of(Coins.NONE);
     }
 
     public Optional<Coins> getCloseCosts(ClosedChannel closedChannel) {

@@ -43,6 +43,10 @@ public class ChannelService {
                 .build(grpcChannels::getWaitingCloseChannels);
     }
 
+    public boolean isClosed(ChannelId channelId) {
+        return getClosedChannels().stream().anyMatch(c -> c.getId().equals(channelId));
+    }
+
     public Set<LocalOpenChannel> getOpenChannels() {
         return channelsCache.getUnchecked("");
     }
