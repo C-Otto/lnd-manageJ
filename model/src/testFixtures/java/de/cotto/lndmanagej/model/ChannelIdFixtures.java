@@ -11,6 +11,4 @@ public class ChannelIdFixtures {
     public static final ChannelId CHANNEL_ID_4 = ChannelId.fromCompactForm(CHANNEL_ID_COMPACT_4);
     public static final long CHANNEL_ID_SHORT = CHANNEL_ID.getShortChannelId();
     public static final long CHANNEL_ID_2_SHORT = CHANNEL_ID_2.getShortChannelId();
-    public static final long CHANNEL_ID_3_SHORT = CHANNEL_ID_3.getShortChannelId();
-    public static final long CHANNEL_ID_4_SHORT = CHANNEL_ID_4.getShortChannelId();
 }

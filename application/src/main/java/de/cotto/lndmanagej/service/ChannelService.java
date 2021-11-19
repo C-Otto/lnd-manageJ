@@ -23,12 +23,14 @@ import java.util.stream.Stream;
 public class ChannelService {
     private static final int CACHE_EXPIRY_MINUTES = 1;
 
+    private final GrpcChannels grpcChannels;
     private final LoadingCache<Object, Set<LocalOpenChannel>> channelsCache;
     private final LoadingCache<Object, Set<ClosedChannel>> closedChannelsCache;
     private final LoadingCache<Object, Set<ForceClosingChannel>> forceClosingChannelsCache;
     private final LoadingCache<Object, Set<WaitingCloseChannel>> waitingCloseChannelsCache;
 
     public ChannelService(GrpcChannels grpcChannels, GrpcClosedChannels grpcClosedChannels) {
+        this.grpcChannels = grpcChannels;
         channelsCache = new CacheBuilder()
                 .withExpiryMinutes(CACHE_EXPIRY_MINUTES)
                 .build(grpcChannels::getChannels);
@@ -44,11 +46,21 @@ public class ChannelService {
     }
 
     public boolean isClosed(ChannelId channelId) {
-        return getClosedChannels().stream().anyMatch(c -> c.getId().equals(channelId));
+        return getClosedChannel(channelId).isPresent();
+    }
+
+    public Optional<LocalChannel> getLocalChannel(ChannelId channelId) {
+        return getAllLocalChannels()
+                .filter(c -> channelId.equals(c.getId()))
+                .findFirst();
     }
 
     public Set<LocalOpenChannel> getOpenChannels() {
         return channelsCache.getUnchecked("");
+    }
+
+    public Optional<LocalOpenChannel> getOpenChannel(ChannelId channelId) {
+        return grpcChannels.getChannel(channelId);
     }
 
     public Set<ClosedChannel> getClosedChannels() {
@@ -65,6 +77,12 @@ public class ChannelService {
         return forceClosingChannelsCache.getUnchecked("");
     }
 
+    public Optional<ForceClosingChannel> getForceClosingChannel(ChannelId channelId) {
+        return getForceClosingChannels().stream()
+                .filter(c -> channelId.equals(c.getId()))
+                .findFirst();
+    }
+
     public Set<WaitingCloseChannel> getWaitingCloseChannels() {
         return waitingCloseChannelsCache.getUnchecked("");
     }
@@ -75,16 +93,10 @@ public class ChannelService {
                 .collect(Collectors.toSet());
     }
 
-    public Set<LocalChannel> getAllChannelsWith(Pubkey pubkey) {
+    public Set<LocalChannel> getAllChannelsWith(Pubkey peer) {
         return getAllLocalChannels()
-                .filter(c -> c.getRemotePubkey().equals(pubkey))
+                .filter(c -> peer.equals(c.getRemotePubkey()))
                 .collect(Collectors.toSet());
-    }
-
-    public Optional<LocalChannel> getLocalChannel(ChannelId channelId) {
-        return getAllLocalChannels()
-                .filter(c -> c.getId().equals(channelId))
-                .findFirst();
     }
 
     public Stream<LocalChannel> getAllLocalChannels() {
