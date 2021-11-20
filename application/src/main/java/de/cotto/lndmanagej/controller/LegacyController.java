@@ -47,12 +47,6 @@ public class LegacyController {
         this.metrics = metrics;
     }
 
-    @GetMapping("/node/{pubkey}/alias")
-    public String getAlias(@PathVariable Pubkey pubkey) {
-        mark("getAlias");
-        return nodeService.getAlias(pubkey);
-    }
-
     @GetMapping("/node/{pubkey}/open-channels")
     public String getOpenChannelIdsForPubkey(@PathVariable Pubkey pubkey) {
         mark("getOpenChannelIdsForPubkey");

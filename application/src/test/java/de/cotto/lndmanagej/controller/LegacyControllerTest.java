@@ -30,7 +30,6 @@ import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHAN
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_3;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_TO_NODE_3;
-import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_3;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
@@ -63,13 +62,6 @@ class LegacyControllerTest {
 
     @Mock
     private Metrics metrics;
-
-    @Test
-    void getAlias() {
-        when(nodeService.getAlias(PUBKEY)).thenReturn(ALIAS);
-        assertThat(legacyController.getAlias(PUBKEY)).isEqualTo(ALIAS);
-        verify(metrics).mark(argThat(name -> name.endsWith(".getAlias")));
-    }
 
     @Test
     void getOpenChannelIds_for_peer() {

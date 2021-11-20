@@ -26,7 +26,6 @@ import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSIN
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_3;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_TO_NODE_3;
-import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
@@ -46,6 +45,7 @@ class LegacyControllerIT {
     private MockMvc mockMvc;
 
     @MockBean
+    @SuppressWarnings("unused")
     private NodeService nodeService;
 
     @MockBean
@@ -63,17 +63,6 @@ class LegacyControllerIT {
     @MockBean
     @SuppressWarnings("unused")
     private Metrics metrics;
-
-    @Test
-    void getAlias() throws Exception {
-        when(nodeService.getAlias(PUBKEY)).thenReturn(ALIAS);
-        mockMvc.perform(get(PUBKEY_BASE + "/alias")).andExpect(content().string(ALIAS));
-    }
-
-    @Test
-    void getAlias_error() throws Exception {
-        mockMvc.perform(get("/legacy/node/xxx/alias")).andExpect(status().isBadRequest());
-    }
 
     @Test
     void getOpenChannelIds_for_peer() throws Exception {
