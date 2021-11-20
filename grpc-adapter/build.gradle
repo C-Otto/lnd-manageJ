@@ -18,7 +18,7 @@ jacocoTestCoverageVerification {
                     limit.minimum = 0.82
                 }
                 if (limit.counter == 'METHOD') {
-                    limit.minimum = 0.79
+                    limit.minimum = 0.78
                 }
                 if (limit.counter == 'BRANCH') {
                     limit.minimum = 0.92

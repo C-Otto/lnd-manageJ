@@ -24,7 +24,7 @@ import lnrpc.Peer;
 import lnrpc.PendingChannelsRequest;
 import lnrpc.PendingChannelsResponse;
 import lnrpc.PendingChannelsResponse.ForceClosedChannel;
-import lnrpc.TransactionDetails;
+import lnrpc.Transaction;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
@@ -35,18 +35,24 @@ import java.util.Optional;
 @Component
 @SuppressWarnings("PMD.ExcessiveImports")
 public class GrpcService extends GrpcBase {
-    private static final int CACHE_EXPIRY_MILLISECONDS = 200;
+    private static final int CHANNELS_CACHE_EXPIRY_MS = 200;
+    private static final int PENDING_CHANNELS_CACHE_EXPIRY_MS = 10_000;
+    private static final int LIST_PEERS_CACHE_EXPIRY_MS = 10_000;
+    private static final int TRANSACTIONS_CACHE_EXPIRY_MS = 30_000;
 
     private final LightningGrpc.LightningBlockingStub lightningStub;
     private final LoadingCache<Object, List<Channel>> channelsCache = new CacheBuilder()
-            .withExpiryMilliseconds(CACHE_EXPIRY_MILLISECONDS)
+            .withExpiryMilliseconds(CHANNELS_CACHE_EXPIRY_MS)
             .build(this::getChannelsWithoutCache);
     private final LoadingCache<Object, Optional<PendingChannelsResponse>> pendingChannelsCache = new CacheBuilder()
-            .withExpiryMilliseconds(CACHE_EXPIRY_MILLISECONDS)
+            .withExpiryMilliseconds(PENDING_CHANNELS_CACHE_EXPIRY_MS)
             .build(this::getPendingChannelsWithoutCache);
     private final LoadingCache<Object, List<Peer>> listPeersCache = new CacheBuilder()
-            .withExpiryMilliseconds(CACHE_EXPIRY_MILLISECONDS)
+            .withExpiryMilliseconds(LIST_PEERS_CACHE_EXPIRY_MS)
             .build(this::listPeersWithoutCache);
+    private final LoadingCache<Object, Optional<List<Transaction>>> getTransactionsCache = new CacheBuilder()
+            .withExpiryMilliseconds(TRANSACTIONS_CACHE_EXPIRY_MS)
+            .build(this::getTransactionsWithoutCache);
 
     public GrpcService(LndConfiguration lndConfiguration, Metrics metrics) throws IOException {
         super(lndConfiguration, metrics);
@@ -121,13 +127,14 @@ public class GrpcService extends GrpcBase {
                 .orElse(List.of());
     }
 
-    public Optional<TransactionDetails> getTransactionsInBlock(int blockHeight) {
+    public Optional<List<Transaction>> getTransactions() {
+        return getTransactionsCache.getUnchecked("");
+    }
+
+    private Optional<List<Transaction>> getTransactionsWithoutCache() {
         mark("getTransactions");
-        GetTransactionsRequest request = GetTransactionsRequest.newBuilder()
-                .setStartHeight(blockHeight)
-                .setEndHeight(blockHeight)
-                .build();
-        return get(() -> lightningStub.getTransactions(request));
+        return get(() -> lightningStub.getTransactions(GetTransactionsRequest.getDefaultInstance())
+                .getTransactionsList());
     }
 
     private Optional<PendingChannelsResponse> getPendingChannelsWithoutCache() {
