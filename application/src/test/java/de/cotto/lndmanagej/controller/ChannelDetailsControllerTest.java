@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.controller;
 
+import de.cotto.lndmanagej.controller.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
