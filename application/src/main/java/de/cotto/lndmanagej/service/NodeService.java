@@ -12,12 +12,14 @@ import java.time.Duration;
 @Component
 public class NodeService {
     private static final int MAXIMUM_SIZE = 500;
-    private static final Duration ALIAS_CACHE_EXPIRY = Duration.ofMinutes(30);
+    private static final Duration ALIAS_CACHE_EXPIRY = Duration.ofHours(24);
+    private static final Duration ALIAS_CACHE_REFRESH = Duration.ofMinutes(30);
     private static final Duration NODE_CACHE_EXPIRY = Duration.ofSeconds(60);
 
     private final GrpcNodeInfo grpcNodeInfo;
     private final LoadingCache<Pubkey, String> aliasCache = new CacheBuilder()
             .withExpiry(ALIAS_CACHE_EXPIRY)
+            .withRefresh(ALIAS_CACHE_REFRESH)
             .withMaximumSize(MAXIMUM_SIZE)
             .build(this::getAliasWithoutCacheAndUpdateNodeCache);
     private final LoadingCache<Pubkey, Node> nodeCache = new CacheBuilder()
