@@ -1,6 +1,6 @@
 package de.cotto.lndmanagej.transactions.service;
 
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.grpc.GrpcTransactions;
 import de.cotto.lndmanagej.transactions.TransactionDao;
@@ -36,7 +36,7 @@ public class TransactionService {
 
     @SuppressWarnings("PMD.LinguisticNaming")
     public Optional<Boolean> isKnownByLnd(String transactionHash) {
-        return hashIsKnownCache.getUnchecked(transactionHash);
+        return hashIsKnownCache.get(transactionHash);
     }
 
     @SuppressWarnings("PMD.LinguisticNaming")

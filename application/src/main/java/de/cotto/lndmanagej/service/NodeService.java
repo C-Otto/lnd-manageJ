@@ -1,6 +1,6 @@
 package de.cotto.lndmanagej.service;
 
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.grpc.GrpcNodeInfo;
 import de.cotto.lndmanagej.model.Node;
@@ -19,32 +19,34 @@ public class NodeService {
     private final LoadingCache<Pubkey, String> aliasCache = new CacheBuilder()
             .withExpiry(ALIAS_CACHE_EXPIRY)
             .withMaximumSize(MAXIMUM_SIZE)
-            .build(this::getAliasWithoutCache);
+            .build(this::getAliasWithoutCacheAndUpdateNodeCache);
     private final LoadingCache<Pubkey, Node> nodeCache = new CacheBuilder()
             .withExpiry(NODE_CACHE_EXPIRY)
             .withMaximumSize(MAXIMUM_SIZE)
-            .build(this::getNodeWithoutCache);
+            .build(this::getNodeWithoutCacheAndUpdateAliasCache);
 
     public NodeService(GrpcNodeInfo grpcNodeInfo) {
         this.grpcNodeInfo = grpcNodeInfo;
     }
 
     public String getAlias(Pubkey pubkey) {
-        return aliasCache.getUnchecked(pubkey);
+        return aliasCache.get(pubkey);
     }
 
     public Node getNode(Pubkey pubkey) {
-        return nodeCache.getUnchecked(pubkey);
+        return nodeCache.get(pubkey);
     }
 
-    private Node getNodeWithoutCache(Pubkey pubkey) {
+    private Node getNodeWithoutCacheAndUpdateAliasCache(Pubkey pubkey) {
         Node node = grpcNodeInfo.getNode(pubkey);
         aliasCache.put(pubkey, node.alias());
         return node;
     }
 
-    private String getAliasWithoutCache(Pubkey pubkey) {
-        return getNodeWithoutCache(pubkey).alias();
+    private String getAliasWithoutCacheAndUpdateNodeCache(Pubkey pubkey) {
+        Node node = grpcNodeInfo.getNode(pubkey);
+        nodeCache.put(pubkey, node);
+        return node.alias();
     }
 
 }

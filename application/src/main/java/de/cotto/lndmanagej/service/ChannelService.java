@@ -1,6 +1,6 @@
 package de.cotto.lndmanagej.service;
 
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.grpc.GrpcChannels;
 import de.cotto.lndmanagej.grpc.GrpcClosedChannels;
@@ -58,7 +58,7 @@ public class ChannelService {
     }
 
     public Set<LocalOpenChannel> getOpenChannels() {
-        return channelsCache.getUnchecked("");
+        return channelsCache.get("");
     }
 
     public Optional<LocalOpenChannel> getOpenChannel(ChannelId channelId) {
@@ -66,7 +66,7 @@ public class ChannelService {
     }
 
     public Set<ClosedChannel> getClosedChannels() {
-        return closedChannelsCache.getUnchecked("");
+        return closedChannelsCache.get("");
     }
 
     public Optional<ClosedChannel> getClosedChannel(ChannelId channelId) {
@@ -76,7 +76,7 @@ public class ChannelService {
     }
 
     public Set<ForceClosingChannel> getForceClosingChannels() {
-        return forceClosingChannelsCache.getUnchecked("");
+        return forceClosingChannelsCache.get("");
     }
 
     public Optional<ForceClosingChannel> getForceClosingChannel(ChannelId channelId) {
@@ -86,7 +86,7 @@ public class ChannelService {
     }
 
     public Set<WaitingCloseChannel> getWaitingCloseChannels() {
-        return waitingCloseChannelsCache.getUnchecked("");
+        return waitingCloseChannelsCache.get("");
     }
 
     public Set<LocalOpenChannel> getOpenChannelsWith(Pubkey peer) {

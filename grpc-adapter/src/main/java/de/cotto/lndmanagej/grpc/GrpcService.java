@@ -1,6 +1,6 @@
 package de.cotto.lndmanagej.grpc;
 
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import de.cotto.lndmanagej.LndConfiguration;
 import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.metrics.Metrics;
@@ -71,7 +71,7 @@ public class GrpcService extends GrpcBase {
     }
 
     public List<Peer> listPeers() {
-        return listPeersCache.getUnchecked("");
+        return listPeersCache.get("");
     }
 
     private List<Peer> listPeersWithoutCache() {
@@ -103,11 +103,11 @@ public class GrpcService extends GrpcBase {
     }
 
     public List<Channel> getChannels() {
-        return channelsCache.getUnchecked("");
+        return channelsCache.get("");
     }
 
     private Optional<PendingChannelsResponse> getPendingChannels() {
-        return pendingChannelsCache.getUnchecked("");
+        return pendingChannelsCache.get("");
     }
 
     public List<ChannelCloseSummary> getClosedChannels() {
@@ -129,7 +129,7 @@ public class GrpcService extends GrpcBase {
     }
 
     public Optional<List<Transaction>> getTransactions() {
-        return getTransactionsCache.getUnchecked("");
+        return getTransactionsCache.get("");
     }
 
     private Optional<List<Transaction>> getTransactionsWithoutCache() {

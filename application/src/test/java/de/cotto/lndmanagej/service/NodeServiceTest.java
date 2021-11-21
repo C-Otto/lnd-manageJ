@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.grpc.GrpcNodeInfo;
+import de.cotto.lndmanagej.model.Node;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,6 +13,8 @@ import static de.cotto.lndmanagej.model.NodeFixtures.NODE;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_WITHOUT_ALIAS;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,10 +38,20 @@ class NodeServiceTest {
     }
 
     @Test
-    void getNode_updates_alias() {
+    void getAlias_updates_node_cache() {
         when(grpcNodeInfo.getNode(PUBKEY)).thenReturn(NODE_WITHOUT_ALIAS).thenReturn(NODE).thenThrow();
         assertThat(nodeService.getAlias(PUBKEY)).isEqualTo(NODE_WITHOUT_ALIAS.alias());
-        nodeService.getNode(PUBKEY);
-        assertThat(nodeService.getAlias(PUBKEY)).isEqualTo(ALIAS);
+        Node node = nodeService.getNode(PUBKEY);
+        assertThat(node).isEqualTo(NODE_WITHOUT_ALIAS);
+        verify(grpcNodeInfo, times(1)).getNode(PUBKEY);
+    }
+
+    @Test
+    void getNode_updates_alias_cache() {
+        when(grpcNodeInfo.getNode(PUBKEY)).thenReturn(NODE_WITHOUT_ALIAS).thenReturn(NODE).thenThrow();
+        assertThat(nodeService.getNode(PUBKEY)).isEqualTo(NODE_WITHOUT_ALIAS);
+        String alias = nodeService.getAlias(PUBKEY);
+        assertThat(alias).isEqualTo(NODE_WITHOUT_ALIAS.alias());
+        verify(grpcNodeInfo, times(1)).getNode(PUBKEY);
     }
 }

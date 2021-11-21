@@ -1,26 +1,33 @@
 package de.cotto.lndmanagej.caching;
 
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.CacheLoader;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.Duration;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class CacheBuilder {
-    private Duration duration;
+    private Duration expiry;
 
     @Nullable
     private Integer maximumSize;
 
+    @Nullable
+    private Duration refresh;
+
     public CacheBuilder() {
-        duration = Duration.ofMinutes(10);
+        expiry = Duration.ofMinutes(10);
     }
 
-    public CacheBuilder withExpiry(Duration duration) {
-        this.duration = duration;
+    public CacheBuilder withExpiry(Duration expiry) {
+        this.expiry = expiry;
+        return this;
+    }
+
+    public CacheBuilder withRefresh(Duration refresh) {
+        this.refresh = refresh;
         return this;
     }
 
@@ -29,30 +36,19 @@ public class CacheBuilder {
         return this;
     }
 
-    public <I, O> LoadingCache<I, O> build(Function<I, O> function) {
-        CacheLoader<I, O> loader = getLoader(function);
-        com.google.common.cache.CacheBuilder<Object, Object> builder = com.google.common.cache.CacheBuilder.newBuilder()
-                .expireAfterWrite(duration);
-        if (this.maximumSize != null) {
-            return builder
-                    .maximumSize(maximumSize)
-                    .build(loader);
+    public <I, O> LoadingCache<I, O> build(CacheLoader<I, O> function) {
+        Caffeine<Object, Object> builder = Caffeine.newBuilder()
+                .expireAfterWrite(expiry);
+        if (this.refresh != null) {
+            builder.refreshAfterWrite(refresh);
         }
-        return builder
-                .build(loader);
+        if (this.maximumSize != null) {
+            builder.maximumSize(maximumSize);
+        }
+        return builder.build(function);
     }
 
     public <O> LoadingCache<Object, O> build(Supplier<O> function) {
         return build(ignored -> function.get());
-    }
-
-    private <I, O> CacheLoader<I, O> getLoader(Function<I, O> function) {
-        return new CacheLoader<>() {
-            @Nonnull
-            @Override
-            public O load(@Nonnull I input) {
-                return function.apply(input);
-            }
-        };
     }
 }

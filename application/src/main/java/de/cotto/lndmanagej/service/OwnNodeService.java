@@ -1,6 +1,6 @@
 package de.cotto.lndmanagej.service;
 
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.grpc.GrpcGetInfo;
 import org.springframework.stereotype.Component;
@@ -21,7 +21,7 @@ public class OwnNodeService {
     }
 
     public boolean isSyncedToChain() {
-        return syncedToChainCache.getUnchecked("");
+        return Boolean.TRUE.equals(syncedToChainCache.get(""));
     }
 
     private boolean isSyncedToChainWithoutCache() {
