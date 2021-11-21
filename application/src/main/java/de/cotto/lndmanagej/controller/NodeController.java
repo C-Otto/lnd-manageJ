@@ -4,6 +4,7 @@ import com.codahale.metrics.MetricRegistry;
 import de.cotto.lndmanagej.controller.dto.ChannelsForNodeDto;
 import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
+import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
@@ -11,6 +12,7 @@ import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
+import de.cotto.lndmanagej.service.OnChainCostService;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,11 +30,18 @@ public class NodeController {
     private final NodeService nodeService;
     private final Metrics metrics;
     private final ChannelService channelService;
+    private final OnChainCostService onChainCostService;
 
-    public NodeController(NodeService nodeService, ChannelService channelService, Metrics metrics) {
+    public NodeController(
+            NodeService nodeService,
+            ChannelService channelService,
+            Metrics metrics,
+            OnChainCostService onChainCostService
+    ) {
         this.nodeService = nodeService;
         this.metrics = metrics;
         this.channelService = channelService;
+        this.onChainCostService = onChainCostService;
     }
 
     @GetMapping("/alias")
@@ -45,6 +54,8 @@ public class NodeController {
     public NodeDetailsDto getDetails(@PathVariable Pubkey pubkey) {
         mark("getDetails");
         Node node = nodeService.getNode(pubkey);
+        String openCosts = String.valueOf(onChainCostService.getOpenCostsWith(pubkey).satoshis());
+        String closeCosts = String.valueOf(onChainCostService.getCloseCostsWith(pubkey).satoshis());
         return new NodeDetailsDto(
                 pubkey,
                 node.alias(),
@@ -52,6 +63,7 @@ public class NodeController {
                 toSortedList(channelService.getClosedChannelsWith(pubkey)),
                 toSortedList(channelService.getWaitingCloseChannelsFor(pubkey)),
                 toSortedList(channelService.getForceClosingChannelsFor(pubkey)),
+                new OnChainCostsDto(openCosts, closeCosts),
                 node.online()
         );
     }

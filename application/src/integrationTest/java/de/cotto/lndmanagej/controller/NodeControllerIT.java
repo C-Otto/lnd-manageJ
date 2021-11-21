@@ -1,9 +1,11 @@
 package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.metrics.Metrics;
+import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
+import de.cotto.lndmanagej.service.OnChainCostService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -45,6 +47,9 @@ class NodeControllerIT {
     private ChannelService channelService;
 
     @MockBean
+    private OnChainCostService onChainCostService;
+
+    @MockBean
     @SuppressWarnings("unused")
     private Metrics metrics;
 
@@ -62,6 +67,8 @@ class NodeControllerIT {
         when(channelService.getClosedChannelsWith(PUBKEY_2)).thenReturn(Set.of(CLOSED_CHANNEL, CLOSED_CHANNEL_3));
         when(channelService.getWaitingCloseChannelsFor(PUBKEY_2)).thenReturn(Set.of(WAITING_CLOSE_CHANNEL));
         when(channelService.getForceClosingChannelsFor(PUBKEY_2)).thenReturn(Set.of(FORCE_CLOSING_CHANNEL_2));
+        when(onChainCostService.getOpenCostsWith(PUBKEY_2)).thenReturn(Coins.ofSatoshis(123));
+        when(onChainCostService.getCloseCostsWith(PUBKEY_2)).thenReturn(Coins.ofSatoshis(456));
         List<String> channelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_2.toString());
         List<String> closedChannelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_3.toString());
         List<String> waitingCloseChannelIds = List.of(CHANNEL_ID.toString());
@@ -73,6 +80,8 @@ class NodeControllerIT {
                 .andExpect(jsonPath("$.closedChannels", is(closedChannelIds)))
                 .andExpect(jsonPath("$.waitingCloseChannels", is(waitingCloseChannelIds)))
                 .andExpect(jsonPath("$.pendingForceClosingChannels", is(forceClosingChannelIds)))
+                .andExpect(jsonPath("$.onChainCosts.openCosts", is("123")))
+                .andExpect(jsonPath("$.onChainCosts.closeCosts", is("456")))
                 .andExpect(jsonPath("$.online", is(true)));
     }
 

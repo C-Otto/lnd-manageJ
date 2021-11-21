@@ -6,6 +6,7 @@ import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.OpenInitiator;
+import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.transactions.model.Transaction;
 import de.cotto.lndmanagej.transactions.service.TransactionService;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,13 @@ public class OnChainCostService {
     public OnChainCostService(TransactionService transactionService, ChannelService channelService) {
         this.transactionService = transactionService;
         this.channelService = channelService;
+    }
+
+    public Coins getOpenCostsWith(Pubkey pubkey) {
+        return channelService.getAllChannelsWith(pubkey).stream()
+                .map(this::getOpenCosts)
+                .flatMap(Optional::stream)
+                .reduce(Coins.NONE, Coins::add);
     }
 
     public Optional<Coins> getOpenCosts(ChannelId channelId) {
@@ -41,6 +49,13 @@ public class OnChainCostService {
             return Optional.of(Coins.NONE);
         }
         return Optional.empty();
+    }
+
+    public Coins getCloseCostsWith(Pubkey pubkey) {
+        return channelService.getClosedChannelsWith(pubkey).stream()
+                .map(this::getCloseCosts)
+                .flatMap(Optional::stream)
+                .reduce(Coins.NONE, Coins::add);
     }
 
     public Optional<Coins> getCloseCosts(ChannelId channelId) {

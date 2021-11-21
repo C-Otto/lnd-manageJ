@@ -2,10 +2,13 @@ package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.controller.dto.ChannelsForNodeDto;
 import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
+import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.metrics.Metrics;
+import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
+import de.cotto.lndmanagej.service.OnChainCostService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,6 +35,7 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL_2;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -50,6 +54,9 @@ class NodeControllerTest {
     @Mock
     private ChannelService channelService;
 
+    @Mock
+    private OnChainCostService onChainCostService;
+
     @Test
     void getAlias() {
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
@@ -60,6 +67,8 @@ class NodeControllerTest {
 
     @Test
     void getNodeDetails_no_channels() {
+        when(onChainCostService.getOpenCostsWith(any())).thenReturn(Coins.NONE);
+        when(onChainCostService.getCloseCostsWith(any())).thenReturn(Coins.NONE);
         NodeDetailsDto expectedDetails = new NodeDetailsDto(
                 PUBKEY_2,
                 ALIAS_2,
@@ -67,6 +76,7 @@ class NodeControllerTest {
                 List.of(),
                 List.of(),
                 List.of(),
+                new OnChainCostsDto("0", "0"),
                 true
         );
         when(nodeService.getNode(PUBKEY_2)).thenReturn(new Node(PUBKEY_2, ALIAS_2, 0, true));
@@ -86,6 +96,8 @@ class NodeControllerTest {
         when(channelService.getForceClosingChannelsFor(PUBKEY_2)).thenReturn(
                 Set.of(FORCE_CLOSING_CHANNEL, FORCE_CLOSING_CHANNEL_2, FORCE_CLOSING_CHANNEL_3)
         );
+        when(onChainCostService.getOpenCostsWith(PUBKEY_2)).thenReturn(Coins.ofSatoshis(123));
+        when(onChainCostService.getCloseCostsWith(PUBKEY_2)).thenReturn(Coins.ofSatoshis(456));
         NodeDetailsDto expectedDetails = new NodeDetailsDto(
                 PUBKEY_2,
                 ALIAS_2,
@@ -93,6 +105,7 @@ class NodeControllerTest {
                 List.of(CHANNEL_ID_2, CHANNEL_ID_3),
                 List.of(CHANNEL_ID, CHANNEL_ID_2),
                 List.of(CHANNEL_ID, CHANNEL_ID_2, CHANNEL_ID_3),
+                new OnChainCostsDto("123", "456"),
                 false
         );
 
