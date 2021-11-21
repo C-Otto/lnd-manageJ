@@ -13,6 +13,7 @@ import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.WaitingCloseChannel;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
@@ -22,7 +23,7 @@ import java.util.stream.Stream;
 
 @Component
 public class ChannelService {
-    private static final int CACHE_EXPIRY_MINUTES = 1;
+    private static final Duration CACHE_EXPIRY = Duration.ofMinutes(1);
 
     private final GrpcChannels grpcChannels;
     private final LoadingCache<Object, Set<LocalOpenChannel>> channelsCache;
@@ -33,16 +34,16 @@ public class ChannelService {
     public ChannelService(GrpcChannels grpcChannels, GrpcClosedChannels grpcClosedChannels) {
         this.grpcChannels = grpcChannels;
         channelsCache = new CacheBuilder()
-                .withExpiryMinutes(CACHE_EXPIRY_MINUTES)
+                .withExpiry(CACHE_EXPIRY)
                 .build(grpcChannels::getChannels);
         closedChannelsCache = new CacheBuilder()
-                .withExpiryMinutes(CACHE_EXPIRY_MINUTES)
+                .withExpiry(CACHE_EXPIRY)
                 .build(grpcClosedChannels::getClosedChannels);
         forceClosingChannelsCache = new CacheBuilder()
-                .withExpiryMinutes(CACHE_EXPIRY_MINUTES)
+                .withExpiry(CACHE_EXPIRY)
                 .build(grpcChannels::getForceClosingChannels);
         waitingCloseChannelsCache = new CacheBuilder()
-                .withExpiryMinutes(CACHE_EXPIRY_MINUTES)
+                .withExpiry(CACHE_EXPIRY)
                 .build(grpcChannels::getWaitingCloseChannels);
     }
 

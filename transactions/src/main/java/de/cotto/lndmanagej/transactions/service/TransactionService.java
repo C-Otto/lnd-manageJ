@@ -8,11 +8,13 @@ import de.cotto.lndmanagej.transactions.download.TransactionProvider;
 import de.cotto.lndmanagej.transactions.model.Transaction;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
 
 @Component
 public class TransactionService {
+    private static final Duration CACHE_EXPIRY = Duration.ofMinutes(1);
     private final TransactionDao transactionDao;
     private final TransactionProvider transactionProvider;
     private final GrpcTransactions grpcTransactions;
@@ -27,7 +29,7 @@ public class TransactionService {
         this.transactionProvider = transactionProvider;
         this.grpcTransactions = grpcTransactions;
         hashIsKnownCache = new CacheBuilder()
-                .withExpiryMinutes(1)
+                .withExpiry(CACHE_EXPIRY)
                 .withMaximumSize(1_000)
                 .build(this::isKnownByLndWithoutCache);
     }

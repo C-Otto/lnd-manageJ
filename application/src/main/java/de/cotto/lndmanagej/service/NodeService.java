@@ -7,19 +7,21 @@ import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.Pubkey;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+
 @Component
 public class NodeService {
     private static final int MAXIMUM_SIZE = 500;
-    private static final int ALIAS_CACHE_EXPIRY_MINUTES = 30;
-    private static final int NODE_CACHE_EXPIRY_SECONDS = 60;
+    private static final Duration ALIAS_CACHE_EXPIRY = Duration.ofMinutes(30);
+    private static final Duration NODE_CACHE_EXPIRY = Duration.ofSeconds(60);
 
     private final GrpcNodeInfo grpcNodeInfo;
     private final LoadingCache<Pubkey, String> aliasCache = new CacheBuilder()
-            .withExpiryMinutes(ALIAS_CACHE_EXPIRY_MINUTES)
+            .withExpiry(ALIAS_CACHE_EXPIRY)
             .withMaximumSize(MAXIMUM_SIZE)
             .build(this::getAliasWithoutCache);
     private final LoadingCache<Pubkey, Node> nodeCache = new CacheBuilder()
-            .withExpirySeconds(NODE_CACHE_EXPIRY_SECONDS)
+            .withExpiry(NODE_CACHE_EXPIRY)
             .withMaximumSize(MAXIMUM_SIZE)
             .build(this::getNodeWithoutCache);
 

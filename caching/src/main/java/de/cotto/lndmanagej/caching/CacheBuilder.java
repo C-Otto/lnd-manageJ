@@ -5,40 +5,22 @@ import com.google.common.cache.LoadingCache;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class CacheBuilder {
-    private long duration;
-
-    @Nullable
-    private TimeUnit timeUnit;
+    private Duration duration;
 
     @Nullable
     private Integer maximumSize;
 
     public CacheBuilder() {
-        duration = 10;
-        timeUnit = TimeUnit.MINUTES;
+        duration = Duration.ofMinutes(10);
     }
 
-    public CacheBuilder withExpiryMilliseconds(long milliseconds) {
-        timeUnit = TimeUnit.MILLISECONDS;
-        duration = milliseconds;
-        return this;
-    }
-
-    public CacheBuilder withExpirySeconds(long seconds) {
-        timeUnit = TimeUnit.SECONDS;
-        duration = seconds;
-        return this;
-    }
-
-    public CacheBuilder withExpiryMinutes(long minutes) {
-        timeUnit = TimeUnit.MINUTES;
-        duration = minutes;
+    public CacheBuilder withExpiry(Duration duration) {
+        this.duration = duration;
         return this;
     }
 
@@ -50,7 +32,7 @@ public class CacheBuilder {
     public <I, O> LoadingCache<I, O> build(Function<I, O> function) {
         CacheLoader<I, O> loader = getLoader(function);
         com.google.common.cache.CacheBuilder<Object, Object> builder = com.google.common.cache.CacheBuilder.newBuilder()
-                .expireAfterWrite(duration, Objects.requireNonNull(timeUnit));
+                .expireAfterWrite(duration);
         if (this.maximumSize != null) {
             return builder
                     .maximumSize(maximumSize)

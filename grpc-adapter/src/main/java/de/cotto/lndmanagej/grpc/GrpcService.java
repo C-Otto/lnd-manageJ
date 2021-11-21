@@ -29,29 +29,30 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
 @Component
 @SuppressWarnings("PMD.ExcessiveImports")
 public class GrpcService extends GrpcBase {
-    private static final int CHANNELS_CACHE_EXPIRY_MS = 200;
-    private static final int PENDING_CHANNELS_CACHE_EXPIRY_MS = 10_000;
-    private static final int LIST_PEERS_CACHE_EXPIRY_MS = 10_000;
-    private static final int TRANSACTIONS_CACHE_EXPIRY_MS = 30_000;
+    private static final Duration CHANNELS_CACHE_EXPIRY = Duration.ofMillis(200);
+    private static final Duration PENDING_CHANNELS_CACHE_EXPIRY = Duration.ofSeconds(10);
+    private static final Duration LIST_PEERS_CACHE_EXPIRY = Duration.ofSeconds(10);
+    private static final Duration TRANSACTIONS_CACHE_EXPIRY = Duration.ofSeconds(30);
 
     private final LightningGrpc.LightningBlockingStub lightningStub;
     private final LoadingCache<Object, List<Channel>> channelsCache = new CacheBuilder()
-            .withExpiryMilliseconds(CHANNELS_CACHE_EXPIRY_MS)
+            .withExpiry(CHANNELS_CACHE_EXPIRY)
             .build(this::getChannelsWithoutCache);
     private final LoadingCache<Object, Optional<PendingChannelsResponse>> pendingChannelsCache = new CacheBuilder()
-            .withExpiryMilliseconds(PENDING_CHANNELS_CACHE_EXPIRY_MS)
+            .withExpiry(PENDING_CHANNELS_CACHE_EXPIRY)
             .build(this::getPendingChannelsWithoutCache);
     private final LoadingCache<Object, List<Peer>> listPeersCache = new CacheBuilder()
-            .withExpiryMilliseconds(LIST_PEERS_CACHE_EXPIRY_MS)
+            .withExpiry(LIST_PEERS_CACHE_EXPIRY)
             .build(this::listPeersWithoutCache);
     private final LoadingCache<Object, Optional<List<Transaction>>> getTransactionsCache = new CacheBuilder()
-            .withExpiryMilliseconds(TRANSACTIONS_CACHE_EXPIRY_MS)
+            .withExpiry(TRANSACTIONS_CACHE_EXPIRY)
             .build(this::getTransactionsWithoutCache);
 
     public GrpcService(LndConfiguration lndConfiguration, Metrics metrics) throws IOException {

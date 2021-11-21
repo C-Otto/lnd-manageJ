@@ -3,6 +3,8 @@ package de.cotto.lndmanagej.caching;
 import com.google.common.cache.LoadingCache;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class CacheBuilderTest {
@@ -16,7 +18,7 @@ class CacheBuilderTest {
     @Test
     void expiryOneMillisecond() throws InterruptedException {
         LoadingCache<Object, Long> cache = new CacheBuilder()
-                .withExpiryMilliseconds(1)
+                .withExpiry(Duration.ofMillis(1))
                 .build(System::nanoTime);
         Long first = cache.getUnchecked("");
         Thread.sleep(1);
@@ -25,17 +27,9 @@ class CacheBuilderTest {
     }
 
     @Test
-    void expiryOneSecond() {
-        LoadingCache<Object, Long> cache = new CacheBuilder()
-                .withExpirySeconds(1)
-                .build(System::nanoTime);
-        assertIsCached(cache);
-    }
-
-    @Test
     void expiryOneMinute() {
         LoadingCache<Object, Long> cache = new CacheBuilder()
-                .withExpiryMinutes(1)
+                .withExpiry(Duration.ofMinutes(1))
                 .build(System::nanoTime);
         assertIsCached(cache);
     }
@@ -43,7 +37,7 @@ class CacheBuilderTest {
     @Test
     void withMaximumSize() {
         LoadingCache<Object, Long> cache = new CacheBuilder()
-                .withExpiryMinutes(1)
+                .withExpiry(Duration.ofMinutes(1))
                 .withMaximumSize(1)
                 .build(System::nanoTime);
         Long first = cache.getUnchecked("");

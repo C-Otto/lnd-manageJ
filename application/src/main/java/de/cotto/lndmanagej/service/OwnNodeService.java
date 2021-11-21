@@ -5,13 +5,15 @@ import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.grpc.GrpcGetInfo;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+
 @Component
 public class OwnNodeService {
-    private static final int CACHE_EXPIRY_SECONDS = 30;
+    private static final Duration CACHE_EXPIRY = Duration.ofSeconds(30);
 
     private final GrpcGetInfo grpcGetInfo;
     private final LoadingCache<Object, Boolean> syncedToChainCache = new CacheBuilder()
-            .withExpirySeconds(CACHE_EXPIRY_SECONDS)
+            .withExpiry(CACHE_EXPIRY)
             .build(this::isSyncedToChainWithoutCache);
 
     public OwnNodeService(GrpcGetInfo grpcGetInfo) {
