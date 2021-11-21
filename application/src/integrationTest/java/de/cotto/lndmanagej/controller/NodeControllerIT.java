@@ -18,11 +18,13 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_3;
+import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_3;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
+import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -58,13 +60,19 @@ class NodeControllerIT {
         when(nodeService.getNode(PUBKEY_2)).thenReturn(new Node(PUBKEY_2, ALIAS_2, 0, true));
         when(channelService.getOpenChannelsWith(PUBKEY_2)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2));
         when(channelService.getClosedChannelsWith(PUBKEY_2)).thenReturn(Set.of(CLOSED_CHANNEL, CLOSED_CHANNEL_3));
+        when(channelService.getWaitingCloseChannelsFor(PUBKEY_2)).thenReturn(Set.of(WAITING_CLOSE_CHANNEL));
+        when(channelService.getForceClosingChannelsFor(PUBKEY_2)).thenReturn(Set.of(FORCE_CLOSING_CHANNEL_2));
         List<String> channelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_2.toString());
         List<String> closedChannelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_3.toString());
+        List<String> waitingCloseChannelIds = List.of(CHANNEL_ID.toString());
+        List<String> forceClosingChannelIds = List.of(CHANNEL_ID_2.toString());
         mockMvc.perform(get(NODE_PREFIX + "/details"))
                 .andExpect(jsonPath("$.node", is(PUBKEY_2.toString())))
                 .andExpect(jsonPath("$.alias", is(ALIAS_2)))
                 .andExpect(jsonPath("$.channels", is(channelIds)))
                 .andExpect(jsonPath("$.closedChannels", is(closedChannelIds)))
+                .andExpect(jsonPath("$.waitingCloseChannels", is(waitingCloseChannelIds)))
+                .andExpect(jsonPath("$.pendingForceClosingChannels", is(forceClosingChannelIds)))
                 .andExpect(jsonPath("$.online", is(true)));
     }
 

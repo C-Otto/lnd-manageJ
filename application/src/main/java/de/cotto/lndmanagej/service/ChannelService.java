@@ -101,6 +101,18 @@ public class ChannelService {
                 .collect(Collectors.toSet());
     }
 
+    public Set<WaitingCloseChannel> getWaitingCloseChannelsFor(Pubkey peer) {
+        return getWaitingCloseChannels().stream()
+                .filter(c -> peer.equals(c.getRemotePubkey()))
+                .collect(Collectors.toSet());
+    }
+
+    public Set<ForceClosingChannel> getForceClosingChannelsFor(Pubkey peer) {
+        return getForceClosingChannels().stream()
+                .filter(c -> peer.equals(c.getRemotePubkey()))
+                .collect(Collectors.toSet());
+    }
+
     public Set<LocalChannel> getAllChannelsWith(Pubkey peer) {
         return getAllLocalChannels()
                 .filter(c -> peer.equals(c.getRemotePubkey()))

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -47,8 +48,10 @@ public class NodeController {
         return new NodeDetailsDto(
                 pubkey,
                 node.alias(),
-                getChannelIdsForPubkey(pubkey),
-                getClosedChannelIdsForPubkey(pubkey),
+                toSortedList(channelService.getOpenChannelsWith(pubkey)),
+                toSortedList(channelService.getClosedChannelsWith(pubkey)),
+                toSortedList(channelService.getWaitingCloseChannelsFor(pubkey)),
+                toSortedList(channelService.getForceClosingChannelsFor(pubkey)),
                 node.online()
         );
     }
@@ -56,19 +59,12 @@ public class NodeController {
     @GetMapping("/open-channels")
     public ChannelsForNodeDto getOpenChannelIdsForPubkey(@PathVariable Pubkey pubkey) {
         mark("getOpenChannelIdsForPubkey");
-        List<ChannelId> channels = getChannelIdsForPubkey(pubkey);
+        List<ChannelId> channels = toSortedList(channelService.getOpenChannelsWith(pubkey));
         return new ChannelsForNodeDto(pubkey, channels);
     }
 
-    private List<ChannelId> getChannelIdsForPubkey(Pubkey pubkey) {
-        return channelService.getOpenChannelsWith(pubkey).stream()
-                .map(Channel::getId)
-                .sorted()
-                .collect(Collectors.toList());
-    }
-
-    private List<ChannelId> getClosedChannelIdsForPubkey(Pubkey pubkey) {
-        return channelService.getClosedChannelsWith(pubkey).stream()
+    private List<ChannelId> toSortedList(Set<? extends Channel> channels) {
+        return channels.stream()
                 .map(Channel::getId)
                 .sorted()
                 .collect(Collectors.toList());

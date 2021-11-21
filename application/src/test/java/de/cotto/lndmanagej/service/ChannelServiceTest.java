@@ -146,6 +146,38 @@ class ChannelServiceTest {
     }
 
     @Test
+    void getWaitingCloseChannelsWith_by_pubkey() {
+        when(grpcChannels.getWaitingCloseChannels()).thenReturn(Set.of(WAITING_CLOSE_CHANNEL, WAITING_CLOSE_CHANNEL_2));
+        assertThat(channelService.getWaitingCloseChannelsFor(PUBKEY_2))
+                .containsExactlyInAnyOrder(WAITING_CLOSE_CHANNEL, WAITING_CLOSE_CHANNEL_2);
+    }
+
+    @Test
+    void getWaitingCloseChannelsWith_ignores_channel_to_other_node() {
+        when(grpcChannels.getWaitingCloseChannels()).thenReturn(
+                Set.of(WAITING_CLOSE_CHANNEL, WAITING_CLOSE_CHANNEL_2, WAITING_CLOSE_CHANNEL_TO_NODE_3)
+        );
+        assertThat(channelService.getWaitingCloseChannelsFor(PUBKEY_2))
+                .containsExactlyInAnyOrder(WAITING_CLOSE_CHANNEL, WAITING_CLOSE_CHANNEL_2);
+    }
+
+    @Test
+    void getForceClosingChannelsWith_by_pubkey() {
+        when(grpcChannels.getForceClosingChannels()).thenReturn(Set.of(FORCE_CLOSING_CHANNEL, FORCE_CLOSING_CHANNEL_2));
+        assertThat(channelService.getForceClosingChannelsFor(PUBKEY_2))
+                .containsExactlyInAnyOrder(FORCE_CLOSING_CHANNEL, FORCE_CLOSING_CHANNEL_2);
+    }
+
+    @Test
+    void getForceClosingChannelsWith_ignores_channel_to_other_node() {
+        when(grpcChannels.getForceClosingChannels()).thenReturn(
+                Set.of(FORCE_CLOSING_CHANNEL, FORCE_CLOSING_CHANNEL_2, FORCE_CLOSING_CHANNEL_TO_NODE_3)
+        );
+        assertThat(channelService.getForceClosingChannelsFor(PUBKEY_2))
+                .containsExactlyInAnyOrder(FORCE_CLOSING_CHANNEL, FORCE_CLOSING_CHANNEL_2);
+    }
+
+    @Test
     void getOpenChannels() {
         when(grpcChannels.getChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2));
         assertThat(channelService.getOpenChannels())

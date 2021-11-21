@@ -12,6 +12,8 @@ public record NodeDetailsDto(
         String alias,
         List<ChannelId> channels,
         List<ChannelId> closedChannels,
+        List<ChannelId> waitingCloseChannels,
+        List<ChannelId> pendingForceClosingChannels,
         boolean online
 ) {
 }
