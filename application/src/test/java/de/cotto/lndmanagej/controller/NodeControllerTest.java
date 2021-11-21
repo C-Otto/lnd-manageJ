@@ -18,6 +18,8 @@ import java.util.Set;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
+import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_2;
+import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_3;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_3;
@@ -53,7 +55,7 @@ class NodeControllerTest {
 
     @Test
     void getNodeDetails_no_channels() {
-        NodeDetailsDto expectedDetails = new NodeDetailsDto(PUBKEY_2, ALIAS_2, List.of(), true);
+        NodeDetailsDto expectedDetails = new NodeDetailsDto(PUBKEY_2, ALIAS_2, List.of(), List.of(), true);
         when(nodeService.getNode(PUBKEY_2)).thenReturn(new Node(PUBKEY_2, ALIAS_2, 0, true));
 
         assertThat(nodeController.getDetails(PUBKEY_2)).isEqualTo(expectedDetails);
@@ -64,10 +66,12 @@ class NodeControllerTest {
     void getNodeDetails_with_channels() {
         when(nodeService.getNode(PUBKEY_2)).thenReturn(new Node(PUBKEY_2, ALIAS_2, 0, false));
         when(channelService.getOpenChannelsWith(PUBKEY_2)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_3));
+        when(channelService.getClosedChannelsWith(PUBKEY_2)).thenReturn(Set.of(CLOSED_CHANNEL_2, CLOSED_CHANNEL_3));
         NodeDetailsDto expectedDetails = new NodeDetailsDto(
                 PUBKEY_2,
                 ALIAS_2,
                 List.of(CHANNEL_ID, CHANNEL_ID_3),
+                List.of(CHANNEL_ID_2, CHANNEL_ID_3),
                 false
         );
 

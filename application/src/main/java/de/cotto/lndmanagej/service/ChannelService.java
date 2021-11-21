@@ -95,6 +95,12 @@ public class ChannelService {
                 .collect(Collectors.toSet());
     }
 
+    public Set<ClosedChannel> getClosedChannelsWith(Pubkey peer) {
+        return getClosedChannels().stream()
+                .filter(c -> peer.equals(c.getRemotePubkey()))
+                .collect(Collectors.toSet());
+    }
+
     public Set<LocalChannel> getAllChannelsWith(Pubkey peer) {
         return getAllLocalChannels()
                 .filter(c -> peer.equals(c.getRemotePubkey()))

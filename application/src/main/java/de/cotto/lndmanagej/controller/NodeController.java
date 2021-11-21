@@ -44,7 +44,13 @@ public class NodeController {
     public NodeDetailsDto getDetails(@PathVariable Pubkey pubkey) {
         mark("getDetails");
         Node node = nodeService.getNode(pubkey);
-        return new NodeDetailsDto(pubkey, node.alias(), getChannelIdsForPubkey(pubkey), node.online());
+        return new NodeDetailsDto(
+                pubkey,
+                node.alias(),
+                getChannelIdsForPubkey(pubkey),
+                getClosedChannelIdsForPubkey(pubkey),
+                node.online()
+        );
     }
 
     @GetMapping("/open-channels")
@@ -56,6 +62,13 @@ public class NodeController {
 
     private List<ChannelId> getChannelIdsForPubkey(Pubkey pubkey) {
         return channelService.getOpenChannelsWith(pubkey).stream()
+                .map(Channel::getId)
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    private List<ChannelId> getClosedChannelIdsForPubkey(Pubkey pubkey) {
+        return channelService.getClosedChannelsWith(pubkey).stream()
                 .map(Channel::getId)
                 .sorted()
                 .collect(Collectors.toList());

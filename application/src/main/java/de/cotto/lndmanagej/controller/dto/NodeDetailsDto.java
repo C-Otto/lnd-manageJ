@@ -11,6 +11,7 @@ public record NodeDetailsDto(
         @JsonSerialize(using = ToStringSerializer.class) Pubkey node,
         String alias,
         List<ChannelId> channels,
+        List<ChannelId> closedChannels,
         boolean online
 ) {
 }

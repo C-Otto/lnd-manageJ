@@ -130,6 +130,22 @@ class ChannelServiceTest {
     }
 
     @Test
+    void getClosedChannelsWith_by_pubkey() {
+        when(grpcClosedChannels.getClosedChannels()).thenReturn(Set.of(CLOSED_CHANNEL, CLOSED_CHANNEL_2));
+        assertThat(channelService.getClosedChannelsWith(PUBKEY_2))
+                .containsExactlyInAnyOrder(CLOSED_CHANNEL, CLOSED_CHANNEL_2);
+    }
+
+    @Test
+    void getClosedChannelsWith_ignores_channel_to_other_node() {
+        when(grpcClosedChannels.getClosedChannels()).thenReturn(
+                Set.of(CLOSED_CHANNEL, CLOSED_CHANNEL_2, CLOSED_CHANNEL_TO_NODE_3)
+        );
+        assertThat(channelService.getClosedChannelsWith(PUBKEY_2))
+                .containsExactlyInAnyOrder(CLOSED_CHANNEL, CLOSED_CHANNEL_2);
+    }
+
+    @Test
     void getOpenChannels() {
         when(grpcChannels.getChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2));
         assertThat(channelService.getOpenChannels())
