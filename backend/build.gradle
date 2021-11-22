@@ -1,0 +1,12 @@
+plugins {
+    id 'lnd-manageJ.java-library-conventions'
+}
+
+dependencies {
+    implementation project(':grpc-adapter')
+    implementation project(':model')
+    implementation project(':caching')
+    implementation project(':transactions')
+    testImplementation testFixtures(project(':model'))
+    testImplementation testFixtures(project(':transactions'))
+}

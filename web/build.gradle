@@ -1,0 +1,14 @@
+plugins {
+    id 'lnd-manageJ.java-library-conventions'
+}
+
+dependencies {
+    implementation('org.springframework.boot:spring-boot-starter-web')
+    implementation project(':backend')
+    implementation project(':model')
+//    implementation project(':caching')
+    implementation project(':metrics')
+//    implementation project(':transactions')
+    testImplementation testFixtures(project(':model'))
+//    testImplementation testFixtures(project(':transactions'))
+}

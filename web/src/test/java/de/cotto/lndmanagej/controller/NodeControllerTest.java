@@ -98,7 +98,7 @@ class NodeControllerTest {
     @Test
     void getNodeDetails_with_channels() {
         when(nodeService.getNode(PUBKEY_2)).thenReturn(new Node(PUBKEY_2, ALIAS_2, 0, false));
-        when(channelService.getOpenChannelsWith(PUBKEY_2)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_3));
+        when(channelService.getOpenChannelsWith(PUBKEY_2)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL_3, LOCAL_OPEN_CHANNEL));
         when(channelService.getClosedChannelsWith(PUBKEY_2)).thenReturn(Set.of(CLOSED_CHANNEL_2, CLOSED_CHANNEL_3));
         when(channelService.getWaitingCloseChannelsFor(PUBKEY_2)).thenReturn(
                 Set.of(WAITING_CLOSE_CHANNEL, WAITING_CLOSE_CHANNEL_2)

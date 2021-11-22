@@ -3,16 +3,10 @@ plugins {
 }
 
 dependencies {
-    implementation('org.springframework.boot:spring-boot-starter-web')
-    implementation project(':grpc-adapter')
-    implementation project(':model')
-    implementation project(':caching')
-    implementation project(':metrics')
-    implementation project(':transactions')
+    implementation project(':web')
     runtimeOnly 'org.postgresql:postgresql'
-    testImplementation testFixtures(project(':model'))
-    testImplementation testFixtures(project(':transactions'))
     testRuntimeOnly 'com.h2database:h2'
+    testImplementation project(':grpc-adapter')
 }
 
 bootJar {
@@ -24,10 +18,10 @@ jacocoTestCoverageVerification {
         rules.forEach {rule ->
             rule.limits.forEach {limit ->
                 if (limit.counter == 'INSTRUCTION') {
-                    limit.minimum = 0.97
+                    limit.minimum = 0.37
                 }
                 if (limit.counter == 'METHOD') {
-                    limit.minimum = 0.95
+                    limit.minimum = 0.50
                 }
             }
         }
