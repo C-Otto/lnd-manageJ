@@ -133,6 +133,11 @@ class ChannelIdTest {
     }
 
     @Test
+    void getCompactFormLnd() {
+        assertThat(CHANNEL_ID.getCompactFormLnd()).isEqualTo("712345:123:1");
+    }
+
+    @Test
     void testEquals() {
         EqualsVerifier.forClass(ChannelId.class).verify();
     }

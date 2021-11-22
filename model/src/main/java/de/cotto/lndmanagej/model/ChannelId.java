@@ -4,9 +4,10 @@ import javax.annotation.Nonnull;
 import java.util.Objects;
 
 public final class ChannelId implements Comparable<ChannelId> {
-    private final long shortChannelId;
     private static final int EXPECTED_NUMBER_OF_SEGMENTS = 3;
     private static final long NOT_BEFORE = 430_103_660_018_532_352L; // January 1st 2016
+
+    private final long shortChannelId;
 
     private ChannelId(long shortChannelId) {
         this.shortChannelId = shortChannelId;
@@ -33,10 +34,11 @@ public final class ChannelId implements Comparable<ChannelId> {
     }
 
     public String getCompactForm() {
-        long block = shortChannelId >> 40;
-        long transaction = shortChannelId >> 16 & 0xFFFFFF;
-        long output = shortChannelId & 0xFFFF;
-        return block + ":" + transaction + ":" + output;
+        return getCompactFormWithDelimiter("x");
+    }
+
+    public String getCompactFormLnd() {
+        return getCompactFormWithDelimiter(":");
     }
 
     public long getShortChannelId() {
@@ -68,5 +70,12 @@ public final class ChannelId implements Comparable<ChannelId> {
     @Override
     public int compareTo(@Nonnull ChannelId other) {
         return Long.compare(shortChannelId, other.shortChannelId);
+    }
+
+    private String getCompactFormWithDelimiter(String delimiter) {
+        long block = shortChannelId >> 40;
+        long transaction = shortChannelId >> 16 & 0xFFFFFF;
+        long output = shortChannelId & 0xFFFF;
+        return block + delimiter + transaction + delimiter + output;
     }
 }

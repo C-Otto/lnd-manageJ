@@ -61,14 +61,6 @@ public class LegacyController {
                 .collect(Collectors.joining(NEWLINE));
     }
 
-    @GetMapping("/open-channels/compact")
-    public String getOpenChannelIdsCompact() {
-        mark("getOpenChannelIdsCompact");
-        return getOpenChannelIdsSorted()
-                .map(ChannelId::getCompactForm)
-                .collect(Collectors.joining(NEWLINE));
-    }
-
     @GetMapping("/open-channels/pretty")
     public String getOpenChannelIdsPretty() {
         mark("getOpenChannelIdsPretty");
