@@ -12,14 +12,18 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
+import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = OnChainCostsController.class)
 class OnChainCostsControllerIT {
     private static final String CHANNEL_PREFIX = "/api/channel/" + CHANNEL_ID.getShortChannelId();
+    private static final String PEER_PREFIX = "/api/node/" + PUBKEY;
 
     @Autowired
     private MockMvc mockMvc;
@@ -30,6 +34,15 @@ class OnChainCostsControllerIT {
     @MockBean
     @SuppressWarnings("unused")
     private Metrics metrics;
+
+    @Test
+    void on_chain_costs_for_peer() throws Exception {
+        when(onChainCostService.getOpenCostsWith(PUBKEY)).thenReturn(Coins.ofSatoshis(123));
+        when(onChainCostService.getCloseCostsWith(PUBKEY)).thenReturn(Coins.ofSatoshis(456));
+        mockMvc.perform(get(PEER_PREFIX + "/on-chain-costs"))
+                .andExpect(jsonPath("$.openCosts", is("123")))
+                .andExpect(jsonPath("$.closeCosts", is("456")));
+    }
 
     @Test
     void open_costs_for_channel() throws Exception {

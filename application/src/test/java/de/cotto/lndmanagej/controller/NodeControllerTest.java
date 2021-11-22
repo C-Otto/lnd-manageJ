@@ -76,7 +76,7 @@ class NodeControllerTest {
                 List.of(),
                 List.of(),
                 List.of(),
-                new OnChainCostsDto("0", "0"),
+                new OnChainCostsDto(Coins.NONE, Coins.NONE),
                 true
         );
         when(nodeService.getNode(PUBKEY_2)).thenReturn(new Node(PUBKEY_2, ALIAS_2, 0, true));
@@ -96,8 +96,10 @@ class NodeControllerTest {
         when(channelService.getForceClosingChannelsFor(PUBKEY_2)).thenReturn(
                 Set.of(FORCE_CLOSING_CHANNEL, FORCE_CLOSING_CHANNEL_2, FORCE_CLOSING_CHANNEL_3)
         );
-        when(onChainCostService.getOpenCostsWith(PUBKEY_2)).thenReturn(Coins.ofSatoshis(123));
-        when(onChainCostService.getCloseCostsWith(PUBKEY_2)).thenReturn(Coins.ofSatoshis(456));
+        Coins openCosts = Coins.ofSatoshis(123);
+        Coins closeCosts = Coins.ofSatoshis(456);
+        when(onChainCostService.getOpenCostsWith(PUBKEY_2)).thenReturn(openCosts);
+        when(onChainCostService.getCloseCostsWith(PUBKEY_2)).thenReturn(closeCosts);
         NodeDetailsDto expectedDetails = new NodeDetailsDto(
                 PUBKEY_2,
                 ALIAS_2,
@@ -105,7 +107,7 @@ class NodeControllerTest {
                 List.of(CHANNEL_ID_2, CHANNEL_ID_3),
                 List.of(CHANNEL_ID, CHANNEL_ID_2),
                 List.of(CHANNEL_ID, CHANNEL_ID_2, CHANNEL_ID_3),
-                new OnChainCostsDto("123", "456"),
+                new OnChainCostsDto(openCosts, closeCosts),
                 false
         );
 

@@ -8,6 +8,7 @@ import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.ChannelService;
@@ -54,8 +55,8 @@ public class NodeController {
     public NodeDetailsDto getDetails(@PathVariable Pubkey pubkey) {
         mark("getDetails");
         Node node = nodeService.getNode(pubkey);
-        String openCosts = String.valueOf(onChainCostService.getOpenCostsWith(pubkey).satoshis());
-        String closeCosts = String.valueOf(onChainCostService.getCloseCostsWith(pubkey).satoshis());
+        Coins openCosts = onChainCostService.getOpenCostsWith(pubkey);
+        Coins closeCosts = onChainCostService.getCloseCostsWith(pubkey);
         return new NodeDetailsDto(
                 pubkey,
                 node.alias(),
