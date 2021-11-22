@@ -36,15 +36,28 @@ class BalanceServiceTest {
     @Test
     void getBalanceInformation_for_pubkey() {
         BalanceInformation expected = new BalanceInformation(
-                Coins.ofSatoshis(2_000),
-                Coins.ofSatoshis(200),
-                Coins.ofSatoshis(246),
-                Coins.ofSatoshis(20)
+                Coins.ofSatoshis(3_000),
+                Coins.ofSatoshis(300),
+                Coins.ofSatoshis(346),
+                Coins.ofSatoshis(30)
         );
         when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2));
         when(grpcChannels.getChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_MORE_BALANCE));
         when(grpcChannels.getChannel(CHANNEL_ID_2)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_MORE_BALANCE_2));
         assertThat(balanceService.getBalanceInformation(PUBKEY)).isEqualTo(expected);
+    }
+
+    @Test
+    void getBalanceInformation_for_channel() {
+        when(grpcChannels.getChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_MORE_BALANCE));
+        assertThat(balanceService.getBalanceInformation(CHANNEL_ID))
+                .contains(LOCAL_OPEN_CHANNEL_MORE_BALANCE.getBalanceInformation());
+    }
+
+    @Test
+    void getBalanceInformation_for_channel_empty() {
+        when(grpcChannels.getChannel(CHANNEL_ID)).thenReturn(Optional.empty());
+        assertThat(balanceService.getBalanceInformation(CHANNEL_ID)).isEmpty();
     }
 
     @Test

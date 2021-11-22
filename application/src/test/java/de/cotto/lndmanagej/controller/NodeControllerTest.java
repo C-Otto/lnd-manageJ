@@ -8,6 +8,7 @@ import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Node;
+import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
@@ -76,7 +77,7 @@ class NodeControllerTest {
     void getNodeDetails_no_channels() {
         when(onChainCostService.getOpenCostsWith(any())).thenReturn(Coins.NONE);
         when(onChainCostService.getCloseCostsWith(any())).thenReturn(Coins.NONE);
-        when(balanceService.getBalanceInformation(any())).thenReturn(BalanceInformation.EMPTY);
+        when(balanceService.getBalanceInformation(any(Pubkey.class))).thenReturn(BalanceInformation.EMPTY);
         NodeDetailsDto expectedDetails = new NodeDetailsDto(
                 PUBKEY_2,
                 ALIAS_2,

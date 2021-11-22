@@ -1,9 +1,14 @@
 package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.controller.dto.ChannelDetailsDto;
+import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.metrics.Metrics;
+import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
+import de.cotto.lndmanagej.service.OnChainCostService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,11 +25,15 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ChannelDetailsControllerTest {
+    private static final Coins OPEN_COSTS = Coins.ofSatoshis(1);
+    private static final Coins CLOSE_COSTS = Coins.ofSatoshis(2);
+    private static final OnChainCostsDto ON_CHAIN_COSTS = new OnChainCostsDto(OPEN_COSTS, CLOSE_COSTS);
     @InjectMocks
     private ChannelDetailsController channelDetailsController;
 
@@ -37,6 +46,18 @@ class ChannelDetailsControllerTest {
     @Mock
     private Metrics metrics;
 
+    @Mock
+    private BalanceService balanceService;
+
+    @Mock
+    private OnChainCostService onChainCostService;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(onChainCostService.getOpenCosts(CHANNEL_ID)).thenReturn(Optional.of(OPEN_COSTS));
+        lenient().when(onChainCostService.getCloseCosts(CHANNEL_ID)).thenReturn(Optional.of(CLOSE_COSTS));
+    }
+
     @Test
     void getDetails_channel_not_found() {
         assertThatExceptionOfType(NotFoundException.class)
@@ -45,9 +66,16 @@ class ChannelDetailsControllerTest {
 
     @Test
     void getDetails() throws NotFoundException {
-        ChannelDetailsDto expectedDetails = new ChannelDetailsDto(CHANNEL_ID, PUBKEY_2, ALIAS_2, false);
+        ChannelDetailsDto expectedDetails = new ChannelDetailsDto(
+                LOCAL_OPEN_CHANNEL,
+                ALIAS_2,
+                LOCAL_OPEN_CHANNEL.getBalanceInformation(),
+                ON_CHAIN_COSTS
+        );
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+        when(balanceService.getBalanceInformation(CHANNEL_ID))
+                .thenReturn(Optional.ofNullable(LOCAL_OPEN_CHANNEL.getBalanceInformation()));
 
         assertThat(channelDetailsController.getDetails(CHANNEL_ID)).isEqualTo(expectedDetails);
         verify(metrics).mark(argThat(name -> name.endsWith(".getDetails")));
@@ -55,9 +83,16 @@ class ChannelDetailsControllerTest {
 
     @Test
     void getDetails_private() throws NotFoundException {
-        ChannelDetailsDto expectedDetails = new ChannelDetailsDto(CHANNEL_ID, PUBKEY_2, ALIAS_2, true);
+        ChannelDetailsDto expectedDetails = new ChannelDetailsDto(
+                LOCAL_OPEN_CHANNEL_PRIVATE,
+                ALIAS_2,
+                LOCAL_OPEN_CHANNEL_PRIVATE.getBalanceInformation(),
+                ON_CHAIN_COSTS
+        );
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_PRIVATE));
+        when(balanceService.getBalanceInformation(CHANNEL_ID))
+                .thenReturn(Optional.ofNullable(LOCAL_OPEN_CHANNEL_PRIVATE.getBalanceInformation()));
 
         assertThat(channelDetailsController.getDetails(CHANNEL_ID)).isEqualTo(expectedDetails);
         verify(metrics).mark(argThat(name -> name.endsWith(".getDetails")));

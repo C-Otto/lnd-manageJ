@@ -55,7 +55,7 @@ public class BalanceService {
                 .reduce(BalanceInformation.EMPTY, BalanceInformation::add);
     }
 
-    private Optional<BalanceInformation> getBalanceInformation(ChannelId channelId) {
+    public Optional<BalanceInformation> getBalanceInformation(ChannelId channelId) {
         return grpcChannels.getChannel(channelId)
                 .map(LocalOpenChannel::getBalanceInformation);
     }

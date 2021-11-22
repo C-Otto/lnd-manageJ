@@ -6,10 +6,10 @@ public class BalanceInformationFixtures {
     public static final Coins REMOTE_BALANCE = Coins.ofSatoshis(123);
     public static final Coins REMOTE_RESERVE = Coins.ofSatoshis(10);
 
-    public static final Coins LOCAL_BALANCE_2 = Coins.ofSatoshis(1_000);
-    public static final Coins LOCAL_RESERVE_2 = Coins.ofSatoshis(100);
-    public static final Coins REMOTE_BALANCE_2 = Coins.ofSatoshis(123);
-    public static final Coins REMOTE_RESERVE_2 = Coins.ofSatoshis(10);
+    public static final Coins LOCAL_BALANCE_2 = Coins.ofSatoshis(2_000);
+    public static final Coins LOCAL_RESERVE_2 = Coins.ofSatoshis(200);
+    public static final Coins REMOTE_BALANCE_2 = Coins.ofSatoshis(223);
+    public static final Coins REMOTE_RESERVE_2 = Coins.ofSatoshis(20);
 
     public static final BalanceInformation BALANCE_INFORMATION =
             new BalanceInformation(LOCAL_BALANCE, LOCAL_RESERVE, REMOTE_BALANCE, REMOTE_RESERVE);
