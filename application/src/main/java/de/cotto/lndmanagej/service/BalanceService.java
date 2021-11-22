@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.grpc.GrpcChannels;
 import de.cotto.lndmanagej.model.BalanceInformation;
+import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
@@ -29,7 +30,7 @@ public class BalanceService {
 
     public Coins getAvailableLocalBalance(ChannelId channelId) {
         return getBalanceInformation(channelId)
-                .map(BalanceInformation::availableLocalBalance)
+                .map(BalanceInformation::localAvailable)
                 .orElse(Coins.NONE);
     }
 
@@ -42,8 +43,16 @@ public class BalanceService {
 
     public Coins getAvailableRemoteBalance(ChannelId channelId) {
         return getBalanceInformation(channelId)
-                .map(BalanceInformation::availableRemoteBalance)
+                .map(BalanceInformation::remoteAvailable)
                 .orElse(Coins.NONE);
+    }
+
+    public BalanceInformation getBalanceInformation(Pubkey pubkey) {
+        return channelService.getOpenChannelsWith(pubkey).stream()
+                .map(Channel::getId)
+                .map(this::getBalanceInformation)
+                .flatMap(Optional::stream)
+                .reduce(BalanceInformation.EMPTY, BalanceInformation::add);
     }
 
     private Optional<BalanceInformation> getBalanceInformation(ChannelId channelId) {

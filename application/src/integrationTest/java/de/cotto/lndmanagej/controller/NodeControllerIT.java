@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.controller;
 import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Node;
+import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.OnChainCostService;
@@ -15,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.Set;
 
+import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
@@ -50,6 +52,9 @@ class NodeControllerIT {
     private OnChainCostService onChainCostService;
 
     @MockBean
+    private BalanceService balanceService;
+
+    @MockBean
     @SuppressWarnings("unused")
     private Metrics metrics;
 
@@ -69,6 +74,7 @@ class NodeControllerIT {
         when(channelService.getForceClosingChannelsFor(PUBKEY_2)).thenReturn(Set.of(FORCE_CLOSING_CHANNEL_2));
         when(onChainCostService.getOpenCostsWith(PUBKEY_2)).thenReturn(Coins.ofSatoshis(123));
         when(onChainCostService.getCloseCostsWith(PUBKEY_2)).thenReturn(Coins.ofSatoshis(456));
+        when(balanceService.getBalanceInformation(PUBKEY_2)).thenReturn(BALANCE_INFORMATION);
         List<String> channelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_2.toString());
         List<String> closedChannelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_3.toString());
         List<String> waitingCloseChannelIds = List.of(CHANNEL_ID.toString());
@@ -82,6 +88,12 @@ class NodeControllerIT {
                 .andExpect(jsonPath("$.pendingForceClosingChannels", is(forceClosingChannelIds)))
                 .andExpect(jsonPath("$.onChainCosts.openCosts", is("123")))
                 .andExpect(jsonPath("$.onChainCosts.closeCosts", is("456")))
+                .andExpect(jsonPath("$.balance.localBalance", is("1000")))
+                .andExpect(jsonPath("$.balance.localReserve", is("100")))
+                .andExpect(jsonPath("$.balance.localAvailable", is("900")))
+                .andExpect(jsonPath("$.balance.remoteBalance", is("123")))
+                .andExpect(jsonPath("$.balance.remoteReserve", is("10")))
+                .andExpect(jsonPath("$.balance.remoteAvailable", is("113")))
                 .andExpect(jsonPath("$.online", is(true)));
     }
 

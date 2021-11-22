@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.grpc.GrpcChannels;
+import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Coins;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +16,8 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_MORE_BALANCE;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_MORE_BALANCE_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -29,6 +32,20 @@ class BalanceServiceTest {
 
     @Mock
     private ChannelService channelService;
+
+    @Test
+    void getBalanceInformation_for_pubkey() {
+        BalanceInformation expected = new BalanceInformation(
+                Coins.ofSatoshis(2_000),
+                Coins.ofSatoshis(200),
+                Coins.ofSatoshis(246),
+                Coins.ofSatoshis(20)
+        );
+        when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2));
+        when(grpcChannels.getChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_MORE_BALANCE));
+        when(grpcChannels.getChannel(CHANNEL_ID_2)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_MORE_BALANCE_2));
+        assertThat(balanceService.getBalanceInformation(PUBKEY)).isEqualTo(expected);
+    }
 
     @Test
     void getAvailableLocalBalance_channel() {

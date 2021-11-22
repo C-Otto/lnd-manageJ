@@ -1,16 +1,19 @@
 package de.cotto.lndmanagej.controller;
 
 import com.codahale.metrics.MetricRegistry;
+import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.ChannelsForNodeDto;
 import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.metrics.Metrics;
+import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.OnChainCostService;
@@ -32,17 +35,20 @@ public class NodeController {
     private final Metrics metrics;
     private final ChannelService channelService;
     private final OnChainCostService onChainCostService;
+    private final BalanceService balanceService;
 
     public NodeController(
             NodeService nodeService,
             ChannelService channelService,
             Metrics metrics,
-            OnChainCostService onChainCostService
+            OnChainCostService onChainCostService,
+            BalanceService balanceService
     ) {
         this.nodeService = nodeService;
         this.metrics = metrics;
         this.channelService = channelService;
         this.onChainCostService = onChainCostService;
+        this.balanceService = balanceService;
     }
 
     @GetMapping("/alias")
@@ -57,6 +63,7 @@ public class NodeController {
         Node node = nodeService.getNode(pubkey);
         Coins openCosts = onChainCostService.getOpenCostsWith(pubkey);
         Coins closeCosts = onChainCostService.getCloseCostsWith(pubkey);
+        BalanceInformation balanceInformation = balanceService.getBalanceInformation(pubkey);
         return new NodeDetailsDto(
                 pubkey,
                 node.alias(),
@@ -65,6 +72,7 @@ public class NodeController {
                 toSortedList(channelService.getWaitingCloseChannelsFor(pubkey)),
                 toSortedList(channelService.getForceClosingChannelsFor(pubkey)),
                 new OnChainCostsDto(openCosts, closeCosts),
+                BalanceInformationDto.createFrom(balanceInformation),
                 node.online()
         );
     }

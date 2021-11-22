@@ -15,6 +15,7 @@ public record NodeDetailsDto(
         List<ChannelId> waitingCloseChannels,
         List<ChannelId> pendingForceClosingChannels,
         OnChainCostsDto onChainCosts,
+        BalanceInformationDto balance,
         boolean online
 ) {
 }

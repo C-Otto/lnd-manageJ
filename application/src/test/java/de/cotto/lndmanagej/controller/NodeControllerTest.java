@@ -1,11 +1,14 @@
 package de.cotto.lndmanagej.controller;
 
+import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.ChannelsForNodeDto;
 import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.metrics.Metrics;
+import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Node;
+import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.OnChainCostService;
@@ -18,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Set;
 
+import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
@@ -57,6 +61,9 @@ class NodeControllerTest {
     @Mock
     private OnChainCostService onChainCostService;
 
+    @Mock
+    private BalanceService balanceService;
+
     @Test
     void getAlias() {
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
@@ -69,6 +76,7 @@ class NodeControllerTest {
     void getNodeDetails_no_channels() {
         when(onChainCostService.getOpenCostsWith(any())).thenReturn(Coins.NONE);
         when(onChainCostService.getCloseCostsWith(any())).thenReturn(Coins.NONE);
+        when(balanceService.getBalanceInformation(any())).thenReturn(BalanceInformation.EMPTY);
         NodeDetailsDto expectedDetails = new NodeDetailsDto(
                 PUBKEY_2,
                 ALIAS_2,
@@ -77,6 +85,7 @@ class NodeControllerTest {
                 List.of(),
                 List.of(),
                 new OnChainCostsDto(Coins.NONE, Coins.NONE),
+                BalanceInformationDto.createFrom(BalanceInformation.EMPTY),
                 true
         );
         when(nodeService.getNode(PUBKEY_2)).thenReturn(new Node(PUBKEY_2, ALIAS_2, 0, true));
@@ -100,6 +109,7 @@ class NodeControllerTest {
         Coins closeCosts = Coins.ofSatoshis(456);
         when(onChainCostService.getOpenCostsWith(PUBKEY_2)).thenReturn(openCosts);
         when(onChainCostService.getCloseCostsWith(PUBKEY_2)).thenReturn(closeCosts);
+        when(balanceService.getBalanceInformation(PUBKEY_2)).thenReturn(BALANCE_INFORMATION);
         NodeDetailsDto expectedDetails = new NodeDetailsDto(
                 PUBKEY_2,
                 ALIAS_2,
@@ -108,6 +118,7 @@ class NodeControllerTest {
                 List.of(CHANNEL_ID, CHANNEL_ID_2),
                 List.of(CHANNEL_ID, CHANNEL_ID_2, CHANNEL_ID_3),
                 new OnChainCostsDto(openCosts, closeCosts),
+                BalanceInformationDto.createFrom(BALANCE_INFORMATION),
                 false
         );
 

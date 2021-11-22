@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.model;
 
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
+import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION_2;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
@@ -26,6 +27,17 @@ public  class LocalOpenChannelFixtures {
                     LOCAL,
                     false
             );
+    public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_MORE_BALANCE =
+            new LocalOpenChannel(
+                    CHANNEL_ID,
+                    CHANNEL_POINT,
+                    CAPACITY,
+                    PUBKEY,
+                    PUBKEY_2,
+                    BALANCE_INFORMATION_2,
+                    LOCAL,
+                    false
+            );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_PRIVATE =
             new LocalOpenChannel(
                     CHANNEL_ID,
@@ -38,6 +50,17 @@ public  class LocalOpenChannelFixtures {
                     true
             );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_2 =
+            new LocalOpenChannel(
+                    CHANNEL_ID_2,
+                    CHANNEL_POINT,
+                    CAPACITY,
+                    PUBKEY,
+                    PUBKEY_2,
+                    BALANCE_INFORMATION,
+                    REMOTE,
+                    false
+            );
+    public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_MORE_BALANCE_2 =
             new LocalOpenChannel(
                     CHANNEL_ID_2,
                     CHANNEL_POINT,
