@@ -61,13 +61,6 @@ class LegacyControllerIT {
     private Metrics metrics;
 
     @Test
-    void getOpenChannelIds_for_peer() throws Exception {
-        when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_3));
-        mockMvc.perform(get(PUBKEY_BASE + "/open-channels"))
-                .andExpect(content().string(CHANNEL_ID + "\n" + CHANNEL_ID_3));
-    }
-
-    @Test
     void getAllChannelIds_for_peer() throws Exception {
         when(channelService.getAllChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, CLOSED_CHANNEL_3));
         mockMvc.perform(get(PUBKEY_BASE + "/all-channels"))

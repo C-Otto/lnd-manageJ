@@ -60,23 +60,6 @@ class LegacyControllerTest {
     private Metrics metrics;
 
     @Test
-    void getOpenChannelIds_for_peer() {
-        when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_3));
-        assertThat(legacyController.getOpenChannelIdsForPubkey(PUBKEY)).isEqualTo(
-                CHANNEL_ID + "\n" + CHANNEL_ID_3
-        );
-        verify(metrics).mark(argThat(name -> name.endsWith(".getOpenChannelIdsForPubkey")));
-    }
-
-    @Test
-    void getOpenChannelIds_for_peer_ordered() {
-        when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL_3, LOCAL_OPEN_CHANNEL));
-        assertThat(legacyController.getOpenChannelIdsForPubkey(PUBKEY)).isEqualTo(
-                CHANNEL_ID + "\n" + CHANNEL_ID_3
-        );
-    }
-
-    @Test
     void getAllChannelIds_for_peer() {
         when(channelService.getAllChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, CLOSED_CHANNEL_3));
         assertThat(legacyController.getAllChannelIdsForPubkey(PUBKEY)).isEqualTo(
