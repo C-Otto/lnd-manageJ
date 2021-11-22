@@ -144,7 +144,6 @@ class ChannelIdTest {
 
     @Test
     void testToString() {
-        String expectedString = String.valueOf(CHANNEL_ID.getShortChannelId());
-        assertThat(CHANNEL_ID).hasToString(expectedString);
+        assertThat(CHANNEL_ID).hasToString(CHANNEL_ID.getCompactForm());
     }
 }

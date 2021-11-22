@@ -16,6 +16,7 @@ import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
@@ -62,7 +63,10 @@ class ChannelDetailsControllerIT {
         when(onChainCostService.getCloseCosts(CHANNEL_ID)).thenReturn(Optional.of(Coins.ofSatoshis(2000)));
         when(balanceService.getBalanceInformation(CHANNEL_ID)).thenReturn(Optional.of(BALANCE_INFORMATION_2));
         mockMvc.perform(get(CHANNEL_PREFIX + "/details"))
-                .andExpect(jsonPath("$.channelId", is(CHANNEL_ID.toString())))
+                .andExpect(jsonPath("$.channelIdShort", is(String.valueOf(CHANNEL_ID.getShortChannelId()))))
+                .andExpect(jsonPath("$.channelIdCompact", is(CHANNEL_ID.getCompactForm())))
+                .andExpect(jsonPath("$.channelIdCompactLnd", is(CHANNEL_ID.getCompactFormLnd())))
+                .andExpect(jsonPath("$.channelPoint", is(CHANNEL_POINT.toString())))
                 .andExpect(jsonPath("$.remotePubkey", is(PUBKEY_2.toString())))
                 .andExpect(jsonPath("$.remoteAlias", is(ALIAS_2)))
                 .andExpect(jsonPath("$.private", is(true)))

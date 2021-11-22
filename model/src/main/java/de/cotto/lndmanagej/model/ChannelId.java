@@ -64,7 +64,7 @@ public final class ChannelId implements Comparable<ChannelId> {
 
     @Override
     public String toString() {
-        return String.valueOf(shortChannelId);
+        return getCompactForm();
     }
 
     @Override
