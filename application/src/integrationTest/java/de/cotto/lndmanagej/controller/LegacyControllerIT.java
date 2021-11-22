@@ -6,7 +6,6 @@ import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
-import de.cotto.lndmanagej.service.OwnNodeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -50,9 +49,6 @@ class LegacyControllerIT {
 
     @MockBean
     private ChannelService channelService;
-
-    @MockBean
-    private OwnNodeService ownNodeService;
 
     @MockBean
     private FeeService feeService;
@@ -112,18 +108,6 @@ class LegacyControllerIT {
                 .thenReturn(Set.of(FORCE_CLOSING_CHANNEL, FORCE_CLOSING_CHANNEL_3));
         mockMvc.perform(get("/legacy/force-closing-channels"))
                 .andExpect(content().string(CHANNEL_ID + "\n" + CHANNEL_ID_3));
-    }
-
-    @Test
-    void isSyncedToChain_true() throws Exception {
-        when(ownNodeService.isSyncedToChain()).thenReturn(true);
-        mockMvc.perform(get("/legacy/synced-to-chain")).andExpect(content().string("true"));
-    }
-
-    @Test
-    void isSyncedToChain_false() throws Exception {
-        when(ownNodeService.isSyncedToChain()).thenReturn(false);
-        mockMvc.perform(get("/legacy/synced-to-chain")).andExpect(content().string("false"));
     }
 
     @Test

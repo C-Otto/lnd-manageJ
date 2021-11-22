@@ -10,7 +10,6 @@ import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
-import de.cotto.lndmanagej.service.OwnNodeService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +25,6 @@ public class LegacyController {
     private static final String NEWLINE = "\n";
     private final NodeService nodeService;
     private final ChannelService channelService;
-    private final OwnNodeService ownNodeService;
     private final FeeService feeService;
     private final BalanceService balanceService;
     private final Metrics metrics;
@@ -34,14 +32,12 @@ public class LegacyController {
     public LegacyController(
             NodeService nodeService,
             ChannelService channelService,
-            OwnNodeService ownNodeService,
             FeeService feeService,
             BalanceService balanceService,
             Metrics metrics
     ) {
         this.nodeService = nodeService;
         this.channelService = channelService;
-        this.ownNodeService = ownNodeService;
         this.feeService = feeService;
         this.balanceService = balanceService;
         this.metrics = metrics;
@@ -125,12 +121,6 @@ public class LegacyController {
                 .sorted()
                 .distinct()
                 .collect(Collectors.joining(NEWLINE));
-    }
-
-    @GetMapping("/synced-to-chain")
-    public boolean syncedToChain() {
-        mark("syncedToChain");
-        return ownNodeService.isSyncedToChain();
     }
 
     @GetMapping("/channel/{channelId}/incoming-fee-rate")

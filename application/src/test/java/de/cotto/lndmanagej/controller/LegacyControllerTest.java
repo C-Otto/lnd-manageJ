@@ -6,7 +6,6 @@ import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
-import de.cotto.lndmanagej.service.OwnNodeService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -50,9 +49,6 @@ class LegacyControllerTest {
 
     @Mock
     private ChannelService channelService;
-
-    @Mock
-    private OwnNodeService ownNodeService;
 
     @Mock
     private FeeService feeService;
@@ -176,19 +172,6 @@ class LegacyControllerTest {
         assertThat(legacyController.getForceClosingChannelIds()).isEqualTo(
                 CHANNEL_ID + "\n" + CHANNEL_ID_3
         );
-    }
-
-    @Test
-    void syncedToChain() {
-        when(ownNodeService.isSyncedToChain()).thenReturn(true);
-        assertThat(legacyController.syncedToChain()).isTrue();
-        verify(metrics).mark(argThat(name -> name.endsWith(".syncedToChain")));
-    }
-
-    @Test
-    void syncedToChain_false() {
-        when(ownNodeService.isSyncedToChain()).thenReturn(false);
-        assertThat(legacyController.syncedToChain()).isFalse();
     }
 
     @Test
