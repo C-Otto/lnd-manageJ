@@ -13,6 +13,7 @@ public record ChannelDetailsDto(
         ChannelPoint channelPoint,
         Pubkey remotePubkey,
         String remoteAlias,
+        String capacity,
         @JsonProperty("private") boolean privateChannel,
         BalanceInformationDto balance,
         OnChainCostsDto onChainCosts
@@ -30,6 +31,7 @@ public record ChannelDetailsDto(
                 localChannel.getChannelPoint(),
                 localChannel.getRemotePubkey(),
                 remoteAlias,
+                String.valueOf(localChannel.getCapacity().satoshis()),
                 localChannel.isPrivateChannel(),
                 BalanceInformationDto.createFrom(balanceInformation),
                 onChainCosts

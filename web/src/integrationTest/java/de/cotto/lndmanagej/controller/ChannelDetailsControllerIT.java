@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION_2;
+import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
@@ -69,6 +70,7 @@ class ChannelDetailsControllerIT {
                 .andExpect(jsonPath("$.channelPoint", is(CHANNEL_POINT.toString())))
                 .andExpect(jsonPath("$.remotePubkey", is(PUBKEY_2.toString())))
                 .andExpect(jsonPath("$.remoteAlias", is(ALIAS_2)))
+                .andExpect(jsonPath("$.capacity", is(String.valueOf(CAPACITY.satoshis()))))
                 .andExpect(jsonPath("$.private", is(true)))
                 .andExpect(jsonPath("$.onChainCosts.openCosts", is("1000")))
                 .andExpect(jsonPath("$.onChainCosts.closeCosts", is("2000")))
