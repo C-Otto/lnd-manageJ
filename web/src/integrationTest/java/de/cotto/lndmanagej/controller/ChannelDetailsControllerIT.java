@@ -73,6 +73,7 @@ class ChannelDetailsControllerIT {
                 .andExpect(jsonPath("$.capacity", is(String.valueOf(CAPACITY.satoshis()))))
                 .andExpect(jsonPath("$.openHeight", is(CHANNEL_ID.getBlockHeight())))
                 .andExpect(jsonPath("$.private", is(true)))
+                .andExpect(jsonPath("$.active", is(true)))
                 .andExpect(jsonPath("$.onChainCosts.openCosts", is("1000")))
                 .andExpect(jsonPath("$.onChainCosts.closeCosts", is("2000")))
                 .andExpect(jsonPath("$.balance.localBalance", is("2000")))

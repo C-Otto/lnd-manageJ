@@ -44,6 +44,11 @@ class WaitingCloseChannelTest {
     }
 
     @Test
+    void isActive() {
+        assertThat(WAITING_CLOSE_CHANNEL.isActive()).isFalse();
+    }
+
+    @Test
     void testEquals() {
         EqualsVerifier.forClass(WaitingCloseChannel.class).usingGetClass().verify();
     }

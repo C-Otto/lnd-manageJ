@@ -144,7 +144,9 @@ class TransactionBackgroundLoaderTest {
                 PUBKEY_2,
                 BALANCE_INFORMATION,
                 LOCAL,
-                false);
+                false,
+                true
+        );
         LocalOpenChannel channel2 = new LocalOpenChannel(
                 CHANNEL_ID_2,
                 CHANNEL_POINT_2,
@@ -153,7 +155,9 @@ class TransactionBackgroundLoaderTest {
                 PUBKEY_2,
                 BALANCE_INFORMATION,
                 LOCAL,
-                false);
+                false,
+                true
+        );
         LocalOpenChannel channel3 = new LocalOpenChannel(
                 CHANNEL_ID_3,
                 CHANNEL_POINT_3,
@@ -162,7 +166,9 @@ class TransactionBackgroundLoaderTest {
                 PUBKEY_2,
                 BALANCE_INFORMATION,
                 LOCAL,
-                false);
+                false,
+                true
+        );
         when(channelService.getOpenChannels()).thenReturn(Set.of(channel1, channel2, channel3));
         String unknownHash = CHANNEL_POINT_3.getTransactionHash();
         when(transactionService.isUnknown(any())).thenReturn(false);

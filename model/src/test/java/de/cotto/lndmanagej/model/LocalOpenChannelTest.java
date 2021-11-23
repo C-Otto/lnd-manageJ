@@ -12,6 +12,8 @@ import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
 import static de.cotto.lndmanagej.model.OpenInitiator.LOCAL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
@@ -33,7 +35,8 @@ class LocalOpenChannelTest {
                 PUBKEY,
                 BALANCE_INFORMATION,
                 LOCAL,
-                false
+                false,
+                true
         );
         assertThat(localOpenChannel.getRemotePubkey()).isEqualTo(PUBKEY);
     }
@@ -61,6 +64,26 @@ class LocalOpenChannelTest {
     @Test
     void getOpenInitiator() {
         assertThat(LOCAL_OPEN_CHANNEL.getOpenInitiator()).isEqualTo(LOCAL);
+    }
+
+    @Test
+    void isPrivateChannel_false() {
+        assertThat(LOCAL_OPEN_CHANNEL.isPrivateChannel()).isFalse();
+    }
+
+    @Test
+    void isPrivateChannel_true() {
+        assertThat(LOCAL_OPEN_CHANNEL_PRIVATE.isPrivateChannel()).isTrue();
+    }
+
+    @Test
+    void isActive_true() {
+        assertThat(LOCAL_OPEN_CHANNEL.isActive()).isTrue();
+    }
+
+    @Test
+    void isActive_false() {
+        assertThat(LOCAL_OPEN_CHANNEL_2.isActive()).isFalse();
     }
 
     @Test

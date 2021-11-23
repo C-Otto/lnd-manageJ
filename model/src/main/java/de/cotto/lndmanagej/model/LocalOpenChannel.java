@@ -4,6 +4,7 @@ import java.util.Objects;
 
 public class LocalOpenChannel extends LocalChannel {
     private final BalanceInformation balanceInformation;
+    private final boolean active;
 
     public LocalOpenChannel(
             ChannelId channelId,
@@ -13,14 +14,21 @@ public class LocalOpenChannel extends LocalChannel {
             Pubkey remotePubkey,
             BalanceInformation balanceInformation,
             OpenInitiator openInitiator,
-            boolean isPrivate
+            boolean isPrivate,
+            boolean active
     ) {
         super(channelId, channelPoint, capacity, ownPubkey, remotePubkey, openInitiator, isPrivate);
         this.balanceInformation = balanceInformation;
+        this.active = active;
     }
 
     public BalanceInformation getBalanceInformation() {
         return balanceInformation;
+    }
+
+    @Override
+    public boolean isActive() {
+        return active;
     }
 
     @Override
@@ -36,11 +44,11 @@ public class LocalOpenChannel extends LocalChannel {
             return false;
         }
         LocalOpenChannel that = (LocalOpenChannel) other;
-        return Objects.equals(balanceInformation, that.balanceInformation);
+        return active == that.active && Objects.equals(balanceInformation, that.balanceInformation);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), balanceInformation);
+        return Objects.hash(super.hashCode(), balanceInformation, active);
     }
 }

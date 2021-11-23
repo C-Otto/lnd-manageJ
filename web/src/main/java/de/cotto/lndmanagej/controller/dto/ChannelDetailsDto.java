@@ -16,6 +16,7 @@ public record ChannelDetailsDto(
         String remoteAlias,
         String capacity,
         @JsonProperty("private") boolean privateChannel,
+        boolean active,
         BalanceInformationDto balance,
         OnChainCostsDto onChainCosts
 ) {
@@ -35,6 +36,7 @@ public record ChannelDetailsDto(
                 remoteAlias,
                 String.valueOf(localChannel.getCapacity().satoshis()),
                 localChannel.isPrivateChannel(),
+                localChannel.isActive(),
                 BalanceInformationDto.createFrom(balanceInformation),
                 onChainCosts
         );

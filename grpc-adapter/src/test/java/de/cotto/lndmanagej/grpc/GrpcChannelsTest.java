@@ -67,8 +67,8 @@ class GrpcChannelsTest {
     @Test
     void getChannels() {
         when(grpcService.getChannels()).thenReturn(List.of(
-                channel(CHANNEL_ID, true, false),
-                channel(CHANNEL_ID_2, false, false)
+                channel(CHANNEL_ID, true, false, true),
+                channel(CHANNEL_ID_2, false, false, false)
         ));
         assertThat(grpcChannels.getChannels()).containsExactlyInAnyOrder(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2);
     }
@@ -76,7 +76,7 @@ class GrpcChannelsTest {
     @Test
     void getChannels_private() {
         when(grpcService.getChannels()).thenReturn(List.of(
-                channel(CHANNEL_ID, true, true)
+                channel(CHANNEL_ID, true, true, true)
         ));
         assertThat(grpcChannels.getChannels()).containsExactlyInAnyOrder(LOCAL_OPEN_CHANNEL_PRIVATE);
     }
@@ -128,8 +128,8 @@ class GrpcChannelsTest {
     @Test
     void getChannel() {
         when(grpcService.getChannels()).thenReturn(List.of(
-                channel(CHANNEL_ID_2, false, false),
-                channel(CHANNEL_ID, true, false)
+                channel(CHANNEL_ID_2, false, false, false),
+                channel(CHANNEL_ID, true, false, true)
         ));
         assertThat(grpcChannels.getChannel(CHANNEL_ID)).contains(LOCAL_OPEN_CHANNEL);
     }
@@ -139,7 +139,7 @@ class GrpcChannelsTest {
         assertThat(grpcChannels.getChannel(CHANNEL_ID)).isEmpty();
     }
 
-    private Channel channel(ChannelId channelId, boolean isInitiator, boolean isPrivate) {
+    private Channel channel(ChannelId channelId, boolean isInitiator, boolean isPrivate, boolean isActive) {
         ChannelConstraints localConstraints = ChannelConstraints.newBuilder()
                 .setChanReserveSat(BALANCE_INFORMATION.localReserve().satoshis())
                 .build();
@@ -157,6 +157,7 @@ class GrpcChannelsTest {
                 .setRemoteConstraints(remoteConstraints)
                 .setInitiator(isInitiator)
                 .setPrivate(isPrivate)
+                .setActive(isActive)
                 .build();
     }
 

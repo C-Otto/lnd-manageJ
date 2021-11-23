@@ -25,7 +25,8 @@ public  class LocalOpenChannelFixtures {
                     PUBKEY_2,
                     BALANCE_INFORMATION,
                     LOCAL,
-                    false
+                    false,
+                    true
             );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_MORE_BALANCE =
             new LocalOpenChannel(
@@ -36,7 +37,8 @@ public  class LocalOpenChannelFixtures {
                     PUBKEY_2,
                     BALANCE_INFORMATION_2,
                     LOCAL,
-                    false
+                    false,
+                    true
             );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_PRIVATE =
             new LocalOpenChannel(
@@ -47,6 +49,7 @@ public  class LocalOpenChannelFixtures {
                     PUBKEY_2,
                     BALANCE_INFORMATION,
                     LOCAL,
+                    true,
                     true
             );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_2 =
@@ -58,6 +61,7 @@ public  class LocalOpenChannelFixtures {
                     PUBKEY_2,
                     BALANCE_INFORMATION,
                     REMOTE,
+                    false,
                     false
             );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_MORE_BALANCE_2 =
@@ -69,7 +73,8 @@ public  class LocalOpenChannelFixtures {
                     PUBKEY_2,
                     BALANCE_INFORMATION_2,
                     REMOTE,
-                    false
+                    false,
+                    true
             );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_3 =
             new LocalOpenChannel(
@@ -80,7 +85,8 @@ public  class LocalOpenChannelFixtures {
                     PUBKEY_2,
                     BALANCE_INFORMATION,
                     LOCAL,
-                    false
+                    false,
+                    true
             );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_TO_NODE_3 =
             new LocalOpenChannel(
@@ -91,6 +97,7 @@ public  class LocalOpenChannelFixtures {
                     PUBKEY_3,
                     BALANCE_INFORMATION,
                     LOCAL,
-                    false
+                    false,
+                    true
             );
 }

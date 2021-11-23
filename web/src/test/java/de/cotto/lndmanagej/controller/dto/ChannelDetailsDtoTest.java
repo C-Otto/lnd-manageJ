@@ -8,6 +8,7 @@ import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
@@ -69,6 +70,18 @@ class ChannelDetailsDtoTest {
         ChannelDetailsDto dto =
                 new ChannelDetailsDto(LOCAL_OPEN_CHANNEL_PRIVATE, ALIAS, BALANCE_INFORMATION, ON_CHAIN_COSTS);
         assertThat(dto.privateChannel()).isTrue();
+    }
+
+    @Test
+    void active_true() {
+        ChannelDetailsDto dto =
+                new ChannelDetailsDto(LOCAL_OPEN_CHANNEL, ALIAS, BALANCE_INFORMATION, ON_CHAIN_COSTS);
+        assertThat(dto.active()).isTrue();
+    }
+
+    @Test
+    void active_false() {
+        assertThat(CHANNEL_DETAILS_DTO.active()).isFalse();
     }
 
     @Test
