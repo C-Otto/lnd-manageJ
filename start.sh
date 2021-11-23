@@ -1,5 +1,5 @@
 #!/bin/bash
-if [ "x$TERM" == "x" ];
+if [ "x$TERM" == "xdumb" ];
 then
   export TERM="xterm"
 fi
