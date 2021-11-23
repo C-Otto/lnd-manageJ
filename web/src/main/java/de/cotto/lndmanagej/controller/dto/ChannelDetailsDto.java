@@ -17,6 +17,7 @@ public record ChannelDetailsDto(
         String capacity,
         @JsonProperty("private") boolean privateChannel,
         boolean active,
+        boolean closed,
         BalanceInformationDto balance,
         OnChainCostsDto onChainCosts
 ) {
@@ -37,6 +38,7 @@ public record ChannelDetailsDto(
                 String.valueOf(localChannel.getCapacity().satoshis()),
                 localChannel.isPrivateChannel(),
                 localChannel.isActive(),
+                localChannel.isClosed(),
                 BalanceInformationDto.createFrom(balanceInformation),
                 onChainCosts
         );

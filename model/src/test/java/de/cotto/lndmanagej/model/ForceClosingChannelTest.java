@@ -60,6 +60,11 @@ class ForceClosingChannelTest {
     }
 
     @Test
+    void isClosed() {
+        assertThat(FORCE_CLOSING_CHANNEL.isClosed()).isTrue();
+    }
+
+    @Test
     void testEquals() {
         EqualsVerifier.forClass(ForceClosingChannel.class).usingGetClass().verify();
     }

@@ -72,6 +72,11 @@ class LocalOpenChannelTest {
     }
 
     @Test
+    void isClosed() {
+        assertThat(LOCAL_OPEN_CHANNEL.isClosed()).isFalse();
+    }
+
+    @Test
     void isPrivateChannel_true() {
         assertThat(LOCAL_OPEN_CHANNEL_PRIVATE.isPrivateChannel()).isTrue();
     }

@@ -85,6 +85,18 @@ class ChannelDetailsDtoTest {
     }
 
     @Test
+    void closed_true() {
+        assertThat(CHANNEL_DETAILS_DTO.closed()).isTrue();
+    }
+
+    @Test
+    void closed_false() {
+        ChannelDetailsDto dto =
+                new ChannelDetailsDto(LOCAL_OPEN_CHANNEL, ALIAS, BALANCE_INFORMATION, ON_CHAIN_COSTS);
+        assertThat(dto.closed()).isFalse();
+    }
+
+    @Test
     void balance() {
         assertThat(CHANNEL_DETAILS_DTO.balance()).isEqualTo(BalanceInformationDto.createFrom(BALANCE_INFORMATION));
     }

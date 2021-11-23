@@ -74,6 +74,7 @@ class ChannelDetailsControllerIT {
                 .andExpect(jsonPath("$.openHeight", is(CHANNEL_ID.getBlockHeight())))
                 .andExpect(jsonPath("$.private", is(true)))
                 .andExpect(jsonPath("$.active", is(true)))
+                .andExpect(jsonPath("$.closed", is(false)))
                 .andExpect(jsonPath("$.onChainCosts.openCosts", is("1000")))
                 .andExpect(jsonPath("$.onChainCosts.closeCosts", is("2000")))
                 .andExpect(jsonPath("$.balance.localBalance", is("2000")))

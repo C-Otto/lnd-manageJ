@@ -38,6 +38,10 @@ public class LocalChannel extends Channel {
         return false;
     }
 
+    public boolean isClosed() {
+        return false;
+    }
+
     @Override
     @SuppressWarnings("CPD-START")
     public boolean equals(Object other) {
