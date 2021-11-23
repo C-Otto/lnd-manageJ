@@ -5,7 +5,7 @@ import de.cotto.lndmanagej.model.ChannelId;
 
 import java.time.LocalDateTime;
 
-public record Statistics(
+public record Balances(
         LocalDateTime timestamp,
         ChannelId channelId,
         BalanceInformation balanceInformation

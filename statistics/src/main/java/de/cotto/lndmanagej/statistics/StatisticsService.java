@@ -30,7 +30,7 @@ public class StatisticsService {
     private void storeBalance(LocalOpenChannel channel, LocalDateTime timestamp) {
         ChannelId channelId = channel.getId();
         BalanceInformation balanceInformation = channel.getBalanceInformation();
-        Statistics statistics = new Statistics(timestamp, channelId, balanceInformation);
-        statisticsDao.saveStatistics(statistics);
+        Balances balances = new Balances(timestamp, channelId, balanceInformation);
+        statisticsDao.saveBalances(balances);
     }
 }

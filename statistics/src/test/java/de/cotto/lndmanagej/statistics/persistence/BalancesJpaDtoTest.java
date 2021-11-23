@@ -6,15 +6,15 @@ import java.time.ZoneOffset;
 
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
-import static de.cotto.lndmanagej.statistics.StatisticsFixtures.STATISTICS;
+import static de.cotto.lndmanagej.statistics.StatisticsFixtures.BALANCES;
 import static de.cotto.lndmanagej.statistics.StatisticsFixtures.TIMESTAMP;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class StatisticsJpaDtoTest {
+class BalancesJpaDtoTest {
     @Test
     @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
     void fromModel() {
-        StatisticsJpaDto jpaDto = StatisticsJpaDto.fromModel(STATISTICS);
+        BalancesJpaDto jpaDto = BalancesJpaDto.fromModel(BALANCES);
         assertThat(jpaDto.getTimestamp()).isEqualTo(TIMESTAMP.toEpochSecond(ZoneOffset.UTC));
         assertThat(jpaDto.getChannelId()).isEqualTo(CHANNEL_ID.getShortChannelId());
         assertThat(jpaDto.getLocalBalance()).isEqualTo(BALANCE_INFORMATION.localBalance().satoshis());

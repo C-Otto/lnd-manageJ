@@ -5,7 +5,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 @SuppressWarnings("unused")
-public final class StatisticsId implements Serializable {
+public final class BalancesId implements Serializable {
     @Serial
     private static final long serialVersionUID = 0L;
 
@@ -14,7 +14,7 @@ public final class StatisticsId implements Serializable {
 
     private long timestamp;
 
-    public StatisticsId() {
+    public BalancesId() {
         // for JPA
     }
 }

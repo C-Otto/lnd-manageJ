@@ -1,7 +1,7 @@
 package de.cotto.lndmanagej.statistics.persistence;
 
 import com.google.common.annotations.VisibleForTesting;
-import de.cotto.lndmanagej.statistics.Statistics;
+import de.cotto.lndmanagej.statistics.Balances;
 
 import javax.annotation.Nullable;
 import javax.persistence.Entity;
@@ -12,9 +12,9 @@ import java.time.ZoneOffset;
 import java.util.Objects;
 
 @Entity
-@IdClass(StatisticsId.class)
-@Table(name = "statistics")
-class StatisticsJpaDto {
+@IdClass(BalancesId.class)
+@Table(name = "balances")
+class BalancesJpaDto {
     @Id
     private long timestamp;
 
@@ -27,18 +27,18 @@ class StatisticsJpaDto {
     private long remoteBalance;
     private long remoteReserved;
 
-    StatisticsJpaDto() {
+    BalancesJpaDto() {
         // for JPA
     }
 
-    protected static StatisticsJpaDto fromModel(Statistics statistics) {
-        StatisticsJpaDto dto = new StatisticsJpaDto();
-        dto.timestamp = statistics.timestamp().toEpochSecond(ZoneOffset.UTC);
-        dto.channelId = statistics.channelId().getShortChannelId();
-        dto.localBalance = statistics.balanceInformation().localBalance().satoshis();
-        dto.localReserved = statistics.balanceInformation().localReserve().satoshis();
-        dto.remoteBalance = statistics.balanceInformation().remoteBalance().satoshis();
-        dto.remoteReserved = statistics.balanceInformation().remoteReserve().satoshis();
+    protected static BalancesJpaDto fromModel(Balances balances) {
+        BalancesJpaDto dto = new BalancesJpaDto();
+        dto.timestamp = balances.timestamp().toEpochSecond(ZoneOffset.UTC);
+        dto.channelId = balances.channelId().getShortChannelId();
+        dto.localBalance = balances.balanceInformation().localBalance().satoshis();
+        dto.localReserved = balances.balanceInformation().localReserve().satoshis();
+        dto.remoteBalance = balances.balanceInformation().remoteBalance().satoshis();
+        dto.remoteReserved = balances.balanceInformation().remoteReserve().satoshis();
         return dto;
     }
 

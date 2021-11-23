@@ -21,7 +21,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class StatisticsServiceTest {
+class BalancesServiceTest {
     @InjectMocks
     private StatisticsService statisticsService;
 
@@ -38,19 +38,19 @@ class StatisticsServiceTest {
                 LOCAL_OPEN_CHANNEL_MORE_BALANCE_2
         ));
         statisticsService.storeBalances();
-        verify(statisticsDao).saveStatistics(argThat(withBalanceInformation(LOCAL_OPEN_CHANNEL_MORE_BALANCE_2)));
-        verify(statisticsDao).saveStatistics(argThat(withChannelId(LOCAL_OPEN_CHANNEL_MORE_BALANCE_2)));
-        verify(statisticsDao).saveStatistics(argThat(withBalanceInformation(LOCAL_OPEN_CHANNEL)));
-        verify(statisticsDao).saveStatistics(argThat(withChannelId(LOCAL_OPEN_CHANNEL)));
-        verify(statisticsDao, times(2)).saveStatistics(any());
+        verify(statisticsDao).saveBalances(argThat(withBalanceInformation(LOCAL_OPEN_CHANNEL_MORE_BALANCE_2)));
+        verify(statisticsDao).saveBalances(argThat(withChannelId(LOCAL_OPEN_CHANNEL_MORE_BALANCE_2)));
+        verify(statisticsDao).saveBalances(argThat(withBalanceInformation(LOCAL_OPEN_CHANNEL)));
+        verify(statisticsDao).saveBalances(argThat(withChannelId(LOCAL_OPEN_CHANNEL)));
+        verify(statisticsDao, times(2)).saveBalances(any());
         verifyNoMoreInteractions(statisticsDao);
     }
 
-    private ArgumentMatcher<Statistics> withChannelId(LocalOpenChannel channel) {
+    private ArgumentMatcher<Balances> withChannelId(LocalOpenChannel channel) {
         return statistics -> statistics.channelId().equals(channel.getId());
     }
 
-    private ArgumentMatcher<Statistics> withBalanceInformation(LocalOpenChannel channel) {
+    private ArgumentMatcher<Balances> withBalanceInformation(LocalOpenChannel channel) {
         return statistics -> statistics.balanceInformation().equals(channel.getBalanceInformation());
     }
 }

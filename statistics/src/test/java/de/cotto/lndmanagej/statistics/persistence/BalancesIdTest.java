@@ -4,10 +4,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class StatisticsIdTest {
+class BalancesIdTest {
     @Test
     void test_default_constructor() {
         // required for JPA
-        assertThat(new StatisticsId()).isNotNull();
+        assertThat(new BalancesId()).isNotNull();
     }
 }

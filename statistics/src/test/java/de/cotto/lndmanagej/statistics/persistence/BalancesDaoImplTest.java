@@ -15,7 +15,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class StatisticsDaoImplTest {
+class BalancesDaoImplTest {
 
     @InjectMocks
     private StatisticsDaoImpl statisticsDaoImpl;
@@ -25,7 +25,7 @@ class StatisticsDaoImplTest {
 
     @Test
     void saveStatistics() {
-        statisticsDaoImpl.saveStatistics(StatisticsFixtures.STATISTICS);
+        statisticsDaoImpl.saveBalances(StatisticsFixtures.BALANCES);
         verify(statisticsRepository).save(argThat(jpaDto ->
                 jpaDto.getTimestamp() == StatisticsFixtures.TIMESTAMP.toEpochSecond(ZoneOffset.UTC)
         ));

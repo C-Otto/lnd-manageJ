@@ -1,6 +1,6 @@
 package de.cotto.lndmanagej.statistics.persistence;
 
-import de.cotto.lndmanagej.statistics.Statistics;
+import de.cotto.lndmanagej.statistics.Balances;
 import de.cotto.lndmanagej.statistics.StatisticsDao;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +16,7 @@ public class StatisticsDaoImpl implements StatisticsDao {
     }
 
     @Override
-    public void saveStatistics(Statistics statistics) {
-        statisticsRepository.save(StatisticsJpaDto.fromModel(statistics));
+    public void saveBalances(Balances balances) {
+        statisticsRepository.save(BalancesJpaDto.fromModel(balances));
     }
 }
