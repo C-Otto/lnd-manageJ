@@ -36,22 +36,33 @@ import java.util.Optional;
 @Component
 @SuppressWarnings("PMD.ExcessiveImports")
 public class GrpcService extends GrpcBase {
+    private static final Duration CHANNELS_CACHE_REFRESH = Duration.ofMillis(100);
     private static final Duration CHANNELS_CACHE_EXPIRY = Duration.ofMillis(200);
+
+    private static final Duration PENDING_CHANNELS_CACHE_REFRESH = Duration.ofSeconds(5);
     private static final Duration PENDING_CHANNELS_CACHE_EXPIRY = Duration.ofSeconds(10);
+
+    private static final Duration LIST_PEERS_CACHE_REFRESH = Duration.ofSeconds(5);
     private static final Duration LIST_PEERS_CACHE_EXPIRY = Duration.ofSeconds(10);
+
+    private static final Duration TRANSACTIONS_CACHE_REFRESH = Duration.ofSeconds(15);
     private static final Duration TRANSACTIONS_CACHE_EXPIRY = Duration.ofSeconds(30);
 
     private final LightningGrpc.LightningBlockingStub lightningStub;
     private final LoadingCache<Object, List<Channel>> channelsCache = new CacheBuilder()
+            .withRefresh(CHANNELS_CACHE_REFRESH)
             .withExpiry(CHANNELS_CACHE_EXPIRY)
             .build(this::getChannelsWithoutCache);
     private final LoadingCache<Object, Optional<PendingChannelsResponse>> pendingChannelsCache = new CacheBuilder()
+            .withRefresh(PENDING_CHANNELS_CACHE_REFRESH)
             .withExpiry(PENDING_CHANNELS_CACHE_EXPIRY)
             .build(this::getPendingChannelsWithoutCache);
     private final LoadingCache<Object, List<Peer>> listPeersCache = new CacheBuilder()
+            .withRefresh(LIST_PEERS_CACHE_REFRESH)
             .withExpiry(LIST_PEERS_CACHE_EXPIRY)
             .build(this::listPeersWithoutCache);
     private final LoadingCache<Object, Optional<List<Transaction>>> getTransactionsCache = new CacheBuilder()
+            .withRefresh(TRANSACTIONS_CACHE_REFRESH)
             .withExpiry(TRANSACTIONS_CACHE_EXPIRY)
             .build(this::getTransactionsWithoutCache);
 
