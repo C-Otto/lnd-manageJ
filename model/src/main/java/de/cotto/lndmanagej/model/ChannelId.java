@@ -45,6 +45,10 @@ public final class ChannelId implements Comparable<ChannelId> {
         return shortChannelId;
     }
 
+    public int getBlockHeight() {
+        return (int) (shortChannelId >> 40);
+    }
+
     @Override
     public boolean equals(Object other) {
         if (this == other) {
@@ -73,7 +77,7 @@ public final class ChannelId implements Comparable<ChannelId> {
     }
 
     private String getCompactFormWithDelimiter(String delimiter) {
-        long block = shortChannelId >> 40;
+        long block = getBlockHeight();
         long transaction = shortChannelId >> 16 & 0xFFFFFF;
         long output = shortChannelId & 0xFFFF;
         return block + delimiter + transaction + delimiter + output;

@@ -138,6 +138,11 @@ class ChannelIdTest {
     }
 
     @Test
+    void getBlocKHeight() {
+        assertThat(CHANNEL_ID.getBlockHeight()).isEqualTo(712_345);
+    }
+
+    @Test
     void testEquals() {
         EqualsVerifier.forClass(ChannelId.class).verify();
     }

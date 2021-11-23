@@ -71,6 +71,7 @@ class ChannelDetailsControllerIT {
                 .andExpect(jsonPath("$.remotePubkey", is(PUBKEY_2.toString())))
                 .andExpect(jsonPath("$.remoteAlias", is(ALIAS_2)))
                 .andExpect(jsonPath("$.capacity", is(String.valueOf(CAPACITY.satoshis()))))
+                .andExpect(jsonPath("$.openHeight", is(CHANNEL_ID.getBlockHeight())))
                 .andExpect(jsonPath("$.private", is(true)))
                 .andExpect(jsonPath("$.onChainCosts.openCosts", is("1000")))
                 .andExpect(jsonPath("$.onChainCosts.closeCosts", is("2000")))
