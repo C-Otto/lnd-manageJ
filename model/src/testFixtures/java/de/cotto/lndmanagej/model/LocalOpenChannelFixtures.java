@@ -67,7 +67,7 @@ public  class LocalOpenChannelFixtures {
                     CAPACITY,
                     PUBKEY,
                     PUBKEY_2,
-                    BALANCE_INFORMATION,
+                    BALANCE_INFORMATION_2,
                     REMOTE,
                     false
             );

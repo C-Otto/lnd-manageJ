@@ -36,10 +36,10 @@ class BalanceServiceTest {
     @Test
     void getBalanceInformation_for_pubkey() {
         BalanceInformation expected = new BalanceInformation(
-                Coins.ofSatoshis(3_000),
-                Coins.ofSatoshis(300),
-                Coins.ofSatoshis(346),
-                Coins.ofSatoshis(30)
+                Coins.ofSatoshis(4_000),
+                Coins.ofSatoshis(400),
+                Coins.ofSatoshis(446),
+                Coins.ofSatoshis(40)
         );
         when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2));
         when(grpcChannels.getChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_MORE_BALANCE));

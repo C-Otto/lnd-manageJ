@@ -3,9 +3,11 @@ plugins {
 }
 
 dependencies {
-    implementation project(':web')
+    runtimeOnly project(':web')
+    runtimeOnly project(':statistics')
     runtimeOnly 'org.postgresql:postgresql'
     testRuntimeOnly 'com.h2database:h2'
+    testImplementation project(':backend')
     testImplementation project(':grpc-adapter')
 }
 
