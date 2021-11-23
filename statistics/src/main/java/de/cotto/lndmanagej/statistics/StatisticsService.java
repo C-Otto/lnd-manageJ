@@ -5,11 +5,13 @@ import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.service.ChannelService;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.concurrent.TimeUnit;
 
+@Component
 public class StatisticsService {
     private final ChannelService channelService;
     private final StatisticsDao statisticsDao;
