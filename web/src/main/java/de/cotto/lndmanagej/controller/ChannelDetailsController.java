@@ -11,6 +11,7 @@ import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FeeConfiguration;
 import de.cotto.lndmanagej.model.LocalChannel;
+import de.cotto.lndmanagej.model.OpenCloseStatus;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
@@ -64,7 +65,7 @@ public class ChannelDetailsController {
                 remoteAlias,
                 getBalanceInformation(channelId),
                 getOnChainCosts(channelId),
-                getFeeConfiguration(channelId)
+                getFeeConfiguration(localChannel)
         );
     }
 
@@ -79,8 +80,11 @@ public class ChannelDetailsController {
         return new OnChainCostsDto(openCosts, closeCosts);
     }
 
-    private FeeConfigurationDto getFeeConfiguration(ChannelId channelId) {
-        FeeConfiguration feeConfiguration = feeService.getFeeConfiguration(channelId);
-        return FeeConfigurationDto.createFrom(feeConfiguration);
+    private FeeConfigurationDto getFeeConfiguration(LocalChannel channel) {
+        if (channel.getStatus().openCloseStatus() == OpenCloseStatus.OPEN) {
+            FeeConfiguration feeConfiguration = feeService.getFeeConfiguration(channel.getId());
+            return FeeConfigurationDto.createFrom(feeConfiguration);
+        }
+        return new FeeConfigurationDto(0, 0, 0, 0);
     }
 }
