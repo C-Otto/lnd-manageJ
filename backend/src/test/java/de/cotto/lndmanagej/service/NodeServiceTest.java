@@ -1,7 +1,6 @@
 package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.grpc.GrpcNodeInfo;
-import de.cotto.lndmanagej.model.Node;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,7 +26,7 @@ class NodeServiceTest {
 
     @Test
     void getAlias() {
-        when(grpcNodeInfo.getNode(PUBKEY)).thenReturn(NODE);
+        when(grpcNodeInfo.getAlias(PUBKEY)).thenReturn(ALIAS);
         assertThat(nodeService.getAlias(PUBKEY)).isEqualTo(ALIAS);
     }
 
@@ -35,15 +34,6 @@ class NodeServiceTest {
     void getNode() {
         when(grpcNodeInfo.getNode(PUBKEY)).thenReturn(NODE);
         assertThat(nodeService.getNode(PUBKEY)).isEqualTo(NODE);
-    }
-
-    @Test
-    void getAlias_updates_node_cache() {
-        when(grpcNodeInfo.getNode(PUBKEY)).thenReturn(NODE_WITHOUT_ALIAS).thenReturn(NODE).thenThrow();
-        assertThat(nodeService.getAlias(PUBKEY)).isEqualTo(NODE_WITHOUT_ALIAS.alias());
-        Node node = nodeService.getNode(PUBKEY);
-        assertThat(node).isEqualTo(NODE_WITHOUT_ALIAS);
-        verify(grpcNodeInfo, times(1)).getNode(PUBKEY);
     }
 
     @Test

@@ -18,6 +18,8 @@ import static de.cotto.lndmanagej.model.NodeFixtures.NODE_PEER;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,6 +37,18 @@ class GrpcNodeInfoTest {
                 .setLastUpdate(NODE.lastUpdate())
                 .build());
         when(grpcService.getNodeInfo(NODE.pubkey())).thenReturn(Optional.of(node.build()));
+    }
+
+    @Test
+    void getAlias() {
+        assertThat(grpcNodeInfo.getAlias(NODE.pubkey())).isEqualTo(NODE.alias());
+        verify(grpcService, never()).listPeers();
+    }
+
+    @Test
+    void getAlias_not_found() {
+        when(grpcService.getNodeInfo(NODE.pubkey())).thenReturn(Optional.empty());
+        assertThat(grpcNodeInfo.getAlias(NODE.pubkey())).isEqualTo(NODE.pubkey().toString());
     }
 
     @Test

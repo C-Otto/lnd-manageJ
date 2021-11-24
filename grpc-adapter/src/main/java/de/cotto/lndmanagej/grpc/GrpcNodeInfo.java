@@ -15,6 +15,14 @@ public class GrpcNodeInfo {
         this.grpcService = grpcService;
     }
 
+    public String getAlias(Pubkey pubkey) {
+        NodeInfo nodeInfo = grpcService.getNodeInfo(pubkey).orElse(null);
+        if (nodeInfo == null) {
+            return pubkey.toString();
+        }
+        return nodeInfo.getNode().getAlias();
+    }
+
     public Node getNode(Pubkey pubkey) {
         NodeInfo nodeInfo = grpcService.getNodeInfo(pubkey).orElse(null);
         if (nodeInfo == null) {

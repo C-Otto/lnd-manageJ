@@ -21,7 +21,7 @@ public class NodeService {
             .withExpiry(ALIAS_CACHE_EXPIRY)
             .withRefresh(ALIAS_CACHE_REFRESH)
             .withMaximumSize(MAXIMUM_SIZE)
-            .build(this::getAliasWithoutCacheAndUpdateNodeCache);
+            .build(this::getAliasWithoutCache);
     private final LoadingCache<Pubkey, Node> nodeCache = new CacheBuilder()
             .withExpiry(NODE_CACHE_EXPIRY)
             .withMaximumSize(MAXIMUM_SIZE)
@@ -45,10 +45,8 @@ public class NodeService {
         return node;
     }
 
-    private String getAliasWithoutCacheAndUpdateNodeCache(Pubkey pubkey) {
-        Node node = grpcNodeInfo.getNode(pubkey);
-        nodeCache.put(pubkey, node);
-        return node.alias();
+    private String getAliasWithoutCache(Pubkey pubkey) {
+        return grpcNodeInfo.getAlias(pubkey);
     }
 
 }
