@@ -105,6 +105,18 @@ class ChannelControllerIT {
     }
 
     @Test
+    void getBalance() throws Exception {
+        when(balanceService.getBalanceInformation(CHANNEL_ID)).thenReturn(Optional.of(BALANCE_INFORMATION_2));
+        mockMvc.perform(get(CHANNEL_PREFIX + "/balance"))
+                .andExpect(jsonPath("$.localBalance", is("2000")))
+                .andExpect(jsonPath("$.localReserve", is("200")))
+                .andExpect(jsonPath("$.localAvailable", is("1800")))
+                .andExpect(jsonPath("$.remoteBalance", is("223")))
+                .andExpect(jsonPath("$.remoteReserve", is("20")))
+                .andExpect(jsonPath("$.remoteAvailable", is("203")));
+    }
+
+    @Test
     void getFeeConfiguration() throws Exception {
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         when(feeService.getFeeConfiguration(CHANNEL_ID)).thenReturn(FEE_CONFIGURATION);

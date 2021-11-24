@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.controller;
 
 import com.codahale.metrics.MetricRegistry;
+import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.controller.dto.FeeConfigurationDto;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
@@ -69,6 +70,14 @@ public class ChannelController {
                 getOnChainCosts(channelId),
                 getFeeConfiguration(localChannel)
         );
+    }
+
+    @GetMapping("/balance")
+    public BalanceInformationDto getBalance(@PathVariable ChannelId channelId) {
+        metrics.mark(MetricRegistry.name(getClass(), "getBalance"));
+        BalanceInformation balanceInformation = balanceService.getBalanceInformation(channelId)
+                .orElse(BalanceInformation.EMPTY);
+        return BalanceInformationDto.createFrom(balanceInformation);
     }
 
     @GetMapping("/fee-configuration")

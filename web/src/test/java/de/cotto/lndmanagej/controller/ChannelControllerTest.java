@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.controller;
 
+import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.controller.dto.FeeConfigurationDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
@@ -21,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
+import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.FeeConfigurationFixtures.FEE_CONFIGURATION;
@@ -122,6 +124,22 @@ class ChannelControllerTest {
     void getDetails_waiting_close() throws NotFoundException {
         ChannelDetailsDto expectedDetails = mockForChannelWithoutFeeConfiguration(WAITING_CLOSE_CHANNEL);
         assertThat(channelController.getDetails(CHANNEL_ID)).isEqualTo(expectedDetails);
+    }
+
+    @Test
+    void getBalance() {
+        when(balanceService.getBalanceInformation(CHANNEL_ID)).thenReturn(Optional.of(BALANCE_INFORMATION));
+        assertThat(channelController.getBalance(CHANNEL_ID))
+                .isEqualTo(BalanceInformationDto.createFrom(BALANCE_INFORMATION));
+        verify(metrics).mark(argThat(name -> name.endsWith(".getBalance")));
+    }
+
+    @Test
+    void getBalance_not_found() {
+        when(balanceService.getBalanceInformation(CHANNEL_ID)).thenReturn(Optional.empty());
+        assertThat(channelController.getBalance(CHANNEL_ID))
+                .isEqualTo(BalanceInformationDto.createFrom(BalanceInformation.EMPTY));
+        verify(metrics).mark(argThat(name -> name.endsWith(".getBalance")));
     }
 
     @Test
