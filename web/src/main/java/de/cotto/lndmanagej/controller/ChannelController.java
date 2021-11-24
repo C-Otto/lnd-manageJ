@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/channel/{channelId}")
 @Import(ObjectMapperConfiguration.class)
-public class ChannelDetailsController {
+public class ChannelController {
     private final ChannelService channelService;
     private final NodeService nodeService;
     private final Metrics metrics;
@@ -35,7 +35,7 @@ public class ChannelDetailsController {
     private final OnChainCostService onChainCostService;
     private final FeeService feeService;
 
-    public ChannelDetailsController(
+    public ChannelController(
             ChannelService channelService,
             NodeService nodeService,
             BalanceService balanceService,

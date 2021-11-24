@@ -37,14 +37,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ChannelDetailsControllerTest {
+class ChannelControllerTest {
     private static final Coins OPEN_COSTS = Coins.ofSatoshis(1);
     private static final Coins CLOSE_COSTS = Coins.ofSatoshis(2);
     private static final OnChainCostsDto ON_CHAIN_COSTS = new OnChainCostsDto(OPEN_COSTS, CLOSE_COSTS);
     private static final FeeConfigurationDto FEE_CONFIGURATION_DTO = FeeConfigurationDto.createFrom(FEE_CONFIGURATION);
 
     @InjectMocks
-    private ChannelDetailsController channelDetailsController;
+    private ChannelController channelController;
 
     @Mock
     private ChannelService channelService;
@@ -74,7 +74,7 @@ class ChannelDetailsControllerTest {
     @Test
     void getDetails_channel_not_found() {
         assertThatExceptionOfType(NotFoundException.class)
-                .isThrownBy(() -> channelDetailsController.getDetails(CHANNEL_ID));
+                .isThrownBy(() -> channelController.getDetails(CHANNEL_ID));
     }
 
     @Test
@@ -91,7 +91,7 @@ class ChannelDetailsControllerTest {
         when(balanceService.getBalanceInformation(CHANNEL_ID))
                 .thenReturn(Optional.ofNullable(LOCAL_OPEN_CHANNEL.getBalanceInformation()));
 
-        assertThat(channelDetailsController.getDetails(CHANNEL_ID)).isEqualTo(expectedDetails);
+        assertThat(channelController.getDetails(CHANNEL_ID)).isEqualTo(expectedDetails);
         verify(metrics).mark(argThat(name -> name.endsWith(".getDetails")));
     }
 
@@ -109,19 +109,19 @@ class ChannelDetailsControllerTest {
         when(balanceService.getBalanceInformation(CHANNEL_ID))
                 .thenReturn(Optional.ofNullable(LOCAL_OPEN_CHANNEL_PRIVATE.getBalanceInformation()));
 
-        assertThat(channelDetailsController.getDetails(CHANNEL_ID)).isEqualTo(expectedDetails);
+        assertThat(channelController.getDetails(CHANNEL_ID)).isEqualTo(expectedDetails);
     }
 
     @Test
     void getDetails_closed() throws NotFoundException {
         ChannelDetailsDto expectedDetails = mockForChannelWithoutFeeConfiguration(CLOSED_CHANNEL);
-        assertThat(channelDetailsController.getDetails(CHANNEL_ID)).isEqualTo(expectedDetails);
+        assertThat(channelController.getDetails(CHANNEL_ID)).isEqualTo(expectedDetails);
     }
 
     @Test
     void getDetails_waiting_close() throws NotFoundException {
         ChannelDetailsDto expectedDetails = mockForChannelWithoutFeeConfiguration(WAITING_CLOSE_CHANNEL);
-        assertThat(channelDetailsController.getDetails(CHANNEL_ID)).isEqualTo(expectedDetails);
+        assertThat(channelController.getDetails(CHANNEL_ID)).isEqualTo(expectedDetails);
     }
 
     private ChannelDetailsDto mockForChannelWithoutFeeConfiguration(LocalChannel channel) {
