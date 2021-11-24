@@ -61,7 +61,8 @@ class ForceClosingChannelTest {
 
     @Test
     void isClosed() {
-        assertThat(FORCE_CLOSING_CHANNEL.isClosed()).isTrue();
+        // only consider a channel closed once it is fully closed
+        assertThat(FORCE_CLOSING_CHANNEL.isClosed()).isFalse();
     }
 
     @Test

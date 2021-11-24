@@ -25,11 +25,6 @@ public final class ForceClosingChannel extends ClosedOrClosingChannel {
     }
 
     @Override
-    public boolean isClosed() {
-        return true;
-    }
-
-    @Override
     @SuppressWarnings("CPD-START")
     public boolean equals(Object other) {
         if (this == other) {
