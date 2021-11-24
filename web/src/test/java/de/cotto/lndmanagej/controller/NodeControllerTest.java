@@ -127,7 +127,7 @@ class NodeControllerTest {
     }
 
     @Test
-    void getOpenChannelIds_for_peer() {
+    void getOpenChannelIds() {
         when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_3));
         assertThat(nodeController.getOpenChannelIdsForPubkey(PUBKEY))
                 .isEqualTo(new ChannelsForNodeDto(PUBKEY, List.of(CHANNEL_ID, CHANNEL_ID_3)));
@@ -135,9 +135,16 @@ class NodeControllerTest {
     }
 
     @Test
-    void getOpenChannelIds_for_peer_ordered() {
+    void getOpenChannelIds_ordered() {
         when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL_2, LOCAL_OPEN_CHANNEL));
         assertThat(nodeController.getOpenChannelIdsForPubkey(PUBKEY))
                 .isEqualTo(new ChannelsForNodeDto(PUBKEY, List.of(CHANNEL_ID, CHANNEL_ID_2)));
+    }
+
+    @Test
+    void getBalance() {
+        when(balanceService.getBalanceInformation(PUBKEY)).thenReturn(BALANCE_INFORMATION);
+        assertThat(nodeController.getBalance(PUBKEY)).isEqualTo(BalanceInformationDto.createFrom(BALANCE_INFORMATION));
+        verify(metrics).mark(argThat(name -> name.endsWith(".getBalance")));
     }
 }

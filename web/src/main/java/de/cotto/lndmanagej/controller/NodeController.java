@@ -84,6 +84,12 @@ public class NodeController {
         return new ChannelsForNodeDto(pubkey, channels);
     }
 
+    @GetMapping("/balance")
+    public BalanceInformationDto getBalance(@PathVariable Pubkey pubkey) {
+        mark("getBalance");
+        return BalanceInformationDto.createFrom(balanceService.getBalanceInformation(pubkey));
+    }
+
     private List<ChannelId> toSortedList(Set<? extends Channel> channels) {
         return channels.stream()
                 .map(Channel::getId)

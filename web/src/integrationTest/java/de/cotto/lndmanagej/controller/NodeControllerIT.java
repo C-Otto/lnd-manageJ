@@ -98,12 +98,24 @@ class NodeControllerIT {
     }
 
     @Test
-    void getOpenChannelIds_for_peer() throws Exception {
+    void getOpenChannelIds() throws Exception {
         when(channelService.getOpenChannelsWith(PUBKEY_2)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_3));
         List<String> channelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_3.toString());
         mockMvc.perform(get(NODE_PREFIX + "/open-channels"))
                 .andExpect(jsonPath("$.node", is(PUBKEY_2.toString())))
                 .andExpect(jsonPath("$.channels", is(channelIds)));
+    }
+
+    @Test
+    void getBalance() throws Exception {
+        when(balanceService.getBalanceInformation(PUBKEY_2)).thenReturn(BALANCE_INFORMATION);
+        mockMvc.perform(get(NODE_PREFIX + "/balance"))
+                .andExpect(jsonPath("$.localBalance", is("1000")))
+                .andExpect(jsonPath("$.localReserve", is("100")))
+                .andExpect(jsonPath("$.localAvailable", is("900")))
+                .andExpect(jsonPath("$.remoteBalance", is("123")))
+                .andExpect(jsonPath("$.remoteReserve", is("10")))
+                .andExpect(jsonPath("$.remoteAvailable", is("113")));
     }
 
 }
