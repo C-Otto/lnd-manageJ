@@ -1,11 +1,14 @@
 package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.controller.dto.ChannelDetailsDto;
+import de.cotto.lndmanagej.controller.dto.FeeConfigurationDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.FeeConfiguration;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
+import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.OnChainCostService;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +37,10 @@ class ChannelDetailsControllerTest {
     private static final Coins OPEN_COSTS = Coins.ofSatoshis(1);
     private static final Coins CLOSE_COSTS = Coins.ofSatoshis(2);
     private static final OnChainCostsDto ON_CHAIN_COSTS = new OnChainCostsDto(OPEN_COSTS, CLOSE_COSTS);
+    private static final FeeConfiguration FEE_CONFIGURATION =
+            new FeeConfiguration(1, Coins.ofMilliSatoshis(2), 3, Coins.ofMilliSatoshis(4));
+    private static final FeeConfigurationDto FEE_CONFIGURATION_DTO = FeeConfigurationDto.createFrom(FEE_CONFIGURATION);
+
     @InjectMocks
     private ChannelDetailsController channelDetailsController;
 
@@ -52,10 +59,14 @@ class ChannelDetailsControllerTest {
     @Mock
     private OnChainCostService onChainCostService;
 
+    @Mock
+    private FeeService feeService;
+
     @BeforeEach
     void setUp() {
         lenient().when(onChainCostService.getOpenCosts(CHANNEL_ID)).thenReturn(Optional.of(OPEN_COSTS));
         lenient().when(onChainCostService.getCloseCosts(CHANNEL_ID)).thenReturn(Optional.of(CLOSE_COSTS));
+        lenient().when(feeService.getFeeConfiguration(CHANNEL_ID)).thenReturn(FEE_CONFIGURATION);
     }
 
     @Test
@@ -70,7 +81,8 @@ class ChannelDetailsControllerTest {
                 LOCAL_OPEN_CHANNEL,
                 ALIAS_2,
                 LOCAL_OPEN_CHANNEL.getBalanceInformation(),
-                ON_CHAIN_COSTS
+                ON_CHAIN_COSTS,
+                FEE_CONFIGURATION_DTO
         );
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
@@ -87,7 +99,8 @@ class ChannelDetailsControllerTest {
                 LOCAL_OPEN_CHANNEL_PRIVATE,
                 ALIAS_2,
                 LOCAL_OPEN_CHANNEL_PRIVATE.getBalanceInformation(),
-                ON_CHAIN_COSTS
+                ON_CHAIN_COSTS,
+                FEE_CONFIGURATION_DTO
         );
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_PRIVATE));

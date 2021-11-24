@@ -16,13 +16,15 @@ public record ChannelDetailsDto(
         String capacity,
         ChannelStatusDto status,
         BalanceInformationDto balance,
-        OnChainCostsDto onChainCosts
+        OnChainCostsDto onChainCosts,
+        FeeConfigurationDto feeConfiguration
 ) {
     public ChannelDetailsDto(
             LocalChannel localChannel,
             String remoteAlias,
             BalanceInformation balanceInformation,
-            OnChainCostsDto onChainCosts
+            OnChainCostsDto onChainCosts,
+            FeeConfigurationDto feeConfiguration
     ) {
         this(
                 String.valueOf(localChannel.getId().getShortChannelId()),
@@ -35,7 +37,8 @@ public record ChannelDetailsDto(
                 String.valueOf(localChannel.getCapacity().satoshis()),
                 ChannelStatusDto.createFrom(localChannel.getStatus()),
                 BalanceInformationDto.createFrom(balanceInformation),
-                onChainCosts
+                onChainCosts,
+                feeConfiguration
         );
     }
 }

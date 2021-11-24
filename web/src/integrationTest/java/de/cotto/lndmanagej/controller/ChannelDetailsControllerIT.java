@@ -2,8 +2,10 @@ package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.FeeConfiguration;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
+import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.OnChainCostService;
 import org.junit.jupiter.api.Test;
@@ -30,6 +32,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = ChannelDetailsController.class)
 class ChannelDetailsControllerIT {
     private static final String CHANNEL_PREFIX = "/api/channel/" + CHANNEL_ID.getShortChannelId();
+    private static final FeeConfiguration FEE_CONFIGURATION =
+            new FeeConfiguration(1, Coins.ofMilliSatoshis(2), 3, Coins.ofMilliSatoshis(4));
 
     @Autowired
     private MockMvc mockMvc;
@@ -50,6 +54,9 @@ class ChannelDetailsControllerIT {
     @MockBean
     private BalanceService balanceService;
 
+    @MockBean
+    private FeeService feeService;
+
     @Test
     void not_found() throws Exception {
         mockMvc.perform(get(CHANNEL_PREFIX + "/details"))
@@ -58,6 +65,7 @@ class ChannelDetailsControllerIT {
 
     @Test
     void getChannelDetails() throws Exception {
+        when(feeService.getFeeConfiguration(CHANNEL_ID)).thenReturn(FEE_CONFIGURATION);
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_PRIVATE));
         when(onChainCostService.getOpenCosts(CHANNEL_ID)).thenReturn(Optional.of(Coins.ofSatoshis(1000)));
@@ -83,7 +91,11 @@ class ChannelDetailsControllerIT {
                 .andExpect(jsonPath("$.balance.localAvailable", is("1800")))
                 .andExpect(jsonPath("$.balance.remoteBalance", is("223")))
                 .andExpect(jsonPath("$.balance.remoteReserve", is("20")))
-                .andExpect(jsonPath("$.balance.remoteAvailable", is("203")));
+                .andExpect(jsonPath("$.balance.remoteAvailable", is("203")))
+                .andExpect(jsonPath("$.feeConfiguration.outgoingFeeRatePpm", is(1)))
+                .andExpect(jsonPath("$.feeConfiguration.outgoingBaseFeeMilliSat", is(2)))
+                .andExpect(jsonPath("$.feeConfiguration.incomingFeeRatePpm", is(3)))
+                .andExpect(jsonPath("$.feeConfiguration.incomingBaseFeeMilliSat", is(4)));
     }
 
     @Test
