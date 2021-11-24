@@ -2,29 +2,27 @@ package de.cotto.lndmanagej.model;
 
 import org.junit.jupiter.api.Test;
 
+import static de.cotto.lndmanagej.model.FeeConfigurationFixtures.FEE_CONFIGURATION;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class FeeConfigurationTest {
-    private final FeeConfiguration feeConfiguration =
-            new FeeConfiguration(10, Coins.ofMilliSatoshis(20), 30, Coins.ofMilliSatoshis(40));
-
     @Test
     void outgoingFeeRate() {
-        assertThat(feeConfiguration.outgoingFeeRate()).isEqualTo(10L);
+        assertThat(FEE_CONFIGURATION.outgoingFeeRate()).isEqualTo(1);
     }
 
     @Test
     void outgoingBaseFee() {
-        assertThat(feeConfiguration.outgoingBaseFee()).isEqualTo(Coins.ofMilliSatoshis(20));
+        assertThat(FEE_CONFIGURATION.outgoingBaseFee()).isEqualTo(Coins.ofMilliSatoshis(2));
     }
 
     @Test
     void incomingFeeRate() {
-        assertThat(feeConfiguration.incomingFeeRate()).isEqualTo(30L);
+        assertThat(FEE_CONFIGURATION.incomingFeeRate()).isEqualTo(3);
     }
 
     @Test
     void incomingBaseFee() {
-        assertThat(feeConfiguration.incomingBaseFee()).isEqualTo(Coins.ofMilliSatoshis(40));
+        assertThat(FEE_CONFIGURATION.incomingBaseFee()).isEqualTo(Coins.ofMilliSatoshis(4));
     }
 }

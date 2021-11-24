@@ -14,22 +14,6 @@ public class FeeService {
         this.grpcFees = grpcFees;
     }
 
-    public long getIncomingFeeRate(ChannelId channelId) {
-        return grpcFees.getIncomingFeeRate(channelId).orElseThrow(IllegalStateException::new);
-    }
-
-    public long getOutgoingFeeRate(ChannelId channelId) {
-        return grpcFees.getOutgoingFeeRate(channelId).orElseThrow(IllegalStateException::new);
-    }
-
-    public Coins getOutgoingBaseFee(ChannelId channelId) {
-        return grpcFees.getOutgoingBaseFee(channelId).orElseThrow(IllegalStateException::new);
-    }
-
-    public Coins getIncomingBaseFee(ChannelId channelId) {
-        return grpcFees.getIncomingBaseFee(channelId).orElseThrow(IllegalStateException::new);
-    }
-
     public FeeConfiguration getFeeConfiguration(ChannelId channelId) {
         return new FeeConfiguration(
                 getOutgoingFeeRate(channelId),
@@ -37,5 +21,21 @@ public class FeeService {
                 getIncomingFeeRate(channelId),
                 getIncomingBaseFee(channelId)
         );
+    }
+
+    private long getIncomingFeeRate(ChannelId channelId) {
+        return grpcFees.getIncomingFeeRate(channelId).orElseThrow(IllegalStateException::new);
+    }
+
+    private long getOutgoingFeeRate(ChannelId channelId) {
+        return grpcFees.getOutgoingFeeRate(channelId).orElseThrow(IllegalStateException::new);
+    }
+
+    private Coins getOutgoingBaseFee(ChannelId channelId) {
+        return grpcFees.getOutgoingBaseFee(channelId).orElseThrow(IllegalStateException::new);
+    }
+
+    private Coins getIncomingBaseFee(ChannelId channelId) {
+        return grpcFees.getIncomingBaseFee(channelId).orElseThrow(IllegalStateException::new);
     }
 }

@@ -1,9 +1,8 @@
 package de.cotto.lndmanagej.controller.dto;
 
-import de.cotto.lndmanagej.model.Coins;
-import de.cotto.lndmanagej.model.FeeConfiguration;
 import org.junit.jupiter.api.Test;
 
+import static de.cotto.lndmanagej.model.FeeConfigurationFixtures.FEE_CONFIGURATION;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class FeeConfigurationDtoTest {
@@ -11,9 +10,7 @@ class FeeConfigurationDtoTest {
     void createFrom() {
         FeeConfigurationDto expected = new FeeConfigurationDto(1, 2, 3, 4);
 
-        FeeConfiguration feeConfiguration =
-                new FeeConfiguration(1, Coins.ofMilliSatoshis(2), 3, Coins.ofMilliSatoshis(4));
-        FeeConfigurationDto dto = FeeConfigurationDto.createFrom(feeConfiguration);
+        FeeConfigurationDto dto = FeeConfigurationDto.createFrom(FEE_CONFIGURATION);
 
         assertThat(dto).isEqualTo(expected);
     }

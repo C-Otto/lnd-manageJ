@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.FeeConfigurationFixtures;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
@@ -167,31 +168,31 @@ class LegacyControllerTest {
     }
 
     @Test
-    void getIncomingFeeRate() {
-        when(feeService.getIncomingFeeRate(CHANNEL_ID)).thenReturn(123L);
-        assertThat(legacyController.getIncomingFeeRate(CHANNEL_ID)).isEqualTo(123);
-        verify(metrics).mark(argThat(name -> name.endsWith(".getIncomingFeeRate")));
-    }
-
-    @Test
     void getOutgoingFeeRate() {
-        when(feeService.getOutgoingFeeRate(CHANNEL_ID)).thenReturn(123L);
-        assertThat(legacyController.getOutgoingFeeRate(CHANNEL_ID)).isEqualTo(123);
+        when(feeService.getFeeConfiguration(CHANNEL_ID)).thenReturn(FeeConfigurationFixtures.FEE_CONFIGURATION);
+        assertThat(legacyController.getOutgoingFeeRate(CHANNEL_ID)).isEqualTo(1);
         verify(metrics).mark(argThat(name -> name.endsWith(".getOutgoingFeeRate")));
     }
 
     @Test
-    void getIncomingBaseFee() {
-        when(feeService.getIncomingBaseFee(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(10L));
-        assertThat(legacyController.getIncomingBaseFee(CHANNEL_ID)).isEqualTo(10);
-        verify(metrics).mark(argThat(name -> name.endsWith(".getIncomingBaseFee")));
+    void getOutgoingBaseFee() {
+        when(feeService.getFeeConfiguration(CHANNEL_ID)).thenReturn(FeeConfigurationFixtures.FEE_CONFIGURATION);
+        assertThat(legacyController.getOutgoingBaseFee(CHANNEL_ID)).isEqualTo(2);
+        verify(metrics).mark(argThat(name -> name.endsWith(".getOutgoingBaseFee")));
     }
 
     @Test
-    void getOutgoingBaseFee() {
-        when(feeService.getOutgoingBaseFee(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(10L));
-        assertThat(legacyController.getOutgoingBaseFee(CHANNEL_ID)).isEqualTo(10);
-        verify(metrics).mark(argThat(name -> name.endsWith(".getOutgoingBaseFee")));
+    void getIncomingFeeRate() {
+        when(feeService.getFeeConfiguration(CHANNEL_ID)).thenReturn(FeeConfigurationFixtures.FEE_CONFIGURATION);
+        assertThat(legacyController.getIncomingFeeRate(CHANNEL_ID)).isEqualTo(3);
+        verify(metrics).mark(argThat(name -> name.endsWith(".getIncomingFeeRate")));
+    }
+
+    @Test
+    void getIncomingBaseFee() {
+        when(feeService.getFeeConfiguration(CHANNEL_ID)).thenReturn(FeeConfigurationFixtures.FEE_CONFIGURATION);
+        assertThat(legacyController.getIncomingBaseFee(CHANNEL_ID)).isEqualTo(4);
+        verify(metrics).mark(argThat(name -> name.endsWith(".getIncomingBaseFee")));
     }
 
     @Test

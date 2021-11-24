@@ -108,25 +108,25 @@ public class LegacyController {
     @GetMapping("/channel/{channelId}/incoming-fee-rate")
     public long getIncomingFeeRate(@PathVariable ChannelId channelId) {
         mark("getIncomingFeeRate");
-        return feeService.getIncomingFeeRate(channelId);
+        return feeService.getFeeConfiguration(channelId).incomingFeeRate();
     }
 
     @GetMapping("/channel/{channelId}/outgoing-fee-rate")
     public long getOutgoingFeeRate(@PathVariable ChannelId channelId) {
         mark("getOutgoingFeeRate");
-        return feeService.getOutgoingFeeRate(channelId);
+        return feeService.getFeeConfiguration(channelId).outgoingFeeRate();
     }
 
     @GetMapping("/channel/{channelId}/incoming-base-fee")
     public long getIncomingBaseFee(@PathVariable ChannelId channelId) {
         mark("getIncomingBaseFee");
-        return feeService.getIncomingBaseFee(channelId).milliSatoshis();
+        return feeService.getFeeConfiguration(channelId).incomingBaseFee().milliSatoshis();
     }
 
     @GetMapping("/channel/{channelId}/outgoing-base-fee")
     public long getOutgoingBaseFee(@PathVariable ChannelId channelId) {
         mark("getOutgoingBaseFee");
-        return feeService.getOutgoingBaseFee(channelId).milliSatoshis();
+        return feeService.getFeeConfiguration(channelId).outgoingBaseFee().milliSatoshis();
     }
 
     @GetMapping("/channel/{channelId}/available-local-balance")

@@ -18,6 +18,7 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_3;
+import static de.cotto.lndmanagej.model.FeeConfigurationFixtures.FEE_CONFIGURATION;
 import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL;
 import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL_3;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
@@ -35,8 +36,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class LegacyControllerIT {
     private static final String PUBKEY_BASE = "/legacy/node/" + PUBKEY;
     private static final String CHANNEL_BASE = "/legacy/channel/" + CHANNEL_ID;
-    private static final long FEE_RATE = 123L;
-    private static final Coins BASE_FEE = Coins.ofMilliSatoshis(10L);
 
     @Autowired
     private MockMvc mockMvc;
@@ -102,31 +101,31 @@ class LegacyControllerIT {
     }
 
     @Test
-    void getIncomingFeeRate() throws Exception {
-        when(feeService.getIncomingFeeRate(CHANNEL_ID)).thenReturn(FEE_RATE);
-        mockMvc.perform(get(CHANNEL_BASE + "/incoming-fee-rate"))
-                .andExpect(content().string(Long.toString(FEE_RATE)));
-    }
-
-    @Test
     void getOutgoingFeeRate() throws Exception {
-        when(feeService.getOutgoingFeeRate(CHANNEL_ID)).thenReturn(FEE_RATE);
+        when(feeService.getFeeConfiguration(CHANNEL_ID)).thenReturn(FEE_CONFIGURATION);
         mockMvc.perform(get(CHANNEL_BASE + "/outgoing-fee-rate"))
-                .andExpect(content().string(Long.toString(FEE_RATE)));
-    }
-
-    @Test
-    void getIncomingBaseFee() throws Exception {
-        when(feeService.getIncomingBaseFee(CHANNEL_ID)).thenReturn(BASE_FEE);
-        mockMvc.perform(get(CHANNEL_BASE + "/incoming-base-fee"))
-                .andExpect(content().string(String.valueOf(BASE_FEE.milliSatoshis())));
+                .andExpect(content().string("1"));
     }
 
     @Test
     void getOutgoingBaseFee() throws Exception {
-        when(feeService.getOutgoingBaseFee(CHANNEL_ID)).thenReturn(BASE_FEE);
+        when(feeService.getFeeConfiguration(CHANNEL_ID)).thenReturn(FEE_CONFIGURATION);
         mockMvc.perform(get(CHANNEL_BASE + "/outgoing-base-fee"))
-                .andExpect(content().string(String.valueOf(BASE_FEE.milliSatoshis())));
+                .andExpect(content().string("2"));
+    }
+
+    @Test
+    void getIncomingFeeRate() throws Exception {
+        when(feeService.getFeeConfiguration(CHANNEL_ID)).thenReturn(FEE_CONFIGURATION);
+        mockMvc.perform(get(CHANNEL_BASE + "/incoming-fee-rate"))
+                .andExpect(content().string("3"));
+    }
+
+    @Test
+    void getIncomingBaseFee() throws Exception {
+        when(feeService.getFeeConfiguration(CHANNEL_ID)).thenReturn(FEE_CONFIGURATION);
+        mockMvc.perform(get(CHANNEL_BASE + "/incoming-base-fee"))
+                .andExpect(content().string("4"));
     }
 
     @Test

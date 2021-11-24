@@ -2,7 +2,6 @@ package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.Coins;
-import de.cotto.lndmanagej.model.FeeConfiguration;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
@@ -20,6 +19,7 @@ import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFOR
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
+import static de.cotto.lndmanagej.model.FeeConfigurationFixtures.FEE_CONFIGURATION;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
@@ -32,8 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = ChannelDetailsController.class)
 class ChannelDetailsControllerIT {
     private static final String CHANNEL_PREFIX = "/api/channel/" + CHANNEL_ID.getShortChannelId();
-    private static final FeeConfiguration FEE_CONFIGURATION =
-            new FeeConfiguration(1, Coins.ofMilliSatoshis(2), 3, Coins.ofMilliSatoshis(4));
 
     @Autowired
     private MockMvc mockMvc;

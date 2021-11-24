@@ -5,7 +5,6 @@ import de.cotto.lndmanagej.controller.dto.FeeConfigurationDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.Coins;
-import de.cotto.lndmanagej.model.FeeConfiguration;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
@@ -21,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.FeeConfigurationFixtures.FEE_CONFIGURATION;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
@@ -37,8 +37,6 @@ class ChannelDetailsControllerTest {
     private static final Coins OPEN_COSTS = Coins.ofSatoshis(1);
     private static final Coins CLOSE_COSTS = Coins.ofSatoshis(2);
     private static final OnChainCostsDto ON_CHAIN_COSTS = new OnChainCostsDto(OPEN_COSTS, CLOSE_COSTS);
-    private static final FeeConfiguration FEE_CONFIGURATION =
-            new FeeConfiguration(1, Coins.ofMilliSatoshis(2), 3, Coins.ofMilliSatoshis(4));
     private static final FeeConfigurationDto FEE_CONFIGURATION_DTO = FeeConfigurationDto.createFrom(FEE_CONFIGURATION);
 
     @InjectMocks
