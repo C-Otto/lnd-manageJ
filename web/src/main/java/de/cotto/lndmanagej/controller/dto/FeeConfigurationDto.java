@@ -8,6 +8,9 @@ public record FeeConfigurationDto(
         long incomingFeeRatePpm,
         long incomingBaseFeeMilliSat
 ) {
+    public static final FeeConfigurationDto EMPTY =
+            new FeeConfigurationDto(0, 0, 0, 0);
+
     public static FeeConfigurationDto createFrom(FeeConfiguration feeConfiguration) {
         return new FeeConfigurationDto(
                 feeConfiguration.outgoingFeeRate(),

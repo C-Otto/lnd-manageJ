@@ -124,6 +124,19 @@ class ChannelControllerTest {
         assertThat(channelController.getDetails(CHANNEL_ID)).isEqualTo(expectedDetails);
     }
 
+    @Test
+    void getFeeConfiguration() {
+        when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+        when(feeService.getFeeConfiguration(CHANNEL_ID)).thenReturn(FEE_CONFIGURATION);
+        assertThat(channelController.getFeeConfiguration(CHANNEL_ID)).isEqualTo(FEE_CONFIGURATION_DTO);
+        verify(metrics).mark(argThat(name -> name.endsWith(".getFeeConfiguration")));
+    }
+
+    @Test
+    void getFeeConfiguration_waiting_close() {
+        assertThat(channelController.getFeeConfiguration(CHANNEL_ID)).isEqualTo(FeeConfigurationDto.EMPTY);
+    }
+
     private ChannelDetailsDto mockForChannelWithoutFeeConfiguration(LocalChannel channel) {
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(channel));
@@ -133,7 +146,7 @@ class ChannelControllerTest {
                 ALIAS_2,
                 BalanceInformation.EMPTY,
                 ON_CHAIN_COSTS,
-                new FeeConfigurationDto(0, 0, 0, 0)
+                FeeConfigurationDto.EMPTY
         );
     }
 }

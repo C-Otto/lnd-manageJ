@@ -20,6 +20,7 @@ import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.FeeConfigurationFixtures.FEE_CONFIGURATION;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
@@ -101,5 +102,16 @@ class ChannelControllerIT {
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         mockMvc.perform(get(CHANNEL_PREFIX + "/details"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getFeeConfiguration() throws Exception {
+        when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+        when(feeService.getFeeConfiguration(CHANNEL_ID)).thenReturn(FEE_CONFIGURATION);
+        mockMvc.perform(get(CHANNEL_PREFIX + "/fee-configuration"))
+                .andExpect(jsonPath("$.outgoingFeeRatePpm", is(1)))
+                .andExpect(jsonPath("$.outgoingBaseFeeMilliSat", is(2)))
+                .andExpect(jsonPath("$.incomingFeeRatePpm", is(3)))
+                .andExpect(jsonPath("$.incomingBaseFeeMilliSat", is(4)));
     }
 }

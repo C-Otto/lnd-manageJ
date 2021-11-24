@@ -18,10 +18,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ChannelDetailsDtoTest {
 
     private static final OnChainCostsDto ON_CHAIN_COSTS = new OnChainCostsDto(Coins.ofSatoshis(1), Coins.ofSatoshis(2));
-    private static final FeeConfigurationDto FEE_CONFIGURATION_DTO =
-            new FeeConfigurationDto(0, 0, 0, 0);
-    private static final ChannelDetailsDto CHANNEL_DETAILS_DTO =
-            new ChannelDetailsDto(CLOSED_CHANNEL, ALIAS, BALANCE_INFORMATION, ON_CHAIN_COSTS, FEE_CONFIGURATION_DTO);
+    private static final ChannelDetailsDto CHANNEL_DETAILS_DTO = new ChannelDetailsDto(
+            CLOSED_CHANNEL,
+            ALIAS,
+            BALANCE_INFORMATION,
+            ON_CHAIN_COSTS,
+            FeeConfigurationDto.EMPTY
+    );
 
     @Test
     void channelIdShort() {
@@ -70,7 +73,7 @@ class ChannelDetailsDtoTest {
                 ALIAS,
                 BALANCE_INFORMATION,
                 ON_CHAIN_COSTS,
-                FEE_CONFIGURATION_DTO
+                FeeConfigurationDto.EMPTY
         );
         ChannelStatusDto channelStatusDto =
                 ChannelStatusDto.createFrom(new ChannelStatus(false, true, false, OPEN));

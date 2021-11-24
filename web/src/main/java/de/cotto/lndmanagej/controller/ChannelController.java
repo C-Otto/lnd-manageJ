@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Nullable;
+
 @RestController
 @RequestMapping("/api/channel/{channelId}")
 @Import(ObjectMapperConfiguration.class)
@@ -69,6 +71,21 @@ public class ChannelController {
         );
     }
 
+    @GetMapping("/fee-configuration")
+    public FeeConfigurationDto getFeeConfiguration(@PathVariable ChannelId channelId) {
+        metrics.mark(MetricRegistry.name(getClass(), "getFeeConfiguration"));
+        LocalChannel localChannel = channelService.getLocalChannel(channelId).orElse(null);
+        return getFeeConfiguration(localChannel);
+    }
+
+    private FeeConfigurationDto getFeeConfiguration(@Nullable LocalChannel channel) {
+        if (channel == null || channel.getStatus().openCloseStatus() != OpenCloseStatus.OPEN) {
+            return FeeConfigurationDto.EMPTY;
+        }
+        FeeConfiguration feeConfiguration = feeService.getFeeConfiguration(channel.getId());
+        return FeeConfigurationDto.createFrom(feeConfiguration);
+    }
+
     private BalanceInformation getBalanceInformation(ChannelId channelId) {
         return balanceService.getBalanceInformation(channelId)
                 .orElse(BalanceInformation.EMPTY);
@@ -78,13 +95,5 @@ public class ChannelController {
         Coins openCosts = onChainCostService.getOpenCosts(channelId).orElse(Coins.NONE);
         Coins closeCosts = onChainCostService.getCloseCosts(channelId).orElse(Coins.NONE);
         return new OnChainCostsDto(openCosts, closeCosts);
-    }
-
-    private FeeConfigurationDto getFeeConfiguration(LocalChannel channel) {
-        if (channel.getStatus().openCloseStatus() == OpenCloseStatus.OPEN) {
-            FeeConfiguration feeConfiguration = feeService.getFeeConfiguration(channel.getId());
-            return FeeConfigurationDto.createFrom(feeConfiguration);
-        }
-        return new FeeConfigurationDto(0, 0, 0, 0);
     }
 }
