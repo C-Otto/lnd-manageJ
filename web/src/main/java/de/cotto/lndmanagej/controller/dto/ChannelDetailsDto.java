@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.controller.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelPoint;
 import de.cotto.lndmanagej.model.LocalChannel;
@@ -15,9 +14,7 @@ public record ChannelDetailsDto(
         Pubkey remotePubkey,
         String remoteAlias,
         String capacity,
-        @JsonProperty("private") boolean privateChannel,
-        boolean active,
-        boolean closed,
+        ChannelStatusDto status,
         BalanceInformationDto balance,
         OnChainCostsDto onChainCosts
 ) {
@@ -36,9 +33,7 @@ public record ChannelDetailsDto(
                 localChannel.getRemotePubkey(),
                 remoteAlias,
                 String.valueOf(localChannel.getCapacity().satoshis()),
-                localChannel.isPrivateChannel(),
-                localChannel.isActive(),
-                localChannel.isClosed(),
+                ChannelStatusDto.createFrom(localChannel.getStatus()),
                 BalanceInformationDto.createFrom(balanceInformation),
                 onChainCosts
         );

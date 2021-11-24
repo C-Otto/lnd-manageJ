@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.controller.dto;
 
+import de.cotto.lndmanagej.model.ChannelStatus;
 import de.cotto.lndmanagej.model.Coins;
 import org.junit.jupiter.api.Test;
 
@@ -9,8 +10,8 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
-import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
+import static de.cotto.lndmanagej.model.OpenCloseStatus.OPEN;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -61,39 +62,12 @@ class ChannelDetailsDtoTest {
     }
 
     @Test
-    void privateChannel_false() {
-        assertThat(CHANNEL_DETAILS_DTO.privateChannel()).isFalse();
-    }
-
-    @Test
-    void privateChannel_true() {
-        ChannelDetailsDto dto =
-                new ChannelDetailsDto(LOCAL_OPEN_CHANNEL_PRIVATE, ALIAS, BALANCE_INFORMATION, ON_CHAIN_COSTS);
-        assertThat(dto.privateChannel()).isTrue();
-    }
-
-    @Test
-    void active_true() {
+    void status() {
         ChannelDetailsDto dto =
                 new ChannelDetailsDto(LOCAL_OPEN_CHANNEL, ALIAS, BALANCE_INFORMATION, ON_CHAIN_COSTS);
-        assertThat(dto.active()).isTrue();
-    }
-
-    @Test
-    void active_false() {
-        assertThat(CHANNEL_DETAILS_DTO.active()).isFalse();
-    }
-
-    @Test
-    void closed_true() {
-        assertThat(CHANNEL_DETAILS_DTO.closed()).isTrue();
-    }
-
-    @Test
-    void closed_false() {
-        ChannelDetailsDto dto =
-                new ChannelDetailsDto(LOCAL_OPEN_CHANNEL, ALIAS, BALANCE_INFORMATION, ON_CHAIN_COSTS);
-        assertThat(dto.closed()).isFalse();
+        ChannelStatusDto channelStatusDto =
+                ChannelStatusDto.createFrom(new ChannelStatus(false, true, false, OPEN));
+        assertThat(dto.status()).isEqualTo(channelStatusDto);
     }
 
     @Test

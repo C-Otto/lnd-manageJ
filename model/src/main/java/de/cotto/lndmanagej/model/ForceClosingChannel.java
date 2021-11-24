@@ -3,6 +3,8 @@ package de.cotto.lndmanagej.model;
 import java.util.Objects;
 import java.util.Set;
 
+import static de.cotto.lndmanagej.model.OpenCloseStatus.FORCE_CLOSING;
+
 public final class ForceClosingChannel extends ClosedOrClosingChannel {
     private final Set<ChannelPoint> htlcOutpoints;
 
@@ -22,6 +24,11 @@ public final class ForceClosingChannel extends ClosedOrClosingChannel {
 
     public Set<ChannelPoint> getHtlcOutpoints() {
         return htlcOutpoints;
+    }
+
+    @Override
+    public ChannelStatus getStatus() {
+        return new ChannelStatus(false, false, false, FORCE_CLOSING);
     }
 
     @Override

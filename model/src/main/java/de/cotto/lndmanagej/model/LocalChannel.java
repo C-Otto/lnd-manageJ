@@ -2,7 +2,7 @@ package de.cotto.lndmanagej.model;
 
 import java.util.Objects;
 
-public class LocalChannel extends Channel {
+public abstract class LocalChannel extends Channel {
     private final Pubkey remotePubkey;
     private final OpenInitiator openInitiator;
     private final boolean privateChannel;
@@ -30,17 +30,11 @@ public class LocalChannel extends Channel {
         return openInitiator;
     }
 
-    public boolean isPrivateChannel() {
+    protected boolean isPrivateChannel() {
         return privateChannel;
     }
 
-    public boolean isActive() {
-        return false;
-    }
-
-    public boolean isClosed() {
-        return false;
-    }
+    public abstract ChannelStatus getStatus();
 
     @Override
     @SuppressWarnings("CPD-START")

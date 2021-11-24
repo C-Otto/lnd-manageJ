@@ -27,8 +27,8 @@ public class LocalOpenChannel extends LocalChannel {
     }
 
     @Override
-    public boolean isActive() {
-        return active;
+    public ChannelStatus getStatus() {
+        return new ChannelStatus(isPrivateChannel(), active, false, OpenCloseStatus.OPEN);
     }
 
     @Override

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
+import static de.cotto.lndmanagej.model.OpenCloseStatus.WAITING_CLOSE;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
@@ -44,13 +45,9 @@ class WaitingCloseChannelTest {
     }
 
     @Test
-    void isActive() {
-        assertThat(WAITING_CLOSE_CHANNEL.isActive()).isFalse();
-    }
-
-    @Test
-    void isClosed() {
-        assertThat(WAITING_CLOSE_CHANNEL.isClosed()).isFalse();
+    void getStatus() {
+        assertThat(WAITING_CLOSE_CHANNEL.getStatus())
+                .isEqualTo(new ChannelStatus(false, false, false, WAITING_CLOSE));
     }
 
     @Test

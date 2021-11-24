@@ -2,7 +2,7 @@ package de.cotto.lndmanagej.model;
 
 import java.util.Objects;
 
-public class ClosedOrClosingChannel extends LocalChannel {
+public abstract class ClosedOrClosingChannel extends LocalChannel {
     private final String closeTransactionHash;
 
     protected ClosedOrClosingChannel(

@@ -9,6 +9,7 @@ import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.TRANSACTION_HASH_2;
 import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL_REMOTE;
+import static de.cotto.lndmanagej.model.OpenCloseStatus.CLOSED;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,8 +71,9 @@ class ForceClosedChannelTest {
     }
 
     @Test
-    void isClosed() {
-        assertThat(FORCE_CLOSED_CHANNEL_REMOTE.isClosed()).isTrue();
+    void getStatus() {
+        assertThat(FORCE_CLOSED_CHANNEL_REMOTE.getStatus())
+                .isEqualTo(new ChannelStatus(false, false, true, CLOSED));
     }
 
     @Test

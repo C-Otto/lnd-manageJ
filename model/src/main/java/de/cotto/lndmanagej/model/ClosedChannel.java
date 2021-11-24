@@ -2,6 +2,8 @@ package de.cotto.lndmanagej.model;
 
 import java.util.Objects;
 
+import static de.cotto.lndmanagej.model.OpenCloseStatus.CLOSED;
+
 public abstract class ClosedChannel extends ClosedOrClosingChannel {
     private final CloseInitiator closeInitiator;
 
@@ -32,8 +34,8 @@ public abstract class ClosedChannel extends ClosedOrClosingChannel {
     }
 
     @Override
-    public boolean isClosed() {
-        return true;
+    public ChannelStatus getStatus() {
+        return new ChannelStatus(isPrivateChannel(), false, true, CLOSED);
     }
 
     @Override

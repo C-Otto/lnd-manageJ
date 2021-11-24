@@ -9,6 +9,7 @@ import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.TRANSACTION_HASH_3;
 import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL;
 import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.HTLC_OUTPOINTS;
+import static de.cotto.lndmanagej.model.OpenCloseStatus.FORCE_CLOSING;
 import static de.cotto.lndmanagej.model.OpenInitiator.LOCAL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
@@ -60,9 +61,9 @@ class ForceClosingChannelTest {
     }
 
     @Test
-    void isClosed() {
-        // only consider a channel closed once it is fully closed
-        assertThat(FORCE_CLOSING_CHANNEL.isClosed()).isFalse();
+    void getStatus() {
+        assertThat(FORCE_CLOSING_CHANNEL.getStatus())
+                .isEqualTo(new ChannelStatus(false, false, false, FORCE_CLOSING));
     }
 
     @Test

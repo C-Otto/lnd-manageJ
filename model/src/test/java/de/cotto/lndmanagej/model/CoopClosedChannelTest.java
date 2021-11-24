@@ -8,6 +8,7 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.TRANSACTION_HASH_2;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
+import static de.cotto.lndmanagej.model.OpenCloseStatus.CLOSED;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -71,8 +72,9 @@ class CoopClosedChannelTest {
     }
 
     @Test
-    void isClosed() {
-        assertThat(CLOSED_CHANNEL.isClosed()).isTrue();
+    void getStatus() {
+        assertThat(CLOSED_CHANNEL.getStatus())
+                .isEqualTo(new ChannelStatus(false, false, true, CLOSED));
     }
 
     @Test
