@@ -77,8 +77,7 @@ public class GrpcService extends GrpcBase {
     }
 
     Optional<GetInfoResponse> getInfo() {
-        mark("getInfo");
-        return get(() -> lightningStub.getInfo(lnrpc.GetInfoRequest.getDefaultInstance()));
+        return get("getInfo", () -> lightningStub.getInfo(lnrpc.GetInfoRequest.getDefaultInstance()));
     }
 
     public List<Peer> listPeers() {
@@ -86,15 +85,13 @@ public class GrpcService extends GrpcBase {
     }
 
     private List<Peer> listPeersWithoutCache() {
-        mark("listPeers");
         return get(
-                () -> lightningStub.listPeers(ListPeersRequest.getDefaultInstance()).getPeersList()
+                "listPeers", () -> lightningStub.listPeers(ListPeersRequest.getDefaultInstance()).getPeersList()
         ).orElse(List.of());
     }
 
     public Optional<NodeInfo> getNodeInfo(Pubkey pubkey) {
-        mark("getNodeInfo");
-        return get(() -> {
+        return get("getNodeInfo", () -> {
             try {
                 return lightningStub.getNodeInfo(NodeInfoRequest.newBuilder().setPubKey(pubkey.toString()).build());
             } catch (StatusRuntimeException exception) {
@@ -108,9 +105,8 @@ public class GrpcService extends GrpcBase {
     }
 
     public Optional<ChannelEdge> getChannelEdge(ChannelId channelId) {
-        mark("getChanInfo");
         ChanInfoRequest build = ChanInfoRequest.newBuilder().setChanId(channelId.getShortChannelId()).build();
-        return get(() -> lightningStub.getChanInfo(build));
+        return get("getChanInfo", () -> lightningStub.getChanInfo(build));
     }
 
     public List<Channel> getChannels() {
@@ -122,9 +118,9 @@ public class GrpcService extends GrpcBase {
     }
 
     public List<ChannelCloseSummary> getClosedChannels() {
-        mark("closedChannels");
-        return get(() -> lightningStub.closedChannels(ClosedChannelsRequest.getDefaultInstance()).getChannelsList())
-                .orElse(List.of());
+        return get("closedChannels",
+                () -> lightningStub.closedChannels(ClosedChannelsRequest.getDefaultInstance()).getChannelsList()
+        ).orElse(List.of());
     }
 
     public List<ForceClosedChannel> getForceClosingChannels() {
@@ -144,19 +140,20 @@ public class GrpcService extends GrpcBase {
     }
 
     private Optional<List<Transaction>> getTransactionsWithoutCache() {
-        mark("getTransactions");
-        return get(() -> lightningStub.getTransactions(GetTransactionsRequest.getDefaultInstance())
-                .getTransactionsList());
+        return get("getTransactions",
+                () -> lightningStub.getTransactions(GetTransactionsRequest.getDefaultInstance()).getTransactionsList()
+        );
     }
 
     private Optional<PendingChannelsResponse> getPendingChannelsWithoutCache() {
-        mark("pendingChannels");
-        return get(() -> lightningStub.pendingChannels(PendingChannelsRequest.getDefaultInstance()));
+        return get("pendingChannels",
+                () -> lightningStub.pendingChannels(PendingChannelsRequest.getDefaultInstance())
+        );
     }
 
     private List<Channel> getChannelsWithoutCache() {
-        mark("listChannels");
-        return get(() -> lightningStub.listChannels(ListChannelsRequest.getDefaultInstance()).getChannelsList())
-                .orElse(List.of());
+        return get("listChannels",
+                () -> lightningStub.listChannels(ListChannelsRequest.getDefaultInstance()).getChannelsList()
+        ).orElse(List.of());
     }
 }

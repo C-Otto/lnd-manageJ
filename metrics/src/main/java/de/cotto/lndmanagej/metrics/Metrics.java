@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.metrics;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
+import com.codahale.metrics.Timer;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ public class Metrics {
     private final MetricRegistry registry = new MetricRegistry();
     private final Slf4jReporter reporter;
     private final Map<String, Meter> meters = new ConcurrentHashMap<>();
+    private final Map<String, Timer> timers = new ConcurrentHashMap<>();
 
     public Metrics() {
         reporter = Slf4jReporter.forRegistry(registry)
@@ -33,5 +35,9 @@ public class Metrics {
 
     public void mark(String name) {
         meters.computeIfAbsent(name, registry::meter).mark();
+    }
+
+    public Timer timer(String name) {
+        return timers.computeIfAbsent(name, registry::timer);
     }
 }
