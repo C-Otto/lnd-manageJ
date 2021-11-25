@@ -26,14 +26,14 @@ public class ChannelService {
     private static final Duration CACHE_EXPIRY = Duration.ofMinutes(1);
 
     private final GrpcChannels grpcChannels;
-    private final LoadingCache<Object, Set<LocalOpenChannel>> channelsCache;
+    private final LoadingCache<Object, Set<LocalOpenChannel>> localOpenChannelsCache;
     private final LoadingCache<Object, Set<ClosedChannel>> closedChannelsCache;
     private final LoadingCache<Object, Set<ForceClosingChannel>> forceClosingChannelsCache;
     private final LoadingCache<Object, Set<WaitingCloseChannel>> waitingCloseChannelsCache;
 
     public ChannelService(GrpcChannels grpcChannels, GrpcClosedChannels grpcClosedChannels) {
         this.grpcChannels = grpcChannels;
-        channelsCache = new CacheBuilder()
+        localOpenChannelsCache = new CacheBuilder()
                 .withExpiry(CACHE_EXPIRY)
                 .build(grpcChannels::getChannels);
         closedChannelsCache = new CacheBuilder()
@@ -58,7 +58,7 @@ public class ChannelService {
     }
 
     public Set<LocalOpenChannel> getOpenChannels() {
-        return channelsCache.get("");
+        return localOpenChannelsCache.get("");
     }
 
     public Optional<LocalOpenChannel> getOpenChannel(ChannelId channelId) {
