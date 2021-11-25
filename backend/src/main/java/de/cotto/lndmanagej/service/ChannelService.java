@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 @Component
 public class ChannelService {
     private static final Duration CACHE_EXPIRY = Duration.ofMinutes(1);
+    private static final Duration CACHE_REFRESH = Duration.ofSeconds(30);
 
     private final GrpcChannels grpcChannels;
     private final LoadingCache<Object, Set<LocalOpenChannel>> localOpenChannelsCache;
@@ -34,15 +35,19 @@ public class ChannelService {
     public ChannelService(GrpcChannels grpcChannels, GrpcClosedChannels grpcClosedChannels) {
         this.grpcChannels = grpcChannels;
         localOpenChannelsCache = new CacheBuilder()
+                .withRefresh(CACHE_REFRESH)
                 .withExpiry(CACHE_EXPIRY)
                 .build(grpcChannels::getChannels);
         closedChannelsCache = new CacheBuilder()
+                .withRefresh(CACHE_REFRESH)
                 .withExpiry(CACHE_EXPIRY)
                 .build(grpcClosedChannels::getClosedChannels);
         forceClosingChannelsCache = new CacheBuilder()
+                .withRefresh(CACHE_REFRESH)
                 .withExpiry(CACHE_EXPIRY)
                 .build(grpcChannels::getForceClosingChannels);
         waitingCloseChannelsCache = new CacheBuilder()
+                .withRefresh(CACHE_REFRESH)
                 .withExpiry(CACHE_EXPIRY)
                 .build(grpcChannels::getWaitingCloseChannels);
     }
