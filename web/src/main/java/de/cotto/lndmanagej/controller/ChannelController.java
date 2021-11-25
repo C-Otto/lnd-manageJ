@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.controller;
 import com.codahale.metrics.MetricRegistry;
 import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.ChannelDetailsDto;
+import de.cotto.lndmanagej.controller.dto.ChannelDto;
 import de.cotto.lndmanagej.controller.dto.FeeConfigurationDto;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
@@ -52,6 +53,16 @@ public class ChannelController {
         this.onChainCostService = onChainCostService;
         this.metrics = metrics;
         this.feeService = feeService;
+    }
+
+    @GetMapping("/")
+    public ChannelDto getBasicInformation(@PathVariable ChannelId channelId) throws NotFoundException {
+        metrics.mark(MetricRegistry.name(getClass(), "getBasicInformation"));
+        LocalChannel localChannel = channelService.getLocalChannel(channelId).orElse(null);
+        if (localChannel == null) {
+            throw new NotFoundException();
+        }
+        return new ChannelDto(localChannel);
     }
 
     @GetMapping("/details")

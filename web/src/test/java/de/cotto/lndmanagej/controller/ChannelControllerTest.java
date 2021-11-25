@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.ChannelDetailsDto;
+import de.cotto.lndmanagej.controller.dto.ChannelDto;
 import de.cotto.lndmanagej.controller.dto.FeeConfigurationDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.metrics.Metrics;
@@ -71,6 +72,20 @@ class ChannelControllerTest {
         lenient().when(onChainCostService.getOpenCosts(CHANNEL_ID)).thenReturn(Optional.of(OPEN_COSTS));
         lenient().when(onChainCostService.getCloseCosts(CHANNEL_ID)).thenReturn(Optional.of(CLOSE_COSTS));
         lenient().when(feeService.getFeeConfiguration(CHANNEL_ID)).thenReturn(FEE_CONFIGURATION);
+    }
+
+    @Test
+    void getBasicInformation_channel_not_found() {
+        assertThatExceptionOfType(NotFoundException.class)
+                .isThrownBy(() -> channelController.getBasicInformation(CHANNEL_ID));
+    }
+
+    @Test
+    void getBasicInformation() throws NotFoundException {
+        ChannelDto basicInformation = new ChannelDto(LOCAL_OPEN_CHANNEL);
+        when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+        assertThat(channelController.getBasicInformation(CHANNEL_ID)).isEqualTo(basicInformation);
+        verify(metrics).mark(argThat(name -> name.endsWith(".getBasicInformation")));
     }
 
     @Test

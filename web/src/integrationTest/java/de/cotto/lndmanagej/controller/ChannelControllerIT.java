@@ -18,9 +18,11 @@ import java.util.Optional;
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION_2;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.FeeConfigurationFixtures.FEE_CONFIGURATION;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
@@ -57,7 +59,30 @@ class ChannelControllerIT {
     private FeeService feeService;
 
     @Test
-    void not_found() throws Exception {
+    void getBasicInformation_not_found() throws Exception {
+        mockMvc.perform(get(CHANNEL_PREFIX + "/"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getBasicInformation() throws Exception {
+        when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_2));
+        mockMvc.perform(get(CHANNEL_PREFIX + "/"))
+                .andExpect(jsonPath("$.channelIdShort", is(String.valueOf(CHANNEL_ID_2.getShortChannelId()))))
+                .andExpect(jsonPath("$.channelIdCompact", is(CHANNEL_ID_2.getCompactForm())))
+                .andExpect(jsonPath("$.channelIdCompactLnd", is(CHANNEL_ID_2.getCompactFormLnd())))
+                .andExpect(jsonPath("$.channelPoint", is(CHANNEL_POINT.toString())))
+                .andExpect(jsonPath("$.remotePubkey", is(PUBKEY_2.toString())))
+                .andExpect(jsonPath("$.capacity", is(String.valueOf(CAPACITY.satoshis()))))
+                .andExpect(jsonPath("$.openHeight", is(CHANNEL_ID_2.getBlockHeight())))
+                .andExpect(jsonPath("$.status.private", is(false)))
+                .andExpect(jsonPath("$.status.active", is(false)))
+                .andExpect(jsonPath("$.status.closed", is(false)))
+                .andExpect(jsonPath("$.status.openClosed", is("OPEN")));
+    }
+
+    @Test
+    void getChannelDetails_not_found() throws Exception {
         mockMvc.perform(get(CHANNEL_PREFIX + "/details"))
                 .andExpect(status().isNotFound());
     }

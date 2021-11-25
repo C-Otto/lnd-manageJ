@@ -20,6 +20,29 @@ public record ChannelDetailsDto(
         FeeConfigurationDto feeConfiguration
 ) {
     public ChannelDetailsDto(
+            ChannelDto channelDto,
+            String remoteAlias,
+            BalanceInformation balanceInformation,
+            OnChainCostsDto onChainCosts,
+            FeeConfigurationDto feeConfiguration
+    ) {
+        this(
+                channelDto.channelIdShort(),
+                channelDto.channelIdCompact(),
+                channelDto.channelIdCompactLnd(),
+                channelDto.channelPoint(),
+                channelDto.openHeight(),
+                channelDto.remotePubkey(),
+                remoteAlias,
+                channelDto.capacity(),
+                channelDto.status(),
+                BalanceInformationDto.createFrom(balanceInformation),
+                onChainCosts,
+                feeConfiguration
+        );
+    }
+
+    public ChannelDetailsDto(
             LocalChannel localChannel,
             String remoteAlias,
             BalanceInformation balanceInformation,
@@ -27,16 +50,9 @@ public record ChannelDetailsDto(
             FeeConfigurationDto feeConfiguration
     ) {
         this(
-                String.valueOf(localChannel.getId().getShortChannelId()),
-                localChannel.getId().getCompactForm(),
-                localChannel.getId().getCompactFormLnd(),
-                localChannel.getChannelPoint(),
-                localChannel.getId().getBlockHeight(),
-                localChannel.getRemotePubkey(),
+                new ChannelDto(localChannel),
                 remoteAlias,
-                String.valueOf(localChannel.getCapacity().satoshis()),
-                ChannelStatusDto.createFrom(localChannel.getStatus()),
-                BalanceInformationDto.createFrom(balanceInformation),
+                balanceInformation,
                 onChainCosts,
                 feeConfiguration
         );
