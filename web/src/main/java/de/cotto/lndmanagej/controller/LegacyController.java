@@ -59,17 +59,6 @@ public class LegacyController {
                 .collect(Collectors.joining(NEWLINE));
     }
 
-    @GetMapping("/peer-pubkeys")
-    public String getPeerPubkeys() {
-        mark("getPeerPubkeys");
-        return channelService.getOpenChannels().stream()
-                .map(LocalOpenChannel::getRemotePubkey)
-                .map(Pubkey::toString)
-                .sorted()
-                .distinct()
-                .collect(Collectors.joining(NEWLINE));
-    }
-
     private void mark(String name) {
         metrics.mark(MetricRegistry.name(getClass(), name));
     }

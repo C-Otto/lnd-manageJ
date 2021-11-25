@@ -16,10 +16,7 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_3;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_3;
-import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_TO_NODE_3;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
-import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
-import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -55,12 +52,5 @@ class LegacyControllerIT {
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_3));
         mockMvc.perform(get("/legacy/open-channels/pretty"))
                 .andExpect(status().isOk());
-    }
-
-    @Test
-    void getPeerPubkeys() throws Exception {
-        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_TO_NODE_3));
-        mockMvc.perform(get("/legacy/peer-pubkeys"))
-                .andExpect(content().string(PUBKEY_2 + "\n" + PUBKEY_3));
     }
 }
