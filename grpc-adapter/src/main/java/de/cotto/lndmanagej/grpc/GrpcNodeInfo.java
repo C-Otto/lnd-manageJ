@@ -15,15 +15,20 @@ public class GrpcNodeInfo {
         this.grpcService = grpcService;
     }
 
-    public String getAlias(Pubkey pubkey) {
+    public Node getNode(Pubkey pubkey) {
         NodeInfo nodeInfo = grpcService.getNodeInfo(pubkey).orElse(null);
         if (nodeInfo == null) {
-            return pubkey.toString();
+            return Node.forPubkey(pubkey);
         }
-        return nodeInfo.getNode().getAlias();
+        LightningNode node = nodeInfo.getNode();
+        return Node.builder()
+                .withPubkey(pubkey)
+                .withAlias(node.getAlias())
+                .withLastUpdate(node.getLastUpdate())
+                .build();
     }
 
-    public Node getNode(Pubkey pubkey) {
+    public Node getNodeWithOnlineStatus(Pubkey pubkey) {
         NodeInfo nodeInfo = grpcService.getNodeInfo(pubkey).orElse(null);
         if (nodeInfo == null) {
             return Node.forPubkey(pubkey);

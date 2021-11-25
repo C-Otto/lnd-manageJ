@@ -40,13 +40,13 @@ public class NodeService {
     }
 
     private Node getNodeWithoutCacheAndUpdateAliasCache(Pubkey pubkey) {
-        Node node = grpcNodeInfo.getNode(pubkey);
+        Node node = grpcNodeInfo.getNodeWithOnlineStatus(pubkey);
         aliasCache.put(pubkey, node.alias());
         return node;
     }
 
     private String getAliasWithoutCache(Pubkey pubkey) {
-        return grpcNodeInfo.getAlias(pubkey);
+        return grpcNodeInfo.getNode(pubkey).alias();
     }
 
 }

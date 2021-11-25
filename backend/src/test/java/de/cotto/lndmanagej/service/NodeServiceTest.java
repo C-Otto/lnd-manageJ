@@ -1,6 +1,9 @@
 package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.grpc.GrpcNodeInfo;
+import de.cotto.lndmanagej.model.Node;
+import de.cotto.lndmanagej.model.NodeFixtures;
+import de.cotto.lndmanagej.model.Pubkey;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,22 +29,34 @@ class NodeServiceTest {
 
     @Test
     void getAlias() {
-        when(grpcNodeInfo.getAlias(PUBKEY)).thenReturn(ALIAS);
+        when(grpcNodeInfo.getNode(PUBKEY)).thenReturn(NODE);
         assertThat(nodeService.getAlias(PUBKEY)).isEqualTo(ALIAS);
     }
 
     @Test
+    void getAlias_hardcoded() {
+        Pubkey blueWallet = Pubkey.create("037cc5f9f1da20ac0d60e83989729a204a33cc2d8e80438969fadf35c1c5f1233b");
+        Node node = Node.builder()
+                .withPubkey(blueWallet)
+                .withAlias(ALIAS)
+                .withLastUpdate(NodeFixtures.LAST_UPDATE)
+                .build();
+        when(grpcNodeInfo.getNode(blueWallet)).thenReturn(node);
+        assertThat(nodeService.getAlias(blueWallet)).isEqualTo("BlueWallet");
+    }
+
+    @Test
     void getNode() {
-        when(grpcNodeInfo.getNode(PUBKEY)).thenReturn(NODE);
+        when(grpcNodeInfo.getNodeWithOnlineStatus(PUBKEY)).thenReturn(NODE);
         assertThat(nodeService.getNode(PUBKEY)).isEqualTo(NODE);
     }
 
     @Test
-    void getNode_updates_alias_cache() {
-        when(grpcNodeInfo.getNode(PUBKEY)).thenReturn(NODE_WITHOUT_ALIAS).thenReturn(NODE).thenThrow();
+    void getNodeWithOnl_updates_alias_cache() {
+        when(grpcNodeInfo.getNodeWithOnlineStatus(PUBKEY)).thenReturn(NODE_WITHOUT_ALIAS).thenReturn(NODE).thenThrow();
         assertThat(nodeService.getNode(PUBKEY)).isEqualTo(NODE_WITHOUT_ALIAS);
         String alias = nodeService.getAlias(PUBKEY);
         assertThat(alias).isEqualTo(NODE_WITHOUT_ALIAS.alias());
-        verify(grpcNodeInfo, times(1)).getNode(PUBKEY);
+        verify(grpcNodeInfo, times(1)).getNodeWithOnlineStatus(PUBKEY);
     }
 }

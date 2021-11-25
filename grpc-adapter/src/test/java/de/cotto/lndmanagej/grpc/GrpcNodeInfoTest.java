@@ -15,6 +15,7 @@ import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_PEER;
+import static de.cotto.lndmanagej.model.NodeFixtures.NODE_WITHOUT_ALIAS;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,43 +41,43 @@ class GrpcNodeInfoTest {
     }
 
     @Test
-    void getAlias() {
-        assertThat(grpcNodeInfo.getAlias(NODE.pubkey())).isEqualTo(NODE.alias());
+    void getNode() {
+        assertThat(grpcNodeInfo.getNode(NODE.pubkey())).isEqualTo(NODE);
         verify(grpcService, never()).listPeers();
     }
 
     @Test
-    void getAlias_not_found() {
+    void getNode_not_found() {
         when(grpcService.getNodeInfo(NODE.pubkey())).thenReturn(Optional.empty());
-        assertThat(grpcNodeInfo.getAlias(NODE.pubkey())).isEqualTo(NODE.pubkey().toString());
+        assertThat(grpcNodeInfo.getNode(NODE.pubkey())).isEqualTo(NODE_WITHOUT_ALIAS);
     }
 
     @Test
-    void getNode() {
+    void getNodeWithOnlineStatus() {
         when(grpcService.listPeers()).thenReturn(List.of(peer(PUBKEY_2)));
-        assertThat(grpcNodeInfo.getNode(NODE.pubkey())).isEqualTo(NODE);
+        assertThat(grpcNodeInfo.getNodeWithOnlineStatus(NODE.pubkey())).isEqualTo(NODE);
     }
 
     @Test
-    void getNode_for_peer() {
+    void getNodeWithOnlineStatus_for_peer() {
         when(grpcService.listPeers()).thenReturn(List.of(peer(PUBKEY)));
-        assertThat(grpcNodeInfo.getNode(NODE.pubkey())).isEqualTo(NODE_PEER);
+        assertThat(grpcNodeInfo.getNodeWithOnlineStatus(NODE.pubkey())).isEqualTo(NODE_PEER);
     }
 
     @Test
-    void getNode_sets_alias() {
-        assertThat(grpcNodeInfo.getNode(NODE.pubkey()).alias()).isEqualTo(NODE.alias());
+    void getNodeWithOnlineStatus_sets_alias() {
+        assertThat(grpcNodeInfo.getNodeWithOnlineStatus(NODE.pubkey()).alias()).isEqualTo(NODE.alias());
     }
 
     @Test
-    void getNode_sets_last_update() {
-        assertThat(grpcNodeInfo.getNode(NODE.pubkey()).lastUpdate()).isEqualTo(NODE.lastUpdate());
+    void getNodeWithOnlineStatus_sets_last_update() {
+        assertThat(grpcNodeInfo.getNodeWithOnlineStatus(NODE.pubkey()).lastUpdate()).isEqualTo(NODE.lastUpdate());
     }
 
     @Test
-    void getNode_error() {
+    void getNodeWithOnlineStatus_error() {
         when(grpcService.getNodeInfo(NODE.pubkey())).thenReturn(Optional.empty());
-        assertThat(grpcNodeInfo.getNode(NODE.pubkey()).alias()).isEqualTo(NODE.pubkey().toString());
+        assertThat(grpcNodeInfo.getNodeWithOnlineStatus(NODE.pubkey()).alias()).isEqualTo(NODE.pubkey().toString());
     }
 
     private lnrpc.Peer peer(Pubkey pubkey) {
