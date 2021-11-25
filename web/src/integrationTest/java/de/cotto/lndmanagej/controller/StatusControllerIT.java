@@ -11,7 +11,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
+import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_TO_NODE_3;
 import static org.hamcrest.core.Is.is;
@@ -52,6 +54,17 @@ class StatusControllerIT {
                 LOCAL_OPEN_CHANNEL_TO_NODE_3.getRemotePubkey().toString()
         );
         mockMvc.perform(get(PREFIX + "/open-channels/pubkeys"))
+                .andExpect(jsonPath("$.pubkeys", is(sortedPubkeys)));
+    }
+
+    @Test
+    void getPubkeysForAllChannels() throws Exception {
+        when(channelService.getAllLocalChannels()).thenReturn(Stream.of(LOCAL_OPEN_CHANNEL_TO_NODE_3, CLOSED_CHANNEL));
+        List<String> sortedPubkeys = List.of(
+                CLOSED_CHANNEL.getRemotePubkey().toString(),
+                LOCAL_OPEN_CHANNEL_TO_NODE_3.getRemotePubkey().toString()
+        );
+        mockMvc.perform(get(PREFIX + "/all-channels/pubkeys"))
                 .andExpect(jsonPath("$.pubkeys", is(sortedPubkeys)));
     }
 }

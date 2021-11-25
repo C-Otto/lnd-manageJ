@@ -13,7 +13,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
+import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
+import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_TO_NODE_3;
@@ -61,8 +64,23 @@ class StatusControllerTest {
     }
 
     @Test
-    void getPeerPubkeys_without_no_duplicates() {
+    void getPubkeysForOpenChannels_without_no_duplicates() {
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2));
         assertThat(statusController.getPubkeysForOpenChannels().pubkeys()).containsExactly(PUBKEY_2.toString());
+    }
+
+    @Test
+    void getPubkeysForAllChannels() {
+        when(channelService.getAllLocalChannels()).thenReturn(Stream.of(LOCAL_OPEN_CHANNEL_TO_NODE_3, CLOSED_CHANNEL));
+        List<Pubkey> expectedPubkeys =
+                List.of(CLOSED_CHANNEL.getRemotePubkey(), LOCAL_OPEN_CHANNEL_TO_NODE_3.getRemotePubkey());
+        assertThat(statusController.getPubkeysForAllChannels()).isEqualTo(new PubkeysDto(expectedPubkeys));
+        verify(metrics).mark(argThat(name -> name.endsWith(".getPubkeysForAllChannels")));
+    }
+
+    @Test
+    void getPubkeysForAllChannels_without_no_duplicates() {
+        when(channelService.getAllLocalChannels()).thenReturn(Stream.of(CLOSED_CHANNEL_2, CLOSED_CHANNEL));
+        assertThat(statusController.getPubkeysForAllChannels().pubkeys()).containsExactly(PUBKEY_2.toString());
     }
 }

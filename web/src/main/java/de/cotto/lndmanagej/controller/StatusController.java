@@ -4,6 +4,7 @@ import com.codahale.metrics.MetricRegistry;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
 import de.cotto.lndmanagej.controller.dto.PubkeysDto;
 import de.cotto.lndmanagej.metrics.Metrics;
+import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.ChannelService;
@@ -41,6 +42,17 @@ public class StatusController {
         mark("getPubkeysForOpenChannels");
         List<Pubkey> pubkeys = channelService.getOpenChannels().stream()
                 .map(LocalOpenChannel::getRemotePubkey)
+                .sorted()
+                .distinct()
+                .collect(Collectors.toList());
+        return new PubkeysDto(pubkeys);
+    }
+
+    @GetMapping("/all-channels/pubkeys")
+    public PubkeysDto getPubkeysForAllChannels() {
+        mark("getPubkeysForAllChannels");
+        List<Pubkey> pubkeys = channelService.getAllLocalChannels()
+                .map(LocalChannel::getRemotePubkey)
                 .sorted()
                 .distinct()
                 .collect(Collectors.toList());
