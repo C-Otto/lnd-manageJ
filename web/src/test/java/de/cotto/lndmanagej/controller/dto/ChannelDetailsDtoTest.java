@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.controller.dto;
 
 import de.cotto.lndmanagej.model.ChannelStatus;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.OpenInitiator;
 import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
@@ -64,6 +65,11 @@ class ChannelDetailsDtoTest {
     @Test
     void capacity() {
         assertThat(CHANNEL_DETAILS_DTO.capacity()).isEqualTo(String.valueOf(CAPACITY.satoshis()));
+    }
+
+    @Test
+    void openInitiator() {
+        assertThat(CHANNEL_DETAILS_DTO.openInitiator()).isEqualTo(OpenInitiator.LOCAL);
     }
 
     @Test

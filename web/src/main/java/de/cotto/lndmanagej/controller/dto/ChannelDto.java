@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.controller.dto;
 
 import de.cotto.lndmanagej.model.ChannelPoint;
 import de.cotto.lndmanagej.model.LocalChannel;
+import de.cotto.lndmanagej.model.OpenInitiator;
 import de.cotto.lndmanagej.model.Pubkey;
 
 public record ChannelDto(
@@ -12,7 +13,8 @@ public record ChannelDto(
         int openHeight,
         Pubkey remotePubkey,
         String capacity,
-        ChannelStatusDto status
+        ChannelStatusDto status,
+        OpenInitiator openInitiator
 ) {
     public ChannelDto(LocalChannel localChannel) {
         this(
@@ -23,7 +25,8 @@ public record ChannelDto(
                 localChannel.getId().getBlockHeight(),
                 localChannel.getRemotePubkey(),
                 String.valueOf(localChannel.getCapacity().satoshis()),
-                ChannelStatusDto.createFrom(localChannel.getStatus())
+                ChannelStatusDto.createFrom(localChannel.getStatus()),
+                localChannel.getOpenInitiator()
         );
     }
 }

@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.controller.dto;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelPoint;
 import de.cotto.lndmanagej.model.LocalChannel;
+import de.cotto.lndmanagej.model.OpenInitiator;
 import de.cotto.lndmanagej.model.Pubkey;
 
 public record ChannelDetailsDto(
@@ -12,6 +13,7 @@ public record ChannelDetailsDto(
         ChannelPoint channelPoint,
         int openHeight,
         Pubkey remotePubkey,
+        OpenInitiator openInitiator,
         String remoteAlias,
         String capacity,
         ChannelStatusDto status,
@@ -33,6 +35,7 @@ public record ChannelDetailsDto(
                 channelDto.channelPoint(),
                 channelDto.openHeight(),
                 channelDto.remotePubkey(),
+                channelDto.openInitiator(),
                 remoteAlias,
                 channelDto.capacity(),
                 channelDto.status(),

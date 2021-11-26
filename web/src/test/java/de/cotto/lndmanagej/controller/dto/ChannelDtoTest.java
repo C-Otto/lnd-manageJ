@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.controller.dto;
 
 import de.cotto.lndmanagej.model.ChannelStatus;
+import de.cotto.lndmanagej.model.OpenInitiator;
 import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
@@ -48,6 +49,11 @@ class ChannelDtoTest {
     @Test
     void capacity() {
         assertThat(CHANNEL_DTO.capacity()).isEqualTo(String.valueOf(CAPACITY.satoshis()));
+    }
+
+    @Test
+    void openInitiator() {
+        assertThat(CHANNEL_DTO.openInitiator()).isEqualTo(OpenInitiator.LOCAL);
     }
 
     @Test
