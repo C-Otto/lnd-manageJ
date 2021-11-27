@@ -1,9 +1,11 @@
 package de.cotto.lndmanagej.controller;
 
 import com.codahale.metrics.MetricRegistry;
+import de.cotto.lndmanagej.controller.dto.ChannelsDto;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
 import de.cotto.lndmanagej.controller.dto.PubkeysDto;
 import de.cotto.lndmanagej.metrics.Metrics;
+import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.Pubkey;
@@ -43,6 +45,17 @@ public class StatusController {
         return ownNodeService.getBlockHeight();
     }
 
+    @GetMapping("/open-channels/")
+    public ChannelsDto getOpenChannels() {
+        mark("getOpenChannels");
+        List<ChannelId> channelIds = channelService.getOpenChannels().stream()
+                .map(LocalOpenChannel::getId)
+                .sorted()
+                .distinct()
+                .collect(Collectors.toList());
+        return new ChannelsDto(channelIds);
+    }
+
     @GetMapping("/open-channels/pubkeys")
     public PubkeysDto getPubkeysForOpenChannels() {
         mark("getPubkeysForOpenChannels");
@@ -52,6 +65,17 @@ public class StatusController {
                 .distinct()
                 .collect(Collectors.toList());
         return new PubkeysDto(pubkeys);
+    }
+
+    @GetMapping("/all-channels/")
+    public ChannelsDto getAllChannels() {
+        mark("getAllChannels");
+        List<ChannelId> channelIds = channelService.getAllLocalChannels()
+                .map(LocalChannel::getId)
+                .sorted()
+                .distinct()
+                .collect(Collectors.toList());
+        return new ChannelsDto(channelIds);
     }
 
     @GetMapping("/all-channels/pubkeys")

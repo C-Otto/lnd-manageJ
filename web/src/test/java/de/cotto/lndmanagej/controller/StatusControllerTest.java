@@ -1,7 +1,9 @@
 package de.cotto.lndmanagej.controller;
 
+import de.cotto.lndmanagej.controller.dto.ChannelsDto;
 import de.cotto.lndmanagej.controller.dto.PubkeysDto;
 import de.cotto.lndmanagej.metrics.Metrics;
+import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.OwnNodeService;
@@ -55,6 +57,15 @@ class StatusControllerTest {
     }
 
     @Test
+    void getOpenChannels() {
+        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL_TO_NODE_3, LOCAL_OPEN_CHANNEL));
+        List<ChannelId> expectedChannelIds =
+                List.of(LOCAL_OPEN_CHANNEL.getId(), LOCAL_OPEN_CHANNEL_TO_NODE_3.getId());
+        assertThat(statusController.getOpenChannels()).isEqualTo(new ChannelsDto(expectedChannelIds));
+        verify(metrics).mark(argThat(name -> name.endsWith(".getOpenChannels")));
+    }
+
+    @Test
     void getPubkeysForOpenChannels() {
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL_TO_NODE_3, LOCAL_OPEN_CHANNEL));
         List<Pubkey> expectedPubkeys =
@@ -67,6 +78,15 @@ class StatusControllerTest {
     void getPubkeysForOpenChannels_without_no_duplicates() {
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2));
         assertThat(statusController.getPubkeysForOpenChannels().pubkeys()).containsExactly(PUBKEY_2.toString());
+    }
+
+    @Test
+    void getAllChannels() {
+        when(channelService.getAllLocalChannels()).thenReturn(Stream.of(LOCAL_OPEN_CHANNEL_TO_NODE_3, CLOSED_CHANNEL));
+        List<ChannelId> expectedChannelIds =
+                List.of(CLOSED_CHANNEL.getId(), LOCAL_OPEN_CHANNEL_TO_NODE_3.getId());
+        assertThat(statusController.getAllChannels()).isEqualTo(new ChannelsDto(expectedChannelIds));
+        verify(metrics).mark(argThat(name -> name.endsWith(".getAllChannels")));
     }
 
     @Test

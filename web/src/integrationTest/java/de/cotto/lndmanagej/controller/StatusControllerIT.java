@@ -54,6 +54,17 @@ class StatusControllerIT {
     }
 
     @Test
+    void getOpenChannels() throws Exception {
+        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL_TO_NODE_3, LOCAL_OPEN_CHANNEL));
+        List<String> sortedChannelIds = List.of(
+                LOCAL_OPEN_CHANNEL.getId().toString(),
+                LOCAL_OPEN_CHANNEL_TO_NODE_3.getId().toString()
+        );
+        mockMvc.perform(get(PREFIX + "/open-channels/"))
+                .andExpect(jsonPath("$.channels", is(sortedChannelIds)));
+    }
+
+    @Test
     void getPubkeysForOpenChannels() throws Exception {
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL_TO_NODE_3, LOCAL_OPEN_CHANNEL));
         List<String> sortedPubkeys = List.of(
@@ -62,6 +73,17 @@ class StatusControllerIT {
         );
         mockMvc.perform(get(PREFIX + "/open-channels/pubkeys"))
                 .andExpect(jsonPath("$.pubkeys", is(sortedPubkeys)));
+    }
+
+    @Test
+    void getAllChannels() throws Exception {
+        when(channelService.getAllLocalChannels()).thenReturn(Stream.of(LOCAL_OPEN_CHANNEL_TO_NODE_3, CLOSED_CHANNEL));
+        List<String> sortedChannelIds = List.of(
+                CLOSED_CHANNEL.getId().toString(),
+                LOCAL_OPEN_CHANNEL_TO_NODE_3.getId().toString()
+        );
+        mockMvc.perform(get(PREFIX + "/all-channels/"))
+                .andExpect(jsonPath("$.channels", is(sortedChannelIds)));
     }
 
     @Test
