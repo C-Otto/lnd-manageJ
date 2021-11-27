@@ -6,7 +6,7 @@ pmd {
     ruleSetFiles = files("${rootDir}/config/pmd-ruleset.xml")
     ruleSets = []
     consoleOutput = true
-    toolVersion = '6.40.0'
+    toolVersion = '6.41.0'
 }
 tasks.withType(Test).forEach { testTask ->
     tasks.withType(Pmd).forEach { pmdTask ->
