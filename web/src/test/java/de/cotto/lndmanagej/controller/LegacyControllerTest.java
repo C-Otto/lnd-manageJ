@@ -13,16 +13,12 @@ import java.util.Set;
 
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY_2;
-import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
-import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_COMPACT;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_COMPACT_4;
-import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_3;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_TO_NODE_3;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_3;
-import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,23 +39,6 @@ class LegacyControllerTest {
 
     @Mock
     private Metrics metrics;
-
-    @Test
-    void getAllChannelIds_for_peer() {
-        when(channelService.getAllChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, CLOSED_CHANNEL_3));
-        assertThat(legacyController.getAllChannelIdsForPubkey(PUBKEY)).isEqualTo(
-                CHANNEL_ID + "\n" + CHANNEL_ID_3
-        );
-        verify(metrics).mark(argThat(name -> name.endsWith(".getAllChannelIdsForPubkey")));
-    }
-
-    @Test
-    void getAllChannelIds_for_peer_ordered() {
-        when(channelService.getAllChannelsWith(PUBKEY)).thenReturn(Set.of(CLOSED_CHANNEL_3, LOCAL_OPEN_CHANNEL));
-        assertThat(legacyController.getAllChannelIdsForPubkey(PUBKEY)).isEqualTo(
-                CHANNEL_ID + "\n" + CHANNEL_ID_3
-        );
-    }
 
     @Test
     void getOpenChannelIdsPretty() {
