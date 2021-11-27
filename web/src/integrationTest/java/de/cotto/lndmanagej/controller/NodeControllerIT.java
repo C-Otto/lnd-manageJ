@@ -107,6 +107,15 @@ class NodeControllerIT {
     }
 
     @Test
+    void getAllChannelIds() throws Exception {
+        when(channelService.getAllChannelsWith(PUBKEY_2)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, CLOSED_CHANNEL_3));
+        List<String> channelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_3.toString());
+        mockMvc.perform(get(NODE_PREFIX + "/all-channels"))
+                .andExpect(jsonPath("$.node", is(PUBKEY_2.toString())))
+                .andExpect(jsonPath("$.channels", is(channelIds)));
+    }
+
+    @Test
     void getBalance() throws Exception {
         when(balanceService.getBalanceInformation(PUBKEY_2)).thenReturn(BALANCE_INFORMATION);
         mockMvc.perform(get(NODE_PREFIX + "/balance"))

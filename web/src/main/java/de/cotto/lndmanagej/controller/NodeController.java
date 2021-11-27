@@ -84,6 +84,13 @@ public class NodeController {
         return new ChannelsForNodeDto(pubkey, channels);
     }
 
+    @GetMapping("/all-channels")
+    public ChannelsForNodeDto getAllChannelIdsForPubkey(@PathVariable Pubkey pubkey) {
+        mark("getAllChannelIdsForPubkey");
+        List<ChannelId> channels = toSortedList(channelService.getAllChannelsWith(pubkey));
+        return new ChannelsForNodeDto(pubkey, channels);
+    }
+
     @GetMapping("/balance")
     public BalanceInformationDto getBalance(@PathVariable Pubkey pubkey) {
         mark("getBalance");
