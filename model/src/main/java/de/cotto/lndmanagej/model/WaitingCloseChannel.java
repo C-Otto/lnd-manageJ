@@ -4,14 +4,22 @@ import static de.cotto.lndmanagej.model.OpenCloseStatus.WAITING_CLOSE;
 
 public class WaitingCloseChannel extends LocalChannel {
     public WaitingCloseChannel(
-            ChannelId channelId,
-            ChannelPoint channelPoint,
-            Coins capacity,
+            ChannelCoreInformation channelCoreInformation,
             Pubkey ownPubkey,
             Pubkey remotePubkey,
             OpenInitiator openInitiator
     ) {
-        super(channelId, channelPoint, capacity, ownPubkey, remotePubkey, openInitiator, false);
+        super(channelCoreInformation, ownPubkey, remotePubkey, openInitiator, false);
+    }
+
+    @Override
+    public Coins getTotalSent() {
+        return Coins.NONE;
+    }
+
+    @Override
+    public Coins getTotalReceived() {
+        return Coins.NONE;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.service;
 
+import de.cotto.lndmanagej.model.ChannelCoreInformation;
 import de.cotto.lndmanagej.model.ChannelPoint;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.transactions.service.TransactionService;
@@ -23,6 +24,8 @@ import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL
 import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_RECEIVED;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_SENT;
 import static de.cotto.lndmanagej.model.OpenInitiator.LOCAL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
@@ -137,35 +140,35 @@ class TransactionBackgroundLoaderTest {
     @Test
     void update_one_unknown() {
         LocalOpenChannel channel1 = new LocalOpenChannel(
-                CHANNEL_ID,
-                CHANNEL_POINT,
-                CAPACITY,
+                new ChannelCoreInformation(CHANNEL_ID, CHANNEL_POINT, CAPACITY),
                 PUBKEY,
                 PUBKEY_2,
                 BALANCE_INFORMATION,
                 LOCAL,
+                TOTAL_SENT,
+                TOTAL_RECEIVED,
                 false,
                 true
         );
         LocalOpenChannel channel2 = new LocalOpenChannel(
-                CHANNEL_ID_2,
-                CHANNEL_POINT_2,
-                CAPACITY,
+                new ChannelCoreInformation(CHANNEL_ID_2, CHANNEL_POINT_2, CAPACITY),
                 PUBKEY,
                 PUBKEY_2,
                 BALANCE_INFORMATION,
                 LOCAL,
+                TOTAL_SENT,
+                TOTAL_RECEIVED,
                 false,
                 true
         );
         LocalOpenChannel channel3 = new LocalOpenChannel(
-                CHANNEL_ID_3,
-                CHANNEL_POINT_3,
-                CAPACITY,
+                new ChannelCoreInformation(CHANNEL_ID_3, CHANNEL_POINT_3, CAPACITY),
                 PUBKEY,
                 PUBKEY_2,
                 BALANCE_INFORMATION,
                 LOCAL,
+                TOTAL_SENT,
+                TOTAL_RECEIVED,
                 false,
                 true
         );

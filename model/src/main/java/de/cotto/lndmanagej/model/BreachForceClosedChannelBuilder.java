@@ -10,9 +10,7 @@ public class BreachForceClosedChannelBuilder extends ClosedChannelBuilder<Breach
     @Override
     public BreachForceClosedChannel build() {
         return new BreachForceClosedChannel(
-                requireNonNull(channelId),
-                requireNonNull(channelPoint),
-                requireNonNull(capacity),
+                getChannelCoreInformation(),
                 requireNonNull(ownPubkey),
                 requireNonNull(remotePubkey),
                 requireNonNull(closeTransactionHash),

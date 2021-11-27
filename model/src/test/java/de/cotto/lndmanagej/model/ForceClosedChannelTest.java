@@ -46,6 +46,16 @@ class ForceClosedChannelTest {
     }
 
     @Test
+    void getTotalSent() {
+        assertThat(FORCE_CLOSED_CHANNEL_REMOTE.getTotalSent()).isEqualTo(Coins.NONE);
+    }
+
+    @Test
+    void getTotalReceived() {
+        assertThat(FORCE_CLOSED_CHANNEL_REMOTE.getTotalReceived()).isEqualTo(Coins.NONE);
+    }
+
+    @Test
     void getChannelPoint() {
         assertThat(FORCE_CLOSED_CHANNEL_REMOTE.getChannelPoint()).isEqualTo(CHANNEL_POINT);
     }

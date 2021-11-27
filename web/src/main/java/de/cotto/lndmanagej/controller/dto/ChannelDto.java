@@ -13,6 +13,8 @@ public record ChannelDto(
         int openHeight,
         Pubkey remotePubkey,
         String capacity,
+        String totalSent,
+        String totalReceived,
         ChannelStatusDto status,
         OpenInitiator openInitiator
 ) {
@@ -25,6 +27,8 @@ public record ChannelDto(
                 localChannel.getId().getBlockHeight(),
                 localChannel.getRemotePubkey(),
                 String.valueOf(localChannel.getCapacity().satoshis()),
+                String.valueOf(localChannel.getTotalSent().satoshis()),
+                String.valueOf(localChannel.getTotalReceived().satoshis()),
                 ChannelStatusDto.createFrom(localChannel.getStatus()),
                 localChannel.getOpenInitiator()
         );

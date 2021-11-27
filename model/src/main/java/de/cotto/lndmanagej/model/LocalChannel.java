@@ -8,15 +8,13 @@ public abstract class LocalChannel extends Channel {
     private final boolean privateChannel;
 
     protected LocalChannel(
-            ChannelId channelId,
-            ChannelPoint channelPoint,
-            Coins capacity,
+            ChannelCoreInformation channelCoreInformation,
             Pubkey ownPubkey,
             Pubkey remotePubkey,
             OpenInitiator openInitiator,
             boolean privateChannel
     ) {
-        super(channelId, channelPoint, capacity, ownPubkey, remotePubkey);
+        super(channelCoreInformation, ownPubkey, remotePubkey);
         this.remotePubkey = remotePubkey;
         this.openInitiator = openInitiator;
         this.privateChannel = privateChannel;
@@ -35,6 +33,10 @@ public abstract class LocalChannel extends Channel {
     }
 
     public abstract ChannelStatus getStatus();
+
+    public abstract Coins getTotalSent();
+
+    public abstract Coins getTotalReceived();
 
     @Override
     @SuppressWarnings("CPD-START")

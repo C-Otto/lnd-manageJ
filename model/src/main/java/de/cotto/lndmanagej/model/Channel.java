@@ -4,27 +4,23 @@ import java.util.Objects;
 import java.util.Set;
 
 public class Channel {
-    private final ChannelId channelId;
-    private final Coins capacity;
-    private final ChannelPoint channelPoint;
+    private final ChannelCoreInformation channelCoreInformation;
     private final Set<Pubkey> pubkeys;
 
-    protected Channel(ChannelId channelId, ChannelPoint channelPoint, Coins capacity, Pubkey pubkey1, Pubkey pubkey2) {
+    protected Channel(ChannelCoreInformation channelCoreInformation, Pubkey pubkey1, Pubkey pubkey2) {
+        this.channelCoreInformation = channelCoreInformation;
         if (pubkey1.equals(pubkey2)) {
             throw new IllegalArgumentException("Pubkeys must not be the same");
         }
-        this.channelId = channelId;
-        this.capacity = capacity;
-        this.channelPoint = channelPoint;
         this.pubkeys = Set.of(pubkey1, pubkey2);
     }
 
     public Coins getCapacity() {
-        return capacity;
+        return channelCoreInformation.capacity();
     }
 
     public ChannelId getId() {
-        return channelId;
+        return channelCoreInformation.channelId();
     }
 
     public Set<Pubkey> getPubkeys() {
@@ -32,7 +28,7 @@ public class Channel {
     }
 
     public ChannelPoint getChannelPoint() {
-        return channelPoint;
+        return channelCoreInformation.channelPoint();
     }
 
     @Override
@@ -44,14 +40,12 @@ public class Channel {
             return false;
         }
         Channel channel = (Channel) other;
-        return Objects.equals(channelId, channel.channelId)
-                && Objects.equals(capacity, channel.capacity)
-                && Objects.equals(channelPoint, channel.channelPoint)
+        return Objects.equals(channelCoreInformation, channel.channelCoreInformation)
                 && Objects.equals(pubkeys, channel.pubkeys);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(channelId, capacity, channelPoint, pubkeys);
+        return Objects.hash(channelCoreInformation, pubkeys);
     }
 }

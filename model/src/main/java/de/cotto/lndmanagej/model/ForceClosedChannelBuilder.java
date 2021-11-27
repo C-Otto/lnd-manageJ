@@ -10,9 +10,7 @@ public class ForceClosedChannelBuilder extends ClosedChannelBuilder<ForceClosedC
     @Override
     public ForceClosedChannel build() {
         return new ForceClosedChannel(
-                requireNonNull(channelId),
-                requireNonNull(channelPoint),
-                requireNonNull(capacity),
+                getChannelCoreInformation(),
                 requireNonNull(ownPubkey),
                 requireNonNull(remotePubkey),
                 requireNonNull(closeTransactionHash),

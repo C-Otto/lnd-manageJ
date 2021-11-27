@@ -47,6 +47,16 @@ class CoopClosedChannelTest {
     }
 
     @Test
+    void getTotalSent() {
+        assertThat(CLOSED_CHANNEL.getTotalSent()).isEqualTo(Coins.NONE);
+    }
+
+    @Test
+    void getTotalReceived() {
+        assertThat(CLOSED_CHANNEL.getTotalReceived()).isEqualTo(Coins.NONE);
+    }
+
+    @Test
     void getChannelPoint() {
         assertThat(CLOSED_CHANNEL.getChannelPoint()).isEqualTo(CHANNEL_POINT);
     }

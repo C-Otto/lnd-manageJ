@@ -19,9 +19,7 @@ class ForceClosingChannelTest {
     @Test
     void create() {
         assertThat(new ForceClosingChannel(
-                CHANNEL_ID,
-                CHANNEL_POINT,
-                CAPACITY,
+                new ChannelCoreInformation(CHANNEL_ID, CHANNEL_POINT, CAPACITY),
                 PUBKEY,
                 PUBKEY_2,
                 TRANSACTION_HASH_3,
@@ -43,6 +41,16 @@ class ForceClosingChannelTest {
     @Test
     void getCapacity() {
         assertThat(FORCE_CLOSING_CHANNEL.getCapacity()).isEqualTo(CAPACITY);
+    }
+
+    @Test
+    void getTotalSent() {
+        assertThat(FORCE_CLOSING_CHANNEL.getTotalSent()).isEqualTo(Coins.NONE);
+    }
+
+    @Test
+    void getTotalReceived() {
+        assertThat(FORCE_CLOSING_CHANNEL.getTotalReceived()).isEqualTo(Coins.NONE);
     }
 
     @Test

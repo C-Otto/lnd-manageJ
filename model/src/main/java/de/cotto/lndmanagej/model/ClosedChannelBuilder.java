@@ -2,15 +2,17 @@ package de.cotto.lndmanagej.model;
 
 import javax.annotation.Nullable;
 
+import static java.util.Objects.requireNonNull;
+
 public abstract class ClosedChannelBuilder<T extends ClosedChannel> {
     @Nullable
-    ChannelId channelId;
+    private ChannelId channelId;
 
     @Nullable
-    ChannelPoint channelPoint;
+    private ChannelPoint channelPoint;
 
     @Nullable
-    Coins capacity;
+    private Coins capacity;
 
     @Nullable
     Pubkey ownPubkey;
@@ -69,6 +71,14 @@ public abstract class ClosedChannelBuilder<T extends ClosedChannel> {
     public ClosedChannelBuilder<T> withCloseInitiator(CloseInitiator closeInitiator) {
         this.closeInitiator = closeInitiator;
         return this;
+    }
+
+    protected ChannelCoreInformation getChannelCoreInformation() {
+        return new ChannelCoreInformation(
+                requireNonNull(channelId),
+                requireNonNull(channelPoint),
+                requireNonNull(capacity)
+        );
     }
 
     public abstract T build();

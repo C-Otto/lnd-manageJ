@@ -21,11 +21,35 @@ public class ForceClosingChannelFixtures {
     public static final ChannelPoint HTLC_OUTPOINT = CHANNEL_POINT_3;
     public static final Set<ChannelPoint> HTLC_OUTPOINTS = Set.of(HTLC_OUTPOINT);
     public static final ForceClosingChannel FORCE_CLOSING_CHANNEL = new ForceClosingChannel(
-            CHANNEL_ID, CHANNEL_POINT, CAPACITY, PUBKEY, PUBKEY_2, TRANSACTION_HASH_3, HTLC_OUTPOINTS, LOCAL);
+            new ChannelCoreInformation(CHANNEL_ID, CHANNEL_POINT, CAPACITY),
+            PUBKEY,
+            PUBKEY_2,
+            TRANSACTION_HASH_3,
+            HTLC_OUTPOINTS,
+            LOCAL
+    );
     public static final ForceClosingChannel FORCE_CLOSING_CHANNEL_2 = new ForceClosingChannel(
-            CHANNEL_ID_2, CHANNEL_POINT_2, CAPACITY, PUBKEY, PUBKEY_2, TRANSACTION_HASH_3, HTLC_OUTPOINTS, REMOTE);
+            new ChannelCoreInformation(CHANNEL_ID_2, CHANNEL_POINT_2, CAPACITY),
+            PUBKEY,
+            PUBKEY_2,
+            TRANSACTION_HASH_3,
+            HTLC_OUTPOINTS,
+            REMOTE
+    );
     public static final ForceClosingChannel FORCE_CLOSING_CHANNEL_3 = new ForceClosingChannel(
-            CHANNEL_ID_3, CHANNEL_POINT, CAPACITY, PUBKEY, PUBKEY_2, TRANSACTION_HASH_3, HTLC_OUTPOINTS, UNKNOWN);
+            new ChannelCoreInformation(CHANNEL_ID_3, CHANNEL_POINT, CAPACITY),
+            PUBKEY,
+            PUBKEY_2,
+            TRANSACTION_HASH_3,
+            HTLC_OUTPOINTS,
+            UNKNOWN
+    );
     public static final ForceClosingChannel FORCE_CLOSING_CHANNEL_TO_NODE_3 = new ForceClosingChannel(
-            CHANNEL_ID_3, CHANNEL_POINT, CAPACITY, PUBKEY, PUBKEY_3, TRANSACTION_HASH_3, HTLC_OUTPOINTS, LOCAL);
+            new ChannelCoreInformation(CHANNEL_ID_3, CHANNEL_POINT, CAPACITY),
+            PUBKEY,
+            PUBKEY_3,
+            TRANSACTION_HASH_3,
+            HTLC_OUTPOINTS,
+            LOCAL
+    );
 }

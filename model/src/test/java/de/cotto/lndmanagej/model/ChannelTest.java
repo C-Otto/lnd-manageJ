@@ -61,7 +61,7 @@ class ChannelTest {
                 Pubkey pubkey1,
                 Pubkey pubkey2
         ) {
-            super(channelId, channelPoint, Coins.ofMilliSatoshis(capacity.milliSatoshis()), pubkey1, pubkey2);
+            super(new ChannelCoreInformation(channelId, channelPoint, capacity), pubkey1, pubkey2);
         }
     }
 }

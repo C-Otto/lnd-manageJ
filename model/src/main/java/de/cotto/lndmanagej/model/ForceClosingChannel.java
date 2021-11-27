@@ -9,16 +9,14 @@ public final class ForceClosingChannel extends ClosedOrClosingChannel {
     private final Set<ChannelPoint> htlcOutpoints;
 
     public ForceClosingChannel(
-            ChannelId channelId,
-            ChannelPoint channelPoint,
-            Coins capacity,
+            ChannelCoreInformation channelCoreInformation,
             Pubkey ownPubkey,
             Pubkey remotePubkey,
             String closeTransactionHash,
             Set<ChannelPoint> htlcOutpoints,
             OpenInitiator openInitiator
     ) {
-        super(channelId, channelPoint, capacity, ownPubkey, remotePubkey, closeTransactionHash, openInitiator);
+        super(channelCoreInformation, ownPubkey, remotePubkey, closeTransactionHash, openInitiator);
         this.htlcOutpoints = htlcOutpoints;
     }
 

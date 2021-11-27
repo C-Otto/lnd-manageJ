@@ -6,20 +6,28 @@ public abstract class ClosedOrClosingChannel extends LocalChannel {
     private final String closeTransactionHash;
 
     protected ClosedOrClosingChannel(
-            ChannelId channelId,
-            ChannelPoint channelPoint,
-            Coins capacity,
+            ChannelCoreInformation channelCoreInformation,
             Pubkey ownPubkey,
             Pubkey remotePubkey,
             String closeTransactionHash,
             OpenInitiator openInitiator
     ) {
-        super(channelId, channelPoint, capacity, ownPubkey, remotePubkey, openInitiator, false);
+        super(channelCoreInformation, ownPubkey, remotePubkey, openInitiator, false);
         this.closeTransactionHash = closeTransactionHash;
     }
 
     public String getCloseTransactionHash() {
         return closeTransactionHash;
+    }
+
+    @Override
+    public Coins getTotalReceived() {
+        return Coins.NONE;
+    }
+
+    @Override
+    public Coins getTotalSent() {
+        return Coins.NONE;
     }
 
     @Override

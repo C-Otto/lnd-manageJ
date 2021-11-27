@@ -15,8 +15,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 class WaitingCloseChannelTest {
     @Test
     void create() {
-        assertThat(new WaitingCloseChannel(CHANNEL_ID, CHANNEL_POINT, CAPACITY, PUBKEY, PUBKEY_2, OpenInitiator.LOCAL))
-                .isEqualTo(WAITING_CLOSE_CHANNEL);
+        assertThat(new WaitingCloseChannel(
+                new ChannelCoreInformation(CHANNEL_ID, CHANNEL_POINT, CAPACITY),
+                PUBKEY,
+                PUBKEY_2,
+                OpenInitiator.LOCAL)
+        ).isEqualTo(WAITING_CLOSE_CHANNEL);
     }
 
     @Test
@@ -32,6 +36,16 @@ class WaitingCloseChannelTest {
     @Test
     void getCapacity() {
         assertThat(WAITING_CLOSE_CHANNEL.getCapacity()).isEqualTo(CAPACITY);
+    }
+
+    @Test
+    void getTotalSent() {
+        assertThat(WAITING_CLOSE_CHANNEL.getTotalSent()).isEqualTo(Coins.NONE);
+    }
+
+    @Test
+    void getTotalReceived() {
+        assertThat(WAITING_CLOSE_CHANNEL.getTotalReceived()).isEqualTo(Coins.NONE);
     }
 
     @Test

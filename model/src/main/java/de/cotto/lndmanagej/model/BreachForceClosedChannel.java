@@ -2,18 +2,14 @@ package de.cotto.lndmanagej.model;
 
 public class BreachForceClosedChannel extends ForceClosedChannel {
     public BreachForceClosedChannel(
-            ChannelId channelId,
-            ChannelPoint channelPoint,
-            Coins capacity,
+            ChannelCoreInformation channelCoreInformation,
             Pubkey ownPubkey,
             Pubkey remotePubkey,
             String closeTransactionHash,
             OpenInitiator openInitiator
     ) {
         super(
-                channelId,
-                channelPoint,
-                capacity,
+                channelCoreInformation,
                 ownPubkey,
                 remotePubkey,
                 closeTransactionHash,

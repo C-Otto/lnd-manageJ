@@ -24,6 +24,10 @@ import static de.cotto.lndmanagej.model.FeeConfigurationFixtures.FEE_CONFIGURATI
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_RECEIVED;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_RECEIVED_2;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_SENT;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_SENT_2;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.hamcrest.core.Is.is;
@@ -74,6 +78,8 @@ class ChannelControllerIT {
                 .andExpect(jsonPath("$.channelPoint", is(CHANNEL_POINT.toString())))
                 .andExpect(jsonPath("$.remotePubkey", is(PUBKEY_2.toString())))
                 .andExpect(jsonPath("$.capacity", is(String.valueOf(CAPACITY.satoshis()))))
+                .andExpect(jsonPath("$.totalSent", is(String.valueOf(TOTAL_SENT_2.satoshis()))))
+                .andExpect(jsonPath("$.totalReceived", is(String.valueOf(TOTAL_RECEIVED_2.satoshis()))))
                 .andExpect(jsonPath("$.openInitiator", is("REMOTE")))
                 .andExpect(jsonPath("$.openHeight", is(CHANNEL_ID_2.getBlockHeight())))
                 .andExpect(jsonPath("$.status.private", is(false)))
@@ -104,6 +110,8 @@ class ChannelControllerIT {
                 .andExpect(jsonPath("$.remotePubkey", is(PUBKEY_2.toString())))
                 .andExpect(jsonPath("$.remoteAlias", is(ALIAS_2)))
                 .andExpect(jsonPath("$.capacity", is(String.valueOf(CAPACITY.satoshis()))))
+                .andExpect(jsonPath("$.totalSent", is(String.valueOf(TOTAL_SENT.satoshis()))))
+                .andExpect(jsonPath("$.totalReceived", is(String.valueOf(TOTAL_RECEIVED.satoshis()))))
                 .andExpect(jsonPath("$.openInitiator", is("LOCAL")))
                 .andExpect(jsonPath("$.openHeight", is(CHANNEL_ID.getBlockHeight())))
                 .andExpect(jsonPath("$.status.private", is(true)))

@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.grpc;
 
 import de.cotto.lndmanagej.model.BalanceInformation;
+import de.cotto.lndmanagej.model.ChannelCoreInformation;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.ChannelPoint;
@@ -75,10 +76,7 @@ public class GrpcChannels extends GrpcChannelsBase {
         PendingChannel pendingChannel = waitingCloseChannel.getChannel();
         ChannelPoint channelPoint = ChannelPoint.create(pendingChannel.getChannelPoint());
         return resolveChannelId(channelPoint).map(id -> new WaitingCloseChannel(
-                id,
-                channelPoint,
-                Coins.ofSatoshis(pendingChannel.getCapacity()),
-                ownPubkey,
+                new ChannelCoreInformation(id, channelPoint, Coins.ofSatoshis(pendingChannel.getCapacity())), ownPubkey,
                 Pubkey.create(pendingChannel.getRemoteNodePub()),
                 getOpenInitiator(pendingChannel.getInitiator())
         ));
@@ -91,9 +89,7 @@ public class GrpcChannels extends GrpcChannelsBase {
         PendingChannel pendingChannel = forceClosedChannel.getChannel();
         ChannelPoint channelPoint = ChannelPoint.create(pendingChannel.getChannelPoint());
         return resolveChannelId(channelPoint).map(id -> new ForceClosingChannel(
-                id,
-                channelPoint,
-                Coins.ofSatoshis(pendingChannel.getCapacity()),
+                new ChannelCoreInformation(id, channelPoint, Coins.ofSatoshis(pendingChannel.getCapacity())),
                 ownPubkey,
                 Pubkey.create(pendingChannel.getRemoteNodePub()),
                 forceClosedChannel.getClosingTxid(),
@@ -117,13 +113,16 @@ public class GrpcChannels extends GrpcChannelsBase {
                 Coins.ofSatoshis(lndChannel.getRemoteConstraints().getChanReserveSat())
         );
         return new LocalOpenChannel(
-                ChannelId.fromShortChannelId(lndChannel.getChanId()),
-                ChannelPoint.create(lndChannel.getChannelPoint()),
-                Coins.ofSatoshis(lndChannel.getCapacity()),
-                ownPubkey,
+                new ChannelCoreInformation(
+                        ChannelId.fromShortChannelId(lndChannel.getChanId()),
+                        ChannelPoint.create(lndChannel.getChannelPoint()),
+                        Coins.ofSatoshis(lndChannel.getCapacity())
+                ), ownPubkey,
                 Pubkey.create(lndChannel.getRemotePubkey()),
                 balanceInformation,
                 getOpenInitiator(lndChannel),
+                Coins.ofSatoshis(lndChannel.getTotalSatoshisSent()),
+                Coins.ofSatoshis(lndChannel.getTotalSatoshisReceived()),
                 lndChannel.getPrivate(),
                 lndChannel.getActive()
         );

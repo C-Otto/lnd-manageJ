@@ -9,6 +9,8 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_RECEIVED;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_SENT;
 import static de.cotto.lndmanagej.model.OpenCloseStatus.OPEN;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,6 +51,18 @@ class ChannelDtoTest {
     @Test
     void capacity() {
         assertThat(CHANNEL_DTO.capacity()).isEqualTo(String.valueOf(CAPACITY.satoshis()));
+    }
+
+    @Test
+    void totalSent() {
+        assertThat(new ChannelDto(LOCAL_OPEN_CHANNEL).totalSent())
+                .isEqualTo(String.valueOf(TOTAL_SENT.satoshis()));
+    }
+
+    @Test
+    void totalReceived() {
+        assertThat(new ChannelDto(LOCAL_OPEN_CHANNEL).totalReceived())
+                .isEqualTo(String.valueOf(TOTAL_RECEIVED.satoshis()));
     }
 
     @Test

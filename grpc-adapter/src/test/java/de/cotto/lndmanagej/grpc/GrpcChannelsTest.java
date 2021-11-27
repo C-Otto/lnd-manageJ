@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.grpc;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.ChannelPoint;
+import de.cotto.lndmanagej.model.Coins;
 import lnrpc.Channel;
 import lnrpc.ChannelConstraints;
 import lnrpc.Initiator;
@@ -33,6 +34,10 @@ import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.HTLC_OUTPOIN
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_RECEIVED;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_RECEIVED_2;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_SENT;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_SENT_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
@@ -67,8 +72,8 @@ class GrpcChannelsTest {
     @Test
     void getChannels() {
         when(grpcService.getChannels()).thenReturn(List.of(
-                channel(CHANNEL_ID, true, false, true),
-                channel(CHANNEL_ID_2, false, false, false)
+                channel(CHANNEL_ID, true, false, true, TOTAL_SENT, TOTAL_RECEIVED),
+                channel(CHANNEL_ID_2, false, false, false, TOTAL_SENT_2, TOTAL_RECEIVED_2)
         ));
         assertThat(grpcChannels.getChannels()).containsExactlyInAnyOrder(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2);
     }
@@ -76,7 +81,7 @@ class GrpcChannelsTest {
     @Test
     void getChannels_private() {
         when(grpcService.getChannels()).thenReturn(List.of(
-                channel(CHANNEL_ID, true, true, true)
+                channel(CHANNEL_ID, true, true, true, TOTAL_SENT, TOTAL_RECEIVED)
         ));
         assertThat(grpcChannels.getChannels()).containsExactlyInAnyOrder(LOCAL_OPEN_CHANNEL_PRIVATE);
     }
@@ -128,8 +133,8 @@ class GrpcChannelsTest {
     @Test
     void getChannel() {
         when(grpcService.getChannels()).thenReturn(List.of(
-                channel(CHANNEL_ID_2, false, false, false),
-                channel(CHANNEL_ID, true, false, true)
+                channel(CHANNEL_ID_2, false, false, false, TOTAL_SENT_2, TOTAL_RECEIVED_2),
+                channel(CHANNEL_ID, true, false, true, TOTAL_SENT, TOTAL_RECEIVED)
         ));
         assertThat(grpcChannels.getChannel(CHANNEL_ID)).contains(LOCAL_OPEN_CHANNEL);
     }
@@ -139,7 +144,14 @@ class GrpcChannelsTest {
         assertThat(grpcChannels.getChannel(CHANNEL_ID)).isEmpty();
     }
 
-    private Channel channel(ChannelId channelId, boolean isInitiator, boolean isPrivate, boolean isActive) {
+    private Channel channel(
+            ChannelId channelId,
+            boolean isInitiator,
+            boolean isPrivate,
+            boolean isActive,
+            Coins totalSent,
+            Coins totalReceived
+    ) {
         ChannelConstraints localConstraints = ChannelConstraints.newBuilder()
                 .setChanReserveSat(BALANCE_INFORMATION.localReserve().satoshis())
                 .build();
@@ -156,6 +168,8 @@ class GrpcChannelsTest {
                 .setLocalConstraints(localConstraints)
                 .setRemoteConstraints(remoteConstraints)
                 .setInitiator(isInitiator)
+                .setTotalSatoshisSent(totalSent.satoshis())
+                .setTotalSatoshisReceived(totalReceived.satoshis())
                 .setPrivate(isPrivate)
                 .setActive(isActive)
                 .build();

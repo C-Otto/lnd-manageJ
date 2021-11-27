@@ -16,87 +16,92 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 
 public  class LocalOpenChannelFixtures {
+    public static final Coins TOTAL_SENT = Coins.ofSatoshis(1_001);
+    public static final Coins TOTAL_SENT_2 = Coins.ofSatoshis(101);
+    public static final Coins TOTAL_RECEIVED = Coins.ofSatoshis(2_002);
+    public static final Coins TOTAL_RECEIVED_2 = Coins.ofSatoshis(202);
+
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL =
             new LocalOpenChannel(
-                    CHANNEL_ID,
-                    CHANNEL_POINT,
-                    CAPACITY,
+                    new ChannelCoreInformation(CHANNEL_ID, CHANNEL_POINT, CAPACITY),
                     PUBKEY,
                     PUBKEY_2,
                     BALANCE_INFORMATION,
                     LOCAL,
+                    TOTAL_SENT,
+                    TOTAL_RECEIVED,
                     false,
                     true
             );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_MORE_BALANCE =
             new LocalOpenChannel(
-                    CHANNEL_ID,
-                    CHANNEL_POINT,
-                    CAPACITY,
+                    new ChannelCoreInformation(CHANNEL_ID, CHANNEL_POINT, CAPACITY),
                     PUBKEY,
                     PUBKEY_2,
                     BALANCE_INFORMATION_2,
                     LOCAL,
+                    TOTAL_SENT,
+                    TOTAL_RECEIVED,
                     false,
                     true
             );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_PRIVATE =
             new LocalOpenChannel(
-                    CHANNEL_ID,
-                    CHANNEL_POINT,
-                    CAPACITY,
+                    new ChannelCoreInformation(CHANNEL_ID, CHANNEL_POINT, CAPACITY),
                     PUBKEY,
                     PUBKEY_2,
                     BALANCE_INFORMATION,
                     LOCAL,
+                    TOTAL_SENT,
+                    TOTAL_RECEIVED,
                     true,
                     true
             );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_2 =
             new LocalOpenChannel(
-                    CHANNEL_ID_2,
-                    CHANNEL_POINT,
-                    CAPACITY,
+                    new ChannelCoreInformation(CHANNEL_ID_2, CHANNEL_POINT, CAPACITY),
                     PUBKEY,
                     PUBKEY_2,
                     BALANCE_INFORMATION,
                     REMOTE,
+                    TOTAL_SENT_2,
+                    TOTAL_RECEIVED_2,
                     false,
                     false
             );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_MORE_BALANCE_2 =
             new LocalOpenChannel(
-                    CHANNEL_ID_2,
-                    CHANNEL_POINT,
-                    CAPACITY,
+                    new ChannelCoreInformation(CHANNEL_ID_2, CHANNEL_POINT, CAPACITY),
                     PUBKEY,
                     PUBKEY_2,
                     BALANCE_INFORMATION_2,
                     REMOTE,
+                    TOTAL_SENT,
+                    TOTAL_RECEIVED,
                     false,
                     true
             );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_3 =
             new LocalOpenChannel(
-                    CHANNEL_ID_3,
-                    CHANNEL_POINT,
-                    CAPACITY,
+                    new ChannelCoreInformation(CHANNEL_ID_3, CHANNEL_POINT, CAPACITY),
                     PUBKEY,
                     PUBKEY_2,
                     BALANCE_INFORMATION,
                     LOCAL,
+                    TOTAL_SENT,
+                    TOTAL_RECEIVED,
                     false,
                     true
             );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_TO_NODE_3 =
             new LocalOpenChannel(
-                    CHANNEL_ID_4,
-                    CHANNEL_POINT,
-                    CAPACITY_2,
+                    new ChannelCoreInformation(CHANNEL_ID_4, CHANNEL_POINT, CAPACITY_2),
                     PUBKEY,
                     PUBKEY_3,
                     BALANCE_INFORMATION,
                     LOCAL,
+                    TOTAL_SENT,
+                    TOTAL_RECEIVED,
                     false,
                     true
             );

@@ -8,9 +8,7 @@ public abstract class ClosedChannel extends ClosedOrClosingChannel {
     private final CloseInitiator closeInitiator;
 
     public ClosedChannel(
-            ChannelId channelId,
-            ChannelPoint channelPoint,
-            Coins capacity,
+            ChannelCoreInformation channelCoreInformation,
             Pubkey ownPubkey,
             Pubkey remotePubkey,
             String closeTransactionHash,
@@ -18,9 +16,7 @@ public abstract class ClosedChannel extends ClosedOrClosingChannel {
             CloseInitiator closeInitiator
     ) {
         super(
-                channelId,
-                channelPoint,
-                capacity,
+                channelCoreInformation,
                 ownPubkey,
                 remotePubkey,
                 closeTransactionHash,

@@ -10,9 +10,7 @@ public class CoopClosedChannelBuilder extends ClosedChannelBuilder<CoopClosedCha
     @Override
     public CoopClosedChannel build() {
         return new CoopClosedChannel(
-                requireNonNull(channelId),
-                requireNonNull(channelPoint),
-                requireNonNull(capacity),
+                getChannelCoreInformation(),
                 requireNonNull(ownPubkey),
                 requireNonNull(remotePubkey),
                 requireNonNull(closeTransactionHash),
