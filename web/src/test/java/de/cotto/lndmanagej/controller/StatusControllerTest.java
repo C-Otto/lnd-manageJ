@@ -83,4 +83,11 @@ class StatusControllerTest {
         when(channelService.getAllLocalChannels()).thenReturn(Stream.of(CLOSED_CHANNEL_2, CLOSED_CHANNEL));
         assertThat(statusController.getPubkeysForAllChannels().pubkeys()).containsExactly(PUBKEY_2.toString());
     }
+
+    @Test
+    void getBlockHeight() {
+        when(ownNodeService.getBlockHeight()).thenReturn(123_456);
+        assertThat(statusController.getBlockHeight()).isEqualTo(123_456);
+        verify(metrics).mark(argThat(name -> name.endsWith(".getBlockHeight")));
+    }
 }

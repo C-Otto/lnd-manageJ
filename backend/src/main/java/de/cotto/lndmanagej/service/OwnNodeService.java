@@ -24,6 +24,10 @@ public class OwnNodeService {
         return Boolean.TRUE.equals(syncedToChainCache.get(""));
     }
 
+    public int getBlockHeight() {
+        return grpcGetInfo.getBlockHeight().orElseThrow();
+    }
+
     private boolean isSyncedToChainWithoutCache() {
         return grpcGetInfo.isSyncedToChain().orElse(false);
     }

@@ -47,6 +47,13 @@ class StatusControllerIT {
     }
 
     @Test
+    void getBlockHeight() throws Exception {
+        when(ownNodeService.getBlockHeight()).thenReturn(123_456);
+        mockMvc.perform(get(PREFIX + "/block-height"))
+                .andExpect(content().string("123456"));
+    }
+
+    @Test
     void getPubkeysForOpenChannels() throws Exception {
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL_TO_NODE_3, LOCAL_OPEN_CHANNEL));
         List<String> sortedPubkeys = List.of(

@@ -37,6 +37,12 @@ public class StatusController {
         return ownNodeService.isSyncedToChain();
     }
 
+    @GetMapping("/block-height")
+    public int getBlockHeight() {
+        mark("getBlockHeight");
+        return ownNodeService.getBlockHeight();
+    }
+
     @GetMapping("/open-channels/pubkeys")
     public PubkeysDto getPubkeysForOpenChannels() {
         mark("getPubkeysForOpenChannels");

@@ -7,9 +7,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,5 +38,17 @@ class OwnNodeServiceTest {
     void isSyncedToChain_empty() {
         when(grpcGetInfo.isSyncedToChain()).thenReturn(Optional.empty());
         assertThat(ownNodeService.isSyncedToChain()).isFalse();
+    }
+
+    @Test
+    void getBlockHeight() {
+        when(grpcGetInfo.getBlockHeight()).thenReturn(Optional.of(123_456));
+        assertThat(ownNodeService.getBlockHeight()).isEqualTo(123_456);
+    }
+
+    @Test
+    void getBlockHeight_empty() {
+        when(grpcGetInfo.getBlockHeight()).thenReturn(Optional.empty());
+        assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(ownNodeService::getBlockHeight);
     }
 }
