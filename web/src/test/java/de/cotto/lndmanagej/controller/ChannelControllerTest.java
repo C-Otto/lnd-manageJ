@@ -105,7 +105,8 @@ class ChannelControllerTest {
                 ALIAS_2,
                 LOCAL_OPEN_CHANNEL.getBalanceInformation(),
                 ON_CHAIN_COSTS,
-                FEE_CONFIGURATION_DTO
+                FEE_CONFIGURATION_DTO,
+                new ClosedChannelDetailsDto("", 0)
         );
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
@@ -123,7 +124,8 @@ class ChannelControllerTest {
                 ALIAS_2,
                 LOCAL_OPEN_CHANNEL_PRIVATE.getBalanceInformation(),
                 ON_CHAIN_COSTS,
-                FEE_CONFIGURATION_DTO
+                FEE_CONFIGURATION_DTO,
+                new ClosedChannelDetailsDto("", 0)
         );
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_PRIVATE));
@@ -135,13 +137,17 @@ class ChannelControllerTest {
 
     @Test
     void getDetails_closed() throws NotFoundException {
-        ChannelDetailsDto expectedDetails = mockForChannelWithoutPolicies(CLOSED_CHANNEL);
+        ChannelDetailsDto expectedDetails = mockForChannelWithoutPolicies(
+                CLOSED_CHANNEL,
+                CLOSED_CHANNEL.getCloseInitiator().toString(),
+                CLOSED_CHANNEL.getCloseHeight()
+        );
         assertThat(channelController.getDetails(CHANNEL_ID)).isEqualTo(expectedDetails);
     }
 
     @Test
     void getDetails_waiting_close() throws NotFoundException {
-        ChannelDetailsDto expectedDetails = mockForChannelWithoutPolicies(WAITING_CLOSE_CHANNEL);
+        ChannelDetailsDto expectedDetails = mockForChannelWithoutPolicies(WAITING_CLOSE_CHANNEL, "", 0);
         assertThat(channelController.getDetails(CHANNEL_ID)).isEqualTo(expectedDetails);
     }
 
@@ -187,7 +193,11 @@ class ChannelControllerTest {
                 .isThrownBy(() -> channelController.getCloseDetails(CHANNEL_ID));
     }
 
-    private ChannelDetailsDto mockForChannelWithoutPolicies(LocalChannel channel) {
+    private ChannelDetailsDto mockForChannelWithoutPolicies(
+            LocalChannel channel,
+            String closeInitiator,
+            int closeHeight
+    ) {
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(channel));
         when(balanceService.getBalanceInformation(CHANNEL_ID)).thenReturn(Optional.empty());
@@ -196,7 +206,8 @@ class ChannelControllerTest {
                 ALIAS_2,
                 BalanceInformation.EMPTY,
                 ON_CHAIN_COSTS,
-                PoliciesDto.EMPTY
+                PoliciesDto.EMPTY,
+                new ClosedChannelDetailsDto(closeInitiator, closeHeight)
         );
     }
 }

@@ -40,6 +40,11 @@ public abstract class ClosedChannel extends ClosedOrClosingChannel {
     }
 
     @Override
+    public ClosedChannel getAsClosedChannel() {
+        return this;
+    }
+
+    @Override
     public ChannelStatus getStatus() {
         return new ChannelStatus(isPrivateChannel(), false, true, CLOSED);
     }

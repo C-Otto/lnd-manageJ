@@ -21,14 +21,16 @@ public record ChannelDetailsDto(
         ChannelStatusDto status,
         BalanceInformationDto balance,
         OnChainCostsDto onChainCosts,
-        PoliciesDto policies
+        PoliciesDto policies,
+        ClosedChannelDetailsDto closeDetails
 ) {
     public ChannelDetailsDto(
             ChannelDto channelDto,
             String remoteAlias,
             BalanceInformation balanceInformation,
             OnChainCostsDto onChainCosts,
-            PoliciesDto policies
+            PoliciesDto policies,
+            ClosedChannelDetailsDto closeDetails
     ) {
         this(
                 channelDto.channelIdShort(),
@@ -45,7 +47,8 @@ public record ChannelDetailsDto(
                 channelDto.status(),
                 BalanceInformationDto.createFrom(balanceInformation),
                 onChainCosts,
-                policies
+                policies,
+                closeDetails
         );
     }
 
@@ -54,14 +57,16 @@ public record ChannelDetailsDto(
             String remoteAlias,
             BalanceInformation balanceInformation,
             OnChainCostsDto onChainCosts,
-            PoliciesDto policies
+            PoliciesDto policies,
+            ClosedChannelDetailsDto closeDetails
     ) {
         this(
                 new ChannelDto(localChannel),
                 remoteAlias,
                 balanceInformation,
                 onChainCosts,
-                policies
+                policies,
+                closeDetails
         );
     }
 }

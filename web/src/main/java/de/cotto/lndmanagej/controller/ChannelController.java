@@ -81,7 +81,8 @@ public class ChannelController {
                 remoteAlias,
                 getBalanceInformation(channelId),
                 getOnChainCosts(channelId),
-                getPoliciesForChannel(localChannel)
+                getPoliciesForChannel(localChannel),
+                getCloseDetailsForChannel(localChannel)
         );
     }
 
@@ -127,6 +128,15 @@ public class ChannelController {
         Coins openCosts = onChainCostService.getOpenCosts(channelId).orElse(Coins.NONE);
         Coins closeCosts = onChainCostService.getCloseCosts(channelId).orElse(Coins.NONE);
         return new OnChainCostsDto(openCosts, closeCosts);
+    }
+
+    private ClosedChannelDetailsDto getCloseDetailsForChannel(LocalChannel localChannel) {
+        if (localChannel.isClosed()) {
+            ClosedChannel closedChannel = localChannel.getAsClosedChannel();
+            return new ClosedChannelDetailsDto(closedChannel.getCloseInitiator(), closedChannel.getCloseHeight());
+        } else {
+            return new ClosedChannelDetailsDto("", 0);
+        }
     }
 
     private void mark(String name) {

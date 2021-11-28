@@ -111,6 +111,16 @@ class CoopClosedChannelTest {
     }
 
     @Test
+    void isClosed() {
+        assertThat(CLOSED_CHANNEL.isClosed()).isTrue();
+    }
+
+    @Test
+    void getAsClosedChannel() {
+        assertThat(CLOSED_CHANNEL.getAsClosedChannel()).isEqualTo(CLOSED_CHANNEL);
+    }
+
+    @Test
     void testEquals() {
         EqualsVerifier.forClass(CoopClosedChannel.class).usingGetClass().verify();
     }

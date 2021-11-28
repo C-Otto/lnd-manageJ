@@ -40,6 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = ChannelController.class)
 class ChannelControllerIT {
     private static final String CHANNEL_PREFIX = "/api/channel/" + CHANNEL_ID.getShortChannelId();
+    private static final String DETAILS_PREFIX = CHANNEL_PREFIX + "/details";
 
     @Autowired
     private MockMvc mockMvc;
@@ -91,8 +92,7 @@ class ChannelControllerIT {
 
     @Test
     void getChannelDetails_not_found() throws Exception {
-        mockMvc.perform(get(CHANNEL_PREFIX + "/details"))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(get(DETAILS_PREFIX)).andExpect(status().isNotFound());
     }
 
     @Test
@@ -103,7 +103,7 @@ class ChannelControllerIT {
         when(onChainCostService.getOpenCosts(CHANNEL_ID)).thenReturn(Optional.of(Coins.ofSatoshis(1000)));
         when(onChainCostService.getCloseCosts(CHANNEL_ID)).thenReturn(Optional.of(Coins.ofSatoshis(2000)));
         when(balanceService.getBalanceInformation(CHANNEL_ID)).thenReturn(Optional.of(BALANCE_INFORMATION_2));
-        mockMvc.perform(get(CHANNEL_PREFIX + "/details"))
+        mockMvc.perform(get(DETAILS_PREFIX))
                 .andExpect(jsonPath("$.channelIdShort", is(String.valueOf(CHANNEL_ID.getShortChannelId()))))
                 .andExpect(jsonPath("$.channelIdCompact", is(CHANNEL_ID.getCompactForm())))
                 .andExpect(jsonPath("$.channelIdCompactLnd", is(CHANNEL_ID.getCompactFormLnd())))
@@ -136,9 +136,30 @@ class ChannelControllerIT {
     }
 
     @Test
+    void getChannelDetails_closed_channel() throws Exception {
+        when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(CLOSED_CHANNEL));
+        mockMvc.perform(get(DETAILS_PREFIX))
+                .andExpect(jsonPath("$.totalSent", is("0")))
+                .andExpect(jsonPath("$.totalReceived", is("0")))
+                .andExpect(jsonPath("$.status.active", is(false)))
+                .andExpect(jsonPath("$.status.closed", is(true)))
+                .andExpect(jsonPath("$.status.openClosed", is("CLOSED")))
+                .andExpect(jsonPath("$.balance.localBalance", is("0")))
+                .andExpect(jsonPath("$.balance.localReserve", is("0")))
+                .andExpect(jsonPath("$.balance.localAvailable", is("0")))
+                .andExpect(jsonPath("$.balance.remoteBalance", is("0")))
+                .andExpect(jsonPath("$.balance.remoteReserve", is("0")))
+                .andExpect(jsonPath("$.balance.remoteAvailable", is("0")))
+                .andExpect(jsonPath("$.policies.local.enabled", is(false)))
+                .andExpect(jsonPath("$.policies.remote.enabled", is(false)))
+                .andExpect(jsonPath("$.closeDetails.initiator", is("REMOTE")))
+                .andExpect(jsonPath("$.closeDetails.height", is(987_654)));
+    }
+
+    @Test
     void getChannelDetails_channel_not_found() throws Exception {
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
-        mockMvc.perform(get(CHANNEL_PREFIX + "/details"))
+        mockMvc.perform(get(DETAILS_PREFIX))
                 .andExpect(status().isNotFound());
     }
 

@@ -14,6 +14,7 @@ import static de.cotto.lndmanagej.model.OpenInitiator.LOCAL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 class ForceClosingChannelTest {
     @Test
@@ -72,6 +73,18 @@ class ForceClosingChannelTest {
     void getStatus() {
         assertThat(FORCE_CLOSING_CHANNEL.getStatus())
                 .isEqualTo(new ChannelStatus(false, false, false, FORCE_CLOSING));
+    }
+
+    @Test
+    void isClosed() {
+        assertThat(FORCE_CLOSING_CHANNEL.isClosed()).isFalse();
+    }
+
+    @Test
+    void getAsClosedChannel() {
+        assertThatIllegalStateException()
+                .isThrownBy(FORCE_CLOSING_CHANNEL::getAsClosedChannel)
+                .withMessage("Channel is not closed");
     }
 
     @Test
