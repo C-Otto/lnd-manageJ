@@ -7,7 +7,8 @@ public class ForceClosedChannel extends ClosedChannel {
             Pubkey remotePubkey,
             String closeTransactionHash,
             OpenInitiator openInitiator,
-            CloseInitiator closeInitiator
+            CloseInitiator closeInitiator,
+            int closeHeight
     ) {
         super(
                 channelCoreInformation,
@@ -15,7 +16,8 @@ public class ForceClosedChannel extends ClosedChannel {
                 remotePubkey,
                 closeTransactionHash,
                 openInitiator,
-                closeInitiator
+                closeInitiator,
+                closeHeight
         );
     }
 }

@@ -8,6 +8,8 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 
 public final class ClosedChannelFixtures {
+    public static final int CLOSE_HEIGHT = 987_654;
+
     private ClosedChannelFixtures() {
         // do not instantiate
     }
@@ -20,6 +22,7 @@ public final class ClosedChannelFixtures {
                 .withRemotePubkey(PUBKEY_2)
                 .withCloseTransactionHash(TRANSACTION_HASH_2)
                 .withOpenInitiator(OpenInitiator.LOCAL)
-                .withCloseInitiator(CloseInitiator.REMOTE);
+                .withCloseInitiator(CloseInitiator.REMOTE)
+                .withCloseHeight(CLOSE_HEIGHT);
     }
 }

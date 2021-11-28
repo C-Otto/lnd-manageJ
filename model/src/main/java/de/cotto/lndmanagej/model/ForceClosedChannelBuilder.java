@@ -15,7 +15,8 @@ public class ForceClosedChannelBuilder extends ClosedChannelBuilder<ForceClosedC
                 requireNonNull(remotePubkey),
                 requireNonNull(closeTransactionHash),
                 requireNonNull(openInitiator),
-                requireNonNull(closeInitiator)
+                requireNonNull(closeInitiator),
+                closeHeight
         );
     }
 }

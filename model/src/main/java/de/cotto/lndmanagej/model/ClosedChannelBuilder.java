@@ -29,6 +29,8 @@ public abstract class ClosedChannelBuilder<T extends ClosedChannel> {
     @Nullable
     CloseInitiator closeInitiator;
 
+    int closeHeight;
+
     public ClosedChannelBuilder() {
         // default constructor
     }
@@ -70,6 +72,11 @@ public abstract class ClosedChannelBuilder<T extends ClosedChannel> {
 
     public ClosedChannelBuilder<T> withCloseInitiator(CloseInitiator closeInitiator) {
         this.closeInitiator = closeInitiator;
+        return this;
+    }
+
+    public ClosedChannelBuilder<T> withCloseHeight(int closeHeight) {
+        this.closeHeight = closeHeight;
         return this;
     }
 

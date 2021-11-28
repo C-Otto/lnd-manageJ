@@ -87,6 +87,7 @@ public class GrpcClosedChannels extends GrpcChannelsBase {
                         .withRemotePubkey(Pubkey.create(channelCloseSummary.getRemotePubkey()))
                         .withCloseTransactionHash(channelCloseSummary.getClosingTxHash())
                         .withOpenInitiator(openInitiator)
+                        .withCloseHeight(channelCloseSummary.getCloseHeight())
                         .build()
                 );
     }

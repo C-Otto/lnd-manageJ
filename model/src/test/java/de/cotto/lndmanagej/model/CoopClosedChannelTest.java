@@ -6,12 +6,15 @@ import org.junit.jupiter.api.Test;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
+import static de.cotto.lndmanagej.model.ChannelPointFixtures.TRANSACTION_HASH;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.TRANSACTION_HASH_2;
+import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSE_HEIGHT;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.OpenCloseStatus.CLOSED;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 class CoopClosedChannelTest {
     @Test
@@ -26,9 +29,24 @@ class CoopClosedChannelTest {
                 .withCloseTransactionHash(TRANSACTION_HASH_2)
                 .withOpenInitiator(OpenInitiator.LOCAL)
                 .withCloseInitiator(CloseInitiator.REMOTE)
+                .withCloseHeight(CLOSE_HEIGHT)
                 .build()
         ).isEqualTo(CLOSED_CHANNEL);
         // CPD-ON
+    }
+
+    @Test
+    void closeHeight_zero() {
+        ChannelCoreInformation channelCoreInformation = new ChannelCoreInformation(CHANNEL_ID, CHANNEL_POINT, CAPACITY);
+        assertThatIllegalArgumentException().isThrownBy(() -> new CoopClosedChannel(
+                channelCoreInformation,
+                PUBKEY,
+                PUBKEY_2,
+                TRANSACTION_HASH,
+                OpenInitiator.LOCAL,
+                CloseInitiator.LOCAL,
+                0
+        )).withMessage("Close height must be set");
     }
 
     @Test
@@ -79,6 +97,11 @@ class CoopClosedChannelTest {
     @Test
     void getCloseInitiator() {
         assertThat(CLOSED_CHANNEL.getCloseInitiator()).isEqualTo(CloseInitiator.REMOTE);
+    }
+
+    @Test
+    void getCloseHeight() {
+        assertThat(CLOSED_CHANNEL.getCloseHeight()).isEqualTo(987_654);
     }
 
     @Test

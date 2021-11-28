@@ -15,7 +15,8 @@ public class CoopClosedChannelBuilder extends ClosedChannelBuilder<CoopClosedCha
                 requireNonNull(remotePubkey),
                 requireNonNull(closeTransactionHash),
                 requireNonNull(openInitiator),
-                requireNonNull(closeInitiator)
+                requireNonNull(closeInitiator),
+                closeHeight
         );
     }
 }

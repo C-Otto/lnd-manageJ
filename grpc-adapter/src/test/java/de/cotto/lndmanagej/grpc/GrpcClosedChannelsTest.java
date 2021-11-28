@@ -25,6 +25,7 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_SHORT;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.TRANSACTION_HASH;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.TRANSACTION_HASH_2;
+import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSE_HEIGHT;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_2;
 import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL_BREACH;
@@ -202,6 +203,7 @@ class GrpcClosedChannelsTest {
                 .setCloseType(closeType)
                 .setOpenInitiator(openInitiator)
                 .setCloseInitiator(closeInitiator)
+                .setCloseHeight(CLOSE_HEIGHT)
                 .build();
     }
 

@@ -7,6 +7,7 @@ import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.TRANSACTION_HASH_2;
+import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSE_HEIGHT;
 import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL_REMOTE;
 import static de.cotto.lndmanagej.model.OpenCloseStatus.CLOSED;
@@ -26,6 +27,7 @@ class ForceClosedChannelTest {
                 .withCloseTransactionHash(TRANSACTION_HASH_2)
                 .withOpenInitiator(OpenInitiator.LOCAL)
                 .withCloseInitiator(CloseInitiator.REMOTE)
+                .withCloseHeight(CLOSE_HEIGHT)
                 .build()
         ).isEqualTo(FORCE_CLOSED_CHANNEL);
     }
@@ -78,6 +80,11 @@ class ForceClosedChannelTest {
     @Test
     void getCloseInitiator() {
         assertThat(FORCE_CLOSED_CHANNEL_REMOTE.getCloseInitiator()).isEqualTo(CloseInitiator.REMOTE);
+    }
+
+    @Test
+    void getCloseHeight() {
+        assertThat(FORCE_CLOSED_CHANNEL_REMOTE.getCloseHeight()).isEqualTo(987_654);
     }
 
     @Test

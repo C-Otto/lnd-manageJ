@@ -6,6 +6,7 @@ import static de.cotto.lndmanagej.model.OpenCloseStatus.CLOSED;
 
 public abstract class ClosedChannel extends ClosedOrClosingChannel {
     private final CloseInitiator closeInitiator;
+    private final int closeHeight;
 
     public ClosedChannel(
             ChannelCoreInformation channelCoreInformation,
@@ -13,7 +14,8 @@ public abstract class ClosedChannel extends ClosedOrClosingChannel {
             Pubkey remotePubkey,
             String closeTransactionHash,
             OpenInitiator openInitiator,
-            CloseInitiator closeInitiator
+            CloseInitiator closeInitiator,
+            int closeHeight
     ) {
         super(
                 channelCoreInformation,
@@ -23,10 +25,18 @@ public abstract class ClosedChannel extends ClosedOrClosingChannel {
                 openInitiator
         );
         this.closeInitiator = closeInitiator;
+        if (closeHeight == 0) {
+            throw new IllegalArgumentException("Close height must be set");
+        }
+        this.closeHeight = closeHeight;
     }
 
     public CloseInitiator getCloseInitiator() {
         return closeInitiator;
+    }
+
+    public int getCloseHeight() {
+        return closeHeight;
     }
 
     @Override
@@ -47,11 +57,11 @@ public abstract class ClosedChannel extends ClosedOrClosingChannel {
             return false;
         }
         ClosedChannel that = (ClosedChannel) other;
-        return closeInitiator == that.closeInitiator;
+        return closeHeight == that.closeHeight && closeInitiator == that.closeInitiator;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), closeInitiator);
+        return Objects.hash(super.hashCode(), closeInitiator, closeHeight);
     }
 }

@@ -6,7 +6,8 @@ public class BreachForceClosedChannel extends ForceClosedChannel {
             Pubkey ownPubkey,
             Pubkey remotePubkey,
             String closeTransactionHash,
-            OpenInitiator openInitiator
+            OpenInitiator openInitiator,
+            int closeHeight
     ) {
         super(
                 channelCoreInformation,
@@ -14,7 +15,8 @@ public class BreachForceClosedChannel extends ForceClosedChannel {
                 remotePubkey,
                 closeTransactionHash,
                 openInitiator,
-                CloseInitiator.REMOTE
+                CloseInitiator.REMOTE,
+                closeHeight
         );
     }
 }
