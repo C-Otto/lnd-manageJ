@@ -4,12 +4,14 @@ import com.codahale.metrics.MetricRegistry;
 import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.controller.dto.ChannelDto;
+import de.cotto.lndmanagej.controller.dto.ClosedChannelDetailsDto;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.OpenCloseStatus;
@@ -57,7 +59,7 @@ public class ChannelController {
 
     @GetMapping("/")
     public ChannelDto getBasicInformation(@PathVariable ChannelId channelId) throws NotFoundException {
-        metrics.mark(MetricRegistry.name(getClass(), "getBasicInformation"));
+        mark("getBasicInformation");
         LocalChannel localChannel = channelService.getLocalChannel(channelId).orElse(null);
         if (localChannel == null) {
             throw new NotFoundException();
@@ -67,7 +69,7 @@ public class ChannelController {
 
     @GetMapping("/details")
     public ChannelDetailsDto getDetails(@PathVariable ChannelId channelId) throws NotFoundException {
-        metrics.mark(MetricRegistry.name(getClass(), "getDetails"));
+        mark("getDetails");
         LocalChannel localChannel = channelService.getLocalChannel(channelId).orElse(null);
         if (localChannel == null) {
             throw new NotFoundException();
@@ -79,13 +81,13 @@ public class ChannelController {
                 remoteAlias,
                 getBalanceInformation(channelId),
                 getOnChainCosts(channelId),
-                getPolicies(localChannel)
+                getPoliciesForChannel(localChannel)
         );
     }
 
     @GetMapping("/balance")
     public BalanceInformationDto getBalance(@PathVariable ChannelId channelId) {
-        metrics.mark(MetricRegistry.name(getClass(), "getBalance"));
+        mark("getBalance");
         BalanceInformation balanceInformation = balanceService.getBalanceInformation(channelId)
                 .orElse(BalanceInformation.EMPTY);
         return BalanceInformationDto.createFrom(balanceInformation);
@@ -93,12 +95,22 @@ public class ChannelController {
 
     @GetMapping("/policies")
     public PoliciesDto getPolicies(@PathVariable ChannelId channelId) {
-        metrics.mark(MetricRegistry.name(getClass(), "getPolicies"));
+        mark("getPolicies");
         LocalChannel localChannel = channelService.getLocalChannel(channelId).orElse(null);
-        return getPolicies(localChannel);
+        return getPoliciesForChannel(localChannel);
     }
 
-    private PoliciesDto getPolicies(@Nullable LocalChannel channel) {
+    @GetMapping("/close-details")
+    public ClosedChannelDetailsDto getCloseDetails(@PathVariable ChannelId channelId) throws NotFoundException {
+        mark("getCloseDetails");
+        ClosedChannel closedChannel = channelService.getClosedChannel(channelId).orElse(null);
+        if (closedChannel == null) {
+            throw new NotFoundException();
+        }
+        return new ClosedChannelDetailsDto(closedChannel.getCloseInitiator(), closedChannel.getCloseHeight());
+    }
+
+    private PoliciesDto getPoliciesForChannel(@Nullable LocalChannel channel) {
         if (channel == null || channel.getStatus().openCloseStatus() != OpenCloseStatus.OPEN) {
             return PoliciesDto.EMPTY;
         }
@@ -115,5 +127,9 @@ public class ChannelController {
         Coins openCosts = onChainCostService.getOpenCosts(channelId).orElse(Coins.NONE);
         Coins closeCosts = onChainCostService.getCloseCosts(channelId).orElse(Coins.NONE);
         return new OnChainCostsDto(openCosts, closeCosts);
+    }
+
+    private void mark(String name) {
+        metrics.mark(MetricRegistry.name(getClass(), name));
     }
 }

@@ -3,10 +3,12 @@ package de.cotto.lndmanagej.controller;
 import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.controller.dto.ChannelDto;
+import de.cotto.lndmanagej.controller.dto.ClosedChannelDetailsDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.BalanceInformation;
+import de.cotto.lndmanagej.model.CloseInitiator;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.service.BalanceService;
@@ -45,6 +47,8 @@ class ChannelControllerTest {
     private static final Coins CLOSE_COSTS = Coins.ofSatoshis(2);
     private static final OnChainCostsDto ON_CHAIN_COSTS = new OnChainCostsDto(OPEN_COSTS, CLOSE_COSTS);
     private static final PoliciesDto FEE_CONFIGURATION_DTO = PoliciesDto.createFrom(POLICIES);
+    private static final ClosedChannelDetailsDto CLOSED_CHANNEL_DETAILS_DTO =
+            new ClosedChannelDetailsDto(CloseInitiator.REMOTE, 987_654);
 
     @InjectMocks
     private ChannelController channelController;
@@ -168,6 +172,19 @@ class ChannelControllerTest {
     @Test
     void getPolicies_waiting_close() {
         assertThat(channelController.getPolicies(CHANNEL_ID)).isEqualTo(PoliciesDto.EMPTY);
+    }
+
+    @Test
+    void getCloseDetails() throws NotFoundException {
+        when(channelService.getClosedChannel(CHANNEL_ID)).thenReturn(Optional.of(CLOSED_CHANNEL));
+        assertThat(channelController.getCloseDetails(CHANNEL_ID)).isEqualTo(CLOSED_CHANNEL_DETAILS_DTO);
+        verify(metrics).mark(argThat(name -> name.endsWith(".getCloseDetails")));
+    }
+
+    @Test
+    void getCloseDetails_not_closed() {
+        assertThatExceptionOfType(NotFoundException.class)
+                .isThrownBy(() -> channelController.getCloseDetails(CHANNEL_ID));
     }
 
     private ChannelDetailsDto mockForChannelWithoutPolicies(LocalChannel channel) {

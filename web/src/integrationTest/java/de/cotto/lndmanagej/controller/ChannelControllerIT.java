@@ -20,6 +20,7 @@ import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
+import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
@@ -164,5 +165,13 @@ class ChannelControllerIT {
                 .andExpect(jsonPath("$.remote.baseFeeMilliSat", is(0)))
                 .andExpect(jsonPath("$.local.enabled", is(false)))
                 .andExpect(jsonPath("$.remote.enabled", is(true)));
+    }
+
+    @Test
+    void getCloseDetails() throws Exception {
+        when(channelService.getClosedChannel(CHANNEL_ID)).thenReturn(Optional.of(CLOSED_CHANNEL));
+        mockMvc.perform(get(CHANNEL_PREFIX + "/close-details"))
+                .andExpect(jsonPath("$.initiator", is("REMOTE")))
+                .andExpect(jsonPath("$.height", is(987_654)));
     }
 }
