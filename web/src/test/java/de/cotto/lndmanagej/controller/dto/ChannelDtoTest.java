@@ -16,7 +16,8 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ChannelDtoTest {
-    private static final ChannelDto CHANNEL_DTO = new ChannelDto(CLOSED_CHANNEL);
+    private static final ClosedChannelDetailsDto CLOSE_DETAILS = new ClosedChannelDetailsDto("abc", 123);
+    private static final ChannelDto CHANNEL_DTO = new ChannelDto(CLOSED_CHANNEL, CLOSE_DETAILS);
 
     @Test
     void channelIdShort() {
@@ -55,13 +56,13 @@ class ChannelDtoTest {
 
     @Test
     void totalSent() {
-        assertThat(new ChannelDto(LOCAL_OPEN_CHANNEL).totalSent())
+        assertThat(new ChannelDto(LOCAL_OPEN_CHANNEL, CLOSE_DETAILS).totalSent())
                 .isEqualTo(String.valueOf(TOTAL_SENT.satoshis()));
     }
 
     @Test
     void totalReceived() {
-        assertThat(new ChannelDto(LOCAL_OPEN_CHANNEL).totalReceived())
+        assertThat(new ChannelDto(LOCAL_OPEN_CHANNEL, CLOSE_DETAILS).totalReceived())
                 .isEqualTo(String.valueOf(TOTAL_RECEIVED.satoshis()));
     }
 
@@ -71,8 +72,13 @@ class ChannelDtoTest {
     }
 
     @Test
+    void closeDetails() {
+        assertThat(CHANNEL_DTO.closeDetails()).isEqualTo(CLOSE_DETAILS);
+    }
+
+    @Test
     void status() {
-        ChannelDto dto = new ChannelDto(LOCAL_OPEN_CHANNEL);
+        ChannelDto dto = new ChannelDto(LOCAL_OPEN_CHANNEL, CLOSE_DETAILS);
         ChannelStatusDto channelStatusDto =
                 ChannelStatusDto.createFrom(new ChannelStatus(false, true, false, OPEN));
         assertThat(dto.status()).isEqualTo(channelStatusDto);

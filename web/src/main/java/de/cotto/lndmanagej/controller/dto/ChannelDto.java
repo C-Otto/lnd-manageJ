@@ -16,9 +16,10 @@ public record ChannelDto(
         String totalSent,
         String totalReceived,
         ChannelStatusDto status,
-        OpenInitiator openInitiator
+        OpenInitiator openInitiator,
+        ClosedChannelDetailsDto closeDetails
 ) {
-    public ChannelDto(LocalChannel localChannel) {
+    public ChannelDto(LocalChannel localChannel, ClosedChannelDetailsDto closeDetails) {
         this(
                 String.valueOf(localChannel.getId().getShortChannelId()),
                 localChannel.getId().getCompactForm(),
@@ -30,7 +31,8 @@ public record ChannelDto(
                 String.valueOf(localChannel.getTotalSent().satoshis()),
                 String.valueOf(localChannel.getTotalReceived().satoshis()),
                 ChannelStatusDto.createFrom(localChannel.getStatus()),
-                localChannel.getOpenInitiator()
+                localChannel.getOpenInitiator(),
+                closeDetails
         );
     }
 }

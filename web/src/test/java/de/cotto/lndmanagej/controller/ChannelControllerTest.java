@@ -86,8 +86,16 @@ class ChannelControllerTest {
 
     @Test
     void getBasicInformation() throws NotFoundException {
-        ChannelDto basicInformation = new ChannelDto(LOCAL_OPEN_CHANNEL);
+        ChannelDto basicInformation = new ChannelDto(LOCAL_OPEN_CHANNEL, ClosedChannelDetailsDto.UNKNOWN);
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+        assertThat(channelController.getBasicInformation(CHANNEL_ID)).isEqualTo(basicInformation);
+        verify(metrics).mark(argThat(name -> name.endsWith(".getBasicInformation")));
+    }
+
+    @Test
+    void getBasicInformation_closed_channel() throws NotFoundException {
+        ChannelDto basicInformation = new ChannelDto(CLOSED_CHANNEL, CLOSED_CHANNEL_DETAILS_DTO);
+        when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(CLOSED_CHANNEL));
         assertThat(channelController.getBasicInformation(CHANNEL_ID)).isEqualTo(basicInformation);
         verify(metrics).mark(argThat(name -> name.endsWith(".getBasicInformation")));
     }
@@ -106,7 +114,7 @@ class ChannelControllerTest {
                 LOCAL_OPEN_CHANNEL.getBalanceInformation(),
                 ON_CHAIN_COSTS,
                 FEE_CONFIGURATION_DTO,
-                new ClosedChannelDetailsDto("", 0)
+                ClosedChannelDetailsDto.UNKNOWN
         );
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
@@ -125,7 +133,7 @@ class ChannelControllerTest {
                 LOCAL_OPEN_CHANNEL_PRIVATE.getBalanceInformation(),
                 ON_CHAIN_COSTS,
                 FEE_CONFIGURATION_DTO,
-                new ClosedChannelDetailsDto("", 0)
+                ClosedChannelDetailsDto.UNKNOWN
         );
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_PRIVATE));

@@ -37,6 +37,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @WebMvcTest(controllers = ChannelController.class)
 class ChannelControllerIT {
     private static final String CHANNEL_PREFIX = "/api/channel/" + CHANNEL_ID.getShortChannelId();
@@ -91,6 +92,19 @@ class ChannelControllerIT {
     }
 
     @Test
+    void getBasicInformation_closed_channel() throws Exception {
+        when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(CLOSED_CHANNEL));
+        mockMvc.perform(get(CHANNEL_PREFIX + "/"))
+                .andExpect(jsonPath("$.totalSent", is("0")))
+                .andExpect(jsonPath("$.totalReceived", is("0")))
+                .andExpect(jsonPath("$.closeDetails.initiator", is("REMOTE")))
+                .andExpect(jsonPath("$.closeDetails.height", is(987_654)))
+                .andExpect(jsonPath("$.status.active", is(false)))
+                .andExpect(jsonPath("$.status.closed", is(true)))
+                .andExpect(jsonPath("$.status.openClosed", is("CLOSED")));
+    }
+
+    @Test
     void getChannelDetails_not_found() throws Exception {
         mockMvc.perform(get(DETAILS_PREFIX)).andExpect(status().isNotFound());
     }
@@ -139,11 +153,13 @@ class ChannelControllerIT {
     void getChannelDetails_closed_channel() throws Exception {
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(CLOSED_CHANNEL));
         mockMvc.perform(get(DETAILS_PREFIX))
+                .andExpect(jsonPath("$.closeDetails.initiator", is("REMOTE")))
+                .andExpect(jsonPath("$.closeDetails.height", is(987_654)))
+                .andExpect(jsonPath("$.status.openClosed", is("CLOSED")))
                 .andExpect(jsonPath("$.totalSent", is("0")))
                 .andExpect(jsonPath("$.totalReceived", is("0")))
                 .andExpect(jsonPath("$.status.active", is(false)))
                 .andExpect(jsonPath("$.status.closed", is(true)))
-                .andExpect(jsonPath("$.status.openClosed", is("CLOSED")))
                 .andExpect(jsonPath("$.balance.localBalance", is("0")))
                 .andExpect(jsonPath("$.balance.localReserve", is("0")))
                 .andExpect(jsonPath("$.balance.localAvailable", is("0")))
@@ -151,9 +167,7 @@ class ChannelControllerIT {
                 .andExpect(jsonPath("$.balance.remoteReserve", is("0")))
                 .andExpect(jsonPath("$.balance.remoteAvailable", is("0")))
                 .andExpect(jsonPath("$.policies.local.enabled", is(false)))
-                .andExpect(jsonPath("$.policies.remote.enabled", is(false)))
-                .andExpect(jsonPath("$.closeDetails.initiator", is("REMOTE")))
-                .andExpect(jsonPath("$.closeDetails.height", is(987_654)));
+                .andExpect(jsonPath("$.policies.remote.enabled", is(false)));
     }
 
     @Test

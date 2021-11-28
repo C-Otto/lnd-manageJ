@@ -19,13 +19,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ChannelDetailsDtoTest {
 
     private static final OnChainCostsDto ON_CHAIN_COSTS = new OnChainCostsDto(Coins.ofSatoshis(1), Coins.ofSatoshis(2));
+    private static final ClosedChannelDetailsDto CLOSE_DETAILS = new ClosedChannelDetailsDto("abc", 123);
     private static final ChannelDetailsDto CHANNEL_DETAILS_DTO = new ChannelDetailsDto(
             CLOSED_CHANNEL,
             ALIAS,
             BALANCE_INFORMATION,
             ON_CHAIN_COSTS,
             PoliciesDto.EMPTY,
-            new ClosedChannelDetailsDto("", 0)
+            CLOSE_DETAILS
     );
 
     @Test
@@ -81,11 +82,16 @@ class ChannelDetailsDtoTest {
                 BALANCE_INFORMATION,
                 ON_CHAIN_COSTS,
                 PoliciesDto.EMPTY,
-                new ClosedChannelDetailsDto("", 0)
+                CLOSE_DETAILS
         );
         ChannelStatusDto channelStatusDto =
                 ChannelStatusDto.createFrom(new ChannelStatus(false, true, false, OPEN));
         assertThat(dto.status()).isEqualTo(channelStatusDto);
+    }
+
+    @Test
+    void closeDetails() {
+        assertThat(CHANNEL_DETAILS_DTO.closeDetails()).isEqualTo(CLOSE_DETAILS);
     }
 
     @Test

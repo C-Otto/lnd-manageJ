@@ -64,7 +64,8 @@ public class ChannelController {
         if (localChannel == null) {
             throw new NotFoundException();
         }
-        return new ChannelDto(localChannel);
+        ClosedChannelDetailsDto closeDetailsForChannel = getCloseDetailsForChannel(localChannel);
+        return new ChannelDto(localChannel, closeDetailsForChannel);
     }
 
     @GetMapping("/details")
@@ -135,7 +136,7 @@ public class ChannelController {
             ClosedChannel closedChannel = localChannel.getAsClosedChannel();
             return new ClosedChannelDetailsDto(closedChannel.getCloseInitiator(), closedChannel.getCloseHeight());
         } else {
-            return new ClosedChannelDetailsDto("", 0);
+            return ClosedChannelDetailsDto.UNKNOWN;
         }
     }
 
