@@ -24,7 +24,7 @@ class ChannelDetailsDtoTest {
             ALIAS,
             BALANCE_INFORMATION,
             ON_CHAIN_COSTS,
-            FeeConfigurationDto.EMPTY
+            PoliciesDto.EMPTY
     );
 
     @Test
@@ -79,7 +79,7 @@ class ChannelDetailsDtoTest {
                 ALIAS,
                 BALANCE_INFORMATION,
                 ON_CHAIN_COSTS,
-                FeeConfigurationDto.EMPTY
+                PoliciesDto.EMPTY
         );
         ChannelStatusDto channelStatusDto =
                 ChannelStatusDto.createFrom(new ChannelStatus(false, true, false, OPEN));

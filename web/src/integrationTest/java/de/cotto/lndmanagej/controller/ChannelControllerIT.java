@@ -4,9 +4,9 @@ import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
-import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.OnChainCostService;
+import de.cotto.lndmanagej.service.PolicyService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -20,7 +20,6 @@ import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
-import static de.cotto.lndmanagej.model.FeeConfigurationFixtures.FEE_CONFIGURATION;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
@@ -29,6 +28,7 @@ import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_RECEIVED_
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_SENT;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_SENT_2;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
+import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
@@ -60,7 +60,7 @@ class ChannelControllerIT {
     private BalanceService balanceService;
 
     @MockBean
-    private FeeService feeService;
+    private PolicyService policyService;
 
     @Test
     void getBasicInformation_not_found() throws Exception {
@@ -96,7 +96,7 @@ class ChannelControllerIT {
 
     @Test
     void getChannelDetails() throws Exception {
-        when(feeService.getFeeConfiguration(CHANNEL_ID)).thenReturn(FEE_CONFIGURATION);
+        when(policyService.getPolicies(CHANNEL_ID)).thenReturn(POLICIES);
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_PRIVATE));
         when(onChainCostService.getOpenCosts(CHANNEL_ID)).thenReturn(Optional.of(Coins.ofSatoshis(1000)));
@@ -126,12 +126,12 @@ class ChannelControllerIT {
                 .andExpect(jsonPath("$.balance.remoteBalance", is("223")))
                 .andExpect(jsonPath("$.balance.remoteReserve", is("20")))
                 .andExpect(jsonPath("$.balance.remoteAvailable", is("203")))
-                .andExpect(jsonPath("$.feeConfiguration.enabledLocal", is(false)))
-                .andExpect(jsonPath("$.feeConfiguration.enabledRemote", is(true)))
-                .andExpect(jsonPath("$.feeConfiguration.outgoingFeeRatePpm", is(1)))
-                .andExpect(jsonPath("$.feeConfiguration.outgoingBaseFeeMilliSat", is(2)))
-                .andExpect(jsonPath("$.feeConfiguration.incomingFeeRatePpm", is(3)))
-                .andExpect(jsonPath("$.feeConfiguration.incomingBaseFeeMilliSat", is(4)));
+                .andExpect(jsonPath("$.policies.local.enabled", is(false)))
+                .andExpect(jsonPath("$.policies.remote.enabled", is(true)))
+                .andExpect(jsonPath("$.policies.local.feeRatePpm", is(100)))
+                .andExpect(jsonPath("$.policies.local.baseFeeMilliSat", is(10)))
+                .andExpect(jsonPath("$.policies.remote.feeRatePpm", is(222)))
+                .andExpect(jsonPath("$.policies.remote.baseFeeMilliSat", is(0)));
     }
 
     @Test
@@ -154,15 +154,15 @@ class ChannelControllerIT {
     }
 
     @Test
-    void getFeeConfiguration() throws Exception {
+    void getPolicies() throws Exception {
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
-        when(feeService.getFeeConfiguration(CHANNEL_ID)).thenReturn(FEE_CONFIGURATION);
-        mockMvc.perform(get(CHANNEL_PREFIX + "/fee-configuration"))
-                .andExpect(jsonPath("$.outgoingFeeRatePpm", is(1)))
-                .andExpect(jsonPath("$.outgoingBaseFeeMilliSat", is(2)))
-                .andExpect(jsonPath("$.incomingFeeRatePpm", is(3)))
-                .andExpect(jsonPath("$.incomingBaseFeeMilliSat", is(4)))
-                .andExpect(jsonPath("$.enabledLocal", is(false)))
-                .andExpect(jsonPath("$.enabledRemote", is(true)));
+        when(policyService.getPolicies(CHANNEL_ID)).thenReturn(POLICIES);
+        mockMvc.perform(get(CHANNEL_PREFIX + "/policies"))
+                .andExpect(jsonPath("$.local.feeRatePpm", is(100)))
+                .andExpect(jsonPath("$.local.baseFeeMilliSat", is(10)))
+                .andExpect(jsonPath("$.remote.feeRatePpm", is(222)))
+                .andExpect(jsonPath("$.remote.baseFeeMilliSat", is(0)))
+                .andExpect(jsonPath("$.local.enabled", is(false)))
+                .andExpect(jsonPath("$.remote.enabled", is(true)));
     }
 }

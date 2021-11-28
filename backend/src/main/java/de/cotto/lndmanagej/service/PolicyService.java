@@ -3,25 +3,22 @@ package de.cotto.lndmanagej.service;
 import de.cotto.lndmanagej.grpc.GrpcFees;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
-import de.cotto.lndmanagej.model.FeeConfiguration;
+import de.cotto.lndmanagej.model.Policies;
+import de.cotto.lndmanagej.model.Policy;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FeeService {
+public class PolicyService {
     private final GrpcFees grpcFees;
 
-    public FeeService(GrpcFees grpcFees) {
+    public PolicyService(GrpcFees grpcFees) {
         this.grpcFees = grpcFees;
     }
 
-    public FeeConfiguration getFeeConfiguration(ChannelId channelId) {
-        return new FeeConfiguration(
-                getOutgoingFeeRate(channelId),
-                getOutgoingBaseFee(channelId),
-                getIncomingFeeRate(channelId),
-                getIncomingBaseFee(channelId),
-                isEnabledLocal(channelId),
-                isEnabledRemote(channelId)
+    public Policies getPolicies(ChannelId channelId) {
+        return new Policies(
+                new Policy(getOutgoingFeeRate(channelId), getOutgoingBaseFee(channelId), isEnabledLocal(channelId)),
+                new Policy(getIncomingFeeRate(channelId), getIncomingBaseFee(channelId), isEnabledRemote(channelId))
         );
     }
 

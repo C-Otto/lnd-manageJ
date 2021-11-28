@@ -3,17 +3,17 @@ package de.cotto.lndmanagej.controller;
 import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.controller.dto.ChannelDto;
-import de.cotto.lndmanagej.controller.dto.FeeConfigurationDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
+import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
-import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.OnChainCostService;
+import de.cotto.lndmanagej.service.PolicyService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,10 +26,10 @@ import java.util.Optional;
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
-import static de.cotto.lndmanagej.model.FeeConfigurationFixtures.FEE_CONFIGURATION;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
+import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,7 +44,7 @@ class ChannelControllerTest {
     private static final Coins OPEN_COSTS = Coins.ofSatoshis(1);
     private static final Coins CLOSE_COSTS = Coins.ofSatoshis(2);
     private static final OnChainCostsDto ON_CHAIN_COSTS = new OnChainCostsDto(OPEN_COSTS, CLOSE_COSTS);
-    private static final FeeConfigurationDto FEE_CONFIGURATION_DTO = FeeConfigurationDto.createFrom(FEE_CONFIGURATION);
+    private static final PoliciesDto FEE_CONFIGURATION_DTO = PoliciesDto.createFrom(POLICIES);
 
     @InjectMocks
     private ChannelController channelController;
@@ -65,13 +65,13 @@ class ChannelControllerTest {
     private OnChainCostService onChainCostService;
 
     @Mock
-    private FeeService feeService;
+    private PolicyService policyService;
 
     @BeforeEach
     void setUp() {
         lenient().when(onChainCostService.getOpenCosts(CHANNEL_ID)).thenReturn(Optional.of(OPEN_COSTS));
         lenient().when(onChainCostService.getCloseCosts(CHANNEL_ID)).thenReturn(Optional.of(CLOSE_COSTS));
-        lenient().when(feeService.getFeeConfiguration(CHANNEL_ID)).thenReturn(FEE_CONFIGURATION);
+        lenient().when(policyService.getPolicies(CHANNEL_ID)).thenReturn(POLICIES);
     }
 
     @Test
@@ -131,13 +131,13 @@ class ChannelControllerTest {
 
     @Test
     void getDetails_closed() throws NotFoundException {
-        ChannelDetailsDto expectedDetails = mockForChannelWithoutFeeConfiguration(CLOSED_CHANNEL);
+        ChannelDetailsDto expectedDetails = mockForChannelWithoutPolicies(CLOSED_CHANNEL);
         assertThat(channelController.getDetails(CHANNEL_ID)).isEqualTo(expectedDetails);
     }
 
     @Test
     void getDetails_waiting_close() throws NotFoundException {
-        ChannelDetailsDto expectedDetails = mockForChannelWithoutFeeConfiguration(WAITING_CLOSE_CHANNEL);
+        ChannelDetailsDto expectedDetails = mockForChannelWithoutPolicies(WAITING_CLOSE_CHANNEL);
         assertThat(channelController.getDetails(CHANNEL_ID)).isEqualTo(expectedDetails);
     }
 
@@ -158,19 +158,19 @@ class ChannelControllerTest {
     }
 
     @Test
-    void getFeeConfiguration() {
+    void getPolicies() {
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
-        when(feeService.getFeeConfiguration(CHANNEL_ID)).thenReturn(FEE_CONFIGURATION);
-        assertThat(channelController.getFeeConfiguration(CHANNEL_ID)).isEqualTo(FEE_CONFIGURATION_DTO);
-        verify(metrics).mark(argThat(name -> name.endsWith(".getFeeConfiguration")));
+        when(policyService.getPolicies(CHANNEL_ID)).thenReturn(POLICIES);
+        assertThat(channelController.getPolicies(CHANNEL_ID)).isEqualTo(FEE_CONFIGURATION_DTO);
+        verify(metrics).mark(argThat(name -> name.endsWith(".getPolicies")));
     }
 
     @Test
-    void getFeeConfiguration_waiting_close() {
-        assertThat(channelController.getFeeConfiguration(CHANNEL_ID)).isEqualTo(FeeConfigurationDto.EMPTY);
+    void getPolicies_waiting_close() {
+        assertThat(channelController.getPolicies(CHANNEL_ID)).isEqualTo(PoliciesDto.EMPTY);
     }
 
-    private ChannelDetailsDto mockForChannelWithoutFeeConfiguration(LocalChannel channel) {
+    private ChannelDetailsDto mockForChannelWithoutPolicies(LocalChannel channel) {
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(channel));
         when(balanceService.getBalanceInformation(CHANNEL_ID)).thenReturn(Optional.empty());
@@ -179,7 +179,7 @@ class ChannelControllerTest {
                 ALIAS_2,
                 BalanceInformation.EMPTY,
                 ON_CHAIN_COSTS,
-                FeeConfigurationDto.EMPTY
+                PoliciesDto.EMPTY
         );
     }
 }
