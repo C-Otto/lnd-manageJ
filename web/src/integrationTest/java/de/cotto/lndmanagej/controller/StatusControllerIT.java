@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.metrics.Metrics;
+import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.OwnNodeService;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,10 @@ class StatusControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    @SuppressWarnings("unused")
+    private ChannelIdResolver channelIdResolver;
 
     @MockBean
     private ChannelService channelService;

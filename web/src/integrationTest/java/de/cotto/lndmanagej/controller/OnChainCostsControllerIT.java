@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.metrics.Metrics;
+import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.service.OnChainCostService;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,10 @@ class OnChainCostsControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    @SuppressWarnings("unused")
+    private ChannelIdResolver channelIdResolver;
 
     @MockBean
     private OnChainCostService onChainCostService;

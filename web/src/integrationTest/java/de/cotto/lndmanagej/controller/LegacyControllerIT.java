@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.metrics.Metrics;
+import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class LegacyControllerIT {
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    @SuppressWarnings("unused")
+    private ChannelIdResolver channelIdResolver;
 
     @MockBean
     @SuppressWarnings("unused")
