@@ -30,16 +30,40 @@ class FeeServiceTest {
                 789,
                 Coins.ofMilliSatoshis(111),
                 123,
-                Coins.ofMilliSatoshis(456)
+                Coins.ofMilliSatoshis(456),
+                true,
+                false
         );
 
         when(grpcFees.getOutgoingFeeRate(CHANNEL_ID)).thenReturn(Optional.of(789L));
         when(grpcFees.getOutgoingBaseFee(CHANNEL_ID)).thenReturn(Optional.of(Coins.ofMilliSatoshis(111)));
         when(grpcFees.getIncomingFeeRate(CHANNEL_ID)).thenReturn(Optional.of(123L));
         when(grpcFees.getIncomingBaseFee(CHANNEL_ID)).thenReturn(Optional.of(Coins.ofMilliSatoshis(456)));
+        when(grpcFees.isEnabledLocal(CHANNEL_ID)).thenReturn(Optional.of(true));
+        when(grpcFees.isEnabledRemote(CHANNEL_ID)).thenReturn(Optional.of(false));
 
-        assertThat(feeService.getFeeConfiguration(CHANNEL_ID))
-                .isEqualTo(expected);
+        assertThat(feeService.getFeeConfiguration(CHANNEL_ID)).isEqualTo(expected);
+    }
+
+    @Test
+    void getFeeConfiguration_swapped() {
+        FeeConfiguration expected = new FeeConfiguration(
+                123,
+                Coins.ofMilliSatoshis(456),
+                789,
+                Coins.ofMilliSatoshis(111),
+                false,
+                true
+        );
+
+        when(grpcFees.getOutgoingFeeRate(CHANNEL_ID)).thenReturn(Optional.of(123L));
+        when(grpcFees.getOutgoingBaseFee(CHANNEL_ID)).thenReturn(Optional.of(Coins.ofMilliSatoshis(456)));
+        when(grpcFees.getIncomingFeeRate(CHANNEL_ID)).thenReturn(Optional.of(789L));
+        when(grpcFees.getIncomingBaseFee(CHANNEL_ID)).thenReturn(Optional.of(Coins.ofMilliSatoshis(111)));
+        when(grpcFees.isEnabledLocal(CHANNEL_ID)).thenReturn(Optional.of(false));
+        when(grpcFees.isEnabledRemote(CHANNEL_ID)).thenReturn(Optional.of(true));
+
+        assertThat(feeService.getFeeConfiguration(CHANNEL_ID)).isEqualTo(expected);
     }
 
     @Test

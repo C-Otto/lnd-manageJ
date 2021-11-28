@@ -6,7 +6,8 @@ import static de.cotto.lndmanagej.model.OpenCloseStatus.OPEN;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ChannelStatusTest {
-    private final ChannelStatus channelStatus = new ChannelStatus(false, true, false, OPEN);
+    private final ChannelStatus channelStatus =
+            new ChannelStatus(false, true, false, OPEN);
 
     @Test
     void privateChannel() {

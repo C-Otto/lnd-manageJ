@@ -25,4 +25,14 @@ class FeeConfigurationTest {
     void incomingBaseFee() {
         assertThat(FEE_CONFIGURATION.incomingBaseFee()).isEqualTo(Coins.ofMilliSatoshis(4));
     }
+
+    @Test
+    void enabledLocal() {
+        assertThat(FEE_CONFIGURATION.enabledLocal()).isFalse();
+    }
+
+    @Test
+    void enabledRemote() {
+        assertThat(FEE_CONFIGURATION.enabledRemote()).isTrue();
+    }
 }

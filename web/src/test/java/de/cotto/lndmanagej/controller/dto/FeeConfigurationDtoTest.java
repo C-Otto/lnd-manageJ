@@ -8,7 +8,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 class FeeConfigurationDtoTest {
     @Test
     void createFrom() {
-        FeeConfigurationDto expected = new FeeConfigurationDto(1, 2, 3, 4);
+        FeeConfigurationDto expected = new FeeConfigurationDto(
+                1,
+                2,
+                3,
+                4,
+                false,
+                true
+        );
 
         FeeConfigurationDto dto = FeeConfigurationDto.createFrom(FEE_CONFIGURATION);
 

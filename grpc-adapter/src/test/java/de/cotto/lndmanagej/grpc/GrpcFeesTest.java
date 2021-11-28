@@ -69,10 +69,49 @@ class GrpcFeesTest {
         assertThat(grpcFees.getIncomingBaseFee(CHANNEL_ID)).isEmpty();
     }
 
+    @Test
+    void isEnabledLocal_false() {
+        when(grpcChannelPolicy.getLocalPolicy(CHANNEL_ID)).thenReturn(Optional.of(routingPolicy(true)));
+        assertThat(grpcFees.isEnabledLocal(CHANNEL_ID)).contains(false);
+    }
+
+    @Test
+    void isEnabledLocal_true() {
+        when(grpcChannelPolicy.getLocalPolicy(CHANNEL_ID)).thenReturn(Optional.of(routingPolicy(false)));
+        assertThat(grpcFees.isEnabledLocal(CHANNEL_ID)).contains(true);
+    }
+
+    @Test
+    void isEnabledLocal_empty() {
+        assertThat(grpcFees.isEnabledLocal(CHANNEL_ID)).isEmpty();
+    }
+
+    @Test
+    void isEnabledRemote_false() {
+        when(grpcChannelPolicy.getRemotePolicy(CHANNEL_ID)).thenReturn(Optional.of(routingPolicy(true)));
+        assertThat(grpcFees.isEnabledRemote(CHANNEL_ID)).contains(false);
+    }
+
+    @Test
+    void isEnabledRemote_true() {
+        when(grpcChannelPolicy.getRemotePolicy(CHANNEL_ID)).thenReturn(Optional.of(routingPolicy(false)));
+        assertThat(grpcFees.isEnabledRemote(CHANNEL_ID)).contains(true);
+    }
+
+    @Test
+    void isEnabledRemote_empty() {
+        assertThat(grpcFees.isEnabledRemote(CHANNEL_ID)).isEmpty();
+    }
+
     private RoutingPolicy routingPolicy() {
+        return routingPolicy(false);
+    }
+
+    private RoutingPolicy routingPolicy(boolean disabled) {
         return RoutingPolicy.newBuilder()
                 .setFeeRateMilliMsat(FEE_RATE)
                 .setFeeBaseMsat(BASE_FEE.milliSatoshis())
+                .setDisabled(disabled)
                 .build();
     }
 

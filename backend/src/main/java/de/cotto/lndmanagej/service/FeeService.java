@@ -19,7 +19,9 @@ public class FeeService {
                 getOutgoingFeeRate(channelId),
                 getOutgoingBaseFee(channelId),
                 getIncomingFeeRate(channelId),
-                getIncomingBaseFee(channelId)
+                getIncomingBaseFee(channelId),
+                isEnabledLocal(channelId),
+                isEnabledRemote(channelId)
         );
     }
 
@@ -37,5 +39,13 @@ public class FeeService {
 
     private Coins getIncomingBaseFee(ChannelId channelId) {
         return grpcFees.getIncomingBaseFee(channelId).orElseThrow(IllegalStateException::new);
+    }
+
+    private boolean isEnabledLocal(ChannelId channelId) {
+        return grpcFees.isEnabledLocal(channelId).orElseThrow(IllegalStateException::new);
+    }
+
+    private boolean isEnabledRemote(ChannelId channelId) {
+        return grpcFees.isEnabledRemote(channelId).orElseThrow(IllegalStateException::new);
     }
 }

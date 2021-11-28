@@ -34,4 +34,18 @@ public class GrpcFees {
                 .map(RoutingPolicy::getFeeBaseMsat)
                 .map(Coins::ofMilliSatoshis);
     }
+
+    @SuppressWarnings("PMD.LinguisticNaming")
+    public Optional<Boolean> isEnabledLocal(ChannelId channelId) {
+        return grpcChannelPolicy.getLocalPolicy(channelId)
+                .map(RoutingPolicy::getDisabled)
+                .map(b -> !b);
+    }
+
+    @SuppressWarnings("PMD.LinguisticNaming")
+    public Optional<Boolean> isEnabledRemote(ChannelId channelId) {
+        return grpcChannelPolicy.getRemotePolicy(channelId)
+                .map(RoutingPolicy::getDisabled)
+                .map(b -> !b);
+    }
 }

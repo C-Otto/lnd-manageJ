@@ -126,6 +126,8 @@ class ChannelControllerIT {
                 .andExpect(jsonPath("$.balance.remoteBalance", is("223")))
                 .andExpect(jsonPath("$.balance.remoteReserve", is("20")))
                 .andExpect(jsonPath("$.balance.remoteAvailable", is("203")))
+                .andExpect(jsonPath("$.feeConfiguration.enabledLocal", is(false)))
+                .andExpect(jsonPath("$.feeConfiguration.enabledRemote", is(true)))
                 .andExpect(jsonPath("$.feeConfiguration.outgoingFeeRatePpm", is(1)))
                 .andExpect(jsonPath("$.feeConfiguration.outgoingBaseFeeMilliSat", is(2)))
                 .andExpect(jsonPath("$.feeConfiguration.incomingFeeRatePpm", is(3)))
@@ -159,6 +161,8 @@ class ChannelControllerIT {
                 .andExpect(jsonPath("$.outgoingFeeRatePpm", is(1)))
                 .andExpect(jsonPath("$.outgoingBaseFeeMilliSat", is(2)))
                 .andExpect(jsonPath("$.incomingFeeRatePpm", is(3)))
-                .andExpect(jsonPath("$.incomingBaseFeeMilliSat", is(4)));
+                .andExpect(jsonPath("$.incomingBaseFeeMilliSat", is(4)))
+                .andExpect(jsonPath("$.enabledLocal", is(false)))
+                .andExpect(jsonPath("$.enabledRemote", is(true)));
     }
 }
