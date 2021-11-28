@@ -134,6 +134,6 @@ public class ChannelService {
                 closedChannels,
                 waitingCloseChannels,
                 forceClosingChannels
-        ).map(Supplier::get).flatMap(Collection::stream);
+        ).parallel().map(Supplier::get).flatMap(Collection::stream);
     }
 }

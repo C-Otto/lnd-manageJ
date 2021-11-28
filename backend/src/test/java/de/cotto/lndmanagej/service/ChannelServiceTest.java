@@ -29,8 +29,6 @@ import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOS
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL_2;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL_TO_NODE_3;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,15 +66,6 @@ class ChannelServiceTest {
     }
 
     @Test
-    void getLocalChannel_open_tried_first() {
-        when(grpcChannels.getChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL));
-        assertThat(channelService.getLocalChannel(CHANNEL_ID)).contains(LOCAL_OPEN_CHANNEL);
-        verify(grpcClosedChannels, never()).getClosedChannels();
-        verify(grpcChannels, never()).getForceClosingChannels();
-        verify(grpcChannels, never()).getWaitingCloseChannels();
-    }
-
-    @Test
     void getLocalChannel_waiting_close_channel() {
         when(grpcChannels.getWaitingCloseChannels()).thenReturn(Set.of(WAITING_CLOSE_CHANNEL, WAITING_CLOSE_CHANNEL_2));
         assertThat(channelService.getLocalChannel(CHANNEL_ID)).contains(WAITING_CLOSE_CHANNEL);
@@ -92,14 +81,6 @@ class ChannelServiceTest {
     void getLocalChannel_closed() {
         when(grpcClosedChannels.getClosedChannels()).thenReturn(Set.of(CLOSED_CHANNEL));
         assertThat(channelService.getLocalChannel(CHANNEL_ID)).contains(CLOSED_CHANNEL);
-    }
-
-    @Test
-    void getLocalChannel_closed_tried_second() {
-        when(grpcClosedChannels.getClosedChannels()).thenReturn(Set.of(CLOSED_CHANNEL));
-        assertThat(channelService.getLocalChannel(CHANNEL_ID)).contains(CLOSED_CHANNEL);
-        verify(grpcChannels, never()).getForceClosingChannels();
-        verify(grpcChannels, never()).getWaitingCloseChannels();
     }
 
     @Test

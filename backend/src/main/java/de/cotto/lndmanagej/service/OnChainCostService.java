@@ -24,7 +24,7 @@ public class OnChainCostService {
     }
 
     public Coins getOpenCostsWith(Pubkey pubkey) {
-        return channelService.getAllChannelsWith(pubkey).stream()
+        return channelService.getAllChannelsWith(pubkey).parallelStream()
                 .map(this::getOpenCosts)
                 .flatMap(Optional::stream)
                 .reduce(Coins.NONE, Coins::add);
@@ -52,7 +52,7 @@ public class OnChainCostService {
     }
 
     public Coins getCloseCostsWith(Pubkey pubkey) {
-        return channelService.getClosedChannelsWith(pubkey).stream()
+        return channelService.getClosedChannelsWith(pubkey).parallelStream()
                 .map(this::getCloseCosts)
                 .flatMap(Optional::stream)
                 .reduce(Coins.NONE, Coins::add);

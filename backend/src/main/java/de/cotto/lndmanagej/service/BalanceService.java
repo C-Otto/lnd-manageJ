@@ -48,7 +48,7 @@ public class BalanceService {
     }
 
     public BalanceInformation getBalanceInformation(Pubkey pubkey) {
-        return channelService.getOpenChannelsWith(pubkey).stream()
+        return channelService.getOpenChannelsWith(pubkey).parallelStream()
                 .map(Channel::getId)
                 .map(this::getBalanceInformation)
                 .flatMap(Optional::stream)
