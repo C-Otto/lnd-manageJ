@@ -13,6 +13,8 @@ import lnrpc.Channel;
 import lnrpc.ChannelCloseSummary;
 import lnrpc.ChannelEdge;
 import lnrpc.ClosedChannelsRequest;
+import lnrpc.ForwardingHistoryRequest;
+import lnrpc.ForwardingHistoryResponse;
 import lnrpc.GetInfoResponse;
 import lnrpc.GetTransactionsRequest;
 import lnrpc.LightningGrpc;
@@ -129,20 +131,29 @@ public class GrpcService extends GrpcBase {
         return getTransactionsCache.get("");
     }
 
+    public Optional<ForwardingHistoryResponse> getForwardingHistory(int offset, int limit) {
+        ForwardingHistoryRequest request = ForwardingHistoryRequest.newBuilder()
+                .setStartTime(0)
+                .setIndexOffset(offset)
+                .setNumMaxEvents(limit)
+                .build();
+        return get("forwardingHistory", () -> lightningStub.forwardingHistory(request));
+    }
+
     private List<Peer> listPeersWithoutCache() {
         return get(
                 "listPeers", () -> lightningStub.listPeers(ListPeersRequest.getDefaultInstance()).getPeersList()
         ).orElse(List.of());
     }
 
-    private Optional<PendingChannelsResponse> getPendingChannels() {
-        return pendingChannelsCache.get("");
-    }
-
     private Optional<List<Transaction>> getTransactionsWithoutCache() {
         return get("getTransactions",
                 () -> lightningStub.getTransactions(GetTransactionsRequest.getDefaultInstance()).getTransactionsList()
         );
+    }
+
+    private Optional<PendingChannelsResponse> getPendingChannels() {
+        return pendingChannelsCache.get("");
     }
 
     private Optional<PendingChannelsResponse> getPendingChannelsWithoutCache() {
