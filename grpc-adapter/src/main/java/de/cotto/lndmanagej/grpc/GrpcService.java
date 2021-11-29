@@ -76,18 +76,12 @@ public class GrpcService extends GrpcBase {
         stubCreator.shutdown();
     }
 
-    Optional<GetInfoResponse> getInfo() {
+    public Optional<GetInfoResponse> getInfo() {
         return get("getInfo", () -> lightningStub.getInfo(lnrpc.GetInfoRequest.getDefaultInstance()));
     }
 
     public List<Peer> listPeers() {
         return listPeersCache.get("");
-    }
-
-    private List<Peer> listPeersWithoutCache() {
-        return get(
-                "listPeers", () -> lightningStub.listPeers(ListPeersRequest.getDefaultInstance()).getPeersList()
-        ).orElse(List.of());
     }
 
     public Optional<NodeInfo> getNodeInfo(Pubkey pubkey) {
@@ -113,10 +107,6 @@ public class GrpcService extends GrpcBase {
         return channelsCache.get("");
     }
 
-    private Optional<PendingChannelsResponse> getPendingChannels() {
-        return pendingChannelsCache.get("");
-    }
-
     public List<ChannelCloseSummary> getClosedChannels() {
         return get("closedChannels",
                 () -> lightningStub.closedChannels(ClosedChannelsRequest.getDefaultInstance()).getChannelsList()
@@ -137,6 +127,16 @@ public class GrpcService extends GrpcBase {
 
     public Optional<List<Transaction>> getTransactions() {
         return getTransactionsCache.get("");
+    }
+
+    private List<Peer> listPeersWithoutCache() {
+        return get(
+                "listPeers", () -> lightningStub.listPeers(ListPeersRequest.getDefaultInstance()).getPeersList()
+        ).orElse(List.of());
+    }
+
+    private Optional<PendingChannelsResponse> getPendingChannels() {
+        return pendingChannelsCache.get("");
     }
 
     private Optional<List<Transaction>> getTransactionsWithoutCache() {
