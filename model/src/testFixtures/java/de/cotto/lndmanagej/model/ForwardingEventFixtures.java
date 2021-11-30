@@ -13,15 +13,15 @@ public class ForwardingEventFixtures {
             Coins.ofMilliSatoshis(900),
             CHANNEL_ID,
             CHANNEL_ID_2,
-            LocalDateTime.of(2021, 11, 29, 18, 30, 0)
+            LocalDateTime.of(2021, 11, 29, 18, 30, 0, 500_000_000)
     );
 
     public static final ForwardingEvent FORWARDING_EVENT_2 = new ForwardingEvent(
             2,
-            Coins.ofMilliSatoshis(2_000),
+            Coins.ofMilliSatoshis(2_001),
             Coins.ofMilliSatoshis(2_000),
             CHANNEL_ID_3,
             CHANNEL_ID,
-            LocalDateTime.of(2021, 11, 29, 18, 30, 1)
+            LocalDateTime.of(2021, 11, 29, 18, 30, 1, 500_000_000)
     );
 }

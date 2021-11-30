@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.statistics.persistence;
 
+import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ForwardingEvent;
 import de.cotto.lndmanagej.statistics.ForwardingEventsDao;
 import org.springframework.stereotype.Component;
@@ -30,5 +31,12 @@ public class ForwardingEventsDaoImpl implements ForwardingEventsDao {
     @Override
     public int getOffset() {
         return repository.findMaxIndex().orElse(0);
+    }
+
+    @Override
+    public List<ForwardingEvent> getEventsWithOutgoingChannel(ChannelId channelId) {
+        return repository.findByChannelOutgoing(channelId.getShortChannelId()).stream()
+                .map(ForwardingEventJpaDto::toModel)
+                .toList();
     }
 }

@@ -36,9 +36,14 @@ class ForwardingEventTest {
     }
 
     @Test
+    void fees() {
+        assertThat(FORWARDING_EVENT.fees()).isEqualTo(Coins.ofMilliSatoshis(100));
+    }
+
+    @Test
     void timestamp() {
         assertThat(FORWARDING_EVENT.timestamp()).isEqualTo(
-                LocalDateTime.of(2021, 11, 29, 18, 30, 0)
+                LocalDateTime.of(2021, 11, 29, 18, 30, 0, 500_000_000)
         );
     }
 }

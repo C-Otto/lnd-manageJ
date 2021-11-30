@@ -30,4 +30,22 @@ class ForwardingEventsRepositoryIT {
         repository.save(ForwardingEventJpaDto.createFromForwardingEvent(FORWARDING_EVENT));
         assertThat(repository.findMaxIndex()).contains(2);
     }
+
+    @Test
+    void findByChannelIncoming() {
+        repository.save(ForwardingEventJpaDto.createFromForwardingEvent(FORWARDING_EVENT_2));
+        repository.save(ForwardingEventJpaDto.createFromForwardingEvent(FORWARDING_EVENT));
+        assertThat(repository.findByChannelIncoming(FORWARDING_EVENT.channelIn().getShortChannelId()))
+                .map(ForwardingEventJpaDto::toModel)
+                .containsExactly(FORWARDING_EVENT);
+    }
+
+    @Test
+    void findByChannelOutgoing() {
+        repository.save(ForwardingEventJpaDto.createFromForwardingEvent(FORWARDING_EVENT_2));
+        repository.save(ForwardingEventJpaDto.createFromForwardingEvent(FORWARDING_EVENT));
+        assertThat(repository.findByChannelOutgoing(FORWARDING_EVENT.channelOut().getShortChannelId()))
+                .map(ForwardingEventJpaDto::toModel)
+                .containsExactly(FORWARDING_EVENT);
+    }
 }

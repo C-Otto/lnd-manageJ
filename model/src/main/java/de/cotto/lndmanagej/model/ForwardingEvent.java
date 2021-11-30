@@ -10,4 +10,7 @@ public record ForwardingEvent(
         ChannelId channelOut,
         LocalDateTime timestamp
 ) {
+    public Coins fees() {
+        return amountIn.subtract(amountOut);
+    }
 }
