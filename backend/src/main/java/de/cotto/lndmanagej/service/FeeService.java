@@ -3,13 +3,13 @@ package de.cotto.lndmanagej.service;
 import com.codahale.metrics.annotation.Timed;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
+import de.cotto.lndmanagej.forwardinghistory.ForwardingEventsDao;
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.ForwardingEvent;
 import de.cotto.lndmanagej.model.Pubkey;
-import de.cotto.lndmanagej.statistics.ForwardingEventsDao;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;

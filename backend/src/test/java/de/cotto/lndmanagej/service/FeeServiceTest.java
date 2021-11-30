@@ -1,8 +1,8 @@
 package de.cotto.lndmanagej.service;
 
+import de.cotto.lndmanagej.forwardinghistory.ForwardingEventsDao;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FeeReport;
-import de.cotto.lndmanagej.statistics.ForwardingEventsDao;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

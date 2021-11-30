@@ -1,8 +1,8 @@
-package de.cotto.lndmanagej.statistics.persistence;
+package de.cotto.lndmanagej.forwardinghistory.persistence;
 
+import de.cotto.lndmanagej.forwardinghistory.ForwardingEventsDao;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ForwardingEvent;
-import de.cotto.lndmanagej.statistics.ForwardingEventsDao;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;

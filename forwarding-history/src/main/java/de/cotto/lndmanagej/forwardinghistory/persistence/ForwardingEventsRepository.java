@@ -1,4 +1,4 @@
-package de.cotto.lndmanagej.statistics.persistence;
+package de.cotto.lndmanagej.forwardinghistory.persistence;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

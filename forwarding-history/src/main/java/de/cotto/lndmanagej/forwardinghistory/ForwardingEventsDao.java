@@ -1,4 +1,4 @@
-package de.cotto.lndmanagej.statistics;
+package de.cotto.lndmanagej.forwardinghistory;
 
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ForwardingEvent;

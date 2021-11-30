@@ -1,4 +1,4 @@
-package de.cotto.lndmanagej.statistics.persistence;
+package de.cotto.lndmanagej.forwardinghistory.persistence;
 
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;

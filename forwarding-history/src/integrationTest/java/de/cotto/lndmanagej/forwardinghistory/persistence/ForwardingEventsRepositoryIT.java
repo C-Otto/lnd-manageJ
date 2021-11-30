@@ -1,4 +1,4 @@
-package de.cotto.lndmanagej.statistics.persistence;
+package de.cotto.lndmanagej.forwardinghistory.persistence;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package de.cotto.lndmanagej.statistics;
+package de.cotto.lndmanagej.forwardinghistory;
 
 import de.cotto.lndmanagej.grpc.GrpcForwardingHistory;
 import de.cotto.lndmanagej.model.ForwardingEvent;
