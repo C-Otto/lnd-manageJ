@@ -37,7 +37,7 @@ public class Metrics {
         meters.computeIfAbsent(name, registry::meter).mark();
     }
 
-    public Timer timer(String name) {
-        return timers.computeIfAbsent(name, registry::timer);
+    public Timer timer(Class<?> callingClass, String name) {
+        return timers.computeIfAbsent(MetricRegistry.name(callingClass, name), registry::timer);
     }
 }

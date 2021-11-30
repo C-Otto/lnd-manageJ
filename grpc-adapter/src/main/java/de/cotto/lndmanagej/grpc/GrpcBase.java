@@ -35,7 +35,7 @@ public class GrpcBase {
 
     <X> Optional<X> get(String name, Supplier<X> supplier) {
         try {
-            return Optional.ofNullable(metrics.timer(name).timeSupplier(supplier));
+            return Optional.ofNullable(metrics.timer(getClass(), name).timeSupplier(supplier));
         } catch (StatusRuntimeException exception) {
             logger.warn("Exception while connecting to lnd: ", exception);
             return Optional.empty();

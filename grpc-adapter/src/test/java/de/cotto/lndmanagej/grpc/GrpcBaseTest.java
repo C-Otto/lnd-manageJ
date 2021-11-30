@@ -33,7 +33,7 @@ class GrpcBaseTest {
     void setUp() {
         Timer timer = mock(Timer.class);
         lenient().when(timer.timeSupplier(any())).then(invocation -> ((Supplier<?>) invocation.getArgument(0)).get());
-        lenient().when(metrics.timer(anyString())).thenReturn(timer);
+        lenient().when(metrics.timer(any(), anyString())).thenReturn(timer);
     }
 
     @Test
@@ -44,7 +44,7 @@ class GrpcBaseTest {
     @Test
     void get_uses_timer() {
         grpcBase.get("name", () -> "x");
-        verify(metrics).timer("name");
+        verify(metrics).timer(grpcBase.getClass(), "name");
     }
 
     @Test

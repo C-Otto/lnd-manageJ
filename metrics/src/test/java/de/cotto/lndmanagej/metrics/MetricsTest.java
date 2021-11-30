@@ -17,8 +17,8 @@ class MetricsTest {
     @Test
     void timer() {
         String name = "timer.name";
-        metrics.timer(name).time(this::sleep);
-        assertThat(metrics.timer(name).getCount()).isEqualTo(1);
+        metrics.timer(String.class, name).time(this::sleep);
+        assertThat(metrics.timer(String.class, name).getCount()).isEqualTo(1);
     }
 
     @Test
