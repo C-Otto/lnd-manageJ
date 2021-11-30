@@ -32,14 +32,14 @@ public class OnChainCostsController {
     @Timed
     @GetMapping("/channel/{channelId}/open-costs")
     public long getOpenCostsForChannel(@PathVariable ChannelId channelId) throws CostException {
-        return onChainCostService.getOpenCosts(channelId).map(Coins::satoshis)
+        return onChainCostService.getOpenCostsForChannelId(channelId).map(Coins::satoshis)
                 .orElseThrow(() -> new CostException("Unable to get open costs for channel with ID " + channelId));
     }
 
     @Timed
     @GetMapping("/channel/{channelId}/close-costs")
     public long getCloseCostsForChannel(@PathVariable ChannelId channelId) throws CostException {
-        return onChainCostService.getCloseCosts(channelId).map(Coins::satoshis)
+        return onChainCostService.getCloseCostsForChannelId(channelId).map(Coins::satoshis)
                 .orElseThrow(() -> new CostException("Unable to get close costs for channel with ID " + channelId));
     }
 

@@ -76,11 +76,11 @@ class NodeControllerIT {
         when(nodeService.getNode(PUBKEY_2)).thenReturn(new Node(PUBKEY_2, ALIAS_2, 0, true));
         when(channelService.getOpenChannelsWith(PUBKEY_2)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2));
         when(channelService.getClosedChannelsWith(PUBKEY_2)).thenReturn(Set.of(CLOSED_CHANNEL, CLOSED_CHANNEL_3));
-        when(channelService.getWaitingCloseChannelsFor(PUBKEY_2)).thenReturn(Set.of(WAITING_CLOSE_CHANNEL));
-        when(channelService.getForceClosingChannelsFor(PUBKEY_2)).thenReturn(Set.of(FORCE_CLOSING_CHANNEL_2));
+        when(channelService.getWaitingCloseChannelsWith(PUBKEY_2)).thenReturn(Set.of(WAITING_CLOSE_CHANNEL));
+        when(channelService.getForceClosingChannelsWith(PUBKEY_2)).thenReturn(Set.of(FORCE_CLOSING_CHANNEL_2));
         when(onChainCostService.getOpenCostsWith(PUBKEY_2)).thenReturn(Coins.ofSatoshis(123));
         when(onChainCostService.getCloseCostsWith(PUBKEY_2)).thenReturn(Coins.ofSatoshis(456));
-        when(balanceService.getBalanceInformation(PUBKEY_2)).thenReturn(BALANCE_INFORMATION);
+        when(balanceService.getBalanceInformationForPeer(PUBKEY_2)).thenReturn(BALANCE_INFORMATION);
         when(feeService.getFeeReportForPeer(PUBKEY_2)).thenReturn(FEE_REPORT);
         List<String> channelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_2.toString());
         List<String> closedChannelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_3.toString());
@@ -126,7 +126,7 @@ class NodeControllerIT {
 
     @Test
     void getBalance() throws Exception {
-        when(balanceService.getBalanceInformation(PUBKEY_2)).thenReturn(BALANCE_INFORMATION);
+        when(balanceService.getBalanceInformationForPeer(PUBKEY_2)).thenReturn(BALANCE_INFORMATION);
         mockMvc.perform(get(NODE_PREFIX + "/balance"))
                 .andExpect(jsonPath("$.localBalance", is("1000")))
                 .andExpect(jsonPath("$.localReserve", is("100")))

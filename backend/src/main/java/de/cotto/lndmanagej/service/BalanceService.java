@@ -23,7 +23,7 @@ public class BalanceService {
     }
 
     @Timed
-    public Coins getAvailableLocalBalance(Pubkey peer) {
+    public Coins getAvailableLocalBalanceForPeer(Pubkey peer) {
         return channelService.getOpenChannelsWith(peer).stream()
                 .map(LocalOpenChannel::getId)
                 .map(this::getAvailableLocalBalance)
@@ -38,7 +38,7 @@ public class BalanceService {
     }
 
     @Timed
-    public Coins getAvailableRemoteBalance(Pubkey peer) {
+    public Coins getAvailableRemoteBalanceForPeer(Pubkey peer) {
         return channelService.getOpenChannelsWith(peer).stream()
                 .map(LocalOpenChannel::getId)
                 .map(this::getAvailableRemoteBalance)
@@ -53,7 +53,7 @@ public class BalanceService {
     }
 
     @Timed
-    public BalanceInformation getBalanceInformation(Pubkey pubkey) {
+    public BalanceInformation getBalanceInformationForPeer(Pubkey pubkey) {
         return channelService.getOpenChannelsWith(pubkey).parallelStream()
                 .map(Channel::getId)
                 .map(this::getBalanceInformation)

@@ -75,8 +75,8 @@ class ChannelControllerTest {
 
     @BeforeEach
     void setUp() {
-        lenient().when(onChainCostService.getOpenCosts(CHANNEL_ID)).thenReturn(Optional.of(OPEN_COSTS));
-        lenient().when(onChainCostService.getCloseCosts(CHANNEL_ID)).thenReturn(Optional.of(CLOSE_COSTS));
+        lenient().when(onChainCostService.getOpenCostsForChannelId(CHANNEL_ID)).thenReturn(Optional.of(OPEN_COSTS));
+        lenient().when(onChainCostService.getCloseCostsForChannelId(CHANNEL_ID)).thenReturn(Optional.of(CLOSE_COSTS));
         lenient().when(policyService.getPolicies(CHANNEL_ID)).thenReturn(POLICIES);
         lenient().when(feeService.getFeeReportForChannel(CHANNEL_ID)).thenReturn(FEE_REPORT);
     }

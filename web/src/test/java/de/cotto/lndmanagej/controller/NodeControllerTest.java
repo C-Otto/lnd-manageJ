@@ -78,7 +78,7 @@ class NodeControllerTest {
     void getNodeDetails_no_channels() {
         when(onChainCostService.getOpenCostsWith(any())).thenReturn(Coins.NONE);
         when(onChainCostService.getCloseCostsWith(any())).thenReturn(Coins.NONE);
-        when(balanceService.getBalanceInformation(any(Pubkey.class))).thenReturn(BalanceInformation.EMPTY);
+        when(balanceService.getBalanceInformationForPeer(any(Pubkey.class))).thenReturn(BalanceInformation.EMPTY);
         when(feeService.getFeeReportForPeer(any())).thenReturn(new FeeReport(Coins.NONE, Coins.NONE));
         NodeDetailsDto expectedDetails = new NodeDetailsDto(
                 PUBKEY_2,
@@ -102,17 +102,17 @@ class NodeControllerTest {
         when(nodeService.getNode(PUBKEY_2)).thenReturn(new Node(PUBKEY_2, ALIAS_2, 0, false));
         when(channelService.getOpenChannelsWith(PUBKEY_2)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL_3, LOCAL_OPEN_CHANNEL));
         when(channelService.getClosedChannelsWith(PUBKEY_2)).thenReturn(Set.of(CLOSED_CHANNEL_2, CLOSED_CHANNEL_3));
-        when(channelService.getWaitingCloseChannelsFor(PUBKEY_2)).thenReturn(
+        when(channelService.getWaitingCloseChannelsWith(PUBKEY_2)).thenReturn(
                 Set.of(WAITING_CLOSE_CHANNEL, WAITING_CLOSE_CHANNEL_2)
         );
-        when(channelService.getForceClosingChannelsFor(PUBKEY_2)).thenReturn(
+        when(channelService.getForceClosingChannelsWith(PUBKEY_2)).thenReturn(
                 Set.of(FORCE_CLOSING_CHANNEL, FORCE_CLOSING_CHANNEL_2, FORCE_CLOSING_CHANNEL_3)
         );
         Coins openCosts = Coins.ofSatoshis(123);
         Coins closeCosts = Coins.ofSatoshis(456);
         when(onChainCostService.getOpenCostsWith(PUBKEY_2)).thenReturn(openCosts);
         when(onChainCostService.getCloseCostsWith(PUBKEY_2)).thenReturn(closeCosts);
-        when(balanceService.getBalanceInformation(PUBKEY_2)).thenReturn(BALANCE_INFORMATION);
+        when(balanceService.getBalanceInformationForPeer(PUBKEY_2)).thenReturn(BALANCE_INFORMATION);
         when(feeService.getFeeReportForPeer(PUBKEY_2)).thenReturn(FEE_REPORT);
         NodeDetailsDto expectedDetails = new NodeDetailsDto(
                 PUBKEY_2,
@@ -160,7 +160,7 @@ class NodeControllerTest {
 
     @Test
     void getBalance() {
-        when(balanceService.getBalanceInformation(PUBKEY)).thenReturn(BALANCE_INFORMATION);
+        when(balanceService.getBalanceInformationForPeer(PUBKEY)).thenReturn(BALANCE_INFORMATION);
         assertThat(nodeController.getBalance(PUBKEY)).isEqualTo(BalanceInformationDto.createFrom(BALANCE_INFORMATION));
     }
 

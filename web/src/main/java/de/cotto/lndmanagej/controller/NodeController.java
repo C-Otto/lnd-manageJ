@@ -64,14 +64,14 @@ public class NodeController {
         Node node = nodeService.getNode(pubkey);
         Coins openCosts = onChainCostService.getOpenCostsWith(pubkey);
         Coins closeCosts = onChainCostService.getCloseCostsWith(pubkey);
-        BalanceInformation balanceInformation = balanceService.getBalanceInformation(pubkey);
+        BalanceInformation balanceInformation = balanceService.getBalanceInformationForPeer(pubkey);
         return new NodeDetailsDto(
                 pubkey,
                 node.alias(),
                 toSortedList(channelService.getOpenChannelsWith(pubkey)),
                 toSortedList(channelService.getClosedChannelsWith(pubkey)),
-                toSortedList(channelService.getWaitingCloseChannelsFor(pubkey)),
-                toSortedList(channelService.getForceClosingChannelsFor(pubkey)),
+                toSortedList(channelService.getWaitingCloseChannelsWith(pubkey)),
+                toSortedList(channelService.getForceClosingChannelsWith(pubkey)),
                 new OnChainCostsDto(openCosts, closeCosts),
                 BalanceInformationDto.createFrom(balanceInformation),
                 node.online(),
@@ -96,7 +96,7 @@ public class NodeController {
     @Timed
     @GetMapping("/balance")
     public BalanceInformationDto getBalance(@PathVariable Pubkey pubkey) {
-        return BalanceInformationDto.createFrom(balanceService.getBalanceInformation(pubkey));
+        return BalanceInformationDto.createFrom(balanceService.getBalanceInformationForPeer(pubkey));
     }
 
     @Timed

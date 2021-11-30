@@ -76,93 +76,93 @@ class OnChainCostServiceTest {
 
         @Test
         void getOpenCosts_by_channel_id_not_resolved() {
-            assertThat(onChainCostService.getOpenCosts(CHANNEL_ID)).isEmpty();
+            assertThat(onChainCostService.getOpenCostsForChannelId(CHANNEL_ID)).isEmpty();
         }
 
         @Test
         void getOpenCosts_by_channel_id_resolved() {
             mockOpenTransaction(LOCAL_OPEN_CHANNEL);
             when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
-            assertThat(onChainCostService.getOpenCosts(CHANNEL_ID)).contains(OPEN_COSTS);
+            assertThat(onChainCostService.getOpenCostsForChannelId(CHANNEL_ID)).contains(OPEN_COSTS);
         }
 
         @Test
         void getOpenCosts_for_local_open_channel_initiator_local_transaction_not_found() {
-            assertThat(onChainCostService.getOpenCosts(LOCAL_OPEN_CHANNEL)).isEmpty();
+            assertThat(onChainCostService.getOpenCostsForChannel(LOCAL_OPEN_CHANNEL)).isEmpty();
         }
 
         @Test
         void getOpenCosts_for_local_open_channel_initiator_local() {
             mockOpenTransaction(LOCAL_OPEN_CHANNEL);
-            assertThat(onChainCostService.getOpenCosts(LOCAL_OPEN_CHANNEL))
+            assertThat(onChainCostService.getOpenCostsForChannel(LOCAL_OPEN_CHANNEL))
                     .contains(OPEN_COSTS);
         }
 
         @Test
         void getOpenCosts_for_local_open_channel_initiator_remote() {
             mockOpenTransaction(LOCAL_OPEN_CHANNEL_2);
-            assertThat(onChainCostService.getOpenCosts(LOCAL_OPEN_CHANNEL_2))
+            assertThat(onChainCostService.getOpenCostsForChannel(LOCAL_OPEN_CHANNEL_2))
                     .contains(Coins.NONE);
         }
 
         @Test
         void getOpenCosts_for_coop_closed_channel_initiator_local() {
             mockOpenTransaction(CLOSED_CHANNEL);
-            assertThat(onChainCostService.getOpenCosts(CLOSED_CHANNEL))
+            assertThat(onChainCostService.getOpenCostsForChannel(CLOSED_CHANNEL))
                     .contains(OPEN_COSTS);
         }
 
         @Test
         void getOpenCosts_for_coop_closed_channel_initiator_unknown() {
-            assertThat(onChainCostService.getOpenCosts(CLOSED_CHANNEL_2)).isEmpty();
+            assertThat(onChainCostService.getOpenCostsForChannel(CLOSED_CHANNEL_2)).isEmpty();
         }
 
         @Test
         void getOpenCosts_for_coop_closed_channel_initiator_remote() {
             mockOpenTransaction(CLOSED_CHANNEL_3);
-            assertThat(onChainCostService.getOpenCosts(CLOSED_CHANNEL_3))
+            assertThat(onChainCostService.getOpenCostsForChannel(CLOSED_CHANNEL_3))
                     .contains(Coins.NONE);
         }
 
         @Test
         void getOpenCosts_for_force_closed_channel_initiator_local() {
             mockOpenTransaction(FORCE_CLOSED_CHANNEL_OPEN_LOCAL);
-            assertThat(onChainCostService.getOpenCosts(FORCE_CLOSED_CHANNEL_OPEN_LOCAL))
+            assertThat(onChainCostService.getOpenCostsForChannel(FORCE_CLOSED_CHANNEL_OPEN_LOCAL))
                     .contains(OPEN_COSTS);
         }
 
         @Test
         void getOpenCosts_for_force_closed_channel_initiator_remote() {
             mockOpenTransaction(FORCE_CLOSED_CHANNEL_OPEN_REMOTE);
-            assertThat(onChainCostService.getOpenCosts(FORCE_CLOSED_CHANNEL_OPEN_REMOTE))
+            assertThat(onChainCostService.getOpenCostsForChannel(FORCE_CLOSED_CHANNEL_OPEN_REMOTE))
                     .contains(Coins.NONE);
         }
 
         @Test
         void getOpenCosts_for_waiting_close_channel_initiator_local() {
             mockOpenTransaction(WAITING_CLOSE_CHANNEL);
-            assertThat(onChainCostService.getOpenCosts(WAITING_CLOSE_CHANNEL))
+            assertThat(onChainCostService.getOpenCostsForChannel(WAITING_CLOSE_CHANNEL))
                     .contains(OPEN_COSTS);
         }
 
         @Test
         void getOpenCosts_for_waiting_close_channel_initiator_remote() {
             mockOpenTransaction(WAITING_CLOSE_CHANNEL_2);
-            assertThat(onChainCostService.getOpenCosts(WAITING_CLOSE_CHANNEL_2))
+            assertThat(onChainCostService.getOpenCostsForChannel(WAITING_CLOSE_CHANNEL_2))
                     .contains(Coins.NONE);
         }
 
         @Test
         void getOpenCosts_for_force_closing_channel_initiator_local() {
             mockOpenTransaction(FORCE_CLOSING_CHANNEL);
-            assertThat(onChainCostService.getOpenCosts(FORCE_CLOSING_CHANNEL))
+            assertThat(onChainCostService.getOpenCostsForChannel(FORCE_CLOSING_CHANNEL))
                     .contains(OPEN_COSTS);
         }
 
         @Test
         void getOpenCosts_for_force_closing_channel_initiator_remote() {
             mockOpenTransaction(FORCE_CLOSING_CHANNEL_2);
-            assertThat(onChainCostService.getOpenCosts(FORCE_CLOSING_CHANNEL_2))
+            assertThat(onChainCostService.getOpenCostsForChannel(FORCE_CLOSING_CHANNEL_2))
                     .contains(Coins.NONE);
         }
 
@@ -171,7 +171,7 @@ class OnChainCostServiceTest {
             assertThat(OPEN_COSTS.satoshis()).isEqualTo(124);
             mockOpenTransaction(LOCAL_OPEN_CHANNEL);
             when(channelService.getAllLocalChannels()).thenReturn(Stream.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2));
-            assertThat(onChainCostService.getOpenCosts(LOCAL_OPEN_CHANNEL))
+            assertThat(onChainCostService.getOpenCostsForChannel(LOCAL_OPEN_CHANNEL))
                     .contains(Coins.ofSatoshis(62));
         }
 
@@ -182,7 +182,7 @@ class OnChainCostServiceTest {
             when(channelService.getAllLocalChannels()).thenReturn(
                     Stream.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2, CLOSED_CHANNEL, CLOSED_CHANNEL_3)
             );
-            assertThat(onChainCostService.getOpenCosts(LOCAL_OPEN_CHANNEL))
+            assertThat(onChainCostService.getOpenCostsForChannel(LOCAL_OPEN_CHANNEL))
                     .contains(Coins.ofSatoshis(41));
         }
 
@@ -215,57 +215,57 @@ class OnChainCostServiceTest {
 
         @Test
         void getCloseCosts_by_channel_id_not_resolved() {
-            assertThat(onChainCostService.getCloseCosts(CHANNEL_ID)).isEmpty();
+            assertThat(onChainCostService.getCloseCostsForChannelId(CHANNEL_ID)).isEmpty();
         }
 
         @Test
         void getCloseCosts_by_channel_id_not_closed() {
             when(channelService.isClosed(CHANNEL_ID)).thenReturn(false);
-            assertThat(onChainCostService.getCloseCosts(CHANNEL_ID)).contains(Coins.NONE);
+            assertThat(onChainCostService.getCloseCostsForChannelId(CHANNEL_ID)).contains(Coins.NONE);
         }
 
         @Test
         void getCloseCosts_by_channel_id_resolved() {
             mockCloseTransaction(CLOSED_CHANNEL);
             when(channelService.getClosedChannel(CHANNEL_ID)).thenReturn(Optional.of(CLOSED_CHANNEL));
-            assertThat(onChainCostService.getCloseCosts(CHANNEL_ID)).contains(CLOSE_COSTS);
+            assertThat(onChainCostService.getCloseCostsForChannelId(CHANNEL_ID)).contains(CLOSE_COSTS);
         }
 
         @Test
         void getOpenCosts_for_coop_closed_channel_initiator_local_transaction_not_found() {
-            assertThat(onChainCostService.getCloseCosts(CLOSED_CHANNEL)).isEmpty();
+            assertThat(onChainCostService.getCloseCostsForChannel(CLOSED_CHANNEL)).isEmpty();
         }
 
         @Test
         void getOpenCosts_for_coop_closed_channel_initiator_local() {
             mockCloseTransaction(CLOSED_CHANNEL);
-            assertThat(onChainCostService.getCloseCosts(CLOSED_CHANNEL))
+            assertThat(onChainCostService.getCloseCostsForChannel(CLOSED_CHANNEL))
                     .contains(CLOSE_COSTS);
         }
 
         @Test
         void getOpenCosts_for_coop_closed_channel_initiator_unknown() {
-            assertThat(onChainCostService.getCloseCosts(CLOSED_CHANNEL_2)).isEmpty();
+            assertThat(onChainCostService.getCloseCostsForChannel(CLOSED_CHANNEL_2)).isEmpty();
         }
 
         @Test
         void getOpenCosts_for_coop_closed_channel_initiator_remote() {
             mockCloseTransaction(CLOSED_CHANNEL_3);
-            assertThat(onChainCostService.getCloseCosts(CLOSED_CHANNEL_3))
+            assertThat(onChainCostService.getCloseCostsForChannel(CLOSED_CHANNEL_3))
                     .contains(Coins.NONE);
         }
 
         @Test
         void getOpenCosts_for_force_closed_channel_initiator_local() {
             mockCloseTransaction(FORCE_CLOSED_CHANNEL_OPEN_LOCAL);
-            assertThat(onChainCostService.getCloseCosts(FORCE_CLOSED_CHANNEL_OPEN_LOCAL))
+            assertThat(onChainCostService.getCloseCostsForChannel(FORCE_CLOSED_CHANNEL_OPEN_LOCAL))
                     .contains(CLOSE_COSTS);
         }
 
         @Test
         void getOpenCosts_for_force_closed_channel_initiator_remote() {
             mockCloseTransaction(FORCE_CLOSED_CHANNEL_OPEN_REMOTE);
-            assertThat(onChainCostService.getCloseCosts(FORCE_CLOSED_CHANNEL_OPEN_REMOTE))
+            assertThat(onChainCostService.getCloseCostsForChannel(FORCE_CLOSED_CHANNEL_OPEN_REMOTE))
                     .contains(Coins.NONE);
         }
 

@@ -139,8 +139,8 @@ public class ChannelController {
     }
 
     private OnChainCostsDto getOnChainCosts(ChannelId channelId) {
-        Coins openCosts = onChainCostService.getOpenCosts(channelId).orElse(Coins.NONE);
-        Coins closeCosts = onChainCostService.getCloseCosts(channelId).orElse(Coins.NONE);
+        Coins openCosts = onChainCostService.getOpenCostsForChannelId(channelId).orElse(Coins.NONE);
+        Coins closeCosts = onChainCostService.getCloseCostsForChannelId(channelId).orElse(Coins.NONE);
         return new OnChainCostsDto(openCosts, closeCosts);
     }
 

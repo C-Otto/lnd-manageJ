@@ -44,7 +44,7 @@ class BalanceServiceTest {
         when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2));
         when(grpcChannels.getChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_MORE_BALANCE));
         when(grpcChannels.getChannel(CHANNEL_ID_2)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_MORE_BALANCE_2));
-        assertThat(balanceService.getBalanceInformation(PUBKEY)).isEqualTo(expected);
+        assertThat(balanceService.getBalanceInformationForPeer(PUBKEY)).isEqualTo(expected);
     }
 
     @Test
@@ -85,23 +85,23 @@ class BalanceServiceTest {
     @Test
     void getAvailableLocalBalance_peer() {
         mockChannels();
-        assertThat(balanceService.getAvailableLocalBalance(PUBKEY)).isEqualTo(Coins.ofSatoshis(1_800));
+        assertThat(balanceService.getAvailableLocalBalanceForPeer(PUBKEY)).isEqualTo(Coins.ofSatoshis(1_800));
     }
 
     @Test
     void getAvailableLocalBalance_peer_empty() {
-        assertThat(balanceService.getAvailableLocalBalance(PUBKEY)).isEqualTo(Coins.NONE);
+        assertThat(balanceService.getAvailableLocalBalanceForPeer(PUBKEY)).isEqualTo(Coins.NONE);
     }
 
     @Test
     void getAvailableRemoteBalance_peer() {
         mockChannels();
-        assertThat(balanceService.getAvailableRemoteBalance(PUBKEY)).isEqualTo(Coins.ofSatoshis(226));
+        assertThat(balanceService.getAvailableRemoteBalanceForPeer(PUBKEY)).isEqualTo(Coins.ofSatoshis(226));
     }
 
     @Test
     void getAvailableRemoteBalance_peer_empty() {
-        assertThat(balanceService.getAvailableRemoteBalance(PUBKEY)).isEqualTo(Coins.NONE);
+        assertThat(balanceService.getAvailableRemoteBalanceForPeer(PUBKEY)).isEqualTo(Coins.NONE);
     }
 
     private void mockChannels() {

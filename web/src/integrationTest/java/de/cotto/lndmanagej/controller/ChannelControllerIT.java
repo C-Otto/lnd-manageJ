@@ -120,8 +120,8 @@ class ChannelControllerIT {
         when(policyService.getPolicies(CHANNEL_ID)).thenReturn(POLICIES);
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_PRIVATE));
-        when(onChainCostService.getOpenCosts(CHANNEL_ID)).thenReturn(Optional.of(Coins.ofSatoshis(1000)));
-        when(onChainCostService.getCloseCosts(CHANNEL_ID)).thenReturn(Optional.of(Coins.ofSatoshis(2000)));
+        when(onChainCostService.getOpenCostsForChannelId(CHANNEL_ID)).thenReturn(Optional.of(Coins.ofSatoshis(1000)));
+        when(onChainCostService.getCloseCostsForChannelId(CHANNEL_ID)).thenReturn(Optional.of(Coins.ofSatoshis(2000)));
         when(balanceService.getBalanceInformation(CHANNEL_ID)).thenReturn(Optional.of(BALANCE_INFORMATION_2));
         when(feeService.getFeeReportForChannel(CHANNEL_ID)).thenReturn(FEE_REPORT);
         mockMvc.perform(get(DETAILS_PREFIX))

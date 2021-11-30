@@ -119,14 +119,14 @@ public class ChannelService {
     }
 
     @Timed
-    public Set<WaitingCloseChannel> getWaitingCloseChannelsFor(Pubkey peer) {
+    public Set<WaitingCloseChannel> getWaitingCloseChannelsWith(Pubkey peer) {
         return getWaitingCloseChannels().stream()
                 .filter(c -> peer.equals(c.getRemotePubkey()))
                 .collect(Collectors.toSet());
     }
 
     @Timed
-    public Set<ForceClosingChannel> getForceClosingChannelsFor(Pubkey peer) {
+    public Set<ForceClosingChannel> getForceClosingChannelsWith(Pubkey peer) {
         return getForceClosingChannels().stream()
                 .filter(c -> peer.equals(c.getRemotePubkey()))
                 .collect(Collectors.toSet());

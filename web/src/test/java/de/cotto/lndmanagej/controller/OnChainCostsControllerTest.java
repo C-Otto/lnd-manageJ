@@ -38,7 +38,7 @@ class OnChainCostsControllerTest {
     @Test
     void getOpenCostsForChannel() throws CostException {
         Coins coins = Coins.ofSatoshis(123);
-        when(onChainCostService.getOpenCosts(CHANNEL_ID)).thenReturn(Optional.of(coins));
+        when(onChainCostService.getOpenCostsForChannelId(CHANNEL_ID)).thenReturn(Optional.of(coins));
         assertThat(onChainCostsController.getOpenCostsForChannel(CHANNEL_ID)).isEqualTo(coins.satoshis());
     }
 
@@ -52,7 +52,7 @@ class OnChainCostsControllerTest {
     @Test
     void getCloseCostsForChannel() throws CostException {
         Coins coins = Coins.ofSatoshis(123);
-        when(onChainCostService.getCloseCosts(CHANNEL_ID)).thenReturn(Optional.of(coins));
+        when(onChainCostService.getCloseCostsForChannelId(CHANNEL_ID)).thenReturn(Optional.of(coins));
         assertThat(onChainCostsController.getCloseCostsForChannel(CHANNEL_ID)).isEqualTo(coins.satoshis());
     }
 

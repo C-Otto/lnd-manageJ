@@ -46,7 +46,7 @@ class OnChainCostsControllerIT {
 
     @Test
     void open_costs_for_channel() throws Exception {
-        when(onChainCostService.getOpenCosts(CHANNEL_ID)).thenReturn(Optional.of(Coins.ofSatoshis(123)));
+        when(onChainCostService.getOpenCostsForChannelId(CHANNEL_ID)).thenReturn(Optional.of(Coins.ofSatoshis(123)));
         mockMvc.perform(get(CHANNEL_PREFIX + "/open-costs"))
                 .andExpect(content().string("123"));
     }
@@ -60,7 +60,7 @@ class OnChainCostsControllerIT {
 
     @Test
     void close_costs_for_channel() throws Exception {
-        when(onChainCostService.getCloseCosts(CHANNEL_ID)).thenReturn(Optional.of(Coins.ofSatoshis(123)));
+        when(onChainCostService.getCloseCostsForChannelId(CHANNEL_ID)).thenReturn(Optional.of(Coins.ofSatoshis(123)));
         mockMvc.perform(get(CHANNEL_PREFIX + "/close-costs"))
                 .andExpect(content().string("123"));
     }

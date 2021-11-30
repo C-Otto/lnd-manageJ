@@ -27,18 +27,18 @@ public class OnChainCostService {
     @Timed
     public Coins getOpenCostsWith(Pubkey pubkey) {
         return channelService.getAllChannelsWith(pubkey).parallelStream()
-                .map(this::getOpenCosts)
+                .map(this::getOpenCostsForChannel)
                 .flatMap(Optional::stream)
                 .reduce(Coins.NONE, Coins::add);
     }
 
     @Timed
-    public Optional<Coins> getOpenCosts(ChannelId channelId) {
-        return channelService.getLocalChannel(channelId).flatMap(this::getOpenCosts);
+    public Optional<Coins> getOpenCostsForChannelId(ChannelId channelId) {
+        return channelService.getLocalChannel(channelId).flatMap(this::getOpenCostsForChannel);
     }
 
     @Timed
-    public Optional<Coins> getOpenCosts(LocalChannel localChannel) {
+    public Optional<Coins> getOpenCostsForChannel(LocalChannel localChannel) {
         if (localChannel.getOpenInitiator().equals(OpenInitiator.LOCAL)) {
             String openTransactionHash = localChannel.getChannelPoint().getTransactionHash();
             return transactionService.getTransaction(openTransactionHash)
@@ -58,21 +58,21 @@ public class OnChainCostService {
     @Timed
     public Coins getCloseCostsWith(Pubkey pubkey) {
         return channelService.getClosedChannelsWith(pubkey).parallelStream()
-                .map(this::getCloseCosts)
+                .map(this::getCloseCostsForChannel)
                 .flatMap(Optional::stream)
                 .reduce(Coins.NONE, Coins::add);
     }
 
     @Timed
-    public Optional<Coins> getCloseCosts(ChannelId channelId) {
+    public Optional<Coins> getCloseCostsForChannelId(ChannelId channelId) {
         if (channelService.isClosed(channelId)) {
-            return channelService.getClosedChannel(channelId).flatMap(this::getCloseCosts);
+            return channelService.getClosedChannel(channelId).flatMap(this::getCloseCostsForChannel);
         }
         return Optional.of(Coins.NONE);
     }
 
     @Timed
-    public Optional<Coins> getCloseCosts(ClosedChannel closedChannel) {
+    public Optional<Coins> getCloseCostsForChannel(ClosedChannel closedChannel) {
         if (closedChannel.getOpenInitiator().equals(OpenInitiator.LOCAL)) {
             return transactionService.getTransaction(closedChannel.getCloseTransactionHash())
                     .map(Transaction::fees);
