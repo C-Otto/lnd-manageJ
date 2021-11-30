@@ -20,8 +20,10 @@ public class ForwardingHistory {
 
     @Scheduled(fixedDelay = 10, timeUnit = TimeUnit.SECONDS)
     public void refresh() {
-        List<ForwardingEvent> events = grpcForwardingHistory.getForwardingEventsAfter(dao.getOffset())
-                .orElse(List.of());
-        dao.save(events);
+        List<ForwardingEvent> events;
+        do {
+            events = grpcForwardingHistory.getForwardingEventsAfter(dao.getOffset()).orElse(List.of());
+            dao.save(events);
+        } while (events.size() == grpcForwardingHistory.getLimit());
     }
 }

@@ -69,6 +69,11 @@ class GrpcForwardingHistoryTest {
         verify(grpcService).getForwardingHistory(OFFSET, LIMIT);
     }
 
+    @Test
+    void getLimit() {
+        assertThat(grpcForwardingHistory.getLimit()).isEqualTo(LIMIT);
+    }
+
     private lnrpc.ForwardingEvent event(ForwardingEvent forwardingEvent) {
         return lnrpc.ForwardingEvent.newBuilder()
                 .setAmtInMsat(forwardingEvent.amountIn().milliSatoshis())

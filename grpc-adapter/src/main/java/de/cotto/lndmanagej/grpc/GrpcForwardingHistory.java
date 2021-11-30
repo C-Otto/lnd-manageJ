@@ -39,6 +39,10 @@ public class GrpcForwardingHistory {
         return Optional.of(result);
     }
 
+    public int getLimit() {
+        return LIMIT;
+    }
+
     private ForwardingEvent toForwardingEvent(lnrpc.ForwardingEvent lndForwardingEvent, int index) {
         Instant timestamp = Instant.ofEpochMilli(lndForwardingEvent.getTimestampNs() / 1_000);
         return new ForwardingEvent(
@@ -50,5 +54,4 @@ public class GrpcForwardingHistory {
                 LocalDateTime.ofInstant(timestamp, ZoneOffset.UTC)
         );
     }
-
 }

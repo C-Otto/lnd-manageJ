@@ -32,6 +32,7 @@ class ForwardingHistoryTest {
     @BeforeEach
     void setUp() {
         when(dao.getOffset()).thenReturn(OFFSET);
+        when(grpcForwardingHistory.getLimit()).thenReturn(1);
     }
 
     @Test
@@ -44,8 +45,19 @@ class ForwardingHistoryTest {
     void refresh_saves_events() {
         when(grpcForwardingHistory.getForwardingEventsAfter(OFFSET)).thenReturn(
                 Optional.of(List.of(FORWARDING_EVENT, FORWARDING_EVENT_2))
-        );
+        ).thenReturn(Optional.of(List.of()));
         service.refresh();
         verify(dao).save(List.of(FORWARDING_EVENT, FORWARDING_EVENT_2));
+    }
+
+    @Test
+    void refresh_repeats_while_at_limit() {
+        when(grpcForwardingHistory.getForwardingEventsAfter(OFFSET))
+                .thenReturn(Optional.of(List.of(FORWARDING_EVENT)))
+                .thenReturn(Optional.of(List.of(FORWARDING_EVENT_2)))
+                .thenReturn(Optional.of(List.of()));
+        service.refresh();
+        verify(dao).save(List.of(FORWARDING_EVENT));
+        verify(dao).save(List.of(FORWARDING_EVENT_2));
     }
 }
