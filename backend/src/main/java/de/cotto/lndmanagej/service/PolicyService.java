@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.service;
 
+import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.grpc.GrpcFees;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
@@ -15,6 +16,7 @@ public class PolicyService {
         this.grpcFees = grpcFees;
     }
 
+    @Timed
     public Policies getPolicies(ChannelId channelId) {
         return new Policies(
                 new Policy(getOutgoingFeeRate(channelId), getOutgoingBaseFee(channelId), isEnabledLocal(channelId)),

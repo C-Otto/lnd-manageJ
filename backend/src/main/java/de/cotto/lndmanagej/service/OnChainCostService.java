@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.service;
 
+import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ChannelPoint;
 import de.cotto.lndmanagej.model.ClosedChannel;
@@ -23,6 +24,7 @@ public class OnChainCostService {
         this.channelService = channelService;
     }
 
+    @Timed
     public Coins getOpenCostsWith(Pubkey pubkey) {
         return channelService.getAllChannelsWith(pubkey).parallelStream()
                 .map(this::getOpenCosts)
@@ -30,10 +32,12 @@ public class OnChainCostService {
                 .reduce(Coins.NONE, Coins::add);
     }
 
+    @Timed
     public Optional<Coins> getOpenCosts(ChannelId channelId) {
         return channelService.getLocalChannel(channelId).flatMap(this::getOpenCosts);
     }
 
+    @Timed
     public Optional<Coins> getOpenCosts(LocalChannel localChannel) {
         if (localChannel.getOpenInitiator().equals(OpenInitiator.LOCAL)) {
             String openTransactionHash = localChannel.getChannelPoint().getTransactionHash();
@@ -51,6 +55,7 @@ public class OnChainCostService {
         return Optional.empty();
     }
 
+    @Timed
     public Coins getCloseCostsWith(Pubkey pubkey) {
         return channelService.getClosedChannelsWith(pubkey).parallelStream()
                 .map(this::getCloseCosts)
@@ -58,6 +63,7 @@ public class OnChainCostService {
                 .reduce(Coins.NONE, Coins::add);
     }
 
+    @Timed
     public Optional<Coins> getCloseCosts(ChannelId channelId) {
         if (channelService.isClosed(channelId)) {
             return channelService.getClosedChannel(channelId).flatMap(this::getCloseCosts);
@@ -65,6 +71,7 @@ public class OnChainCostService {
         return Optional.of(Coins.NONE);
     }
 
+    @Timed
     public Optional<Coins> getCloseCosts(ClosedChannel closedChannel) {
         if (closedChannel.getOpenInitiator().equals(OpenInitiator.LOCAL)) {
             return transactionService.getTransaction(closedChannel.getCloseTransactionHash())

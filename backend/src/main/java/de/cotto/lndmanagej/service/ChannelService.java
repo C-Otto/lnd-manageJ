@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.service;
 
+import com.codahale.metrics.annotation.Timed;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.grpc.GrpcChannels;
@@ -52,78 +53,93 @@ public class ChannelService {
                 .build(grpcChannels::getWaitingCloseChannels);
     }
 
+    @Timed
     public boolean isClosed(ChannelId channelId) {
         return getClosedChannel(channelId).isPresent();
     }
 
+    @Timed
     public Optional<LocalChannel> getLocalChannel(ChannelId channelId) {
         return getAllLocalChannels()
                 .filter(c -> channelId.equals(c.getId()))
                 .findFirst();
     }
 
+    @Timed
     public Set<LocalOpenChannel> getOpenChannels() {
         return localOpenChannelsCache.get("");
     }
 
+    @Timed
     public Optional<LocalOpenChannel> getOpenChannel(ChannelId channelId) {
         return grpcChannels.getChannel(channelId);
     }
 
+    @Timed
     public Set<ClosedChannel> getClosedChannels() {
         return closedChannelsCache.get("");
     }
 
+    @Timed
     public Optional<ClosedChannel> getClosedChannel(ChannelId channelId) {
         return getClosedChannels().stream()
                 .filter(c -> channelId.equals(c.getId()))
                 .findFirst();
     }
 
+    @Timed
     public Set<ForceClosingChannel> getForceClosingChannels() {
         return forceClosingChannelsCache.get("");
     }
 
+    @Timed
     public Optional<ForceClosingChannel> getForceClosingChannel(ChannelId channelId) {
         return getForceClosingChannels().stream()
                 .filter(c -> channelId.equals(c.getId()))
                 .findFirst();
     }
 
+    @Timed
     public Set<WaitingCloseChannel> getWaitingCloseChannels() {
         return waitingCloseChannelsCache.get("");
     }
 
+    @Timed
     public Set<LocalOpenChannel> getOpenChannelsWith(Pubkey peer) {
         return getOpenChannels().stream()
                 .filter(c -> peer.equals(c.getRemotePubkey()))
                 .collect(Collectors.toSet());
     }
 
+    @Timed
     public Set<ClosedChannel> getClosedChannelsWith(Pubkey peer) {
         return getClosedChannels().stream()
                 .filter(c -> peer.equals(c.getRemotePubkey()))
                 .collect(Collectors.toSet());
     }
 
+    @Timed
     public Set<WaitingCloseChannel> getWaitingCloseChannelsFor(Pubkey peer) {
         return getWaitingCloseChannels().stream()
                 .filter(c -> peer.equals(c.getRemotePubkey()))
                 .collect(Collectors.toSet());
     }
 
+    @Timed
     public Set<ForceClosingChannel> getForceClosingChannelsFor(Pubkey peer) {
         return getForceClosingChannels().stream()
                 .filter(c -> peer.equals(c.getRemotePubkey()))
                 .collect(Collectors.toSet());
     }
 
+    @Timed
     public Set<LocalChannel> getAllChannelsWith(Pubkey peer) {
         return getAllLocalChannels()
                 .filter(c -> peer.equals(c.getRemotePubkey()))
                 .collect(Collectors.toSet());
     }
 
+    @Timed
     public Stream<LocalChannel> getAllLocalChannels() {
         Supplier<Set<LocalOpenChannel>> openChannels = this::getOpenChannels;
         Supplier<Set<ClosedChannel>> closedChannels = this::getClosedChannels;

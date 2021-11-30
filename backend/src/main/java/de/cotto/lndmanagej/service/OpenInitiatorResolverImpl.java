@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.service;
 
+import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.model.OpenInitiator;
 import de.cotto.lndmanagej.model.OpenInitiatorResolver;
 import de.cotto.lndmanagej.transactions.service.TransactionService;
@@ -13,6 +14,7 @@ public class OpenInitiatorResolverImpl implements OpenInitiatorResolver {
         this.transactionService = transactionService;
     }
 
+    @Timed
     @Override
     public OpenInitiator resolveFromOpenTransactionHash(String transactionHash) {
         Boolean knownByLnd = transactionService.isKnownByLnd(transactionHash).orElse(null);

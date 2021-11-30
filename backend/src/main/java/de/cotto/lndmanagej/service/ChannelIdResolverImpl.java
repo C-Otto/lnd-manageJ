@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.service;
 
+import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.ChannelPoint;
@@ -20,6 +21,7 @@ public class ChannelIdResolverImpl implements ChannelIdResolver {
         this.transactionService = transactionService;
     }
 
+    @Timed
     @Override
     public Optional<ChannelId> resolveFromChannelPoint(ChannelPoint channelPoint) {
         String transactionHash = channelPoint.getTransactionHash();

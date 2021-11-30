@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.service;
 
+import com.codahale.metrics.annotation.Timed;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.grpc.GrpcGetInfo;
@@ -28,10 +29,12 @@ public class OwnNodeService {
         this.grpcGetInfo = grpcGetInfo;
     }
 
+    @Timed
     public boolean isSyncedToChain() {
         return Boolean.TRUE.equals(syncedToChainCache.get(""));
     }
 
+    @Timed
     public int getBlockHeight() {
         return Objects.requireNonNull(blockHeightCache.get(""));
     }

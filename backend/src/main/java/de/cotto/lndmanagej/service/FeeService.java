@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.service;
 
+import com.codahale.metrics.annotation.Timed;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.model.Channel;
@@ -33,10 +34,12 @@ public class FeeService {
                 .build(this::getFeeReportForChannelWithoutCache);
     }
 
+    @Timed
     public FeeReport getFeeReportForPeer(Pubkey pubkey) {
         return new FeeReport(getEarnedFeesForPeer(pubkey), getSourcedFeesForPeer(pubkey));
     }
 
+    @Timed
     public FeeReport getFeeReportForChannel(ChannelId channelId) {
         if (channelService.isClosed(channelId)) {
             return cacheForClosedChannels.get(channelId);

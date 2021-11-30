@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.service;
 
+import com.codahale.metrics.annotation.Timed;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.grpc.GrpcNodeInfo;
@@ -31,10 +32,12 @@ public class NodeService {
         this.grpcNodeInfo = grpcNodeInfo;
     }
 
+    @Timed
     public String getAlias(Pubkey pubkey) {
         return aliasCache.get(pubkey);
     }
 
+    @Timed
     public Node getNode(Pubkey pubkey) {
         return nodeCache.get(pubkey);
     }

@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.service;
 
+import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.grpc.GrpcChannels;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Channel;
@@ -21,6 +22,7 @@ public class BalanceService {
         this.channelService = channelService;
     }
 
+    @Timed
     public Coins getAvailableLocalBalance(Pubkey peer) {
         return channelService.getOpenChannelsWith(peer).stream()
                 .map(LocalOpenChannel::getId)
@@ -28,12 +30,14 @@ public class BalanceService {
                 .reduce(Coins.NONE, Coins::add);
     }
 
+    @Timed
     public Coins getAvailableLocalBalance(ChannelId channelId) {
         return getBalanceInformation(channelId)
                 .map(BalanceInformation::localAvailable)
                 .orElse(Coins.NONE);
     }
 
+    @Timed
     public Coins getAvailableRemoteBalance(Pubkey peer) {
         return channelService.getOpenChannelsWith(peer).stream()
                 .map(LocalOpenChannel::getId)
@@ -41,12 +45,14 @@ public class BalanceService {
                 .reduce(Coins.NONE, Coins::add);
     }
 
+    @Timed
     public Coins getAvailableRemoteBalance(ChannelId channelId) {
         return getBalanceInformation(channelId)
                 .map(BalanceInformation::remoteAvailable)
                 .orElse(Coins.NONE);
     }
 
+    @Timed
     public BalanceInformation getBalanceInformation(Pubkey pubkey) {
         return channelService.getOpenChannelsWith(pubkey).parallelStream()
                 .map(Channel::getId)
@@ -55,6 +61,7 @@ public class BalanceService {
                 .reduce(BalanceInformation.EMPTY, BalanceInformation::add);
     }
 
+    @Timed
     public Optional<BalanceInformation> getBalanceInformation(ChannelId channelId) {
         return grpcChannels.getChannel(channelId)
                 .map(LocalOpenChannel::getBalanceInformation);
