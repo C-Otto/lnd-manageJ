@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.ChannelsForNodeDto;
+import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.metrics.Metrics;
@@ -11,6 +12,7 @@ import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
+import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.OnChainCostService;
 import org.junit.jupiter.api.Test;
@@ -65,6 +67,9 @@ class NodeControllerTest {
     @Mock
     private BalanceService balanceService;
 
+    @Mock
+    private FeeService feeService;
+
     @Test
     void getAlias() {
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
@@ -78,6 +83,7 @@ class NodeControllerTest {
         when(onChainCostService.getOpenCostsWith(any())).thenReturn(Coins.NONE);
         when(onChainCostService.getCloseCostsWith(any())).thenReturn(Coins.NONE);
         when(balanceService.getBalanceInformation(any(Pubkey.class))).thenReturn(BalanceInformation.EMPTY);
+        when(feeService.getEarnedFeesForPeer(any())).thenReturn(Coins.NONE);
         NodeDetailsDto expectedDetails = new NodeDetailsDto(
                 PUBKEY_2,
                 ALIAS_2,
@@ -87,7 +93,8 @@ class NodeControllerTest {
                 List.of(),
                 new OnChainCostsDto(Coins.NONE, Coins.NONE),
                 BalanceInformationDto.createFrom(BalanceInformation.EMPTY),
-                true
+                true,
+                new FeeReportDto("0")
         );
         when(nodeService.getNode(PUBKEY_2)).thenReturn(new Node(PUBKEY_2, ALIAS_2, 0, true));
 
@@ -111,6 +118,7 @@ class NodeControllerTest {
         when(onChainCostService.getOpenCostsWith(PUBKEY_2)).thenReturn(openCosts);
         when(onChainCostService.getCloseCostsWith(PUBKEY_2)).thenReturn(closeCosts);
         when(balanceService.getBalanceInformation(PUBKEY_2)).thenReturn(BALANCE_INFORMATION);
+        when(feeService.getEarnedFeesForPeer(any())).thenReturn(Coins.ofMilliSatoshis(1234));
         NodeDetailsDto expectedDetails = new NodeDetailsDto(
                 PUBKEY_2,
                 ALIAS_2,
@@ -120,7 +128,8 @@ class NodeControllerTest {
                 List.of(CHANNEL_ID, CHANNEL_ID_2, CHANNEL_ID_3),
                 new OnChainCostsDto(openCosts, closeCosts),
                 BalanceInformationDto.createFrom(BALANCE_INFORMATION),
-                false
+                false,
+                new FeeReportDto("1234")
         );
 
         assertThat(nodeController.getDetails(PUBKEY_2)).isEqualTo(expectedDetails);
@@ -161,5 +170,12 @@ class NodeControllerTest {
         when(balanceService.getBalanceInformation(PUBKEY)).thenReturn(BALANCE_INFORMATION);
         assertThat(nodeController.getBalance(PUBKEY)).isEqualTo(BalanceInformationDto.createFrom(BALANCE_INFORMATION));
         verify(metrics).mark(argThat(name -> name.endsWith(".getBalance")));
+    }
+
+    @Test
+    void getFeeReport() {
+        when(feeService.getEarnedFeesForPeer(PUBKEY)).thenReturn(Coins.ofMilliSatoshis(1_234));
+        assertThat(nodeController.getFeeReport(PUBKEY)).isEqualTo(new FeeReportDto("1234"));
+        verify(metrics).mark(argThat(name -> name.endsWith(".getFeeReport")));
     }
 }

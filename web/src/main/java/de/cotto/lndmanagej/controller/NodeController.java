@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.controller;
 import com.codahale.metrics.MetricRegistry;
 import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.ChannelsForNodeDto;
+import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
@@ -15,6 +16,7 @@ import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
+import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.OnChainCostService;
 import org.springframework.context.annotation.Import;
@@ -36,23 +38,26 @@ public class NodeController {
     private final ChannelService channelService;
     private final OnChainCostService onChainCostService;
     private final BalanceService balanceService;
+    private final FeeService feeService;
 
     public NodeController(
             NodeService nodeService,
             ChannelService channelService,
-            Metrics metrics,
             OnChainCostService onChainCostService,
-            BalanceService balanceService
+            BalanceService balanceService,
+            FeeService feeService,
+            Metrics metrics
     ) {
         this.nodeService = nodeService;
-        this.metrics = metrics;
         this.channelService = channelService;
         this.onChainCostService = onChainCostService;
         this.balanceService = balanceService;
+        this.feeService = feeService;
+        this.metrics = metrics;
     }
 
     @GetMapping("/alias")
-    public String getAlias(Pubkey pubkey) {
+    public String getAlias(@PathVariable Pubkey pubkey) {
         mark("getAlias");
         return nodeService.getAlias(pubkey);
     }
@@ -73,7 +78,8 @@ public class NodeController {
                 toSortedList(channelService.getForceClosingChannelsFor(pubkey)),
                 new OnChainCostsDto(openCosts, closeCosts),
                 BalanceInformationDto.createFrom(balanceInformation),
-                node.online()
+                node.online(),
+                getFeeReportDto(pubkey)
         );
     }
 
@@ -95,6 +101,16 @@ public class NodeController {
     public BalanceInformationDto getBalance(@PathVariable Pubkey pubkey) {
         mark("getBalance");
         return BalanceInformationDto.createFrom(balanceService.getBalanceInformation(pubkey));
+    }
+
+    @GetMapping("/fee-report")
+    public FeeReportDto getFeeReport(@PathVariable Pubkey pubkey) {
+        mark("getFeeReport");
+        return getFeeReportDto(pubkey);
+    }
+
+    private FeeReportDto getFeeReportDto(Pubkey pubkey) {
+        return new FeeReportDto(feeService.getEarnedFeesForPeer(pubkey));
     }
 
     private List<ChannelId> toSortedList(Set<? extends Channel> channels) {

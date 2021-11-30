@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_4;
 
 public class ForwardingEventFixtures {
     public static final ForwardingEvent FORWARDING_EVENT = new ForwardingEvent(
@@ -23,5 +24,14 @@ public class ForwardingEventFixtures {
             CHANNEL_ID_3,
             CHANNEL_ID,
             LocalDateTime.of(2021, 11, 29, 18, 30, 1, 500_000_000)
+    );
+
+    public static final ForwardingEvent FORWARDING_EVENT_3 = new ForwardingEvent(
+            3,
+            Coins.ofMilliSatoshis(30_000),
+            Coins.ofMilliSatoshis(25_000),
+            CHANNEL_ID_2,
+            CHANNEL_ID_4,
+            LocalDateTime.of(2021, 11, 29, 18, 30, 2)
     );
 }

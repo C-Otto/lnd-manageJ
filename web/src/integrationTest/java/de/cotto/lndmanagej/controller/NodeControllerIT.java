@@ -6,6 +6,7 @@ import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
+import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.OnChainCostService;
 import org.junit.jupiter.api.Test;
@@ -60,6 +61,9 @@ class NodeControllerIT {
     private BalanceService balanceService;
 
     @MockBean
+    private FeeService feeService;
+
+    @MockBean
     @SuppressWarnings("unused")
     private Metrics metrics;
 
@@ -80,6 +84,7 @@ class NodeControllerIT {
         when(onChainCostService.getOpenCostsWith(PUBKEY_2)).thenReturn(Coins.ofSatoshis(123));
         when(onChainCostService.getCloseCostsWith(PUBKEY_2)).thenReturn(Coins.ofSatoshis(456));
         when(balanceService.getBalanceInformation(PUBKEY_2)).thenReturn(BALANCE_INFORMATION);
+        when(feeService.getEarnedFeesForPeer(PUBKEY_2)).thenReturn(Coins.ofMilliSatoshis(1_234));
         List<String> channelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_2.toString());
         List<String> closedChannelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_3.toString());
         List<String> waitingCloseChannelIds = List.of(CHANNEL_ID.toString());
@@ -99,6 +104,7 @@ class NodeControllerIT {
                 .andExpect(jsonPath("$.balance.remoteBalance", is("123")))
                 .andExpect(jsonPath("$.balance.remoteReserve", is("10")))
                 .andExpect(jsonPath("$.balance.remoteAvailable", is("113")))
+                .andExpect(jsonPath("$.feeReport.earned", is("1234")))
                 .andExpect(jsonPath("$.online", is(true)));
     }
 
@@ -132,4 +138,10 @@ class NodeControllerIT {
                 .andExpect(jsonPath("$.remoteAvailable", is("113")));
     }
 
+    @Test
+    void getFeeReport() throws Exception {
+        when(feeService.getEarnedFeesForPeer(PUBKEY_2)).thenReturn(Coins.ofMilliSatoshis(1_234));
+        mockMvc.perform(get(NODE_PREFIX + "/fee-report"))
+                .andExpect(jsonPath("$.earned", is("1234")));
+    }
 }
