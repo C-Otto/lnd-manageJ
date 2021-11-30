@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.controller;
 
-import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.service.OnChainCostService;
@@ -35,10 +34,6 @@ class OnChainCostsControllerIT {
 
     @MockBean
     private OnChainCostService onChainCostService;
-
-    @MockBean
-    @SuppressWarnings("unused")
-    private Metrics metrics;
 
     @Test
     void on_chain_costs_for_peer() throws Exception {

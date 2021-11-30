@@ -6,6 +6,5 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-web')
     implementation project(':backend')
     implementation project(':model')
-    implementation project(':metrics')
     testImplementation testFixtures(project(':model'))
 }

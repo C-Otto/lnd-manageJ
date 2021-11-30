@@ -1,10 +1,9 @@
 package de.cotto.lndmanagej.controller;
 
-import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.controller.dto.ChannelsDto;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
 import de.cotto.lndmanagej.controller.dto.PubkeysDto;
-import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
@@ -25,29 +24,27 @@ import java.util.stream.Collectors;
 public class StatusController {
     private final OwnNodeService ownNodeService;
     private final ChannelService channelService;
-    private final Metrics metrics;
 
-    public StatusController(OwnNodeService ownNodeService, ChannelService channelService, Metrics metrics) {
+    public StatusController(OwnNodeService ownNodeService, ChannelService channelService) {
         this.ownNodeService = ownNodeService;
         this.channelService = channelService;
-        this.metrics = metrics;
     }
 
+    @Timed
     @GetMapping("/synced-to-chain")
     public boolean isSyncedToChain() {
-        mark("isSyncedToChain");
         return ownNodeService.isSyncedToChain();
     }
 
+    @Timed
     @GetMapping("/block-height")
     public int getBlockHeight() {
-        mark("getBlockHeight");
         return ownNodeService.getBlockHeight();
     }
 
+    @Timed
     @GetMapping("/open-channels/")
     public ChannelsDto getOpenChannels() {
-        mark("getOpenChannels");
         List<ChannelId> channelIds = channelService.getOpenChannels().stream()
                 .map(LocalOpenChannel::getId)
                 .sorted()
@@ -56,9 +53,9 @@ public class StatusController {
         return new ChannelsDto(channelIds);
     }
 
+    @Timed
     @GetMapping("/open-channels/pubkeys")
     public PubkeysDto getPubkeysForOpenChannels() {
-        mark("getPubkeysForOpenChannels");
         List<Pubkey> pubkeys = channelService.getOpenChannels().stream()
                 .map(LocalOpenChannel::getRemotePubkey)
                 .sorted()
@@ -67,9 +64,9 @@ public class StatusController {
         return new PubkeysDto(pubkeys);
     }
 
+    @Timed
     @GetMapping("/all-channels/")
     public ChannelsDto getAllChannels() {
-        mark("getAllChannels");
         List<ChannelId> channelIds = channelService.getAllLocalChannels()
                 .map(LocalChannel::getId)
                 .sorted()
@@ -78,9 +75,9 @@ public class StatusController {
         return new ChannelsDto(channelIds);
     }
 
+    @Timed
     @GetMapping("/all-channels/pubkeys")
     public PubkeysDto getPubkeysForAllChannels() {
-        mark("getPubkeysForAllChannels");
         List<Pubkey> pubkeys = channelService.getAllLocalChannels()
                 .map(LocalChannel::getRemotePubkey)
                 .sorted()
@@ -89,7 +86,4 @@ public class StatusController {
         return new PubkeysDto(pubkeys);
     }
 
-    private void mark(String name) {
-        metrics.mark(MetricRegistry.name(getClass(), name));
-    }
 }

@@ -1,7 +1,7 @@
 package de.cotto.lndmanagej.grpc;
 
+import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.LndConfiguration;
-import de.cotto.lndmanagej.metrics.Metrics;
 import org.springframework.stereotype.Component;
 import routerrpc.RouterGrpc;
 import routerrpc.RouterOuterClass;
@@ -16,8 +16,8 @@ import java.util.Iterator;
 public class GrpcRouterService extends GrpcBase {
     private final RouterGrpc.RouterBlockingStub routerStub;
 
-    public GrpcRouterService(LndConfiguration lndConfiguration, Metrics metrics) throws IOException {
-        super(lndConfiguration, metrics);
+    public GrpcRouterService(LndConfiguration lndConfiguration) throws IOException {
+        super(lndConfiguration);
         routerStub = stubCreator.getRouterStub();
     }
 
@@ -26,9 +26,9 @@ public class GrpcRouterService extends GrpcBase {
         stubCreator.shutdown();
     }
 
+    @Timed
     Iterator<RouterOuterClass.HtlcEvent> getHtlcEvents() {
-        return get("subscribeHtlcEvents",
-                () -> routerStub.subscribeHtlcEvents(SubscribeHtlcEventsRequest.getDefaultInstance())
-        ).orElse(Collections.emptyIterator());
+        return get(() -> routerStub.subscribeHtlcEvents(SubscribeHtlcEventsRequest.getDefaultInstance()))
+                .orElse(Collections.emptyIterator());
     }
 }

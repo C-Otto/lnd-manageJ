@@ -1,7 +1,6 @@
 package de.cotto.lndmanagej.controller;
 
-import com.codahale.metrics.MetricRegistry;
-import de.cotto.lndmanagej.metrics.Metrics;
+import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.ChannelService;
@@ -19,21 +18,18 @@ public class LegacyController {
     private static final String NEWLINE = "\n";
     private final NodeService nodeService;
     private final ChannelService channelService;
-    private final Metrics metrics;
 
     public LegacyController(
             NodeService nodeService,
-            ChannelService channelService,
-            Metrics metrics
+            ChannelService channelService
     ) {
         this.nodeService = nodeService;
         this.channelService = channelService;
-        this.metrics = metrics;
     }
 
+    @Timed
     @GetMapping("/open-channels/pretty")
     public String getOpenChannelIdsPretty() {
-        metrics.mark(MetricRegistry.name(getClass(), "getOpenChannelIdsPretty"));
         return channelService.getOpenChannels().stream()
                 .sorted(Comparator.comparing(LocalOpenChannel::getId))
                 .map(localOpenChannel -> {

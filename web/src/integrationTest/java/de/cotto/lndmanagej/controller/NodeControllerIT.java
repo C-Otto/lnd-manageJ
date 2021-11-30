@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.controller;
 
-import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FeeReport;
@@ -64,10 +63,6 @@ class NodeControllerIT {
 
     @MockBean
     private FeeService feeService;
-
-    @MockBean
-    @SuppressWarnings("unused")
-    private Metrics metrics;
 
     @Test
     void getAlias() throws Exception {

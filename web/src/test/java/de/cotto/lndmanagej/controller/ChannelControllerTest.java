@@ -7,7 +7,6 @@ import de.cotto.lndmanagej.controller.dto.ClosedChannelDetailsDto;
 import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
-import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.CloseInitiator;
 import de.cotto.lndmanagej.model.Coins;
@@ -39,9 +38,7 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,9 +60,6 @@ class ChannelControllerTest {
 
     @Mock
     private NodeService nodeService;
-
-    @Mock
-    private Metrics metrics;
 
     @Mock
     private BalanceService balanceService;
@@ -98,7 +92,6 @@ class ChannelControllerTest {
         ChannelDto basicInformation = new ChannelDto(LOCAL_OPEN_CHANNEL, ClosedChannelDetailsDto.UNKNOWN);
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         assertThat(channelController.getBasicInformation(CHANNEL_ID)).isEqualTo(basicInformation);
-        verify(metrics).mark(argThat(name -> name.endsWith(".getBasicInformation")));
     }
 
     @Test
@@ -106,7 +99,6 @@ class ChannelControllerTest {
         ChannelDto basicInformation = new ChannelDto(CLOSED_CHANNEL, CLOSED_CHANNEL_DETAILS_DTO);
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(CLOSED_CHANNEL));
         assertThat(channelController.getBasicInformation(CHANNEL_ID)).isEqualTo(basicInformation);
-        verify(metrics).mark(argThat(name -> name.endsWith(".getBasicInformation")));
     }
 
     @Test
@@ -132,7 +124,6 @@ class ChannelControllerTest {
                 .thenReturn(Optional.ofNullable(LOCAL_OPEN_CHANNEL.getBalanceInformation()));
 
         assertThat(channelController.getDetails(CHANNEL_ID)).isEqualTo(expectedDetails);
-        verify(metrics).mark(argThat(name -> name.endsWith(".getDetails")));
     }
 
     @Test
@@ -175,7 +166,6 @@ class ChannelControllerTest {
         when(balanceService.getBalanceInformation(CHANNEL_ID)).thenReturn(Optional.of(BALANCE_INFORMATION));
         assertThat(channelController.getBalance(CHANNEL_ID))
                 .isEqualTo(BalanceInformationDto.createFrom(BALANCE_INFORMATION));
-        verify(metrics).mark(argThat(name -> name.endsWith(".getBalance")));
     }
 
     @Test
@@ -183,7 +173,6 @@ class ChannelControllerTest {
         when(balanceService.getBalanceInformation(CHANNEL_ID)).thenReturn(Optional.empty());
         assertThat(channelController.getBalance(CHANNEL_ID))
                 .isEqualTo(BalanceInformationDto.createFrom(BalanceInformation.EMPTY));
-        verify(metrics).mark(argThat(name -> name.endsWith(".getBalance")));
     }
 
     @Test
@@ -191,7 +180,6 @@ class ChannelControllerTest {
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         when(policyService.getPolicies(CHANNEL_ID)).thenReturn(POLICIES);
         assertThat(channelController.getPolicies(CHANNEL_ID)).isEqualTo(FEE_CONFIGURATION_DTO);
-        verify(metrics).mark(argThat(name -> name.endsWith(".getPolicies")));
     }
 
     @Test
@@ -203,7 +191,6 @@ class ChannelControllerTest {
     void getCloseDetails() throws NotFoundException {
         when(channelService.getClosedChannel(CHANNEL_ID)).thenReturn(Optional.of(CLOSED_CHANNEL));
         assertThat(channelController.getCloseDetails(CHANNEL_ID)).isEqualTo(CLOSED_CHANNEL_DETAILS_DTO);
-        verify(metrics).mark(argThat(name -> name.endsWith(".getCloseDetails")));
     }
 
     @Test
@@ -216,7 +203,6 @@ class ChannelControllerTest {
     void getFeeReport() {
         when(feeService.getFeeReportForChannel(CHANNEL_ID)).thenReturn(FEE_REPORT);
         assertThat(channelController.getFeeReport(CHANNEL_ID)).isEqualTo(FEE_REPORT_DTO);
-        verify(metrics).mark(argThat(name -> name.endsWith(".getFeeReport")));
     }
 
     private ChannelDetailsDto mockForChannelWithoutPolicies(

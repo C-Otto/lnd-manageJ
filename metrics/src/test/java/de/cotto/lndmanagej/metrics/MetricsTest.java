@@ -7,7 +7,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 
 class MetricsTest {
 
-    private final Metrics metrics = new Metrics();
+    private final Metrics metrics = new Metrics(registry);
 
     @Test
     void mark() {

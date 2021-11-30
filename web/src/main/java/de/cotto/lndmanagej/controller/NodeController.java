@@ -1,13 +1,12 @@
 package de.cotto.lndmanagej.controller;
 
-import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.ChannelsForNodeDto;
 import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
-import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
@@ -34,7 +33,6 @@ import java.util.stream.Collectors;
 @Import(ObjectMapperConfiguration.class)
 public class NodeController {
     private final NodeService nodeService;
-    private final Metrics metrics;
     private final ChannelService channelService;
     private final OnChainCostService onChainCostService;
     private final BalanceService balanceService;
@@ -45,26 +43,24 @@ public class NodeController {
             ChannelService channelService,
             OnChainCostService onChainCostService,
             BalanceService balanceService,
-            FeeService feeService,
-            Metrics metrics
+            FeeService feeService
     ) {
         this.nodeService = nodeService;
         this.channelService = channelService;
         this.onChainCostService = onChainCostService;
         this.balanceService = balanceService;
         this.feeService = feeService;
-        this.metrics = metrics;
     }
 
+    @Timed
     @GetMapping("/alias")
     public String getAlias(@PathVariable Pubkey pubkey) {
-        mark("getAlias");
         return nodeService.getAlias(pubkey);
     }
 
+    @Timed
     @GetMapping("/details")
     public NodeDetailsDto getDetails(@PathVariable Pubkey pubkey) {
-        mark("getDetails");
         Node node = nodeService.getNode(pubkey);
         Coins openCosts = onChainCostService.getOpenCostsWith(pubkey);
         Coins closeCosts = onChainCostService.getCloseCostsWith(pubkey);
@@ -83,29 +79,29 @@ public class NodeController {
         );
     }
 
+    @Timed
     @GetMapping("/open-channels")
     public ChannelsForNodeDto getOpenChannelIdsForPubkey(@PathVariable Pubkey pubkey) {
-        mark("getOpenChannelIdsForPubkey");
         List<ChannelId> channels = toSortedList(channelService.getOpenChannelsWith(pubkey));
         return new ChannelsForNodeDto(pubkey, channels);
     }
 
+    @Timed
     @GetMapping("/all-channels")
     public ChannelsForNodeDto getAllChannelIdsForPubkey(@PathVariable Pubkey pubkey) {
-        mark("getAllChannelIdsForPubkey");
         List<ChannelId> channels = toSortedList(channelService.getAllChannelsWith(pubkey));
         return new ChannelsForNodeDto(pubkey, channels);
     }
 
+    @Timed
     @GetMapping("/balance")
     public BalanceInformationDto getBalance(@PathVariable Pubkey pubkey) {
-        mark("getBalance");
         return BalanceInformationDto.createFrom(balanceService.getBalanceInformation(pubkey));
     }
 
+    @Timed
     @GetMapping("/fee-report")
     public FeeReportDto getFeeReport(@PathVariable Pubkey pubkey) {
-        mark("getFeeReport");
         return getFeeReportDto(pubkey);
     }
 
@@ -119,9 +115,4 @@ public class NodeController {
                 .sorted()
                 .collect(Collectors.toList());
     }
-
-    private void mark(String getDetails) {
-        metrics.mark(MetricRegistry.name(getClass(), getDetails));
-    }
-
 }

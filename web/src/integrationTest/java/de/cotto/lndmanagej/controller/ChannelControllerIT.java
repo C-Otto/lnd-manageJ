@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.controller;
 
-import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FeeReport;
@@ -59,10 +58,6 @@ class ChannelControllerIT {
     @MockBean
     @SuppressWarnings("unused")
     private ChannelIdResolver channelIdResolver;
-
-    @MockBean
-    @SuppressWarnings("unused")
-    private Metrics metrics;
 
     @MockBean
     private OnChainCostService onChainCostService;

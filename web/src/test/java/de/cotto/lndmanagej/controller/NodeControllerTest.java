@@ -5,7 +5,6 @@ import de.cotto.lndmanagej.controller.dto.ChannelsForNodeDto;
 import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
-import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FeeReport;
@@ -44,8 +43,6 @@ import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOS
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL_2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,9 +54,6 @@ class NodeControllerTest {
 
     @Mock
     private NodeService nodeService;
-
-    @Mock
-    private Metrics metrics;
 
     @Mock
     private ChannelService channelService;
@@ -78,7 +72,6 @@ class NodeControllerTest {
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
 
         assertThat(nodeController.getAlias(PUBKEY_2)).isEqualTo(ALIAS_2);
-        verify(metrics).mark(argThat(name -> name.endsWith(".getAlias")));
     }
 
     @Test
@@ -102,7 +95,6 @@ class NodeControllerTest {
         when(nodeService.getNode(PUBKEY_2)).thenReturn(new Node(PUBKEY_2, ALIAS_2, 0, true));
 
         assertThat(nodeController.getDetails(PUBKEY_2)).isEqualTo(expectedDetails);
-        verify(metrics).mark(argThat(name -> name.endsWith(".getDetails")));
     }
 
     @Test
@@ -143,7 +135,6 @@ class NodeControllerTest {
         when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_3));
         assertThat(nodeController.getOpenChannelIdsForPubkey(PUBKEY))
                 .isEqualTo(new ChannelsForNodeDto(PUBKEY, List.of(CHANNEL_ID, CHANNEL_ID_3)));
-        verify(metrics).mark(argThat(name -> name.endsWith(".getOpenChannelIdsForPubkey")));
     }
 
     @Test
@@ -158,7 +149,6 @@ class NodeControllerTest {
         when(channelService.getAllChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, CLOSED_CHANNEL_3));
         assertThat(nodeController.getAllChannelIdsForPubkey(PUBKEY))
                 .isEqualTo(new ChannelsForNodeDto(PUBKEY, List.of(CHANNEL_ID, CHANNEL_ID_3)));
-        verify(metrics).mark(argThat(name -> name.endsWith(".getAllChannelIdsForPubkey")));
     }
 
     @Test
@@ -172,13 +162,11 @@ class NodeControllerTest {
     void getBalance() {
         when(balanceService.getBalanceInformation(PUBKEY)).thenReturn(BALANCE_INFORMATION);
         assertThat(nodeController.getBalance(PUBKEY)).isEqualTo(BalanceInformationDto.createFrom(BALANCE_INFORMATION));
-        verify(metrics).mark(argThat(name -> name.endsWith(".getBalance")));
     }
 
     @Test
     void getFeeReport() {
         when(feeService.getFeeReportForPeer(PUBKEY)).thenReturn(FEE_REPORT);
         assertThat(nodeController.getFeeReport(PUBKEY)).isEqualTo(new FeeReportDto("1234", "567"));
-        verify(metrics).mark(argThat(name -> name.endsWith(".getFeeReport")));
     }
 }

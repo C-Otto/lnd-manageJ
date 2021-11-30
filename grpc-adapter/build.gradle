@@ -6,7 +6,6 @@ dependencies {
     implementation project(':grpc-client')
     implementation project(':model')
     implementation project(':caching')
-    implementation project(':metrics')
     testImplementation testFixtures(project(':model'))
 }
 
@@ -15,13 +14,13 @@ jacocoTestCoverageVerification {
         rules.forEach {rule ->
             rule.limits.forEach {limit ->
                 if (limit.counter == 'INSTRUCTION') {
-                    limit.minimum = 0.82
+                    limit.minimum = 0.86
                 }
                 if (limit.counter == 'METHOD') {
-                    limit.minimum = 0.78
+                    limit.minimum = 0.79
                 }
                 if (limit.counter == 'BRANCH') {
-                    limit.minimum = 0.92
+                    limit.minimum = 0.93
                 }
             }
         }

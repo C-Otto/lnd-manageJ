@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.controller;
 
-import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
@@ -33,10 +32,6 @@ class LegacyControllerIT {
 
     @MockBean
     private ChannelService channelService;
-
-    @MockBean
-    @SuppressWarnings("unused")
-    private Metrics metrics;
 
     @Test
     void getOpenChannelIdsPretty() throws Exception {

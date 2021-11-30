@@ -1,9 +1,9 @@
 package de.cotto.lndmanagej.grpc;
 
+import com.codahale.metrics.annotation.Timed;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import de.cotto.lndmanagej.LndConfiguration;
 import de.cotto.lndmanagej.caching.CacheBuilder;
-import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
 import io.grpc.Status;
@@ -68,8 +68,8 @@ public class GrpcService extends GrpcBase {
             .withExpiry(TRANSACTIONS_CACHE_EXPIRY)
             .build(this::getTransactionsWithoutCache);
 
-    public GrpcService(LndConfiguration lndConfiguration, Metrics metrics) throws IOException {
-        super(lndConfiguration, metrics);
+    public GrpcService(LndConfiguration lndConfiguration) throws IOException {
+        super(lndConfiguration);
         lightningStub = stubCreator.getLightningStub();
     }
 
@@ -78,16 +78,18 @@ public class GrpcService extends GrpcBase {
         stubCreator.shutdown();
     }
 
+    @Timed
     public Optional<GetInfoResponse> getInfo() {
-        return get("getInfo", () -> lightningStub.getInfo(lnrpc.GetInfoRequest.getDefaultInstance()));
+        return get(() -> lightningStub.getInfo(lnrpc.GetInfoRequest.getDefaultInstance()));
     }
 
     public List<Peer> listPeers() {
         return listPeersCache.get("");
     }
 
+    @Timed
     public Optional<NodeInfo> getNodeInfo(Pubkey pubkey) {
-        return get("getNodeInfo", () -> {
+        return get(() -> {
             try {
                 return lightningStub.getNodeInfo(NodeInfoRequest.newBuilder().setPubKey(pubkey.toString()).build());
             } catch (StatusRuntimeException exception) {
@@ -100,19 +102,20 @@ public class GrpcService extends GrpcBase {
         });
     }
 
+    @Timed
     public Optional<ChannelEdge> getChannelEdge(ChannelId channelId) {
         ChanInfoRequest build = ChanInfoRequest.newBuilder().setChanId(channelId.getShortChannelId()).build();
-        return get("getChanInfo", () -> lightningStub.getChanInfo(build));
+        return get(() -> lightningStub.getChanInfo(build));
     }
 
     public List<Channel> getChannels() {
         return channelsCache.get("");
     }
 
+    @Timed
     public List<ChannelCloseSummary> getClosedChannels() {
-        return get("closedChannels",
-                () -> lightningStub.closedChannels(ClosedChannelsRequest.getDefaultInstance()).getChannelsList()
-        ).orElse(List.of());
+        return get(() -> lightningStub.closedChannels(ClosedChannelsRequest.getDefaultInstance()).getChannelsList())
+                .orElse(List.of());
     }
 
     public List<ForceClosedChannel> getForceClosingChannels() {
@@ -131,23 +134,25 @@ public class GrpcService extends GrpcBase {
         return getTransactionsCache.get("");
     }
 
+    @Timed
     public Optional<ForwardingHistoryResponse> getForwardingHistory(int offset, int limit) {
         ForwardingHistoryRequest request = ForwardingHistoryRequest.newBuilder()
                 .setStartTime(0)
                 .setIndexOffset(offset)
                 .setNumMaxEvents(limit)
                 .build();
-        return get("forwardingHistory", () -> lightningStub.forwardingHistory(request));
+        return get(() -> lightningStub.forwardingHistory(request));
     }
 
+    @Timed
     private List<Peer> listPeersWithoutCache() {
-        return get(
-                "listPeers", () -> lightningStub.listPeers(ListPeersRequest.getDefaultInstance()).getPeersList()
-        ).orElse(List.of());
+        return get(() -> lightningStub.listPeers(ListPeersRequest.getDefaultInstance()).getPeersList())
+                .orElse(List.of());
     }
 
+    @Timed
     private Optional<List<Transaction>> getTransactionsWithoutCache() {
-        return get("getTransactions",
+        return get(
                 () -> lightningStub.getTransactions(GetTransactionsRequest.getDefaultInstance()).getTransactionsList()
         );
     }
@@ -156,15 +161,14 @@ public class GrpcService extends GrpcBase {
         return pendingChannelsCache.get("");
     }
 
+    @Timed
     private Optional<PendingChannelsResponse> getPendingChannelsWithoutCache() {
-        return get("pendingChannels",
-                () -> lightningStub.pendingChannels(PendingChannelsRequest.getDefaultInstance())
-        );
+        return get(() -> lightningStub.pendingChannels(PendingChannelsRequest.getDefaultInstance()));
     }
 
+    @Timed
     private List<Channel> getChannelsWithoutCache() {
-        return get("listChannels",
-                () -> lightningStub.listChannels(ListChannelsRequest.getDefaultInstance()).getChannelsList()
-        ).orElse(List.of());
+        return get(() -> lightningStub.listChannels(ListChannelsRequest.getDefaultInstance()).getChannelsList())
+                .orElse(List.of());
     }
 }

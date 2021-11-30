@@ -1,8 +1,7 @@
 package de.cotto.lndmanagej.controller;
 
-import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
-import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Pubkey;
@@ -16,32 +15,30 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/")
 public class OnChainCostsController {
     private final OnChainCostService onChainCostService;
-    private final Metrics metrics;
 
-    public OnChainCostsController(OnChainCostService onChainCostService, Metrics metrics) {
+    public OnChainCostsController(OnChainCostService onChainCostService) {
         this.onChainCostService = onChainCostService;
-        this.metrics = metrics;
     }
 
+    @Timed
     @GetMapping("/node/{pubkey}/on-chain-costs")
     public OnChainCostsDto getCostsForPeer(@PathVariable Pubkey pubkey) {
-        metrics.mark(MetricRegistry.name(getClass(), "getCostsForPeer"));
         return new OnChainCostsDto(
                 onChainCostService.getOpenCostsWith(pubkey),
                 onChainCostService.getCloseCostsWith(pubkey)
         );
     }
 
+    @Timed
     @GetMapping("/channel/{channelId}/open-costs")
     public long getOpenCostsForChannel(@PathVariable ChannelId channelId) throws CostException {
-        metrics.mark(MetricRegistry.name(getClass(), "getOpenCostsForChannel"));
         return onChainCostService.getOpenCosts(channelId).map(Coins::satoshis)
                 .orElseThrow(() -> new CostException("Unable to get open costs for channel with ID " + channelId));
     }
 
+    @Timed
     @GetMapping("/channel/{channelId}/close-costs")
     public long getCloseCostsForChannel(@PathVariable ChannelId channelId) throws CostException {
-        metrics.mark(MetricRegistry.name(getClass(), "getCloseCostsForChannel"));
         return onChainCostService.getCloseCosts(channelId).map(Coins::satoshis)
                 .orElseThrow(() -> new CostException("Unable to get close costs for channel with ID " + channelId));
     }

@@ -21,12 +21,16 @@ jacocoTestCoverageVerification {
         rules.forEach {rule ->
             rule.limits.forEach {limit ->
                 if (limit.counter == 'INSTRUCTION') {
-                    limit.minimum = 0.37
+                    limit.minimum = 0.83
                 }
                 if (limit.counter == 'METHOD') {
-                    limit.minimum = 0.50
+                    limit.minimum = 0.73
                 }
             }
         }
     }
+}
+
+pitest {
+    testStrengthThreshold = 0
 }

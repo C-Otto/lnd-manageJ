@@ -2,7 +2,6 @@ package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.controller.dto.ChannelsDto;
 import de.cotto.lndmanagej.controller.dto.PubkeysDto;
-import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.ChannelService;
@@ -24,8 +23,6 @@ import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHAN
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_TO_NODE_3;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,9 +34,6 @@ class StatusControllerTest {
     private OwnNodeService ownNodeService;
 
     @Mock
-    private Metrics metrics;
-
-    @Mock
     private ChannelService channelService;
 
     @Test
@@ -47,7 +41,6 @@ class StatusControllerTest {
         when(ownNodeService.isSyncedToChain()).thenReturn(true);
 
         assertThat(statusController.isSyncedToChain()).isTrue();
-        verify(metrics).mark(argThat(name -> name.endsWith(".isSyncedToChain")));
     }
 
     @Test
@@ -62,7 +55,6 @@ class StatusControllerTest {
         List<ChannelId> expectedChannelIds =
                 List.of(LOCAL_OPEN_CHANNEL.getId(), LOCAL_OPEN_CHANNEL_TO_NODE_3.getId());
         assertThat(statusController.getOpenChannels()).isEqualTo(new ChannelsDto(expectedChannelIds));
-        verify(metrics).mark(argThat(name -> name.endsWith(".getOpenChannels")));
     }
 
     @Test
@@ -71,7 +63,6 @@ class StatusControllerTest {
         List<Pubkey> expectedPubkeys =
                 List.of(LOCAL_OPEN_CHANNEL.getRemotePubkey(), LOCAL_OPEN_CHANNEL_TO_NODE_3.getRemotePubkey());
         assertThat(statusController.getPubkeysForOpenChannels()).isEqualTo(new PubkeysDto(expectedPubkeys));
-        verify(metrics).mark(argThat(name -> name.endsWith(".getPubkeysForOpenChannels")));
     }
 
     @Test
@@ -86,7 +77,6 @@ class StatusControllerTest {
         List<ChannelId> expectedChannelIds =
                 List.of(CLOSED_CHANNEL.getId(), LOCAL_OPEN_CHANNEL_TO_NODE_3.getId());
         assertThat(statusController.getAllChannels()).isEqualTo(new ChannelsDto(expectedChannelIds));
-        verify(metrics).mark(argThat(name -> name.endsWith(".getAllChannels")));
     }
 
     @Test
@@ -95,7 +85,6 @@ class StatusControllerTest {
         List<Pubkey> expectedPubkeys =
                 List.of(CLOSED_CHANNEL.getRemotePubkey(), LOCAL_OPEN_CHANNEL_TO_NODE_3.getRemotePubkey());
         assertThat(statusController.getPubkeysForAllChannels()).isEqualTo(new PubkeysDto(expectedPubkeys));
-        verify(metrics).mark(argThat(name -> name.endsWith(".getPubkeysForAllChannels")));
     }
 
     @Test
@@ -108,6 +97,5 @@ class StatusControllerTest {
     void getBlockHeight() {
         when(ownNodeService.getBlockHeight()).thenReturn(123_456);
         assertThat(statusController.getBlockHeight()).isEqualTo(123_456);
-        verify(metrics).mark(argThat(name -> name.endsWith(".getBlockHeight")));
     }
 }

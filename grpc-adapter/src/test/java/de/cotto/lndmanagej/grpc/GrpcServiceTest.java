@@ -1,7 +1,6 @@
 package de.cotto.lndmanagej.grpc;
 
 import de.cotto.lndmanagej.LndConfiguration;
-import de.cotto.lndmanagej.metrics.Metrics;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,12 +14,11 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class GrpcServiceTest {
     private final StubCreator stubCreator = mock(StubCreator.class);
-    private final Metrics metrics = mock(Metrics.class);
     private TestableGrpcService grpcService;
 
     @BeforeEach
     void setUp() throws IOException {
-        grpcService = new TestableGrpcService(mock(LndConfiguration.class), metrics);
+        grpcService = new TestableGrpcService(mock(LndConfiguration.class));
     }
 
     @Test
@@ -30,11 +28,8 @@ class GrpcServiceTest {
     }
 
     public class TestableGrpcService extends GrpcService {
-        public TestableGrpcService(
-                LndConfiguration lndConfiguration,
-                Metrics metrics
-        ) throws IOException {
-            super(lndConfiguration, metrics);
+        public TestableGrpcService(LndConfiguration lndConfiguration) throws IOException {
+            super(lndConfiguration);
         }
 
         @Override

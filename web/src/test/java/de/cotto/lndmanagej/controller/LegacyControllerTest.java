@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.controller;
 
-import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
 import org.junit.jupiter.api.Test;
@@ -22,8 +21,6 @@ import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_3;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,9 +34,6 @@ class LegacyControllerTest {
     @Mock
     private ChannelService channelService;
 
-    @Mock
-    private Metrics metrics;
-
     @Test
     void getOpenChannelIdsPretty() {
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
@@ -49,7 +43,6 @@ class LegacyControllerTest {
                 CHANNEL_ID_COMPACT + "\t" + PUBKEY_2 + "\t" + CAPACITY + "\t" + ALIAS_2 + "\n" +
                         CHANNEL_ID_COMPACT_4 + "\t" + PUBKEY_3 + "\t" + CAPACITY_2 + "\t" + ALIAS_3
         );
-        verify(metrics).mark(argThat(name -> name.endsWith(".getOpenChannelIdsPretty")));
     }
 
     @Test

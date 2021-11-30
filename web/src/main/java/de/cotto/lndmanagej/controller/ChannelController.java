@@ -1,6 +1,6 @@
 package de.cotto.lndmanagej.controller;
 
-import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.controller.dto.ChannelDto;
@@ -9,7 +9,6 @@ import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
-import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ClosedChannel;
@@ -39,7 +38,6 @@ import javax.annotation.Nullable;
 public class ChannelController {
     private final ChannelService channelService;
     private final NodeService nodeService;
-    private final Metrics metrics;
     private final BalanceService balanceService;
     private final OnChainCostService onChainCostService;
     private final PolicyService policyService;
@@ -51,8 +49,7 @@ public class ChannelController {
             BalanceService balanceService,
             OnChainCostService onChainCostService,
             PolicyService policyService,
-            FeeService feeService,
-            Metrics metrics
+            FeeService feeService
     ) {
         this.channelService = channelService;
         this.nodeService = nodeService;
@@ -60,12 +57,11 @@ public class ChannelController {
         this.onChainCostService = onChainCostService;
         this.policyService = policyService;
         this.feeService = feeService;
-        this.metrics = metrics;
     }
 
+    @Timed
     @GetMapping("/")
     public ChannelDto getBasicInformation(@PathVariable ChannelId channelId) throws NotFoundException {
-        mark("getBasicInformation");
         LocalChannel localChannel = channelService.getLocalChannel(channelId).orElse(null);
         if (localChannel == null) {
             throw new NotFoundException();
@@ -74,9 +70,9 @@ public class ChannelController {
         return new ChannelDto(localChannel, closeDetailsForChannel);
     }
 
+    @Timed
     @GetMapping("/details")
     public ChannelDetailsDto getDetails(@PathVariable ChannelId channelId) throws NotFoundException {
-        mark("getDetails");
         LocalChannel localChannel = channelService.getLocalChannel(channelId).orElse(null);
         if (localChannel == null) {
             throw new NotFoundException();
@@ -94,24 +90,24 @@ public class ChannelController {
         );
     }
 
+    @Timed
     @GetMapping("/balance")
     public BalanceInformationDto getBalance(@PathVariable ChannelId channelId) {
-        mark("getBalance");
         BalanceInformation balanceInformation = balanceService.getBalanceInformation(channelId)
                 .orElse(BalanceInformation.EMPTY);
         return BalanceInformationDto.createFrom(balanceInformation);
     }
 
+    @Timed
     @GetMapping("/policies")
     public PoliciesDto getPolicies(@PathVariable ChannelId channelId) {
-        mark("getPolicies");
         LocalChannel localChannel = channelService.getLocalChannel(channelId).orElse(null);
         return getPoliciesForChannel(localChannel);
     }
 
+    @Timed
     @GetMapping("/close-details")
     public ClosedChannelDetailsDto getCloseDetails(@PathVariable ChannelId channelId) throws NotFoundException {
-        mark("getCloseDetails");
         ClosedChannel closedChannel = channelService.getClosedChannel(channelId).orElse(null);
         if (closedChannel == null) {
             throw new NotFoundException();
@@ -119,9 +115,9 @@ public class ChannelController {
         return new ClosedChannelDetailsDto(closedChannel.getCloseInitiator(), closedChannel.getCloseHeight());
     }
 
+    @Timed
     @GetMapping("/fee-report")
     public FeeReportDto getFeeReport(@PathVariable ChannelId channelId) {
-        mark("getFeeReport");
         return getFeeReportDto(channelId);
     }
 
@@ -155,9 +151,5 @@ public class ChannelController {
         } else {
             return ClosedChannelDetailsDto.UNKNOWN;
         }
-    }
-
-    private void mark(String name) {
-        metrics.mark(MetricRegistry.name(getClass(), name));
     }
 }
