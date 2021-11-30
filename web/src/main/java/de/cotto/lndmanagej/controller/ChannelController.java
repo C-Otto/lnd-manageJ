@@ -127,7 +127,8 @@ public class ChannelController {
 
     private FeeReportDto getFeeReportDto(ChannelId channelId) {
         Coins earned = feeService.getEarnedFeesForChannel(channelId);
-        return new FeeReportDto(earned);
+        Coins sourced = feeService.getSourcedFeesForChannel(channelId);
+        return new FeeReportDto(earned, sourced);
     }
 
     private PoliciesDto getPoliciesForChannel(@Nullable LocalChannel channel) {

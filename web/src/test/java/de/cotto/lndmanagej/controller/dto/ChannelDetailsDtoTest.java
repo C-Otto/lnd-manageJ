@@ -20,6 +20,8 @@ class ChannelDetailsDtoTest {
 
     private static final OnChainCostsDto ON_CHAIN_COSTS = new OnChainCostsDto(Coins.ofSatoshis(1), Coins.ofSatoshis(2));
     private static final ClosedChannelDetailsDto CLOSE_DETAILS = new ClosedChannelDetailsDto("abc", 123);
+    private static final FeeReportDto FEE_REPORT =
+            new FeeReportDto(Coins.ofMilliSatoshis(1234), Coins.ofMilliSatoshis(567));
     private static final ChannelDetailsDto CHANNEL_DETAILS_DTO = new ChannelDetailsDto(
             CLOSED_CHANNEL,
             ALIAS,
@@ -27,7 +29,7 @@ class ChannelDetailsDtoTest {
             ON_CHAIN_COSTS,
             PoliciesDto.EMPTY,
             CLOSE_DETAILS,
-            new FeeReportDto(Coins.ofMilliSatoshis(1234))
+            FEE_REPORT
     );
 
     @Test
@@ -84,7 +86,7 @@ class ChannelDetailsDtoTest {
                 ON_CHAIN_COSTS,
                 PoliciesDto.EMPTY,
                 CLOSE_DETAILS,
-                new FeeReportDto(Coins.ofMilliSatoshis(1234))
+                FEE_REPORT
         );
         ChannelStatusDto channelStatusDto =
                 ChannelStatusDto.createFrom(new ChannelStatus(false, true, false, OPEN));
@@ -103,7 +105,7 @@ class ChannelDetailsDtoTest {
 
     @Test
     void feeReport() {
-        assertThat(CHANNEL_DETAILS_DTO.feeReport()).isEqualTo(new FeeReportDto(Coins.ofMilliSatoshis(1_234)));
+        assertThat(CHANNEL_DETAILS_DTO.feeReport()).isEqualTo(FEE_REPORT);
     }
 
     @Test

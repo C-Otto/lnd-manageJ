@@ -49,7 +49,8 @@ class ChannelControllerTest {
     private static final Coins CLOSE_COSTS = Coins.ofSatoshis(2);
     private static final OnChainCostsDto ON_CHAIN_COSTS = new OnChainCostsDto(OPEN_COSTS, CLOSE_COSTS);
     private static final PoliciesDto FEE_CONFIGURATION_DTO = PoliciesDto.createFrom(POLICIES);
-    private static final FeeReportDto FEE_REPORT_DTO = new FeeReportDto(Coins.ofMilliSatoshis(1234));
+    private static final FeeReportDto FEE_REPORT_DTO =
+            new FeeReportDto(Coins.ofMilliSatoshis(1234), Coins.ofMilliSatoshis(567));
     private static final ClosedChannelDetailsDto CLOSED_CHANNEL_DETAILS_DTO =
             new ClosedChannelDetailsDto(CloseInitiator.REMOTE, 987_654);
 
@@ -83,6 +84,7 @@ class ChannelControllerTest {
         lenient().when(onChainCostService.getCloseCosts(CHANNEL_ID)).thenReturn(Optional.of(CLOSE_COSTS));
         lenient().when(policyService.getPolicies(CHANNEL_ID)).thenReturn(POLICIES);
         lenient().when(feeService.getEarnedFeesForChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(1_234));
+        lenient().when(feeService.getSourcedFeesForChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(567));
     }
 
     @Test
@@ -212,8 +214,9 @@ class ChannelControllerTest {
 
     @Test
     void getFeeReport() {
-        when(feeService.getEarnedFeesForChannel(CHANNEL_ID)).thenReturn(Coins.ofSatoshis(123));
-        assertThat(channelController.getFeeReport(CHANNEL_ID)).isEqualTo(new FeeReportDto(Coins.ofSatoshis(123)));
+        when(feeService.getEarnedFeesForChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(1_234));
+        when(feeService.getSourcedFeesForChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(567));
+        assertThat(channelController.getFeeReport(CHANNEL_ID)).isEqualTo(FEE_REPORT_DTO);
         verify(metrics).mark(argThat(name -> name.endsWith(".getFeeReport")));
     }
 

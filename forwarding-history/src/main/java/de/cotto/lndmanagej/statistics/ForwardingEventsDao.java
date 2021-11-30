@@ -12,4 +12,6 @@ public interface ForwardingEventsDao {
     int getOffset();
 
     List<ForwardingEvent> getEventsWithOutgoingChannel(ChannelId channelId);
+
+    List<ForwardingEvent> getEventsWithIncomingChannel(ChannelId channelId);
 }

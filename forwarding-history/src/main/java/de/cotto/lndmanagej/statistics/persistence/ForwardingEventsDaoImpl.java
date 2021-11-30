@@ -39,4 +39,11 @@ public class ForwardingEventsDaoImpl implements ForwardingEventsDao {
                 .map(ForwardingEventJpaDto::toModel)
                 .toList();
     }
+
+    @Override
+    public List<ForwardingEvent> getEventsWithIncomingChannel(ChannelId channelId) {
+        return repository.findByChannelIncoming(channelId.getShortChannelId()).stream()
+                .map(ForwardingEventJpaDto::toModel)
+                .toList();
+    }
 }

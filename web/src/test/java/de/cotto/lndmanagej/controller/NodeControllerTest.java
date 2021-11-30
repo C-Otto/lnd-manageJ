@@ -84,6 +84,7 @@ class NodeControllerTest {
         when(onChainCostService.getCloseCostsWith(any())).thenReturn(Coins.NONE);
         when(balanceService.getBalanceInformation(any(Pubkey.class))).thenReturn(BalanceInformation.EMPTY);
         when(feeService.getEarnedFeesForPeer(any())).thenReturn(Coins.NONE);
+        when(feeService.getSourcedFeesForPeer(any())).thenReturn(Coins.NONE);
         NodeDetailsDto expectedDetails = new NodeDetailsDto(
                 PUBKEY_2,
                 ALIAS_2,
@@ -94,7 +95,7 @@ class NodeControllerTest {
                 new OnChainCostsDto(Coins.NONE, Coins.NONE),
                 BalanceInformationDto.createFrom(BalanceInformation.EMPTY),
                 true,
-                new FeeReportDto("0")
+                new FeeReportDto("0", "0")
         );
         when(nodeService.getNode(PUBKEY_2)).thenReturn(new Node(PUBKEY_2, ALIAS_2, 0, true));
 
@@ -119,6 +120,7 @@ class NodeControllerTest {
         when(onChainCostService.getCloseCostsWith(PUBKEY_2)).thenReturn(closeCosts);
         when(balanceService.getBalanceInformation(PUBKEY_2)).thenReturn(BALANCE_INFORMATION);
         when(feeService.getEarnedFeesForPeer(any())).thenReturn(Coins.ofMilliSatoshis(1234));
+        when(feeService.getSourcedFeesForPeer(any())).thenReturn(Coins.ofMilliSatoshis(567));
         NodeDetailsDto expectedDetails = new NodeDetailsDto(
                 PUBKEY_2,
                 ALIAS_2,
@@ -129,7 +131,7 @@ class NodeControllerTest {
                 new OnChainCostsDto(openCosts, closeCosts),
                 BalanceInformationDto.createFrom(BALANCE_INFORMATION),
                 false,
-                new FeeReportDto("1234")
+                new FeeReportDto("1234", "567")
         );
 
         assertThat(nodeController.getDetails(PUBKEY_2)).isEqualTo(expectedDetails);
@@ -175,7 +177,8 @@ class NodeControllerTest {
     @Test
     void getFeeReport() {
         when(feeService.getEarnedFeesForPeer(PUBKEY)).thenReturn(Coins.ofMilliSatoshis(1_234));
-        assertThat(nodeController.getFeeReport(PUBKEY)).isEqualTo(new FeeReportDto("1234"));
+        when(feeService.getSourcedFeesForPeer(PUBKEY)).thenReturn(Coins.ofMilliSatoshis(567));
+        assertThat(nodeController.getFeeReport(PUBKEY)).isEqualTo(new FeeReportDto("1234", "567"));
         verify(metrics).mark(argThat(name -> name.endsWith(".getFeeReport")));
     }
 }

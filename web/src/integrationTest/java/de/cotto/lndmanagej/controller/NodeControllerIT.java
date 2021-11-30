@@ -85,6 +85,7 @@ class NodeControllerIT {
         when(onChainCostService.getCloseCostsWith(PUBKEY_2)).thenReturn(Coins.ofSatoshis(456));
         when(balanceService.getBalanceInformation(PUBKEY_2)).thenReturn(BALANCE_INFORMATION);
         when(feeService.getEarnedFeesForPeer(PUBKEY_2)).thenReturn(Coins.ofMilliSatoshis(1_234));
+        when(feeService.getSourcedFeesForPeer(PUBKEY_2)).thenReturn(Coins.ofMilliSatoshis(567));
         List<String> channelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_2.toString());
         List<String> closedChannelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_3.toString());
         List<String> waitingCloseChannelIds = List.of(CHANNEL_ID.toString());
@@ -105,6 +106,7 @@ class NodeControllerIT {
                 .andExpect(jsonPath("$.balance.remoteReserve", is("10")))
                 .andExpect(jsonPath("$.balance.remoteAvailable", is("113")))
                 .andExpect(jsonPath("$.feeReport.earned", is("1234")))
+                .andExpect(jsonPath("$.feeReport.sourced", is("567")))
                 .andExpect(jsonPath("$.online", is(true)));
     }
 
@@ -141,7 +143,9 @@ class NodeControllerIT {
     @Test
     void getFeeReport() throws Exception {
         when(feeService.getEarnedFeesForPeer(PUBKEY_2)).thenReturn(Coins.ofMilliSatoshis(1_234));
+        when(feeService.getSourcedFeesForPeer(PUBKEY_2)).thenReturn(Coins.ofMilliSatoshis(567));
         mockMvc.perform(get(NODE_PREFIX + "/fee-report"))
-                .andExpect(jsonPath("$.earned", is("1234")));
+                .andExpect(jsonPath("$.earned", is("1234")))
+                .andExpect(jsonPath("$.sourced", is("567")));
     }
 }

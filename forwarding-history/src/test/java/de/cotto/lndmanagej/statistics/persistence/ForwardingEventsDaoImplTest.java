@@ -71,6 +71,21 @@ class ForwardingEventsDaoImplTest {
                 .containsExactly(FORWARDING_EVENT, FORWARDING_EVENT_2);
     }
 
+    @Test
+    void getEventsWithIncomingChannel_empty() {
+        assertThat(dao.getEventsWithIncomingChannel(CHANNEL_ID)).isEmpty();
+    }
+
+    @Test
+    void getEventsWithIncomingChannel() {
+        when(repository.findByChannelIncoming(CHANNEL_ID_2.getShortChannelId())).thenReturn(List.of(
+                ForwardingEventJpaDto.createFromForwardingEvent(FORWARDING_EVENT),
+                ForwardingEventJpaDto.createFromForwardingEvent(FORWARDING_EVENT_2)
+        ));
+        assertThat(dao.getEventsWithIncomingChannel(CHANNEL_ID_2))
+                .containsExactly(FORWARDING_EVENT, FORWARDING_EVENT_2);
+    }
+
     @SuppressWarnings("PMD.LinguisticNaming")
     private <S extends ForwardingEventJpaDto> ArgumentMatcher<Iterable<S>> isSet(Set<ForwardingEvent> expected) {
         return iterable -> iterable instanceof List && ((List<S>) iterable).stream()

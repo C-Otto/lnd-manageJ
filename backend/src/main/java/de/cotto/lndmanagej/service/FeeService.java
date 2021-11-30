@@ -24,10 +24,23 @@ public class FeeService {
                 .reduce(Coins.NONE, Coins::add);
     }
 
+    public Coins getSourcedFeesForChannel(ChannelId channelId) {
+        return forwardingEventsDao.getEventsWithIncomingChannel(channelId).parallelStream()
+                .map(ForwardingEvent::fees)
+                .reduce(Coins.NONE, Coins::add);
+    }
+
     public Coins getEarnedFeesForPeer(Pubkey peer) {
         return channelService.getAllChannelsWith(peer).parallelStream()
                 .map(Channel::getId)
                 .map(this::getEarnedFeesForChannel)
+                .reduce(Coins.NONE, Coins::add);
+    }
+
+    public Coins getSourcedFeesForPeer(Pubkey peer) {
+        return channelService.getAllChannelsWith(peer).parallelStream()
+                .map(Channel::getId)
+                .map(this::getSourcedFeesForChannel)
                 .reduce(Coins.NONE, Coins::add);
     }
 }

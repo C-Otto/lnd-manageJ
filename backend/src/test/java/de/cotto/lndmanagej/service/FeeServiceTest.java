@@ -50,6 +50,22 @@ class FeeServiceTest {
     }
 
     @Test
+    void getSourcedFeesForChannel() {
+        when(dao.getEventsWithIncomingChannel(CHANNEL_ID)).thenReturn(List.of(FORWARDING_EVENT, FORWARDING_EVENT_2));
+        assertThat(feeService.getSourcedFeesForChannel(CHANNEL_ID)).isEqualTo(Coins.ofMilliSatoshis(101));
+    }
+
+    @Test
+    void getSourcedFeesForChannel_no_forward() {
+        assertThat(feeService.getSourcedFeesForChannel(CHANNEL_ID)).isEqualTo(Coins.NONE);
+    }
+
+    @Test
+    void getSourcedFeesForPeer_no_channel() {
+        assertThat(feeService.getSourcedFeesForPeer(PUBKEY)).isEqualTo(Coins.NONE);
+    }
+
+    @Test
     void getEarnedFeesForPeer() {
         when(dao.getEventsWithOutgoingChannel(CLOSED_CHANNEL.getId())).thenReturn(List.of(FORWARDING_EVENT_3));
         when(dao.getEventsWithOutgoingChannel(WAITING_CLOSE_CHANNEL_2.getId())).thenReturn(List.of(FORWARDING_EVENT));
@@ -57,5 +73,15 @@ class FeeServiceTest {
         when(channelService.getAllChannelsWith(PUBKEY))
                 .thenReturn(Set.of(CLOSED_CHANNEL, WAITING_CLOSE_CHANNEL_2, LOCAL_OPEN_CHANNEL_3));
         assertThat(feeService.getEarnedFeesForPeer(PUBKEY)).isEqualTo(Coins.ofMilliSatoshis(5_101));
+    }
+
+    @Test
+    void getSourcedFeesForPeer() {
+        when(dao.getEventsWithIncomingChannel(CLOSED_CHANNEL.getId())).thenReturn(List.of(FORWARDING_EVENT_3));
+        when(dao.getEventsWithIncomingChannel(WAITING_CLOSE_CHANNEL_2.getId())).thenReturn(List.of(FORWARDING_EVENT));
+        when(dao.getEventsWithIncomingChannel(LOCAL_OPEN_CHANNEL_3.getId())).thenReturn(List.of(FORWARDING_EVENT_2));
+        when(channelService.getAllChannelsWith(PUBKEY))
+                .thenReturn(Set.of(CLOSED_CHANNEL, WAITING_CLOSE_CHANNEL_2, LOCAL_OPEN_CHANNEL_3));
+        assertThat(feeService.getSourcedFeesForPeer(PUBKEY)).isEqualTo(Coins.ofMilliSatoshis(5_101));
     }
 }
