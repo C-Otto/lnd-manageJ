@@ -20,7 +20,7 @@ public class MetricsConfiguration extends MetricsConfigurerAdapter {
     @SuppressWarnings("PMD.CloseResource")
     public void configureReporters(MetricRegistry metricRegistry) {
         Slf4jReporter reporter = Slf4jReporter.forRegistry(metricRegistry)
-                .outputTo(LoggerFactory.getLogger(getClass()))
+                .outputTo(LoggerFactory.getLogger("Metrics"))
                 .convertRatesTo(TimeUnit.SECONDS)
                 .convertDurationsTo(TimeUnit.MILLISECONDS)
                 .build();
