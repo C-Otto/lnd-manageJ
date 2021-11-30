@@ -145,30 +145,30 @@ public class GrpcService extends GrpcBase {
     }
 
     @Timed
-    private List<Peer> listPeersWithoutCache() {
+    public List<Peer> listPeersWithoutCache() {
         return get(() -> lightningStub.listPeers(ListPeersRequest.getDefaultInstance()).getPeersList())
                 .orElse(List.of());
     }
 
     @Timed
-    private Optional<List<Transaction>> getTransactionsWithoutCache() {
+    public Optional<List<Transaction>> getTransactionsWithoutCache() {
         return get(
                 () -> lightningStub.getTransactions(GetTransactionsRequest.getDefaultInstance()).getTransactionsList()
         );
     }
 
-    private Optional<PendingChannelsResponse> getPendingChannels() {
-        return pendingChannelsCache.get("");
-    }
-
     @Timed
-    private Optional<PendingChannelsResponse> getPendingChannelsWithoutCache() {
+    public Optional<PendingChannelsResponse> getPendingChannelsWithoutCache() {
         return get(() -> lightningStub.pendingChannels(PendingChannelsRequest.getDefaultInstance()));
     }
 
     @Timed
-    private List<Channel> getChannelsWithoutCache() {
+    public List<Channel> getChannelsWithoutCache() {
         return get(() -> lightningStub.listChannels(ListChannelsRequest.getDefaultInstance()).getChannelsList())
                 .orElse(List.of());
+    }
+
+    private Optional<PendingChannelsResponse> getPendingChannels() {
+        return pendingChannelsCache.get("");
     }
 }
