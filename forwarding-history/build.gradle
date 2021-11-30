@@ -3,8 +3,8 @@ plugins {
 }
 
 dependencies {
-    implementation project(':backend')
     implementation project(':model')
+    implementation project(':grpc-adapter')
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     testRuntimeOnly 'com.h2database:h2'
     testFixturesApi testFixtures(project(':model'))
