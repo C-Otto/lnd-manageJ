@@ -21,6 +21,8 @@ import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHAN
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL_2;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,6 +42,29 @@ class FeeServiceTest {
         when(dao.getEventsWithIncomingChannel(CHANNEL_ID)).thenReturn(List.of(FORWARDING_EVENT_2, FORWARDING_EVENT_3));
         assertThat(feeService.getFeeReportForChannel(CHANNEL_ID))
                 .isEqualTo(new FeeReport(Coins.ofMilliSatoshis(101), Coins.ofMilliSatoshis(5_001)));
+    }
+
+    @Test
+    void getFeeReportForChannel_cached() {
+        feeService.getFeeReportForChannel(CHANNEL_ID);
+        feeService.getFeeReportForChannel(CHANNEL_ID);
+        verify(dao, times(1)).getEventsWithIncomingChannel(CHANNEL_ID);
+    }
+
+    @Test
+    void getFeeReportForChannel_closed() {
+        when(channelService.isClosed(CHANNEL_ID)).thenReturn(true);
+        when(dao.getEventsWithOutgoingChannel(CHANNEL_ID)).thenReturn(List.of(FORWARDING_EVENT));
+        assertThat(feeService.getFeeReportForChannel(CHANNEL_ID))
+                .isEqualTo(new FeeReport(Coins.ofMilliSatoshis(100), Coins.NONE));
+    }
+
+    @Test
+    void getFeeReportForChannel_closed_cached() {
+        when(channelService.isClosed(CHANNEL_ID)).thenReturn(true);
+        feeService.getFeeReportForChannel(CHANNEL_ID);
+        feeService.getFeeReportForChannel(CHANNEL_ID);
+        verify(dao, times(1)).getEventsWithIncomingChannel(CHANNEL_ID);
     }
 
     @Test

@@ -17,14 +17,19 @@ import java.time.Duration;
 public class FeeService {
     private final ForwardingEventsDao forwardingEventsDao;
     private final ChannelService channelService;
-    private final LoadingCache<ChannelId, FeeReport> cache;
+    private final LoadingCache<ChannelId, FeeReport> cacheForOpenChannels;
+    private final LoadingCache<ChannelId, FeeReport> cacheForClosedChannels;
 
     public FeeService(ForwardingEventsDao forwardingEventsDao, ChannelService channelService) {
         this.forwardingEventsDao = forwardingEventsDao;
         this.channelService = channelService;
-        cache = new CacheBuilder()
+        cacheForOpenChannels = new CacheBuilder()
                 .withRefresh(Duration.ofSeconds(5))
                 .withExpiry(Duration.ofSeconds(10))
+                .build(this::getFeeReportForChannelWithoutCache);
+        cacheForClosedChannels = new CacheBuilder()
+                .withRefresh(Duration.ofMinutes(30))
+                .withExpiry(Duration.ofHours(24))
                 .build(this::getFeeReportForChannelWithoutCache);
     }
 
@@ -33,7 +38,10 @@ public class FeeService {
     }
 
     public FeeReport getFeeReportForChannel(ChannelId channelId) {
-        return cache.get(channelId);
+        if (channelService.isClosed(channelId)) {
+            return cacheForClosedChannels.get(channelId);
+        }
+        return cacheForOpenChannels.get(channelId);
     }
 
     private FeeReport getFeeReportForChannelWithoutCache(ChannelId channelId) {
