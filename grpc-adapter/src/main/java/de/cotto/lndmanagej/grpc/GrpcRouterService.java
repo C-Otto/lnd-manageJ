@@ -27,7 +27,7 @@ public class GrpcRouterService extends GrpcBase {
     }
 
     @Timed
-    Iterator<RouterOuterClass.HtlcEvent> getHtlcEvents() {
+    public Iterator<RouterOuterClass.HtlcEvent> getHtlcEvents() {
         return get(() -> routerStub.subscribeHtlcEvents(SubscribeHtlcEventsRequest.getDefaultInstance()))
                 .orElse(Collections.emptyIterator());
     }
