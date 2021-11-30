@@ -1,5 +1,7 @@
 package de.cotto.lndmanagej.service;
 
+import com.github.benmanes.caffeine.cache.LoadingCache;
+import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
@@ -9,14 +11,21 @@ import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.statistics.ForwardingEventsDao;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+
 @Component
 public class FeeService {
     private final ForwardingEventsDao forwardingEventsDao;
     private final ChannelService channelService;
+    private final LoadingCache<ChannelId, FeeReport> cache;
 
     public FeeService(ForwardingEventsDao forwardingEventsDao, ChannelService channelService) {
         this.forwardingEventsDao = forwardingEventsDao;
         this.channelService = channelService;
+        cache = new CacheBuilder()
+                .withRefresh(Duration.ofSeconds(5))
+                .withExpiry(Duration.ofSeconds(10))
+                .build(this::getFeeReportForChannelWithoutCache);
     }
 
     public FeeReport getFeeReportForPeer(Pubkey pubkey) {
@@ -24,6 +33,10 @@ public class FeeService {
     }
 
     public FeeReport getFeeReportForChannel(ChannelId channelId) {
+        return cache.get(channelId);
+    }
+
+    private FeeReport getFeeReportForChannelWithoutCache(ChannelId channelId) {
         return new FeeReport(getEarnedFeesForChannel(channelId), getSourcedFeesForChannel(channelId));
     }
 
