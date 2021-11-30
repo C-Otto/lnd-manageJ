@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.controller;
 import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
@@ -44,6 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ChannelControllerIT {
     private static final String CHANNEL_PREFIX = "/api/channel/" + CHANNEL_ID.getShortChannelId();
     private static final String DETAILS_PREFIX = CHANNEL_PREFIX + "/details";
+    private static final FeeReport FEE_REPORT = new FeeReport(Coins.ofMilliSatoshis(1_234), Coins.ofMilliSatoshis(567));
 
     @Autowired
     private MockMvc mockMvc;
@@ -126,8 +128,7 @@ class ChannelControllerIT {
         when(onChainCostService.getOpenCosts(CHANNEL_ID)).thenReturn(Optional.of(Coins.ofSatoshis(1000)));
         when(onChainCostService.getCloseCosts(CHANNEL_ID)).thenReturn(Optional.of(Coins.ofSatoshis(2000)));
         when(balanceService.getBalanceInformation(CHANNEL_ID)).thenReturn(Optional.of(BALANCE_INFORMATION_2));
-        when(feeService.getEarnedFeesForChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(1_234));
-        when(feeService.getSourcedFeesForChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(567));
+        when(feeService.getFeeReportForChannel(CHANNEL_ID)).thenReturn(FEE_REPORT);
         mockMvc.perform(get(DETAILS_PREFIX))
                 .andExpect(jsonPath("$.channelIdShort", is(String.valueOf(CHANNEL_ID.getShortChannelId()))))
                 .andExpect(jsonPath("$.channelIdCompact", is(CHANNEL_ID.getCompactForm())))
@@ -165,8 +166,7 @@ class ChannelControllerIT {
     @Test
     void getChannelDetails_closed_channel() throws Exception {
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(CLOSED_CHANNEL));
-        when(feeService.getEarnedFeesForChannel(CHANNEL_ID)).thenReturn(Coins.NONE);
-        when(feeService.getSourcedFeesForChannel(CHANNEL_ID)).thenReturn(Coins.NONE);
+        when(feeService.getFeeReportForChannel(CHANNEL_ID)).thenReturn(new FeeReport(Coins.NONE, Coins.NONE));
         mockMvc.perform(get(DETAILS_PREFIX))
                 .andExpect(jsonPath("$.closeDetails.initiator", is("REMOTE")))
                 .andExpect(jsonPath("$.closeDetails.height", is(987_654)))
@@ -227,8 +227,7 @@ class ChannelControllerIT {
 
     @Test
     void getFeeReport() throws Exception {
-        when(feeService.getEarnedFeesForChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(1_234));
-        when(feeService.getSourcedFeesForChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(567));
+        when(feeService.getFeeReportForChannel(CHANNEL_ID)).thenReturn(FEE_REPORT);
         mockMvc.perform(get(CHANNEL_PREFIX + "/fee-report"))
                 .andExpect(jsonPath("$.earned", is("1234")))
                 .andExpect(jsonPath("$.sourced", is("567")));

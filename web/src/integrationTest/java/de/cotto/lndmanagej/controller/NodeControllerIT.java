@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.controller;
 import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
@@ -40,6 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = NodeController.class)
 class NodeControllerIT {
     private static final String NODE_PREFIX = "/api/node/" + PUBKEY_2;
+    private static final FeeReport FEE_REPORT = new FeeReport(Coins.ofMilliSatoshis(1_234), Coins.ofMilliSatoshis(567));
 
     @Autowired
     private MockMvc mockMvc;
@@ -84,8 +86,7 @@ class NodeControllerIT {
         when(onChainCostService.getOpenCostsWith(PUBKEY_2)).thenReturn(Coins.ofSatoshis(123));
         when(onChainCostService.getCloseCostsWith(PUBKEY_2)).thenReturn(Coins.ofSatoshis(456));
         when(balanceService.getBalanceInformation(PUBKEY_2)).thenReturn(BALANCE_INFORMATION);
-        when(feeService.getEarnedFeesForPeer(PUBKEY_2)).thenReturn(Coins.ofMilliSatoshis(1_234));
-        when(feeService.getSourcedFeesForPeer(PUBKEY_2)).thenReturn(Coins.ofMilliSatoshis(567));
+        when(feeService.getFeeReportForPeer(PUBKEY_2)).thenReturn(FEE_REPORT);
         List<String> channelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_2.toString());
         List<String> closedChannelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_3.toString());
         List<String> waitingCloseChannelIds = List.of(CHANNEL_ID.toString());
@@ -142,8 +143,7 @@ class NodeControllerIT {
 
     @Test
     void getFeeReport() throws Exception {
-        when(feeService.getEarnedFeesForPeer(PUBKEY_2)).thenReturn(Coins.ofMilliSatoshis(1_234));
-        when(feeService.getSourcedFeesForPeer(PUBKEY_2)).thenReturn(Coins.ofMilliSatoshis(567));
+        when(feeService.getFeeReportForPeer(PUBKEY_2)).thenReturn(FEE_REPORT);
         mockMvc.perform(get(NODE_PREFIX + "/fee-report"))
                 .andExpect(jsonPath("$.earned", is("1234")))
                 .andExpect(jsonPath("$.sourced", is("567")));

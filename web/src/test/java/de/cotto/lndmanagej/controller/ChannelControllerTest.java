@@ -11,6 +11,7 @@ import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.CloseInitiator;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
@@ -49,10 +50,10 @@ class ChannelControllerTest {
     private static final Coins CLOSE_COSTS = Coins.ofSatoshis(2);
     private static final OnChainCostsDto ON_CHAIN_COSTS = new OnChainCostsDto(OPEN_COSTS, CLOSE_COSTS);
     private static final PoliciesDto FEE_CONFIGURATION_DTO = PoliciesDto.createFrom(POLICIES);
-    private static final FeeReportDto FEE_REPORT_DTO =
-            new FeeReportDto(Coins.ofMilliSatoshis(1234), Coins.ofMilliSatoshis(567));
     private static final ClosedChannelDetailsDto CLOSED_CHANNEL_DETAILS_DTO =
             new ClosedChannelDetailsDto(CloseInitiator.REMOTE, 987_654);
+    private static final FeeReport FEE_REPORT = new FeeReport(Coins.ofMilliSatoshis(1_234), Coins.ofMilliSatoshis(567));
+    private static final FeeReportDto FEE_REPORT_DTO = FeeReportDto.createFrom(FEE_REPORT);
 
     @InjectMocks
     private ChannelController channelController;
@@ -83,8 +84,7 @@ class ChannelControllerTest {
         lenient().when(onChainCostService.getOpenCosts(CHANNEL_ID)).thenReturn(Optional.of(OPEN_COSTS));
         lenient().when(onChainCostService.getCloseCosts(CHANNEL_ID)).thenReturn(Optional.of(CLOSE_COSTS));
         lenient().when(policyService.getPolicies(CHANNEL_ID)).thenReturn(POLICIES);
-        lenient().when(feeService.getEarnedFeesForChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(1_234));
-        lenient().when(feeService.getSourcedFeesForChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(567));
+        lenient().when(feeService.getFeeReportForChannel(CHANNEL_ID)).thenReturn(FEE_REPORT);
     }
 
     @Test
@@ -214,8 +214,7 @@ class ChannelControllerTest {
 
     @Test
     void getFeeReport() {
-        when(feeService.getEarnedFeesForChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(1_234));
-        when(feeService.getSourcedFeesForChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(567));
+        when(feeService.getFeeReportForChannel(CHANNEL_ID)).thenReturn(FEE_REPORT);
         assertThat(channelController.getFeeReport(CHANNEL_ID)).isEqualTo(FEE_REPORT_DTO);
         verify(metrics).mark(argThat(name -> name.endsWith(".getFeeReport")));
     }

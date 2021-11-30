@@ -110,7 +110,7 @@ public class NodeController {
     }
 
     private FeeReportDto getFeeReportDto(Pubkey pubkey) {
-        return new FeeReportDto(feeService.getEarnedFeesForPeer(pubkey), feeService.getSourcedFeesForPeer(pubkey));
+        return FeeReportDto.createFrom(feeService.getFeeReportForPeer(pubkey));
     }
 
     private List<ChannelId> toSortedList(Set<? extends Channel> channels) {

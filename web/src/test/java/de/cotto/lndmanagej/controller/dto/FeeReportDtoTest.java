@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.controller.dto;
 
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.FeeReport;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,5 +19,11 @@ class FeeReportDtoTest {
     @Test
     void sourced() {
         assertThat(FEE_REPORT_DTO.sourced()).isEqualTo("567");
+    }
+
+    @Test
+    void createFrom() {
+        assertThat(FeeReportDto.createFrom(new FeeReport(Coins.ofSatoshis(1), Coins.ofSatoshis(2))))
+                .isEqualTo(new FeeReportDto("1000", "2000"));
     }
 }

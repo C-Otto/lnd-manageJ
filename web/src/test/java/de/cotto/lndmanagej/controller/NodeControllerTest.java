@@ -8,6 +8,7 @@ import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.metrics.Metrics;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.BalanceService;
@@ -49,6 +50,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class NodeControllerTest {
+    private static final FeeReport FEE_REPORT = new FeeReport(Coins.ofMilliSatoshis(1_234), Coins.ofMilliSatoshis(567));
+
     @InjectMocks
     private NodeController nodeController;
 
@@ -83,8 +86,7 @@ class NodeControllerTest {
         when(onChainCostService.getOpenCostsWith(any())).thenReturn(Coins.NONE);
         when(onChainCostService.getCloseCostsWith(any())).thenReturn(Coins.NONE);
         when(balanceService.getBalanceInformation(any(Pubkey.class))).thenReturn(BalanceInformation.EMPTY);
-        when(feeService.getEarnedFeesForPeer(any())).thenReturn(Coins.NONE);
-        when(feeService.getSourcedFeesForPeer(any())).thenReturn(Coins.NONE);
+        when(feeService.getFeeReportForPeer(any())).thenReturn(new FeeReport(Coins.NONE, Coins.NONE));
         NodeDetailsDto expectedDetails = new NodeDetailsDto(
                 PUBKEY_2,
                 ALIAS_2,
@@ -119,8 +121,7 @@ class NodeControllerTest {
         when(onChainCostService.getOpenCostsWith(PUBKEY_2)).thenReturn(openCosts);
         when(onChainCostService.getCloseCostsWith(PUBKEY_2)).thenReturn(closeCosts);
         when(balanceService.getBalanceInformation(PUBKEY_2)).thenReturn(BALANCE_INFORMATION);
-        when(feeService.getEarnedFeesForPeer(any())).thenReturn(Coins.ofMilliSatoshis(1234));
-        when(feeService.getSourcedFeesForPeer(any())).thenReturn(Coins.ofMilliSatoshis(567));
+        when(feeService.getFeeReportForPeer(PUBKEY_2)).thenReturn(FEE_REPORT);
         NodeDetailsDto expectedDetails = new NodeDetailsDto(
                 PUBKEY_2,
                 ALIAS_2,
@@ -176,8 +177,7 @@ class NodeControllerTest {
 
     @Test
     void getFeeReport() {
-        when(feeService.getEarnedFeesForPeer(PUBKEY)).thenReturn(Coins.ofMilliSatoshis(1_234));
-        when(feeService.getSourcedFeesForPeer(PUBKEY)).thenReturn(Coins.ofMilliSatoshis(567));
+        when(feeService.getFeeReportForPeer(PUBKEY)).thenReturn(FEE_REPORT);
         assertThat(nodeController.getFeeReport(PUBKEY)).isEqualTo(new FeeReportDto("1234", "567"));
         verify(metrics).mark(argThat(name -> name.endsWith(".getFeeReport")));
     }
