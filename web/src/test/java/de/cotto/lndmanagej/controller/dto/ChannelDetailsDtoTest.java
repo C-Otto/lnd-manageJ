@@ -26,7 +26,8 @@ class ChannelDetailsDtoTest {
             BALANCE_INFORMATION,
             ON_CHAIN_COSTS,
             PoliciesDto.EMPTY,
-            CLOSE_DETAILS
+            CLOSE_DETAILS,
+            new FeeReportDto(Coins.ofMilliSatoshis(1234))
     );
 
     @Test
@@ -82,7 +83,8 @@ class ChannelDetailsDtoTest {
                 BALANCE_INFORMATION,
                 ON_CHAIN_COSTS,
                 PoliciesDto.EMPTY,
-                CLOSE_DETAILS
+                CLOSE_DETAILS,
+                new FeeReportDto(Coins.ofMilliSatoshis(1234))
         );
         ChannelStatusDto channelStatusDto =
                 ChannelStatusDto.createFrom(new ChannelStatus(false, true, false, OPEN));
@@ -97,6 +99,11 @@ class ChannelDetailsDtoTest {
     @Test
     void balance() {
         assertThat(CHANNEL_DETAILS_DTO.balance()).isEqualTo(BalanceInformationDto.createFrom(BALANCE_INFORMATION));
+    }
+
+    @Test
+    void feeReport() {
+        assertThat(CHANNEL_DETAILS_DTO.feeReport()).isEqualTo(new FeeReportDto(Coins.ofMilliSatoshis(1_234)));
     }
 
     @Test

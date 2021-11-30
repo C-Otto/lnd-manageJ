@@ -5,6 +5,7 @@ import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.controller.dto.ChannelDto;
 import de.cotto.lndmanagej.controller.dto.ClosedChannelDetailsDto;
+import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
@@ -19,6 +20,7 @@ import de.cotto.lndmanagej.model.Policies;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
+import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.OnChainCostService;
 import de.cotto.lndmanagej.service.PolicyService;
@@ -31,8 +33,9 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Nullable;
 
 @RestController
-@RequestMapping("/api/channel/{channelId}")
 @Import(ObjectMapperConfiguration.class)
+@SuppressWarnings("PMD.ExcessiveImports")
+@RequestMapping("/api/channel/{channelId}")
 public class ChannelController {
     private final ChannelService channelService;
     private final NodeService nodeService;
@@ -40,6 +43,7 @@ public class ChannelController {
     private final BalanceService balanceService;
     private final OnChainCostService onChainCostService;
     private final PolicyService policyService;
+    private final FeeService feeService;
 
     public ChannelController(
             ChannelService channelService,
@@ -47,14 +51,16 @@ public class ChannelController {
             BalanceService balanceService,
             OnChainCostService onChainCostService,
             PolicyService policyService,
+            FeeService feeService,
             Metrics metrics
     ) {
         this.channelService = channelService;
         this.nodeService = nodeService;
         this.balanceService = balanceService;
         this.onChainCostService = onChainCostService;
-        this.metrics = metrics;
         this.policyService = policyService;
+        this.feeService = feeService;
+        this.metrics = metrics;
     }
 
     @GetMapping("/")
@@ -83,7 +89,8 @@ public class ChannelController {
                 getBalanceInformation(channelId),
                 getOnChainCosts(channelId),
                 getPoliciesForChannel(localChannel),
-                getCloseDetailsForChannel(localChannel)
+                getCloseDetailsForChannel(localChannel),
+                getFeeReportDto(localChannel.getId())
         );
     }
 
@@ -110,6 +117,17 @@ public class ChannelController {
             throw new NotFoundException();
         }
         return new ClosedChannelDetailsDto(closedChannel.getCloseInitiator(), closedChannel.getCloseHeight());
+    }
+
+    @GetMapping("/fee-report")
+    public FeeReportDto getFeeReport(@PathVariable ChannelId channelId) {
+        mark("getFeeReport");
+        return getFeeReportDto(channelId);
+    }
+
+    private FeeReportDto getFeeReportDto(ChannelId channelId) {
+        Coins earned = feeService.getEarnedFeesForChannel(channelId);
+        return new FeeReportDto(earned);
     }
 
     private PoliciesDto getPoliciesForChannel(@Nullable LocalChannel channel) {

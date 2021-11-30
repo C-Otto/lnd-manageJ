@@ -4,6 +4,7 @@ import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.controller.dto.ChannelDto;
 import de.cotto.lndmanagej.controller.dto.ClosedChannelDetailsDto;
+import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.metrics.Metrics;
@@ -13,6 +14,7 @@ import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
+import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.OnChainCostService;
 import de.cotto.lndmanagej.service.PolicyService;
@@ -47,6 +49,7 @@ class ChannelControllerTest {
     private static final Coins CLOSE_COSTS = Coins.ofSatoshis(2);
     private static final OnChainCostsDto ON_CHAIN_COSTS = new OnChainCostsDto(OPEN_COSTS, CLOSE_COSTS);
     private static final PoliciesDto FEE_CONFIGURATION_DTO = PoliciesDto.createFrom(POLICIES);
+    private static final FeeReportDto FEE_REPORT_DTO = new FeeReportDto(Coins.ofMilliSatoshis(1234));
     private static final ClosedChannelDetailsDto CLOSED_CHANNEL_DETAILS_DTO =
             new ClosedChannelDetailsDto(CloseInitiator.REMOTE, 987_654);
 
@@ -71,11 +74,15 @@ class ChannelControllerTest {
     @Mock
     private PolicyService policyService;
 
+    @Mock
+    private FeeService feeService;
+
     @BeforeEach
     void setUp() {
         lenient().when(onChainCostService.getOpenCosts(CHANNEL_ID)).thenReturn(Optional.of(OPEN_COSTS));
         lenient().when(onChainCostService.getCloseCosts(CHANNEL_ID)).thenReturn(Optional.of(CLOSE_COSTS));
         lenient().when(policyService.getPolicies(CHANNEL_ID)).thenReturn(POLICIES);
+        lenient().when(feeService.getEarnedFeesForChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(1_234));
     }
 
     @Test
@@ -114,7 +121,8 @@ class ChannelControllerTest {
                 LOCAL_OPEN_CHANNEL.getBalanceInformation(),
                 ON_CHAIN_COSTS,
                 FEE_CONFIGURATION_DTO,
-                ClosedChannelDetailsDto.UNKNOWN
+                ClosedChannelDetailsDto.UNKNOWN,
+                FEE_REPORT_DTO
         );
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
@@ -133,7 +141,8 @@ class ChannelControllerTest {
                 LOCAL_OPEN_CHANNEL_PRIVATE.getBalanceInformation(),
                 ON_CHAIN_COSTS,
                 FEE_CONFIGURATION_DTO,
-                ClosedChannelDetailsDto.UNKNOWN
+                ClosedChannelDetailsDto.UNKNOWN,
+                FEE_REPORT_DTO
         );
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_PRIVATE));
@@ -201,6 +210,13 @@ class ChannelControllerTest {
                 .isThrownBy(() -> channelController.getCloseDetails(CHANNEL_ID));
     }
 
+    @Test
+    void getFeeReport() {
+        when(feeService.getEarnedFeesForChannel(CHANNEL_ID)).thenReturn(Coins.ofSatoshis(123));
+        assertThat(channelController.getFeeReport(CHANNEL_ID)).isEqualTo(new FeeReportDto(Coins.ofSatoshis(123)));
+        verify(metrics).mark(argThat(name -> name.endsWith(".getFeeReport")));
+    }
+
     private ChannelDetailsDto mockForChannelWithoutPolicies(
             LocalChannel channel,
             String closeInitiator,
@@ -215,7 +231,8 @@ class ChannelControllerTest {
                 BalanceInformation.EMPTY,
                 ON_CHAIN_COSTS,
                 PoliciesDto.EMPTY,
-                new ClosedChannelDetailsDto(closeInitiator, closeHeight)
+                new ClosedChannelDetailsDto(closeInitiator, closeHeight),
+                FEE_REPORT_DTO
         );
     }
 }
