@@ -28,7 +28,17 @@ public class SettledInvoicesDaoImpl implements SettledInvoicesDao {
     }
 
     @Override
-    public long getOffset() {
+    public void save(SettledInvoice settledInvoice) {
+        repository.save(SettledInvoiceJpaDto.createFromInvoice(settledInvoice));
+    }
+
+    @Override
+    public long getAddIndexOffset() {
         return repository.getMaxAddIndexWithoutGaps();
+    }
+
+    @Override
+    public long getSettleIndexOffset() {
+        return repository.getMaxSettledIndex();
     }
 }

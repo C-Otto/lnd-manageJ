@@ -24,8 +24,12 @@ public class SettledInvoices {
     public void refresh() {
         List<SettledInvoice> settledInvoices;
         do {
-            settledInvoices = grpcInvoices.getSettledInvoicesAfter(dao.getOffset()).orElse(List.of());
+            settledInvoices = grpcInvoices.getSettledInvoicesAfter(dao.getAddIndexOffset()).orElse(List.of());
             dao.save(settledInvoices.stream().filter(SettledInvoice::isValid).collect(toList()));
         } while (settledInvoices.size() == grpcInvoices.getLimit());
+
+        grpcInvoices.getNewSettledInvoicesAfter(dao.getSettleIndexOffset())
+                .filter(SettledInvoice::isValid)
+                .forEach(dao::save);
     }
 }

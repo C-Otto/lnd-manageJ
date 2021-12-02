@@ -28,16 +28,35 @@ class SettledInvoicesDaoImplTest {
     private SettledInvoicesRepository repository;
 
     @Test
-    void getOffset_initially_0() {
+    void getSettleIndexOffset_initially_0() {
+        when(repository.getMaxSettledIndex()).thenReturn(0L);
+        assertThat(dao.getSettleIndexOffset()).isEqualTo(0);
+    }
+
+    @Test
+    void getSettleIndexOffset() {
+        long expectedOffset = 123;
+        when(repository.getMaxSettledIndex()).thenReturn(expectedOffset);
+        assertThat(dao.getSettleIndexOffset()).isEqualTo(expectedOffset);
+    }
+
+    @Test
+    void getAddIndexOffset_initially_0() {
         when(repository.getMaxAddIndexWithoutGaps()).thenReturn(0L);
-        assertThat(dao.getOffset()).isEqualTo(0);
+        assertThat(dao.getAddIndexOffset()).isEqualTo(0);
     }
 
     @Test
     void getMaxAddIndexWithoutGaps() {
         long expectedOffset = 123;
         when(repository.getMaxAddIndexWithoutGaps()).thenReturn(expectedOffset);
-        assertThat(dao.getOffset()).isEqualTo(expectedOffset);
+        assertThat(dao.getAddIndexOffset()).isEqualTo(expectedOffset);
+    }
+
+    @Test
+    void save_single() {
+        dao.save(SETTLED_INVOICE);
+        verify(repository).save(argThat(jpaDto -> jpaDto.getMemo().equals(SETTLED_INVOICE.memo())));
     }
 
     @Test

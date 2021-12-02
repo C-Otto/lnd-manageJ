@@ -9,8 +9,12 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.HexFormat;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 @Component
 public class GrpcInvoices {
@@ -23,6 +27,10 @@ public class GrpcInvoices {
         this.grpcService = grpcService;
     }
 
+    public int getLimit() {
+        return LIMIT;
+    }
+
     public Optional<List<SettledInvoice>> getSettledInvoicesAfter(long offset) {
         ListInvoiceResponse list = grpcService.getInvoices(offset, LIMIT).orElse(null);
         if (list == null) {
@@ -31,6 +39,14 @@ public class GrpcInvoices {
         return Optional.ofNullable(list.getInvoicesList().stream()
                 .map(this::toSettledInvoice)
                 .toList());
+    }
+
+    public Stream<SettledInvoice> getNewSettledInvoicesAfter(long settleIndexOffset) {
+        return grpcService.subscribeToSettledInvoices(settleIndexOffset)
+                .map(this::toStream)
+                .orElse(Stream.of())
+                .map(this::toSettledInvoice)
+                .filter(SettledInvoice::isValid);
     }
 
     private SettledInvoice toSettledInvoice(Invoice lndInvoice) {
@@ -47,7 +63,7 @@ public class GrpcInvoices {
         );
     }
 
-    public int getLimit() {
-        return LIMIT;
+    private Stream<Invoice> toStream(Iterator<Invoice> iterator) {
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false);
     }
 }

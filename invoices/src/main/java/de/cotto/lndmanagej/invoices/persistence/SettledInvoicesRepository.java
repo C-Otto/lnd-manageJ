@@ -7,4 +7,7 @@ public interface SettledInvoicesRepository extends JpaRepository<SettledInvoiceJ
     @Query("SELECT coalesce(max(i.addIndex), 0) FROM SettledInvoiceJpaDto i WHERE " +
             "i.settleIndex = (SELECT COUNT(j) FROM SettledInvoiceJpaDto j WHERE j.settleIndex <= i.settleIndex)")
     long getMaxAddIndexWithoutGaps();
+
+    @Query("SELECT coalesce(max(settleIndex), 0) FROM SettledInvoiceJpaDto")
+    long getMaxSettledIndex();
 }

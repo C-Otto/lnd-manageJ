@@ -7,5 +7,9 @@ import java.util.Collection;
 public interface SettledInvoicesDao {
     void save(Collection<SettledInvoice> settledInvoices);
 
-    long getOffset();
+    void save(SettledInvoice settledInvoice);
+
+    long getAddIndexOffset();
+
+    long getSettleIndexOffset();
 }

@@ -17,6 +17,8 @@ import lnrpc.ForwardingHistoryRequest;
 import lnrpc.ForwardingHistoryResponse;
 import lnrpc.GetInfoResponse;
 import lnrpc.GetTransactionsRequest;
+import lnrpc.Invoice;
+import lnrpc.InvoiceSubscription;
 import lnrpc.LightningGrpc;
 import lnrpc.ListChannelsRequest;
 import lnrpc.ListInvoiceRequest;
@@ -34,6 +36,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -153,6 +156,13 @@ public class GrpcService extends GrpcBase {
                 .setNumMaxInvoices(limit)
                 .build();
         return get(() -> lightningStub.listInvoices(request));
+    }
+
+    @Timed
+    public Optional<Iterator<Invoice>> subscribeToSettledInvoices(long settleIndex) {
+        return get(() -> lightningStub.subscribeInvoices(InvoiceSubscription.newBuilder()
+                .setSettleIndex(settleIndex)
+                .build()));
     }
 
     @Timed
