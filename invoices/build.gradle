@@ -1,0 +1,13 @@
+plugins {
+    id 'lnd-manageJ.java-library-conventions'
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation project(':model')
+    implementation project(':caching')
+    implementation project(':grpc-adapter')
+    testRuntimeOnly 'com.h2database:h2'
+    testFixturesApi testFixtures(project(':model'))
+}
