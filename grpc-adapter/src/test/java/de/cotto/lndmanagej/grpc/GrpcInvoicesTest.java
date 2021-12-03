@@ -97,6 +97,15 @@ class GrpcInvoicesTest {
         }
 
         @Test
+        void with_keysend_message_v2() {
+            // https://github.com/alexbosworth/keysend_protocols
+            mockResponse(keysendInvoiceV2());
+            assertThat(grpcInvoices.getSettledInvoicesAfter(0L)).contains(
+                    List.of(SETTLED_INVOICE_KEYSEND)
+            );
+        }
+
+        @Test
         void with_keysend_message_just_preimage() {
             LinkedHashMap<Long, ByteString> customRecords = new LinkedHashMap<>();
             customRecords.put(5_482_373_484L, ByteString.copyFromUtf8("000"));
@@ -195,6 +204,13 @@ class GrpcInvoicesTest {
         LinkedHashMap<Long, ByteString> customRecords = new LinkedHashMap<>();
         customRecords.put(5_482_373_484L, ByteString.copyFromUtf8("000"));
         customRecords.put(7_629_168L, ByteString.copyFromUtf8(KEYSEND_MESSAGE));
+        return invoice(SETTLED, SETTLED_INVOICE_KEYSEND, customRecords);
+    }
+
+    private Invoice keysendInvoiceV2() {
+        LinkedHashMap<Long, ByteString> customRecords = new LinkedHashMap<>();
+        customRecords.put(5_482_373_484L, ByteString.copyFromUtf8("000"));
+        customRecords.put(34_349_334L, ByteString.copyFromUtf8(KEYSEND_MESSAGE));
         return invoice(SETTLED, SETTLED_INVOICE_KEYSEND, customRecords);
     }
 

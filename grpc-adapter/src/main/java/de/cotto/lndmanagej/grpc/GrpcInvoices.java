@@ -24,6 +24,7 @@ public class GrpcInvoices {
     private static final HexFormat HEX_FORMAT = HexFormat.of();
     private static final long KEYSEND_PREIMAGE = 5_482_373_484L;
     private static final long KEYSEND_DATA = 7_629_168L;
+    private static final long KEYSEND_DATA_V2 = 34_349_334L;
 
     private final GrpcService grpcService;
 
@@ -71,9 +72,14 @@ public class GrpcInvoices {
     private Optional<String> getKeysendMessage(Invoice lndInvoice) {
         return lndInvoice.getHtlcsList().stream()
                 .map(InvoiceHTLC::getCustomRecordsMap)
-                .filter(map -> map.containsKey(KEYSEND_PREIMAGE))
-                .filter(map -> map.containsKey(KEYSEND_DATA))
-                .map(map -> map.get(KEYSEND_DATA))
+                .filter(map1 -> map1.containsKey(KEYSEND_PREIMAGE))
+                .filter(map -> map.containsKey(KEYSEND_DATA) || map.containsKey(KEYSEND_DATA_V2))
+                .map(map -> {
+                    if (map.containsKey(KEYSEND_DATA)) {
+                        return map.get(KEYSEND_DATA);
+                    }
+                    return map.get(KEYSEND_DATA_V2);
+                })
                 .map(ByteString::toStringUtf8)
                 .findFirst();
     }
