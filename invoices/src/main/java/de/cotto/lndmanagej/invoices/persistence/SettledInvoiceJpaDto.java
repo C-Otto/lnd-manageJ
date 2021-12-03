@@ -4,6 +4,7 @@ import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.SettledInvoice;
 
 import javax.annotation.Nullable;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Index;
@@ -31,6 +32,7 @@ class SettledInvoiceJpaDto {
     private String memo;
 
     @Nullable
+    @Column(length = 5_000)
     private String keysendMessage;
 
     public SettledInvoiceJpaDto() {
