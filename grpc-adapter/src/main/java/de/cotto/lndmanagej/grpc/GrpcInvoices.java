@@ -1,8 +1,10 @@
 package de.cotto.lndmanagej.grpc;
 
+import com.google.protobuf.ByteString;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.SettledInvoice;
 import lnrpc.Invoice;
+import lnrpc.InvoiceHTLC;
 import lnrpc.ListInvoiceResponse;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +22,8 @@ import java.util.stream.StreamSupport;
 public class GrpcInvoices {
     private static final int LIMIT = 1_000;
     private static final HexFormat HEX_FORMAT = HexFormat.of();
+    private static final long KEYSEND_PREIMAGE = 5_482_373_484L;
+    private static final long KEYSEND_DATA = 7_629_168L;
 
     private final GrpcService grpcService;
 
@@ -59,8 +63,19 @@ public class GrpcInvoices {
                 LocalDateTime.ofEpochSecond(lndInvoice.getSettleDate(), 0, ZoneOffset.UTC),
                 HEX_FORMAT.formatHex(lndInvoice.getRHash().toByteArray()),
                 Coins.ofMilliSatoshis(lndInvoice.getAmtPaidMsat()),
-                lndInvoice.getMemo()
+                lndInvoice.getMemo(),
+                getKeysendMessage(lndInvoice)
         );
+    }
+
+    private Optional<String> getKeysendMessage(Invoice lndInvoice) {
+        return lndInvoice.getHtlcsList().stream()
+                .map(InvoiceHTLC::getCustomRecordsMap)
+                .filter(map -> map.containsKey(KEYSEND_PREIMAGE))
+                .filter(map -> map.containsKey(KEYSEND_DATA))
+                .map(map -> map.get(KEYSEND_DATA))
+                .map(ByteString::toStringUtf8)
+                .findFirst();
     }
 
     private Stream<Invoice> toStream(Iterator<Invoice> iterator) {

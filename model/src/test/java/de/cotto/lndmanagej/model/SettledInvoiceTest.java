@@ -3,12 +3,15 @@ package de.cotto.lndmanagej.model;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.ADD_INDEX;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.AMOUNT_PAID;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.HASH;
+import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.KEYSEND_MESSAGE;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.MEMO;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE;
+import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE_KEYSEND;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLE_DATE;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLE_INDEX;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,7 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SettledInvoiceTest {
     @Test
     void invalid() {
-        assertThat(SettledInvoice.INVALID).isEqualTo(new SettledInvoice(-1, -1, LocalDateTime.MIN, "", Coins.NONE, ""));
+        SettledInvoice expected = new SettledInvoice(-1, -1, LocalDateTime.MIN, "", Coins.NONE, "", Optional.empty());
+        assertThat(SettledInvoice.INVALID).isEqualTo(expected);
     }
 
     @Test
@@ -53,5 +57,15 @@ class SettledInvoiceTest {
     @Test
     void memo() {
         assertThat(SETTLED_INVOICE.memo()).isEqualTo(MEMO);
+    }
+
+    @Test
+    void keysendMessage_empty() {
+        assertThat(SETTLED_INVOICE.keysendMessage()).isEmpty();
+    }
+
+    @Test
+    void keysendMessage() {
+        assertThat(SETTLED_INVOICE_KEYSEND.keysendMessage()).contains(KEYSEND_MESSAGE);
     }
 }

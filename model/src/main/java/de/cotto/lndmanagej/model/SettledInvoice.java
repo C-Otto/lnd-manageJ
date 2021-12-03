@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.model;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 public record SettledInvoice(
         long addIndex,
@@ -8,9 +9,11 @@ public record SettledInvoice(
         LocalDateTime settleDate,
         String hash,
         Coins amountPaid,
-        String memo
+        String memo,
+        Optional<String> keysendMessage
 ) {
-    public static final SettledInvoice INVALID = new SettledInvoice(-1, -1, LocalDateTime.MIN, "", Coins.NONE, "");
+    public static final SettledInvoice INVALID =
+            new SettledInvoice(-1, -1, LocalDateTime.MIN, "", Coins.NONE, "", Optional.empty());
 
     public boolean isValid() {
         return !INVALID.equals(this);

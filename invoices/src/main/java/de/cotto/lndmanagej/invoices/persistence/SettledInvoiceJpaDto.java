@@ -11,6 +11,7 @@ import javax.persistence.Table;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Objects;
+import java.util.Optional;
 
 @Entity
 @Table(name = "settled_invoices", indexes = {@Index(unique = true, columnList = "settleIndex")})
@@ -29,6 +30,9 @@ class SettledInvoiceJpaDto {
     @Nullable
     private String memo;
 
+    @Nullable
+    private String keysendMessage;
+
     public SettledInvoiceJpaDto() {
         // for JPA
     }
@@ -41,6 +45,7 @@ class SettledInvoiceJpaDto {
         jpaDto.hash = settledInvoice.hash();
         jpaDto.amountPaid = settledInvoice.amountPaid().milliSatoshis();
         jpaDto.memo = settledInvoice.memo();
+        jpaDto.keysendMessage = settledInvoice.keysendMessage().orElse(null);
         return jpaDto;
     }
 
@@ -52,7 +57,8 @@ class SettledInvoiceJpaDto {
                 localDateTime,
                 Objects.requireNonNull(hash),
                 Coins.ofMilliSatoshis(amountPaid),
-                Objects.requireNonNull(memo)
+                Objects.requireNonNull(memo),
+                Optional.ofNullable(keysendMessage)
         );
     }
 
@@ -78,5 +84,10 @@ class SettledInvoiceJpaDto {
 
     public String getMemo() {
         return Objects.requireNonNull(memo);
+    }
+
+    @Nullable
+    public String getKeysendMessage() {
+        return keysendMessage;
     }
 }

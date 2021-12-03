@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.model;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 public class SettledInvoiceFixtures {
     public static final LocalDateTime SETTLE_DATE = LocalDateTime.of(2021, 12, 2, 16, 4, 30);
@@ -14,6 +15,7 @@ public class SettledInvoiceFixtures {
     public static final Coins AMOUNT_PAID_2 = Coins.ofMilliSatoshis(4_567);
     public static final String MEMO = "this is a memo";
     public static final String MEMO_2 = "yet another memo";
+    public static final String KEYSEND_MESSAGE = "hello world";
 
     public static final SettledInvoice SETTLED_INVOICE = new SettledInvoice(
             ADD_INDEX,
@@ -21,7 +23,18 @@ public class SettledInvoiceFixtures {
             SETTLE_DATE,
             HASH,
             AMOUNT_PAID,
-            MEMO
+            MEMO,
+            Optional.empty()
+    );
+
+    public static final SettledInvoice SETTLED_INVOICE_KEYSEND = new SettledInvoice(
+            ADD_INDEX,
+            SETTLE_INDEX,
+            SETTLE_DATE,
+            HASH,
+            AMOUNT_PAID,
+            MEMO,
+            Optional.of(KEYSEND_MESSAGE)
     );
 
     public static final SettledInvoice SETTLED_INVOICE_2 = new SettledInvoice(
@@ -30,6 +43,7 @@ public class SettledInvoiceFixtures {
             SETTLE_DATE.plusSeconds(1),
             HASH_2,
             AMOUNT_PAID_2,
-            MEMO_2
+            MEMO_2,
+            Optional.empty()
     );
 }

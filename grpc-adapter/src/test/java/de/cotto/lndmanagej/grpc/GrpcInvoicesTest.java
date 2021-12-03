@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.grpc;
 import com.google.protobuf.ByteString;
 import de.cotto.lndmanagej.model.SettledInvoice;
 import lnrpc.Invoice;
+import lnrpc.InvoiceHTLC;
 import lnrpc.ListInvoiceResponse;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -15,11 +16,15 @@ import javax.annotation.Nullable;
 import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.HexFormat;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.KEYSEND_MESSAGE;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE_2;
+import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE_KEYSEND;
 import static lnrpc.Invoice.InvoiceState.ACCEPTED;
 import static lnrpc.Invoice.InvoiceState.CANCELED;
 import static lnrpc.Invoice.InvoiceState.OPEN;
@@ -60,7 +65,7 @@ class GrpcInvoicesTest {
         }
 
         @Test
-        void with_events() {
+        void with_invoices() {
             ListInvoiceResponse response = ListInvoiceResponse.newBuilder()
                     .addInvoices(invoice(SETTLED, SETTLED_INVOICE))
                     .addInvoices(invoice(SETTLED, SETTLED_INVOICE_2))
@@ -81,6 +86,40 @@ class GrpcInvoicesTest {
             assertThat(grpcInvoices.getSettledInvoicesAfter(0L)).contains(
                     List.of(SettledInvoice.INVALID, SettledInvoice.INVALID)
             );
+        }
+
+        @Test
+        void with_keysend_message() {
+            mockResponse(keysendInvoice());
+            assertThat(grpcInvoices.getSettledInvoicesAfter(0L)).contains(
+                    List.of(SETTLED_INVOICE_KEYSEND)
+            );
+        }
+
+        @Test
+        void with_keysend_message_just_preimage() {
+            LinkedHashMap<Long, ByteString> customRecords = new LinkedHashMap<>();
+            customRecords.put(5_482_373_484L, ByteString.copyFromUtf8("000"));
+            mockResponse(invoice(SETTLED, SETTLED_INVOICE_KEYSEND, customRecords));
+            assertThat(grpcInvoices.getSettledInvoicesAfter(0L)).contains(
+                    List.of(SETTLED_INVOICE)
+            );
+        }
+
+        @Test
+        void with_keysend_message_without_preimage() {
+            LinkedHashMap<Long, ByteString> customRecords = new LinkedHashMap<>();
+            customRecords.put(7_629_168L, ByteString.copyFromUtf8(KEYSEND_MESSAGE));
+            mockResponse(invoice(SETTLED, SETTLED_INVOICE_KEYSEND, customRecords));
+            assertThat(grpcInvoices.getSettledInvoicesAfter(0L)).contains(
+                    List.of(SETTLED_INVOICE)
+            );
+        }
+
+        private void mockResponse(Invoice invoice) {
+            when(grpcService.getInvoices(anyLong(), anyInt())).thenReturn(Optional.of(ListInvoiceResponse.newBuilder()
+                    .addInvoices(invoice)
+                    .build()));
         }
 
         @Test
@@ -144,6 +183,7 @@ class GrpcInvoicesTest {
                     .thenReturn(Optional.of(Collections.emptyIterator()));
             assertThat(grpcInvoices.getNewSettledInvoicesAfter(SETTLE_INDEX_OFFSET)).isEmpty();
         }
+
     }
 
     @Test
@@ -151,7 +191,25 @@ class GrpcInvoicesTest {
         assertThat(grpcInvoices.getLimit()).isEqualTo(LIMIT);
     }
 
-    private Invoice invoice(Invoice.InvoiceState state, @Nullable SettledInvoice settledInvoice) {
+    private Invoice keysendInvoice() {
+        LinkedHashMap<Long, ByteString> customRecords = new LinkedHashMap<>();
+        customRecords.put(5_482_373_484L, ByteString.copyFromUtf8("000"));
+        customRecords.put(7_629_168L, ByteString.copyFromUtf8(KEYSEND_MESSAGE));
+        return invoice(SETTLED, SETTLED_INVOICE_KEYSEND, customRecords);
+    }
+
+    private Invoice invoice(
+            Invoice.InvoiceState state,
+            @Nullable SettledInvoice settledInvoice
+    ) {
+        return invoice(state, settledInvoice, Map.of());
+    }
+
+    private Invoice invoice(
+            Invoice.InvoiceState state,
+            @Nullable SettledInvoice settledInvoice,
+            Map<Long, ByteString> customRecords
+    ) {
         if (settledInvoice == null) {
             return Invoice.newBuilder().setState(state).build();
         }
@@ -163,6 +221,7 @@ class GrpcInvoicesTest {
                 .setMemo(settledInvoice.memo())
                 .setSettleDate(settledInvoice.settleDate().toEpochSecond(ZoneOffset.UTC))
                 .setAmtPaidMsat(settledInvoice.amountPaid().milliSatoshis())
+                .addHtlcs(InvoiceHTLC.newBuilder().putAllCustomRecords(customRecords).build())
                 .build();
     }
 }

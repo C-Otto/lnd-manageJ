@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -55,7 +56,7 @@ class SettledInvoicesRepositoryIT {
 
     private SettledInvoiceJpaDto invoice(int addIndex, int settleIndex) {
         return SettledInvoiceJpaDto.createFromInvoice(
-                new SettledInvoice(addIndex, settleIndex, LocalDateTime.MIN, "", Coins.NONE, "")
+                new SettledInvoice(addIndex, settleIndex, LocalDateTime.MIN, "", Coins.NONE, "", Optional.empty())
         );
     }
 }
