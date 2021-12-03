@@ -29,27 +29,27 @@ class SettledInvoicesDaoImplTest {
 
     @Test
     void getSettleIndexOffset_initially_0() {
-        when(repository.getMaxSettledIndex()).thenReturn(0L);
+        when(repository.getMaxSettledIndexWithoutGaps()).thenReturn(0L);
         assertThat(dao.getSettleIndexOffset()).isEqualTo(0);
     }
 
     @Test
     void getSettleIndexOffset() {
         long expectedOffset = 123;
-        when(repository.getMaxSettledIndex()).thenReturn(expectedOffset);
+        when(repository.getMaxSettledIndexWithoutGaps()).thenReturn(expectedOffset);
         assertThat(dao.getSettleIndexOffset()).isEqualTo(expectedOffset);
     }
 
     @Test
     void getAddIndexOffset_initially_0() {
-        when(repository.getMaxAddIndexWithoutGaps()).thenReturn(0L);
+        when(repository.getMaxAddIndex()).thenReturn(0L);
         assertThat(dao.getAddIndexOffset()).isEqualTo(0);
     }
 
     @Test
     void getMaxAddIndexWithoutGaps() {
         long expectedOffset = 123;
-        when(repository.getMaxAddIndexWithoutGaps()).thenReturn(expectedOffset);
+        when(repository.getMaxAddIndex()).thenReturn(expectedOffset);
         assertThat(dao.getAddIndexOffset()).isEqualTo(expectedOffset);
     }
 

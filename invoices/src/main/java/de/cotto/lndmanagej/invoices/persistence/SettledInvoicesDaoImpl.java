@@ -34,11 +34,11 @@ public class SettledInvoicesDaoImpl implements SettledInvoicesDao {
 
     @Override
     public long getAddIndexOffset() {
-        return repository.getMaxAddIndexWithoutGaps();
+        return repository.getMaxAddIndex();
     }
 
     @Override
     public long getSettleIndexOffset() {
-        return repository.getMaxSettledIndex();
+        return repository.getMaxSettledIndexWithoutGaps();
     }
 }

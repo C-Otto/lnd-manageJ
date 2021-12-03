@@ -16,41 +16,41 @@ class SettledInvoicesRepositoryIT {
     private SettledInvoicesRepository repository;
 
     @Test
-    void getMaxSettledIndex_no_invoice() {
-        assertThat(repository.getMaxSettledIndex()).isEqualTo(0);
+    void getMaxSettledIndexWithoutGaps_no_invoice() {
+        assertThat(repository.getMaxSettledIndexWithoutGaps()).isEqualTo(0);
     }
 
     @Test
-    void getMaxSettledIndex_with_gaps_in_addIndex() {
+    void getMaxSettledIndexWithoutGaps_with_gaps_in_addIndex() {
         repository.save(invoice(1, 1));
         repository.save(invoice(2, 2));
         repository.save(invoice(5, 3));
         repository.save(invoice(6, 5));
         repository.save(invoice(7, 4));
-        assertThat(repository.getMaxSettledIndex()).isEqualTo(5);
+        assertThat(repository.getMaxSettledIndexWithoutGaps()).isEqualTo(5);
     }
 
     @Test
-    void getMaxAddIndexWithoutGaps_no_invoice() {
-        assertThat(repository.getMaxAddIndexWithoutGaps()).isEqualTo(0);
-    }
-
-    @Test
-    void getMaxAddIndexWithoutGaps_no_gap() {
-        repository.save(invoice(1, 1));
-        repository.save(invoice(2, 2));
-        repository.save(invoice(3, 3));
-        assertThat(repository.getMaxAddIndexWithoutGaps()).isEqualTo(3L);
-    }
-
-    @Test
-    void getMaxAddIndexWithoutGaps_gap() {
+    void getMaxSettleIndexWithoutGaps_gap_in_settleIndex() {
         repository.save(invoice(1, 1));
         repository.save(invoice(2, 2));
         repository.save(invoice(5, 3));
         repository.save(invoice(6, 6));
         repository.save(invoice(7, 5));
-        assertThat(repository.getMaxAddIndexWithoutGaps()).isEqualTo(5L);
+        assertThat(repository.getMaxSettledIndexWithoutGaps()).isEqualTo(3L);
+    }
+
+    @Test
+    void getMaxAddIndex_no_invoice() {
+        assertThat(repository.getMaxAddIndex()).isEqualTo(0);
+    }
+
+    @Test
+    void getMaxAddIndex() {
+        repository.save(invoice(1, 1));
+        repository.save(invoice(2, 2));
+        repository.save(invoice(3, 4));
+        assertThat(repository.getMaxAddIndex()).isEqualTo(3L);
     }
 
     private SettledInvoiceJpaDto invoice(int addIndex, int settleIndex) {
