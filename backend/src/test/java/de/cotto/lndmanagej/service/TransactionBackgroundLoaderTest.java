@@ -121,12 +121,11 @@ class TransactionBackgroundLoaderTest {
     }
 
     @Test
-    void update_from_force_closing_channels_pending_htlc_output() {
+    void update_from_force_closing_channels_ignores_pending_htlc_output() {
         String htlcOutpointHash = FORCE_CLOSING_CHANNEL.getHtlcOutpoints().stream()
                 .map(ChannelPoint::getTransactionHash)
                 .findFirst()
                 .orElseThrow();
-        when(transactionService.isUnknown(htlcOutpointHash)).thenReturn(true);
 
         String openTransactionHash = FORCE_CLOSING_CHANNEL.getChannelPoint().getTransactionHash();
         when(transactionService.isUnknown(openTransactionHash)).thenReturn(false);
@@ -134,7 +133,7 @@ class TransactionBackgroundLoaderTest {
 
         when(channelService.getForceClosingChannels()).thenReturn(Set.of(FORCE_CLOSING_CHANNEL));
         transactionBackgroundLoader.loadTransactionForOneChannel();
-        verify(transactionService).getTransaction(htlcOutpointHash);
+        verify(transactionService, never()).getTransaction(htlcOutpointHash);
     }
 
     @Test
