@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.KEYSEND_MESSAGE;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE_2;
@@ -229,6 +230,10 @@ class GrpcInvoicesTest {
         if (settledInvoice == null) {
             return Invoice.newBuilder().setState(state).build();
         }
+        InvoiceHTLC htlc = InvoiceHTLC.newBuilder()
+                .setChanId(CHANNEL_ID.getShortChannelId())
+                .putAllCustomRecords(customRecords)
+                .build();
         return Invoice.newBuilder()
                 .setState(state)
                 .setAddIndex(settledInvoice.addIndex())
@@ -237,7 +242,7 @@ class GrpcInvoicesTest {
                 .setMemo(settledInvoice.memo())
                 .setSettleDate(settledInvoice.settleDate().toEpochSecond(ZoneOffset.UTC))
                 .setAmtPaidMsat(settledInvoice.amountPaid().milliSatoshis())
-                .addHtlcs(InvoiceHTLC.newBuilder().putAllCustomRecords(customRecords).build())
+                .addHtlcs(htlc)
                 .build();
     }
 }

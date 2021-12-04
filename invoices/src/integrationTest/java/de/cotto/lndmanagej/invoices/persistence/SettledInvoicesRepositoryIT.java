@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
@@ -55,8 +56,16 @@ class SettledInvoicesRepositoryIT {
     }
 
     private SettledInvoiceJpaDto invoice(int addIndex, int settleIndex) {
-        return SettledInvoiceJpaDto.createFromInvoice(
-                new SettledInvoice(addIndex, settleIndex, LocalDateTime.MIN, "", Coins.NONE, "", Optional.empty())
+        return SettledInvoiceJpaDto.createFromInvoice(new SettledInvoice(
+                        addIndex,
+                        settleIndex,
+                        LocalDateTime.MIN,
+                        "",
+                        Coins.NONE,
+                        "",
+                        Optional.empty(),
+                        CHANNEL_ID
+                )
         );
     }
 }

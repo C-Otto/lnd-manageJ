@@ -3,6 +3,8 @@ package de.cotto.lndmanagej.model;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+
 public class SettledInvoiceFixtures {
     public static final LocalDateTime SETTLE_DATE = LocalDateTime.of(2021, 12, 2, 16, 4, 30);
     public static final int ADD_INDEX = 2;
@@ -24,7 +26,8 @@ public class SettledInvoiceFixtures {
             HASH,
             AMOUNT_PAID,
             MEMO,
-            Optional.empty()
+            Optional.empty(),
+            CHANNEL_ID
     );
 
     public static final SettledInvoice SETTLED_INVOICE_KEYSEND = new SettledInvoice(
@@ -34,7 +37,8 @@ public class SettledInvoiceFixtures {
             HASH,
             AMOUNT_PAID,
             MEMO,
-            Optional.of(KEYSEND_MESSAGE)
+            Optional.of(KEYSEND_MESSAGE),
+            CHANNEL_ID
     );
 
     public static final SettledInvoice SETTLED_INVOICE_2 = new SettledInvoice(
@@ -44,6 +48,7 @@ public class SettledInvoiceFixtures {
             HASH_2,
             AMOUNT_PAID_2,
             MEMO_2,
-            Optional.empty()
+            Optional.empty(),
+            CHANNEL_ID
     );
 }

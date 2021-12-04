@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.invoices.persistence;
 
+import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.SettledInvoice;
 
@@ -34,6 +35,7 @@ class SettledInvoiceJpaDto {
     @Nullable
     @Column(length = 5_000)
     private String keysendMessage;
+    private long receivedVia;
 
     public SettledInvoiceJpaDto() {
         // for JPA
@@ -48,6 +50,7 @@ class SettledInvoiceJpaDto {
         jpaDto.amountPaid = settledInvoice.amountPaid().milliSatoshis();
         jpaDto.memo = settledInvoice.memo();
         jpaDto.keysendMessage = settledInvoice.keysendMessage().orElse(null);
+        jpaDto.receivedVia = settledInvoice.receivedVia().getShortChannelId();
         return jpaDto;
     }
 
@@ -60,7 +63,8 @@ class SettledInvoiceJpaDto {
                 Objects.requireNonNull(hash),
                 Coins.ofMilliSatoshis(amountPaid),
                 Objects.requireNonNull(memo),
-                Optional.ofNullable(keysendMessage)
+                Optional.ofNullable(keysendMessage),
+                ChannelId.fromShortChannelId(receivedVia)
         );
     }
 
