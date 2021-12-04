@@ -11,9 +11,8 @@ public record SettledInvoice(
         Coins amountPaid,
         String memo,
         Optional<String> keysendMessage,
-        ChannelId receivedVia
+        Optional<ChannelId> receivedVia
 ) {
-    private static final ChannelId SOME_CHANNEL_ID = ChannelId.fromShortChannelId(430_103_660_018_532_352L);
     public static final SettledInvoice INVALID = new SettledInvoice(
             -1,
             -1,
@@ -22,7 +21,7 @@ public record SettledInvoice(
             Coins.NONE,
             "",
             Optional.empty(),
-            SOME_CHANNEL_ID
+            Optional.empty()
     );
 
     public boolean isValid() {

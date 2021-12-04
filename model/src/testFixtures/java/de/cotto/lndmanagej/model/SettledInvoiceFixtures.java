@@ -27,7 +27,18 @@ public class SettledInvoiceFixtures {
             AMOUNT_PAID,
             MEMO,
             Optional.empty(),
-            CHANNEL_ID
+            Optional.of(CHANNEL_ID)
+    );
+
+    public static final SettledInvoice SETTLED_INVOICE_NO_CHANNEL_ID = new SettledInvoice(
+            ADD_INDEX,
+            SETTLE_INDEX,
+            SETTLE_DATE,
+            HASH,
+            AMOUNT_PAID,
+            MEMO,
+            Optional.empty(),
+            Optional.empty()
     );
 
     public static final SettledInvoice SETTLED_INVOICE_KEYSEND = new SettledInvoice(
@@ -38,7 +49,7 @@ public class SettledInvoiceFixtures {
             AMOUNT_PAID,
             MEMO,
             Optional.of(KEYSEND_MESSAGE),
-            CHANNEL_ID
+            Optional.of(CHANNEL_ID)
     );
 
     public static final SettledInvoice SETTLED_INVOICE_2 = new SettledInvoice(
@@ -49,6 +60,6 @@ public class SettledInvoiceFixtures {
             AMOUNT_PAID_2,
             MEMO_2,
             Optional.empty(),
-            CHANNEL_ID
+            Optional.of(CHANNEL_ID)
     );
 }

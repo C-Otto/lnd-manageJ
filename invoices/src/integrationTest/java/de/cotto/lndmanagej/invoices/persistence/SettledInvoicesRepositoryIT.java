@@ -64,7 +64,7 @@ class SettledInvoicesRepositoryIT {
                         Coins.NONE,
                         "",
                         Optional.empty(),
-                        CHANNEL_ID
+                        Optional.of(CHANNEL_ID)
                 )
         );
     }

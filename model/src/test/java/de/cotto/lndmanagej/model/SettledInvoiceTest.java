@@ -19,7 +19,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SettledInvoiceTest {
     @Test
     void invalid() {
-        ChannelId someChannelId = ChannelId.fromShortChannelId(430_103_660_018_532_352L);
         SettledInvoice expected = new SettledInvoice(
                 -1,
                 -1,
@@ -28,7 +27,7 @@ class SettledInvoiceTest {
                 Coins.NONE,
                 "",
                 Optional.empty(),
-                someChannelId
+                Optional.empty()
         );
         assertThat(SettledInvoice.INVALID).isEqualTo(expected);
     }

@@ -21,11 +21,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.KEYSEND_MESSAGE;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE_2;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE_KEYSEND;
+import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE_NO_CHANNEL_ID;
 import static lnrpc.Invoice.InvoiceState.ACCEPTED;
 import static lnrpc.Invoice.InvoiceState.CANCELED;
 import static lnrpc.Invoice.InvoiceState.OPEN;
@@ -123,6 +123,15 @@ class GrpcInvoicesTest {
             mockResponse(invoice(SETTLED, SETTLED_INVOICE_KEYSEND, customRecords));
             assertThat(grpcInvoices.getSettledInvoicesAfter(0L)).contains(
                     List.of(SETTLED_INVOICE)
+            );
+        }
+
+        @Test
+        void without_channel_id() {
+            // https://github.com/alexbosworth/keysend_protocols
+            mockResponse(invoice(SETTLED, SETTLED_INVOICE_NO_CHANNEL_ID));
+            assertThat(grpcInvoices.getSettledInvoicesAfter(0L)).contains(
+                    List.of(SETTLED_INVOICE_NO_CHANNEL_ID)
             );
         }
 
@@ -230,10 +239,11 @@ class GrpcInvoicesTest {
         if (settledInvoice == null) {
             return Invoice.newBuilder().setState(state).build();
         }
-        InvoiceHTLC htlc = InvoiceHTLC.newBuilder()
-                .setChanId(CHANNEL_ID.getShortChannelId())
-                .putAllCustomRecords(customRecords)
-                .build();
+        InvoiceHTLC.Builder htlcBuilder = InvoiceHTLC.newBuilder();
+        if (settledInvoice.receivedVia().isPresent()) {
+            htlcBuilder.setChanId(settledInvoice.receivedVia().get().getShortChannelId());
+        }
+        InvoiceHTLC htlc = htlcBuilder.putAllCustomRecords(customRecords).build();
         return Invoice.newBuilder()
                 .setState(state)
                 .setAddIndex(settledInvoice.addIndex())

@@ -50,12 +50,18 @@ class SettledInvoiceJpaDto {
         jpaDto.amountPaid = settledInvoice.amountPaid().milliSatoshis();
         jpaDto.memo = settledInvoice.memo();
         jpaDto.keysendMessage = settledInvoice.keysendMessage().orElse(null);
-        jpaDto.receivedVia = settledInvoice.receivedVia().getShortChannelId();
+        jpaDto.receivedVia = settledInvoice.receivedVia().map(ChannelId::getShortChannelId).orElse(0L);
         return jpaDto;
     }
 
     public SettledInvoice toModel() {
         LocalDateTime localDateTime = LocalDateTime.ofEpochSecond(settleDate, 0, ZoneOffset.UTC);
+        Optional<ChannelId> channelId;
+        if (receivedVia > 0) {
+            channelId = Optional.of(ChannelId.fromShortChannelId(receivedVia));
+        } else {
+            channelId = Optional.empty();
+        }
         return new SettledInvoice(
                 addIndex,
                 settleIndex,
@@ -64,7 +70,7 @@ class SettledInvoiceJpaDto {
                 Coins.ofMilliSatoshis(amountPaid),
                 Objects.requireNonNull(memo),
                 Optional.ofNullable(keysendMessage),
-                ChannelId.fromShortChannelId(receivedVia)
+                channelId
         );
     }
 
@@ -95,5 +101,9 @@ class SettledInvoiceJpaDto {
     @Nullable
     public String getKeysendMessage() {
         return keysendMessage;
+    }
+
+    public long getReceivedVia() {
+        return receivedVia;
     }
 }

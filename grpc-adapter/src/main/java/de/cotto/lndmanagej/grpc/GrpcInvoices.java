@@ -86,12 +86,12 @@ public class GrpcInvoices {
                 .findFirst();
     }
 
-    private ChannelId getLastHopChannelId(Invoice lndInvoice) {
+    private Optional<ChannelId> getLastHopChannelId(Invoice lndInvoice) {
         return lndInvoice.getHtlcsList().stream()
                 .map(InvoiceHTLC::getChanId)
+                .filter(channelId -> channelId > 0)
                 .map(ChannelId::fromShortChannelId)
-                .findFirst()
-                .orElseThrow();
+                .findFirst();
     }
 
     private Stream<Invoice> toStream(Iterator<Invoice> iterator) {
