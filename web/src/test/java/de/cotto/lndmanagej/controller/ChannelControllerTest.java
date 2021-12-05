@@ -46,11 +46,11 @@ class ChannelControllerTest {
     private static final Coins OPEN_COSTS = Coins.ofSatoshis(1);
     private static final Coins CLOSE_COSTS = Coins.ofSatoshis(2);
     private static final OnChainCostsDto ON_CHAIN_COSTS = new OnChainCostsDto(OPEN_COSTS, CLOSE_COSTS);
-    private static final PoliciesDto FEE_CONFIGURATION_DTO = PoliciesDto.createFrom(POLICIES);
+    private static final PoliciesDto FEE_CONFIGURATION_DTO = PoliciesDto.createFromModel(POLICIES);
     private static final ClosedChannelDetailsDto CLOSED_CHANNEL_DETAILS_DTO =
             new ClosedChannelDetailsDto(CloseInitiator.REMOTE, 987_654);
     private static final FeeReport FEE_REPORT = new FeeReport(Coins.ofMilliSatoshis(1_234), Coins.ofMilliSatoshis(567));
-    private static final FeeReportDto FEE_REPORT_DTO = FeeReportDto.createFrom(FEE_REPORT);
+    private static final FeeReportDto FEE_REPORT_DTO = FeeReportDto.createFromModel(FEE_REPORT);
 
     @InjectMocks
     private ChannelController channelController;
@@ -165,14 +165,14 @@ class ChannelControllerTest {
     void getBalance() {
         when(balanceService.getBalanceInformation(CHANNEL_ID)).thenReturn(Optional.of(BALANCE_INFORMATION));
         assertThat(channelController.getBalance(CHANNEL_ID))
-                .isEqualTo(BalanceInformationDto.createFrom(BALANCE_INFORMATION));
+                .isEqualTo(BalanceInformationDto.createFromModel(BALANCE_INFORMATION));
     }
 
     @Test
     void getBalance_not_found() {
         when(balanceService.getBalanceInformation(CHANNEL_ID)).thenReturn(Optional.empty());
         assertThat(channelController.getBalance(CHANNEL_ID))
-                .isEqualTo(BalanceInformationDto.createFrom(BalanceInformation.EMPTY));
+                .isEqualTo(BalanceInformationDto.createFromModel(BalanceInformation.EMPTY));
     }
 
     @Test

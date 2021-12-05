@@ -11,7 +11,7 @@ public record BalanceInformationDto(
         String remoteReserve,
         String remoteAvailable
 ) {
-    public static BalanceInformationDto createFrom(BalanceInformation balanceInformation) {
+    public static BalanceInformationDto createFromModel(BalanceInformation balanceInformation) {
         return new BalanceInformationDto(
                 toString(balanceInformation.localBalance()),
                 toString(balanceInformation.localReserve()),

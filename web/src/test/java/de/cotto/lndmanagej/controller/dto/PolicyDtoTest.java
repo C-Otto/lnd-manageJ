@@ -7,9 +7,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class PolicyDtoTest {
     @Test
-    void createFrom() {
+    void createFromModel() {
         PolicyDto expected = new PolicyDto(100, 10, false);
-        PolicyDto dto = PolicyDto.createFrom(POLICY_1);
+        PolicyDto dto = PolicyDto.createFromModel(POLICY_1);
         assertThat(dto).isEqualTo(expected);
     }
 }

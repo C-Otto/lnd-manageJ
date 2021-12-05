@@ -6,6 +6,7 @@ dependencies {
     runtimeOnly project(':web')
     runtimeOnly project(':forwarding-history')
     runtimeOnly project(':invoices')
+    runtimeOnly project(':payments')
     runtimeOnly project(':statistics')
     runtimeOnly 'org.postgresql:postgresql'
     testRuntimeOnly 'com.h2database:h2'

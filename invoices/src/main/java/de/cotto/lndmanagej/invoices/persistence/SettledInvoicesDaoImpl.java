@@ -22,14 +22,14 @@ public class SettledInvoicesDaoImpl implements SettledInvoicesDao {
     @Override
     public void save(Collection<SettledInvoice> settledInvoices) {
         List<SettledInvoiceJpaDto> converted = settledInvoices.stream()
-                .map(SettledInvoiceJpaDto::createFromInvoice)
+                .map(SettledInvoiceJpaDto::createFromModel)
                 .collect(toList());
         repository.saveAll(converted);
     }
 
     @Override
     public void save(SettledInvoice settledInvoice) {
-        repository.save(SettledInvoiceJpaDto.createFromInvoice(settledInvoice));
+        repository.save(SettledInvoiceJpaDto.createFromModel(settledInvoice));
     }
 
     @Override

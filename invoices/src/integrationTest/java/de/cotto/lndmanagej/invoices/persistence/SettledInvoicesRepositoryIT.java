@@ -56,7 +56,7 @@ class SettledInvoicesRepositoryIT {
     }
 
     private SettledInvoiceJpaDto invoice(int addIndex, int settleIndex) {
-        return SettledInvoiceJpaDto.createFromInvoice(new SettledInvoice(
+        return SettledInvoiceJpaDto.createFromModel(new SettledInvoice(
                         addIndex,
                         settleIndex,
                         LocalDateTime.MIN,

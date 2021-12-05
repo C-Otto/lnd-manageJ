@@ -64,8 +64,8 @@ class ForwardingEventsDaoImplTest {
     @Test
     void getEventsWithOutgoingChannel() {
         when(repository.findByChannelOutgoing(CHANNEL_ID_2.getShortChannelId())).thenReturn(List.of(
-                ForwardingEventJpaDto.createFromForwardingEvent(FORWARDING_EVENT),
-                ForwardingEventJpaDto.createFromForwardingEvent(FORWARDING_EVENT_2)
+                ForwardingEventJpaDto.createFromModel(FORWARDING_EVENT),
+                ForwardingEventJpaDto.createFromModel(FORWARDING_EVENT_2)
         ));
         assertThat(dao.getEventsWithOutgoingChannel(CHANNEL_ID_2))
                 .containsExactly(FORWARDING_EVENT, FORWARDING_EVENT_2);
@@ -79,8 +79,8 @@ class ForwardingEventsDaoImplTest {
     @Test
     void getEventsWithIncomingChannel() {
         when(repository.findByChannelIncoming(CHANNEL_ID_2.getShortChannelId())).thenReturn(List.of(
-                ForwardingEventJpaDto.createFromForwardingEvent(FORWARDING_EVENT),
-                ForwardingEventJpaDto.createFromForwardingEvent(FORWARDING_EVENT_2)
+                ForwardingEventJpaDto.createFromModel(FORWARDING_EVENT),
+                ForwardingEventJpaDto.createFromModel(FORWARDING_EVENT_2)
         ));
         assertThat(dao.getEventsWithIncomingChannel(CHANNEL_ID_2))
                 .containsExactly(FORWARDING_EVENT, FORWARDING_EVENT_2);

@@ -20,21 +20,21 @@ class ForwardingEventsRepositoryIT {
 
     @Test
     void findMaxIndex_one_event() {
-        repository.save(ForwardingEventJpaDto.createFromForwardingEvent(FORWARDING_EVENT));
+        repository.save(ForwardingEventJpaDto.createFromModel(FORWARDING_EVENT));
         assertThat(repository.findMaxIndex()).contains(1);
     }
 
     @Test
     void findMaxIndex_two_events() {
-        repository.save(ForwardingEventJpaDto.createFromForwardingEvent(FORWARDING_EVENT_2));
-        repository.save(ForwardingEventJpaDto.createFromForwardingEvent(FORWARDING_EVENT));
+        repository.save(ForwardingEventJpaDto.createFromModel(FORWARDING_EVENT_2));
+        repository.save(ForwardingEventJpaDto.createFromModel(FORWARDING_EVENT));
         assertThat(repository.findMaxIndex()).contains(2);
     }
 
     @Test
     void findByChannelIncoming() {
-        repository.save(ForwardingEventJpaDto.createFromForwardingEvent(FORWARDING_EVENT_2));
-        repository.save(ForwardingEventJpaDto.createFromForwardingEvent(FORWARDING_EVENT));
+        repository.save(ForwardingEventJpaDto.createFromModel(FORWARDING_EVENT_2));
+        repository.save(ForwardingEventJpaDto.createFromModel(FORWARDING_EVENT));
         assertThat(repository.findByChannelIncoming(FORWARDING_EVENT.channelIn().getShortChannelId()))
                 .map(ForwardingEventJpaDto::toModel)
                 .containsExactly(FORWARDING_EVENT);
@@ -42,8 +42,8 @@ class ForwardingEventsRepositoryIT {
 
     @Test
     void findByChannelOutgoing() {
-        repository.save(ForwardingEventJpaDto.createFromForwardingEvent(FORWARDING_EVENT_2));
-        repository.save(ForwardingEventJpaDto.createFromForwardingEvent(FORWARDING_EVENT));
+        repository.save(ForwardingEventJpaDto.createFromModel(FORWARDING_EVENT_2));
+        repository.save(ForwardingEventJpaDto.createFromModel(FORWARDING_EVENT));
         assertThat(repository.findByChannelOutgoing(FORWARDING_EVENT.channelOut().getShortChannelId()))
                 .map(ForwardingEventJpaDto::toModel)
                 .containsExactly(FORWARDING_EVENT);

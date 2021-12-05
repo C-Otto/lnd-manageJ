@@ -12,7 +12,7 @@ class ChannelStatusDtoTest {
     private final ChannelStatus channelStatusOpen = new ChannelStatus(false, true, false, OPEN);
 
     @Test
-    void createFrom() {
-        assertThat(ChannelStatusDto.createFrom(channelStatusOpen)).isEqualTo(dtoOpen);
+    void createFromModel() {
+        assertThat(ChannelStatusDto.createFromModel(channelStatusOpen)).isEqualTo(dtoOpen);
     }
 }

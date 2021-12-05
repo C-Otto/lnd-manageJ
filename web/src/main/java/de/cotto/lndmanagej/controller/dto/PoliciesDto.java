@@ -9,10 +9,10 @@ public record PoliciesDto(
     public static final PoliciesDto EMPTY =
             new PoliciesDto(PolicyDto.EMPTY, PolicyDto.EMPTY);
 
-    public static PoliciesDto createFrom(Policies policies) {
+    public static PoliciesDto createFromModel(Policies policies) {
         return new PoliciesDto(
-                PolicyDto.createFrom(policies.local()),
-                PolicyDto.createFrom(policies.remote())
+                PolicyDto.createFromModel(policies.local()),
+                PolicyDto.createFromModel(policies.remote())
         );
     }
 }

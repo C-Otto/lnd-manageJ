@@ -30,7 +30,7 @@ public record ChannelDto(
                 String.valueOf(localChannel.getCapacity().satoshis()),
                 String.valueOf(localChannel.getTotalSent().satoshis()),
                 String.valueOf(localChannel.getTotalReceived().satoshis()),
-                ChannelStatusDto.createFrom(localChannel.getStatus()),
+                ChannelStatusDto.createFromModel(localChannel.getStatus()),
                 localChannel.getOpenInitiator(),
                 closeDetails
         );

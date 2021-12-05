@@ -7,7 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class BalanceInformationDtoTest {
     @Test
-    void createFrom() {
+    void createFromModel() {
         BalanceInformationDto expected = new BalanceInformationDto(
                 String.valueOf(BALANCE_INFORMATION.localBalance().satoshis()),
                 String.valueOf(BALANCE_INFORMATION.localReserve().satoshis()),
@@ -16,6 +16,6 @@ class BalanceInformationDtoTest {
                 String.valueOf(BALANCE_INFORMATION.remoteReserve().satoshis()),
                 String.valueOf(BALANCE_INFORMATION.remoteAvailable().satoshis())
         );
-        assertThat(BalanceInformationDto.createFrom(BALANCE_INFORMATION)).isEqualTo(expected);
+        assertThat(BalanceInformationDto.createFromModel(BALANCE_INFORMATION)).isEqualTo(expected);
     }
 }

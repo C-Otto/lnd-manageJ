@@ -9,7 +9,7 @@ public record ChannelStatusDto(
         boolean closed,
         String openClosed
 ) {
-    public static ChannelStatusDto createFrom(ChannelStatus status) {
+    public static ChannelStatusDto createFromModel(ChannelStatus status) {
         return new ChannelStatusDto(
                 status.privateChannel(),
                 status.active(),

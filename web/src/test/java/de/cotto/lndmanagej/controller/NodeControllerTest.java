@@ -88,7 +88,7 @@ class NodeControllerTest {
                 List.of(),
                 List.of(),
                 new OnChainCostsDto(Coins.NONE, Coins.NONE),
-                BalanceInformationDto.createFrom(BalanceInformation.EMPTY),
+                BalanceInformationDto.createFromModel(BalanceInformation.EMPTY),
                 true,
                 new FeeReportDto("0", "0")
         );
@@ -122,7 +122,7 @@ class NodeControllerTest {
                 List.of(CHANNEL_ID, CHANNEL_ID_2),
                 List.of(CHANNEL_ID, CHANNEL_ID_2, CHANNEL_ID_3),
                 new OnChainCostsDto(openCosts, closeCosts),
-                BalanceInformationDto.createFrom(BALANCE_INFORMATION),
+                BalanceInformationDto.createFromModel(BALANCE_INFORMATION),
                 false,
                 new FeeReportDto("1234", "567")
         );
@@ -161,7 +161,8 @@ class NodeControllerTest {
     @Test
     void getBalance() {
         when(balanceService.getBalanceInformationForPeer(PUBKEY)).thenReturn(BALANCE_INFORMATION);
-        assertThat(nodeController.getBalance(PUBKEY)).isEqualTo(BalanceInformationDto.createFrom(BALANCE_INFORMATION));
+        assertThat(nodeController.getBalance(PUBKEY))
+                .isEqualTo(BalanceInformationDto.createFromModel(BALANCE_INFORMATION));
     }
 
     @Test

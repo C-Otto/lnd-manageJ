@@ -95,7 +95,7 @@ public class ChannelController {
     public BalanceInformationDto getBalance(@PathVariable ChannelId channelId) {
         BalanceInformation balanceInformation = balanceService.getBalanceInformation(channelId)
                 .orElse(BalanceInformation.EMPTY);
-        return BalanceInformationDto.createFrom(balanceInformation);
+        return BalanceInformationDto.createFromModel(balanceInformation);
     }
 
     @Timed
@@ -122,7 +122,7 @@ public class ChannelController {
     }
 
     private FeeReportDto getFeeReportDto(ChannelId channelId) {
-        return FeeReportDto.createFrom(feeService.getFeeReportForChannel(channelId));
+        return FeeReportDto.createFromModel(feeService.getFeeReportForChannel(channelId));
     }
 
     private PoliciesDto getPoliciesForChannel(@Nullable LocalChannel channel) {
@@ -130,7 +130,7 @@ public class ChannelController {
             return PoliciesDto.EMPTY;
         }
         Policies policies = policyService.getPolicies(channel.getId());
-        return PoliciesDto.createFrom(policies);
+        return PoliciesDto.createFromModel(policies);
     }
 
     private BalanceInformation getBalanceInformation(ChannelId channelId) {

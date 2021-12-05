@@ -1,0 +1,11 @@
+plugins {
+    id 'lnd-manageJ.java-library-conventions'
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation project(':model')
+    implementation project(':grpc-adapter')
+    testRuntimeOnly 'com.h2database:h2'
+    testFixturesApi testFixtures(project(':model'))
+}

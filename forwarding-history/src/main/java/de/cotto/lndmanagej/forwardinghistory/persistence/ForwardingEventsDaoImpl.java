@@ -23,7 +23,7 @@ public class ForwardingEventsDaoImpl implements ForwardingEventsDao {
     @Override
     public void save(Collection<ForwardingEvent> forwardingEvents) {
         List<ForwardingEventJpaDto> converted = forwardingEvents.stream()
-                .map(ForwardingEventJpaDto::createFromForwardingEvent)
+                .map(ForwardingEventJpaDto::createFromModel)
                 .collect(toList());
         repository.saveAll(converted);
     }

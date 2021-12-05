@@ -23,6 +23,8 @@ import lnrpc.LightningGrpc;
 import lnrpc.ListChannelsRequest;
 import lnrpc.ListInvoiceRequest;
 import lnrpc.ListInvoiceResponse;
+import lnrpc.ListPaymentsRequest;
+import lnrpc.ListPaymentsResponse;
 import lnrpc.ListPeersRequest;
 import lnrpc.NodeInfo;
 import lnrpc.NodeInfoRequest;
@@ -156,6 +158,16 @@ public class GrpcService extends GrpcBase {
                 .setNumMaxInvoices(limit)
                 .build();
         return get(() -> lightningStub.listInvoices(request));
+    }
+
+    public Optional<ListPaymentsResponse> getPayments(long offset, int limit) {
+        ListPaymentsRequest request = ListPaymentsRequest.newBuilder()
+                .setIndexOffset(offset)
+                .setMaxPayments(limit)
+                .setIncludeIncomplete(false)
+                .setReversed(false)
+                .build();
+        return get(() -> lightningStub.listPayments(request));
     }
 
     @Timed

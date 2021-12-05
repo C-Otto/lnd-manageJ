@@ -14,8 +14,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SettledSettledInvoiceJpaDtoTest {
     @Test
     @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
-    void createFromInvoice() {
-        SettledInvoiceJpaDto jpaDto = SettledInvoiceJpaDto.createFromInvoice(SETTLED_INVOICE);
+    void createFromModel() {
+        SettledInvoiceJpaDto jpaDto = SettledInvoiceJpaDto.createFromModel(SETTLED_INVOICE);
         assertThat(jpaDto.getAddIndex()).isEqualTo(SETTLED_INVOICE.addIndex());
         assertThat(jpaDto.getSettleIndex()).isEqualTo(SETTLED_INVOICE.settleIndex());
         assertThat(jpaDto.getSettleDate())
@@ -28,32 +28,32 @@ class SettledSettledInvoiceJpaDtoTest {
     }
 
     @Test
-    void createFromInvoice_with_keysend_message() {
-        SettledInvoiceJpaDto jpaDto = SettledInvoiceJpaDto.createFromInvoice(SETTLED_INVOICE_KEYSEND);
+    void createFromModel_with_keysend_message() {
+        SettledInvoiceJpaDto jpaDto = SettledInvoiceJpaDto.createFromModel(SETTLED_INVOICE_KEYSEND);
         assertThat(jpaDto.getKeysendMessage()).isEqualTo(KEYSEND_MESSAGE);
     }
 
     @Test
-    void createFromInvoice_without_receivedVia_channel() {
-        SettledInvoiceJpaDto jpaDto = SettledInvoiceJpaDto.createFromInvoice(SETTLED_INVOICE_NO_CHANNEL_ID);
+    void createFromModel_without_receivedVia_channel() {
+        SettledInvoiceJpaDto jpaDto = SettledInvoiceJpaDto.createFromModel(SETTLED_INVOICE_NO_CHANNEL_ID);
         assertThat(jpaDto.getReceivedVia()).isEqualTo(0L);
     }
 
     @Test
     void toModel() {
-        assertThat(SettledInvoiceJpaDto.createFromInvoice(SETTLED_INVOICE).toModel())
+        assertThat(SettledInvoiceJpaDto.createFromModel(SETTLED_INVOICE).toModel())
                 .isEqualTo(SETTLED_INVOICE);
     }
 
     @Test
     void toModel_without_receivedVia_channel() {
-        assertThat(SettledInvoiceJpaDto.createFromInvoice(SETTLED_INVOICE_NO_CHANNEL_ID).toModel())
+        assertThat(SettledInvoiceJpaDto.createFromModel(SETTLED_INVOICE_NO_CHANNEL_ID).toModel())
                 .isEqualTo(SETTLED_INVOICE_NO_CHANNEL_ID);
     }
 
     @Test
     void toModel_with_keysend_message() {
-        assertThat(SettledInvoiceJpaDto.createFromInvoice(SETTLED_INVOICE_KEYSEND).toModel())
+        assertThat(SettledInvoiceJpaDto.createFromModel(SETTLED_INVOICE_KEYSEND).toModel())
                 .isEqualTo(SETTLED_INVOICE_KEYSEND);
     }
 }

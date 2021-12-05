@@ -9,11 +9,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class PoliciesDtoTest {
     @Test
-    void createFrom() {
-        PoliciesDto expected = new PoliciesDto(PolicyDto.createFrom(POLICY_1), PolicyDto.createFrom(POLICY_2));
-
-        PoliciesDto dto = PoliciesDto.createFrom(POLICIES);
-
+    void createFromModel() {
+        PoliciesDto expected =
+                new PoliciesDto(PolicyDto.createFromModel(POLICY_1), PolicyDto.createFromModel(POLICY_2));
+        PoliciesDto dto = PoliciesDto.createFromModel(POLICIES);
         assertThat(dto).isEqualTo(expected);
     }
 }

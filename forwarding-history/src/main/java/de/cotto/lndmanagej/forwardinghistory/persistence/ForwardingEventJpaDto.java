@@ -30,7 +30,7 @@ class ForwardingEventJpaDto {
         // for JPA
     }
 
-    public static ForwardingEventJpaDto createFromForwardingEvent(ForwardingEvent forwardingEvent) {
+    public static ForwardingEventJpaDto createFromModel(ForwardingEvent forwardingEvent) {
         ForwardingEventJpaDto jpaDto = new ForwardingEventJpaDto();
         jpaDto.eventIndex = forwardingEvent.index();
         jpaDto.amountIncoming = forwardingEvent.amountIn().milliSatoshis();

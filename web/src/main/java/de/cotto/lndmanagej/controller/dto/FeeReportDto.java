@@ -11,7 +11,7 @@ public record FeeReportDto(String earned, String sourced) {
         );
     }
 
-    public static FeeReportDto createFrom(FeeReport feeReport) {
+    public static FeeReportDto createFromModel(FeeReport feeReport) {
         return new FeeReportDto(feeReport.earned(), feeReport.sourced());
     }
 }

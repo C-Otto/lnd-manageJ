@@ -89,7 +89,7 @@ class ChannelDetailsDtoTest {
                 FEE_REPORT
         );
         ChannelStatusDto channelStatusDto =
-                ChannelStatusDto.createFrom(new ChannelStatus(false, true, false, OPEN));
+                ChannelStatusDto.createFromModel(new ChannelStatus(false, true, false, OPEN));
         assertThat(dto.status()).isEqualTo(channelStatusDto);
     }
 
@@ -100,7 +100,7 @@ class ChannelDetailsDtoTest {
 
     @Test
     void balance() {
-        assertThat(CHANNEL_DETAILS_DTO.balance()).isEqualTo(BalanceInformationDto.createFrom(BALANCE_INFORMATION));
+        assertThat(CHANNEL_DETAILS_DTO.balance()).isEqualTo(BalanceInformationDto.createFromModel(BALANCE_INFORMATION));
     }
 
     @Test

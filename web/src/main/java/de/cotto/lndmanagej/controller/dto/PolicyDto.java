@@ -14,7 +14,7 @@ public record PolicyDto(
                     false
             );
 
-    public static PolicyDto createFrom(Policy policy) {
+    public static PolicyDto createFromModel(Policy policy) {
         return new PolicyDto(
                 policy.feeRate(),
                 policy.baseFee().milliSatoshis(),

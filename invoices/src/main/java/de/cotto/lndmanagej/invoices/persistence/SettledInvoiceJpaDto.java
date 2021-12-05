@@ -41,7 +41,7 @@ class SettledInvoiceJpaDto {
         // for JPA
     }
 
-    public static SettledInvoiceJpaDto createFromInvoice(SettledInvoice settledInvoice) {
+    public static SettledInvoiceJpaDto createFromModel(SettledInvoice settledInvoice) {
         SettledInvoiceJpaDto jpaDto = new SettledInvoiceJpaDto();
         jpaDto.addIndex = settledInvoice.addIndex();
         jpaDto.settleIndex = settledInvoice.settleIndex();

@@ -80,7 +80,7 @@ class ChannelDtoTest {
     void status() {
         ChannelDto dto = new ChannelDto(LOCAL_OPEN_CHANNEL, CLOSE_DETAILS);
         ChannelStatusDto channelStatusDto =
-                ChannelStatusDto.createFrom(new ChannelStatus(false, true, false, OPEN));
+                ChannelStatusDto.createFromModel(new ChannelStatus(false, true, false, OPEN));
         assertThat(dto.status()).isEqualTo(channelStatusDto);
     }
 }

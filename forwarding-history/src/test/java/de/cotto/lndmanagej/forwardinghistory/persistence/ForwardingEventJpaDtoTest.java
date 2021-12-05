@@ -10,8 +10,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ForwardingEventJpaDtoTest {
     @Test
     @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
-    void createFromForwardingEvent() {
-        ForwardingEventJpaDto jpaDto = ForwardingEventJpaDto.createFromForwardingEvent(FORWARDING_EVENT);
+    void createFromModel() {
+        ForwardingEventJpaDto jpaDto = ForwardingEventJpaDto.createFromModel(FORWARDING_EVENT);
         assertThat(jpaDto.getIndex()).isEqualTo(FORWARDING_EVENT.index());
         assertThat(jpaDto.getAmountIncoming()).isEqualTo(FORWARDING_EVENT.amountIn().milliSatoshis());
         assertThat(jpaDto.getAmountOutgoing()).isEqualTo(FORWARDING_EVENT.amountOut().milliSatoshis());
@@ -23,7 +23,7 @@ class ForwardingEventJpaDtoTest {
 
     @Test
     void toModel() {
-        assertThat(ForwardingEventJpaDto.createFromForwardingEvent(FORWARDING_EVENT).toModel())
+        assertThat(ForwardingEventJpaDto.createFromModel(FORWARDING_EVENT).toModel())
                 .isEqualTo(FORWARDING_EVENT);
     }
 }

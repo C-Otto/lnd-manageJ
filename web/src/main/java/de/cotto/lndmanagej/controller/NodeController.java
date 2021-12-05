@@ -73,7 +73,7 @@ public class NodeController {
                 toSortedList(channelService.getWaitingCloseChannelsWith(pubkey)),
                 toSortedList(channelService.getForceClosingChannelsWith(pubkey)),
                 new OnChainCostsDto(openCosts, closeCosts),
-                BalanceInformationDto.createFrom(balanceInformation),
+                BalanceInformationDto.createFromModel(balanceInformation),
                 node.online(),
                 getFeeReportDto(pubkey)
         );
@@ -96,7 +96,7 @@ public class NodeController {
     @Timed
     @GetMapping("/balance")
     public BalanceInformationDto getBalance(@PathVariable Pubkey pubkey) {
-        return BalanceInformationDto.createFrom(balanceService.getBalanceInformationForPeer(pubkey));
+        return BalanceInformationDto.createFromModel(balanceService.getBalanceInformationForPeer(pubkey));
     }
 
     @Timed
@@ -106,7 +106,7 @@ public class NodeController {
     }
 
     private FeeReportDto getFeeReportDto(Pubkey pubkey) {
-        return FeeReportDto.createFrom(feeService.getFeeReportForPeer(pubkey));
+        return FeeReportDto.createFromModel(feeService.getFeeReportForPeer(pubkey));
     }
 
     private List<ChannelId> toSortedList(Set<? extends Channel> channels) {

@@ -22,8 +22,8 @@ class FeeReportDtoTest {
     }
 
     @Test
-    void createFrom() {
-        assertThat(FeeReportDto.createFrom(new FeeReport(Coins.ofSatoshis(1), Coins.ofSatoshis(2))))
+    void createFromModel() {
+        assertThat(FeeReportDto.createFromModel(new FeeReport(Coins.ofSatoshis(1), Coins.ofSatoshis(2))))
                 .isEqualTo(new FeeReportDto("1000", "2000"));
     }
 }

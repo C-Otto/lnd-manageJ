@@ -46,7 +46,7 @@ public record ChannelDetailsDto(
                 channelDto.totalSent(),
                 channelDto.totalReceived(),
                 channelDto.status(),
-                BalanceInformationDto.createFrom(balanceInformation),
+                BalanceInformationDto.createFromModel(balanceInformation),
                 onChainCosts,
                 policies,
                 channelDto.closeDetails(),
