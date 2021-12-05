@@ -18,6 +18,8 @@ import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE_2;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,8 +41,8 @@ class SettledInvoicesTest {
     @BeforeEach
     void setUp() {
         when(dao.getAddIndexOffset()).thenReturn(ADD_INDEX_OFFSET);
-        when(dao.getSettleIndexOffset()).thenReturn(SETTLE_INDEX_OFFSET);
-        when(grpcInvoices.getLimit()).thenReturn(1);
+        lenient().when(dao.getSettleIndexOffset()).thenReturn(SETTLE_INDEX_OFFSET);
+        lenient().when(grpcInvoices.getLimit()).thenReturn(1);
     }
 
     @Test
@@ -59,11 +61,19 @@ class SettledInvoicesTest {
     }
 
     @Test
-    void refresh_subscribes_after_bulk_get() {
+    void refresh_subscribes_after_empty_bulk_get() {
+        mockEmptyGetReply();
         settledInvoices.refresh();
         InOrder inOrder = inOrder(grpcInvoices);
         inOrder.verify(grpcInvoices).getSettledInvoicesAfter(ADD_INDEX_OFFSET);
         inOrder.verify(grpcInvoices).getNewSettledInvoicesAfter(SETTLE_INDEX_OFFSET);
+    }
+
+    @Test
+    void refresh_does_not_subscribe_after_failed_bulk_get() {
+        settledInvoices.refresh();
+        verify(grpcInvoices).getSettledInvoicesAfter(ADD_INDEX_OFFSET);
+        verify(grpcInvoices, never()).getNewSettledInvoicesAfter(SETTLE_INDEX_OFFSET);
     }
 
     @Test
@@ -88,6 +98,7 @@ class SettledInvoicesTest {
 
     @Test
     void refresh_saves_invoices_from_subscription() {
+        mockEmptyGetReply();
         when(grpcInvoices.getNewSettledInvoicesAfter(SETTLE_INDEX_OFFSET))
                 .thenReturn(Stream.of(SETTLED_INVOICE, SETTLED_INVOICE_2));
         settledInvoices.refresh();
@@ -97,9 +108,16 @@ class SettledInvoicesTest {
 
     @Test
     void refresh_skips_invalid_invoices_from_subscription() {
+        mockEmptyGetReply();
         when(grpcInvoices.getNewSettledInvoicesAfter(SETTLE_INDEX_OFFSET))
                 .thenReturn(Stream.of(SETTLED_INVOICE, SettledInvoice.INVALID, SETTLED_INVOICE_2));
         settledInvoices.refresh();
         verify(dao, times(2)).save(any(SettledInvoice.class));
+    }
+
+    private void mockEmptyGetReply() {
+        when(grpcInvoices.getSettledInvoicesAfter(ADD_INDEX_OFFSET))
+                .thenReturn(Optional.of(List.of()))
+                .thenReturn(Optional.empty());
     }
 }
