@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/status/")
@@ -49,7 +48,7 @@ public class StatusController {
                 .map(LocalOpenChannel::getId)
                 .sorted()
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
         return new ChannelsDto(channelIds);
     }
 
@@ -60,7 +59,7 @@ public class StatusController {
                 .map(LocalOpenChannel::getRemotePubkey)
                 .sorted()
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
         return new PubkeysDto(pubkeys);
     }
 
@@ -71,7 +70,7 @@ public class StatusController {
                 .map(LocalChannel::getId)
                 .sorted()
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
         return new ChannelsDto(channelIds);
     }
 
@@ -82,7 +81,7 @@ public class StatusController {
                 .map(LocalChannel::getRemotePubkey)
                 .sorted()
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
         return new PubkeysDto(pubkeys);
     }
 

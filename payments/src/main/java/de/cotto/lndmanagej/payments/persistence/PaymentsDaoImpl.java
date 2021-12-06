@@ -8,8 +8,6 @@ import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.List;
 
-import static java.util.stream.Collectors.toList;
-
 @Component
 @Transactional
 public class PaymentsDaoImpl implements PaymentsDao {
@@ -23,7 +21,7 @@ public class PaymentsDaoImpl implements PaymentsDao {
     public void save(Collection<Payment> payments) {
         List<PaymentJpaDto> converted = payments.stream()
                 .map(PaymentJpaDto::createFromModel)
-                .collect(toList());
+                .toList();
         repository.saveAll(converted);
     }
 

@@ -9,8 +9,6 @@ import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.List;
 
-import static java.util.stream.Collectors.toList;
-
 @Component
 @Transactional
 public class ForwardingEventsDaoImpl implements ForwardingEventsDao {
@@ -24,7 +22,7 @@ public class ForwardingEventsDaoImpl implements ForwardingEventsDao {
     public void save(Collection<ForwardingEvent> forwardingEvents) {
         List<ForwardingEventJpaDto> converted = forwardingEvents.stream()
                 .map(ForwardingEventJpaDto::createFromModel)
-                .collect(toList());
+                .toList();
         repository.saveAll(converted);
     }
 

@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/node/{pubkey}")
@@ -113,6 +112,6 @@ public class NodeController {
         return channels.stream()
                 .map(Channel::getId)
                 .sorted()
-                .collect(Collectors.toList());
+                .toList();
     }
 }

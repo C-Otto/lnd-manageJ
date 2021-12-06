@@ -34,7 +34,7 @@ public class GrpcTransactions {
         }
         List<Transaction> filteredTransactions = transactions.stream()
                 .filter(transaction -> transaction.getBlockHeight() == blockHeight)
-                .collect(Collectors.toList());
+                .toList();
         return Optional.of(filteredTransactions);
     }
 }
