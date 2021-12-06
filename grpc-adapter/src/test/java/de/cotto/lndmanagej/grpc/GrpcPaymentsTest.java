@@ -67,6 +67,30 @@ class GrpcPaymentsTest {
     }
 
     @Test
+    void payment_without_channel_id() {
+        Hop hop = Hop.newBuilder()
+                .setChanId(0L)
+                .setAmtToForwardMsat(123L)
+                .build();
+        Route route = Route.newBuilder().addHops(hop).build();
+        HTLCAttempt htlc = HTLCAttempt.newBuilder().setRoute(route).build();
+        lnrpc.Payment result = lnrpc.Payment.newBuilder()
+                .setStatus(PaymentStatus.SUCCEEDED)
+                .setPaymentIndex(PAYMENT.index())
+                .setPaymentHash(PAYMENT.paymentHash())
+                .setValueMsat(PAYMENT.value().milliSatoshis())
+                .setFeeMsat(PAYMENT.fees().milliSatoshis())
+                .setCreationTimeNs(PAYMENT.creationDateTime().toInstant(ZoneOffset.UTC).toEpochMilli() * 1_000)
+                .addHtlcs(htlc)
+                .build();
+        ListPaymentsResponse response = ListPaymentsResponse.newBuilder()
+                .addPayments(result)
+                .build();
+        when(grpcService.getPayments(anyLong(), anyInt())).thenReturn(Optional.of(response));
+        assertThat(grpcPayments.getPaymentsAfter(0L).orElseThrow().get(0).routes()).hasSize(1);
+    }
+
+    @Test
     void throws_exception_for_unsuccessful_payment() {
         mockResponse(payment(PaymentStatus.IN_FLIGHT, null));
         assertThatExceptionOfType(IllegalStateException.class).isThrownBy(

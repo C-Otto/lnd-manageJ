@@ -58,7 +58,10 @@ public class GrpcPayments {
     }
 
     private PaymentRoute toPaymentRoute(HTLCAttempt htlcAttempt) {
-        List<PaymentHop> hops = htlcAttempt.getRoute().getHopsList().stream().map(this::toHop).toList();
+        List<PaymentHop> hops = htlcAttempt.getRoute().getHopsList().stream()
+                .filter(hop -> hop.getChanId() != 0)
+                .map(this::toHop)
+                .toList();
         return new PaymentRoute(hops);
     }
 
