@@ -10,7 +10,7 @@ dependencies {
     implementation 'de.aaschmid:gradle-cpd-plugin:3.3'
     implementation 'net.ltgt.gradle:gradle-errorprone-plugin:2.0.2'
     implementation 'net.ltgt.gradle:gradle-nullaway-plugin:1.2.0'
-    implementation 'com.github.spotbugs.snom:spotbugs-gradle-plugin:4.8.0'
+    implementation 'com.github.spotbugs.snom:spotbugs-gradle-plugin:5.0.0'
     implementation 'org.springframework.boot:spring-boot-gradle-plugin:2.5.6'
     implementation 'com.adarshr:gradle-test-logger-plugin:3.1.0'
     implementation 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.7.0'
