@@ -8,8 +8,6 @@ import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.List;
 
-import static java.util.stream.Collectors.toList;
-
 @Component
 @Transactional
 public class SettledInvoicesDaoImpl implements SettledInvoicesDao {
@@ -23,7 +21,7 @@ public class SettledInvoicesDaoImpl implements SettledInvoicesDao {
     public void save(Collection<SettledInvoice> settledInvoices) {
         List<SettledInvoiceJpaDto> converted = settledInvoices.stream()
                 .map(SettledInvoiceJpaDto::createFromModel)
-                .collect(toList());
+                .toList();
         repository.saveAll(converted);
     }
 

@@ -1,7 +1,0 @@
-plugins {
-    id 'lnd-manageJ.java-library-conventions'
-}
-
-pitest {
-    testStrengthThreshold = 0
-}

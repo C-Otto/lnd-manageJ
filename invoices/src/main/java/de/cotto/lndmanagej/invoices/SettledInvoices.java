@@ -8,8 +8,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static java.util.stream.Collectors.toList;
-
 @Component
 public class SettledInvoices {
     private final GrpcInvoices grpcInvoices;
@@ -28,7 +26,7 @@ public class SettledInvoices {
             if (settledInvoices == null) {
                 return;
             }
-            dao.save(settledInvoices.stream().filter(SettledInvoice::isValid).collect(toList()));
+            dao.save(settledInvoices.stream().filter(SettledInvoice::isValid).toList());
         } while (settledInvoices.size() == grpcInvoices.getLimit());
 
         grpcInvoices.getNewSettledInvoicesAfter(dao.getSettleIndexOffset())
