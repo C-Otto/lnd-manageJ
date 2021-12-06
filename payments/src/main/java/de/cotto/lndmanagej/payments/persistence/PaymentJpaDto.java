@@ -4,11 +4,14 @@ import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Payment;
 
 import javax.annotation.Nullable;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -23,6 +26,10 @@ class PaymentJpaDto {
     private long value;
     private long fees;
 
+    @Nullable
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<PaymentRouteJpaDto> routes;
+
     public PaymentJpaDto() {
         // for JPA
     }
@@ -34,6 +41,7 @@ class PaymentJpaDto {
         jpaDto.timestamp = payment.creationDateTime().toInstant(ZoneOffset.UTC).toEpochMilli();
         jpaDto.value = payment.value().milliSatoshis();
         jpaDto.fees = payment.fees().milliSatoshis();
+        jpaDto.routes = payment.routes().stream().map(PaymentRouteJpaDto::createFromModel).toList();
         return jpaDto;
     }
 
@@ -46,7 +54,8 @@ class PaymentJpaDto {
                 Objects.requireNonNull(hash),
                 LocalDateTime.ofEpochSecond(epochSecond, nanoseconds, ZoneOffset.UTC),
                 Coins.ofMilliSatoshis(value),
-                Coins.ofMilliSatoshis(fees)
+                Coins.ofMilliSatoshis(fees),
+                Objects.requireNonNull(routes).stream().map(PaymentRouteJpaDto::toModel).toList()
         );
     }
 
@@ -68,5 +77,10 @@ class PaymentJpaDto {
 
     public long getFees() {
         return fees;
+    }
+
+    @Nullable
+    public List<PaymentRouteJpaDto> getRoutes() {
+        return routes;
     }
 }

@@ -27,8 +27,14 @@ class PaymentsRepositoryIT {
     }
 
     private PaymentJpaDto payment(int index) {
-        return PaymentJpaDto.createFromModel(
-                new Payment(index, PAYMENT.paymentHash(), PAYMENT.creationDateTime(), PAYMENT.value(), PAYMENT.fees())
+        return PaymentJpaDto.createFromModel(new Payment(
+                        index,
+                        PAYMENT.paymentHash(),
+                        PAYMENT.creationDateTime(),
+                        PAYMENT.value(),
+                        PAYMENT.fees(),
+                        PAYMENT.routes()
+                )
         );
     }
 }

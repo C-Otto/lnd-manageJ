@@ -1,8 +1,13 @@
 package de.cotto.lndmanagej.grpc;
 
 import de.cotto.lndmanagej.model.Payment;
+import de.cotto.lndmanagej.model.PaymentHop;
+import de.cotto.lndmanagej.model.PaymentRoute;
+import lnrpc.HTLCAttempt;
+import lnrpc.Hop;
 import lnrpc.ListPaymentsResponse;
 import lnrpc.Payment.PaymentStatus;
+import lnrpc.Route;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -11,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.annotation.Nullable;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -98,13 +104,27 @@ class GrpcPaymentsTest {
         if (payment == null) {
             return lnrpc.Payment.newBuilder().setStatus(status).build();
         }
-        return lnrpc.Payment.newBuilder()
+        HTLCAttempt.Builder htlcBuilder = HTLCAttempt.newBuilder();
+        List<HTLCAttempt> htlcs = new ArrayList<>();
+        for (PaymentRoute paymentRoute : payment.routes()) {
+            Route.Builder routeBuilder = Route.newBuilder();
+            for (PaymentHop hop : paymentRoute.hops()) {
+                routeBuilder.addHops(Hop.newBuilder()
+                        .setChanId(hop.channelId().getShortChannelId())
+                        .setAmtToForwardMsat(hop.amount().milliSatoshis())
+                        .build());
+            }
+            htlcBuilder.setRoute(routeBuilder.build());
+            htlcs.add(htlcBuilder.build());
+        }
+        lnrpc.Payment.Builder builder = lnrpc.Payment.newBuilder()
                 .setStatus(status)
                 .setPaymentIndex(payment.index())
                 .setPaymentHash(payment.paymentHash())
                 .setValueMsat(payment.value().milliSatoshis())
                 .setFeeMsat(payment.fees().milliSatoshis())
-                .setCreationTimeNs(payment.creationDateTime().toInstant(ZoneOffset.UTC).toEpochMilli() * 1_000)
-                .build();
+                .setCreationTimeNs(payment.creationDateTime().toInstant(ZoneOffset.UTC).toEpochMilli() * 1_000);
+        htlcs.forEach(builder::addHtlcs);
+        return builder.build();
     }
 }

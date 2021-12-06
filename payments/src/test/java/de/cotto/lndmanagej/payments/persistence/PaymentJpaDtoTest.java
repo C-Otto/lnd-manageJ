@@ -23,12 +23,12 @@ class PaymentJpaDtoTest {
                 .isEqualTo(PAYMENT_CREATION_DATE_TIME.toInstant(ZoneOffset.UTC).toEpochMilli());
         assertThat(jpaDto.getValue()).isEqualTo(PAYMENT_VALUE.milliSatoshis());
         assertThat(jpaDto.getFees()).isEqualTo(PAYMENT_FEES.milliSatoshis());
+        assertThat(jpaDto.getRoutes()).hasSize(1);
     }
 
     @Test
     void toModel() {
-        assertThat(PaymentJpaDto.createFromModel(PAYMENT).toModel())
-                .isEqualTo(PAYMENT);
+        assertThat(PaymentJpaDto.createFromModel(PAYMENT).toModel()).isEqualTo(PAYMENT);
     }
 }
 

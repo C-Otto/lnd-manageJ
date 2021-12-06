@@ -1,7 +1,12 @@
 package de.cotto.lndmanagej.grpc;
 
+import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Payment;
+import de.cotto.lndmanagej.model.PaymentHop;
+import de.cotto.lndmanagej.model.PaymentRoute;
+import lnrpc.HTLCAttempt;
+import lnrpc.Hop;
 import lnrpc.ListPaymentsResponse;
 import org.springframework.stereotype.Component;
 
@@ -47,7 +52,20 @@ public class GrpcPayments {
                 lndPayment.getPaymentHash(),
                 LocalDateTime.ofInstant(timestamp, ZoneOffset.UTC),
                 Coins.ofMilliSatoshis(lndPayment.getValueMsat()),
-                Coins.ofMilliSatoshis(lndPayment.getFeeMsat())
+                Coins.ofMilliSatoshis(lndPayment.getFeeMsat()),
+                lndPayment.getHtlcsList().stream().map(this::toPaymentRoute).toList()
+        );
+    }
+
+    private PaymentRoute toPaymentRoute(HTLCAttempt htlcAttempt) {
+        List<PaymentHop> hops = htlcAttempt.getRoute().getHopsList().stream().map(this::toHop).toList();
+        return new PaymentRoute(hops);
+    }
+
+    private PaymentHop toHop(Hop hop) {
+        return new PaymentHop(
+                ChannelId.fromShortChannelId(hop.getChanId()),
+                Coins.ofMilliSatoshis(hop.getAmtToForwardMsat())
         );
     }
 }
