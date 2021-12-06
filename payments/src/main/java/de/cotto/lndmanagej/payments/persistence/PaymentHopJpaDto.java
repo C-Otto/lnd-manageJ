@@ -8,7 +8,7 @@ import javax.persistence.Embeddable;
 
 @Embeddable
 public class PaymentHopJpaDto {
-    private long shortChannelId;
+    private long channelId;
     private long amount;
 
     @SuppressWarnings("unused")
@@ -16,8 +16,8 @@ public class PaymentHopJpaDto {
         // for JPA
     }
 
-    public PaymentHopJpaDto(long shortChannelId, long amount) {
-        this.shortChannelId = shortChannelId;
+    public PaymentHopJpaDto(long channelId, long amount) {
+        this.channelId = channelId;
         this.amount = amount;
     }
 
@@ -26,6 +26,6 @@ public class PaymentHopJpaDto {
     }
 
     public PaymentHop toModel() {
-        return new PaymentHop(ChannelId.fromShortChannelId(shortChannelId), Coins.ofMilliSatoshis(amount));
+        return new PaymentHop(ChannelId.fromShortChannelId(channelId), Coins.ofMilliSatoshis(amount));
     }
 }
