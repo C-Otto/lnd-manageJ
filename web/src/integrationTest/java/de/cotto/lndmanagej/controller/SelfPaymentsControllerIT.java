@@ -15,6 +15,7 @@ import static de.cotto.lndmanagej.SelfPaymentFixtures.SELF_PAYMENT_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_4;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.Is.is;
@@ -22,9 +23,11 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @WebMvcTest(controllers = SelfPaymentsController.class)
 class SelfPaymentsControllerIT {
     private static final String CHANNEL_PREFIX = "/api/channel/" + CHANNEL_ID.getShortChannelId() + "/";
+    private static final String NODE_PREFIX = "/api/node/" + PUBKEY + "/";
 
     @Autowired
     private MockMvc mockMvc;
@@ -41,6 +44,15 @@ class SelfPaymentsControllerIT {
         when(selfPaymentsService.getSelfPaymentsFromChannel(CHANNEL_ID))
                 .thenReturn(List.of(SELF_PAYMENT_2, SELF_PAYMENT));
         mockMvc.perform(get(CHANNEL_PREFIX + "/self-payments-from-channel/"))
+                .andExpect(jsonPath("$[0].memo", is(SELF_PAYMENT_2.memo())))
+                .andExpect(jsonPath("$[1].memo", is(SELF_PAYMENT.memo())));
+    }
+
+    @Test
+    void getSelfPaymentsFromPeer() throws Exception {
+        when(selfPaymentsService.getSelfPaymentsFromPeer(PUBKEY))
+                .thenReturn(List.of(SELF_PAYMENT_2, SELF_PAYMENT));
+        mockMvc.perform(get(NODE_PREFIX + "/self-payments-from-peer/"))
                 .andExpect(jsonPath("$[0].memo", is(SELF_PAYMENT_2.memo())))
                 .andExpect(jsonPath("$[1].memo", is(SELF_PAYMENT.memo())));
     }
@@ -64,4 +76,12 @@ class SelfPaymentsControllerIT {
                 .andExpect(jsonPath("$[1].lastChannel", is(CHANNEL_ID.toString())));
     }
 
+    @Test
+    void getSelfPaymentsToPeer() throws Exception {
+        when(selfPaymentsService.getSelfPaymentsToPeer(PUBKEY))
+                .thenReturn(List.of(SELF_PAYMENT_2, SELF_PAYMENT));
+        mockMvc.perform(get(NODE_PREFIX + "/self-payments-to-peer/"))
+                .andExpect(jsonPath("$[0].memo", is(SELF_PAYMENT_2.memo())))
+                .andExpect(jsonPath("$[1].memo", is(SELF_PAYMENT.memo())));
+    }
 }

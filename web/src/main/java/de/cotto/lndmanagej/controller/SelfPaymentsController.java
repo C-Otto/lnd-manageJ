@@ -4,6 +4,7 @@ import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
 import de.cotto.lndmanagej.controller.dto.SelfPaymentDto;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.SelfPaymentsService;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +25,22 @@ public class SelfPaymentsController {
     }
 
     @Timed
+    @GetMapping("/channel/{channelId}/self-payments-from-channel")
+    public List<SelfPaymentDto> getSelfPaymentsFromChannel(@PathVariable ChannelId channelId) {
+        return selfPaymentsService.getSelfPaymentsFromChannel(channelId).stream()
+                .map(SelfPaymentDto::createFromModel)
+                .toList();
+    }
+
+    @Timed
+    @GetMapping("/node/{pubkey}/self-payments-from-peer")
+    public List<SelfPaymentDto> getSelfPaymentsFromPeer(@PathVariable Pubkey pubkey) {
+        return selfPaymentsService.getSelfPaymentsFromPeer(pubkey).stream()
+                .map(SelfPaymentDto::createFromModel)
+                .toList();
+    }
+
+    @Timed
     @GetMapping("/channel/{channelId}/self-payments-to-channel")
     public List<SelfPaymentDto> getSelfPaymentsToChannel(@PathVariable ChannelId channelId) {
         return selfPaymentsService.getSelfPaymentsToChannel(channelId).stream()
@@ -32,9 +49,9 @@ public class SelfPaymentsController {
     }
 
     @Timed
-    @GetMapping("/channel/{channelId}/self-payments-from-channel")
-    public List<SelfPaymentDto> getSelfPaymentsFromChannel(@PathVariable ChannelId channelId) {
-        return selfPaymentsService.getSelfPaymentsFromChannel(channelId).stream()
+    @GetMapping("/node/{pubkey}/self-payments-to-peer")
+    public List<SelfPaymentDto> getSelfPaymentsToPeer(@PathVariable Pubkey pubkey) {
+        return selfPaymentsService.getSelfPaymentsToPeer(pubkey).stream()
                 .map(SelfPaymentDto::createFromModel)
                 .toList();
     }

@@ -14,5 +14,5 @@ dependencies {
 }
 
 pitest {
-    testStrengthThreshold = 99
+    testStrengthThreshold = 97
 }
