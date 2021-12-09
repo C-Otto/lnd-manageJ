@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
+import java.time.ZonedDateTime;
+
 @Configuration
 public class ObjectMapperConfiguration {
     public ObjectMapperConfiguration() {
@@ -23,6 +25,7 @@ public class ObjectMapperConfiguration {
         module.addSerializer(Pubkey.class, new ToStringSerializer());
         module.addSerializer(ChannelId.class, new ToStringSerializer());
         module.addSerializer(ChannelPoint.class, new ToStringSerializer());
+        module.addSerializer(ZonedDateTime.class, new ToStringSerializer());
         return new ObjectMapper().registerModule(module);
     }
 }

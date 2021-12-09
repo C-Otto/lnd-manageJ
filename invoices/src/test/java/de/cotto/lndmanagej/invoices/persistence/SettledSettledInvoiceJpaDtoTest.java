@@ -4,10 +4,10 @@ import de.cotto.lndmanagej.model.SettledInvoice;
 import de.cotto.lndmanagej.model.SettledInvoiceFixtures;
 import org.junit.jupiter.api.Test;
 
-import java.time.ZoneOffset;
 import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.KEYSEND_MESSAGE;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE_KEYSEND;
@@ -21,13 +21,12 @@ class SettledSettledInvoiceJpaDtoTest {
         SettledInvoiceJpaDto jpaDto = SettledInvoiceJpaDto.createFromModel(SETTLED_INVOICE);
         assertThat(jpaDto.getAddIndex()).isEqualTo(SETTLED_INVOICE.addIndex());
         assertThat(jpaDto.getSettleIndex()).isEqualTo(SETTLED_INVOICE.settleIndex());
-        assertThat(jpaDto.getSettleDate())
-                .isEqualTo(SETTLED_INVOICE.settleDate().toEpochSecond(ZoneOffset.UTC));
+        assertThat(jpaDto.getSettleDate()).isEqualTo(SETTLED_INVOICE.settleDate().toEpochSecond());
         assertThat(jpaDto.getHash()).isEqualTo(SETTLED_INVOICE.hash());
         assertThat(jpaDto.getAmountPaid()).isEqualTo(SETTLED_INVOICE.amountPaid().milliSatoshis());
         assertThat(jpaDto.getMemo()).isEqualTo(SETTLED_INVOICE.memo());
         assertThat(jpaDto.getKeysendMessage()).isNull();
-        assertThat(jpaDto.getReceivedVia()).isEqualTo(CHANNEL_ID.getShortChannelId());
+        assertThat(jpaDto.getReceivedVia()).isEqualTo(CHANNEL_ID_2.getShortChannelId());
     }
 
     @Test

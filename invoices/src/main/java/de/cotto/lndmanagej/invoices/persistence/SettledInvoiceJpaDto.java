@@ -11,9 +11,11 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.Optional;
+
+import static java.time.ZoneOffset.UTC;
 
 @Entity
 @Table(name = "settled_invoices", indexes = {@Index(unique = true, columnList = "settleIndex")})
@@ -47,7 +49,7 @@ public class SettledInvoiceJpaDto {
         SettledInvoiceJpaDto jpaDto = new SettledInvoiceJpaDto();
         jpaDto.addIndex = settledInvoice.addIndex();
         jpaDto.settleIndex = settledInvoice.settleIndex();
-        jpaDto.settleDate = settledInvoice.settleDate().toEpochSecond(ZoneOffset.UTC);
+        jpaDto.settleDate = settledInvoice.settleDate().toEpochSecond();
         jpaDto.hash = settledInvoice.hash();
         jpaDto.amountPaid = settledInvoice.amountPaid().milliSatoshis();
         jpaDto.memo = settledInvoice.memo();
@@ -57,7 +59,7 @@ public class SettledInvoiceJpaDto {
     }
 
     public SettledInvoice toModel() {
-        LocalDateTime localDateTime = LocalDateTime.ofEpochSecond(settleDate, 0, ZoneOffset.UTC);
+        ZonedDateTime dateTime = LocalDateTime.ofEpochSecond(settleDate, 0, UTC).atZone(UTC);
         Optional<ChannelId> channelId;
         if (receivedVia > 0) {
             channelId = Optional.of(ChannelId.fromShortChannelId(receivedVia));
@@ -67,7 +69,7 @@ public class SettledInvoiceJpaDto {
         return new SettledInvoice(
                 addIndex,
                 settleIndex,
-                localDateTime,
+                dateTime,
                 Objects.requireNonNull(hash),
                 Coins.ofMilliSatoshis(amountPaid),
                 Objects.requireNonNull(memo),

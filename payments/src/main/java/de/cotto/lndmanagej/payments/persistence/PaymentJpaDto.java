@@ -16,7 +16,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "payments")
-class PaymentJpaDto {
+public class PaymentJpaDto {
     @Id
     private long paymentIndex;
 

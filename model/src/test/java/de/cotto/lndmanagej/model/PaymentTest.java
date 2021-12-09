@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_4;
 import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT;
 import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT_2;
 import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT_CREATION_DATE_TIME;
@@ -11,8 +12,8 @@ import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT_FEES;
 import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT_HASH;
 import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT_INDEX;
 import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT_VALUE;
-import static de.cotto.lndmanagej.model.PaymentRouteFixtures.PAYMENT_ROUTE;
-import static de.cotto.lndmanagej.model.PaymentRouteFixtures.PAYMENT_ROUTE_2;
+import static de.cotto.lndmanagej.model.PaymentRouteFixtures.PAYMENT_ROUTE_3_TO_1;
+import static de.cotto.lndmanagej.model.PaymentRouteFixtures.PAYMENT_ROUTE_4_TO_1;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PaymentTest {
@@ -43,6 +44,11 @@ class PaymentTest {
 
     @Test
     void routes() {
-        assertThat(PAYMENT_2.routes()).isEqualTo(List.of(PAYMENT_ROUTE, PAYMENT_ROUTE_2));
+        assertThat(PAYMENT_2.routes()).isEqualTo(List.of(PAYMENT_ROUTE_4_TO_1, PAYMENT_ROUTE_3_TO_1));
+    }
+
+    @Test
+    void getFirstChannel() {
+        assertThat(PAYMENT.getFirstChannel()).contains(CHANNEL_ID_4);
     }
 }

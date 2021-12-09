@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
@@ -59,7 +60,7 @@ class SettledInvoicesRepositoryIT {
         return SettledInvoiceJpaDto.createFromModel(new SettledInvoice(
                         addIndex,
                         settleIndex,
-                        LocalDateTime.MIN,
+                        LocalDateTime.MIN.atZone(ZoneOffset.UTC),
                         "",
                         Coins.NONE,
                         "",

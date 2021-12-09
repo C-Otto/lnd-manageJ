@@ -13,7 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.annotation.Nullable;
-import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.HexFormat;
 import java.util.LinkedHashMap;
@@ -250,7 +249,7 @@ class GrpcInvoicesTest {
                 .setSettleIndex(settledInvoice.settleIndex())
                 .setRHash(ByteString.copyFrom(HEX_FORMAT.parseHex(settledInvoice.hash())))
                 .setMemo(settledInvoice.memo())
-                .setSettleDate(settledInvoice.settleDate().toEpochSecond(ZoneOffset.UTC))
+                .setSettleDate(settledInvoice.settleDate().toEpochSecond())
                 .setAmtPaidMsat(settledInvoice.amountPaid().milliSatoshis())
                 .addHtlcs(htlc)
                 .build();

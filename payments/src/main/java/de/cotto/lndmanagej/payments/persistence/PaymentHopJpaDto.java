@@ -7,7 +7,7 @@ import de.cotto.lndmanagej.model.PaymentHop;
 import javax.persistence.Embeddable;
 
 @Embeddable
-public class PaymentHopJpaDto {
+class PaymentHopJpaDto {
     private long channelId;
     private long amount;
 

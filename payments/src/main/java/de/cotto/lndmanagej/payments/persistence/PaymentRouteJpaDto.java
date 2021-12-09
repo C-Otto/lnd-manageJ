@@ -9,19 +9,21 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import java.util.List;
 import java.util.Objects;
 
 @Entity
 @Table(name = "payment_routes")
-public class PaymentRouteJpaDto {
+class PaymentRouteJpaDto {
     @Id
     @GeneratedValue
     @SuppressWarnings("unused")
     private long routeId;
 
     @Nullable
+    @OrderColumn
     @ElementCollection
     @CollectionTable(name = "payment_route_hops")
     private List<PaymentHopJpaDto> hops;

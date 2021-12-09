@@ -1,0 +1,72 @@
+package de.cotto.lndmanagej.selfpayments.persistence;
+
+import de.cotto.lndmanagej.invoices.persistence.SettledInvoiceJpaDto;
+import de.cotto.lndmanagej.invoices.persistence.SettledInvoicesRepository;
+import de.cotto.lndmanagej.payments.persistence.PaymentJpaDto;
+import de.cotto.lndmanagej.payments.persistence.PaymentsRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+
+import static de.cotto.lndmanagej.SelfPaymentFixtures.SELF_PAYMENT;
+import static de.cotto.lndmanagej.SelfPaymentFixtures.SELF_PAYMENT_2;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_4;
+import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT;
+import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT_2;
+import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT_3;
+import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE;
+import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE_2;
+import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE_3;
+import static org.assertj.core.api.Assertions.assertThat;
+
+@DataJpaTest
+class SelfPaymentsRepositoryIT {
+    @Autowired
+    private SelfPaymentsRepository repository;
+
+    @Autowired
+    private SettledInvoicesRepository invoicesRepository;
+
+    @Autowired
+    private PaymentsRepository paymentsRepository;
+
+    @BeforeEach
+    void setUp() {
+        paymentsRepository.save(PaymentJpaDto.createFromModel(PAYMENT));
+        paymentsRepository.save(PaymentJpaDto.createFromModel(PAYMENT_2));
+        paymentsRepository.save(PaymentJpaDto.createFromModel(PAYMENT_3));
+        invoicesRepository.save(SettledInvoiceJpaDto.createFromModel(SETTLED_INVOICE));
+        invoicesRepository.save(SettledInvoiceJpaDto.createFromModel(SETTLED_INVOICE_2));
+        invoicesRepository.save(SettledInvoiceJpaDto.createFromModel(SETTLED_INVOICE_3));
+    }
+
+    @Test
+    void getSelfPayments() {
+        assertThat(repository.getAllSelfPayments()).map(SelfPaymentJpaDto::toModel)
+                .containsExactlyInAnyOrder(SELF_PAYMENT, SELF_PAYMENT_2);
+    }
+
+    @Test
+    void getSelfPaymentsToChannel() {
+        assertThat(repository.getSelfPaymentsToChannel(CHANNEL_ID_2.getShortChannelId()))
+                .map(SelfPaymentJpaDto::toModel)
+                .containsExactly(SELF_PAYMENT);
+    }
+
+    @Test
+    void getSelfPaymentsFromChannel() {
+        assertThat(repository.getSelfPaymentsFromChannel(CHANNEL_ID_3.getShortChannelId()))
+                .map(SelfPaymentJpaDto::toModel)
+                .containsExactly(SELF_PAYMENT_2);
+    }
+
+    @Test
+    void getSelfPaymentsFromChannel_two_payments() {
+        assertThat(repository.getSelfPaymentsFromChannel(CHANNEL_ID_4.getShortChannelId()))
+                .map(SelfPaymentJpaDto::toModel)
+                .containsExactly(SELF_PAYMENT, SELF_PAYMENT_2);
+    }
+}

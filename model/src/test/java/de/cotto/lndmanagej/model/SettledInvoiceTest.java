@@ -3,9 +3,10 @@ package de.cotto.lndmanagej.model;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Optional;
 
-import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.ADD_INDEX;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.AMOUNT_PAID;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.HASH;
@@ -23,7 +24,7 @@ class SettledInvoiceTest {
         SettledInvoice expected = new SettledInvoice(
                 -1,
                 -1,
-                LocalDateTime.MIN,
+                LocalDateTime.MIN.atZone(ZoneOffset.UTC),
                 "",
                 Coins.NONE,
                 "",
@@ -81,6 +82,6 @@ class SettledInvoiceTest {
 
     @Test
     void receivedVia() {
-        assertThat(SETTLED_INVOICE.receivedVia()).contains(CHANNEL_ID);
+        assertThat(SETTLED_INVOICE.receivedVia()).contains(CHANNEL_ID_2);
     }
 }

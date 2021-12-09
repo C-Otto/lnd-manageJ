@@ -8,6 +8,7 @@ dependencies {
     implementation project(':grpc-adapter')
     implementation project(':model')
     implementation project(':transactions')
+    implementation project(':selfpayments')
     testImplementation testFixtures(project(':model'))
     testImplementation testFixtures(project(':transactions'))
 }

@@ -10,7 +10,6 @@ import lnrpc.ListInvoiceResponse;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.HexFormat;
 import java.util.Iterator;
 import java.util.List;
@@ -18,6 +17,8 @@ import java.util.Optional;
 import java.util.Spliterators;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import static java.time.ZoneOffset.UTC;
 
 @Component
 public class GrpcInvoices {
@@ -62,7 +63,7 @@ public class GrpcInvoices {
         return new SettledInvoice(
                 lndInvoice.getAddIndex(),
                 lndInvoice.getSettleIndex(),
-                LocalDateTime.ofEpochSecond(lndInvoice.getSettleDate(), 0, ZoneOffset.UTC),
+                LocalDateTime.ofEpochSecond(lndInvoice.getSettleDate(), 0, UTC).atZone(UTC),
                 HEX_FORMAT.formatHex(lndInvoice.getRHash().toByteArray()),
                 Coins.ofMilliSatoshis(lndInvoice.getAmtPaidMsat()),
                 lndInvoice.getMemo(),
