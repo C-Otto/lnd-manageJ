@@ -1,8 +1,11 @@
 package de.cotto.lndmanagej.invoices.persistence;
 
+import de.cotto.lndmanagej.model.SettledInvoice;
+import de.cotto.lndmanagej.model.SettledInvoiceFixtures;
 import org.junit.jupiter.api.Test;
 
 import java.time.ZoneOffset;
+import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.KEYSEND_MESSAGE;
@@ -34,6 +37,27 @@ class SettledSettledInvoiceJpaDtoTest {
     }
 
     @Test
+    void createFromModel_truncates_too_long_keysend_message() {
+        String longMessage = longMessage(5_001);
+        SettledInvoiceJpaDto jpaDto = getDtoWithMessage(longMessage);
+        assertThat(jpaDto.getKeysendMessage()).isEqualTo(longMessage.substring(0, 5_000));
+    }
+
+    @Test
+    void createFromModel_with_keysend_message_at_length_limit() {
+        String longMessage = longMessage(5_000);
+        SettledInvoiceJpaDto jpaDto = getDtoWithMessage(longMessage);
+        assertThat(jpaDto.getKeysendMessage()).isEqualTo(longMessage);
+    }
+
+    @Test
+    void createFromModel_with_keysend_message_below_length_limit() {
+        String longMessage = longMessage(4_999);
+        SettledInvoiceJpaDto jpaDto = getDtoWithMessage(longMessage);
+        assertThat(jpaDto.getKeysendMessage()).isEqualTo(longMessage);
+    }
+
+    @Test
     void createFromModel_without_receivedVia_channel() {
         SettledInvoiceJpaDto jpaDto = SettledInvoiceJpaDto.createFromModel(SETTLED_INVOICE_NO_CHANNEL_ID);
         assertThat(jpaDto.getReceivedVia()).isEqualTo(0L);
@@ -55,6 +79,23 @@ class SettledSettledInvoiceJpaDtoTest {
     void toModel_with_keysend_message() {
         assertThat(SettledInvoiceJpaDto.createFromModel(SETTLED_INVOICE_KEYSEND).toModel())
                 .isEqualTo(SETTLED_INVOICE_KEYSEND);
+    }
+
+    private String longMessage(int length) {
+        return "x".repeat(length);
+    }
+
+    private SettledInvoiceJpaDto getDtoWithMessage(String longMessage) {
+        return SettledInvoiceJpaDto.createFromModel(new SettledInvoice(
+                SettledInvoiceFixtures.ADD_INDEX,
+                SettledInvoiceFixtures.SETTLE_INDEX,
+                SettledInvoiceFixtures.SETTLE_DATE,
+                SettledInvoiceFixtures.HASH,
+                SettledInvoiceFixtures.AMOUNT_PAID,
+                SettledInvoiceFixtures.MEMO,
+                Optional.of(longMessage),
+                Optional.of(CHANNEL_ID)
+        ));
     }
 }
 

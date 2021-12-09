@@ -17,7 +17,9 @@ import java.util.Optional;
 
 @Entity
 @Table(name = "settled_invoices", indexes = {@Index(unique = true, columnList = "settleIndex")})
-class SettledInvoiceJpaDto {
+public class SettledInvoiceJpaDto {
+    private static final int KEYSEND_MESSAGE_LENGTH = 5_000;
+
     @Id
     private long addIndex;
 
@@ -33,7 +35,7 @@ class SettledInvoiceJpaDto {
     private String memo;
 
     @Nullable
-    @Column(length = 5_000)
+    @Column(length = KEYSEND_MESSAGE_LENGTH)
     private String keysendMessage;
     private long receivedVia;
 
@@ -49,7 +51,7 @@ class SettledInvoiceJpaDto {
         jpaDto.hash = settledInvoice.hash();
         jpaDto.amountPaid = settledInvoice.amountPaid().milliSatoshis();
         jpaDto.memo = settledInvoice.memo();
-        jpaDto.keysendMessage = settledInvoice.keysendMessage().orElse(null);
+        jpaDto.keysendMessage = getTruncatedKeysendMessage(settledInvoice);
         jpaDto.receivedVia = settledInvoice.receivedVia().map(ChannelId::getShortChannelId).orElse(0L);
         return jpaDto;
     }
@@ -105,5 +107,14 @@ class SettledInvoiceJpaDto {
 
     public long getReceivedVia() {
         return receivedVia;
+    }
+
+    @Nullable
+    private static String getTruncatedKeysendMessage(SettledInvoice settledInvoice) {
+        String message = settledInvoice.keysendMessage().orElse(null);
+        if (message == null || message.length() <= KEYSEND_MESSAGE_LENGTH) {
+            return message;
+        }
+        return message.substring(0, KEYSEND_MESSAGE_LENGTH);
     }
 }
