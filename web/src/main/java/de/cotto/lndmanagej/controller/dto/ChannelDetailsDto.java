@@ -21,6 +21,7 @@ public record ChannelDetailsDto(
         ChannelStatusDto status,
         BalanceInformationDto balance,
         OnChainCostsDto onChainCosts,
+        OffChainCostsDto offChainCosts,
         PoliciesDto policies,
         ClosedChannelDetailsDto closeDetails,
         FeeReportDto feeReport
@@ -30,6 +31,7 @@ public record ChannelDetailsDto(
             String remoteAlias,
             BalanceInformation balanceInformation,
             OnChainCostsDto onChainCosts,
+            OffChainCostsDto offChainCosts,
             PoliciesDto policies,
             FeeReportDto feeReport
     ) {
@@ -48,6 +50,7 @@ public record ChannelDetailsDto(
                 channelDto.status(),
                 BalanceInformationDto.createFromModel(balanceInformation),
                 onChainCosts,
+                offChainCosts,
                 policies,
                 channelDto.closeDetails(),
                 feeReport
@@ -59,6 +62,7 @@ public record ChannelDetailsDto(
             String remoteAlias,
             BalanceInformation balanceInformation,
             OnChainCostsDto onChainCosts,
+            OffChainCostsDto offChainCosts,
             PoliciesDto policies,
             ClosedChannelDetailsDto closeDetails,
             FeeReportDto feeReport
@@ -68,6 +72,7 @@ public record ChannelDetailsDto(
                 remoteAlias,
                 balanceInformation,
                 onChainCosts,
+                offChainCosts,
                 policies,
                 feeReport
         );

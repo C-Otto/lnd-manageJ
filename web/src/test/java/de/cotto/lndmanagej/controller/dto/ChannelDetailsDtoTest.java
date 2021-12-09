@@ -19,6 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ChannelDetailsDtoTest {
 
     private static final OnChainCostsDto ON_CHAIN_COSTS = new OnChainCostsDto(Coins.ofSatoshis(1), Coins.ofSatoshis(2));
+    private static final OffChainCostsDto OFF_CHAIN_COSTS =
+            new OffChainCostsDto(Coins.ofSatoshis(3), Coins.ofSatoshis(4));
     private static final ClosedChannelDetailsDto CLOSE_DETAILS = new ClosedChannelDetailsDto("abc", 123);
     private static final FeeReportDto FEE_REPORT =
             new FeeReportDto(Coins.ofMilliSatoshis(1234), Coins.ofMilliSatoshis(567));
@@ -27,6 +29,7 @@ class ChannelDetailsDtoTest {
             ALIAS,
             BALANCE_INFORMATION,
             ON_CHAIN_COSTS,
+            OFF_CHAIN_COSTS,
             PoliciesDto.EMPTY,
             CLOSE_DETAILS,
             FEE_REPORT
@@ -84,6 +87,7 @@ class ChannelDetailsDtoTest {
                 ALIAS,
                 BALANCE_INFORMATION,
                 ON_CHAIN_COSTS,
+                OFF_CHAIN_COSTS,
                 PoliciesDto.EMPTY,
                 CLOSE_DETAILS,
                 FEE_REPORT
@@ -111,5 +115,10 @@ class ChannelDetailsDtoTest {
     @Test
     void onChainCosts() {
         assertThat(CHANNEL_DETAILS_DTO.onChainCosts()).isEqualTo(ON_CHAIN_COSTS);
+    }
+
+    @Test
+    void offChainCosts() {
+        assertThat(CHANNEL_DETAILS_DTO.offChainCosts()).isEqualTo(OFF_CHAIN_COSTS);
     }
 }

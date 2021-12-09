@@ -5,6 +5,7 @@ import de.cotto.lndmanagej.controller.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.controller.dto.ChannelDto;
 import de.cotto.lndmanagej.controller.dto.ClosedChannelDetailsDto;
 import de.cotto.lndmanagej.controller.dto.FeeReportDto;
+import de.cotto.lndmanagej.controller.dto.OffChainCostsDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.model.BalanceInformation;
@@ -16,6 +17,7 @@ import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
+import de.cotto.lndmanagej.service.OffChainCostService;
 import de.cotto.lndmanagej.service.OnChainCostService;
 import de.cotto.lndmanagej.service.PolicyService;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,7 +47,10 @@ import static org.mockito.Mockito.when;
 class ChannelControllerTest {
     private static final Coins OPEN_COSTS = Coins.ofSatoshis(1);
     private static final Coins CLOSE_COSTS = Coins.ofSatoshis(2);
+    private static final Coins SOURCE_COSTS = Coins.ofSatoshis(3);
+    private static final Coins TARGET_COSTS = Coins.ofSatoshis(4);
     private static final OnChainCostsDto ON_CHAIN_COSTS = new OnChainCostsDto(OPEN_COSTS, CLOSE_COSTS);
+    private static final OffChainCostsDto OFF_CHAIN_COSTS = new OffChainCostsDto(SOURCE_COSTS, TARGET_COSTS);
     private static final PoliciesDto FEE_CONFIGURATION_DTO = PoliciesDto.createFromModel(POLICIES);
     private static final ClosedChannelDetailsDto CLOSED_CHANNEL_DETAILS_DTO =
             new ClosedChannelDetailsDto(CloseInitiator.REMOTE, 987_654);
@@ -68,6 +73,9 @@ class ChannelControllerTest {
     private OnChainCostService onChainCostService;
 
     @Mock
+    private OffChainCostService offChainCostService;
+
+    @Mock
     private PolicyService policyService;
 
     @Mock
@@ -77,6 +85,8 @@ class ChannelControllerTest {
     void setUp() {
         lenient().when(onChainCostService.getOpenCostsForChannelId(CHANNEL_ID)).thenReturn(Optional.of(OPEN_COSTS));
         lenient().when(onChainCostService.getCloseCostsForChannelId(CHANNEL_ID)).thenReturn(Optional.of(CLOSE_COSTS));
+        lenient().when(offChainCostService.getRebalanceSourceCostsForChannel(CHANNEL_ID)).thenReturn(SOURCE_COSTS);
+        lenient().when(offChainCostService.getRebalanceTargetCostsForChannel(CHANNEL_ID)).thenReturn(TARGET_COSTS);
         lenient().when(policyService.getPolicies(CHANNEL_ID)).thenReturn(POLICIES);
         lenient().when(feeService.getFeeReportForChannel(CHANNEL_ID)).thenReturn(FEE_REPORT);
     }
@@ -114,6 +124,7 @@ class ChannelControllerTest {
                 ALIAS_2,
                 LOCAL_OPEN_CHANNEL.getBalanceInformation(),
                 ON_CHAIN_COSTS,
+                OFF_CHAIN_COSTS,
                 FEE_CONFIGURATION_DTO,
                 ClosedChannelDetailsDto.UNKNOWN,
                 FEE_REPORT_DTO
@@ -133,6 +144,7 @@ class ChannelControllerTest {
                 ALIAS_2,
                 LOCAL_OPEN_CHANNEL_PRIVATE.getBalanceInformation(),
                 ON_CHAIN_COSTS,
+                OFF_CHAIN_COSTS,
                 FEE_CONFIGURATION_DTO,
                 ClosedChannelDetailsDto.UNKNOWN,
                 FEE_REPORT_DTO
@@ -218,6 +230,7 @@ class ChannelControllerTest {
                 ALIAS_2,
                 BalanceInformation.EMPTY,
                 ON_CHAIN_COSTS,
+                OFF_CHAIN_COSTS,
                 PoliciesDto.EMPTY,
                 new ClosedChannelDetailsDto(closeInitiator, closeHeight),
                 FEE_REPORT_DTO

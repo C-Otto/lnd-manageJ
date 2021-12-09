@@ -7,6 +7,7 @@ import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
+import de.cotto.lndmanagej.service.OffChainCostService;
 import de.cotto.lndmanagej.service.OnChainCostService;
 import de.cotto.lndmanagej.service.PolicyService;
 import org.junit.jupiter.api.Test;
@@ -61,6 +62,9 @@ class ChannelControllerIT {
 
     @MockBean
     private OnChainCostService onChainCostService;
+
+    @MockBean
+    private OffChainCostService offChainCostService;
 
     @MockBean
     private BalanceService balanceService;
@@ -122,6 +126,8 @@ class ChannelControllerIT {
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_PRIVATE));
         when(onChainCostService.getOpenCostsForChannelId(CHANNEL_ID)).thenReturn(Optional.of(Coins.ofSatoshis(1000)));
         when(onChainCostService.getCloseCostsForChannelId(CHANNEL_ID)).thenReturn(Optional.of(Coins.ofSatoshis(2000)));
+        when(offChainCostService.getRebalanceSourceCostsForChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(1));
+        when(offChainCostService.getRebalanceTargetCostsForChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(2));
         when(balanceService.getBalanceInformation(CHANNEL_ID)).thenReturn(Optional.of(BALANCE_INFORMATION_2));
         when(feeService.getFeeReportForChannel(CHANNEL_ID)).thenReturn(FEE_REPORT);
         mockMvc.perform(get(DETAILS_PREFIX))
@@ -142,6 +148,8 @@ class ChannelControllerIT {
                 .andExpect(jsonPath("$.status.openClosed", is("OPEN")))
                 .andExpect(jsonPath("$.onChainCosts.openCosts", is("1000")))
                 .andExpect(jsonPath("$.onChainCosts.closeCosts", is("2000")))
+                .andExpect(jsonPath("$.offChainCosts.rebalanceSource", is("1")))
+                .andExpect(jsonPath("$.offChainCosts.rebalanceTarget", is("2")))
                 .andExpect(jsonPath("$.balance.localBalance", is("2000")))
                 .andExpect(jsonPath("$.balance.localReserve", is("200")))
                 .andExpect(jsonPath("$.balance.localAvailable", is("1800")))
@@ -162,6 +170,8 @@ class ChannelControllerIT {
     void getChannelDetails_closed_channel() throws Exception {
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(CLOSED_CHANNEL));
         when(feeService.getFeeReportForChannel(CHANNEL_ID)).thenReturn(new FeeReport(Coins.NONE, Coins.NONE));
+        when(offChainCostService.getRebalanceSourceCostsForChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(1));
+        when(offChainCostService.getRebalanceTargetCostsForChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(2));
         mockMvc.perform(get(DETAILS_PREFIX))
                 .andExpect(jsonPath("$.closeDetails.initiator", is("REMOTE")))
                 .andExpect(jsonPath("$.closeDetails.height", is(987_654)))

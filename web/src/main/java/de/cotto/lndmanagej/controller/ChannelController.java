@@ -7,6 +7,7 @@ import de.cotto.lndmanagej.controller.dto.ChannelDto;
 import de.cotto.lndmanagej.controller.dto.ClosedChannelDetailsDto;
 import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
+import de.cotto.lndmanagej.controller.dto.OffChainCostsDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.model.BalanceInformation;
@@ -21,6 +22,7 @@ import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
+import de.cotto.lndmanagej.service.OffChainCostService;
 import de.cotto.lndmanagej.service.OnChainCostService;
 import de.cotto.lndmanagej.service.PolicyService;
 import org.springframework.context.annotation.Import;
@@ -42,6 +44,7 @@ public class ChannelController {
     private final OnChainCostService onChainCostService;
     private final PolicyService policyService;
     private final FeeService feeService;
+    private final OffChainCostService offChainCostService;
 
     public ChannelController(
             ChannelService channelService,
@@ -49,7 +52,8 @@ public class ChannelController {
             BalanceService balanceService,
             OnChainCostService onChainCostService,
             PolicyService policyService,
-            FeeService feeService
+            FeeService feeService,
+            OffChainCostService offChainCostService
     ) {
         this.channelService = channelService;
         this.nodeService = nodeService;
@@ -57,6 +61,7 @@ public class ChannelController {
         this.onChainCostService = onChainCostService;
         this.policyService = policyService;
         this.feeService = feeService;
+        this.offChainCostService = offChainCostService;
     }
 
     @Timed
@@ -84,6 +89,7 @@ public class ChannelController {
                 remoteAlias,
                 getBalanceInformation(channelId),
                 getOnChainCosts(channelId),
+                getOffChainCosts(channelId),
                 getPoliciesForChannel(localChannel),
                 getCloseDetailsForChannel(localChannel),
                 getFeeReportDto(localChannel.getId())
@@ -142,6 +148,12 @@ public class ChannelController {
         Coins openCosts = onChainCostService.getOpenCostsForChannelId(channelId).orElse(Coins.NONE);
         Coins closeCosts = onChainCostService.getCloseCostsForChannelId(channelId).orElse(Coins.NONE);
         return new OnChainCostsDto(openCosts, closeCosts);
+    }
+
+    private OffChainCostsDto getOffChainCosts(ChannelId channelId) {
+        Coins rebalanceSource = offChainCostService.getRebalanceSourceCostsForChannel(channelId);
+        Coins rebalanceTarget = offChainCostService.getRebalanceTargetCostsForChannel(channelId);
+        return new OffChainCostsDto(rebalanceSource, rebalanceTarget);
     }
 
     private ClosedChannelDetailsDto getCloseDetailsForChannel(LocalChannel localChannel) {
