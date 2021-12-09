@@ -4,6 +4,7 @@ import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.ChannelsForNodeDto;
 import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
+import de.cotto.lndmanagej.controller.dto.OffChainCostsDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Coins;
@@ -14,6 +15,7 @@ import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
+import de.cotto.lndmanagej.service.OffChainCostService;
 import de.cotto.lndmanagej.service.OnChainCostService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,6 +64,9 @@ class NodeControllerTest {
     private OnChainCostService onChainCostService;
 
     @Mock
+    private OffChainCostService offChainCostService;
+
+    @Mock
     private BalanceService balanceService;
 
     @Mock
@@ -78,6 +83,8 @@ class NodeControllerTest {
     void getNodeDetails_no_channels() {
         when(onChainCostService.getOpenCostsWith(any())).thenReturn(Coins.NONE);
         when(onChainCostService.getCloseCostsWith(any())).thenReturn(Coins.NONE);
+        when(offChainCostService.getRebalanceSourceCostsForPeer(any())).thenReturn(Coins.NONE);
+        when(offChainCostService.getRebalanceTargetCostsForPeer(any())).thenReturn(Coins.NONE);
         when(balanceService.getBalanceInformationForPeer(any(Pubkey.class))).thenReturn(BalanceInformation.EMPTY);
         when(feeService.getFeeReportForPeer(any())).thenReturn(new FeeReport(Coins.NONE, Coins.NONE));
         NodeDetailsDto expectedDetails = new NodeDetailsDto(
@@ -88,6 +95,7 @@ class NodeControllerTest {
                 List.of(),
                 List.of(),
                 new OnChainCostsDto(Coins.NONE, Coins.NONE),
+                new OffChainCostsDto(Coins.NONE, Coins.NONE),
                 BalanceInformationDto.createFromModel(BalanceInformation.EMPTY),
                 true,
                 new FeeReportDto("0", "0")
@@ -110,8 +118,12 @@ class NodeControllerTest {
         );
         Coins openCosts = Coins.ofSatoshis(123);
         Coins closeCosts = Coins.ofSatoshis(456);
+        Coins rebalanceSourceCosts = Coins.ofMilliSatoshis(1);
+        Coins rebalanceTargetCosts = Coins.ofMilliSatoshis(2);
         when(onChainCostService.getOpenCostsWith(PUBKEY_2)).thenReturn(openCosts);
         when(onChainCostService.getCloseCostsWith(PUBKEY_2)).thenReturn(closeCosts);
+        when(offChainCostService.getRebalanceSourceCostsForPeer(PUBKEY_2)).thenReturn(rebalanceSourceCosts);
+        when(offChainCostService.getRebalanceTargetCostsForPeer(PUBKEY_2)).thenReturn(rebalanceTargetCosts);
         when(balanceService.getBalanceInformationForPeer(PUBKEY_2)).thenReturn(BALANCE_INFORMATION);
         when(feeService.getFeeReportForPeer(PUBKEY_2)).thenReturn(FEE_REPORT);
         NodeDetailsDto expectedDetails = new NodeDetailsDto(
@@ -122,6 +134,7 @@ class NodeControllerTest {
                 List.of(CHANNEL_ID, CHANNEL_ID_2),
                 List.of(CHANNEL_ID, CHANNEL_ID_2, CHANNEL_ID_3),
                 new OnChainCostsDto(openCosts, closeCosts),
+                new OffChainCostsDto(rebalanceSourceCosts, rebalanceTargetCosts),
                 BalanceInformationDto.createFromModel(BALANCE_INFORMATION),
                 false,
                 new FeeReportDto("1234", "567")

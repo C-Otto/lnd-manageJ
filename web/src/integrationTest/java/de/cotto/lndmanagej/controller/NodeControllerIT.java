@@ -8,6 +8,7 @@ import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
+import de.cotto.lndmanagej.service.OffChainCostService;
 import de.cotto.lndmanagej.service.OnChainCostService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +56,9 @@ class NodeControllerIT {
     private OnChainCostService onChainCostService;
 
     @MockBean
+    private OffChainCostService offChainCostService;
+
+    @MockBean
     @SuppressWarnings("unused")
     private ChannelIdResolver channelIdResolver;
 
@@ -80,6 +84,8 @@ class NodeControllerIT {
         when(channelService.getForceClosingChannelsWith(PUBKEY_2)).thenReturn(Set.of(FORCE_CLOSING_CHANNEL_2));
         when(onChainCostService.getOpenCostsWith(PUBKEY_2)).thenReturn(Coins.ofSatoshis(123));
         when(onChainCostService.getCloseCostsWith(PUBKEY_2)).thenReturn(Coins.ofSatoshis(456));
+        when(offChainCostService.getRebalanceSourceCostsForPeer(PUBKEY_2)).thenReturn(Coins.ofMilliSatoshis(1));
+        when(offChainCostService.getRebalanceTargetCostsForPeer(PUBKEY_2)).thenReturn(Coins.ofMilliSatoshis(2));
         when(balanceService.getBalanceInformationForPeer(PUBKEY_2)).thenReturn(BALANCE_INFORMATION);
         when(feeService.getFeeReportForPeer(PUBKEY_2)).thenReturn(FEE_REPORT);
         List<String> channelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_2.toString());
@@ -95,6 +101,8 @@ class NodeControllerIT {
                 .andExpect(jsonPath("$.pendingForceClosingChannels", is(forceClosingChannelIds)))
                 .andExpect(jsonPath("$.onChainCosts.openCosts", is("123")))
                 .andExpect(jsonPath("$.onChainCosts.closeCosts", is("456")))
+                .andExpect(jsonPath("$.offChainCosts.rebalanceSource", is("1")))
+                .andExpect(jsonPath("$.offChainCosts.rebalanceTarget", is("2")))
                 .andExpect(jsonPath("$.balance.localBalance", is("1000")))
                 .andExpect(jsonPath("$.balance.localReserve", is("100")))
                 .andExpect(jsonPath("$.balance.localAvailable", is("900")))

@@ -6,6 +6,7 @@ import de.cotto.lndmanagej.controller.dto.ChannelsForNodeDto;
 import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
+import de.cotto.lndmanagej.controller.dto.OffChainCostsDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Channel;
@@ -17,6 +18,7 @@ import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
+import de.cotto.lndmanagej.service.OffChainCostService;
 import de.cotto.lndmanagej.service.OnChainCostService;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,6 +36,7 @@ public class NodeController {
     private final NodeService nodeService;
     private final ChannelService channelService;
     private final OnChainCostService onChainCostService;
+    private final OffChainCostService offChainCostService;
     private final BalanceService balanceService;
     private final FeeService feeService;
 
@@ -41,12 +44,14 @@ public class NodeController {
             NodeService nodeService,
             ChannelService channelService,
             OnChainCostService onChainCostService,
+            OffChainCostService offChainCostService,
             BalanceService balanceService,
             FeeService feeService
     ) {
         this.nodeService = nodeService;
         this.channelService = channelService;
         this.onChainCostService = onChainCostService;
+        this.offChainCostService = offChainCostService;
         this.balanceService = balanceService;
         this.feeService = feeService;
     }
@@ -63,6 +68,8 @@ public class NodeController {
         Node node = nodeService.getNode(pubkey);
         Coins openCosts = onChainCostService.getOpenCostsWith(pubkey);
         Coins closeCosts = onChainCostService.getCloseCostsWith(pubkey);
+        Coins rebalanceSourceCosts = offChainCostService.getRebalanceSourceCostsForPeer(pubkey);
+        Coins rebalanceTargetCosts = offChainCostService.getRebalanceTargetCostsForPeer(pubkey);
         BalanceInformation balanceInformation = balanceService.getBalanceInformationForPeer(pubkey);
         return new NodeDetailsDto(
                 pubkey,
@@ -72,6 +79,7 @@ public class NodeController {
                 toSortedList(channelService.getWaitingCloseChannelsWith(pubkey)),
                 toSortedList(channelService.getForceClosingChannelsWith(pubkey)),
                 new OnChainCostsDto(openCosts, closeCosts),
+                new OffChainCostsDto(rebalanceSourceCosts, rebalanceTargetCosts),
                 BalanceInformationDto.createFromModel(balanceInformation),
                 node.online(),
                 getFeeReportDto(pubkey)
