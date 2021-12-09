@@ -75,7 +75,7 @@ public class SelfPaymentsService {
             Pubkey pubkey,
             Function<ChannelId, List<SelfPayment>> provider
     ) {
-        return channelService.getAllChannelsWith(pubkey).stream()
+        return channelService.getAllChannelsWith(pubkey).parallelStream()
                 .map(Channel::getId)
                 .map(provider)
                 .flatMap(List::stream)

@@ -16,8 +16,8 @@ public class PaymentFixtures {
     public static final String PAYMENT_HASH_3 = "aaa1";
     public static final Coins PAYMENT_VALUE = Coins.ofSatoshis(1_000_000);
     public static final Coins PAYMENT_FEES = Coins.ofMilliSatoshis(10);
-    private static final List<PaymentRoute> ONE_ROUTE_4_TO_2 = List.of(PAYMENT_ROUTE_4_TO_2);
-    private static final List<PaymentRoute> TWO_ROUTES = List.of(PAYMENT_ROUTE_4_TO_1, PAYMENT_ROUTE_3_TO_1);
+    public static final List<PaymentRoute> ONE_ROUTE_4_TO_2 = List.of(PAYMENT_ROUTE_4_TO_2);
+    public static final List<PaymentRoute> TWO_ROUTES = List.of(PAYMENT_ROUTE_4_TO_1, PAYMENT_ROUTE_3_TO_1);
     public static final LocalDateTime PAYMENT_CREATION_DATE_TIME =
             LocalDateTime.of(2021, 12, 5, 22, 22, 22, 500_000_000);
 
