@@ -11,6 +11,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,6 +37,22 @@ class ArchUnitIT {
                 .arePublic()
                 .should()
                 .beAnnotatedWith(Timed.class);
+        assertThat(importedClasses).isNotEmpty();
+        rule.check(importedClasses);
+    }
+
+    @Test
+    void public_controller_methods_do_not_return_collection_type() {
+        ArchRule rule = ArchRuleDefinition.methods().that()
+                .areDeclaredInClassesThat().areAnnotatedWith(RequestMapping.class)
+                .and()
+                .arePublic()
+                .should()
+                .notHaveRawReturnType(Collection.class)
+                .andShould()
+                .notHaveRawReturnType(List.class)
+                .andShould()
+                .notHaveRawReturnType(Set.class);
         assertThat(importedClasses).isNotEmpty();
         rule.check(importedClasses);
     }

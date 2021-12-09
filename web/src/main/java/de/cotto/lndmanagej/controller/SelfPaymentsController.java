@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.controller;
 import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
 import de.cotto.lndmanagej.controller.dto.SelfPaymentDto;
+import de.cotto.lndmanagej.dto.SelfPaymentsDto;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.SelfPaymentsService;
@@ -11,8 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/")
@@ -26,33 +25,33 @@ public class SelfPaymentsController {
 
     @Timed
     @GetMapping("/channel/{channelId}/self-payments-from-channel")
-    public List<SelfPaymentDto> getSelfPaymentsFromChannel(@PathVariable ChannelId channelId) {
-        return selfPaymentsService.getSelfPaymentsFromChannel(channelId).stream()
+    public SelfPaymentsDto getSelfPaymentsFromChannel(@PathVariable ChannelId channelId) {
+        return new SelfPaymentsDto(selfPaymentsService.getSelfPaymentsFromChannel(channelId).stream()
                 .map(SelfPaymentDto::createFromModel)
-                .toList();
+                .toList());
     }
 
     @Timed
     @GetMapping("/node/{pubkey}/self-payments-from-peer")
-    public List<SelfPaymentDto> getSelfPaymentsFromPeer(@PathVariable Pubkey pubkey) {
-        return selfPaymentsService.getSelfPaymentsFromPeer(pubkey).stream()
+    public SelfPaymentsDto getSelfPaymentsFromPeer(@PathVariable Pubkey pubkey) {
+        return new SelfPaymentsDto(selfPaymentsService.getSelfPaymentsFromPeer(pubkey).stream()
                 .map(SelfPaymentDto::createFromModel)
-                .toList();
+                .toList());
     }
 
     @Timed
     @GetMapping("/channel/{channelId}/self-payments-to-channel")
-    public List<SelfPaymentDto> getSelfPaymentsToChannel(@PathVariable ChannelId channelId) {
-        return selfPaymentsService.getSelfPaymentsToChannel(channelId).stream()
+    public SelfPaymentsDto getSelfPaymentsToChannel(@PathVariable ChannelId channelId) {
+        return new SelfPaymentsDto(selfPaymentsService.getSelfPaymentsToChannel(channelId).stream()
                 .map(SelfPaymentDto::createFromModel)
-                .toList();
+                .toList());
     }
 
     @Timed
     @GetMapping("/node/{pubkey}/self-payments-to-peer")
-    public List<SelfPaymentDto> getSelfPaymentsToPeer(@PathVariable Pubkey pubkey) {
-        return selfPaymentsService.getSelfPaymentsToPeer(pubkey).stream()
+    public SelfPaymentsDto getSelfPaymentsToPeer(@PathVariable Pubkey pubkey) {
+        return new SelfPaymentsDto(selfPaymentsService.getSelfPaymentsToPeer(pubkey).stream()
                 .map(SelfPaymentDto::createFromModel)
-                .toList();
+                .toList());
     }
 }

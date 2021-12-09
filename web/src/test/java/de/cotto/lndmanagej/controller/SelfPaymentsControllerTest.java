@@ -28,7 +28,7 @@ class SelfPaymentsControllerTest {
     @Test
     void getSelfPaymentsFromChannel() {
         when(service.getSelfPaymentsFromChannel(CHANNEL_ID)).thenReturn(List.of(SELF_PAYMENT, SELF_PAYMENT_2));
-        assertThat(selfPaymentsController.getSelfPaymentsFromChannel(CHANNEL_ID)).containsExactly(
+        assertThat(selfPaymentsController.getSelfPaymentsFromChannel(CHANNEL_ID).selfPayments()).containsExactly(
                 SelfPaymentDto.createFromModel(SELF_PAYMENT),
                 SelfPaymentDto.createFromModel(SELF_PAYMENT_2)
         );
@@ -37,7 +37,7 @@ class SelfPaymentsControllerTest {
     @Test
     void getSelfPaymentsFromPeer() {
         when(service.getSelfPaymentsFromPeer(PUBKEY)).thenReturn(List.of(SELF_PAYMENT, SELF_PAYMENT_2));
-        assertThat(selfPaymentsController.getSelfPaymentsFromPeer(PUBKEY)).containsExactly(
+        assertThat(selfPaymentsController.getSelfPaymentsFromPeer(PUBKEY).selfPayments()).containsExactly(
                 SelfPaymentDto.createFromModel(SELF_PAYMENT),
                 SelfPaymentDto.createFromModel(SELF_PAYMENT_2)
         );
@@ -46,7 +46,7 @@ class SelfPaymentsControllerTest {
     @Test
     void getSelfPaymentsToChannel() {
         when(service.getSelfPaymentsToChannel(CHANNEL_ID)).thenReturn(List.of(SELF_PAYMENT, SELF_PAYMENT_2));
-        assertThat(selfPaymentsController.getSelfPaymentsToChannel(CHANNEL_ID)).containsExactly(
+        assertThat(selfPaymentsController.getSelfPaymentsToChannel(CHANNEL_ID).selfPayments()).containsExactly(
                 SelfPaymentDto.createFromModel(SELF_PAYMENT),
                 SelfPaymentDto.createFromModel(SELF_PAYMENT_2)
         );
@@ -55,7 +55,7 @@ class SelfPaymentsControllerTest {
     @Test
     void getSelfPaymentsToPeer() {
         when(service.getSelfPaymentsToPeer(PUBKEY)).thenReturn(List.of(SELF_PAYMENT, SELF_PAYMENT_2));
-        assertThat(selfPaymentsController.getSelfPaymentsToPeer(PUBKEY)).containsExactly(
+        assertThat(selfPaymentsController.getSelfPaymentsToPeer(PUBKEY).selfPayments()).containsExactly(
                 SelfPaymentDto.createFromModel(SELF_PAYMENT),
                 SelfPaymentDto.createFromModel(SELF_PAYMENT_2)
         );
