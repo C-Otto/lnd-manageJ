@@ -6,6 +6,7 @@ import de.cotto.lndmanagej.model.ChannelPoint;
 import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.LocalChannel;
+import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.model.OpenInitiator;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.transactions.model.Transaction;
@@ -25,11 +26,25 @@ public class OnChainCostService {
     }
 
     @Timed
-    public Coins getOpenCostsWith(Pubkey pubkey) {
+    public OnChainCosts getOnChainCostsForChannelId(ChannelId channelId) {
+        return channelService.getLocalChannel(channelId)
+                .map(this::getOnChainCostsForChannel)
+                .orElse(OnChainCosts.NONE);
+    }
+
+    @Timed
+    public OnChainCosts getOnChainCostsForChannel(LocalChannel localChannel) {
+        return new OnChainCosts(
+                getOpenCostsForChannel(localChannel).orElse(Coins.NONE),
+                getCloseCostsForChannelId(localChannel.getId()).orElse(Coins.NONE)
+        );
+    }
+
+    @Timed
+    public OnChainCosts getOnChainCostsForPeer(Pubkey pubkey) {
         return channelService.getAllChannelsWith(pubkey).parallelStream()
-                .map(this::getOpenCostsForChannel)
-                .flatMap(Optional::stream)
-                .reduce(Coins.NONE, Coins::add);
+                .map(this::getOnChainCostsForChannel)
+                .reduce(OnChainCosts.NONE, OnChainCosts::add);
     }
 
     @Timed
@@ -53,14 +68,6 @@ public class OnChainCostService {
             return Optional.of(Coins.NONE);
         }
         return Optional.empty();
-    }
-
-    @Timed
-    public Coins getCloseCostsWith(Pubkey pubkey) {
-        return channelService.getClosedChannelsWith(pubkey).parallelStream()
-                .map(this::getCloseCostsForChannel)
-                .flatMap(Optional::stream)
-                .reduce(Coins.NONE, Coins::add);
     }
 
     @Timed

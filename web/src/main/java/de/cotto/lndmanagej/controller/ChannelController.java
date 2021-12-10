@@ -8,12 +8,12 @@ import de.cotto.lndmanagej.controller.dto.ClosedChannelDetailsDto;
 import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
 import de.cotto.lndmanagej.controller.dto.OffChainCostsDto;
-import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.OpenCloseStatus;
 import de.cotto.lndmanagej.model.Policies;
@@ -88,11 +88,11 @@ public class ChannelController {
                 localChannel,
                 remoteAlias,
                 getBalanceInformation(channelId),
-                getOnChainCosts(channelId),
+                onChainCostService.getOnChainCostsForChannelId(channelId),
                 getOffChainCosts(channelId),
                 getPoliciesForChannel(localChannel),
                 getCloseDetailsForChannel(localChannel),
-                getFeeReportDto(localChannel.getId())
+                getFeeReportFromService(localChannel.getId())
         );
     }
 
@@ -124,11 +124,11 @@ public class ChannelController {
     @Timed
     @GetMapping("/fee-report")
     public FeeReportDto getFeeReport(@PathVariable ChannelId channelId) {
-        return getFeeReportDto(channelId);
+        return FeeReportDto.createFromModel(getFeeReportFromService(channelId));
     }
 
-    private FeeReportDto getFeeReportDto(ChannelId channelId) {
-        return FeeReportDto.createFromModel(feeService.getFeeReportForChannel(channelId));
+    private FeeReport getFeeReportFromService(ChannelId channelId) {
+        return feeService.getFeeReportForChannel(channelId);
     }
 
     private PoliciesDto getPoliciesForChannel(@Nullable LocalChannel channel) {
@@ -142,12 +142,6 @@ public class ChannelController {
     private BalanceInformation getBalanceInformation(ChannelId channelId) {
         return balanceService.getBalanceInformation(channelId)
                 .orElse(BalanceInformation.EMPTY);
-    }
-
-    private OnChainCostsDto getOnChainCosts(ChannelId channelId) {
-        Coins openCosts = onChainCostService.getOpenCostsForChannelId(channelId).orElse(Coins.NONE);
-        Coins closeCosts = onChainCostService.getCloseCostsForChannelId(channelId).orElse(Coins.NONE);
-        return new OnChainCostsDto(openCosts, closeCosts);
     }
 
     private OffChainCostsDto getOffChainCosts(ChannelId channelId) {

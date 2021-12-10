@@ -6,13 +6,13 @@ import de.cotto.lndmanagej.controller.dto.ChannelDto;
 import de.cotto.lndmanagej.controller.dto.ClosedChannelDetailsDto;
 import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.OffChainCostsDto;
-import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.CloseInitiator;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.LocalChannel;
+import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
@@ -49,13 +49,12 @@ class ChannelControllerTest {
     private static final Coins CLOSE_COSTS = Coins.ofSatoshis(2);
     private static final Coins SOURCE_COSTS = Coins.ofSatoshis(3);
     private static final Coins TARGET_COSTS = Coins.ofSatoshis(4);
-    private static final OnChainCostsDto ON_CHAIN_COSTS = new OnChainCostsDto(OPEN_COSTS, CLOSE_COSTS);
+    private static final OnChainCosts ON_CHAIN_COSTS = new OnChainCosts(OPEN_COSTS, CLOSE_COSTS);
     private static final OffChainCostsDto OFF_CHAIN_COSTS = new OffChainCostsDto(SOURCE_COSTS, TARGET_COSTS);
     private static final PoliciesDto FEE_CONFIGURATION_DTO = PoliciesDto.createFromModel(POLICIES);
     private static final ClosedChannelDetailsDto CLOSED_CHANNEL_DETAILS_DTO =
             new ClosedChannelDetailsDto(CloseInitiator.REMOTE, 987_654);
     private static final FeeReport FEE_REPORT = new FeeReport(Coins.ofMilliSatoshis(1_234), Coins.ofMilliSatoshis(567));
-    private static final FeeReportDto FEE_REPORT_DTO = FeeReportDto.createFromModel(FEE_REPORT);
 
     @InjectMocks
     private ChannelController channelController;
@@ -83,8 +82,7 @@ class ChannelControllerTest {
 
     @BeforeEach
     void setUp() {
-        lenient().when(onChainCostService.getOpenCostsForChannelId(CHANNEL_ID)).thenReturn(Optional.of(OPEN_COSTS));
-        lenient().when(onChainCostService.getCloseCostsForChannelId(CHANNEL_ID)).thenReturn(Optional.of(CLOSE_COSTS));
+        lenient().when(onChainCostService.getOnChainCostsForChannelId(CHANNEL_ID)).thenReturn(ON_CHAIN_COSTS);
         lenient().when(offChainCostService.getRebalanceSourceCostsForChannel(CHANNEL_ID)).thenReturn(SOURCE_COSTS);
         lenient().when(offChainCostService.getRebalanceTargetCostsForChannel(CHANNEL_ID)).thenReturn(TARGET_COSTS);
         lenient().when(policyService.getPolicies(CHANNEL_ID)).thenReturn(POLICIES);
@@ -127,7 +125,7 @@ class ChannelControllerTest {
                 OFF_CHAIN_COSTS,
                 FEE_CONFIGURATION_DTO,
                 ClosedChannelDetailsDto.UNKNOWN,
-                FEE_REPORT_DTO
+                FEE_REPORT
         );
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
@@ -147,7 +145,7 @@ class ChannelControllerTest {
                 OFF_CHAIN_COSTS,
                 FEE_CONFIGURATION_DTO,
                 ClosedChannelDetailsDto.UNKNOWN,
-                FEE_REPORT_DTO
+                FEE_REPORT
         );
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_PRIVATE));
@@ -214,7 +212,7 @@ class ChannelControllerTest {
     @Test
     void getFeeReport() {
         when(feeService.getFeeReportForChannel(CHANNEL_ID)).thenReturn(FEE_REPORT);
-        assertThat(channelController.getFeeReport(CHANNEL_ID)).isEqualTo(FEE_REPORT_DTO);
+        assertThat(channelController.getFeeReport(CHANNEL_ID)).isEqualTo(FeeReportDto.createFromModel(FEE_REPORT));
     }
 
     private ChannelDetailsDto mockForChannelWithoutPolicies(
@@ -233,7 +231,7 @@ class ChannelControllerTest {
                 OFF_CHAIN_COSTS,
                 PoliciesDto.EMPTY,
                 new ClosedChannelDetailsDto(closeInitiator, closeHeight),
-                FEE_REPORT_DTO
+                FEE_REPORT
         );
     }
 }

@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.service;
 import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.LocalChannel;
+import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.transactions.service.TransactionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -20,7 +21,6 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_2;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_3;
-import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL_2;
 import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL_OPEN_LOCAL;
 import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL_OPEN_REMOTE;
@@ -28,18 +28,22 @@ import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSIN
 import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_TO_NODE_3;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL_2;
+import static de.cotto.lndmanagej.transactions.model.TransactionFixtures.FEES;
+import static de.cotto.lndmanagej.transactions.model.TransactionFixtures.FEES_2;
 import static de.cotto.lndmanagej.transactions.model.TransactionFixtures.TRANSACTION;
 import static de.cotto.lndmanagej.transactions.model.TransactionFixtures.TRANSACTION_2;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class OnChainCostServiceTest {
+    private static final Coins OPEN_COSTS = TRANSACTION.fees();
+
     @InjectMocks
     private OnChainCostService onChainCostService;
 
@@ -49,31 +53,60 @@ class OnChainCostServiceTest {
     @Mock
     private ChannelService channelService;
 
+    @Test
+    void getOnChainCostsForChannelId() {
+        mockOpenTransaction(FORCE_CLOSED_CHANNEL_OPEN_LOCAL);
+        mockCloseTransaction(FORCE_CLOSED_CHANNEL_OPEN_LOCAL);
+        when(channelService.isClosed(FORCE_CLOSED_CHANNEL_OPEN_LOCAL.getId())).thenReturn(true);
+        when(channelService.getLocalChannel(FORCE_CLOSED_CHANNEL_OPEN_LOCAL.getId()))
+                .thenReturn(Optional.of(FORCE_CLOSED_CHANNEL_OPEN_LOCAL));
+        when(channelService.getClosedChannel(FORCE_CLOSED_CHANNEL_OPEN_LOCAL.getId()))
+                .thenReturn(Optional.of(FORCE_CLOSED_CHANNEL_OPEN_LOCAL));
+        OnChainCosts expected = new OnChainCosts(
+                FEES,
+                FEES_2
+        );
+        assertThat(onChainCostService.getOnChainCostsForChannelId(CHANNEL_ID)).isEqualTo(expected);
+    }
+
+    @Test
+    void getOnChainCostsForChannel() {
+        mockOpenTransaction(FORCE_CLOSED_CHANNEL_OPEN_LOCAL);
+        mockCloseTransaction(FORCE_CLOSED_CHANNEL_OPEN_LOCAL);
+        when(channelService.isClosed(FORCE_CLOSED_CHANNEL_OPEN_LOCAL.getId())).thenReturn(true);
+        when(channelService.getClosedChannel(FORCE_CLOSED_CHANNEL_OPEN_LOCAL.getId()))
+                .thenReturn(Optional.of(FORCE_CLOSED_CHANNEL_OPEN_LOCAL));
+        OnChainCosts expected = new OnChainCosts(
+                FEES,
+                FEES_2
+        );
+        assertThat(onChainCostService.getOnChainCostsForChannel(FORCE_CLOSED_CHANNEL_OPEN_LOCAL)).isEqualTo(expected);
+    }
+
+    @Test
+    void getOnChainCostsForPeer() {
+        when(channelService.getAllLocalChannels())
+                .thenReturn(Stream.of(LOCAL_OPEN_CHANNEL_TO_NODE_3, FORCE_CLOSED_CHANNEL_2))
+                .thenReturn(Stream.of(LOCAL_OPEN_CHANNEL_TO_NODE_3, FORCE_CLOSED_CHANNEL_2));
+        when(transactionService.getTransaction(LOCAL_OPEN_CHANNEL_TO_NODE_3.getChannelPoint().getTransactionHash()))
+                .thenReturn(Optional.of(TRANSACTION));
+        when(transactionService.getTransaction(FORCE_CLOSED_CHANNEL_2.getChannelPoint().getTransactionHash()))
+                .thenReturn(Optional.of(TRANSACTION_2));
+        when(channelService.isClosed(LOCAL_OPEN_CHANNEL_TO_NODE_3.getId())).thenReturn(false);
+        when(channelService.isClosed(FORCE_CLOSED_CHANNEL_2.getId())).thenReturn(true);
+        when(channelService.getClosedChannel(FORCE_CLOSED_CHANNEL_2.getId()))
+                .thenReturn(Optional.of(FORCE_CLOSED_CHANNEL_2));
+        when(channelService.getAllChannelsWith(PUBKEY))
+                .thenReturn(Set.of(LOCAL_OPEN_CHANNEL_TO_NODE_3, FORCE_CLOSED_CHANNEL_2));
+        OnChainCosts expected = new OnChainCosts(
+                FEES.add(FEES_2),
+                FEES
+        );
+        assertThat(onChainCostService.getOnChainCostsForPeer(PUBKEY)).isEqualTo(expected);
+    }
+
     @Nested
     class GetOpenCosts {
-        private static final Coins OPEN_COSTS = TRANSACTION.fees();
-
-        @Test
-        void getOpenCosts_by_pubkey() {
-            when(transactionService.getTransaction(any())).thenReturn(Optional.of(TRANSACTION));
-            when(channelService.getAllChannelsWith(PUBKEY)).thenReturn(Set.of(
-                    LOCAL_OPEN_CHANNEL,
-                    CLOSED_CHANNEL,
-                    WAITING_CLOSE_CHANNEL,
-                    FORCE_CLOSING_CHANNEL,
-                    FORCE_CLOSED_CHANNEL
-            ));
-            when(channelService.getAllLocalChannels())
-                    .thenReturn(Stream.of(LOCAL_OPEN_CHANNEL_2))
-                    .thenReturn(Stream.of(LOCAL_OPEN_CHANNEL_2))
-                    .thenReturn(Stream.of(LOCAL_OPEN_CHANNEL_2))
-                    .thenReturn(Stream.of(LOCAL_OPEN_CHANNEL_2))
-                    .thenReturn(Stream.of(LOCAL_OPEN_CHANNEL_2));
-            assertThat(onChainCostService.getOpenCostsWith(PUBKEY)).isEqualTo(
-                    Coins.ofSatoshis(OPEN_COSTS.satoshis() * 5)
-            );
-        }
-
         @Test
         void getOpenCosts_by_channel_id_not_resolved() {
             assertThat(onChainCostService.getOpenCostsForChannelId(CHANNEL_ID)).isEmpty();
@@ -185,12 +218,6 @@ class OnChainCostServiceTest {
             assertThat(onChainCostService.getOpenCostsForChannel(LOCAL_OPEN_CHANNEL))
                     .contains(Coins.ofSatoshis(41));
         }
-
-        private void mockOpenTransaction(LocalChannel channel) {
-            lenient().when(channelService.getAllLocalChannels()).thenReturn(Stream.of(channel));
-            lenient().when(transactionService.getTransaction(channel.getChannelPoint().getTransactionHash()))
-                    .thenReturn(Optional.of(TRANSACTION));
-        }
     }
 
     @Nested
@@ -200,17 +227,6 @@ class OnChainCostServiceTest {
         @BeforeEach
         void setUp() {
             lenient().when(channelService.isClosed(CHANNEL_ID)).thenReturn(true);
-        }
-
-        @Test
-        void getOpenCosts_by_pubkey() {
-            when(transactionService.getTransaction(any())).thenReturn(Optional.of(TRANSACTION_2));
-            when(channelService.getClosedChannelsWith(PUBKEY)).thenReturn(
-                    Set.of(CLOSED_CHANNEL, FORCE_CLOSED_CHANNEL_2)
-            );
-            assertThat(onChainCostService.getCloseCostsWith(PUBKEY)).isEqualTo(
-                    Coins.ofSatoshis(CLOSE_COSTS.satoshis() * 2)
-            );
         }
 
         @Test
@@ -268,10 +284,16 @@ class OnChainCostServiceTest {
             assertThat(onChainCostService.getCloseCostsForChannel(FORCE_CLOSED_CHANNEL_OPEN_REMOTE))
                     .contains(Coins.NONE);
         }
+    }
 
-        private void mockCloseTransaction(ClosedChannel channel) {
-            lenient().when(transactionService.getTransaction(channel.getCloseTransactionHash()))
-                    .thenReturn(Optional.of(TRANSACTION_2));
-        }
+    private void mockOpenTransaction(LocalChannel channel) {
+        lenient().when(channelService.getAllLocalChannels()).thenReturn(Stream.of(channel));
+        lenient().when(transactionService.getTransaction(channel.getChannelPoint().getTransactionHash()))
+                .thenReturn(Optional.of(TRANSACTION));
+    }
+
+    private void mockCloseTransaction(ClosedChannel channel) {
+        lenient().when(transactionService.getTransaction(channel.getCloseTransactionHash()))
+                .thenReturn(Optional.of(TRANSACTION_2));
     }
 }

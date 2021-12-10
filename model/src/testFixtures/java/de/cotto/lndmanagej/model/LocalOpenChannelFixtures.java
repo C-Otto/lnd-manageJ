@@ -9,6 +9,7 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_4;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
+import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT_3;
 import static de.cotto.lndmanagej.model.OpenInitiator.LOCAL;
 import static de.cotto.lndmanagej.model.OpenInitiator.REMOTE;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
@@ -95,7 +96,7 @@ public  class LocalOpenChannelFixtures {
             );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_TO_NODE_3 =
             new LocalOpenChannel(
-                    new ChannelCoreInformation(CHANNEL_ID_4, CHANNEL_POINT, CAPACITY_2),
+                    new ChannelCoreInformation(CHANNEL_ID_4, CHANNEL_POINT_3, CAPACITY_2),
                     PUBKEY,
                     PUBKEY_3,
                     BALANCE_INFORMATION,

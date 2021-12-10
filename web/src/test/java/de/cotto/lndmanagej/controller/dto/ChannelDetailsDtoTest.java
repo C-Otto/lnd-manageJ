@@ -2,6 +2,8 @@ package de.cotto.lndmanagej.controller.dto;
 
 import de.cotto.lndmanagej.model.ChannelStatus;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.FeeReport;
+import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.model.OpenInitiator;
 import org.junit.jupiter.api.Test;
 
@@ -18,12 +20,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ChannelDetailsDtoTest {
 
-    private static final OnChainCostsDto ON_CHAIN_COSTS = new OnChainCostsDto(Coins.ofSatoshis(1), Coins.ofSatoshis(2));
+    private static final OnChainCosts ON_CHAIN_COSTS = new OnChainCosts(Coins.ofSatoshis(1), Coins.ofSatoshis(2));
     private static final OffChainCostsDto OFF_CHAIN_COSTS =
             new OffChainCostsDto(Coins.ofSatoshis(3), Coins.ofSatoshis(4));
     private static final ClosedChannelDetailsDto CLOSE_DETAILS = new ClosedChannelDetailsDto("abc", 123);
-    private static final FeeReportDto FEE_REPORT =
-            new FeeReportDto(Coins.ofMilliSatoshis(1234), Coins.ofMilliSatoshis(567));
+    private static final FeeReport FEE_REPORT =
+            new FeeReport(Coins.ofMilliSatoshis(1234), Coins.ofMilliSatoshis(567));
     private static final ChannelDetailsDto CHANNEL_DETAILS_DTO = new ChannelDetailsDto(
             CLOSED_CHANNEL,
             ALIAS,
@@ -109,12 +111,12 @@ class ChannelDetailsDtoTest {
 
     @Test
     void feeReport() {
-        assertThat(CHANNEL_DETAILS_DTO.feeReport()).isEqualTo(FEE_REPORT);
+        assertThat(CHANNEL_DETAILS_DTO.feeReport()).isEqualTo(FeeReportDto.createFromModel(FEE_REPORT));
     }
 
     @Test
     void onChainCosts() {
-        assertThat(CHANNEL_DETAILS_DTO.onChainCosts()).isEqualTo(ON_CHAIN_COSTS);
+        assertThat(CHANNEL_DETAILS_DTO.onChainCosts()).isEqualTo(OnChainCostsDto.createFromModel(ON_CHAIN_COSTS));
     }
 
     @Test

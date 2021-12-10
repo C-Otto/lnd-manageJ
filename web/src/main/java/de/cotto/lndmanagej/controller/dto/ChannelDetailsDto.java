@@ -2,7 +2,9 @@ package de.cotto.lndmanagej.controller.dto;
 
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelPoint;
+import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.LocalChannel;
+import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.model.OpenInitiator;
 import de.cotto.lndmanagej.model.Pubkey;
 
@@ -30,10 +32,10 @@ public record ChannelDetailsDto(
             ChannelDto channelDto,
             String remoteAlias,
             BalanceInformation balanceInformation,
-            OnChainCostsDto onChainCosts,
+            OnChainCosts onChainCosts,
             OffChainCostsDto offChainCosts,
             PoliciesDto policies,
-            FeeReportDto feeReport
+            FeeReport feeReport
     ) {
         this(
                 channelDto.channelIdShort(),
@@ -49,11 +51,11 @@ public record ChannelDetailsDto(
                 channelDto.totalReceived(),
                 channelDto.status(),
                 BalanceInformationDto.createFromModel(balanceInformation),
-                onChainCosts,
+                OnChainCostsDto.createFromModel(onChainCosts),
                 offChainCosts,
                 policies,
                 channelDto.closeDetails(),
-                feeReport
+                FeeReportDto.createFromModel(feeReport)
         );
     }
 
@@ -61,11 +63,11 @@ public record ChannelDetailsDto(
             LocalChannel localChannel,
             String remoteAlias,
             BalanceInformation balanceInformation,
-            OnChainCostsDto onChainCosts,
+            OnChainCosts onChainCosts,
             OffChainCostsDto offChainCosts,
             PoliciesDto policies,
             ClosedChannelDetailsDto closeDetails,
-            FeeReportDto feeReport
+            FeeReport feeReport
     ) {
         this(
                 new ChannelDto(localChannel, closeDetails),

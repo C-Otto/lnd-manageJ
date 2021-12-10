@@ -23,10 +23,7 @@ public class OnChainCostsController {
     @Timed
     @GetMapping("/node/{pubkey}/on-chain-costs")
     public OnChainCostsDto getCostsForPeer(@PathVariable Pubkey pubkey) {
-        return new OnChainCostsDto(
-                onChainCostService.getOpenCostsWith(pubkey),
-                onChainCostService.getCloseCostsWith(pubkey)
-        );
+        return OnChainCostsDto.createFromModel(onChainCostService.getOnChainCostsForPeer(pubkey));
     }
 
     @Timed

@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -27,12 +28,9 @@ class OnChainCostsControllerTest {
 
     @Test
     void getCostsForPeer() {
-        Coins openCosts = Coins.ofSatoshis(123);
-        Coins closeCosts = Coins.ofSatoshis(456);
-        when(onChainCostService.getOpenCostsWith(PUBKEY)).thenReturn(openCosts);
-        when(onChainCostService.getCloseCostsWith(PUBKEY)).thenReturn(closeCosts);
-        OnChainCostsDto expected = new OnChainCostsDto(openCosts, closeCosts);
-        assertThat(onChainCostsController.getCostsForPeer(PUBKEY)).isEqualTo(expected);
+        when(onChainCostService.getOnChainCostsForPeer(PUBKEY)).thenReturn(ON_CHAIN_COSTS);
+        assertThat(onChainCostsController.getCostsForPeer(PUBKEY))
+                .isEqualTo(OnChainCostsDto.createFromModel(ON_CHAIN_COSTS));
     }
 
     @Test
