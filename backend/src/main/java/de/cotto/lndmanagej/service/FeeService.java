@@ -29,7 +29,7 @@ public class FeeService {
                 .withExpiry(Duration.ofSeconds(10))
                 .build(this::getFeeReportForChannelWithoutCache);
         cacheForClosedChannels = new CacheBuilder()
-                .withRefresh(Duration.ofMinutes(30))
+                .withRefresh(Duration.ofHours(12))
                 .withExpiry(Duration.ofHours(24))
                 .build(this::getFeeReportForChannelWithoutCache);
     }

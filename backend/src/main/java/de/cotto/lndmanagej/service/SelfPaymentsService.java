@@ -19,7 +19,7 @@ public class SelfPaymentsService {
     private static final Duration EXPIRY = Duration.ofSeconds(30);
     private static final Duration REFRESH = Duration.ofSeconds(15);
     private static final Duration EXPIRY_CLOSED = Duration.ofHours(24);
-    private static final Duration REFRESH_CLOSED = Duration.ofHours(1);
+    private static final Duration REFRESH_CLOSED = Duration.ofHours(12);
 
     private final SelfPaymentsDao dao;
     private final ChannelService channelService;
