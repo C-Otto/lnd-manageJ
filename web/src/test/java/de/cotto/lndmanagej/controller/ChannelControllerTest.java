@@ -47,9 +47,10 @@ import static org.mockito.Mockito.when;
 class ChannelControllerTest {
     private static final Coins OPEN_COSTS = Coins.ofSatoshis(1);
     private static final Coins CLOSE_COSTS = Coins.ofSatoshis(2);
+    private static final Coins SWEEP_COSTS = Coins.ofSatoshis(3);
     private static final Coins SOURCE_COSTS = Coins.ofSatoshis(3);
     private static final Coins TARGET_COSTS = Coins.ofSatoshis(4);
-    private static final OnChainCosts ON_CHAIN_COSTS = new OnChainCosts(OPEN_COSTS, CLOSE_COSTS);
+    private static final OnChainCosts ON_CHAIN_COSTS = new OnChainCosts(OPEN_COSTS, CLOSE_COSTS, SWEEP_COSTS);
     private static final OffChainCostsDto OFF_CHAIN_COSTS = new OffChainCostsDto(SOURCE_COSTS, TARGET_COSTS);
     private static final PoliciesDto FEE_CONFIGURATION_DTO = PoliciesDto.createFromModel(POLICIES);
     private static final ClosedChannelDetailsDto CLOSED_CHANNEL_DETAILS_DTO =

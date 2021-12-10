@@ -2,12 +2,16 @@ package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelPoint;
+import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.ClosedOrClosingChannel;
+import de.cotto.lndmanagej.model.ForceClosedChannel;
+import de.cotto.lndmanagej.model.Resolution;
 import de.cotto.lndmanagej.transactions.service.TransactionService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -33,7 +37,8 @@ public class TransactionBackgroundLoader {
     private Stream<String> getTransactionHashes() {
         Stream<String> openTransactionHashes = getOpenTransactionHashes();
         Stream<String> closeTransactionHashes = getCloseTransactionHashes();
-        return Stream.of(openTransactionHashes, closeTransactionHashes)
+        Stream<String> sweepTransactionHashes = getSweepTransactionHashes();
+        return Stream.of(openTransactionHashes, closeTransactionHashes, sweepTransactionHashes)
                 .flatMap(s -> s);
     }
 
@@ -53,5 +58,15 @@ public class TransactionBackgroundLoader {
         return Stream.of(channelService.getClosedChannels(), channelService.getForceClosingChannels())
                 .flatMap(Collection::stream)
                 .map(ClosedOrClosingChannel::getCloseTransactionHash);
+    }
+
+    private Stream<String> getSweepTransactionHashes() {
+        return channelService.getClosedChannels().stream()
+                .filter(ClosedChannel::isForceClosed)
+                .map(ClosedChannel::getAsForceClosedChannel)
+                .map(ForceClosedChannel::getResolutions)
+                .flatMap(Collection::stream)
+                .map(Resolution::sweepTransaction)
+                .flatMap(Optional::stream);
     }
 }

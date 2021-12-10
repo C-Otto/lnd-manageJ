@@ -20,4 +20,9 @@ public class CoopClosedChannel extends ClosedChannel {
                 closeHeight
         );
     }
+
+    @Override
+    public boolean isForceClosed() {
+        return false;
+    }
 }

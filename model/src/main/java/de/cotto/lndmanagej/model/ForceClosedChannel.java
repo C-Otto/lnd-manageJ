@@ -33,6 +33,16 @@ public class ForceClosedChannel extends ClosedChannel {
     }
 
     @Override
+    public boolean isForceClosed() {
+        return true;
+    }
+
+    @Override
+    public ForceClosedChannel getAsForceClosedChannel() {
+        return this;
+    }
+
+    @Override
     public boolean equals(Object other) {
         if (this == other) {
             return true;

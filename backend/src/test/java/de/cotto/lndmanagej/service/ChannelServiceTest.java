@@ -17,6 +17,7 @@ import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_2;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_3;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_TO_NODE_3;
+import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL_2;
 import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL;
 import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL_2;
 import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL_TO_NODE_3;
@@ -181,6 +182,18 @@ class ChannelServiceTest {
     void getClosedChannel_not_closed() {
         when(grpcClosedChannels.getClosedChannels()).thenReturn(Set.of(CLOSED_CHANNEL));
         assertThat(channelService.getClosedChannel(CHANNEL_ID_2)).isEmpty();
+    }
+
+    @Test
+    void getForceClosedChannel() {
+        when(grpcClosedChannels.getClosedChannels()).thenReturn(Set.of(FORCE_CLOSED_CHANNEL_2, CLOSED_CHANNEL_2));
+        assertThat(channelService.getForceClosedChannel(CHANNEL_ID_2)).contains(FORCE_CLOSED_CHANNEL_2);
+    }
+
+    @Test
+    void getForceClosedChannel_not_force_closed() {
+        when(grpcClosedChannels.getClosedChannels()).thenReturn(Set.of(CLOSED_CHANNEL_2));
+        assertThat(channelService.getForceClosedChannel(CHANNEL_ID_2)).isEmpty();
     }
 
     @Test

@@ -7,6 +7,7 @@ import de.cotto.lndmanagej.grpc.GrpcChannels;
 import de.cotto.lndmanagej.grpc.GrpcClosedChannels;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ClosedChannel;
+import de.cotto.lndmanagej.model.ForceClosedChannel;
 import de.cotto.lndmanagej.model.ForceClosingChannel;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
@@ -84,6 +85,15 @@ public class ChannelService {
     public Optional<ClosedChannel> getClosedChannel(ChannelId channelId) {
         return getClosedChannels().stream()
                 .filter(c -> channelId.equals(c.getId()))
+                .findFirst();
+    }
+
+    @Timed
+    public Optional<ForceClosedChannel> getForceClosedChannel(ChannelId channelId) {
+        return getClosedChannels().stream()
+                .filter(c -> channelId.equals(c.getId()))
+                .filter(ClosedChannel::isForceClosed)
+                .map(ClosedChannel::getAsForceClosedChannel)
                 .findFirst();
     }
 

@@ -31,6 +31,8 @@ public abstract class ClosedChannel extends ClosedOrClosingChannel {
         this.closeHeight = closeHeight;
     }
 
+    public abstract boolean isForceClosed();
+
     public CloseInitiator getCloseInitiator() {
         return closeInitiator;
     }
@@ -42,6 +44,10 @@ public abstract class ClosedChannel extends ClosedOrClosingChannel {
     @Override
     public ClosedChannel getAsClosedChannel() {
         return this;
+    }
+
+    public ForceClosedChannel getAsForceClosedChannel() {
+        throw new IllegalStateException("Channel is not force-closed");
     }
 
     @Override

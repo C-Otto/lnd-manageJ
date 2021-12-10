@@ -118,7 +118,8 @@ class NodeControllerTest {
         );
         OnChainCosts onChainCosts = new OnChainCosts(
                 Coins.ofSatoshis(123),
-                Coins.ofSatoshis(456)
+                Coins.ofSatoshis(456),
+                Coins.ofSatoshis(789)
         );
         Coins rebalanceSourceCosts = Coins.ofMilliSatoshis(1);
         Coins rebalanceTargetCosts = Coins.ofMilliSatoshis(2);

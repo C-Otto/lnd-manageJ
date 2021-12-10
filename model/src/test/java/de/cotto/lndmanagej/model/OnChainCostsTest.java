@@ -15,7 +15,8 @@ class OnChainCostsTest {
     void add() {
         assertThat(ON_CHAIN_COSTS.add(ON_CHAIN_COSTS)).isEqualTo(new OnChainCosts(
                 Coins.ofSatoshis(2000),
-                Coins.ofSatoshis(4000)
+                Coins.ofSatoshis(4000),
+                Coins.ofSatoshis(6000)
         ));
     }
 
@@ -27,5 +28,10 @@ class OnChainCostsTest {
     @Test
     void close() {
         assertThat(ON_CHAIN_COSTS.close()).isEqualTo(Coins.ofSatoshis(2000));
+    }
+
+    @Test
+    void sweep() {
+        assertThat(ON_CHAIN_COSTS.sweep()).isEqualTo(Coins.ofSatoshis(3000));
     }
 }

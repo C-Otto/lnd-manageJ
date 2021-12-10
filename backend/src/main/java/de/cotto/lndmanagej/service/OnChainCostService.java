@@ -5,10 +5,12 @@ import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ChannelPoint;
 import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.ForceClosedChannel;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.model.OpenInitiator;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.model.Resolution;
 import de.cotto.lndmanagej.transactions.model.Transaction;
 import de.cotto.lndmanagej.transactions.service.TransactionService;
 import org.springframework.stereotype.Component;
@@ -36,7 +38,8 @@ public class OnChainCostService {
     public OnChainCosts getOnChainCostsForChannel(LocalChannel localChannel) {
         return new OnChainCosts(
                 getOpenCostsForChannel(localChannel).orElse(Coins.NONE),
-                getCloseCostsForChannelId(localChannel.getId()).orElse(Coins.NONE)
+                getCloseCostsForChannelId(localChannel.getId()).orElse(Coins.NONE),
+                getSweepCostsForChannelId(localChannel.getId()).orElse(Coins.NONE)
         );
     }
 
@@ -88,6 +91,26 @@ public class OnChainCostService {
             return Optional.of(Coins.NONE);
         }
         return Optional.empty();
+    }
+
+    @Timed
+    public Optional<Coins> getSweepCostsForChannelId(ChannelId channelId) {
+        if (channelService.isClosed(channelId)) {
+            return channelService.getForceClosedChannel(channelId).map(this::getSweepCostsForChannel);
+        }
+        return Optional.of(Coins.NONE);
+    }
+
+    @Timed
+    public Coins getSweepCostsForChannel(ForceClosedChannel forceClosedChannel) {
+        return forceClosedChannel.getResolutions().stream()
+                .map(Resolution::sweepTransaction)
+                .flatMap(Optional::stream)
+                .distinct()
+                .map(transactionService::getTransaction)
+                .flatMap(Optional::stream)
+                .map(Transaction::fees)
+                .reduce(Coins.NONE, Coins::add);
     }
 
     private long getNumberOfChannelsWithOpenTransactionHash(String openTransactionHash) {

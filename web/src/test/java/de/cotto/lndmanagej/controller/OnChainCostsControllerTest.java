@@ -60,4 +60,18 @@ class OnChainCostsControllerTest {
                 () -> onChainCostsController.getCloseCostsForChannel(CHANNEL_ID)
         );
     }
+
+    @Test
+    void getSweepCostsForChannel() throws CostException {
+        Coins coins = Coins.ofSatoshis(123);
+        when(onChainCostService.getSweepCostsForChannelId(CHANNEL_ID)).thenReturn(Optional.of(coins));
+        assertThat(onChainCostsController.getSweepCostsForChannel(CHANNEL_ID)).isEqualTo(coins.satoshis());
+    }
+
+    @Test
+    void getSweepCostsForChannel_unknown() {
+        assertThatExceptionOfType(CostException.class).isThrownBy(
+                () -> onChainCostsController.getSweepCostsForChannel(CHANNEL_ID)
+        );
+    }
 }

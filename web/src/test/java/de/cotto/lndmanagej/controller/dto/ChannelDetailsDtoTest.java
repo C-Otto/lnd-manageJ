@@ -20,7 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ChannelDetailsDtoTest {
 
-    private static final OnChainCosts ON_CHAIN_COSTS = new OnChainCosts(Coins.ofSatoshis(1), Coins.ofSatoshis(2));
+    private static final OnChainCosts ON_CHAIN_COSTS =
+            new OnChainCosts(Coins.ofSatoshis(1), Coins.ofSatoshis(2), Coins.ofSatoshis(3));
     private static final OffChainCostsDto OFF_CHAIN_COSTS =
             new OffChainCostsDto(Coins.ofSatoshis(3), Coins.ofSatoshis(4));
     private static final ClosedChannelDetailsDto CLOSE_DETAILS = new ClosedChannelDetailsDto("abc", 123);

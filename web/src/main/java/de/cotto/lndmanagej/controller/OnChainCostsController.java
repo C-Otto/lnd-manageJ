@@ -40,4 +40,10 @@ public class OnChainCostsController {
                 .orElseThrow(() -> new CostException("Unable to get close costs for channel with ID " + channelId));
     }
 
+    @Timed
+    @GetMapping("/channel/{channelId}/sweep-costs")
+    public long getSweepCostsForChannel(@PathVariable ChannelId channelId) throws CostException {
+        return onChainCostService.getSweepCostsForChannelId(channelId).map(Coins::satoshis)
+                .orElseThrow(() -> new CostException("Unable to get sweep costs for channel with ID " + channelId));
+    }
 }

@@ -9,6 +9,6 @@ class OnChainCostsDtoTest {
     @Test
     void createFromModel() {
         assertThat(OnChainCostsDto.createFromModel(ON_CHAIN_COSTS))
-                .isEqualTo(new OnChainCostsDto("1000", "2000"));
+                .isEqualTo(new OnChainCostsDto("1000", "2000", "3000"));
     }
 }
