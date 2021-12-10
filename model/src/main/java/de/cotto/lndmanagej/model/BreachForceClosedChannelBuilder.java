@@ -15,7 +15,8 @@ public class BreachForceClosedChannelBuilder extends ClosedChannelBuilder<Breach
                 requireNonNull(remotePubkey),
                 requireNonNull(closeTransactionHash),
                 requireNonNull(openInitiator),
-                closeHeight
+                closeHeight,
+                resolutions
         );
     }
 }

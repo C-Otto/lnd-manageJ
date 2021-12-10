@@ -1,6 +1,11 @@
 package de.cotto.lndmanagej.model;
 
+import java.util.Objects;
+import java.util.Set;
+
 public class ForceClosedChannel extends ClosedChannel {
+    private final Set<Resolution> resolutions;
+
     public ForceClosedChannel(
             ChannelCoreInformation channelCoreInformation,
             Pubkey ownPubkey,
@@ -8,7 +13,8 @@ public class ForceClosedChannel extends ClosedChannel {
             String closeTransactionHash,
             OpenInitiator openInitiator,
             CloseInitiator closeInitiator,
-            int closeHeight
+            int closeHeight,
+            Set<Resolution> resolutions
     ) {
         super(
                 channelCoreInformation,
@@ -19,5 +25,30 @@ public class ForceClosedChannel extends ClosedChannel {
                 closeInitiator,
                 closeHeight
         );
+        this.resolutions = resolutions;
+    }
+
+    public Set<Resolution> getResolutions() {
+        return resolutions;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
+        if (!super.equals(other)) {
+            return false;
+        }
+        ForceClosedChannel that = (ForceClosedChannel) other;
+        return Objects.equals(resolutions, that.resolutions);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), resolutions);
     }
 }

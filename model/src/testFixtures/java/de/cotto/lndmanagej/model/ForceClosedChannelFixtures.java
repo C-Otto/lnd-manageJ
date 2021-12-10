@@ -1,10 +1,15 @@
 package de.cotto.lndmanagej.model;
 
+import java.util.Set;
+
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
+import static de.cotto.lndmanagej.model.ResolutionFixtures.RESOLUTION;
+import static de.cotto.lndmanagej.model.ResolutionFixtures.RESOLUTION_2;
 
 public class ForceClosedChannelFixtures {
     public static final ForceClosedChannel FORCE_CLOSED_CHANNEL =
             ClosedChannelFixtures.getWithDefaults(new ForceClosedChannelBuilder())
+                    .withResolutions(Set.of(RESOLUTION, RESOLUTION_2))
                     .build();
 
     public static final ForceClosedChannel FORCE_CLOSED_CHANNEL_2 =
@@ -31,5 +36,7 @@ public class ForceClosedChannelFixtures {
                     .build();
 
     public static final BreachForceClosedChannel FORCE_CLOSED_CHANNEL_BREACH =
-            ClosedChannelFixtures.getWithDefaults(new BreachForceClosedChannelBuilder()).build();
+            ClosedChannelFixtures.getWithDefaults(new BreachForceClosedChannelBuilder())
+                    .withResolutions(Set.of(RESOLUTION_2))
+                    .build();
 }

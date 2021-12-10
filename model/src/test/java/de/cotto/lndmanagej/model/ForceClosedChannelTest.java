@@ -3,6 +3,8 @@ package de.cotto.lndmanagej.model;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
+import java.util.Set;
+
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
@@ -13,6 +15,8 @@ import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_
 import static de.cotto.lndmanagej.model.OpenCloseStatus.CLOSED;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
+import static de.cotto.lndmanagej.model.ResolutionFixtures.RESOLUTION;
+import static de.cotto.lndmanagej.model.ResolutionFixtures.RESOLUTION_2;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ForceClosedChannelTest {
@@ -28,6 +32,7 @@ class ForceClosedChannelTest {
                 .withOpenInitiator(OpenInitiator.LOCAL)
                 .withCloseInitiator(CloseInitiator.REMOTE)
                 .withCloseHeight(CLOSE_HEIGHT)
+                .withResolutions(Set.of(RESOLUTION, RESOLUTION_2))
                 .build()
         ).isEqualTo(FORCE_CLOSED_CHANNEL);
     }
@@ -101,6 +106,11 @@ class ForceClosedChannelTest {
     @Test
     void getAsClosedChannel() {
         assertThat(FORCE_CLOSED_CHANNEL_REMOTE.getAsClosedChannel()).isEqualTo(FORCE_CLOSED_CHANNEL_REMOTE);
+    }
+
+    @Test
+    void getResolutions() {
+        assertThat(FORCE_CLOSED_CHANNEL.getResolutions()).containsExactlyInAnyOrder(RESOLUTION, RESOLUTION_2);
     }
 
     @Test

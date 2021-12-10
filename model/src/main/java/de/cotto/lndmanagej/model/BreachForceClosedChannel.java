@@ -1,5 +1,7 @@
 package de.cotto.lndmanagej.model;
 
+import java.util.Set;
+
 public class BreachForceClosedChannel extends ForceClosedChannel {
     public BreachForceClosedChannel(
             ChannelCoreInformation channelCoreInformation,
@@ -7,7 +9,8 @@ public class BreachForceClosedChannel extends ForceClosedChannel {
             Pubkey remotePubkey,
             String closeTransactionHash,
             OpenInitiator openInitiator,
-            int closeHeight
+            int closeHeight,
+            Set<Resolution> resolutions
     ) {
         super(
                 channelCoreInformation,
@@ -16,7 +19,8 @@ public class BreachForceClosedChannel extends ForceClosedChannel {
                 closeTransactionHash,
                 openInitiator,
                 CloseInitiator.REMOTE,
-                closeHeight
+                closeHeight,
+                resolutions
         );
     }
 }

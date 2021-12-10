@@ -1,9 +1,11 @@
 package de.cotto.lndmanagej.model;
 
 import javax.annotation.Nullable;
+import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 
+@SuppressWarnings("PMD.TooManyMethods")
 public abstract class ClosedChannelBuilder<T extends ClosedChannel> {
     @Nullable
     private ChannelId channelId;
@@ -28,6 +30,8 @@ public abstract class ClosedChannelBuilder<T extends ClosedChannel> {
 
     @Nullable
     CloseInitiator closeInitiator;
+
+    Set<Resolution> resolutions = Set.of();
 
     int closeHeight;
 
@@ -77,6 +81,11 @@ public abstract class ClosedChannelBuilder<T extends ClosedChannel> {
 
     public ClosedChannelBuilder<T> withCloseHeight(int closeHeight) {
         this.closeHeight = closeHeight;
+        return this;
+    }
+
+    public ClosedChannelBuilder<T> withResolutions(Set<Resolution> resolutions) {
+        this.resolutions = resolutions;
         return this;
     }
 

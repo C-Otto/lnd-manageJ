@@ -12,6 +12,7 @@ import de.cotto.lndmanagej.model.ForceClosedChannelBuilder;
 import de.cotto.lndmanagej.model.OpenInitiator;
 import de.cotto.lndmanagej.model.OpenInitiatorResolver;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.model.Resolution;
 import lnrpc.ChannelCloseSummary;
 import lnrpc.ChannelCloseSummary.ClosureType;
 import lnrpc.Initiator;
@@ -88,8 +89,23 @@ public class GrpcClosedChannels extends GrpcChannelsBase {
                         .withCloseTransactionHash(channelCloseSummary.getClosingTxHash())
                         .withOpenInitiator(openInitiator)
                         .withCloseHeight(channelCloseSummary.getCloseHeight())
+                        .withResolutions(getResolutions(channelCloseSummary))
                         .build()
                 );
+    }
+
+    private Set<Resolution> getResolutions(ChannelCloseSummary channelCloseSummary) {
+        return channelCloseSummary.getResolutionsList().stream()
+                .map(lndResolution -> {
+                    Optional<String> sweepTransaction;
+                    if (lndResolution.getSweepTxid().isBlank()) {
+                        sweepTransaction = Optional.empty();
+                    } else {
+                        sweepTransaction = Optional.of(lndResolution.getSweepTxid());
+                    }
+                    return new Resolution(sweepTransaction);
+                })
+                .collect(toSet());
     }
 
     private OpenInitiator getOpenInitiator(Initiator initiator, String transactionHash) {
