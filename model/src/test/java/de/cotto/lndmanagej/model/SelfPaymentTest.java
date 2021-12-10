@@ -2,9 +2,9 @@ package de.cotto.lndmanagej.model;
 
 import org.junit.jupiter.api.Test;
 
-import static de.cotto.lndmanagej.SelfPaymentFixtures.SELF_PAYMENT;
-import static de.cotto.lndmanagej.SelfPaymentFixtures.SELF_PAYMENT_2;
 import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT_2;
+import static de.cotto.lndmanagej.model.SelfPaymentFixtures.SELF_PAYMENT;
+import static de.cotto.lndmanagej.model.SelfPaymentFixtures.SELF_PAYMENT_2;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE_2;
 import static org.assertj.core.api.Assertions.assertThat;

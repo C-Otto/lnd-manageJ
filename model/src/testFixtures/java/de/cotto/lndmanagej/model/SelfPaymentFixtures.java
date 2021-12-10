@@ -1,6 +1,4 @@
-package de.cotto.lndmanagej;
-
-import de.cotto.lndmanagej.model.SelfPayment;
+package de.cotto.lndmanagej.model;
 
 import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT;
 import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT_2;

@@ -10,12 +10,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Set;
 
-import static de.cotto.lndmanagej.SelfPaymentFixtures.SELF_PAYMENT;
-import static de.cotto.lndmanagej.SelfPaymentFixtures.SELF_PAYMENT_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
+import static de.cotto.lndmanagej.model.SelfPaymentFixtures.SELF_PAYMENT;
+import static de.cotto.lndmanagej.model.SelfPaymentFixtures.SELF_PAYMENT_2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 

@@ -12,11 +12,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static de.cotto.lndmanagej.SelfPaymentFixtures.SELF_PAYMENT;
-import static de.cotto.lndmanagej.SelfPaymentFixtures.SELF_PAYMENT_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT;
 import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT_2;
+import static de.cotto.lndmanagej.model.SelfPaymentFixtures.SELF_PAYMENT;
+import static de.cotto.lndmanagej.model.SelfPaymentFixtures.SELF_PAYMENT_2;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE_2;
 import static org.assertj.core.api.Assertions.assertThat;

@@ -9,14 +9,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import static de.cotto.lndmanagej.SelfPaymentFixtures.SELF_PAYMENT;
-import static de.cotto.lndmanagej.SelfPaymentFixtures.SELF_PAYMENT_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_4;
 import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT;
 import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT_2;
 import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT_3;
+import static de.cotto.lndmanagej.model.SelfPaymentFixtures.SELF_PAYMENT;
+import static de.cotto.lndmanagej.model.SelfPaymentFixtures.SELF_PAYMENT_2;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE_2;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE_3;

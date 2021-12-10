@@ -2,7 +2,7 @@ package de.cotto.lndmanagej.controller.dto;
 
 import org.junit.jupiter.api.Test;
 
-import static de.cotto.lndmanagej.SelfPaymentFixtures.SELF_PAYMENT;
+import static de.cotto.lndmanagej.model.SelfPaymentFixtures.SELF_PAYMENT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SelfPaymentDtoTest {

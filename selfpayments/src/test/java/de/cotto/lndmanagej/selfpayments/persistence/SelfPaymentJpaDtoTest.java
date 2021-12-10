@@ -5,8 +5,8 @@ import de.cotto.lndmanagej.payments.persistence.PaymentJpaDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static de.cotto.lndmanagej.SelfPaymentFixtures.SELF_PAYMENT;
 import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT;
+import static de.cotto.lndmanagej.model.SelfPaymentFixtures.SELF_PAYMENT;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE;
 import static org.assertj.core.api.Assertions.assertThat;
 
