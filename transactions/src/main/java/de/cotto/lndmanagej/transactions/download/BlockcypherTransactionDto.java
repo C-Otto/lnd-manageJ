@@ -6,31 +6,13 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import de.cotto.lndmanagej.model.Coins;
-import de.cotto.lndmanagej.transactions.model.Transaction;
 
 import java.io.IOException;
 
 @JsonDeserialize(using = BlockcypherTransactionDto.Deserializer.class)
-public class BlockcypherTransactionDto {
-    private final String hash;
-    private final int blockHeight;
-    private final int positionInBlock;
-    private final Coins fees;
-
-    public BlockcypherTransactionDto(
-            String hash,
-            int blockHeight,
-            int positionInBlock,
-            Coins fees
-    ) {
-        this.hash = hash;
-        this.blockHeight = blockHeight;
-        this.positionInBlock = positionInBlock;
-        this.fees = fees;
-    }
-
-    public Transaction toModel() {
-        return new Transaction(hash, blockHeight, positionInBlock, fees);
+public final class BlockcypherTransactionDto extends TransactionDto {
+    public BlockcypherTransactionDto(String hash, int blockHeight, int positionInBlock, Coins fees) {
+        super(hash, blockHeight, positionInBlock, fees);
     }
 
     public static class Deserializer extends JsonDeserializer<BlockcypherTransactionDto> {

@@ -18,3 +18,7 @@ dependencies {
     implementation project(':grpc-adapter')
     testFixturesApi testFixtures(project(':model'))
 }
+
+pitest {
+    testStrengthThreshold = 97
+}
