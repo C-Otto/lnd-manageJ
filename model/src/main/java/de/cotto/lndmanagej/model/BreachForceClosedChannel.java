@@ -23,4 +23,9 @@ public class BreachForceClosedChannel extends ForceClosedChannel {
                 resolutions
         );
     }
+
+    @Override
+    public boolean isBreach() {
+        return true;
+    }
 }

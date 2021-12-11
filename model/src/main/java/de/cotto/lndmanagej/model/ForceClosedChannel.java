@@ -42,6 +42,10 @@ public class ForceClosedChannel extends ClosedChannel {
         return this;
     }
 
+    public boolean isBreach() {
+        return false;
+    }
+
     @Override
     public boolean equals(Object other) {
         if (this == other) {

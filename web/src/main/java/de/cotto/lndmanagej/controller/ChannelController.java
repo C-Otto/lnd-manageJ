@@ -118,7 +118,7 @@ public class ChannelController {
         if (closedChannel == null) {
             throw new NotFoundException();
         }
-        return new ClosedChannelDetailsDto(closedChannel.getCloseInitiator(), closedChannel.getCloseHeight());
+        return ClosedChannelDetailsDto.createFromModel(closedChannel);
     }
 
     @Timed
@@ -151,11 +151,6 @@ public class ChannelController {
     }
 
     private ClosedChannelDetailsDto getCloseDetailsForChannel(LocalChannel localChannel) {
-        if (localChannel.isClosed()) {
-            ClosedChannel closedChannel = localChannel.getAsClosedChannel();
-            return new ClosedChannelDetailsDto(closedChannel.getCloseInitiator(), closedChannel.getCloseHeight());
-        } else {
-            return ClosedChannelDetailsDto.UNKNOWN;
-        }
+        return ClosedChannelDetailsDto.createFromModel(localChannel);
     }
 }

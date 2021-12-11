@@ -24,7 +24,8 @@ class ChannelDetailsDtoTest {
             new OnChainCosts(Coins.ofSatoshis(1), Coins.ofSatoshis(2), Coins.ofSatoshis(3));
     private static final OffChainCostsDto OFF_CHAIN_COSTS =
             new OffChainCostsDto(Coins.ofSatoshis(3), Coins.ofSatoshis(4));
-    private static final ClosedChannelDetailsDto CLOSE_DETAILS = new ClosedChannelDetailsDto("abc", 123);
+    private static final ClosedChannelDetailsDto CLOSE_DETAILS =
+            ClosedChannelDetailsDto.createFromModel(CLOSED_CHANNEL);
     private static final FeeReport FEE_REPORT =
             new FeeReport(Coins.ofMilliSatoshis(1234), Coins.ofMilliSatoshis(567));
     private static final ChannelDetailsDto CHANNEL_DETAILS_DTO = new ChannelDetailsDto(

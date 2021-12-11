@@ -25,6 +25,8 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
+import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL;
+import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL_BREACH;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
@@ -230,7 +232,29 @@ class ChannelControllerIT {
         when(channelService.getClosedChannel(CHANNEL_ID)).thenReturn(Optional.of(CLOSED_CHANNEL));
         mockMvc.perform(get(CHANNEL_PREFIX + "/close-details"))
                 .andExpect(jsonPath("$.initiator", is("REMOTE")))
-                .andExpect(jsonPath("$.height", is(987_654)));
+                .andExpect(jsonPath("$.height", is(987_654)))
+                .andExpect(jsonPath("$.force", is(false)))
+                .andExpect(jsonPath("$.breach", is(false)));
+    }
+
+    @Test
+    void getCloseDetails_force() throws Exception {
+        when(channelService.getClosedChannel(CHANNEL_ID)).thenReturn(Optional.of(FORCE_CLOSED_CHANNEL));
+        mockMvc.perform(get(CHANNEL_PREFIX + "/close-details"))
+                .andExpect(jsonPath("$.initiator", is("REMOTE")))
+                .andExpect(jsonPath("$.height", is(987_654)))
+                .andExpect(jsonPath("$.force", is(true)))
+                .andExpect(jsonPath("$.breach", is(false)));
+    }
+
+    @Test
+    void getCloseDetails_breach() throws Exception {
+        when(channelService.getClosedChannel(CHANNEL_ID)).thenReturn(Optional.of(FORCE_CLOSED_CHANNEL_BREACH));
+        mockMvc.perform(get(CHANNEL_PREFIX + "/close-details"))
+                .andExpect(jsonPath("$.breach", is(true)))
+                .andExpect(jsonPath("$.initiator", is("REMOTE")))
+                .andExpect(jsonPath("$.height", is(987_654)))
+                .andExpect(jsonPath("$.force", is(true)));
     }
 
     @Test

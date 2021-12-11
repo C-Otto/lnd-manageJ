@@ -8,7 +8,6 @@ import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.OffChainCostsDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.model.BalanceInformation;
-import de.cotto.lndmanagej.model.CloseInitiator;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.LocalChannel;
@@ -54,7 +53,7 @@ class ChannelControllerTest {
     private static final OffChainCostsDto OFF_CHAIN_COSTS = new OffChainCostsDto(SOURCE_COSTS, TARGET_COSTS);
     private static final PoliciesDto FEE_CONFIGURATION_DTO = PoliciesDto.createFromModel(POLICIES);
     private static final ClosedChannelDetailsDto CLOSED_CHANNEL_DETAILS_DTO =
-            new ClosedChannelDetailsDto(CloseInitiator.REMOTE, 987_654);
+            ClosedChannelDetailsDto.createFromModel(CLOSED_CHANNEL);
     private static final FeeReport FEE_REPORT = new FeeReport(Coins.ofMilliSatoshis(1_234), Coins.ofMilliSatoshis(567));
 
     @InjectMocks
@@ -158,17 +157,13 @@ class ChannelControllerTest {
 
     @Test
     void getDetails_closed() throws NotFoundException {
-        ChannelDetailsDto expectedDetails = mockForChannelWithoutPolicies(
-                CLOSED_CHANNEL,
-                CLOSED_CHANNEL.getCloseInitiator().toString(),
-                CLOSED_CHANNEL.getCloseHeight()
-        );
+        ChannelDetailsDto expectedDetails = mockForChannelWithoutPolicies(CLOSED_CHANNEL);
         assertThat(channelController.getDetails(CHANNEL_ID)).isEqualTo(expectedDetails);
     }
 
     @Test
     void getDetails_waiting_close() throws NotFoundException {
-        ChannelDetailsDto expectedDetails = mockForChannelWithoutPolicies(WAITING_CLOSE_CHANNEL, "", 0);
+        ChannelDetailsDto expectedDetails = mockForChannelWithoutPolicies(WAITING_CLOSE_CHANNEL);
         assertThat(channelController.getDetails(CHANNEL_ID)).isEqualTo(expectedDetails);
     }
 
@@ -216,11 +211,7 @@ class ChannelControllerTest {
         assertThat(channelController.getFeeReport(CHANNEL_ID)).isEqualTo(FeeReportDto.createFromModel(FEE_REPORT));
     }
 
-    private ChannelDetailsDto mockForChannelWithoutPolicies(
-            LocalChannel channel,
-            String closeInitiator,
-            int closeHeight
-    ) {
+    private ChannelDetailsDto mockForChannelWithoutPolicies(LocalChannel channel) {
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(channel));
         when(balanceService.getBalanceInformation(CHANNEL_ID)).thenReturn(Optional.empty());
@@ -231,7 +222,7 @@ class ChannelControllerTest {
                 ON_CHAIN_COSTS,
                 OFF_CHAIN_COSTS,
                 PoliciesDto.EMPTY,
-                new ClosedChannelDetailsDto(closeInitiator, closeHeight),
+                ClosedChannelDetailsDto.createFromModel(channel),
                 FEE_REPORT
         );
     }

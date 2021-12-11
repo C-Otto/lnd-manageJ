@@ -16,7 +16,8 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ChannelDtoTest {
-    private static final ClosedChannelDetailsDto CLOSE_DETAILS = new ClosedChannelDetailsDto("abc", 123);
+    private static final ClosedChannelDetailsDto CLOSE_DETAILS =
+            ClosedChannelDetailsDto.createFromModel(CLOSED_CHANNEL);
     private static final ChannelDto CHANNEL_DTO = new ChannelDto(CLOSED_CHANNEL, CLOSE_DETAILS);
 
     @Test

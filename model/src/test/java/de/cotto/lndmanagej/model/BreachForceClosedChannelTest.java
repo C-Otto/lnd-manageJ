@@ -111,6 +111,11 @@ class BreachForceClosedChannelTest {
     }
 
     @Test
+    void isBreach() {
+        assertThat(FORCE_CLOSED_CHANNEL_BREACH.isBreach()).isTrue();
+    }
+
+    @Test
     void testEquals() {
         EqualsVerifier.forClass(BreachForceClosedChannel.class).usingGetClass().verify();
     }
