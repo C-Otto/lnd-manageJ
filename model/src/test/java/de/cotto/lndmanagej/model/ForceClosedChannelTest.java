@@ -15,8 +15,8 @@ import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_
 import static de.cotto.lndmanagej.model.OpenCloseStatus.CLOSED;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
-import static de.cotto.lndmanagej.model.ResolutionFixtures.RESOLUTION;
-import static de.cotto.lndmanagej.model.ResolutionFixtures.RESOLUTION_2;
+import static de.cotto.lndmanagej.model.ResolutionFixtures.COMMIT_CLAIMED;
+import static de.cotto.lndmanagej.model.ResolutionFixtures.INCOMING_HTLC_CLAIMED;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ForceClosedChannelTest {
@@ -32,7 +32,7 @@ class ForceClosedChannelTest {
                 .withOpenInitiator(OpenInitiator.LOCAL)
                 .withCloseInitiator(CloseInitiator.REMOTE)
                 .withCloseHeight(CLOSE_HEIGHT)
-                .withResolutions(Set.of(RESOLUTION, RESOLUTION_2))
+                .withResolutions(Set.of(INCOMING_HTLC_CLAIMED, COMMIT_CLAIMED))
                 .build()
         ).isEqualTo(FORCE_CLOSED_CHANNEL);
     }
@@ -120,7 +120,8 @@ class ForceClosedChannelTest {
 
     @Test
     void getResolutions() {
-        assertThat(FORCE_CLOSED_CHANNEL.getResolutions()).containsExactlyInAnyOrder(RESOLUTION, RESOLUTION_2);
+        assertThat(FORCE_CLOSED_CHANNEL.getResolutions())
+                .containsExactlyInAnyOrder(INCOMING_HTLC_CLAIMED, COMMIT_CLAIMED);
     }
 
     @Test

@@ -103,7 +103,11 @@ public class GrpcClosedChannels extends GrpcChannelsBase {
                     } else {
                         sweepTransaction = Optional.of(lndResolution.getSweepTxid());
                     }
-                    return new Resolution(sweepTransaction);
+                    return new Resolution(
+                            sweepTransaction,
+                            lndResolution.getResolutionType().name(),
+                            lndResolution.getOutcome().name()
+                    );
                 })
                 .collect(toSet());
     }

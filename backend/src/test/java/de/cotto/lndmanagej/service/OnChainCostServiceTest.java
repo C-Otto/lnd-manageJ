@@ -359,6 +359,11 @@ class OnChainCostServiceTest {
             assertThat(onChainCostService.getSweepCostsForChannel(FORCE_CLOSED_CHANNEL))
                     .isEqualTo(TRANSACTION_2.fees());
         }
+
+        @Test
+        void with_sweep_transaction_for_peer() {
+            assertThat(onChainCostService.getSweepCostsForChannel(FORCE_CLOSED_CHANNEL_2)).isEqualTo(Coins.NONE);
+        }
     }
 
     private void mockOpenTransaction(LocalChannel channel) {

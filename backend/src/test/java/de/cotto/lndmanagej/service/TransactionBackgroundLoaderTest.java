@@ -25,6 +25,7 @@ import static de.cotto.lndmanagej.model.ChannelPointFixtures.TRANSACTION_HASH_2;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.TRANSACTION_HASH_3;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL;
+import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL_2;
 import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
@@ -148,6 +149,15 @@ class TransactionBackgroundLoaderTest {
         when(channelService.getClosedChannels()).thenReturn(Set.of(FORCE_CLOSED_CHANNEL));
         transactionBackgroundLoader.loadTransactionForOneChannel();
         verify(transactionService).getTransaction(TRANSACTION_HASH_3);
+    }
+
+    @Test
+    void update_from_force_closed_channels_sweep_transaction_ignores_peer_sweeps() {
+        when(transactionService.isUnknown(TRANSACTION_HASH)).thenReturn(false);
+        when(transactionService.isUnknown(TRANSACTION_HASH_2)).thenReturn(false);
+        when(channelService.getClosedChannels()).thenReturn(Set.of(FORCE_CLOSED_CHANNEL_2));
+        transactionBackgroundLoader.loadTransactionForOneChannel();
+        verify(transactionService, never()).getTransaction(any());
     }
 
     @Test

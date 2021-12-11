@@ -66,6 +66,7 @@ public class TransactionBackgroundLoader {
                 .map(ClosedChannel::getAsForceClosedChannel)
                 .map(ForceClosedChannel::getResolutions)
                 .flatMap(Collection::stream)
+                .filter(Resolution::sweepTransactionClaimsFunds)
                 .map(Resolution::sweepTransaction)
                 .flatMap(Optional::stream);
     }

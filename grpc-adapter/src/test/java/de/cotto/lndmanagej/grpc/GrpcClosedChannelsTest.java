@@ -9,6 +9,8 @@ import de.cotto.lndmanagej.model.OpenInitiatorResolver;
 import de.cotto.lndmanagej.model.Resolution;
 import lnrpc.ChannelCloseSummary;
 import lnrpc.Initiator;
+import lnrpc.ResolutionOutcome;
+import lnrpc.ResolutionType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,8 +38,8 @@ import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_
 import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL_REMOTE;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
-import static de.cotto.lndmanagej.model.ResolutionFixtures.RESOLUTION;
-import static de.cotto.lndmanagej.model.ResolutionFixtures.RESOLUTION_2;
+import static de.cotto.lndmanagej.model.ResolutionFixtures.COMMIT_CLAIMED;
+import static de.cotto.lndmanagej.model.ResolutionFixtures.INCOMING_HTLC_CLAIMED;
 import static lnrpc.ChannelCloseSummary.ClosureType.ABANDONED;
 import static lnrpc.ChannelCloseSummary.ClosureType.BREACH_CLOSE;
 import static lnrpc.ChannelCloseSummary.ClosureType.COOPERATIVE_CLOSE;
@@ -148,7 +150,7 @@ class GrpcClosedChannelsTest {
     @Test
     void getClosedChannels_force_closed_breach_detected() {
         when(grpcService.getClosedChannels()).thenReturn(List.of(
-                closedChannel(CHANNEL_ID_SHORT, BREACH_CLOSE, INITIATOR_LOCAL, INITIATOR_REMOTE, Set.of(RESOLUTION_2))
+                closedChannel(CHANNEL_ID_SHORT, BREACH_CLOSE, INITIATOR_LOCAL, INITIATOR_REMOTE, Set.of(COMMIT_CLAIMED))
         ));
         assertThat(grpcClosedChannels.getClosedChannels())
                 .containsExactlyInAnyOrder(FORCE_CLOSED_CHANNEL_BREACH);
@@ -156,7 +158,7 @@ class GrpcClosedChannelsTest {
 
     @Test
     void getClosedChannels_force_close_with_resolutions() {
-        Set<Resolution> resolutions = Set.of(RESOLUTION, RESOLUTION_2);
+        Set<Resolution> resolutions = Set.of(INCOMING_HTLC_CLAIMED, COMMIT_CLAIMED);
         when(grpcService.getClosedChannels()).thenReturn(List.of(
                 closedChannel(CHANNEL_ID_SHORT, REMOTE_FORCE_CLOSE, INITIATOR_LOCAL, INITIATOR_REMOTE, resolutions)
         ));
@@ -237,6 +239,8 @@ class GrpcClosedChannelsTest {
         resolutions.stream().map(
                 resolution -> lnrpc.Resolution.newBuilder()
                         .setSweepTxid(resolution.sweepTransaction().orElse(""))
+                        .setOutcome(ResolutionOutcome.valueOf(resolution.outcome()))
+                        .setResolutionType(ResolutionType.valueOf(resolution.resolutionType()))
                         .build()
         ).forEach(builder::addResolutions);
     }
