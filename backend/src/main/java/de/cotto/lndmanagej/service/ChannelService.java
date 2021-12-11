@@ -60,6 +60,11 @@ public class ChannelService {
     }
 
     @Timed
+    public boolean isForceClosed(ChannelId channelId) {
+        return getClosedChannel(channelId).filter(ClosedChannel::isForceClosed).isPresent();
+    }
+
+    @Timed
     public Optional<LocalChannel> getLocalChannel(ChannelId channelId) {
         return getAllLocalChannels()
                 .filter(c -> channelId.equals(c.getId()))

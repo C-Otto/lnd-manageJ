@@ -321,7 +321,7 @@ class OnChainCostServiceTest {
     class GetSweepCosts {
         @BeforeEach
         void setUp() {
-            lenient().when(channelService.isClosed(CHANNEL_ID)).thenReturn(true);
+            lenient().when(channelService.isForceClosed(CHANNEL_ID)).thenReturn(true);
         }
 
         @Test
@@ -330,8 +330,8 @@ class OnChainCostServiceTest {
         }
 
         @Test
-        void by_channel_id_not_closed() {
-            when(channelService.isClosed(CHANNEL_ID)).thenReturn(false);
+        void by_channel_id_not_force_closed() {
+            when(channelService.isForceClosed(CHANNEL_ID)).thenReturn(false);
             assertThat(onChainCostService.getSweepCostsForChannelId(CHANNEL_ID)).contains(Coins.NONE);
         }
 
@@ -376,7 +376,7 @@ class OnChainCostServiceTest {
         ChannelId channelId = FORCE_CLOSED_CHANNEL.getId();
         when(transactionService.getTransaction(any())).thenReturn(Optional.empty());
         when(transactionService.getTransaction(TRANSACTION_HASH_3)).thenReturn(Optional.of(TRANSACTION));
-        when(channelService.isClosed(channelId)).thenReturn(true);
+        when(channelService.isForceClosed(channelId)).thenReturn(true);
         when(channelService.getForceClosedChannel(channelId)).thenReturn(Optional.of(FORCE_CLOSED_CHANNEL));
         return channelId;
     }
