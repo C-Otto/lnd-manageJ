@@ -362,6 +362,8 @@ class OnChainCostServiceTest {
 
         @Test
         void with_sweep_transaction_for_peer() {
+            lenient().when(transactionService.getTransaction(TRANSACTION_HASH_3))
+                    .thenReturn(Optional.of(TRANSACTION_2));
             assertThat(onChainCostService.getSweepCostsForChannel(FORCE_CLOSED_CHANNEL_2)).isEqualTo(Coins.NONE);
         }
     }

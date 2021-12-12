@@ -104,6 +104,7 @@ public class OnChainCostService {
     @Timed
     public Coins getSweepCostsForChannel(ForceClosedChannel forceClosedChannel) {
         return forceClosedChannel.getResolutions().stream()
+                .filter(Resolution::sweepTransactionClaimsFunds)
                 .map(Resolution::sweepTransaction)
                 .flatMap(Optional::stream)
                 .distinct()
