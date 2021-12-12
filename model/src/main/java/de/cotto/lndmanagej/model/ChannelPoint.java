@@ -8,20 +8,20 @@ import java.util.Objects;
 public final class ChannelPoint {
     private static final Splitter SPLITTER = Splitter.on(":");
 
-    private final String transactionHash;
+    private final TransactionHash transactionHash;
     private final int output;
 
-    private ChannelPoint(String transactionHash, Integer output) {
+    private ChannelPoint(TransactionHash transactionHash, Integer output) {
         this.transactionHash = transactionHash;
         this.output = output;
     }
 
     public static ChannelPoint create(String channelPoint) {
         List<String> split = SPLITTER.splitToList(channelPoint);
-        return new ChannelPoint(split.get(0), Integer.valueOf(split.get(1)));
+        return new ChannelPoint(TransactionHash.create(split.get(0)), Integer.valueOf(split.get(1)));
     }
 
-    public String getTransactionHash() {
+    public TransactionHash getTransactionHash() {
         return transactionHash;
     }
 
@@ -48,6 +48,6 @@ public final class ChannelPoint {
 
     @Override
     public String toString() {
-        return transactionHash + ':' + output;
+        return transactionHash.toString() + ':' + output;
     }
 }

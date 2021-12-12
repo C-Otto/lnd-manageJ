@@ -11,6 +11,7 @@ import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.model.OpenInitiator;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.Resolution;
+import de.cotto.lndmanagej.model.TransactionHash;
 import de.cotto.lndmanagej.transactions.model.Transaction;
 import de.cotto.lndmanagej.transactions.service.TransactionService;
 import org.springframework.stereotype.Component;
@@ -58,7 +59,7 @@ public class OnChainCostService {
     @Timed
     public Optional<Coins> getOpenCostsForChannel(LocalChannel localChannel) {
         if (localChannel.getOpenInitiator().equals(OpenInitiator.LOCAL)) {
-            String openTransactionHash = localChannel.getChannelPoint().getTransactionHash();
+            TransactionHash openTransactionHash = localChannel.getChannelPoint().getTransactionHash();
             return transactionService.getTransaction(openTransactionHash)
                     .map(Transaction::fees)
                     .map(Coins::satoshis)
@@ -114,11 +115,11 @@ public class OnChainCostService {
                 .reduce(Coins.NONE, Coins::add);
     }
 
-    private long getNumberOfChannelsWithOpenTransactionHash(String openTransactionHash) {
+    private long getNumberOfChannelsWithOpenTransactionHash(TransactionHash openTransactionHash) {
         return channelService.getAllLocalChannels()
                 .map(LocalChannel::getChannelPoint)
                 .map(ChannelPoint::getTransactionHash)
-                .filter(x -> x.equals(openTransactionHash))
+                .filter(hash -> hash.equals(openTransactionHash))
                 .count();
     }
 }

@@ -3,9 +3,10 @@ plugins {
 }
 
 dependencies {
-    implementation project(':grpc-client')
-    implementation project(':model')
     implementation project(':caching')
+    implementation project(':grpc-client')
+    implementation project(':hardcoded')
+    implementation project(':model')
     testImplementation testFixtures(project(':model'))
 }
 

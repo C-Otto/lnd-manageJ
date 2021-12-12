@@ -12,7 +12,7 @@ public abstract class ClosedChannel extends ClosedOrClosingChannel {
             ChannelCoreInformation channelCoreInformation,
             Pubkey ownPubkey,
             Pubkey remotePubkey,
-            String closeTransactionHash,
+            TransactionHash closeTransactionHash,
             OpenInitiator openInitiator,
             CloseInitiator closeInitiator,
             int closeHeight

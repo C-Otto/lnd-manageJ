@@ -23,7 +23,7 @@ public abstract class ClosedChannelBuilder<T extends ClosedChannel> {
     Pubkey remotePubkey;
 
     @Nullable
-    String closeTransactionHash;
+    TransactionHash closeTransactionHash;
 
     @Nullable
     OpenInitiator openInitiator;
@@ -64,7 +64,7 @@ public abstract class ClosedChannelBuilder<T extends ClosedChannel> {
         return this;
     }
 
-    public ClosedChannelBuilder<T> withCloseTransactionHash(String closeTransactionHash) {
+    public ClosedChannelBuilder<T> withCloseTransactionHash(TransactionHash closeTransactionHash) {
         this.closeTransactionHash = closeTransactionHash;
         return this;
     }

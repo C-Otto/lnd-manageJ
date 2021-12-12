@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.grpc;
 
+import de.cotto.lndmanagej.model.TransactionHash;
 import lnrpc.Transaction;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,9 +18,12 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class GrpcTransactionsTest {
     private static final int BLOCK_HEIGHT = 123_456;
-    private static final String HASH = "abc";
-    private static final String HASH_2 = "def";
-    private static final String HASH_3 = "ghi";
+    private static final TransactionHash HASH =
+            TransactionHash.create("abcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabca");
+    private static final TransactionHash HASH_2 =
+            TransactionHash.create("00000000000cabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabca");
+    private static final TransactionHash HASH_3 =
+            TransactionHash.create("11111111111cabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabca");
     private static final Transaction LND_TRANSACTION = transaction(HASH, BLOCK_HEIGHT);
     private static final Transaction LND_TRANSACTION_2 = transaction(HASH_2, BLOCK_HEIGHT);
     private static final Transaction LND_TRANSACTION_WRONG_BLOCK = transaction(HASH_3, BLOCK_HEIGHT + 1);
@@ -49,7 +53,7 @@ class GrpcTransactionsTest {
         assertThat(grpcTransactions.getKnownTransactionHashesInBlock(BLOCK_HEIGHT)).contains(Set.of(HASH, HASH_2));
     }
 
-    private static Transaction transaction(String hash, int blockHeight) {
-        return Transaction.newBuilder().setTxHash(hash).setBlockHeight(blockHeight).build();
+    private static Transaction transaction(TransactionHash hash, int blockHeight) {
+        return Transaction.newBuilder().setTxHash(hash.getHash()).setBlockHeight(blockHeight).build();
     }
 }

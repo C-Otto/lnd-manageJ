@@ -1,0 +1,10 @@
+plugins {
+    id 'lnd-manageJ.java-library-conventions'
+}
+
+dependencies {
+    implementation project(':model')
+    implementation project(':caching')
+    implementation 'org.ini4j:ini4j:0.5.4'
+    testImplementation testFixtures(project(':model'))
+}

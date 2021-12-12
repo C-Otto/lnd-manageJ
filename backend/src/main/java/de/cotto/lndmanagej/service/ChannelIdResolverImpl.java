@@ -4,6 +4,7 @@ import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.ChannelPoint;
+import de.cotto.lndmanagej.model.TransactionHash;
 import de.cotto.lndmanagej.transactions.model.Transaction;
 import de.cotto.lndmanagej.transactions.service.TransactionService;
 import org.slf4j.Logger;
@@ -24,7 +25,7 @@ public class ChannelIdResolverImpl implements ChannelIdResolver {
     @Timed
     @Override
     public Optional<ChannelId> resolveFromChannelPoint(ChannelPoint channelPoint) {
-        String transactionHash = channelPoint.getTransactionHash();
+        TransactionHash transactionHash = channelPoint.getTransactionHash();
         Optional<Transaction> transactionOptional = transactionService.getTransaction(transactionHash);
         if (transactionOptional.isEmpty()) {
             logger.warn("Unable resolve transaction ID for {}", transactionHash);

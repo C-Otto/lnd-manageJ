@@ -3,20 +3,20 @@ package de.cotto.lndmanagej.model;
 import java.util.Objects;
 
 public abstract class ClosedOrClosingChannel extends LocalChannel {
-    private final String closeTransactionHash;
+    private final TransactionHash closeTransactionHash;
 
     protected ClosedOrClosingChannel(
             ChannelCoreInformation channelCoreInformation,
             Pubkey ownPubkey,
             Pubkey remotePubkey,
-            String closeTransactionHash,
+            TransactionHash closeTransactionHash,
             OpenInitiator openInitiator
     ) {
         super(channelCoreInformation, ownPubkey, remotePubkey, openInitiator, false);
         this.closeTransactionHash = closeTransactionHash;
     }
 
-    public String getCloseTransactionHash() {
+    public TransactionHash getCloseTransactionHash() {
         return closeTransactionHash;
     }
 

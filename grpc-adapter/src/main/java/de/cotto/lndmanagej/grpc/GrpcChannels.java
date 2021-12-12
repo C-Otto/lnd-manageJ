@@ -10,6 +10,7 @@ import de.cotto.lndmanagej.model.ForceClosingChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.OpenInitiator;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.model.TransactionHash;
 import de.cotto.lndmanagej.model.WaitingCloseChannel;
 import lnrpc.Channel;
 import lnrpc.PendingChannelsResponse;
@@ -92,7 +93,7 @@ public class GrpcChannels extends GrpcChannelsBase {
                 new ChannelCoreInformation(id, channelPoint, Coins.ofSatoshis(pendingChannel.getCapacity())),
                 ownPubkey,
                 Pubkey.create(pendingChannel.getRemoteNodePub()),
-                forceClosedChannel.getClosingTxid(),
+                TransactionHash.create(forceClosedChannel.getClosingTxid()),
                 getHtlcOutpoints(forceClosedChannel),
                 getOpenInitiator(pendingChannel.getInitiator())
         ));

@@ -178,7 +178,7 @@ class GrpcChannelsTest {
     private ForceClosedChannel forceClosingChannel(ChannelPoint channelPoint, Initiator initiator) {
         return ForceClosedChannel.newBuilder()
                 .setChannel(pendingChannel(channelPoint, initiator))
-                .setClosingTxid(TRANSACTION_HASH_3)
+                .setClosingTxid(TRANSACTION_HASH_3.getHash())
                 .addPendingHtlcs(PendingHTLC.newBuilder().setOutpoint(HTLC_OUTPOINT.toString()).build())
                 .build();
     }

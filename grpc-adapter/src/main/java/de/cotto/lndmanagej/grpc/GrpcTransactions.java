@@ -1,12 +1,14 @@
 package de.cotto.lndmanagej.grpc;
 
+import de.cotto.lndmanagej.model.TransactionHash;
 import lnrpc.Transaction;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toSet;
 
 @Component
 public class GrpcTransactions {
@@ -16,14 +18,15 @@ public class GrpcTransactions {
         this.grpcService = grpcService;
     }
 
-    public Optional<Set<String>> getKnownTransactionHashesInBlock(int blockHeight) {
+    public Optional<Set<TransactionHash>> getKnownTransactionHashesInBlock(int blockHeight) {
         List<Transaction> transactionsInBlock = getTransactionsInBlock(blockHeight).orElse(null);
         if (transactionsInBlock == null) {
             return Optional.empty();
         }
-        Set<String> hashes = transactionsInBlock.stream()
+        Set<TransactionHash> hashes = transactionsInBlock.stream()
                 .map(Transaction::getTxHash)
-                .collect(Collectors.toSet());
+                .map(TransactionHash::create)
+                .collect(toSet());
         return Optional.of(hashes);
     }
 

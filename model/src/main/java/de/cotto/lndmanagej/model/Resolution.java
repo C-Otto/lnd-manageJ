@@ -2,7 +2,7 @@ package de.cotto.lndmanagej.model;
 
 import java.util.Optional;
 
-public record Resolution(Optional<String> sweepTransaction, String resolutionType, String outcome) {
+public record Resolution(Optional<TransactionHash> sweepTransaction, String resolutionType, String outcome) {
 
     private static final String FIRST_STAGE = "FIRST_STAGE";
     private static final String TIMEOUT = "TIMEOUT";

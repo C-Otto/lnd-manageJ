@@ -55,13 +55,14 @@ class TransactionProviderTest {
 
     @Test
     void success_first_client() {
-        when(blockcypherClient.getTransaction(TRANSACTION_HASH)).thenReturn(Optional.of(BLOCKCYPHER_TRANSACTION));
+        when(blockcypherClient.getTransaction(TRANSACTION_HASH.getHash()))
+                .thenReturn(Optional.of(BLOCKCYPHER_TRANSACTION));
         assertThat(transactionProvider.get(TRANSACTION_HASH)).contains(TRANSACTION);
     }
 
     @Test
     void success_second_client() {
-        when(bitapsClient.getTransaction(TRANSACTION_HASH)).thenReturn(Optional.of(BITAPS_TRANSACTION));
+        when(bitapsClient.getTransaction(TRANSACTION_HASH.getHash())).thenReturn(Optional.of(BITAPS_TRANSACTION));
         assertThat(transactionProvider.get(TRANSACTION_HASH)).contains(TRANSACTION);
     }
 }

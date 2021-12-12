@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.grpc;
 
+import de.cotto.lndmanagej.hardcoded.HardcodedService;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.CloseInitiator;
 import de.cotto.lndmanagej.model.ClosedChannelFixtures;
@@ -7,6 +8,7 @@ import de.cotto.lndmanagej.model.ForceClosedChannelBuilder;
 import de.cotto.lndmanagej.model.OpenInitiator;
 import de.cotto.lndmanagej.model.OpenInitiatorResolver;
 import de.cotto.lndmanagej.model.Resolution;
+import de.cotto.lndmanagej.model.TransactionHash;
 import lnrpc.ChannelCloseSummary;
 import lnrpc.Initiator;
 import lnrpc.ResolutionOutcome;
@@ -23,6 +25,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2_SHORT;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_SHORT;
@@ -72,6 +75,9 @@ class GrpcClosedChannelsTest {
 
     @Mock
     private OpenInitiatorResolver openInitiatorResolver;
+
+    @Mock
+    private HardcodedService hardcodedService;
 
     @BeforeEach
     void setUp() {
@@ -167,6 +173,17 @@ class GrpcClosedChannelsTest {
     }
 
     @Test
+    void getClosedChannels_force_close_with_hardcoded_resolutions() {
+        when(hardcodedService.getResolutions(CHANNEL_ID)).thenReturn(Set.of(COMMIT_CLAIMED));
+        Set<Resolution> resolutions = Set.of(INCOMING_HTLC_CLAIMED);
+        when(grpcService.getClosedChannels()).thenReturn(List.of(
+                closedChannel(CHANNEL_ID_SHORT, REMOTE_FORCE_CLOSE, INITIATOR_LOCAL, INITIATOR_REMOTE, resolutions)
+        ));
+        assertThat(grpcClosedChannels.getClosedChannels())
+                .containsExactlyInAnyOrder(FORCE_CLOSED_CHANNEL);
+    }
+
+    @Test
     void getClosedChannels_with_zero_channel_id_not_resolved() {
         when(grpcService.getClosedChannels()).thenReturn(List.of(
                 closedChannel(CHANNEL_ID_SHORT, COOPERATIVE_CLOSE, INITIATOR_LOCAL, INITIATOR_REMOTE),
@@ -226,7 +243,7 @@ class GrpcClosedChannelsTest {
                 .setRemotePubkey(PUBKEY_2.toString())
                 .setCapacity(CAPACITY.satoshis())
                 .setChannelPoint(CHANNEL_POINT.toString())
-                .setClosingTxHash(TRANSACTION_HASH_2)
+                .setClosingTxHash(TRANSACTION_HASH_2.getHash())
                 .setCloseType(closeType)
                 .setOpenInitiator(openInitiator)
                 .setCloseInitiator(closeInitiator)
@@ -238,7 +255,7 @@ class GrpcClosedChannelsTest {
     private void addResolutions(ChannelCloseSummary.Builder builder, Set<Resolution> resolutions) {
         resolutions.stream().map(
                 resolution -> lnrpc.Resolution.newBuilder()
-                        .setSweepTxid(resolution.sweepTransaction().orElse(""))
+                        .setSweepTxid(resolution.sweepTransaction().map(TransactionHash::getHash).orElse(""))
                         .setOutcome(ResolutionOutcome.valueOf(resolution.outcome()))
                         .setResolutionType(ResolutionType.valueOf(resolution.resolutionType()))
                         .build()

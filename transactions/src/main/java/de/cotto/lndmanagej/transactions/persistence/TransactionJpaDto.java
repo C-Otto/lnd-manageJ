@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.transactions.persistence;
 
 import com.google.common.annotations.VisibleForTesting;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.TransactionHash;
 import de.cotto.lndmanagej.transactions.model.Transaction;
 
 import javax.annotation.CheckForNull;
@@ -31,7 +32,7 @@ class TransactionJpaDto {
 
     protected static TransactionJpaDto fromModel(Transaction transaction) {
         TransactionJpaDto dto = new TransactionJpaDto();
-        dto.setHash(transaction.hash());
+        dto.setHash(transaction.hash().getHash());
         dto.setBlockHeight(transaction.blockHeight());
         dto.setFees(transaction.fees().satoshis());
         dto.setPositionInBlock(transaction.positionInBlock());
@@ -43,7 +44,7 @@ class TransactionJpaDto {
             return Optional.empty();
         }
         return Optional.of(new Transaction(
-                hash,
+                TransactionHash.create(hash),
                 blockHeight,
                 positionInBlock,
                 Coins.ofSatoshis(fees)

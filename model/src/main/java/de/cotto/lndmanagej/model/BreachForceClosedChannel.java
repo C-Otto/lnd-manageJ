@@ -7,7 +7,7 @@ public class BreachForceClosedChannel extends ForceClosedChannel {
             ChannelCoreInformation channelCoreInformation,
             Pubkey ownPubkey,
             Pubkey remotePubkey,
-            String closeTransactionHash,
+            TransactionHash closeTransactionHash,
             OpenInitiator openInitiator,
             int closeHeight,
             Set<Resolution> resolutions

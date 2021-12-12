@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.transactions.persistence;
 
+import de.cotto.lndmanagej.model.TransactionHash;
 import de.cotto.lndmanagej.transactions.TransactionDao;
 import de.cotto.lndmanagej.transactions.model.Transaction;
 import org.springframework.stereotype.Component;
@@ -17,8 +18,8 @@ public class TransactionDaoImpl implements TransactionDao {
     }
 
     @Override
-    public Optional<Transaction> getTransaction(String transactionHash) {
-        return transactionRepository.findById(transactionHash)
+    public Optional<Transaction> getTransaction(TransactionHash transactionHash) {
+        return transactionRepository.findById(transactionHash.getHash())
                 .flatMap(TransactionJpaDto::toModel);
     }
 

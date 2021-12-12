@@ -6,12 +6,13 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.TransactionHash;
 
 import java.io.IOException;
 
 @JsonDeserialize(using = BlockcypherTransactionDto.Deserializer.class)
 public final class BlockcypherTransactionDto extends TransactionDto {
-    public BlockcypherTransactionDto(String hash, int blockHeight, int positionInBlock, Coins fees) {
+    public BlockcypherTransactionDto(TransactionHash hash, int blockHeight, int positionInBlock, Coins fees) {
         super(hash, blockHeight, positionInBlock, fees);
     }
 
@@ -22,11 +23,11 @@ public final class BlockcypherTransactionDto extends TransactionDto {
                 DeserializationContext context
         ) throws IOException {
             JsonNode transactionDetailsNode = jsonParser.getCodec().readTree(jsonParser);
-            String hash = transactionDetailsNode.get("hash").textValue();
+            TransactionHash hash = TransactionHash.create(transactionDetailsNode.get("hash").textValue());
             int blockHeight = transactionDetailsNode.get("block_height").asInt();
-            long fees = transactionDetailsNode.get("fees").asLong();
+            Coins fees2 = Coins.ofSatoshis(transactionDetailsNode.get("fees").asLong());
             int positionInBlock = transactionDetailsNode.get("block_index").asInt();
-            return new BlockcypherTransactionDto(hash, blockHeight, positionInBlock, Coins.ofSatoshis(fees));
+            return new BlockcypherTransactionDto(hash, blockHeight, positionInBlock, fees2);
         }
     }
 }

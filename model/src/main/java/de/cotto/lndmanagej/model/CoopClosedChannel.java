@@ -5,7 +5,7 @@ public class CoopClosedChannel extends ClosedChannel {
             ChannelCoreInformation channelCoreInformation,
             Pubkey ownPubkey,
             Pubkey remotePubkey,
-            String closeTransactionHash,
+            TransactionHash closeTransactionHash,
             OpenInitiator openInitiator,
             CloseInitiator closeInitiator,
             int closeHeight

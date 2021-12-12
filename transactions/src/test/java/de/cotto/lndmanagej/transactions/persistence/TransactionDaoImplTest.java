@@ -35,7 +35,7 @@ class TransactionDaoImplTest {
 
     @Test
     void getTransaction() {
-        when(transactionRepository.findById(TRANSACTION_HASH)).thenReturn(Optional.of(TRANSACTION_JPA_DTO));
+        when(transactionRepository.findById(TRANSACTION_HASH.getHash())).thenReturn(Optional.of(TRANSACTION_JPA_DTO));
 
         assertThat(transactionDao.getTransaction(TRANSACTION_HASH)).contains(TRANSACTION);
     }
@@ -43,7 +43,7 @@ class TransactionDaoImplTest {
     @Test
     void saveTransaction() {
         transactionDao.saveTransaction(TRANSACTION);
-        verify(transactionRepository).save(argThat(dto -> TRANSACTION_HASH.equals(dto.getHash())));
+        verify(transactionRepository).save(argThat(dto -> TRANSACTION_HASH.getHash().equals(dto.getHash())));
         verify(transactionRepository).save(argThat(dto -> BLOCK_HEIGHT == dto.getBlockHeight()));
         verify(transactionRepository).save(argThat(dto -> POSITION_IN_BLOCK == dto.getPositionInBlock()));
         verify(transactionRepository).save(argThat(dto -> FEES.satoshis() == dto.getFees()));

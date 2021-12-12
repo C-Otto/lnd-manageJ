@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.transactions.download;
 
+import de.cotto.lndmanagej.model.TransactionHash;
 import de.cotto.lndmanagej.transactions.model.Transaction;
 import feign.FeignException;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
@@ -21,11 +22,11 @@ public class TransactionProvider {
         this.clients = clients;
     }
 
-    public Optional<Transaction> get(String transactionHash) {
+    public Optional<Transaction> get(TransactionHash transactionHash) {
         return getAndHandleExceptions(transactionHash).map(TransactionDto::toModel);
     }
 
-    private Optional<? extends TransactionDto> getAndHandleExceptions(String transactionHash) {
+    private Optional<? extends TransactionDto> getAndHandleExceptions(TransactionHash transactionHash) {
         List<TransactionDetailsClient> randomizedClients = new ArrayList<>(clients);
         Collections.shuffle(randomizedClients);
         return randomizedClients.stream()
@@ -34,9 +35,12 @@ public class TransactionProvider {
                 .findFirst();
     }
 
-    private Optional<? extends TransactionDto> getWithClient(String transactionHash, TransactionDetailsClient client) {
+    private Optional<? extends TransactionDto> getWithClient(
+            TransactionHash transactionHash,
+            TransactionDetailsClient client
+    ) {
         try {
-            return client.getTransaction(transactionHash);
+            return client.getTransaction(transactionHash.getHash());
         } catch (FeignException feignException) {
             logger.warn("Feign exception: ", feignException);
             return Optional.empty();

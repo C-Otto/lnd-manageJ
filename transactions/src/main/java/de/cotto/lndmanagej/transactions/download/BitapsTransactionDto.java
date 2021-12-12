@@ -6,12 +6,13 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.TransactionHash;
 
 import java.io.IOException;
 
 @JsonDeserialize(using = BitapsTransactionDto.Deserializer.class)
 public class BitapsTransactionDto extends TransactionDto {
-    public BitapsTransactionDto(String hash, int blockHeight, int positionInBlock, Coins fees) {
+    public BitapsTransactionDto(TransactionHash hash, int blockHeight, int positionInBlock, Coins fees) {
         super(hash, blockHeight, positionInBlock, fees);
     }
 
@@ -22,11 +23,11 @@ public class BitapsTransactionDto extends TransactionDto {
                 DeserializationContext deserializationContext
         ) throws IOException {
             JsonNode transactionDetailsNode = jsonParser.getCodec().<JsonNode>readTree(jsonParser).get("data");
-            String hash = transactionDetailsNode.get("txId").textValue();
+            TransactionHash hash = TransactionHash.create(transactionDetailsNode.get("txId").textValue());
             int blockHeight = transactionDetailsNode.get("blockHeight").asInt();
-            long fees = transactionDetailsNode.get("fee").asLong();
+            Coins fees = Coins.ofSatoshis(transactionDetailsNode.get("fee").asLong());
             int positionInBlock = transactionDetailsNode.get("blockIndex").asInt();
-            return new BitapsTransactionDto(hash, blockHeight, positionInBlock, Coins.ofSatoshis(fees));
+            return new BitapsTransactionDto(hash, blockHeight, positionInBlock, fees);
         }
     }
 }

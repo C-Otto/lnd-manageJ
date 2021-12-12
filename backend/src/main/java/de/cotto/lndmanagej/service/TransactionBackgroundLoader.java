@@ -6,6 +6,7 @@ import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.ClosedOrClosingChannel;
 import de.cotto.lndmanagej.model.ForceClosedChannel;
 import de.cotto.lndmanagej.model.Resolution;
+import de.cotto.lndmanagej.model.TransactionHash;
 import de.cotto.lndmanagej.transactions.service.TransactionService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -34,15 +35,15 @@ public class TransactionBackgroundLoader {
                 .ifPresent(transactionService::getTransaction);
     }
 
-    private Stream<String> getTransactionHashes() {
-        Stream<String> openTransactionHashes = getOpenTransactionHashes();
-        Stream<String> closeTransactionHashes = getCloseTransactionHashes();
-        Stream<String> sweepTransactionHashes = getSweepTransactionHashes();
+    private Stream<TransactionHash> getTransactionHashes() {
+        Stream<TransactionHash> openTransactionHashes = getOpenTransactionHashes();
+        Stream<TransactionHash> closeTransactionHashes = getCloseTransactionHashes();
+        Stream<TransactionHash> sweepTransactionHashes = getSweepTransactionHashes();
         return Stream.of(openTransactionHashes, closeTransactionHashes, sweepTransactionHashes)
                 .flatMap(s -> s);
     }
 
-    private Stream<String> getOpenTransactionHashes() {
+    private Stream<TransactionHash> getOpenTransactionHashes() {
         return Stream.of(
                         channelService.getOpenChannels(),
                         channelService.getClosedChannels(),
@@ -54,13 +55,13 @@ public class TransactionBackgroundLoader {
                 .map(ChannelPoint::getTransactionHash);
     }
 
-    private Stream<String> getCloseTransactionHashes() {
+    private Stream<TransactionHash> getCloseTransactionHashes() {
         return Stream.of(channelService.getClosedChannels(), channelService.getForceClosingChannels())
                 .flatMap(Collection::stream)
                 .map(ClosedOrClosingChannel::getCloseTransactionHash);
     }
 
-    private Stream<String> getSweepTransactionHashes() {
+    private Stream<TransactionHash> getSweepTransactionHashes() {
         return channelService.getClosedChannels().stream()
                 .filter(ClosedChannel::isForceClosed)
                 .map(ClosedChannel::getAsForceClosedChannel)

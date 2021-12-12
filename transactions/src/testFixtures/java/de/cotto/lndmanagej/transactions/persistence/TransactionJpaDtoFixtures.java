@@ -10,7 +10,7 @@ public class TransactionJpaDtoFixtures {
 
     static {
         TRANSACTION_JPA_DTO = new TransactionJpaDto();
-        TRANSACTION_JPA_DTO.setHash(TRANSACTION_HASH);
+        TRANSACTION_JPA_DTO.setHash(TRANSACTION_HASH.getHash());
         TRANSACTION_JPA_DTO.setBlockHeight(BLOCK_HEIGHT);
         TRANSACTION_JPA_DTO.setPositionInBlock(POSITION_IN_BLOCK);
         TRANSACTION_JPA_DTO.setFees(FEES.satoshis());

@@ -12,7 +12,7 @@ public final class ForceClosingChannel extends ClosedOrClosingChannel {
             ChannelCoreInformation channelCoreInformation,
             Pubkey ownPubkey,
             Pubkey remotePubkey,
-            String closeTransactionHash,
+            TransactionHash closeTransactionHash,
             Set<ChannelPoint> htlcOutpoints,
             OpenInitiator openInitiator
     ) {

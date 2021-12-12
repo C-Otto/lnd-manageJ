@@ -1,6 +1,8 @@
 package de.cotto.lndmanagej.grpc;
 
+import de.cotto.lndmanagej.hardcoded.HardcodedService;
 import de.cotto.lndmanagej.model.BreachForceClosedChannelBuilder;
+import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.ChannelPoint;
 import de.cotto.lndmanagej.model.CloseInitiator;
@@ -13,6 +15,7 @@ import de.cotto.lndmanagej.model.OpenInitiator;
 import de.cotto.lndmanagej.model.OpenInitiatorResolver;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.Resolution;
+import de.cotto.lndmanagej.model.TransactionHash;
 import lnrpc.ChannelCloseSummary;
 import lnrpc.ChannelCloseSummary.ClosureType;
 import lnrpc.Initiator;
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
 import static lnrpc.ChannelCloseSummary.ClosureType.LOCAL_FORCE_CLOSE;
@@ -33,17 +37,20 @@ public class GrpcClosedChannels extends GrpcChannelsBase {
     private final GrpcService grpcService;
     private final GrpcGetInfo grpcGetInfo;
     private final OpenInitiatorResolver openInitiatorResolver;
+    private final HardcodedService hardcodedService;
 
     public GrpcClosedChannels(
             GrpcService grpcService,
             GrpcGetInfo grpcGetInfo,
             ChannelIdResolver channelIdResolver,
-            OpenInitiatorResolver openInitiatorResolver
+            OpenInitiatorResolver openInitiatorResolver,
+            HardcodedService hardcodedService
     ) {
         super(channelIdResolver);
         this.grpcService = grpcService;
         this.grpcGetInfo = grpcGetInfo;
         this.openInitiatorResolver = openInitiatorResolver;
+        this.hardcodedService = hardcodedService;
     }
 
     public Set<ClosedChannel> getClosedChannels() {
@@ -86,33 +93,34 @@ public class GrpcClosedChannels extends GrpcChannelsBase {
                         .withCapacity(Coins.ofSatoshis(channelCloseSummary.getCapacity()))
                         .withOwnPubkey(ownPubkey)
                         .withRemotePubkey(Pubkey.create(channelCloseSummary.getRemotePubkey()))
-                        .withCloseTransactionHash(channelCloseSummary.getClosingTxHash())
+                        .withCloseTransactionHash(TransactionHash.create(channelCloseSummary.getClosingTxHash()))
                         .withOpenInitiator(openInitiator)
                         .withCloseHeight(channelCloseSummary.getCloseHeight())
-                        .withResolutions(getResolutions(channelCloseSummary))
+                        .withResolutions(getResolutions(channelId, channelCloseSummary))
                         .build()
                 );
     }
 
-    private Set<Resolution> getResolutions(ChannelCloseSummary channelCloseSummary) {
-        return channelCloseSummary.getResolutionsList().stream()
+    private Set<Resolution> getResolutions(ChannelId channelId, ChannelCloseSummary channelCloseSummary) {
+        Stream<Resolution> hardcodedResolutions = hardcodedService.getResolutions(channelId).stream();
+        Stream<Resolution> resolutions = channelCloseSummary.getResolutionsList().stream()
                 .map(lndResolution -> {
-                    Optional<String> sweepTransaction;
+                    Optional<TransactionHash> sweepTransaction;
                     if (lndResolution.getSweepTxid().isBlank()) {
                         sweepTransaction = Optional.empty();
                     } else {
-                        sweepTransaction = Optional.of(lndResolution.getSweepTxid());
+                        sweepTransaction = Optional.of(TransactionHash.create(lndResolution.getSweepTxid()));
                     }
                     return new Resolution(
                             sweepTransaction,
                             lndResolution.getResolutionType().name(),
                             lndResolution.getOutcome().name()
                     );
-                })
-                .collect(toSet());
+                });
+        return Stream.concat(hardcodedResolutions, resolutions).collect(toSet());
     }
 
-    private OpenInitiator getOpenInitiator(Initiator initiator, String transactionHash) {
+    private OpenInitiator getOpenInitiator(Initiator initiator, TransactionHash transactionHash) {
         OpenInitiator openInitiator = getOpenInitiator(initiator);
         if (openInitiator.equals(OpenInitiator.UNKNOWN)) {
             return openInitiatorResolver.resolveFromOpenTransactionHash(transactionHash);
