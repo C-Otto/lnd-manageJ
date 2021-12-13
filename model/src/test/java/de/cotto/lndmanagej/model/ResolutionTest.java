@@ -90,4 +90,16 @@ class ResolutionTest {
         assertThat(resolution.sweepTransactionClaimsFunds())
                 .isFalse();
     }
+
+    @Test
+    void isClaimedAnchor_false() {
+        Resolution resolution = new Resolution(Optional.of(TRANSACTION_HASH_3), "ANCHOR", "foo");
+        assertThat(resolution.isClaimedAnchor()).isFalse();
+        assertThat(OUTGOING_HTLC_CLAIMED.isClaimedAnchor()).isFalse();
+    }
+
+    @Test
+    void isClaimedAnchor() {
+        assertThat(ANCHOR_CLAIMED.isClaimedAnchor()).isTrue();
+    }
 }

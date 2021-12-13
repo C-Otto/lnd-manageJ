@@ -27,4 +27,8 @@ public record Resolution(Optional<TransactionHash> sweepTransaction, String reso
         }
         return COMMIT.equals(resolutionType) && CLAIMED.equals(outcome);
     }
+
+    public boolean isClaimedAnchor() {
+        return ANCHOR.equals(resolutionType) && CLAIMED.equals(outcome);
+    }
 }

@@ -17,9 +17,12 @@ import de.cotto.lndmanagej.transactions.service.TransactionService;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Component
 public class OnChainCostService {
+    private static final Coins ANCHOR = Coins.ofSatoshis(330);
+
     private final TransactionService transactionService;
     private final ChannelService channelService;
 
@@ -104,7 +107,9 @@ public class OnChainCostService {
 
     @Timed
     public Coins getSweepCostsForChannel(ForceClosedChannel forceClosedChannel) {
-        return forceClosedChannel.getResolutions().stream()
+        Set<Resolution> resolutions = forceClosedChannel.getResolutions();
+        Coins anchorCosts = getAnchorCosts(forceClosedChannel, resolutions);
+        return resolutions.stream()
                 .filter(Resolution::sweepTransactionClaimsFunds)
                 .map(Resolution::sweepTransaction)
                 .flatMap(Optional::stream)
@@ -112,7 +117,20 @@ public class OnChainCostService {
                 .map(transactionService::getTransaction)
                 .flatMap(Optional::stream)
                 .map(Transaction::fees)
-                .reduce(Coins.NONE, Coins::add);
+                .reduce(anchorCosts, Coins::add);
+    }
+
+    private Coins getAnchorCosts(ForceClosedChannel forceClosedChannel, Set<Resolution> resolutions) {
+        if (resolutions.stream().noneMatch(Resolution::isClaimedAnchor)) {
+            return Coins.NONE;
+        }
+        boolean initiatedByPeer = forceClosedChannel.getOpenInitiator().equals(OpenInitiator.REMOTE);
+        if (initiatedByPeer) {
+            // peer pays for our anchor
+            return Coins.NONE.subtract(ANCHOR);
+        }
+        // we pay for peer's anchor
+        return ANCHOR;
     }
 
     private long getNumberOfChannelsWithOpenTransactionHash(TransactionHash openTransactionHash) {

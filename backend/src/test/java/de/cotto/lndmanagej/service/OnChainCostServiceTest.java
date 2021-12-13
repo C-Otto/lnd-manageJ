@@ -2,9 +2,13 @@ package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ClosedChannel;
+import de.cotto.lndmanagej.model.ClosedChannelFixtures;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.ForceClosedChannel;
+import de.cotto.lndmanagej.model.ForceClosedChannelBuilder;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.OnChainCosts;
+import de.cotto.lndmanagej.model.OpenInitiator;
 import de.cotto.lndmanagej.transactions.service.TransactionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -33,6 +37,7 @@ import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHAN
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_TO_NODE_3;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
+import static de.cotto.lndmanagej.model.ResolutionFixtures.ANCHOR_CLAIMED;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL_2;
 import static de.cotto.lndmanagej.transactions.model.TransactionFixtures.FEES;
@@ -319,6 +324,8 @@ class OnChainCostServiceTest {
 
     @Nested
     class GetSweepCosts {
+        private static final Coins ANCHOR_SIZE = Coins.ofSatoshis(330);
+
         @BeforeEach
         void setUp() {
             lenient().when(channelService.isForceClosed(CHANNEL_ID)).thenReturn(true);
@@ -358,6 +365,28 @@ class OnChainCostServiceTest {
             when(transactionService.getTransaction(TRANSACTION_HASH_3)).thenReturn(Optional.of(TRANSACTION_2));
             assertThat(onChainCostService.getSweepCostsForChannel(FORCE_CLOSED_CHANNEL))
                     .isEqualTo(TRANSACTION_2.fees());
+        }
+
+        @Test
+        void with_sweep_transaction_for_anchor_funded_by_own_node() {
+            when(transactionService.getTransaction(TRANSACTION_HASH_3)).thenReturn(Optional.of(TRANSACTION_2));
+            ForceClosedChannel channel = ClosedChannelFixtures.getWithDefaults(new ForceClosedChannelBuilder())
+                    .withOpenInitiator(OpenInitiator.LOCAL)
+                    .withResolutions(Set.of(ANCHOR_CLAIMED))
+                    .build();
+            assertThat(onChainCostService.getSweepCostsForChannel(channel))
+                    .isEqualTo(TRANSACTION_2.fees().add(ANCHOR_SIZE));
+        }
+
+        @Test
+        void with_sweep_transaction_for_anchor_funded_by_peer() {
+            when(transactionService.getTransaction(TRANSACTION_HASH_3)).thenReturn(Optional.of(TRANSACTION_2));
+            ForceClosedChannel channel = ClosedChannelFixtures.getWithDefaults(new ForceClosedChannelBuilder())
+                    .withOpenInitiator(OpenInitiator.REMOTE)
+                    .withResolutions(Set.of(ANCHOR_CLAIMED))
+                    .build();
+            assertThat(onChainCostService.getSweepCostsForChannel(channel))
+                    .isEqualTo(TRANSACTION_2.fees().subtract(ANCHOR_SIZE));
         }
 
         @Test
