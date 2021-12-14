@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name = "payments")
+@Table(name = "payments", indexes = {@Index(columnList = "hash")})
 public class PaymentJpaDto {
     @Id
     private long paymentIndex;

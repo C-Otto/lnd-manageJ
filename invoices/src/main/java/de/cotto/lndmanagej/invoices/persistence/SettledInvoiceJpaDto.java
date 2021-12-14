@@ -18,7 +18,13 @@ import java.util.Optional;
 import static java.time.ZoneOffset.UTC;
 
 @Entity
-@Table(name = "settled_invoices", indexes = {@Index(unique = true, columnList = "settleIndex")})
+@Table(
+        name = "settled_invoices",
+        indexes = {
+            @Index(unique = true, columnList = "settleIndex"),
+            @Index(columnList = "hash"),
+            @Index(columnList = "settleDate")
+        })
 public class SettledInvoiceJpaDto {
     private static final int KEYSEND_MESSAGE_LENGTH = 5_000;
 
