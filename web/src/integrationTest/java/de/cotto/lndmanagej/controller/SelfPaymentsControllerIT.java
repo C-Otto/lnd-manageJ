@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings({"CPD-START", "PMD.AvoidDuplicateLiterals"})
 @WebMvcTest(controllers = SelfPaymentsController.class)
 class SelfPaymentsControllerIT {
     private static final String CHANNEL_PREFIX = "/api/channel/" + CHANNEL_ID.getShortChannelId() + "/";
@@ -46,7 +46,9 @@ class SelfPaymentsControllerIT {
                 .thenReturn(List.of(SELF_PAYMENT_2, SELF_PAYMENT));
         mockMvc.perform(get(CHANNEL_PREFIX + "/self-payments-from-channel/"))
                 .andExpect(jsonPath("$.selfPayments[0].memo", is(SELF_PAYMENT_2.memo())))
-                .andExpect(jsonPath("$.selfPayments[1].memo", is(SELF_PAYMENT.memo())));
+                .andExpect(jsonPath("$.selfPayments[1].memo", is(SELF_PAYMENT.memo())))
+                .andExpect(jsonPath("$.fees", is("20")))
+                .andExpect(jsonPath("$.amountPaid", is("4690")));
     }
 
     @Test
@@ -55,7 +57,9 @@ class SelfPaymentsControllerIT {
                 .thenReturn(List.of(SELF_PAYMENT_2, SELF_PAYMENT));
         mockMvc.perform(get(NODE_PREFIX + "/self-payments-from-peer/"))
                 .andExpect(jsonPath("$.selfPayments[0].memo", is(SELF_PAYMENT_2.memo())))
-                .andExpect(jsonPath("$.selfPayments[1].memo", is(SELF_PAYMENT.memo())));
+                .andExpect(jsonPath("$.selfPayments[1].memo", is(SELF_PAYMENT.memo())))
+                .andExpect(jsonPath("$.fees", is("20")))
+                .andExpect(jsonPath("$.amountPaid", is("4690")));
     }
 
     @Test
@@ -74,7 +78,9 @@ class SelfPaymentsControllerIT {
                 .andExpect(jsonPath("$.selfPayments[1].amountPaid", is(msat(SELF_PAYMENT_2.amountPaid()))))
                 .andExpect(jsonPath("$.selfPayments[1].fees", is(msat(SELF_PAYMENT_2.fees()))))
                 .andExpect(jsonPath("$.selfPayments[1].firstChannel", is(not(empty()))))
-                .andExpect(jsonPath("$.selfPayments[1].lastChannel", is(CHANNEL_ID.toString())));
+                .andExpect(jsonPath("$.selfPayments[1].lastChannel", is(CHANNEL_ID.toString())))
+                .andExpect(jsonPath("$.fees", is("20")))
+                .andExpect(jsonPath("$.amountPaid", is("4690")));
     }
 
     @Test
@@ -83,7 +89,9 @@ class SelfPaymentsControllerIT {
                 .thenReturn(List.of(SELF_PAYMENT_2, SELF_PAYMENT));
         mockMvc.perform(get(NODE_PREFIX + "/self-payments-to-peer/"))
                 .andExpect(jsonPath("$.selfPayments[0].memo", is(SELF_PAYMENT_2.memo())))
-                .andExpect(jsonPath("$.selfPayments[1].memo", is(SELF_PAYMENT.memo())));
+                .andExpect(jsonPath("$.selfPayments[1].memo", is(SELF_PAYMENT.memo())))
+                .andExpect(jsonPath("$.fees", is("20")))
+                .andExpect(jsonPath("$.amountPaid", is("4690")));
     }
 
     private String msat(Coins value) {

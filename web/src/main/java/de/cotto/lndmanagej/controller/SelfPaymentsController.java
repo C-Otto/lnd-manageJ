@@ -2,7 +2,6 @@ package de.cotto.lndmanagej.controller;
 
 import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
-import de.cotto.lndmanagej.controller.dto.SelfPaymentDto;
 import de.cotto.lndmanagej.dto.SelfPaymentsDto;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
@@ -26,32 +25,24 @@ public class SelfPaymentsController {
     @Timed
     @GetMapping("/channel/{channelId}/self-payments-from-channel")
     public SelfPaymentsDto getSelfPaymentsFromChannel(@PathVariable ChannelId channelId) {
-        return new SelfPaymentsDto(selfPaymentsService.getSelfPaymentsFromChannel(channelId).stream()
-                .map(SelfPaymentDto::createFromModel)
-                .toList());
+        return new SelfPaymentsDto(selfPaymentsService.getSelfPaymentsFromChannel(channelId));
     }
 
     @Timed
     @GetMapping("/node/{pubkey}/self-payments-from-peer")
     public SelfPaymentsDto getSelfPaymentsFromPeer(@PathVariable Pubkey pubkey) {
-        return new SelfPaymentsDto(selfPaymentsService.getSelfPaymentsFromPeer(pubkey).stream()
-                .map(SelfPaymentDto::createFromModel)
-                .toList());
+        return new SelfPaymentsDto(selfPaymentsService.getSelfPaymentsFromPeer(pubkey));
     }
 
     @Timed
     @GetMapping("/channel/{channelId}/self-payments-to-channel")
     public SelfPaymentsDto getSelfPaymentsToChannel(@PathVariable ChannelId channelId) {
-        return new SelfPaymentsDto(selfPaymentsService.getSelfPaymentsToChannel(channelId).stream()
-                .map(SelfPaymentDto::createFromModel)
-                .toList());
+        return new SelfPaymentsDto(selfPaymentsService.getSelfPaymentsToChannel(channelId));
     }
 
     @Timed
     @GetMapping("/node/{pubkey}/self-payments-to-peer")
     public SelfPaymentsDto getSelfPaymentsToPeer(@PathVariable Pubkey pubkey) {
-        return new SelfPaymentsDto(selfPaymentsService.getSelfPaymentsToPeer(pubkey).stream()
-                .map(SelfPaymentDto::createFromModel)
-                .toList());
+        return new SelfPaymentsDto(selfPaymentsService.getSelfPaymentsToPeer(pubkey));
     }
 }
