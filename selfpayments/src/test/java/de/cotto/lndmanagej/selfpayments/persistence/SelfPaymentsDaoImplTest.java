@@ -1,9 +1,8 @@
 package de.cotto.lndmanagej.selfpayments.persistence;
 
-import de.cotto.lndmanagej.invoices.persistence.SettledInvoiceJpaDto;
+import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Payment;
 import de.cotto.lndmanagej.model.SettledInvoice;
-import de.cotto.lndmanagej.payments.persistence.PaymentJpaDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -58,8 +57,12 @@ class SelfPaymentsDaoImplTest {
 
     private SelfPaymentJpaDto getDto(Payment payment, SettledInvoice settledInvoice) {
         return new SelfPaymentJpaDto(
-                PaymentJpaDto.createFromModel(payment),
-                SettledInvoiceJpaDto.createFromModel(settledInvoice)
+                settledInvoice.memo(),
+                settledInvoice.settleDate().toEpochSecond(),
+                settledInvoice.amountPaid().milliSatoshis(),
+                payment.fees().milliSatoshis(),
+                payment.getFirstChannel().map(ChannelId::getShortChannelId).orElse(0L),
+                settledInvoice.receivedVia().map(ChannelId::getShortChannelId).orElse(0L)
         );
     }
 }

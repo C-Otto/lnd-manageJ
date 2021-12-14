@@ -20,8 +20,8 @@ class SelfPaymentDtoTest {
     }
 
     @Test
-    void value() {
-        assertThat(dto.value()).isEqualTo(String.valueOf(SELF_PAYMENT.value().milliSatoshis()));
+    void amountPaid() {
+        assertThat(dto.amountPaid()).isEqualTo(String.valueOf(SELF_PAYMENT.amountPaid().milliSatoshis()));
     }
 
     @Test

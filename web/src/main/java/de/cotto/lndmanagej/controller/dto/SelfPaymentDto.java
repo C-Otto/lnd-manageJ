@@ -8,7 +8,7 @@ import java.time.ZonedDateTime;
 public record SelfPaymentDto(
         ZonedDateTime settleDate,
         String memo,
-        String value,
+        String amountPaid,
         String fees,
         ChannelId firstChannel,
         ChannelId lastChannel
@@ -17,7 +17,7 @@ public record SelfPaymentDto(
         return new SelfPaymentDto(
                 selfPayment.settleDate(),
                 selfPayment.memo(),
-                String.valueOf(selfPayment.value().milliSatoshis()),
+                String.valueOf(selfPayment.amountPaid().milliSatoshis()),
                 String.valueOf(selfPayment.fees().milliSatoshis()),
                 selfPayment.firstChannel().orElseThrow(),
                 selfPayment.lastChannel().orElseThrow()

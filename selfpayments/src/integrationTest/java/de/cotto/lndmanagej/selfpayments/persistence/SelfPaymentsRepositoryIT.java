@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
-import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_4;
 import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT;
 import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT_2;
@@ -58,13 +57,6 @@ class SelfPaymentsRepositoryIT {
 
     @Test
     void getSelfPaymentsFromChannel() {
-        assertThat(repository.getSelfPaymentsFromChannel(CHANNEL_ID_3.getShortChannelId()))
-                .map(SelfPaymentJpaDto::toModel)
-                .containsExactly(SELF_PAYMENT_2);
-    }
-
-    @Test
-    void getSelfPaymentsFromChannel_two_payments() {
         assertThat(repository.getSelfPaymentsFromChannel(CHANNEL_ID_4.getShortChannelId()))
                 .map(SelfPaymentJpaDto::toModel)
                 .containsExactly(SELF_PAYMENT, SELF_PAYMENT_2);

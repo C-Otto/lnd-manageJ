@@ -6,7 +6,7 @@ import java.util.Optional;
 public record SelfPayment(
         String memo,
         ZonedDateTime settleDate,
-        Coins value,
+        Coins amountPaid,
         Coins fees,
         Optional<ChannelId> firstChannel,
         Optional<ChannelId> lastChannel
@@ -15,7 +15,7 @@ public record SelfPayment(
         this(
                 settledInvoice.memo(),
                 settledInvoice.settleDate(),
-                payment.value(),
+                settledInvoice.amountPaid(),
                 payment.fees(),
                 payment.getFirstChannel(),
                 settledInvoice.receivedVia()

@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -28,6 +29,7 @@ public class PaymentJpaDto {
     private long fees;
 
     @Nullable
+    @OrderColumn
     @OneToMany(cascade = CascadeType.ALL)
     private List<PaymentRouteJpaDto> routes;
 

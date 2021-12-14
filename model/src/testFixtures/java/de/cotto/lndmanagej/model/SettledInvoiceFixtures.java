@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
-import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_4;
 
 public class SettledInvoiceFixtures {
     public static final ZonedDateTime SETTLE_DATE = ZonedDateTime.of(2021, 12, 2, 16, 4, 30, 0, ZoneOffset.UTC);
@@ -77,6 +77,6 @@ public class SettledInvoiceFixtures {
             AMOUNT_PAID_2,
             MEMO_2,
             Optional.empty(),
-            Optional.of(CHANNEL_ID_3)
+            Optional.of(CHANNEL_ID_4)
     );
 }

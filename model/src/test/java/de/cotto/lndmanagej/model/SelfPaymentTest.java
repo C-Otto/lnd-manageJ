@@ -21,8 +21,8 @@ class SelfPaymentTest {
     }
 
     @Test
-    void value() {
-        assertThat(SELF_PAYMENT_2.value()).isEqualTo(PAYMENT_2.value());
+    void amountPaid() {
+        assertThat(SELF_PAYMENT_2.amountPaid()).isEqualTo(SETTLED_INVOICE_2.amountPaid());
     }
 
     @Test
