@@ -22,4 +22,9 @@ class BalancesJpaDtoTest {
         assertThat(jpaDto.getRemoteBalance()).isEqualTo(BALANCE_INFORMATION.remoteBalance().satoshis());
         assertThat(jpaDto.getRemoteReserved()).isEqualTo(BALANCE_INFORMATION.remoteReserve().satoshis());
     }
+
+    @Test
+    void toModel() {
+        assertThat(BalancesJpaDto.fromModel(BALANCES).toModel()).isEqualTo(BALANCES);
+    }
 }

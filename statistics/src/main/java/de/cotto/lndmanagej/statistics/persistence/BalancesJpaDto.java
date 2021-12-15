@@ -1,15 +1,17 @@
 package de.cotto.lndmanagej.statistics.persistence;
 
 import com.google.common.annotations.VisibleForTesting;
+import de.cotto.lndmanagej.model.BalanceInformation;
+import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.statistics.Balances;
 
-import javax.annotation.Nullable;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.Table;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Objects;
 
 @Entity
 @IdClass(BalancesId.class)
@@ -19,8 +21,7 @@ class BalancesJpaDto {
     private long timestamp;
 
     @Id
-    @Nullable
-    private Long channelId;
+    private long channelId;
 
     private long localBalance;
     private long localReserved;
@@ -42,6 +43,17 @@ class BalancesJpaDto {
         return dto;
     }
 
+    public Balances toModel() {
+        BalanceInformation balanceInformation = new BalanceInformation(
+                Coins.ofSatoshis(localBalance),
+                Coins.ofSatoshis(localReserved),
+                Coins.ofSatoshis(remoteBalance),
+                Coins.ofSatoshis(remoteReserved)
+        );
+        LocalDateTime timestamp = LocalDateTime.ofEpochSecond(this.timestamp, 0, ZoneOffset.UTC);
+        return new Balances(timestamp, ChannelId.fromShortChannelId(channelId), balanceInformation);
+    }
+
     @VisibleForTesting
     protected long getTimestamp() {
         return timestamp;
@@ -49,7 +61,7 @@ class BalancesJpaDto {
 
     @VisibleForTesting
     protected long getChannelId() {
-        return Objects.requireNonNull(channelId);
+        return channelId;
     }
 
     @VisibleForTesting

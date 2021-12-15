@@ -8,14 +8,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.ZoneOffset;
+import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.statistics.StatisticsFixtures.BALANCES;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class BalancesDaoImplTest {
+class StatisticsDaoImplTest {
 
     @InjectMocks
     private StatisticsDaoImpl statisticsDaoImpl;
@@ -25,7 +29,7 @@ class BalancesDaoImplTest {
 
     @Test
     void saveStatistics() {
-        statisticsDaoImpl.saveBalances(StatisticsFixtures.BALANCES);
+        statisticsDaoImpl.saveBalances(BALANCES);
         verify(statisticsRepository).save(argThat(jpaDto ->
                 jpaDto.getTimestamp() == StatisticsFixtures.TIMESTAMP.toEpochSecond(ZoneOffset.UTC)
         ));
@@ -43,5 +47,17 @@ class BalancesDaoImplTest {
         verify(statisticsRepository).save(argThat(jpaDto ->
                 jpaDto.getRemoteReserved() == BALANCE_INFORMATION.remoteReserve().satoshis()
         ));
+    }
+
+    @Test
+    void getMostRecentBalance_not_found() {
+        assertThat(statisticsDaoImpl.getMostRecentBalances(CHANNEL_ID)).isEmpty();
+    }
+
+    @Test
+    void getMostRecentBalance() {
+        when(statisticsRepository.findTopByChannelIdOrderByTimestampDesc(CHANNEL_ID.getShortChannelId()))
+                .thenReturn(Optional.of(BalancesJpaDto.fromModel(BALANCES)));
+        assertThat(statisticsDaoImpl.getMostRecentBalances(CHANNEL_ID)).contains(BALANCES);
     }
 }

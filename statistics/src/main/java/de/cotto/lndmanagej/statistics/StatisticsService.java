@@ -1,7 +1,6 @@
 package de.cotto.lndmanagej.statistics;
 
 import de.cotto.lndmanagej.model.BalanceInformation;
-import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.service.ChannelService;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -9,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -24,13 +24,15 @@ public class StatisticsService {
     @Scheduled(fixedRate = 5, timeUnit = TimeUnit.MINUTES)
     public void storeBalances() {
         LocalDateTime timestamp = LocalDateTime.now(ZoneOffset.UTC);
-        channelService.getOpenChannels().forEach(channel -> storeBalance(channel, timestamp));
+        channelService.getOpenChannels().forEach(channel -> storeUpdatedBalance(channel, timestamp));
     }
 
-    private void storeBalance(LocalOpenChannel channel, LocalDateTime timestamp) {
-        ChannelId channelId = channel.getId();
+    private void storeUpdatedBalance(LocalOpenChannel channel, LocalDateTime timestamp) {
         BalanceInformation balanceInformation = channel.getBalanceInformation();
-        Balances balances = new Balances(timestamp, channelId, balanceInformation);
-        statisticsDao.saveBalances(balances);
+        Optional<Balances> persistedBalances = statisticsDao.getMostRecentBalances(channel.getId());
+        if (persistedBalances.isPresent() && balanceInformation.equals(persistedBalances.get().balanceInformation())) {
+            return;
+        }
+        statisticsDao.saveBalances(new Balances(timestamp, channel.getId(), balanceInformation));
     }
 }
