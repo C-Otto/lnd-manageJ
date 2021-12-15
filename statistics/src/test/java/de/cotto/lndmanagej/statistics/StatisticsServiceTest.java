@@ -21,7 +21,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class BalancesServiceTest {
+class StatisticsServiceTest {
     @InjectMocks
     private StatisticsService statisticsService;
 
