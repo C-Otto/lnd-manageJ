@@ -7,12 +7,10 @@ import de.cotto.lndmanagej.controller.dto.ChannelDto;
 import de.cotto.lndmanagej.controller.dto.ClosedChannelDetailsDto;
 import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
-import de.cotto.lndmanagej.controller.dto.OffChainCostsDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ClosedChannel;
-import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.OpenCloseStatus;
@@ -89,7 +87,7 @@ public class ChannelController {
                 remoteAlias,
                 getBalanceInformation(channelId),
                 onChainCostService.getOnChainCostsForChannelId(channelId),
-                getOffChainCosts(channelId),
+                offChainCostService.getOffChainCostsForChannel(channelId),
                 getPoliciesForChannel(localChannel),
                 getCloseDetailsForChannel(localChannel),
                 getFeeReportFromService(localChannel.getId())
@@ -142,12 +140,6 @@ public class ChannelController {
     private BalanceInformation getBalanceInformation(ChannelId channelId) {
         return balanceService.getBalanceInformation(channelId)
                 .orElse(BalanceInformation.EMPTY);
-    }
-
-    private OffChainCostsDto getOffChainCosts(ChannelId channelId) {
-        Coins rebalanceSource = offChainCostService.getRebalanceSourceCostsForChannel(channelId);
-        Coins rebalanceTarget = offChainCostService.getRebalanceTargetCostsForChannel(channelId);
-        return new OffChainCostsDto(rebalanceSource, rebalanceTarget);
     }
 
     private ClosedChannelDetailsDto getCloseDetailsForChannel(LocalChannel localChannel) {

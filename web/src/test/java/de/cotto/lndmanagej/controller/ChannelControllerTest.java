@@ -5,13 +5,11 @@ import de.cotto.lndmanagej.controller.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.controller.dto.ChannelDto;
 import de.cotto.lndmanagej.controller.dto.ClosedChannelDetailsDto;
 import de.cotto.lndmanagej.controller.dto.FeeReportDto;
-import de.cotto.lndmanagej.controller.dto.OffChainCostsDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.LocalChannel;
-import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
@@ -34,6 +32,8 @@ import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
+import static de.cotto.lndmanagej.model.OffChainCostsFixtures.OFF_CHAIN_COSTS;
+import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
@@ -44,13 +44,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ChannelControllerTest {
-    private static final Coins OPEN_COSTS = Coins.ofSatoshis(1);
-    private static final Coins CLOSE_COSTS = Coins.ofSatoshis(2);
-    private static final Coins SWEEP_COSTS = Coins.ofSatoshis(3);
-    private static final Coins SOURCE_COSTS = Coins.ofSatoshis(3);
-    private static final Coins TARGET_COSTS = Coins.ofSatoshis(4);
-    private static final OnChainCosts ON_CHAIN_COSTS = new OnChainCosts(OPEN_COSTS, CLOSE_COSTS, SWEEP_COSTS);
-    private static final OffChainCostsDto OFF_CHAIN_COSTS = new OffChainCostsDto(SOURCE_COSTS, TARGET_COSTS);
     private static final PoliciesDto FEE_CONFIGURATION_DTO = PoliciesDto.createFromModel(POLICIES);
     private static final ClosedChannelDetailsDto CLOSED_CHANNEL_DETAILS_DTO =
             ClosedChannelDetailsDto.createFromModel(CLOSED_CHANNEL);
@@ -83,8 +76,7 @@ class ChannelControllerTest {
     @BeforeEach
     void setUp() {
         lenient().when(onChainCostService.getOnChainCostsForChannelId(CHANNEL_ID)).thenReturn(ON_CHAIN_COSTS);
-        lenient().when(offChainCostService.getRebalanceSourceCostsForChannel(CHANNEL_ID)).thenReturn(SOURCE_COSTS);
-        lenient().when(offChainCostService.getRebalanceTargetCostsForChannel(CHANNEL_ID)).thenReturn(TARGET_COSTS);
+        lenient().when(offChainCostService.getOffChainCostsForChannel(CHANNEL_ID)).thenReturn(OFF_CHAIN_COSTS);
         lenient().when(policyService.getPolicies(CHANNEL_ID)).thenReturn(POLICIES);
         lenient().when(feeService.getFeeReportForChannel(CHANNEL_ID)).thenReturn(FEE_REPORT);
     }

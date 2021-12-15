@@ -27,6 +27,14 @@ public class OffChainCostService {
     }
 
     @Timed
+    public OffChainCosts getOffChainCostsForChannel(ChannelId channelId) {
+        return new OffChainCosts(
+                getRebalanceSourceCostsForChannel(channelId),
+                getRebalanceTargetCostsForChannel(channelId)
+        );
+    }
+
+    @Timed
     public Coins getRebalanceSourceCostsForChannel(ChannelId channelId) {
         return getSumOfFees(rebalanceService.getRebalancesFromChannel(channelId));
     }

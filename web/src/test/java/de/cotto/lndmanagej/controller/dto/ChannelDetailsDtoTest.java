@@ -3,7 +3,6 @@ package de.cotto.lndmanagej.controller.dto;
 import de.cotto.lndmanagej.model.ChannelStatus;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FeeReport;
-import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.model.OpenInitiator;
 import org.junit.jupiter.api.Test;
 
@@ -14,16 +13,14 @@ import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
+import static de.cotto.lndmanagej.model.OffChainCostsFixtures.OFF_CHAIN_COSTS;
+import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.OpenCloseStatus.OPEN;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ChannelDetailsDtoTest {
 
-    private static final OnChainCosts ON_CHAIN_COSTS =
-            new OnChainCosts(Coins.ofSatoshis(1), Coins.ofSatoshis(2), Coins.ofSatoshis(3));
-    private static final OffChainCostsDto OFF_CHAIN_COSTS =
-            new OffChainCostsDto(Coins.ofSatoshis(3), Coins.ofSatoshis(4));
     private static final ClosedChannelDetailsDto CLOSE_DETAILS =
             ClosedChannelDetailsDto.createFromModel(CLOSED_CHANNEL);
     private static final FeeReport FEE_REPORT =
@@ -123,6 +120,6 @@ class ChannelDetailsDtoTest {
 
     @Test
     void offChainCosts() {
-        assertThat(CHANNEL_DETAILS_DTO.offChainCosts()).isEqualTo(OFF_CHAIN_COSTS);
+        assertThat(CHANNEL_DETAILS_DTO.offChainCosts()).isEqualTo(OffChainCostsDto.createFromModel(OFF_CHAIN_COSTS));
     }
 }

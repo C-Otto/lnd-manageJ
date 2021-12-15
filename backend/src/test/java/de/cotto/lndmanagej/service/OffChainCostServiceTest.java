@@ -12,6 +12,7 @@ import java.util.Set;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_4;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.SelfPaymentFixtures.SELF_PAYMENT;
 import static de.cotto.lndmanagej.model.SelfPaymentFixtures.SELF_PAYMENT_2;
@@ -46,6 +47,26 @@ class OffChainCostServiceTest {
                 COST_FOR_TWO_SELF_PAYMENTS
         );
         assertThat(offChainCostService.getOffChainCostsForPeer(PUBKEY)).isEqualTo(expected);
+    }
+
+    @Test
+    void getOffChainCostsForChannel_source() {
+        when(rebalanceService.getRebalancesFromChannel(CHANNEL_ID_4)).thenReturn(Set.of(SELF_PAYMENT, SELF_PAYMENT_2));
+        OffChainCosts expected = new OffChainCosts(
+                COST_FOR_TWO_SELF_PAYMENTS,
+                Coins.NONE
+        );
+        assertThat(offChainCostService.getOffChainCostsForChannel(CHANNEL_ID_4)).isEqualTo(expected);
+    }
+
+    @Test
+    void getOffChainCostsForChannel_target() {
+        when(rebalanceService.getRebalancesToChannel(CHANNEL_ID_4)).thenReturn(Set.of(SELF_PAYMENT, SELF_PAYMENT_2));
+        OffChainCosts expected = new OffChainCosts(
+                Coins.NONE,
+                COST_FOR_TWO_SELF_PAYMENTS
+        );
+        assertThat(offChainCostService.getOffChainCostsForChannel(CHANNEL_ID_4)).isEqualTo(expected);
     }
 
     @Test
