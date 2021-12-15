@@ -11,8 +11,8 @@ import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
-import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Node;
+import de.cotto.lndmanagej.model.OffChainCosts;
 import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.BalanceService;
@@ -68,8 +68,7 @@ public class NodeController {
     public NodeDetailsDto getDetails(@PathVariable Pubkey pubkey) {
         Node node = nodeService.getNode(pubkey);
         OnChainCosts onChainCosts = onChainCostService.getOnChainCostsForPeer(pubkey);
-        Coins rebalanceSourceCosts = offChainCostService.getRebalanceSourceCostsForPeer(pubkey);
-        Coins rebalanceTargetCosts = offChainCostService.getRebalanceTargetCostsForPeer(pubkey);
+        OffChainCosts offChainCosts = offChainCostService.getOffChainCostsForPeer(pubkey);
         BalanceInformation balanceInformation = balanceService.getBalanceInformationForPeer(pubkey);
         return new NodeDetailsDto(
                 pubkey,
@@ -79,7 +78,7 @@ public class NodeController {
                 toSortedList(channelService.getWaitingCloseChannelsWith(pubkey)),
                 toSortedList(channelService.getForceClosingChannelsWith(pubkey)),
                 OnChainCostsDto.createFromModel(onChainCosts),
-                new OffChainCostsDto(rebalanceSourceCosts, rebalanceTargetCosts),
+                OffChainCostsDto.createFromModel(offChainCosts),
                 BalanceInformationDto.createFromModel(balanceInformation),
                 node.online(),
                 getFeeReportDto(pubkey)

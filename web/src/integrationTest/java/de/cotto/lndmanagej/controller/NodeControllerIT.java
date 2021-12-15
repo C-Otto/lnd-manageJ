@@ -30,6 +30,7 @@ import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHAN
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_3;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
+import static de.cotto.lndmanagej.model.OffChainCostsFixtures.OFF_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
@@ -84,8 +85,7 @@ class NodeControllerIT {
         when(channelService.getWaitingCloseChannelsWith(PUBKEY_2)).thenReturn(Set.of(WAITING_CLOSE_CHANNEL));
         when(channelService.getForceClosingChannelsWith(PUBKEY_2)).thenReturn(Set.of(FORCE_CLOSING_CHANNEL_2));
         when(onChainCostService.getOnChainCostsForPeer(PUBKEY_2)).thenReturn(ON_CHAIN_COSTS);
-        when(offChainCostService.getRebalanceSourceCostsForPeer(PUBKEY_2)).thenReturn(Coins.ofMilliSatoshis(1));
-        when(offChainCostService.getRebalanceTargetCostsForPeer(PUBKEY_2)).thenReturn(Coins.ofMilliSatoshis(2));
+        when(offChainCostService.getOffChainCostsForPeer(PUBKEY_2)).thenReturn(OFF_CHAIN_COSTS);
         when(balanceService.getBalanceInformationForPeer(PUBKEY_2)).thenReturn(BALANCE_INFORMATION);
         when(feeService.getFeeReportForPeer(PUBKEY_2)).thenReturn(FEE_REPORT);
         List<String> channelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_2.toString());
@@ -99,8 +99,8 @@ class NodeControllerIT {
                 .andExpect(jsonPath("$.closedChannels", is(closedChannelIds)))
                 .andExpect(jsonPath("$.waitingCloseChannels", is(waitingCloseChannelIds)))
                 .andExpect(jsonPath("$.pendingForceClosingChannels", is(forceClosingChannelIds)))
-                .andExpect(jsonPath("$.offChainCosts.rebalanceSource", is("1")))
-                .andExpect(jsonPath("$.offChainCosts.rebalanceTarget", is("2")))
+                .andExpect(jsonPath("$.offChainCosts.rebalanceSource", is("1000000")))
+                .andExpect(jsonPath("$.offChainCosts.rebalanceTarget", is("2000000")))
                 .andExpect(jsonPath("$.balance.localBalance", is("1000")))
                 .andExpect(jsonPath("$.balance.localReserve", is("100")))
                 .andExpect(jsonPath("$.balance.localAvailable", is("900")))
