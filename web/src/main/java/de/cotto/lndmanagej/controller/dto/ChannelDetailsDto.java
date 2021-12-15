@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.controller.dto;
 
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelPoint;
+import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.OffChainCosts;
@@ -27,7 +28,9 @@ public record ChannelDetailsDto(
         OffChainCostsDto offChainCosts,
         PoliciesDto policies,
         ClosedChannelDetailsDto closeDetails,
-        FeeReportDto feeReport
+        FeeReportDto feeReport,
+        String rebalanceSourceAmount,
+        String rebalanceTargetAmount
 ) {
     public ChannelDetailsDto(
             ChannelDto channelDto,
@@ -36,7 +39,9 @@ public record ChannelDetailsDto(
             OnChainCosts onChainCosts,
             OffChainCosts offChainCosts,
             PoliciesDto policies,
-            FeeReport feeReport
+            FeeReport feeReport,
+            Coins rebalanceSourceAmount,
+            Coins rebalanceTargetAmount
     ) {
         this(
                 channelDto.channelIdShort(),
@@ -56,10 +61,13 @@ public record ChannelDetailsDto(
                 OffChainCostsDto.createFromModel(offChainCosts),
                 policies,
                 channelDto.closeDetails(),
-                FeeReportDto.createFromModel(feeReport)
+                FeeReportDto.createFromModel(feeReport),
+                String.valueOf(rebalanceSourceAmount.milliSatoshis()),
+                String.valueOf(rebalanceTargetAmount.milliSatoshis())
         );
     }
 
+    @SuppressWarnings("PMD.ExcessiveParameterList")
     public ChannelDetailsDto(
             LocalChannel localChannel,
             String remoteAlias,
@@ -68,7 +76,9 @@ public record ChannelDetailsDto(
             OffChainCosts offChainCosts,
             PoliciesDto policies,
             ClosedChannelDetailsDto closeDetails,
-            FeeReport feeReport
+            FeeReport feeReport,
+            Coins rebalanceSourceAmount,
+            Coins rebalanceTargetAmount
     ) {
         this(
                 new ChannelDto(localChannel, closeDetails),
@@ -77,7 +87,9 @@ public record ChannelDetailsDto(
                 onChainCosts,
                 offChainCosts,
                 policies,
-                feeReport
+                feeReport,
+                rebalanceSourceAmount,
+                rebalanceTargetAmount
         );
     }
 }

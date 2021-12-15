@@ -21,6 +21,7 @@ import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.OffChainCostService;
 import de.cotto.lndmanagej.service.OnChainCostService;
+import de.cotto.lndmanagej.service.RebalanceService;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,6 +41,7 @@ public class NodeController {
     private final OffChainCostService offChainCostService;
     private final BalanceService balanceService;
     private final FeeService feeService;
+    private final RebalanceService rebalanceService;
 
     public NodeController(
             NodeService nodeService,
@@ -47,7 +49,8 @@ public class NodeController {
             OnChainCostService onChainCostService,
             OffChainCostService offChainCostService,
             BalanceService balanceService,
-            FeeService feeService
+            FeeService feeService,
+            RebalanceService rebalanceService
     ) {
         this.nodeService = nodeService;
         this.channelService = channelService;
@@ -55,6 +58,7 @@ public class NodeController {
         this.offChainCostService = offChainCostService;
         this.balanceService = balanceService;
         this.feeService = feeService;
+        this.rebalanceService = rebalanceService;
     }
 
     @Timed
@@ -81,7 +85,9 @@ public class NodeController {
                 OffChainCostsDto.createFromModel(offChainCosts),
                 BalanceInformationDto.createFromModel(balanceInformation),
                 node.online(),
-                getFeeReportDto(pubkey)
+                getFeeReportDto(pubkey),
+                String.valueOf(rebalanceService.getRebalanceAmountFromPeer(pubkey).milliSatoshis()),
+                String.valueOf(rebalanceService.getRebalanceAmountToPeer(pubkey).milliSatoshis())
         );
     }
 

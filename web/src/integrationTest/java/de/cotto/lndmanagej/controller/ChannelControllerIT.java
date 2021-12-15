@@ -12,6 +12,7 @@ import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.OffChainCostService;
 import de.cotto.lndmanagej.service.OnChainCostService;
 import de.cotto.lndmanagej.service.PolicyService;
+import de.cotto.lndmanagej.service.RebalanceService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -81,6 +82,9 @@ class ChannelControllerIT {
     @MockBean
     private FeeService feeService;
 
+    @MockBean
+    private RebalanceService rebalanceService;
+
     @Test
     void getBasicInformation_not_found() throws Exception {
         mockMvc.perform(get(CHANNEL_PREFIX + "/"))
@@ -134,6 +138,8 @@ class ChannelControllerIT {
         when(offChainCostService.getOffChainCostsForChannel(CHANNEL_ID)).thenReturn(OFF_CHAIN_COSTS);
         when(balanceService.getBalanceInformation(CHANNEL_ID)).thenReturn(Optional.of(BALANCE_INFORMATION_2));
         when(feeService.getFeeReportForChannel(CHANNEL_ID)).thenReturn(FEE_REPORT);
+        when(rebalanceService.getRebalanceAmountFromChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(1));
+        when(rebalanceService.getRebalanceAmountToChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(2));
         mockMvc.perform(get(DETAILS_PREFIX))
                 .andExpect(jsonPath("$.channelIdShort", is(String.valueOf(CHANNEL_ID.getShortChannelId()))))
                 .andExpect(jsonPath("$.channelIdCompact", is(CHANNEL_ID.getCompactForm())))
@@ -155,6 +161,8 @@ class ChannelControllerIT {
                 .andExpect(jsonPath("$.onChainCosts.sweepCosts", is("3000")))
                 .andExpect(jsonPath("$.offChainCosts.rebalanceSource", is("1000000")))
                 .andExpect(jsonPath("$.offChainCosts.rebalanceTarget", is("2000000")))
+                .andExpect(jsonPath("$.rebalanceSourceAmount", is("1")))
+                .andExpect(jsonPath("$.rebalanceTargetAmount", is("2")))
                 .andExpect(jsonPath("$.balance.localBalance", is("2000")))
                 .andExpect(jsonPath("$.balance.localReserve", is("200")))
                 .andExpect(jsonPath("$.balance.localAvailable", is("1800")))
@@ -177,6 +185,8 @@ class ChannelControllerIT {
         when(feeService.getFeeReportForChannel(CHANNEL_ID)).thenReturn(new FeeReport(Coins.NONE, Coins.NONE));
         when(onChainCostService.getOnChainCostsForChannelId(CHANNEL_ID)).thenReturn(OnChainCosts.NONE);
         when(offChainCostService.getOffChainCostsForChannel(CHANNEL_ID)).thenReturn(OffChainCosts.NONE);
+        when(rebalanceService.getRebalanceAmountFromChannel(CHANNEL_ID)).thenReturn(Coins.NONE);
+        when(rebalanceService.getRebalanceAmountToChannel(CHANNEL_ID)).thenReturn(Coins.NONE);
         mockMvc.perform(get(DETAILS_PREFIX))
                 .andExpect(jsonPath("$.closeDetails.initiator", is("REMOTE")))
                 .andExpect(jsonPath("$.closeDetails.height", is(987_654)))

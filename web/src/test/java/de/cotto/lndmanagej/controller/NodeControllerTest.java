@@ -19,6 +19,7 @@ import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.OffChainCostService;
 import de.cotto.lndmanagej.service.OnChainCostService;
+import de.cotto.lndmanagej.service.RebalanceService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -75,6 +76,9 @@ class NodeControllerTest {
     @Mock
     private FeeService feeService;
 
+    @Mock
+    private RebalanceService rebalanceService;
+
     @Test
     void getAlias() {
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
@@ -88,6 +92,8 @@ class NodeControllerTest {
         when(offChainCostService.getOffChainCostsForPeer(any())).thenReturn(OffChainCosts.NONE);
         when(balanceService.getBalanceInformationForPeer(any(Pubkey.class))).thenReturn(BalanceInformation.EMPTY);
         when(feeService.getFeeReportForPeer(any())).thenReturn(new FeeReport(Coins.NONE, Coins.NONE));
+        when(rebalanceService.getRebalanceAmountFromPeer(PUBKEY_2)).thenReturn(Coins.NONE);
+        when(rebalanceService.getRebalanceAmountToPeer(PUBKEY_2)).thenReturn(Coins.NONE);
         NodeDetailsDto expectedDetails = new NodeDetailsDto(
                 PUBKEY_2,
                 ALIAS_2,
@@ -99,7 +105,9 @@ class NodeControllerTest {
                 OffChainCostsDto.createFromModel(OffChainCosts.NONE),
                 BalanceInformationDto.createFromModel(BalanceInformation.EMPTY),
                 true,
-                new FeeReportDto("0", "0")
+                new FeeReportDto("0", "0"),
+                "0",
+                "0"
         );
         when(nodeService.getNode(PUBKEY_2)).thenReturn(new Node(PUBKEY_2, ALIAS_2, 0, true));
 
@@ -125,6 +133,8 @@ class NodeControllerTest {
         when(onChainCostService.getOnChainCostsForPeer(PUBKEY_2)).thenReturn(onChainCosts);
         when(offChainCostService.getOffChainCostsForPeer(PUBKEY_2)).thenReturn(OFF_CHAIN_COSTS);
         when(balanceService.getBalanceInformationForPeer(PUBKEY_2)).thenReturn(BALANCE_INFORMATION);
+        when(rebalanceService.getRebalanceAmountFromPeer(PUBKEY_2)).thenReturn(Coins.ofMilliSatoshis(111));
+        when(rebalanceService.getRebalanceAmountToPeer(PUBKEY_2)).thenReturn(Coins.ofMilliSatoshis(222));
         when(feeService.getFeeReportForPeer(PUBKEY_2)).thenReturn(FEE_REPORT);
         NodeDetailsDto expectedDetails = new NodeDetailsDto(
                 PUBKEY_2,
@@ -137,7 +147,9 @@ class NodeControllerTest {
                 OffChainCostsDto.createFromModel(OFF_CHAIN_COSTS),
                 BalanceInformationDto.createFromModel(BALANCE_INFORMATION),
                 false,
-                new FeeReportDto("1234", "567")
+                new FeeReportDto("1234", "567"),
+                "111",
+                "222"
         );
 
         assertThat(nodeController.getDetails(PUBKEY_2)).isEqualTo(expectedDetails);

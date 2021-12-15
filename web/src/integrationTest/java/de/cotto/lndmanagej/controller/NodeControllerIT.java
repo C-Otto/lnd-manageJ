@@ -10,6 +10,7 @@ import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.OffChainCostService;
 import de.cotto.lndmanagej.service.OnChainCostService;
+import de.cotto.lndmanagej.service.RebalanceService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -70,6 +71,9 @@ class NodeControllerIT {
     @MockBean
     private FeeService feeService;
 
+    @MockBean
+    private RebalanceService rebalanceService;
+
     @Test
     void getAlias() throws Exception {
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
@@ -88,6 +92,8 @@ class NodeControllerIT {
         when(offChainCostService.getOffChainCostsForPeer(PUBKEY_2)).thenReturn(OFF_CHAIN_COSTS);
         when(balanceService.getBalanceInformationForPeer(PUBKEY_2)).thenReturn(BALANCE_INFORMATION);
         when(feeService.getFeeReportForPeer(PUBKEY_2)).thenReturn(FEE_REPORT);
+        when(rebalanceService.getRebalanceAmountFromPeer(PUBKEY_2)).thenReturn(Coins.ofMilliSatoshis(1));
+        when(rebalanceService.getRebalanceAmountToPeer(PUBKEY_2)).thenReturn(Coins.ofMilliSatoshis(2));
         List<String> channelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_2.toString());
         List<String> closedChannelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_3.toString());
         List<String> waitingCloseChannelIds = List.of(CHANNEL_ID.toString());
@@ -112,6 +118,8 @@ class NodeControllerIT {
                 .andExpect(jsonPath("$.onChainCosts.openCosts", is("1000")))
                 .andExpect(jsonPath("$.onChainCosts.closeCosts", is("2000")))
                 .andExpect(jsonPath("$.onChainCosts.sweepCosts", is("3000")))
+                .andExpect(jsonPath("$.rebalanceSourceAmount", is("1")))
+                .andExpect(jsonPath("$.rebalanceTargetAmount", is("2")))
                 .andExpect(jsonPath("$.online", is(true)));
     }
 

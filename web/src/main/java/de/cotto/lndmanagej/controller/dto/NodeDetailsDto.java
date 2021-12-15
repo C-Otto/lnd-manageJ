@@ -18,6 +18,8 @@ public record NodeDetailsDto(
         OffChainCostsDto offChainCosts,
         BalanceInformationDto balance,
         boolean online,
-        FeeReportDto feeReport
+        FeeReportDto feeReport,
+        String rebalanceSourceAmount,
+        String rebalanceTargetAmount
 ) {
 }

@@ -33,7 +33,9 @@ class ChannelDetailsDtoTest {
             OFF_CHAIN_COSTS,
             PoliciesDto.EMPTY,
             CLOSE_DETAILS,
-            FEE_REPORT
+            FEE_REPORT,
+            Coins.ofMilliSatoshis(123),
+            Coins.ofMilliSatoshis(456)
     );
 
     @Test
@@ -91,7 +93,9 @@ class ChannelDetailsDtoTest {
                 OFF_CHAIN_COSTS,
                 PoliciesDto.EMPTY,
                 CLOSE_DETAILS,
-                FEE_REPORT
+                FEE_REPORT,
+                Coins.NONE,
+                Coins.NONE
         );
         ChannelStatusDto channelStatusDto =
                 ChannelStatusDto.createFromModel(new ChannelStatus(false, true, false, OPEN));
@@ -121,5 +125,15 @@ class ChannelDetailsDtoTest {
     @Test
     void offChainCosts() {
         assertThat(CHANNEL_DETAILS_DTO.offChainCosts()).isEqualTo(OffChainCostsDto.createFromModel(OFF_CHAIN_COSTS));
+    }
+
+    @Test
+    void rebalanceSourceAmount() {
+        assertThat(CHANNEL_DETAILS_DTO.rebalanceSourceAmount()).isEqualTo("123");
+    }
+
+    @Test
+    void rebalanceTargetAmount() {
+        assertThat(CHANNEL_DETAILS_DTO.rebalanceTargetAmount()).isEqualTo("456");
     }
 }

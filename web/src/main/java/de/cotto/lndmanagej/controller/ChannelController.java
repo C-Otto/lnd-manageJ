@@ -23,6 +23,7 @@ import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.OffChainCostService;
 import de.cotto.lndmanagej.service.OnChainCostService;
 import de.cotto.lndmanagej.service.PolicyService;
+import de.cotto.lndmanagej.service.RebalanceService;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,6 +44,7 @@ public class ChannelController {
     private final PolicyService policyService;
     private final FeeService feeService;
     private final OffChainCostService offChainCostService;
+    private final RebalanceService rebalanceService;
 
     public ChannelController(
             ChannelService channelService,
@@ -51,7 +53,8 @@ public class ChannelController {
             OnChainCostService onChainCostService,
             PolicyService policyService,
             FeeService feeService,
-            OffChainCostService offChainCostService
+            OffChainCostService offChainCostService,
+            RebalanceService rebalanceService
     ) {
         this.channelService = channelService;
         this.nodeService = nodeService;
@@ -60,6 +63,7 @@ public class ChannelController {
         this.policyService = policyService;
         this.feeService = feeService;
         this.offChainCostService = offChainCostService;
+        this.rebalanceService = rebalanceService;
     }
 
     @Timed
@@ -90,7 +94,9 @@ public class ChannelController {
                 offChainCostService.getOffChainCostsForChannel(channelId),
                 getPoliciesForChannel(localChannel),
                 getCloseDetailsForChannel(localChannel),
-                getFeeReportFromService(localChannel.getId())
+                getFeeReportFromService(localChannel.getId()),
+                rebalanceService.getRebalanceAmountFromChannel(localChannel.getId()),
+                rebalanceService.getRebalanceAmountToChannel(localChannel.getId())
         );
     }
 
