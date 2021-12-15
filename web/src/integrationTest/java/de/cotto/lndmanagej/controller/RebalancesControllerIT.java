@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.controller;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.service.OffChainCostService;
+import de.cotto.lndmanagej.service.RebalanceService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -15,8 +16,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
-@WebMvcTest(controllers = OffChainCostsController.class)
-class OffChainCostsControllerIT {
+@WebMvcTest(controllers = RebalancesController.class)
+class RebalancesControllerIT {
     private static final String CHANNEL_PREFIX = "/api/channel/" + CHANNEL_ID.getShortChannelId() + "/";
     private static final String NODE_PREFIX = "/api/node/" + PUBKEY + "/";
 
@@ -30,11 +31,21 @@ class OffChainCostsControllerIT {
     @MockBean
     private OffChainCostService offChainCostService;
 
+    @MockBean
+    private RebalanceService rebalanceService;
+
     @Test
     void getRebalanceSourceCostsForChannel() throws Exception {
         when(offChainCostService.getRebalanceSourceCostsForChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(123));
         mockMvc.perform(get(CHANNEL_PREFIX + "/rebalance-source-costs/"))
                 .andExpect(content().string("123"));
+    }
+
+    @Test
+    void getRebalanceSourceAmountForChannel() throws Exception {
+        when(rebalanceService.getRebalanceAmountFromChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(456));
+        mockMvc.perform(get(CHANNEL_PREFIX + "/rebalance-source-amount/"))
+                .andExpect(content().string("456"));
     }
 
     @Test
@@ -45,6 +56,13 @@ class OffChainCostsControllerIT {
     }
 
     @Test
+    void getRebalanceSourceAmountForPeer() throws Exception {
+        when(rebalanceService.getRebalanceAmountFromPeer(PUBKEY)).thenReturn(Coins.ofMilliSatoshis(666));
+        mockMvc.perform(get(NODE_PREFIX + "/rebalance-source-amount/"))
+                .andExpect(content().string("666"));
+    }
+
+    @Test
     void getRebalanceTargetCostsForChannel() throws Exception {
         when(offChainCostService.getRebalanceTargetCostsForChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(125));
         mockMvc.perform(get(CHANNEL_PREFIX + "/rebalance-target-costs/"))
@@ -52,9 +70,23 @@ class OffChainCostsControllerIT {
     }
 
     @Test
+    void getRebalanceTargetAmountForChannel() throws Exception {
+        when(rebalanceService.getRebalanceAmountToChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(7777));
+        mockMvc.perform(get(CHANNEL_PREFIX + "/rebalance-target-amount/"))
+                .andExpect(content().string("7777"));
+    }
+
+    @Test
     void getRebalanceTargetCostsForPeer() throws Exception {
         when(offChainCostService.getRebalanceTargetCostsForPeer(PUBKEY)).thenReturn(Coins.ofMilliSatoshis(126));
         mockMvc.perform(get(NODE_PREFIX + "/rebalance-target-costs/"))
                 .andExpect(content().string("126"));
+    }
+
+    @Test
+    void getRebalanceTargetAmountForPeer() throws Exception {
+        when(rebalanceService.getRebalanceAmountToPeer(PUBKEY)).thenReturn(Coins.ofMilliSatoshis(999));
+        mockMvc.perform(get(NODE_PREFIX + "/rebalance-target-amount/"))
+                .andExpect(content().string("999"));
     }
 }

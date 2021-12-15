@@ -3,10 +3,12 @@ package de.cotto.lndmanagej.service;
 import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.SelfPayment;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
@@ -29,12 +31,22 @@ public class RebalanceService {
     }
 
     @Timed
+    public Coins getRebalanceAmountFromChannel(ChannelId channelId) {
+        return getSumOfAmountPaid(getRebalancesFromChannel(channelId));
+    }
+
+    @Timed
     public Set<SelfPayment> getRebalancesFromPeer(Pubkey pubkey) {
         return channelService.getAllChannelsWith(pubkey).parallelStream()
                 .map(Channel::getId)
                 .map(this::getRebalancesFromChannel)
                 .flatMap(Set::stream)
                 .collect(toSet());
+    }
+
+    @Timed
+    public Coins getRebalanceAmountFromPeer(Pubkey pubkey) {
+        return getSumOfAmountPaid(getRebalancesFromPeer(pubkey));
     }
 
     @Timed
@@ -45,12 +57,28 @@ public class RebalanceService {
     }
 
     @Timed
+    public Coins getRebalanceAmountToChannel(ChannelId channelId) {
+        return getSumOfAmountPaid(getRebalancesToChannel(channelId));
+    }
+
+    @Timed
     public Set<SelfPayment> getRebalancesToPeer(Pubkey pubkey) {
         return channelService.getAllChannelsWith(pubkey).parallelStream()
                 .map(Channel::getId)
                 .map(this::getRebalancesToChannel)
                 .flatMap(Set::stream)
                 .collect(toSet());
+    }
+
+    @Timed
+    public Coins getRebalanceAmountToPeer(Pubkey pubkey) {
+        return getSumOfAmountPaid(getRebalancesToPeer(pubkey));
+    }
+
+    private Coins getSumOfAmountPaid(Collection<SelfPayment> selfPayments) {
+        return selfPayments.stream()
+                .map(SelfPayment::amountPaid)
+                .reduce(Coins.NONE, Coins::add);
     }
 
     private boolean memoMentionsChannel(SelfPayment selfPayment, ChannelId expectedChannel) {

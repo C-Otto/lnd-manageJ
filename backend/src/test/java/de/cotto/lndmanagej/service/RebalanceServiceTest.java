@@ -50,28 +50,38 @@ class RebalanceServiceTest {
 
     @Test
     void getRebalancesFromPeer() {
-        ChannelId id1 = LOCAL_OPEN_CHANNEL.getId();
-        ChannelId id2 = CLOSED_CHANNEL_2.getId();
-        when(channelService.getAllChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, CLOSED_CHANNEL_2));
-        SelfPayment selfPayment1 = getSelfPayment(id1.toString(), 0);
-        SelfPayment selfPayment2 = getSelfPayment(id2.toString(), 1);
-        when(selfPaymentsService.getSelfPaymentsFromChannel(id1)).thenReturn(List.of(selfPayment1));
-        when(selfPaymentsService.getSelfPaymentsFromChannel(id2)).thenReturn(List.of(selfPayment2));
-        assertThat(rebalanceService.getRebalancesFromPeer(PUBKEY))
-                .containsExactlyInAnyOrder(selfPayment1, selfPayment2);
+        Set<SelfPayment> selfPayments = mockTwoChannelsAndPaymentsFromPeer();
+        assertThat(rebalanceService.getRebalancesFromPeer(PUBKEY)).isEqualTo(selfPayments);
     }
 
     @Test
     void getRebalancesToPeer() {
-        ChannelId id1 = LOCAL_OPEN_CHANNEL_3.getId();
-        ChannelId id2 = CLOSED_CHANNEL_2.getId();
-        when(channelService.getAllChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL_3, CLOSED_CHANNEL_2));
-        SelfPayment selfPayment1 = getSelfPayment(id1.toString(), 0);
-        SelfPayment selfPayment2 = getSelfPayment(id2.toString(), 1);
-        when(selfPaymentsService.getSelfPaymentsToChannel(id1)).thenReturn(List.of(selfPayment1));
-        when(selfPaymentsService.getSelfPaymentsToChannel(id2)).thenReturn(List.of(selfPayment2));
-        assertThat(rebalanceService.getRebalancesToPeer(PUBKEY))
-                .containsExactlyInAnyOrder(selfPayment1, selfPayment2);
+        Set<SelfPayment> selfPayments = mockTwoChannelsAndPaymentsToPeer();
+        assertThat(rebalanceService.getRebalancesToPeer(PUBKEY)).isEqualTo(selfPayments);
+    }
+
+    @Test
+    void getRebalanceAmountFromPeer() {
+        mockTwoChannelsAndPaymentsFromPeer();
+        assertThat(rebalanceService.getRebalanceAmountFromPeer(PUBKEY)).isEqualTo(AMOUNT_PAID.add(AMOUNT_PAID));
+    }
+
+    @Test
+    void getRebalanceAmountToPeer() {
+        mockTwoChannelsAndPaymentsToPeer();
+        assertThat(rebalanceService.getRebalanceAmountToPeer(PUBKEY)).isEqualTo(AMOUNT_PAID.add(AMOUNT_PAID));
+    }
+
+    @Test
+    void getRebalanceAmountFromChannel() {
+        mockSelfPaymentsFromChannel("from " + CHANNEL_ID.getShortChannelId());
+        assertThat(rebalanceService.getRebalanceAmountFromChannel(CHANNEL_ID)).isEqualTo(AMOUNT_PAID.add(AMOUNT_PAID));
+    }
+
+    @Test
+    void getRebalanceAmountToChannel() {
+        mockSelfPaymentsToChannel("to " + CHANNEL_ID_2.getShortChannelId());
+        assertThat(rebalanceService.getRebalanceAmountToChannel(CHANNEL_ID_2)).isEqualTo(AMOUNT_PAID.add(AMOUNT_PAID));
     }
 
     @Test
@@ -196,5 +206,29 @@ class RebalanceServiceTest {
         PaymentHop lastHop = new PaymentHop(CHANNEL_ID_2, Coins.NONE);
         PaymentRoute route = new PaymentRoute(List.of(firstHop, lastHop));
         return List.of(route);
+    }
+
+    private Set<SelfPayment> mockTwoChannelsAndPaymentsToPeer() {
+        ChannelId id1 = LOCAL_OPEN_CHANNEL_3.getId();
+        ChannelId id2 = CLOSED_CHANNEL_2.getId();
+        when(channelService.getAllChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL_3, CLOSED_CHANNEL_2));
+        SelfPayment selfPayment1 = getSelfPayment(id1.toString(), 0);
+        SelfPayment selfPayment2 = getSelfPayment(id2.toString(), 1);
+        Set<SelfPayment> selfPayments = Set.of(selfPayment1, selfPayment2);
+        when(selfPaymentsService.getSelfPaymentsToChannel(id1)).thenReturn(List.of(selfPayment1));
+        when(selfPaymentsService.getSelfPaymentsToChannel(id2)).thenReturn(List.of(selfPayment2));
+        return selfPayments;
+    }
+
+    private Set<SelfPayment> mockTwoChannelsAndPaymentsFromPeer() {
+        ChannelId id1 = LOCAL_OPEN_CHANNEL.getId();
+        ChannelId id2 = CLOSED_CHANNEL_2.getId();
+        when(channelService.getAllChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, CLOSED_CHANNEL_2));
+        SelfPayment selfPayment1 = getSelfPayment(id1.toString(), 0);
+        SelfPayment selfPayment2 = getSelfPayment(id2.toString(), 1);
+        Set<SelfPayment> selfPayments = Set.of(selfPayment1, selfPayment2);
+        when(selfPaymentsService.getSelfPaymentsFromChannel(id1)).thenReturn(List.of(selfPayment1));
+        when(selfPaymentsService.getSelfPaymentsFromChannel(id2)).thenReturn(List.of(selfPayment2));
+        return selfPayments;
     }
 }
