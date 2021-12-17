@@ -3,16 +3,12 @@ package de.cotto.lndmanagej.controller;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FeeReport;
-import de.cotto.lndmanagej.model.OffChainCosts;
-import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.service.BalanceService;
+import de.cotto.lndmanagej.service.ChannelDetailsService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
-import de.cotto.lndmanagej.service.OffChainCostService;
-import de.cotto.lndmanagej.service.OnChainCostService;
 import de.cotto.lndmanagej.service.PolicyService;
-import de.cotto.lndmanagej.service.RebalanceService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -22,6 +18,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION_2;
+import static de.cotto.lndmanagej.model.ChannelDetailsFixtures.CHANNEL_DETAILS;
+import static de.cotto.lndmanagej.model.ChannelDetailsFixtures.CHANNEL_DETAILS_CLOSED;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
@@ -36,9 +34,8 @@ import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_RECEIVED;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_RECEIVED_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_SENT;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_SENT_2;
+import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
-import static de.cotto.lndmanagej.model.OffChainCostsFixtures.OFF_CHAIN_COSTS;
-import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.hamcrest.core.Is.is;
@@ -68,12 +65,6 @@ class ChannelControllerIT {
     private ChannelIdResolver channelIdResolver;
 
     @MockBean
-    private OnChainCostService onChainCostService;
-
-    @MockBean
-    private OffChainCostService offChainCostService;
-
-    @MockBean
     private BalanceService balanceService;
 
     @MockBean
@@ -83,7 +74,7 @@ class ChannelControllerIT {
     private FeeService feeService;
 
     @MockBean
-    private RebalanceService rebalanceService;
+    private ChannelDetailsService channelDetailsService;
 
     @Test
     void getBasicInformation_not_found() throws Exception {
@@ -131,22 +122,15 @@ class ChannelControllerIT {
 
     @Test
     void getChannelDetails() throws Exception {
-        when(policyService.getPolicies(CHANNEL_ID)).thenReturn(POLICIES);
-        when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_PRIVATE));
-        when(onChainCostService.getOnChainCostsForChannelId(CHANNEL_ID)).thenReturn(ON_CHAIN_COSTS);
-        when(offChainCostService.getOffChainCostsForChannel(CHANNEL_ID)).thenReturn(OFF_CHAIN_COSTS);
-        when(balanceService.getBalanceInformation(CHANNEL_ID)).thenReturn(Optional.of(BALANCE_INFORMATION_2));
-        when(feeService.getFeeReportForChannel(CHANNEL_ID)).thenReturn(FEE_REPORT);
-        when(rebalanceService.getRebalanceAmountFromChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(1));
-        when(rebalanceService.getRebalanceAmountToChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(2));
+        when(channelDetailsService.getDetails(LOCAL_OPEN_CHANNEL_PRIVATE)).thenReturn(CHANNEL_DETAILS);
         mockMvc.perform(get(DETAILS_PREFIX))
                 .andExpect(jsonPath("$.channelIdShort", is(String.valueOf(CHANNEL_ID.getShortChannelId()))))
                 .andExpect(jsonPath("$.channelIdCompact", is(CHANNEL_ID.getCompactForm())))
                 .andExpect(jsonPath("$.channelIdCompactLnd", is(CHANNEL_ID.getCompactFormLnd())))
                 .andExpect(jsonPath("$.channelPoint", is(CHANNEL_POINT.toString())))
                 .andExpect(jsonPath("$.remotePubkey", is(PUBKEY_2.toString())))
-                .andExpect(jsonPath("$.remoteAlias", is(ALIAS_2)))
+                .andExpect(jsonPath("$.remoteAlias", is(ALIAS)))
                 .andExpect(jsonPath("$.capacity", is(String.valueOf(CAPACITY.satoshis()))))
                 .andExpect(jsonPath("$.totalSent", is(String.valueOf(TOTAL_SENT.satoshis()))))
                 .andExpect(jsonPath("$.totalReceived", is(String.valueOf(TOTAL_RECEIVED.satoshis()))))
@@ -159,16 +143,16 @@ class ChannelControllerIT {
                 .andExpect(jsonPath("$.onChainCosts.openCosts", is("1000")))
                 .andExpect(jsonPath("$.onChainCosts.closeCosts", is("2000")))
                 .andExpect(jsonPath("$.onChainCosts.sweepCosts", is("3000")))
-                .andExpect(jsonPath("$.offChainCosts.rebalanceSource", is("1000000")))
-                .andExpect(jsonPath("$.offChainCosts.rebalanceTarget", is("2000000")))
-                .andExpect(jsonPath("$.rebalanceSourceAmount", is("1")))
-                .andExpect(jsonPath("$.rebalanceTargetAmount", is("2")))
-                .andExpect(jsonPath("$.balance.localBalance", is("2000")))
-                .andExpect(jsonPath("$.balance.localReserve", is("200")))
-                .andExpect(jsonPath("$.balance.localAvailable", is("1800")))
-                .andExpect(jsonPath("$.balance.remoteBalance", is("223")))
-                .andExpect(jsonPath("$.balance.remoteReserve", is("20")))
-                .andExpect(jsonPath("$.balance.remoteAvailable", is("203")))
+                .andExpect(jsonPath("$.rebalanceReport.sourceCosts", is("1000000")))
+                .andExpect(jsonPath("$.rebalanceReport.sourceAmount", is("665000")))
+                .andExpect(jsonPath("$.rebalanceReport.targetCosts", is("2000000")))
+                .andExpect(jsonPath("$.rebalanceReport.targetAmount", is("991000")))
+                .andExpect(jsonPath("$.balance.localBalance", is("1000")))
+                .andExpect(jsonPath("$.balance.localReserve", is("100")))
+                .andExpect(jsonPath("$.balance.localAvailable", is("900")))
+                .andExpect(jsonPath("$.balance.remoteBalance", is("123")))
+                .andExpect(jsonPath("$.balance.remoteReserve", is("10")))
+                .andExpect(jsonPath("$.balance.remoteAvailable", is("113")))
                 .andExpect(jsonPath("$.policies.local.enabled", is(false)))
                 .andExpect(jsonPath("$.policies.remote.enabled", is(true)))
                 .andExpect(jsonPath("$.policies.local.feeRatePpm", is(100)))
@@ -182,11 +166,7 @@ class ChannelControllerIT {
     @Test
     void getChannelDetails_closed_channel() throws Exception {
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(CLOSED_CHANNEL));
-        when(feeService.getFeeReportForChannel(CHANNEL_ID)).thenReturn(new FeeReport(Coins.NONE, Coins.NONE));
-        when(onChainCostService.getOnChainCostsForChannelId(CHANNEL_ID)).thenReturn(OnChainCosts.NONE);
-        when(offChainCostService.getOffChainCostsForChannel(CHANNEL_ID)).thenReturn(OffChainCosts.NONE);
-        when(rebalanceService.getRebalanceAmountFromChannel(CHANNEL_ID)).thenReturn(Coins.NONE);
-        when(rebalanceService.getRebalanceAmountToChannel(CHANNEL_ID)).thenReturn(Coins.NONE);
+        when(channelDetailsService.getDetails(CLOSED_CHANNEL)).thenReturn(CHANNEL_DETAILS_CLOSED);
         mockMvc.perform(get(DETAILS_PREFIX))
                 .andExpect(jsonPath("$.closeDetails.initiator", is("REMOTE")))
                 .andExpect(jsonPath("$.closeDetails.height", is(987_654)))

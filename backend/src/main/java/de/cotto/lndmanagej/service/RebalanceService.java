@@ -5,6 +5,7 @@ import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.model.RebalanceReport;
 import de.cotto.lndmanagej.model.SelfPayment;
 import org.springframework.stereotype.Component;
 
@@ -24,19 +25,78 @@ public class RebalanceService {
     }
 
     @Timed
-    public Set<SelfPayment> getRebalancesFromChannel(ChannelId channelId) {
+    public RebalanceReport getReportForChannel(ChannelId channelId) {
+        return new RebalanceReport(
+                getSourceCostsForChannel(channelId),
+                getAmountFromChannel(channelId),
+                getTargetCostsForChannel(channelId),
+                getAmountToChannel(channelId)
+        );
+    }
+
+    @Timed
+    public RebalanceReport getReportForPeer(Pubkey pubkey) {
+        return new RebalanceReport(
+                getSourceCostsForPeer(pubkey),
+                getAmountFromPeer(pubkey),
+                getTargetCostsForPeer(pubkey),
+                getAmountToPeer(pubkey)
+        );
+    }
+
+    @Timed
+    public Coins getSourceCostsForChannel(ChannelId channelId) {
+        return getSumOfFees(getRebalancesFromChannel(channelId));
+    }
+
+    @Timed
+    public Coins getSourceCostsForPeer(Pubkey pubkey) {
+        return getSumOfFees(getRebalancesFromPeer(pubkey));
+    }
+
+    @Timed
+    public Coins getTargetCostsForChannel(ChannelId channelId) {
+        return getSumOfFees(getRebalancesToChannel(channelId));
+    }
+
+    @Timed
+    public Coins getTargetCostsForPeer(Pubkey pubkey) {
+        return getSumOfFees(getRebalancesToPeer(pubkey));
+    }
+
+    @Timed
+    public Coins getAmountFromChannel(ChannelId channelId) {
+        return getSumOfAmountPaid(getRebalancesFromChannel(channelId));
+    }
+
+    @Timed
+    public Coins getAmountFromPeer(Pubkey pubkey) {
+        return getSumOfAmountPaid(getRebalancesFromPeer(pubkey));
+    }
+
+    @Timed
+    public Coins getAmountToChannel(ChannelId channelId) {
+        return getSumOfAmountPaid(getRebalancesToChannel(channelId));
+    }
+
+    @Timed
+    public Coins getAmountToPeer(Pubkey pubkey) {
+        return getSumOfAmountPaid(getRebalancesToPeer(pubkey));
+    }
+
+    private Set<SelfPayment> getRebalancesFromChannel(ChannelId channelId) {
         return selfPaymentsService.getSelfPaymentsFromChannel(channelId).stream()
                 .filter(selfPayment -> memoMentionsChannel(selfPayment, channelId))
                 .collect(toSet());
     }
 
-    @Timed
-    public Coins getRebalanceAmountFromChannel(ChannelId channelId) {
-        return getSumOfAmountPaid(getRebalancesFromChannel(channelId));
+    private Set<SelfPayment> getRebalancesToChannel(ChannelId channelId) {
+        return selfPaymentsService.getSelfPaymentsToChannel(channelId).stream()
+                .filter(this::memoDoesNotMentionFirstHopChannel)
+                .collect(toSet());
     }
 
-    @Timed
-    public Set<SelfPayment> getRebalancesFromPeer(Pubkey pubkey) {
+    private Set<SelfPayment> getRebalancesFromPeer(Pubkey pubkey) {
         return channelService.getAllChannelsWith(pubkey).parallelStream()
                 .map(Channel::getId)
                 .map(this::getRebalancesFromChannel)
@@ -44,25 +104,7 @@ public class RebalanceService {
                 .collect(toSet());
     }
 
-    @Timed
-    public Coins getRebalanceAmountFromPeer(Pubkey pubkey) {
-        return getSumOfAmountPaid(getRebalancesFromPeer(pubkey));
-    }
-
-    @Timed
-    public Set<SelfPayment> getRebalancesToChannel(ChannelId channelId) {
-        return selfPaymentsService.getSelfPaymentsToChannel(channelId).stream()
-                .filter(this::memoDoesNotMentionFirstHopChannel)
-                .collect(toSet());
-    }
-
-    @Timed
-    public Coins getRebalanceAmountToChannel(ChannelId channelId) {
-        return getSumOfAmountPaid(getRebalancesToChannel(channelId));
-    }
-
-    @Timed
-    public Set<SelfPayment> getRebalancesToPeer(Pubkey pubkey) {
+    private Set<SelfPayment> getRebalancesToPeer(Pubkey pubkey) {
         return channelService.getAllChannelsWith(pubkey).parallelStream()
                 .map(Channel::getId)
                 .map(this::getRebalancesToChannel)
@@ -70,14 +112,15 @@ public class RebalanceService {
                 .collect(toSet());
     }
 
-    @Timed
-    public Coins getRebalanceAmountToPeer(Pubkey pubkey) {
-        return getSumOfAmountPaid(getRebalancesToPeer(pubkey));
-    }
-
     private Coins getSumOfAmountPaid(Collection<SelfPayment> selfPayments) {
         return selfPayments.stream()
                 .map(SelfPayment::amountPaid)
+                .reduce(Coins.NONE, Coins::add);
+    }
+
+    private Coins getSumOfFees(Set<SelfPayment> selfPayments) {
+        return selfPayments.stream()
+                .map(SelfPayment::fees)
                 .reduce(Coins.NONE, Coins::add);
     }
 

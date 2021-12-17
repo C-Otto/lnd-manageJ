@@ -1,14 +1,15 @@
 package de.cotto.lndmanagej.controller.dto;
 
 import de.cotto.lndmanagej.model.BalanceInformation;
+import de.cotto.lndmanagej.model.ChannelDetails;
 import de.cotto.lndmanagej.model.ChannelPoint;
-import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.LocalChannel;
-import de.cotto.lndmanagej.model.OffChainCosts;
 import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.model.OpenInitiator;
+import de.cotto.lndmanagej.model.Policies;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.model.RebalanceReport;
 
 public record ChannelDetailsDto(
         String channelIdShort,
@@ -25,23 +26,19 @@ public record ChannelDetailsDto(
         ChannelStatusDto status,
         BalanceInformationDto balance,
         OnChainCostsDto onChainCosts,
-        OffChainCostsDto offChainCosts,
         PoliciesDto policies,
         ClosedChannelDetailsDto closeDetails,
         FeeReportDto feeReport,
-        String rebalanceSourceAmount,
-        String rebalanceTargetAmount
+        RebalanceReportDto rebalanceReport
 ) {
     public ChannelDetailsDto(
             ChannelDto channelDto,
             String remoteAlias,
             BalanceInformation balanceInformation,
             OnChainCosts onChainCosts,
-            OffChainCosts offChainCosts,
-            PoliciesDto policies,
+            Policies policies,
             FeeReport feeReport,
-            Coins rebalanceSourceAmount,
-            Coins rebalanceTargetAmount
+            RebalanceReport rebalanceReport
     ) {
         this(
                 channelDto.channelIdShort(),
@@ -58,38 +55,42 @@ public record ChannelDetailsDto(
                 channelDto.status(),
                 BalanceInformationDto.createFromModel(balanceInformation),
                 OnChainCostsDto.createFromModel(onChainCosts),
-                OffChainCostsDto.createFromModel(offChainCosts),
-                policies,
+                PoliciesDto.createFromModel(policies),
                 channelDto.closeDetails(),
                 FeeReportDto.createFromModel(feeReport),
-                String.valueOf(rebalanceSourceAmount.milliSatoshis()),
-                String.valueOf(rebalanceTargetAmount.milliSatoshis())
+                RebalanceReportDto.createFromModel(rebalanceReport)
         );
     }
 
-    @SuppressWarnings("PMD.ExcessiveParameterList")
     public ChannelDetailsDto(
             LocalChannel localChannel,
             String remoteAlias,
             BalanceInformation balanceInformation,
             OnChainCosts onChainCosts,
-            OffChainCosts offChainCosts,
-            PoliciesDto policies,
-            ClosedChannelDetailsDto closeDetails,
+            Policies policies,
             FeeReport feeReport,
-            Coins rebalanceSourceAmount,
-            Coins rebalanceTargetAmount
+            RebalanceReport rebalanceReport
     ) {
         this(
-                new ChannelDto(localChannel, closeDetails),
+                new ChannelDto(localChannel),
                 remoteAlias,
                 balanceInformation,
                 onChainCosts,
-                offChainCosts,
                 policies,
                 feeReport,
-                rebalanceSourceAmount,
-                rebalanceTargetAmount
+                rebalanceReport
+        );
+    }
+
+    public static ChannelDetailsDto createFromModel(ChannelDetails channelDetails) {
+        return new ChannelDetailsDto(
+                channelDetails.localChannel(),
+                channelDetails.remoteAlias(),
+                channelDetails.balanceInformation(),
+                channelDetails.onChainCosts(),
+                channelDetails.policies(),
+                channelDetails.feeReport(),
+                channelDetails.rebalanceReport()
         );
     }
 }

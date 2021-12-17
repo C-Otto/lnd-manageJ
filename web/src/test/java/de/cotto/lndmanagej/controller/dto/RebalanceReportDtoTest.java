@@ -1,0 +1,44 @@
+package de.cotto.lndmanagej.controller.dto;
+
+import de.cotto.lndmanagej.model.Coins;
+import org.junit.jupiter.api.Test;
+
+import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
+import static org.assertj.core.api.Assertions.assertThat;
+
+class RebalanceReportDtoTest {
+
+    private static final RebalanceReportDto REBALANCE_REPORT_DTO = new RebalanceReportDto(
+            Coins.ofMilliSatoshis(1_234),
+            Coins.ofSatoshis(9_000),
+            Coins.ofMilliSatoshis(567),
+            Coins.ofSatoshis(1_000)
+    );
+
+    @Test
+    void sourceCosts() {
+        assertThat(REBALANCE_REPORT_DTO.sourceCosts()).isEqualTo("1234");
+    }
+
+    @Test
+    void sourceAmount() {
+        assertThat(REBALANCE_REPORT_DTO.sourceAmount()).isEqualTo("9000000");
+    }
+
+    @Test
+    void targetCosts() {
+        assertThat(REBALANCE_REPORT_DTO.targetCosts()).isEqualTo("567");
+    }
+
+    @Test
+    void targetAmount() {
+        assertThat(REBALANCE_REPORT_DTO.targetAmount()).isEqualTo("1000000");
+    }
+
+    @Test
+    void createFromModel() {
+        assertThat(RebalanceReportDto.createFromModel(REBALANCE_REPORT)).isEqualTo(
+                new RebalanceReportDto("1000000", "665000", "2000000", "991000")
+        );
+    }
+}

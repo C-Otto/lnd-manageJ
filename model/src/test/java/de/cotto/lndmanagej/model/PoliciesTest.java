@@ -17,4 +17,9 @@ class PoliciesTest {
     void remote() {
         assertThat(POLICIES.remote()).isEqualTo(POLICY_2);
     }
+
+    @Test
+    void unknown() {
+        assertThat(Policies.UNKNOWN).isEqualTo(new Policies(Policy.UNKNOWN, Policy.UNKNOWN));
+    }
 }

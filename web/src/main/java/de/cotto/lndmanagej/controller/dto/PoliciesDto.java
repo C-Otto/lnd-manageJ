@@ -6,9 +6,6 @@ public record PoliciesDto(
         PolicyDto local,
         PolicyDto remote
 ) {
-    public static final PoliciesDto EMPTY =
-            new PoliciesDto(PolicyDto.EMPTY, PolicyDto.EMPTY);
-
     public static PoliciesDto createFromModel(Policies policies) {
         return new PoliciesDto(
                 PolicyDto.createFromModel(policies.local()),

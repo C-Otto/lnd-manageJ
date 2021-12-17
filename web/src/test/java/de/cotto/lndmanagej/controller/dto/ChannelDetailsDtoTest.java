@@ -4,19 +4,24 @@ import de.cotto.lndmanagej.model.ChannelStatus;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.OpenInitiator;
+import de.cotto.lndmanagej.model.Policies;
+import de.cotto.lndmanagej.model.RebalanceReport;
 import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
+import static de.cotto.lndmanagej.model.ChannelDetailsFixtures.CHANNEL_DETAILS;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
-import static de.cotto.lndmanagej.model.OffChainCostsFixtures.OFF_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.OpenCloseStatus.OPEN;
+import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
+import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ChannelDetailsDtoTest {
@@ -30,13 +35,24 @@ class ChannelDetailsDtoTest {
             ALIAS,
             BALANCE_INFORMATION,
             ON_CHAIN_COSTS,
-            OFF_CHAIN_COSTS,
-            PoliciesDto.EMPTY,
-            CLOSE_DETAILS,
+            Policies.UNKNOWN,
             FEE_REPORT,
-            Coins.ofMilliSatoshis(123),
-            Coins.ofMilliSatoshis(456)
+            REBALANCE_REPORT
     );
+
+    @Test
+    void createFromModel() {
+        ChannelDetailsDto expected = new ChannelDetailsDto(
+                LOCAL_OPEN_CHANNEL_PRIVATE,
+                ALIAS,
+                BALANCE_INFORMATION,
+                ON_CHAIN_COSTS,
+                POLICIES,
+                FEE_REPORT,
+                REBALANCE_REPORT
+        );
+        assertThat(ChannelDetailsDto.createFromModel(CHANNEL_DETAILS)).isEqualTo(expected);
+    }
 
     @Test
     void channelIdShort() {
@@ -90,12 +106,9 @@ class ChannelDetailsDtoTest {
                 ALIAS,
                 BALANCE_INFORMATION,
                 ON_CHAIN_COSTS,
-                OFF_CHAIN_COSTS,
-                PoliciesDto.EMPTY,
-                CLOSE_DETAILS,
+                Policies.UNKNOWN,
                 FEE_REPORT,
-                Coins.NONE,
-                Coins.NONE
+                RebalanceReport.EMPTY
         );
         ChannelStatusDto channelStatusDto =
                 ChannelStatusDto.createFromModel(new ChannelStatus(false, true, false, OPEN));
@@ -123,17 +136,9 @@ class ChannelDetailsDtoTest {
     }
 
     @Test
-    void offChainCosts() {
-        assertThat(CHANNEL_DETAILS_DTO.offChainCosts()).isEqualTo(OffChainCostsDto.createFromModel(OFF_CHAIN_COSTS));
-    }
+    void rebalanceReport() {
+        assertThat(CHANNEL_DETAILS_DTO.rebalanceReport())
+                .isEqualTo(RebalanceReportDto.createFromModel(REBALANCE_REPORT));
 
-    @Test
-    void rebalanceSourceAmount() {
-        assertThat(CHANNEL_DETAILS_DTO.rebalanceSourceAmount()).isEqualTo("123");
-    }
-
-    @Test
-    void rebalanceTargetAmount() {
-        assertThat(CHANNEL_DETAILS_DTO.rebalanceTargetAmount()).isEqualTo("456");
     }
 }

@@ -20,4 +20,9 @@ class PolicyTest {
     void enabled() {
         assertThat(POLICY_1.enabled()).isFalse();
     }
+
+    @Test
+    void unknown() {
+        assertThat(Policy.UNKNOWN).isEqualTo(new Policy(0, Coins.NONE, false));
+    }
 }

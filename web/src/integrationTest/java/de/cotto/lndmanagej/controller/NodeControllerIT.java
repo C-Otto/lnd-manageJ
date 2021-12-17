@@ -8,7 +8,6 @@ import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
 import de.cotto.lndmanagej.service.NodeService;
-import de.cotto.lndmanagej.service.OffChainCostService;
 import de.cotto.lndmanagej.service.OnChainCostService;
 import de.cotto.lndmanagej.service.RebalanceService;
 import org.junit.jupiter.api.Test;
@@ -21,6 +20,7 @@ import java.util.List;
 import java.util.Set;
 
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
+import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
@@ -31,9 +31,9 @@ import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHAN
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_3;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
-import static de.cotto.lndmanagej.model.OffChainCostsFixtures.OFF_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
+import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
@@ -57,9 +57,6 @@ class NodeControllerIT {
 
     @MockBean
     private OnChainCostService onChainCostService;
-
-    @MockBean
-    private OffChainCostService offChainCostService;
 
     @MockBean
     @SuppressWarnings("unused")
@@ -89,11 +86,9 @@ class NodeControllerIT {
         when(channelService.getWaitingCloseChannelsWith(PUBKEY_2)).thenReturn(Set.of(WAITING_CLOSE_CHANNEL));
         when(channelService.getForceClosingChannelsWith(PUBKEY_2)).thenReturn(Set.of(FORCE_CLOSING_CHANNEL_2));
         when(onChainCostService.getOnChainCostsForPeer(PUBKEY_2)).thenReturn(ON_CHAIN_COSTS);
-        when(offChainCostService.getOffChainCostsForPeer(PUBKEY_2)).thenReturn(OFF_CHAIN_COSTS);
-        when(balanceService.getBalanceInformationForPeer(PUBKEY_2)).thenReturn(BALANCE_INFORMATION);
+        when(balanceService.getBalanceInformationForPeer(PUBKEY_2)).thenReturn(BALANCE_INFORMATION_2);
         when(feeService.getFeeReportForPeer(PUBKEY_2)).thenReturn(FEE_REPORT);
-        when(rebalanceService.getRebalanceAmountFromPeer(PUBKEY_2)).thenReturn(Coins.ofMilliSatoshis(1));
-        when(rebalanceService.getRebalanceAmountToPeer(PUBKEY_2)).thenReturn(Coins.ofMilliSatoshis(2));
+        when(rebalanceService.getReportForPeer(PUBKEY_2)).thenReturn(REBALANCE_REPORT);
         List<String> channelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_2.toString());
         List<String> closedChannelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_3.toString());
         List<String> waitingCloseChannelIds = List.of(CHANNEL_ID.toString());
@@ -105,21 +100,21 @@ class NodeControllerIT {
                 .andExpect(jsonPath("$.closedChannels", is(closedChannelIds)))
                 .andExpect(jsonPath("$.waitingCloseChannels", is(waitingCloseChannelIds)))
                 .andExpect(jsonPath("$.pendingForceClosingChannels", is(forceClosingChannelIds)))
-                .andExpect(jsonPath("$.offChainCosts.rebalanceSource", is("1000000")))
-                .andExpect(jsonPath("$.offChainCosts.rebalanceTarget", is("2000000")))
-                .andExpect(jsonPath("$.balance.localBalance", is("1000")))
-                .andExpect(jsonPath("$.balance.localReserve", is("100")))
-                .andExpect(jsonPath("$.balance.localAvailable", is("900")))
-                .andExpect(jsonPath("$.balance.remoteBalance", is("123")))
-                .andExpect(jsonPath("$.balance.remoteReserve", is("10")))
-                .andExpect(jsonPath("$.balance.remoteAvailable", is("113")))
+                .andExpect(jsonPath("$.rebalanceReport.sourceCosts", is("1000000")))
+                .andExpect(jsonPath("$.rebalanceReport.targetCosts", is("2000000")))
+                .andExpect(jsonPath("$.rebalanceReport.sourceAmount", is("665000")))
+                .andExpect(jsonPath("$.rebalanceReport.targetAmount", is("991000")))
+                .andExpect(jsonPath("$.balance.localBalance", is("2000")))
+                .andExpect(jsonPath("$.balance.localReserve", is("200")))
+                .andExpect(jsonPath("$.balance.localAvailable", is("1800")))
+                .andExpect(jsonPath("$.balance.remoteBalance", is("223")))
+                .andExpect(jsonPath("$.balance.remoteReserve", is("20")))
+                .andExpect(jsonPath("$.balance.remoteAvailable", is("203")))
                 .andExpect(jsonPath("$.feeReport.earned", is("1234")))
                 .andExpect(jsonPath("$.feeReport.sourced", is("567")))
                 .andExpect(jsonPath("$.onChainCosts.openCosts", is("1000")))
                 .andExpect(jsonPath("$.onChainCosts.closeCosts", is("2000")))
                 .andExpect(jsonPath("$.onChainCosts.sweepCosts", is("3000")))
-                .andExpect(jsonPath("$.rebalanceSourceAmount", is("1")))
-                .andExpect(jsonPath("$.rebalanceTargetAmount", is("2")))
                 .andExpect(jsonPath("$.online", is(true)));
     }
 

@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ChannelDtoTest {
     private static final ClosedChannelDetailsDto CLOSE_DETAILS =
             ClosedChannelDetailsDto.createFromModel(CLOSED_CHANNEL);
-    private static final ChannelDto CHANNEL_DTO = new ChannelDto(CLOSED_CHANNEL, CLOSE_DETAILS);
+    private static final ChannelDto CHANNEL_DTO = new ChannelDto(CLOSED_CHANNEL);
 
     @Test
     void channelIdShort() {
@@ -57,13 +57,13 @@ class ChannelDtoTest {
 
     @Test
     void totalSent() {
-        assertThat(new ChannelDto(LOCAL_OPEN_CHANNEL, CLOSE_DETAILS).totalSent())
+        assertThat(new ChannelDto(LOCAL_OPEN_CHANNEL).totalSent())
                 .isEqualTo(String.valueOf(TOTAL_SENT.satoshis()));
     }
 
     @Test
     void totalReceived() {
-        assertThat(new ChannelDto(LOCAL_OPEN_CHANNEL, CLOSE_DETAILS).totalReceived())
+        assertThat(new ChannelDto(LOCAL_OPEN_CHANNEL).totalReceived())
                 .isEqualTo(String.valueOf(TOTAL_RECEIVED.satoshis()));
     }
 
@@ -79,7 +79,7 @@ class ChannelDtoTest {
 
     @Test
     void status() {
-        ChannelDto dto = new ChannelDto(LOCAL_OPEN_CHANNEL, CLOSE_DETAILS);
+        ChannelDto dto = new ChannelDto(LOCAL_OPEN_CHANNEL);
         ChannelStatusDto channelStatusDto =
                 ChannelStatusDto.createFromModel(new ChannelStatus(false, true, false, OPEN));
         assertThat(dto.status()).isEqualTo(channelStatusDto);
