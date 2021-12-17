@@ -3,11 +3,17 @@ package de.cotto.lndmanagej.service;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelDetails;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.LocalChannel;
+import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.model.OpenCloseStatus;
 import de.cotto.lndmanagej.model.Policies;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.model.RebalanceReport;
 import org.springframework.stereotype.Component;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Component
 public class ChannelDetailsService {
@@ -35,29 +41,55 @@ public class ChannelDetailsService {
     }
 
     public ChannelDetails getDetails(LocalChannel localChannel) {
-        Pubkey remotePubkey = localChannel.getRemotePubkey();
-        String remoteAlias = nodeService.getAlias(remotePubkey);
         ChannelId channelId = localChannel.getId();
-        return new ChannelDetails(
-                localChannel,
-                remoteAlias,
-                getBalanceInformation(channelId),
-                onChainCostService.getOnChainCostsForChannelId(channelId),
-                getPoliciesForChannel(localChannel),
-                feeService.getFeeReportForChannel(channelId),
-                rebalanceService.getReportForChannel(localChannel.getId())
+        Pubkey remotePubkey = localChannel.getRemotePubkey();
+        CompletableFuture<String> remoteAlias = getAlias(remotePubkey);
+        CompletableFuture<BalanceInformation> balanceInformation = getBalanceInformation(channelId);
+        CompletableFuture<OnChainCosts> onChainCosts = getOnChainCosts(channelId);
+        CompletableFuture<Policies> policies = getPoliciesForChannel(localChannel);
+        CompletableFuture<FeeReport> feeReport = getFeeReport(channelId);
+        CompletableFuture<RebalanceReport> rebalanceReport = getRebalanceReport(localChannel);
+        try {
+            return new ChannelDetails(
+                    localChannel,
+                    remoteAlias.get(),
+                    balanceInformation.get(),
+                    onChainCosts.get(),
+                    policies.get(),
+                    feeReport.get(),
+                    rebalanceReport.get()
+            );
+        } catch (InterruptedException | ExecutionException exception) {
+            throw new IllegalStateException("Unable to compute channel details for " + channelId, exception);
+        }
+    }
+
+    private CompletableFuture<RebalanceReport> getRebalanceReport(LocalChannel localChannel) {
+        return CompletableFuture.supplyAsync(() -> rebalanceService.getReportForChannel(localChannel.getId()));
+    }
+
+    private CompletableFuture<FeeReport> getFeeReport(ChannelId channelId) {
+        return CompletableFuture.supplyAsync(() -> feeService.getFeeReportForChannel(channelId));
+    }
+
+    private CompletableFuture<OnChainCosts> getOnChainCosts(ChannelId channelId) {
+        return CompletableFuture.supplyAsync(() -> onChainCostService.getOnChainCostsForChannelId(channelId));
+    }
+
+    private CompletableFuture<String> getAlias(Pubkey remotePubkey) {
+        return CompletableFuture.supplyAsync(() -> nodeService.getAlias(remotePubkey));
+    }
+
+    private CompletableFuture<BalanceInformation> getBalanceInformation(ChannelId channelId) {
+        return CompletableFuture.supplyAsync(
+                () -> balanceService.getBalanceInformation(channelId).orElse(BalanceInformation.EMPTY)
         );
     }
 
-    private BalanceInformation getBalanceInformation(ChannelId channelId) {
-        return balanceService.getBalanceInformation(channelId)
-                .orElse(BalanceInformation.EMPTY);
-    }
-
-    private Policies getPoliciesForChannel(LocalChannel channel) {
+    private CompletableFuture<Policies> getPoliciesForChannel(LocalChannel channel) {
         if (channel.getStatus().openCloseStatus() != OpenCloseStatus.OPEN) {
-            return Policies.UNKNOWN;
+            return CompletableFuture.completedFuture(Policies.UNKNOWN);
         }
-        return policyService.getPolicies(channel.getId());
+        return CompletableFuture.supplyAsync(() -> policyService.getPolicies(channel.getId()));
     }
 }
