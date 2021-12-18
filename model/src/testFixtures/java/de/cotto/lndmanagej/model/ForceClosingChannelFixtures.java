@@ -28,30 +28,47 @@ public class ForceClosingChannelFixtures {
             PUBKEY_2,
             TRANSACTION_HASH_3,
             HTLC_OUTPOINTS,
-            LOCAL
+            LOCAL,
+            false
     );
+
+    public static final ForceClosingChannel FORCE_CLOSING_CHANNEL_PRIVATE = new ForceClosingChannel(
+            new ChannelCoreInformation(CHANNEL_ID, CHANNEL_POINT, CAPACITY),
+            PUBKEY,
+            PUBKEY_2,
+            TRANSACTION_HASH_3,
+            HTLC_OUTPOINTS,
+            LOCAL,
+            true
+    );
+
     public static final ForceClosingChannel FORCE_CLOSING_CHANNEL_2 = new ForceClosingChannel(
             new ChannelCoreInformation(CHANNEL_ID_2, CHANNEL_POINT_2, CAPACITY),
             PUBKEY,
             PUBKEY_2,
             TRANSACTION_HASH_3,
             HTLC_OUTPOINTS,
-            REMOTE
+            REMOTE,
+            false
     );
+
     public static final ForceClosingChannel FORCE_CLOSING_CHANNEL_4 = new ForceClosingChannel(
             new ChannelCoreInformation(CHANNEL_ID_4, CHANNEL_POINT, CAPACITY),
             PUBKEY,
             PUBKEY_2,
             TRANSACTION_HASH_2,
             HTLC_OUTPOINTS,
-            UNKNOWN
+            UNKNOWN,
+            false
     );
+
     public static final ForceClosingChannel FORCE_CLOSING_CHANNEL_TO_NODE_3 = new ForceClosingChannel(
             new ChannelCoreInformation(CHANNEL_ID_3, CHANNEL_POINT, CAPACITY),
             PUBKEY,
             PUBKEY_3,
             TRANSACTION_HASH_3,
             HTLC_OUTPOINTS,
-            LOCAL
+            LOCAL,
+            false
     );
 }

@@ -15,14 +15,16 @@ public abstract class ClosedChannel extends ClosedOrClosingChannel {
             TransactionHash closeTransactionHash,
             OpenInitiator openInitiator,
             CloseInitiator closeInitiator,
-            int closeHeight
+            int closeHeight,
+            boolean isPrivate
     ) {
         super(
                 channelCoreInformation,
                 ownPubkey,
                 remotePubkey,
                 closeTransactionHash,
-                openInitiator
+                openInitiator,
+                isPrivate
         );
         this.closeInitiator = closeInitiator;
         if (closeHeight == 0) {

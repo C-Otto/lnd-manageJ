@@ -10,6 +10,11 @@ public class CoopClosedChannelFixtures {
             ClosedChannelFixtures.getWithDefaults(new CoopClosedChannelBuilder())
                     .build();
 
+    public static final CoopClosedChannel CLOSED_CHANNEL_PRIVATE =
+            ClosedChannelFixtures.getWithDefaults(new CoopClosedChannelBuilder())
+                    .withIsPrivate(true)
+                    .build();
+
     public static final CoopClosedChannel CLOSED_CHANNEL_2 =
             ClosedChannelFixtures.getWithDefaults(new CoopClosedChannelBuilder())
                     .withChannelId(CHANNEL_ID_2)

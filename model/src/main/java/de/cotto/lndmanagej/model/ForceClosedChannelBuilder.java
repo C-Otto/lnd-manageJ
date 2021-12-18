@@ -17,7 +17,8 @@ public class ForceClosedChannelBuilder extends ClosedChannelBuilder<ForceClosedC
                 requireNonNull(openInitiator),
                 requireNonNull(closeInitiator),
                 closeHeight,
-                resolutions
+                resolutions,
+                isPrivate
         );
     }
 }

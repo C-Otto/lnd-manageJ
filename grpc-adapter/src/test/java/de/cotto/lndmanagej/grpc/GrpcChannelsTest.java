@@ -4,6 +4,7 @@ import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.ChannelPoint;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.PrivateResolver;
 import lnrpc.Channel;
 import lnrpc.ChannelConstraints;
 import lnrpc.Initiator;
@@ -30,6 +31,7 @@ import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT_3;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.TRANSACTION_HASH_3;
 import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL;
 import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL_2;
+import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL_PRIVATE;
 import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.HTLC_OUTPOINT;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
@@ -42,6 +44,7 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL_2;
+import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL_PRIVATE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -58,6 +61,9 @@ class GrpcChannelsTest {
 
     @Mock
     private ChannelIdResolver channelIdResolver;
+
+    @Mock
+    private PrivateResolver privateResolver;
 
     @BeforeEach
     void setUp() {
@@ -109,6 +115,17 @@ class GrpcChannelsTest {
     }
 
     @Test
+    void getForceClosingChannels_private() {
+        when(privateResolver.isPrivate(CHANNEL_ID)).thenReturn(true);
+        when(channelIdResolver.resolveFromChannelPoint(CHANNEL_POINT)).thenReturn(Optional.of(CHANNEL_ID));
+        when(grpcService.getForceClosingChannels()).thenReturn(List.of(
+                forceClosingChannel(CHANNEL_POINT, Initiator.INITIATOR_LOCAL)
+        ));
+        assertThat(grpcChannels.getForceClosingChannels())
+                .containsExactlyInAnyOrder(FORCE_CLOSING_CHANNEL_PRIVATE);
+    }
+
+    @Test
     void getWaitingCloseChannels_both_resolved() {
         when(channelIdResolver.resolveFromChannelPoint(CHANNEL_POINT)).thenReturn(Optional.of(CHANNEL_ID));
         when(channelIdResolver.resolveFromChannelPoint(CHANNEL_POINT_2)).thenReturn(Optional.of(CHANNEL_ID_2));
@@ -128,6 +145,17 @@ class GrpcChannelsTest {
                 waitingCloseChannel(CHANNEL_POINT_3, Initiator.INITIATOR_REMOTE)
         ));
         assertThat(grpcChannels.getWaitingCloseChannels()).containsExactlyInAnyOrder(WAITING_CLOSE_CHANNEL);
+    }
+
+    @Test
+    void getWaitingCloseChannels_private() {
+        when(privateResolver.isPrivate(CHANNEL_ID)).thenReturn(true);
+        when(channelIdResolver.resolveFromChannelPoint(CHANNEL_POINT)).thenReturn(Optional.of(CHANNEL_ID));
+        when(grpcService.getWaitingCloseChannels()).thenReturn(List.of(
+                waitingCloseChannel(CHANNEL_POINT, Initiator.INITIATOR_LOCAL)
+        ));
+        assertThat(grpcChannels.getWaitingCloseChannels())
+                .containsExactlyInAnyOrder(WAITING_CLOSE_CHANNEL_PRIVATE);
     }
 
     @Test

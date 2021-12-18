@@ -10,9 +10,10 @@ public abstract class ClosedOrClosingChannel extends LocalChannel {
             Pubkey ownPubkey,
             Pubkey remotePubkey,
             TransactionHash closeTransactionHash,
-            OpenInitiator openInitiator
+            OpenInitiator openInitiator,
+            boolean isPrivate
     ) {
-        super(channelCoreInformation, ownPubkey, remotePubkey, openInitiator, false);
+        super(channelCoreInformation, ownPubkey, remotePubkey, openInitiator, isPrivate);
         this.closeTransactionHash = closeTransactionHash;
     }
 

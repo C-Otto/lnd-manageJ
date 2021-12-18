@@ -8,6 +8,7 @@ import de.cotto.lndmanagej.model.ClosedChannelFixtures;
 import de.cotto.lndmanagej.model.ForceClosedChannelBuilder;
 import de.cotto.lndmanagej.model.OpenInitiator;
 import de.cotto.lndmanagej.model.OpenInitiatorResolver;
+import de.cotto.lndmanagej.model.PrivateResolver;
 import de.cotto.lndmanagej.model.Resolution;
 import de.cotto.lndmanagej.model.TransactionHash;
 import lnrpc.ChannelCloseSummary;
@@ -36,9 +37,12 @@ import static de.cotto.lndmanagej.model.ChannelPointFixtures.TRANSACTION_HASH_2;
 import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSE_HEIGHT;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_2;
+import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_PRIVATE;
 import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL_BREACH;
+import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL_BREACH_PRIVATE;
 import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL_LOCAL;
+import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL_PRIVATE;
 import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL_REMOTE;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
@@ -79,6 +83,9 @@ class GrpcClosedChannelsTest {
 
     @Mock
     private HardcodedService hardcodedService;
+
+    @Mock
+    private PrivateResolver privateResolver;
 
     @BeforeEach
     void setUp() {
@@ -224,7 +231,7 @@ class GrpcClosedChannelsTest {
     }
 
     @Test
-    void getChannelId_already_resolved() {
+    void getClosedChannels_id_already_known() {
         when(grpcService.getClosedChannels()).thenReturn(List.of(
                 closedChannel(CHANNEL_ID_SHORT, COOPERATIVE_CLOSE, INITIATOR_LOCAL, INITIATOR_REMOTE)
         ));
@@ -233,7 +240,7 @@ class GrpcClosedChannelsTest {
     }
 
     @Test
-    void getChannelId_resolved() {
+    void getClosedChannels_id_resolved() {
         when(grpcService.getClosedChannels()).thenReturn(List.of(
                 closedChannel(0, COOPERATIVE_CLOSE, INITIATOR_LOCAL, INITIATOR_REMOTE)
         ));
@@ -242,13 +249,39 @@ class GrpcClosedChannelsTest {
     }
 
     @Test
-    void getChannelId_not_resolved() {
+    void getClosedChannels_id_not_resolved() {
         when(grpcService.getClosedChannels()).thenReturn(List.of(
                 closedChannel(0, COOPERATIVE_CLOSE, INITIATOR_LOCAL, INITIATOR_REMOTE)
         ));
         assertThat(grpcClosedChannels.getClosedChannels()).isEmpty();
     }
 
+    @Test
+    void getClosedChannels_coop_private() {
+        when(privateResolver.isPrivate(CHANNEL_ID)).thenReturn(true);
+        when(grpcService.getClosedChannels()).thenReturn(List.of(
+                closedChannel(CHANNEL_ID.getShortChannelId(), COOPERATIVE_CLOSE, INITIATOR_LOCAL, INITIATOR_REMOTE)
+        ));
+        assertThat(grpcClosedChannels.getClosedChannels()).containsExactly(CLOSED_CHANNEL_PRIVATE);
+    }
+
+    @Test
+    void getClosedChannels_force_private() {
+        when(privateResolver.isPrivate(CHANNEL_ID)).thenReturn(true);
+        when(grpcService.getClosedChannels()).thenReturn(List.of(
+                closedChannel(CHANNEL_ID.getShortChannelId(), REMOTE_FORCE_CLOSE, INITIATOR_LOCAL, INITIATOR_REMOTE)
+        ));
+        assertThat(grpcClosedChannels.getClosedChannels()).containsExactly(FORCE_CLOSED_CHANNEL_PRIVATE);
+    }
+
+    @Test
+    void getClosedChannels_breach_private() {
+        when(privateResolver.isPrivate(CHANNEL_ID)).thenReturn(true);
+        when(grpcService.getClosedChannels()).thenReturn(List.of(
+                closedChannel(CHANNEL_ID.getShortChannelId(), BREACH_CLOSE, INITIATOR_LOCAL, INITIATOR_REMOTE)
+        ));
+        assertThat(grpcClosedChannels.getClosedChannels()).containsExactly(FORCE_CLOSED_CHANNEL_BREACH_PRIVATE);
+    }
 
     private ChannelCloseSummary closedChannel(
             long channelId,

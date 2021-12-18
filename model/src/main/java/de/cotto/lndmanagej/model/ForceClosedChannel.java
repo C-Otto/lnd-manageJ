@@ -14,7 +14,8 @@ public class ForceClosedChannel extends ClosedChannel {
             OpenInitiator openInitiator,
             CloseInitiator closeInitiator,
             int closeHeight,
-            Set<Resolution> resolutions
+            Set<Resolution> resolutions,
+            boolean isPrivate
     ) {
         super(
                 channelCoreInformation,
@@ -23,7 +24,8 @@ public class ForceClosedChannel extends ClosedChannel {
                 closeTransactionHash,
                 openInitiator,
                 closeInitiator,
-                closeHeight
+                closeHeight,
+                isPrivate
         );
         this.resolutions = resolutions;
     }

@@ -11,9 +11,9 @@ import static de.cotto.lndmanagej.statistics.StatisticsFixtures.BALANCES_OLD;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-class StatisticsRepositoryIT {
+class BalancesRepositoryIT {
     @Autowired
-    private StatisticsRepository repository;
+    private BalancesRepository repository;
 
     @Test
     void save() {

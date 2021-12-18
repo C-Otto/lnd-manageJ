@@ -10,7 +10,8 @@ public class BreachForceClosedChannel extends ForceClosedChannel {
             TransactionHash closeTransactionHash,
             OpenInitiator openInitiator,
             int closeHeight,
-            Set<Resolution> resolutions
+            Set<Resolution> resolutions,
+            boolean isPrivate
     ) {
         super(
                 channelCoreInformation,
@@ -20,7 +21,8 @@ public class BreachForceClosedChannel extends ForceClosedChannel {
                 openInitiator,
                 CloseInitiator.REMOTE,
                 closeHeight,
-                resolutions
+                resolutions,
+                isPrivate
         );
     }
 

@@ -19,45 +19,45 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class StatisticsDaoImplTest {
+class BalancesDaoImplTest {
 
     @InjectMocks
-    private StatisticsDaoImpl statisticsDaoImpl;
+    private BalancesDaoImpl dao;
 
     @Mock
-    private StatisticsRepository statisticsRepository;
+    private BalancesRepository balancesRepository;
 
     @Test
     void saveStatistics() {
-        statisticsDaoImpl.saveBalances(BALANCES);
-        verify(statisticsRepository).save(argThat(jpaDto ->
+        dao.saveBalances(BALANCES);
+        verify(balancesRepository).save(argThat(jpaDto ->
                 jpaDto.getTimestamp() == StatisticsFixtures.TIMESTAMP.toEpochSecond(ZoneOffset.UTC)
         ));
-        verify(statisticsRepository).save(argThat(jpaDto ->
+        verify(balancesRepository).save(argThat(jpaDto ->
                 jpaDto.getChannelId() == CHANNEL_ID.getShortChannelId()));
-        verify(statisticsRepository).save(argThat(jpaDto ->
+        verify(balancesRepository).save(argThat(jpaDto ->
                 jpaDto.getLocalBalance() == BALANCE_INFORMATION.localBalance().satoshis()
         ));
-        verify(statisticsRepository).save(argThat(jpaDto ->
+        verify(balancesRepository).save(argThat(jpaDto ->
                 jpaDto.getLocalReserved() == BALANCE_INFORMATION.localReserve().satoshis()
         ));
-        verify(statisticsRepository).save(argThat(jpaDto ->
+        verify(balancesRepository).save(argThat(jpaDto ->
                 jpaDto.getRemoteBalance() == BALANCE_INFORMATION.remoteBalance().satoshis()
         ));
-        verify(statisticsRepository).save(argThat(jpaDto ->
+        verify(balancesRepository).save(argThat(jpaDto ->
                 jpaDto.getRemoteReserved() == BALANCE_INFORMATION.remoteReserve().satoshis()
         ));
     }
 
     @Test
     void getMostRecentBalance_not_found() {
-        assertThat(statisticsDaoImpl.getMostRecentBalances(CHANNEL_ID)).isEmpty();
+        assertThat(dao.getMostRecentBalances(CHANNEL_ID)).isEmpty();
     }
 
     @Test
     void getMostRecentBalance() {
-        when(statisticsRepository.findTopByChannelIdOrderByTimestampDesc(CHANNEL_ID.getShortChannelId()))
+        when(balancesRepository.findTopByChannelIdOrderByTimestampDesc(CHANNEL_ID.getShortChannelId()))
                 .thenReturn(Optional.of(BalancesJpaDto.fromModel(BALANCES)));
-        assertThat(statisticsDaoImpl.getMostRecentBalances(CHANNEL_ID)).contains(BALANCES);
+        assertThat(dao.getMostRecentBalances(CHANNEL_ID)).contains(BALANCES);
     }
 }

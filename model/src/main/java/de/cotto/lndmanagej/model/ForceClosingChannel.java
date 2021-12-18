@@ -14,9 +14,10 @@ public final class ForceClosingChannel extends ClosedOrClosingChannel {
             Pubkey remotePubkey,
             TransactionHash closeTransactionHash,
             Set<ChannelPoint> htlcOutpoints,
-            OpenInitiator openInitiator
+            OpenInitiator openInitiator,
+            boolean isPrivate
     ) {
-        super(channelCoreInformation, ownPubkey, remotePubkey, closeTransactionHash, openInitiator);
+        super(channelCoreInformation, ownPubkey, remotePubkey, closeTransactionHash, openInitiator, isPrivate);
         this.htlcOutpoints = htlcOutpoints;
     }
 

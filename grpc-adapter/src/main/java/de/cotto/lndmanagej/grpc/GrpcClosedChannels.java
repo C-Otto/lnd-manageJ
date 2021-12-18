@@ -13,6 +13,7 @@ import de.cotto.lndmanagej.model.CoopClosedChannelBuilder;
 import de.cotto.lndmanagej.model.ForceClosedChannelBuilder;
 import de.cotto.lndmanagej.model.OpenInitiator;
 import de.cotto.lndmanagej.model.OpenInitiatorResolver;
+import de.cotto.lndmanagej.model.PrivateResolver;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.Resolution;
 import de.cotto.lndmanagej.model.TransactionHash;
@@ -33,6 +34,7 @@ import static lnrpc.Initiator.INITIATOR_REMOTE;
 import static lnrpc.Initiator.INITIATOR_UNKNOWN;
 
 @Component
+@SuppressWarnings("PMD.ExcessiveImports")
 public class GrpcClosedChannels extends GrpcChannelsBase {
     private final GrpcService grpcService;
     private final GrpcGetInfo grpcGetInfo;
@@ -43,10 +45,11 @@ public class GrpcClosedChannels extends GrpcChannelsBase {
             GrpcService grpcService,
             GrpcGetInfo grpcGetInfo,
             ChannelIdResolver channelIdResolver,
+            PrivateResolver privateResolver,
             OpenInitiatorResolver openInitiatorResolver,
             HardcodedService hardcodedService
     ) {
-        super(channelIdResolver);
+        super(channelIdResolver, privateResolver);
         this.grpcService = grpcService;
         this.grpcGetInfo = grpcGetInfo;
         this.openInitiatorResolver = openInitiatorResolver;
@@ -97,6 +100,7 @@ public class GrpcClosedChannels extends GrpcChannelsBase {
                         .withOpenInitiator(openInitiator)
                         .withCloseHeight(channelCloseSummary.getCloseHeight())
                         .withResolutions(getResolutions(channelId, channelCloseSummary))
+                        .withIsPrivate(resolveIsPrivate(channelId))
                         .build()
                 );
     }

@@ -26,16 +26,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class StatisticsServiceTest {
+class BalanceStatisticsServiceTest {
     private static final LocalDateTime LOCAL_DATE_TIME = LocalDateTime.now(ZoneOffset.UTC);
     @InjectMocks
-    private StatisticsService statisticsService;
+    private BalanceStatisticsService balanceStatisticsService;
 
     @Mock
     private ChannelService channelService;
 
     @Mock
-    private StatisticsDao statisticsDao;
+    private BalancesDao dao;
 
     @Test
     void storeBalances_nothing_stored() {
@@ -43,12 +43,12 @@ class StatisticsServiceTest {
                 LOCAL_OPEN_CHANNEL,
                 LOCAL_OPEN_CHANNEL_MORE_BALANCE_2
         ));
-        statisticsService.storeBalances();
-        verify(statisticsDao).saveBalances(argThat(withBalanceInformation(LOCAL_OPEN_CHANNEL_MORE_BALANCE_2)));
-        verify(statisticsDao).saveBalances(argThat(withChannelId(LOCAL_OPEN_CHANNEL_MORE_BALANCE_2)));
-        verify(statisticsDao).saveBalances(argThat(withBalanceInformation(LOCAL_OPEN_CHANNEL)));
-        verify(statisticsDao).saveBalances(argThat(withChannelId(LOCAL_OPEN_CHANNEL)));
-        verify(statisticsDao, times(2)).saveBalances(any());
+        balanceStatisticsService.storeBalances();
+        verify(dao).saveBalances(argThat(withBalanceInformation(LOCAL_OPEN_CHANNEL_MORE_BALANCE_2)));
+        verify(dao).saveBalances(argThat(withChannelId(LOCAL_OPEN_CHANNEL_MORE_BALANCE_2)));
+        verify(dao).saveBalances(argThat(withBalanceInformation(LOCAL_OPEN_CHANNEL)));
+        verify(dao).saveBalances(argThat(withChannelId(LOCAL_OPEN_CHANNEL)));
+        verify(dao, times(2)).saveBalances(any());
     }
 
     @Test
@@ -56,9 +56,9 @@ class StatisticsServiceTest {
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL));
         ChannelId channelId = LOCAL_OPEN_CHANNEL.getId();
         Balances balances = new Balances(LOCAL_DATE_TIME, channelId, BALANCE_INFORMATION_2);
-        when(statisticsDao.getMostRecentBalances(channelId)).thenReturn(Optional.of(balances));
-        statisticsService.storeBalances();
-        verify(statisticsDao).saveBalances(any());
+        when(dao.getMostRecentBalances(channelId)).thenReturn(Optional.of(balances));
+        balanceStatisticsService.storeBalances();
+        verify(dao).saveBalances(any());
     }
 
     @Test
@@ -66,9 +66,9 @@ class StatisticsServiceTest {
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL));
         ChannelId channelId = LOCAL_OPEN_CHANNEL.getId();
         Balances balances = new Balances(LOCAL_DATE_TIME, channelId, LOCAL_OPEN_CHANNEL.getBalanceInformation());
-        when(statisticsDao.getMostRecentBalances(channelId)).thenReturn(Optional.of(balances));
-        statisticsService.storeBalances();
-        verify(statisticsDao, never()).saveBalances(any());
+        when(dao.getMostRecentBalances(channelId)).thenReturn(Optional.of(balances));
+        balanceStatisticsService.storeBalances();
+        verify(dao, never()).saveBalances(any());
     }
 
     private ArgumentMatcher<Balances> withChannelId(LocalOpenChannel channel) {

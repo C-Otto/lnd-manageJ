@@ -25,7 +25,9 @@ class ForceClosingChannelTest {
                 PUBKEY_2,
                 TRANSACTION_HASH_3,
                 HTLC_OUTPOINTS,
-                LOCAL)
+                LOCAL,
+                false
+                )
         ).isEqualTo(FORCE_CLOSING_CHANNEL);
     }
 

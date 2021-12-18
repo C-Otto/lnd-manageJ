@@ -8,7 +8,8 @@ public class CoopClosedChannel extends ClosedChannel {
             TransactionHash closeTransactionHash,
             OpenInitiator openInitiator,
             CloseInitiator closeInitiator,
-            int closeHeight
+            int closeHeight,
+            boolean isPrivate
     ) {
         super(
                 channelCoreInformation,
@@ -17,7 +18,8 @@ public class CoopClosedChannel extends ClosedChannel {
                 closeTransactionHash,
                 openInitiator,
                 closeInitiator,
-                closeHeight
+                closeHeight,
+                isPrivate
         );
     }
 

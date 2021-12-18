@@ -12,13 +12,13 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class StatisticsService {
+public class BalanceStatisticsService {
     private final ChannelService channelService;
-    private final StatisticsDao statisticsDao;
+    private final BalancesDao balancesDao;
 
-    public StatisticsService(ChannelService channelService, StatisticsDao statisticsDao) {
+    public BalanceStatisticsService(ChannelService channelService, BalancesDao balancesDao) {
         this.channelService = channelService;
-        this.statisticsDao = statisticsDao;
+        this.balancesDao = balancesDao;
     }
 
     @Scheduled(fixedRate = 5, timeUnit = TimeUnit.MINUTES)
@@ -29,10 +29,10 @@ public class StatisticsService {
 
     private void storeUpdatedBalance(LocalOpenChannel channel, LocalDateTime timestamp) {
         BalanceInformation balanceInformation = channel.getBalanceInformation();
-        Optional<Balances> persistedBalances = statisticsDao.getMostRecentBalances(channel.getId());
+        Optional<Balances> persistedBalances = balancesDao.getMostRecentBalances(channel.getId());
         if (persistedBalances.isPresent() && balanceInformation.equals(persistedBalances.get().balanceInformation())) {
             return;
         }
-        statisticsDao.saveBalances(new Balances(timestamp, channel.getId(), balanceInformation));
+        balancesDao.saveBalances(new Balances(timestamp, channel.getId(), balanceInformation));
     }
 }

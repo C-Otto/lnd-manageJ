@@ -4,6 +4,7 @@ import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.ChannelPoint;
 import de.cotto.lndmanagej.model.OpenInitiator;
+import de.cotto.lndmanagej.model.PrivateResolver;
 import lnrpc.Initiator;
 
 import java.util.Optional;
@@ -14,9 +15,11 @@ import static lnrpc.Initiator.INITIATOR_UNKNOWN;
 
 public class GrpcChannelsBase {
     private final ChannelIdResolver channelIdResolver;
+    private final PrivateResolver privateResolver;
 
-    protected GrpcChannelsBase(ChannelIdResolver channelIdResolver) {
+    protected GrpcChannelsBase(ChannelIdResolver channelIdResolver, PrivateResolver privateResolver) {
         this.channelIdResolver = channelIdResolver;
+        this.privateResolver = privateResolver;
     }
 
     OpenInitiator getOpenInitiator(Initiator openInitiator) {
@@ -34,4 +37,7 @@ public class GrpcChannelsBase {
         return channelIdResolver.resolveFromChannelPoint(channelPoint);
     }
 
+    boolean resolveIsPrivate(ChannelId channelId) {
+        return privateResolver.isPrivate(channelId);
+    }
 }

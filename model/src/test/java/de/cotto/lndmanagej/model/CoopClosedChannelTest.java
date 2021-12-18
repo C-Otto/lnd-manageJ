@@ -46,7 +46,8 @@ class CoopClosedChannelTest {
                 TRANSACTION_HASH,
                 OpenInitiator.LOCAL,
                 CloseInitiator.LOCAL,
-                0
+                0,
+                false
         )).withMessage("Close height must be set");
     }
 

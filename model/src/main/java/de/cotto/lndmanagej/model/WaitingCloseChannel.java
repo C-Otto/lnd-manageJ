@@ -7,9 +7,10 @@ public class WaitingCloseChannel extends LocalChannel {
             ChannelCoreInformation channelCoreInformation,
             Pubkey ownPubkey,
             Pubkey remotePubkey,
-            OpenInitiator openInitiator
+            OpenInitiator openInitiator,
+            boolean isPrivate
     ) {
-        super(channelCoreInformation, ownPubkey, remotePubkey, openInitiator, false);
+        super(channelCoreInformation, ownPubkey, remotePubkey, openInitiator, isPrivate);
     }
 
     @Override

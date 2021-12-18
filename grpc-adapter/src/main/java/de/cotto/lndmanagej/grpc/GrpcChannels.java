@@ -9,6 +9,7 @@ import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.ForceClosingChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.OpenInitiator;
+import de.cotto.lndmanagej.model.PrivateResolver;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.TransactionHash;
 import de.cotto.lndmanagej.model.WaitingCloseChannel;
@@ -31,9 +32,10 @@ public class GrpcChannels extends GrpcChannelsBase {
     public GrpcChannels(
             GrpcService grpcService,
             GrpcGetInfo grpcGetInfo,
-            ChannelIdResolver channelIdResolver
+            ChannelIdResolver channelIdResolver,
+            PrivateResolver privateResolver
     ) {
-        super(channelIdResolver);
+        super(channelIdResolver, privateResolver);
         this.grpcService = grpcService;
         this.grpcGetInfo = grpcGetInfo;
     }
@@ -79,7 +81,8 @@ public class GrpcChannels extends GrpcChannelsBase {
         return resolveChannelId(channelPoint).map(id -> new WaitingCloseChannel(
                 new ChannelCoreInformation(id, channelPoint, Coins.ofSatoshis(pendingChannel.getCapacity())), ownPubkey,
                 Pubkey.create(pendingChannel.getRemoteNodePub()),
-                getOpenInitiator(pendingChannel.getInitiator())
+                getOpenInitiator(pendingChannel.getInitiator()),
+                resolveIsPrivate(id)
         ));
     }
 
@@ -95,7 +98,8 @@ public class GrpcChannels extends GrpcChannelsBase {
                 Pubkey.create(pendingChannel.getRemoteNodePub()),
                 TransactionHash.create(forceClosedChannel.getClosingTxid()),
                 getHtlcOutpoints(forceClosedChannel),
-                getOpenInitiator(pendingChannel.getInitiator())
+                getOpenInitiator(pendingChannel.getInitiator()),
+                resolveIsPrivate(id)
         ));
     }
 

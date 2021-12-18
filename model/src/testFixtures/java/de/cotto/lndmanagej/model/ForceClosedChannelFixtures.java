@@ -13,6 +13,11 @@ public class ForceClosedChannelFixtures {
                     .withResolutions(Set.of(INCOMING_HTLC_CLAIMED, COMMIT_CLAIMED))
                     .build();
 
+    public static final ForceClosedChannel FORCE_CLOSED_CHANNEL_PRIVATE =
+            ClosedChannelFixtures.getWithDefaults(new ForceClosedChannelBuilder())
+                    .withIsPrivate(true)
+                    .build();
+
     public static final ForceClosedChannel FORCE_CLOSED_CHANNEL_2 =
             ClosedChannelFixtures.getWithDefaults(new ForceClosedChannelBuilder())
                     .withResolutions(Set.of(OUTGOING_HTLC_CLAIMED))
@@ -40,5 +45,10 @@ public class ForceClosedChannelFixtures {
     public static final BreachForceClosedChannel FORCE_CLOSED_CHANNEL_BREACH =
             ClosedChannelFixtures.getWithDefaults(new BreachForceClosedChannelBuilder())
                     .withResolutions(Set.of(COMMIT_CLAIMED))
+                    .build();
+
+    public static final BreachForceClosedChannel FORCE_CLOSED_CHANNEL_BREACH_PRIVATE =
+            ClosedChannelFixtures.getWithDefaults(new BreachForceClosedChannelBuilder())
+                    .withIsPrivate(true)
                     .build();
 }

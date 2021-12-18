@@ -17,18 +17,31 @@ public  class WaitingCloseChannelFixtures {
             new ChannelCoreInformation(CHANNEL_ID, CHANNEL_POINT, CAPACITY),
             PUBKEY,
             PUBKEY_2,
-            LOCAL
+            LOCAL,
+            false
     );
+
+    public static final WaitingCloseChannel WAITING_CLOSE_CHANNEL_PRIVATE = new WaitingCloseChannel(
+            new ChannelCoreInformation(CHANNEL_ID, CHANNEL_POINT, CAPACITY),
+            PUBKEY,
+            PUBKEY_2,
+            LOCAL,
+            true
+    );
+
     public static final WaitingCloseChannel WAITING_CLOSE_CHANNEL_2 = new WaitingCloseChannel(
             new ChannelCoreInformation(CHANNEL_ID_2, CHANNEL_POINT_2, CAPACITY),
             PUBKEY,
             PUBKEY_2,
-            REMOTE
+            REMOTE,
+            false
     );
+
     public static final WaitingCloseChannel WAITING_CLOSE_CHANNEL_TO_NODE_3 = new WaitingCloseChannel(
             new ChannelCoreInformation(CHANNEL_ID_3, CHANNEL_POINT, CAPACITY),
             PUBKEY,
             PUBKEY_3,
-            LOCAL
+            LOCAL,
+            false
     );
 }

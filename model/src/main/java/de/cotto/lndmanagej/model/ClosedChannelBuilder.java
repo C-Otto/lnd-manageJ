@@ -35,6 +35,8 @@ public abstract class ClosedChannelBuilder<T extends ClosedChannel> {
 
     int closeHeight;
 
+    boolean isPrivate;
+
     public ClosedChannelBuilder() {
         // default constructor
     }
@@ -86,6 +88,11 @@ public abstract class ClosedChannelBuilder<T extends ClosedChannel> {
 
     public ClosedChannelBuilder<T> withResolutions(Set<Resolution> resolutions) {
         this.resolutions = resolutions;
+        return this;
+    }
+
+    public ClosedChannelBuilder<T> withIsPrivate(boolean isPrivate) {
+        this.isPrivate = isPrivate;
         return this;
     }
 

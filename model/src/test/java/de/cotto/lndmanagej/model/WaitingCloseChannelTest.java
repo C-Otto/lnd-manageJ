@@ -20,7 +20,9 @@ class WaitingCloseChannelTest {
                 new ChannelCoreInformation(CHANNEL_ID, CHANNEL_POINT, CAPACITY),
                 PUBKEY,
                 PUBKEY_2,
-                OpenInitiator.LOCAL)
+                OpenInitiator.LOCAL,
+                false
+                )
         ).isEqualTo(WAITING_CLOSE_CHANNEL);
     }
 
