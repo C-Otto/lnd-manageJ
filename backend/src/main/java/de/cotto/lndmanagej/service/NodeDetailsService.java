@@ -3,14 +3,18 @@ package de.cotto.lndmanagej.service;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.NodeDetails;
 import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.model.RebalanceReport;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Component
 public class NodeDetailsService {
@@ -38,22 +42,56 @@ public class NodeDetailsService {
     }
 
     public NodeDetails getDetails(Pubkey pubkey) {
-        Node node = nodeService.getNode(pubkey);
-        OnChainCosts onChainCosts = onChainCostService.getOnChainCostsForPeer(pubkey);
-        BalanceInformation balanceInformation = balanceService.getBalanceInformationForPeer(pubkey);
-        return new NodeDetails(
-                pubkey,
-                node.alias(),
-                getSortedChannelIds(channelService.getOpenChannelsWith(pubkey)),
-                getSortedChannelIds(channelService.getClosedChannelsWith(pubkey)),
-                getSortedChannelIds(channelService.getWaitingCloseChannelsWith(pubkey)),
-                getSortedChannelIds(channelService.getForceClosingChannelsWith(pubkey)),
-                onChainCosts,
-                balanceInformation,
-                node.online(),
-                feeService.getFeeReportForPeer(pubkey),
-                rebalanceService.getReportForPeer(pubkey)
-        );
+        CompletableFuture<Node> node = getNode(pubkey);
+        CompletableFuture<OnChainCosts> onChainCosts = getOnChainCosts(pubkey);
+        CompletableFuture<BalanceInformation> balanceInformation = getBalanceInformation(pubkey);
+        CompletableFuture<FeeReport> feeReport = getFeeReport(pubkey);
+        CompletableFuture<RebalanceReport> rebalanceReport = getRebalanceReport(pubkey);
+        List<ChannelId> openChannelIds =
+                getSortedChannelIds(channelService.getOpenChannelsWith(pubkey));
+        List<ChannelId> closedChannelIds =
+                getSortedChannelIds(channelService.getClosedChannelsWith(pubkey));
+        List<ChannelId> waitingCloseChannelIds =
+                getSortedChannelIds(channelService.getWaitingCloseChannelsWith(pubkey));
+        List<ChannelId> forceClosingChannelIds =
+                getSortedChannelIds(channelService.getForceClosingChannelsWith(pubkey));
+        try {
+            return new NodeDetails(
+                    pubkey,
+                    node.get().alias(),
+                    openChannelIds,
+                    closedChannelIds,
+                    waitingCloseChannelIds,
+                    forceClosingChannelIds,
+                    onChainCosts.get(),
+                    balanceInformation.get(),
+                    node.get().online(),
+                    feeReport.get(),
+                    rebalanceReport.get()
+            );
+        } catch (InterruptedException | ExecutionException exception) {
+            throw new IllegalStateException("Unable to compute node details for " + pubkey, exception);
+        }
+    }
+
+    private CompletableFuture<Node> getNode(Pubkey pubkey) {
+        return CompletableFuture.supplyAsync(() -> nodeService.getNode(pubkey));
+    }
+
+    private CompletableFuture<OnChainCosts> getOnChainCosts(Pubkey pubkey) {
+        return CompletableFuture.supplyAsync(() -> onChainCostService.getOnChainCostsForPeer(pubkey));
+    }
+
+    private CompletableFuture<FeeReport> getFeeReport(Pubkey pubkey) {
+        return CompletableFuture.supplyAsync(() -> feeService.getFeeReportForPeer(pubkey));
+    }
+
+    private CompletableFuture<RebalanceReport> getRebalanceReport(Pubkey pubkey) {
+        return CompletableFuture.supplyAsync(() -> rebalanceService.getReportForPeer(pubkey));
+    }
+
+    private CompletableFuture<BalanceInformation> getBalanceInformation(Pubkey pubkey) {
+        return CompletableFuture.supplyAsync(() -> balanceService.getBalanceInformationForPeer(pubkey));
     }
 
     private List<ChannelId> getSortedChannelIds(Set<? extends Channel> channels) {
