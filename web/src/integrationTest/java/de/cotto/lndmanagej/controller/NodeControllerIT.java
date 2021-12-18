@@ -3,13 +3,11 @@ package de.cotto.lndmanagej.controller;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FeeReport;
-import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
+import de.cotto.lndmanagej.service.NodeDetailsService;
 import de.cotto.lndmanagej.service.NodeService;
-import de.cotto.lndmanagej.service.OnChainCostService;
-import de.cotto.lndmanagej.service.RebalanceService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -20,21 +18,17 @@ import java.util.List;
 import java.util.Set;
 
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
-import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
-import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_4;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_3;
-import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
-import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_3;
+import static de.cotto.lndmanagej.model.NodeDetailsFixtures.NODE_DETAILS;
+import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
-import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
-import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
-import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
-import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -43,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = NodeController.class)
 class NodeControllerIT {
-    private static final String NODE_PREFIX = "/api/node/" + PUBKEY_2;
+    private static final String NODE_PREFIX = "/api/node/" + PUBKEY;
     private static final FeeReport FEE_REPORT = new FeeReport(Coins.ofMilliSatoshis(1_234), Coins.ofMilliSatoshis(567));
 
     @Autowired
@@ -56,9 +50,6 @@ class NodeControllerIT {
     private ChannelService channelService;
 
     @MockBean
-    private OnChainCostService onChainCostService;
-
-    @MockBean
     @SuppressWarnings("unused")
     private ChannelIdResolver channelIdResolver;
 
@@ -69,33 +60,25 @@ class NodeControllerIT {
     private FeeService feeService;
 
     @MockBean
-    private RebalanceService rebalanceService;
+    private NodeDetailsService nodeDetailsService;
 
     @Test
     void getAlias() throws Exception {
-        when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
+        when(nodeService.getAlias(PUBKEY)).thenReturn(ALIAS_2);
         mockMvc.perform(get(NODE_PREFIX + "/alias"))
                 .andExpect(content().string(ALIAS_2));
     }
 
     @Test
     void getDetails() throws Exception {
-        when(nodeService.getNode(PUBKEY_2)).thenReturn(new Node(PUBKEY_2, ALIAS_2, 0, true));
-        when(channelService.getOpenChannelsWith(PUBKEY_2)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2));
-        when(channelService.getClosedChannelsWith(PUBKEY_2)).thenReturn(Set.of(CLOSED_CHANNEL, CLOSED_CHANNEL_3));
-        when(channelService.getWaitingCloseChannelsWith(PUBKEY_2)).thenReturn(Set.of(WAITING_CLOSE_CHANNEL));
-        when(channelService.getForceClosingChannelsWith(PUBKEY_2)).thenReturn(Set.of(FORCE_CLOSING_CHANNEL_2));
-        when(onChainCostService.getOnChainCostsForPeer(PUBKEY_2)).thenReturn(ON_CHAIN_COSTS);
-        when(balanceService.getBalanceInformationForPeer(PUBKEY_2)).thenReturn(BALANCE_INFORMATION_2);
-        when(feeService.getFeeReportForPeer(PUBKEY_2)).thenReturn(FEE_REPORT);
-        when(rebalanceService.getReportForPeer(PUBKEY_2)).thenReturn(REBALANCE_REPORT);
-        List<String> channelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_2.toString());
-        List<String> closedChannelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_3.toString());
-        List<String> waitingCloseChannelIds = List.of(CHANNEL_ID.toString());
-        List<String> forceClosingChannelIds = List.of(CHANNEL_ID_2.toString());
+        when(nodeDetailsService.getDetails(PUBKEY)).thenReturn(NODE_DETAILS);
+        List<String> channelIds = List.of(CHANNEL_ID.toString());
+        List<String> closedChannelIds = List.of(CHANNEL_ID_2.toString());
+        List<String> waitingCloseChannelIds = List.of(CHANNEL_ID_3.toString());
+        List<String> forceClosingChannelIds = List.of(CHANNEL_ID_4.toString());
         mockMvc.perform(get(NODE_PREFIX + "/details"))
-                .andExpect(jsonPath("$.node", is(PUBKEY_2.toString())))
-                .andExpect(jsonPath("$.alias", is(ALIAS_2)))
+                .andExpect(jsonPath("$.node", is(PUBKEY.toString())))
+                .andExpect(jsonPath("$.alias", is(ALIAS)))
                 .andExpect(jsonPath("$.channels", is(channelIds)))
                 .andExpect(jsonPath("$.closedChannels", is(closedChannelIds)))
                 .andExpect(jsonPath("$.waitingCloseChannels", is(waitingCloseChannelIds)))
@@ -120,25 +103,25 @@ class NodeControllerIT {
 
     @Test
     void getOpenChannelIds() throws Exception {
-        when(channelService.getOpenChannelsWith(PUBKEY_2)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_3));
+        when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_3));
         List<String> channelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_3.toString());
         mockMvc.perform(get(NODE_PREFIX + "/open-channels"))
-                .andExpect(jsonPath("$.node", is(PUBKEY_2.toString())))
+                .andExpect(jsonPath("$.node", is(PUBKEY.toString())))
                 .andExpect(jsonPath("$.channels", is(channelIds)));
     }
 
     @Test
     void getAllChannelIds() throws Exception {
-        when(channelService.getAllChannelsWith(PUBKEY_2)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, CLOSED_CHANNEL_3));
+        when(channelService.getAllChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, CLOSED_CHANNEL_3));
         List<String> channelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_3.toString());
         mockMvc.perform(get(NODE_PREFIX + "/all-channels"))
-                .andExpect(jsonPath("$.node", is(PUBKEY_2.toString())))
+                .andExpect(jsonPath("$.node", is(PUBKEY.toString())))
                 .andExpect(jsonPath("$.channels", is(channelIds)));
     }
 
     @Test
     void getBalance() throws Exception {
-        when(balanceService.getBalanceInformationForPeer(PUBKEY_2)).thenReturn(BALANCE_INFORMATION);
+        when(balanceService.getBalanceInformationForPeer(PUBKEY)).thenReturn(BALANCE_INFORMATION);
         mockMvc.perform(get(NODE_PREFIX + "/balance"))
                 .andExpect(jsonPath("$.localBalance", is("1000")))
                 .andExpect(jsonPath("$.localReserve", is("100")))
@@ -150,7 +133,7 @@ class NodeControllerIT {
 
     @Test
     void getFeeReport() throws Exception {
-        when(feeService.getFeeReportForPeer(PUBKEY_2)).thenReturn(FEE_REPORT);
+        when(feeService.getFeeReportForPeer(PUBKEY)).thenReturn(FEE_REPORT);
         mockMvc.perform(get(NODE_PREFIX + "/fee-report"))
                 .andExpect(jsonPath("$.earned", is("1234")))
                 .andExpect(jsonPath("$.sourced", is("567")));

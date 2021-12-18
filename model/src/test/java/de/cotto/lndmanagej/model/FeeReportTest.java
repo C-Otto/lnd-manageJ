@@ -15,4 +15,9 @@ class FeeReportTest {
     void sourced() {
         assertThat(FEE_REPORT.sourced()).isEqualTo(Coins.ofMilliSatoshis(567));
     }
+
+    @Test
+    void empty() {
+        assertThat(FeeReport.EMPTY).isEqualTo(new FeeReport(Coins.NONE, Coins.NONE));
+    }
 }

@@ -6,18 +6,15 @@ import de.cotto.lndmanagej.controller.dto.ChannelsForNodeDto;
 import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
-import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
-import de.cotto.lndmanagej.model.Node;
-import de.cotto.lndmanagej.model.OnChainCosts;
+import de.cotto.lndmanagej.model.NodeDetails;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
+import de.cotto.lndmanagej.service.NodeDetailsService;
 import de.cotto.lndmanagej.service.NodeService;
-import de.cotto.lndmanagej.service.OnChainCostService;
-import de.cotto.lndmanagej.service.RebalanceService;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,25 +30,22 @@ import java.util.Set;
 public class NodeController {
     private final NodeService nodeService;
     private final ChannelService channelService;
-    private final OnChainCostService onChainCostService;
     private final BalanceService balanceService;
     private final FeeService feeService;
-    private final RebalanceService rebalanceService;
+    private final NodeDetailsService nodeDetailsService;
 
     public NodeController(
             NodeService nodeService,
             ChannelService channelService,
-            OnChainCostService onChainCostService,
             BalanceService balanceService,
             FeeService feeService,
-            RebalanceService rebalanceService
+            NodeDetailsService nodeDetailsService
     ) {
         this.nodeService = nodeService;
         this.channelService = channelService;
-        this.onChainCostService = onChainCostService;
         this.balanceService = balanceService;
         this.feeService = feeService;
-        this.rebalanceService = rebalanceService;
+        this.nodeDetailsService = nodeDetailsService;
     }
 
     @Timed
@@ -63,22 +57,8 @@ public class NodeController {
     @Timed
     @GetMapping("/details")
     public NodeDetailsDto getDetails(@PathVariable Pubkey pubkey) {
-        Node node = nodeService.getNode(pubkey);
-        OnChainCosts onChainCosts = onChainCostService.getOnChainCostsForPeer(pubkey);
-        BalanceInformation balanceInformation = balanceService.getBalanceInformationForPeer(pubkey);
-        return new NodeDetailsDto(
-                pubkey,
-                node.alias(),
-                toSortedList(channelService.getOpenChannelsWith(pubkey)),
-                toSortedList(channelService.getClosedChannelsWith(pubkey)),
-                toSortedList(channelService.getWaitingCloseChannelsWith(pubkey)),
-                toSortedList(channelService.getForceClosingChannelsWith(pubkey)),
-                onChainCosts,
-                balanceInformation,
-                node.online(),
-                feeService.getFeeReportForPeer(pubkey),
-                rebalanceService.getReportForPeer(pubkey)
-        );
+        NodeDetails nodeDetails = nodeDetailsService.getDetails(pubkey);
+        return NodeDetailsDto.createFromModel(nodeDetails);
     }
 
     @Timed

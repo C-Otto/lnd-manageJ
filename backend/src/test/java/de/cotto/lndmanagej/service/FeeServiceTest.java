@@ -71,7 +71,7 @@ class FeeServiceTest {
     void getFeeReportForChannel_no_forward() {
         when(dao.getEventsWithOutgoingChannel(CHANNEL_ID)).thenReturn(List.of());
         when(dao.getEventsWithIncomingChannel(CHANNEL_ID)).thenReturn(List.of());
-        assertThat(feeService.getFeeReportForChannel(CHANNEL_ID)).isEqualTo(new FeeReport(Coins.NONE, Coins.NONE));
+        assertThat(feeService.getFeeReportForChannel(CHANNEL_ID)).isEqualTo(FeeReport.EMPTY);
     }
 
     @Test
@@ -93,6 +93,6 @@ class FeeServiceTest {
 
     @Test
     void getFeeReportForPeer_no_channel() {
-        assertThat(feeService.getFeeReportForPeer(PUBKEY)).isEqualTo(new FeeReport(Coins.NONE, Coins.NONE));
+        assertThat(feeService.getFeeReportForPeer(PUBKEY)).isEqualTo(FeeReport.EMPTY);
     }
 }

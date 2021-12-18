@@ -2,12 +2,9 @@ package de.cotto.lndmanagej.controller.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelId;
-import de.cotto.lndmanagej.model.FeeReport;
-import de.cotto.lndmanagej.model.OnChainCosts;
+import de.cotto.lndmanagej.model.NodeDetails;
 import de.cotto.lndmanagej.model.Pubkey;
-import de.cotto.lndmanagej.model.RebalanceReport;
 
 import java.util.List;
 
@@ -24,32 +21,19 @@ public record NodeDetailsDto(
         FeeReportDto feeReport,
         RebalanceReportDto rebalanceReport
 ) {
-    @SuppressWarnings("PMD.ExcessiveParameterList")
-    public NodeDetailsDto(
-            Pubkey pubkey,
-            String alias,
-            List<ChannelId> channels,
-            List<ChannelId> closedChannels,
-            List<ChannelId> waitingCloseChannels,
-            List<ChannelId> pendingForceClosingChannels,
-            OnChainCosts onChainCosts,
-            BalanceInformation balanceInformation,
-            boolean online,
-            FeeReport feeReport,
-            RebalanceReport rebalanceReport
-    ) {
-        this(
-                pubkey,
-                alias,
-                channels,
-                closedChannels,
-                waitingCloseChannels,
-                pendingForceClosingChannels,
-                OnChainCostsDto.createFromModel(onChainCosts),
-                BalanceInformationDto.createFromModel(balanceInformation),
-                online,
-                FeeReportDto.createFromModel(feeReport),
-                RebalanceReportDto.createFromModel(rebalanceReport)
+    public static NodeDetailsDto createFromModel(NodeDetails nodeDetails) {
+        return new NodeDetailsDto(
+                nodeDetails.pubkey(),
+                nodeDetails.alias(),
+                nodeDetails.channels(),
+                nodeDetails.closedChannels(),
+                nodeDetails.waitingCloseChannels(),
+                nodeDetails.pendingForceClosingChannels(),
+                OnChainCostsDto.createFromModel(nodeDetails.onChainCosts()),
+                BalanceInformationDto.createFromModel(nodeDetails.balanceInformation()),
+                nodeDetails.online(),
+                FeeReportDto.createFromModel(nodeDetails.feeReport()),
+                RebalanceReportDto.createFromModel(nodeDetails.rebalanceReport())
         );
     }
 }

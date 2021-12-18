@@ -4,21 +4,13 @@ import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.ChannelsForNodeDto;
 import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
-import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
-import de.cotto.lndmanagej.controller.dto.RebalanceReportDto;
-import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FeeReport;
-import de.cotto.lndmanagej.model.Node;
-import de.cotto.lndmanagej.model.OnChainCosts;
-import de.cotto.lndmanagej.model.Pubkey;
-import de.cotto.lndmanagej.model.RebalanceReport;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.FeeService;
+import de.cotto.lndmanagej.service.NodeDetailsService;
 import de.cotto.lndmanagej.service.NodeService;
-import de.cotto.lndmanagej.service.OnChainCostService;
-import de.cotto.lndmanagej.service.RebalanceService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,20 +26,14 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_2;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_3;
-import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL;
-import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL_2;
-import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL_3;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_3;
+import static de.cotto.lndmanagej.model.NodeDetailsFixtures.NODE_DETAILS;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
-import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
-import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
-import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL_2;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -64,16 +50,13 @@ class NodeControllerTest {
     private ChannelService channelService;
 
     @Mock
-    private OnChainCostService onChainCostService;
-
-    @Mock
     private BalanceService balanceService;
 
     @Mock
     private FeeService feeService;
 
     @Mock
-    private RebalanceService rebalanceService;
+    private NodeDetailsService nodeDetailsService;
 
     @Test
     void getAlias() {
@@ -83,64 +66,9 @@ class NodeControllerTest {
     }
 
     @Test
-    void getNodeDetails_no_channels() {
-        when(onChainCostService.getOnChainCostsForPeer(any())).thenReturn(OnChainCosts.NONE);
-        when(balanceService.getBalanceInformationForPeer(any(Pubkey.class))).thenReturn(BalanceInformation.EMPTY);
-        when(feeService.getFeeReportForPeer(any())).thenReturn(new FeeReport(Coins.NONE, Coins.NONE));
-        when(rebalanceService.getReportForPeer(PUBKEY_2)).thenReturn(RebalanceReport.EMPTY);
-        NodeDetailsDto expectedDetails = new NodeDetailsDto(
-                PUBKEY_2,
-                ALIAS_2,
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                OnChainCostsDto.createFromModel(OnChainCosts.NONE),
-                BalanceInformationDto.createFromModel(BalanceInformation.EMPTY),
-                true,
-                new FeeReportDto("0", "0"),
-                RebalanceReportDto.createFromModel(RebalanceReport.EMPTY)
-        );
-        when(nodeService.getNode(PUBKEY_2)).thenReturn(new Node(PUBKEY_2, ALIAS_2, 0, true));
-
-        assertThat(nodeController.getDetails(PUBKEY_2)).isEqualTo(expectedDetails);
-    }
-
-    @Test
-    void getNodeDetails_with_channels() {
-        when(nodeService.getNode(PUBKEY_2)).thenReturn(new Node(PUBKEY_2, ALIAS_2, 0, false));
-        when(channelService.getOpenChannelsWith(PUBKEY_2)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL_3, LOCAL_OPEN_CHANNEL));
-        when(channelService.getClosedChannelsWith(PUBKEY_2)).thenReturn(Set.of(CLOSED_CHANNEL_2, CLOSED_CHANNEL_3));
-        when(channelService.getWaitingCloseChannelsWith(PUBKEY_2)).thenReturn(
-                Set.of(WAITING_CLOSE_CHANNEL, WAITING_CLOSE_CHANNEL_2)
-        );
-        when(channelService.getForceClosingChannelsWith(PUBKEY_2)).thenReturn(
-                Set.of(FORCE_CLOSING_CHANNEL, FORCE_CLOSING_CHANNEL_2, FORCE_CLOSING_CHANNEL_3)
-        );
-        OnChainCosts onChainCosts = new OnChainCosts(
-                Coins.ofSatoshis(123),
-                Coins.ofSatoshis(456),
-                Coins.ofSatoshis(789)
-        );
-        when(onChainCostService.getOnChainCostsForPeer(PUBKEY_2)).thenReturn(onChainCosts);
-        when(balanceService.getBalanceInformationForPeer(PUBKEY_2)).thenReturn(BALANCE_INFORMATION);
-        when(rebalanceService.getReportForPeer(PUBKEY_2)).thenReturn(REBALANCE_REPORT);
-        when(feeService.getFeeReportForPeer(PUBKEY_2)).thenReturn(FEE_REPORT);
-        NodeDetailsDto expectedDetails = new NodeDetailsDto(
-                PUBKEY_2,
-                ALIAS_2,
-                List.of(CHANNEL_ID, CHANNEL_ID_3),
-                List.of(CHANNEL_ID_2, CHANNEL_ID_3),
-                List.of(CHANNEL_ID, CHANNEL_ID_2),
-                List.of(CHANNEL_ID, CHANNEL_ID_2, CHANNEL_ID_3),
-                OnChainCostsDto.createFromModel(onChainCosts),
-                BalanceInformationDto.createFromModel(BALANCE_INFORMATION),
-                false,
-                FeeReportDto.createFromModel(FEE_REPORT),
-                RebalanceReportDto.createFromModel(REBALANCE_REPORT)
-        );
-
-        assertThat(nodeController.getDetails(PUBKEY_2)).isEqualTo(expectedDetails);
+    void getNodeDetails() {
+        when(nodeDetailsService.getDetails(PUBKEY_2)).thenReturn(NODE_DETAILS);
+        assertThat(nodeController.getDetails(PUBKEY_2)).isEqualTo(NodeDetailsDto.createFromModel(NODE_DETAILS));
     }
 
     @Test
