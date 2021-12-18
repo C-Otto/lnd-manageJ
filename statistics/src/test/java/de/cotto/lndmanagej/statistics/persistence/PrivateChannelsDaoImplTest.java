@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.statistics.persistence;
 
+import de.cotto.lndmanagej.model.ChannelId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,45 +23,42 @@ class PrivateChannelsDaoImplTest {
     private PrivateChannelsDaoImpl dao;
 
     @Mock
-    private PrivateChannelsRepository privateChannelsRepository;
+    private PrivateChannelsRepository repository;
 
     @Test
     void isPrivate_unknown() {
-        when(privateChannelsRepository.findById(CHANNEL_ID.getShortChannelId())).thenReturn(Optional.empty());
+        when(repository.findById(CHANNEL_ID.getShortChannelId())).thenReturn(Optional.empty());
         assertThat(dao.isPrivate(CHANNEL_ID)).isEmpty();
     }
 
     @Test
     void isPrivate_true() {
         PrivateChannelJpaDto dto = new PrivateChannelJpaDto(CHANNEL_ID, true);
-        when(privateChannelsRepository.findById(CHANNEL_ID.getShortChannelId())).thenReturn(Optional.of(dto));
+        when(repository.findById(CHANNEL_ID.getShortChannelId())).thenReturn(Optional.of(dto));
         assertThat(dao.isPrivate(CHANNEL_ID)).contains(true);
     }
 
     @Test
     void isPrivate_false() {
         PrivateChannelJpaDto dto = new PrivateChannelJpaDto(CHANNEL_ID, false);
-        when(privateChannelsRepository.findById(CHANNEL_ID.getShortChannelId())).thenReturn(Optional.of(dto));
+        when(repository.findById(CHANNEL_ID.getShortChannelId())).thenReturn(Optional.of(dto));
         assertThat(dao.isPrivate(CHANNEL_ID)).contains(false);
     }
 
     @Test
     void savePrivateFlag_private() {
         dao.savePrivateFlag(CHANNEL_ID, true);
-        verify(privateChannelsRepository).save(argThat(PrivateChannelJpaDto::isPrivate));
-        verify(privateChannelsRepository).save(argThat(
-                privateChannelJpaDto -> CHANNEL_ID.getShortChannelId() == privateChannelJpaDto.getChannelId()
-        ));
+        verifySave(CHANNEL_ID, true);
     }
 
     @Test
     void savePrivateFlag_not_private() {
         dao.savePrivateFlag(CHANNEL_ID_2, false);
-        verify(privateChannelsRepository).save(argThat(
-                privateChannelJpaDto -> !privateChannelJpaDto.isPrivate()
-        ));
-        verify(privateChannelsRepository).save(argThat(
-                privateChannelJpaDto -> CHANNEL_ID_2.getShortChannelId() == privateChannelJpaDto.getChannelId()
-        ));
+        verifySave(CHANNEL_ID_2, false);
+    }
+
+    private void verifySave(ChannelId channelId, boolean expected) {
+        verify(repository).save(argThat(privateChannelJpaDto -> privateChannelJpaDto.isPrivate() == expected));
+        verify(repository).save(argThat(dto -> channelId.equals(ChannelId.fromShortChannelId(dto.getChannelId()))));
     }
 }
