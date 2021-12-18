@@ -30,13 +30,6 @@ public class GrpcChannelsBase {
         throw new IllegalStateException("unexpected open initiator: " + openInitiator);
     }
 
-    Optional<ChannelId> getChannelId(long chanId, ChannelPoint channelPoint) {
-        if (chanId == 0) {
-            return resolveChannelId(channelPoint);
-        }
-        return Optional.of(ChannelId.fromShortChannelId(chanId));
-    }
-
     Optional<ChannelId> resolveChannelId(ChannelPoint channelPoint) {
         return channelIdResolver.resolveFromChannelPoint(channelPoint);
     }

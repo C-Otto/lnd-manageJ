@@ -44,23 +44,6 @@ class GrpcChannelsBaseTest {
     }
 
     @Test
-    void getChannelId_already_resolved() {
-        assertThat(grpcChannelsBase.getChannelId(CHANNEL_ID.getShortChannelId(), CHANNEL_POINT)).contains(CHANNEL_ID);
-        verify(channelIdResolver, never()).resolveFromChannelPoint(any());
-    }
-
-    @Test
-    void getChannelId_resolved() {
-        when(channelIdResolver.resolveFromChannelPoint(CHANNEL_POINT)).thenReturn(Optional.of(CHANNEL_ID_2));
-        assertThat(grpcChannelsBase.getChannelId(0, CHANNEL_POINT)).contains(CHANNEL_ID_2);
-    }
-
-    @Test
-    void getChannelId_not_resolved() {
-        assertThat(grpcChannelsBase.getChannelId(0, CHANNEL_POINT)).isEmpty();
-    }
-
-    @Test
     void resolveChannelId_resolved() {
         when(channelIdResolver.resolveFromChannelPoint(CHANNEL_POINT)).thenReturn(Optional.of(CHANNEL_ID_2));
         assertThat(grpcChannelsBase.resolveChannelId(CHANNEL_POINT)).contains(CHANNEL_ID_2);

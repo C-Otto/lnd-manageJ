@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.grpc;
 
 import de.cotto.lndmanagej.hardcoded.HardcodedService;
+import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.CloseInitiator;
 import de.cotto.lndmanagej.model.ClosedChannelFixtures;
@@ -221,6 +222,33 @@ class GrpcClosedChannelsTest {
         assertThat(grpcClosedChannels.getClosedChannels()).containsExactlyInAnyOrder(CLOSED_CHANNEL);
         verify(channelIdResolver, never()).resolveFromChannelPoint(any());
     }
+
+    @Test
+    void getChannelId_already_resolved() {
+        when(grpcService.getClosedChannels()).thenReturn(List.of(
+                closedChannel(CHANNEL_ID_SHORT, COOPERATIVE_CLOSE, INITIATOR_LOCAL, INITIATOR_REMOTE)
+        ));
+        assertThat(grpcClosedChannels.getClosedChannels()).map(Channel::getId).containsExactly(CHANNEL_ID);
+        verify(channelIdResolver, never()).resolveFromChannelPoint(any());
+    }
+
+    @Test
+    void getChannelId_resolved() {
+        when(grpcService.getClosedChannels()).thenReturn(List.of(
+                closedChannel(0, COOPERATIVE_CLOSE, INITIATOR_LOCAL, INITIATOR_REMOTE)
+        ));
+        when(channelIdResolver.resolveFromChannelPoint(CHANNEL_POINT)).thenReturn(Optional.of(CHANNEL_ID_2));
+        assertThat(grpcClosedChannels.getClosedChannels()).map(Channel::getId).containsExactly(CHANNEL_ID_2);
+    }
+
+    @Test
+    void getChannelId_not_resolved() {
+        when(grpcService.getClosedChannels()).thenReturn(List.of(
+                closedChannel(0, COOPERATIVE_CLOSE, INITIATOR_LOCAL, INITIATOR_REMOTE)
+        ));
+        assertThat(grpcClosedChannels.getClosedChannels()).isEmpty();
+    }
+
 
     private ChannelCloseSummary closedChannel(
             long channelId,

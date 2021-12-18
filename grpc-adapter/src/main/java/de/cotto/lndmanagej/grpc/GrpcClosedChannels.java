@@ -140,4 +140,11 @@ public class GrpcClosedChannels extends GrpcChannelsBase {
         }
         throw new IllegalStateException("unexpected close initiator: " + closeInitiator);
     }
+
+    private Optional<ChannelId> getChannelId(long chanId, ChannelPoint channelPoint) {
+        if (chanId == 0) {
+            return resolveChannelId(channelPoint);
+        }
+        return Optional.of(ChannelId.fromShortChannelId(chanId));
+    }
 }
