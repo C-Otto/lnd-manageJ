@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.dto;
 
+import de.cotto.lndmanagej.controller.dto.SelfPaymentsDto;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

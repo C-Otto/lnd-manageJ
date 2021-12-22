@@ -2,7 +2,7 @@ package de.cotto.lndmanagej.controller;
 
 import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
-import de.cotto.lndmanagej.dto.SelfPaymentsDto;
+import de.cotto.lndmanagej.controller.dto.SelfPaymentsDto;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.SelfPaymentsService;

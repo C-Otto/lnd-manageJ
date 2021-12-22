@@ -1,6 +1,5 @@
-package de.cotto.lndmanagej.dto;
+package de.cotto.lndmanagej.controller.dto;
 
-import de.cotto.lndmanagej.controller.dto.SelfPaymentDto;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.SelfPayment;
 
