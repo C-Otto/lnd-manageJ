@@ -70,4 +70,28 @@ class RebalancesControllerTest {
         when(rebalanceService.getAmountToPeer(PUBKEY)).thenReturn(COINS);
         assertThat(rebalancesController.getRebalanceTargetAmountForPeer(PUBKEY)).isEqualTo(123);
     }
+
+    @Test
+    void getRebalanceSupportAsSourceAmountForChannel() {
+        when(rebalanceService.getSupportAsSourceAmountFromChannel(CHANNEL_ID)).thenReturn(COINS);
+        assertThat(rebalancesController.getRebalanceSupportAsSourceAmountFromChannel(CHANNEL_ID)).isEqualTo(123);
+    }
+
+    @Test
+    void getRebalanceSupportAsSourceAmountFromPeer() {
+        when(rebalanceService.getSupportAsSourceAmountFromPeer(PUBKEY)).thenReturn(COINS);
+        assertThat(rebalancesController.getRebalanceSupportAsSourceAmountFromPeer(PUBKEY)).isEqualTo(123);
+    }
+
+    @Test
+    void getRebalanceSupportAsTargetAmountToChannel() {
+        when(rebalanceService.getSupportAsTargetAmountToChannel(CHANNEL_ID)).thenReturn(COINS);
+        assertThat(rebalancesController.getRebalanceSupportAsTargetAmountToChannel(CHANNEL_ID)).isEqualTo(123);
+    }
+
+    @Test
+    void getRebalanceSupportAsTargetAmountToPeer() {
+        when(rebalanceService.getSupportAsTargetAmountToPeer(PUBKEY)).thenReturn(COINS);
+        assertThat(rebalancesController.getRebalanceSupportAsTargetAmountToPeer(PUBKEY)).isEqualTo(123);
+    }
 }

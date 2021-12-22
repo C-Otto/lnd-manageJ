@@ -87,6 +87,8 @@ class NodeControllerIT {
                 .andExpect(jsonPath("$.rebalanceReport.targetCosts", is("2000000")))
                 .andExpect(jsonPath("$.rebalanceReport.sourceAmount", is("665000")))
                 .andExpect(jsonPath("$.rebalanceReport.targetAmount", is("991000")))
+                .andExpect(jsonPath("$.rebalanceReport.supportAsSourceAmount", is("100000")))
+                .andExpect(jsonPath("$.rebalanceReport.supportAsTargetAmount", is("200000")))
                 .andExpect(jsonPath("$.balance.localBalance", is("2000")))
                 .andExpect(jsonPath("$.balance.localReserve", is("200")))
                 .andExpect(jsonPath("$.balance.localAvailable", is("1800")))

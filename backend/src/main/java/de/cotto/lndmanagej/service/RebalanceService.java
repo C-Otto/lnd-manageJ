@@ -30,7 +30,9 @@ public class RebalanceService {
                 getSourceCostsForChannel(channelId),
                 getAmountFromChannel(channelId),
                 getTargetCostsForChannel(channelId),
-                getAmountToChannel(channelId)
+                getAmountToChannel(channelId),
+                getSupportAsSourceAmountFromChannel(channelId),
+                getSupportAsTargetAmountToChannel(channelId)
         );
     }
 
@@ -40,7 +42,9 @@ public class RebalanceService {
                 getSourceCostsForPeer(pubkey),
                 getAmountFromPeer(pubkey),
                 getTargetCostsForPeer(pubkey),
-                getAmountToPeer(pubkey)
+                getAmountToPeer(pubkey),
+                Coins.NONE,
+                Coins.NONE
         );
     }
 
@@ -82,6 +86,36 @@ public class RebalanceService {
     @Timed
     public Coins getAmountToPeer(Pubkey pubkey) {
         return getSumOfAmountPaid(getRebalancesToPeer(pubkey));
+    }
+
+    @Timed
+    public Coins getSupportAsSourceAmountFromChannel(ChannelId channelId) {
+        Coins amountSourceTotal = getSumOfAmountPaid(selfPaymentsService.getSelfPaymentsFromChannel(channelId));
+        Coins amountRebalanceSource = getAmountFromChannel(channelId);
+        return amountSourceTotal.subtract(amountRebalanceSource);
+    }
+
+    @Timed
+    public Coins getSupportAsTargetAmountToChannel(ChannelId channelId) {
+        Coins amountTargetTotal = getSumOfAmountPaid(selfPaymentsService.getSelfPaymentsToChannel(channelId));
+        Coins amountRebalanceTarget = getAmountToChannel(channelId);
+        return amountTargetTotal.subtract(amountRebalanceTarget);
+    }
+
+    @Timed
+    public Coins getSupportAsSourceAmountFromPeer(Pubkey pubkey) {
+        return channelService.getAllChannelsWith(pubkey).parallelStream()
+                .map(Channel::getId)
+                .map(this::getSupportAsSourceAmountFromChannel)
+                .reduce(Coins.NONE, Coins::add);
+    }
+
+    @Timed
+    public Coins getSupportAsTargetAmountToPeer(Pubkey pubkey) {
+        return channelService.getAllChannelsWith(pubkey).parallelStream()
+                .map(Channel::getId)
+                .map(this::getSupportAsTargetAmountToChannel)
+                .reduce(Coins.NONE, Coins::add);
     }
 
     private Set<SelfPayment> getRebalancesFromChannel(ChannelId channelId) {

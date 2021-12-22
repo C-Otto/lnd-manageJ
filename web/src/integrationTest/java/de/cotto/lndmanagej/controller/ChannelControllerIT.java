@@ -18,7 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION_2;
-import static de.cotto.lndmanagej.model.ChannelDetailsFixtures.CHANNEL_DETAILS;
+import static de.cotto.lndmanagej.model.ChannelDetailsFixtures.CHANNEL_DETAILS_2;
 import static de.cotto.lndmanagej.model.ChannelDetailsFixtures.CHANNEL_DETAILS_CLOSED;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
@@ -123,7 +123,7 @@ class ChannelControllerIT {
     @Test
     void getChannelDetails() throws Exception {
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_PRIVATE));
-        when(channelDetailsService.getDetails(LOCAL_OPEN_CHANNEL_PRIVATE)).thenReturn(CHANNEL_DETAILS);
+        when(channelDetailsService.getDetails(LOCAL_OPEN_CHANNEL_PRIVATE)).thenReturn(CHANNEL_DETAILS_2);
         mockMvc.perform(get(DETAILS_PREFIX))
                 .andExpect(jsonPath("$.channelIdShort", is(String.valueOf(CHANNEL_ID.getShortChannelId()))))
                 .andExpect(jsonPath("$.channelIdCompact", is(CHANNEL_ID.getCompactForm())))
@@ -143,10 +143,12 @@ class ChannelControllerIT {
                 .andExpect(jsonPath("$.onChainCosts.openCosts", is("1000")))
                 .andExpect(jsonPath("$.onChainCosts.closeCosts", is("2000")))
                 .andExpect(jsonPath("$.onChainCosts.sweepCosts", is("3000")))
-                .andExpect(jsonPath("$.rebalanceReport.sourceCosts", is("1000000")))
-                .andExpect(jsonPath("$.rebalanceReport.sourceAmount", is("665000")))
-                .andExpect(jsonPath("$.rebalanceReport.targetCosts", is("2000000")))
-                .andExpect(jsonPath("$.rebalanceReport.targetAmount", is("991000")))
+                .andExpect(jsonPath("$.rebalanceReport.sourceCosts", is("1001000")))
+                .andExpect(jsonPath("$.rebalanceReport.sourceAmount", is("666000")))
+                .andExpect(jsonPath("$.rebalanceReport.targetCosts", is("2001000")))
+                .andExpect(jsonPath("$.rebalanceReport.targetAmount", is("992000")))
+                .andExpect(jsonPath("$.rebalanceReport.supportAsSourceAmount", is("101000")))
+                .andExpect(jsonPath("$.rebalanceReport.supportAsTargetAmount", is("201000")))
                 .andExpect(jsonPath("$.balance.localBalance", is("1000")))
                 .andExpect(jsonPath("$.balance.localReserve", is("100")))
                 .andExpect(jsonPath("$.balance.localAvailable", is("900")))

@@ -85,4 +85,32 @@ class RebalancesControllerIT {
         mockMvc.perform(get(NODE_PREFIX + "/rebalance-target-amount/"))
                 .andExpect(content().string("999"));
     }
+
+    @Test
+    void getRebalanceSupportAsSourceAmountForChannel() throws Exception {
+        when(rebalanceService.getSupportAsSourceAmountFromChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(1));
+        mockMvc.perform(get(CHANNEL_PREFIX + "/rebalance-support-as-source-amount/"))
+                .andExpect(content().string("1"));
+    }
+
+    @Test
+    void getRebalanceSupportAsSourceAmountForPeer() throws Exception {
+        when(rebalanceService.getSupportAsSourceAmountFromPeer(PUBKEY)).thenReturn(Coins.ofMilliSatoshis(2));
+        mockMvc.perform(get(NODE_PREFIX + "/rebalance-support-as-source-amount/"))
+                .andExpect(content().string("2"));
+    }
+
+    @Test
+    void getRebalanceSupportAsTargetAmountForChannel() throws Exception {
+        when(rebalanceService.getSupportAsTargetAmountToChannel(CHANNEL_ID)).thenReturn(Coins.ofMilliSatoshis(3));
+        mockMvc.perform(get(CHANNEL_PREFIX + "/rebalance-support-as-target-amount/"))
+                .andExpect(content().string("3"));
+    }
+
+    @Test
+    void getRebalanceSupportAsTargetAmountForPeer() throws Exception {
+        when(rebalanceService.getSupportAsTargetAmountToPeer(PUBKEY)).thenReturn(Coins.ofMilliSatoshis(4));
+        mockMvc.perform(get(NODE_PREFIX + "/rebalance-support-as-target-amount/"))
+                .andExpect(content().string("4"));
+    }
 }

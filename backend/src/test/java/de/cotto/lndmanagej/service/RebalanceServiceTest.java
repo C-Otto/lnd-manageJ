@@ -21,6 +21,7 @@ import java.util.Set;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
+import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_3;
@@ -59,45 +60,105 @@ class RebalanceServiceTest {
 
     @Test
     void getRebalanceReportForChannel_source() {
-        RebalanceReport expected =
-                new RebalanceReport(FEE_FOR_TWO_REBALANCES, AMOUNT_FOR_TWO_REBALANCES, Coins.NONE, Coins.NONE);
-        mockSelfPaymentsFromChannel("from " + CHANNEL_ID.getShortChannelId());
+        RebalanceReport expected = new RebalanceReport(
+                FEE_FOR_TWO_REBALANCES,
+                AMOUNT_FOR_TWO_REBALANCES,
+                Coins.NONE,
+                Coins.NONE,
+                Coins.NONE,
+                Coins.NONE
+        );
+        mockSelfPaymentsFromChannel("source: " + CHANNEL_ID.getShortChannelId());
         assertThat(rebalanceService.getReportForChannel(CHANNEL_ID)).isEqualTo(expected);
     }
 
     @Test
     void getRebalanceReportForChannel_target() {
-        RebalanceReport expected =
-                new RebalanceReport(Coins.NONE, Coins.NONE, FEE_FOR_TWO_REBALANCES, AMOUNT_FOR_TWO_REBALANCES);
-        mockSelfPaymentsToChannel("to " + CHANNEL_ID_2.getShortChannelId());
+        RebalanceReport expected = new RebalanceReport(
+                Coins.NONE,
+                Coins.NONE,
+                FEE_FOR_TWO_REBALANCES,
+                AMOUNT_FOR_TWO_REBALANCES,
+                Coins.NONE,
+                Coins.NONE
+        );
+        mockSelfPaymentsToChannel("sending to " + CHANNEL_ID_2.getShortChannelId());
+        assertThat(rebalanceService.getReportForChannel(CHANNEL_ID_2)).isEqualTo(expected);
+    }
+
+    @Test
+    void getRebalanceReportForChannel_supportAsSource() {
+        RebalanceReport expected = new RebalanceReport(
+                PAYMENT_FEES,
+                AMOUNT_PAID,
+                Coins.NONE,
+                Coins.NONE,
+                AMOUNT_FOR_TWO_REBALANCES,
+                Coins.NONE
+        );
+        when(selfPaymentsService.getSelfPaymentsFromChannel(CHANNEL_ID)).thenReturn(List.of(
+                getSelfPayment("dest: " + CHANNEL_ID_2, 0),
+                getSelfPayment("into " + CHANNEL_ID_2, 1),
+                getSelfPayment(CHANNEL_ID.toString(), 1)
+        ));
+        assertThat(rebalanceService.getReportForChannel(CHANNEL_ID)).isEqualTo(expected);
+    }
+
+    @Test
+    void getRebalanceReportForChannel_supportAsTarget() {
+        RebalanceReport expected = new RebalanceReport(
+                Coins.NONE,
+                Coins.NONE,
+                PAYMENT_FEES,
+                AMOUNT_PAID,
+                Coins.NONE,
+                AMOUNT_FOR_TWO_REBALANCES
+        );
+        when(selfPaymentsService.getSelfPaymentsToChannel(CHANNEL_ID_2)).thenReturn(List.of(
+                getSelfPayment("filling up " + CHANNEL_ID_2, 0),
+                getSelfPayment("f: " + CHANNEL_ID, 1),
+                getSelfPayment(CHANNEL_ID + " is source", 1)
+        ));
         assertThat(rebalanceService.getReportForChannel(CHANNEL_ID_2)).isEqualTo(expected);
     }
 
     @Test
     void getRebalanceReportForPeer_source() {
-        RebalanceReport expected =
-                new RebalanceReport(FEE_FOR_TWO_REBALANCES, AMOUNT_FOR_TWO_REBALANCES, Coins.NONE, Coins.NONE);
+        RebalanceReport expected = new RebalanceReport(
+                FEE_FOR_TWO_REBALANCES,
+                AMOUNT_FOR_TWO_REBALANCES,
+                Coins.NONE,
+                Coins.NONE,
+                Coins.NONE,
+                Coins.NONE
+        );
         mockTwoChannelsAndPaymentsFromPeer();
         assertThat(rebalanceService.getReportForPeer(PUBKEY)).isEqualTo(expected);
     }
 
     @Test
     void getRebalanceReportForPeer_target() {
-        RebalanceReport expected =
-                new RebalanceReport(Coins.NONE, Coins.NONE, FEE_FOR_TWO_REBALANCES, AMOUNT_FOR_TWO_REBALANCES);
+        RebalanceReport expected = new RebalanceReport(
+                Coins.NONE,
+                Coins.NONE,
+                FEE_FOR_TWO_REBALANCES,
+                AMOUNT_FOR_TWO_REBALANCES,
+                Coins.NONE,
+                Coins.NONE
+        );
         mockTwoChannelsAndPaymentsToPeer();
         assertThat(rebalanceService.getReportForPeer(PUBKEY)).isEqualTo(expected);
     }
 
     @Test
     void getSourceCostsForChannel() {
-        mockSelfPaymentsFromChannel("from " + CHANNEL_ID.getShortChannelId());
+        mockSelfPaymentsFromChannel(CHANNEL_ID.toString());
         assertThat(rebalanceService.getSourceCostsForChannel(CHANNEL_ID)).isEqualTo(FEE_FOR_TWO_REBALANCES);
     }
 
     @Test
     void getTargetCostsForChannel() {
-        mockSelfPaymentsToChannel("to " + CHANNEL_ID_2.getShortChannelId());
+        mockSelfPaymentsToChannel("sending into " + CHANNEL_ID_2.getShortChannelId());
         assertThat(rebalanceService.getTargetCostsForChannel(CHANNEL_ID_2)).isEqualTo(FEE_FOR_TWO_REBALANCES);
     }
 
@@ -127,13 +188,13 @@ class RebalanceServiceTest {
 
     @Test
     void getAmountFromChannel() {
-        mockSelfPaymentsFromChannel("from " + CHANNEL_ID.getShortChannelId());
+        mockSelfPaymentsFromChannel("taking out of " + CHANNEL_ID.getShortChannelId());
         assertThat(rebalanceService.getAmountFromChannel(CHANNEL_ID)).isEqualTo(AMOUNT_FOR_TWO_REBALANCES);
     }
 
     @Test
     void getAmountToChannel() {
-        mockSelfPaymentsToChannel("to " + CHANNEL_ID_2.getShortChannelId());
+        mockSelfPaymentsToChannel("into " + CHANNEL_ID_2.getShortChannelId());
         assertThat(rebalanceService.getAmountToChannel(CHANNEL_ID_2)).isEqualTo(AMOUNT_FOR_TWO_REBALANCES);
     }
 
@@ -200,6 +261,48 @@ class RebalanceServiceTest {
     void getTargetCostsForChannel_source_channel_id_in_memo() {
         mockSelfPaymentsToChannel("something: " + CHANNEL_ID);
         assertThat(rebalanceService.getTargetCostsForChannel(CHANNEL_ID_2)).isEqualTo(Coins.NONE);
+    }
+
+    @Test
+    void getSupportAsSourceAmountFromChannel() {
+        when(selfPaymentsService.getSelfPaymentsFromChannel(CHANNEL_ID)).thenReturn(List.of(
+                getSelfPayment("out of " + CHANNEL_ID, 0),
+                getSelfPayment("emptying " + CHANNEL_ID, 1),
+                getSelfPayment("rebalancing " + CHANNEL_ID_2, 2)
+        ));
+        assertThat(rebalanceService.getSupportAsSourceAmountFromChannel(CHANNEL_ID)).isEqualTo(AMOUNT_PAID);
+    }
+
+    @Test
+    void getSupportAsSourceAmountFromPeer() {
+        when(channelService.getAllChannelsWith(PUBKEY)).thenReturn(Set.of(CLOSED_CHANNEL));
+        when(selfPaymentsService.getSelfPaymentsFromChannel(CHANNEL_ID)).thenReturn(List.of(
+                getSelfPayment("from " + CHANNEL_ID, 0),
+                getSelfPayment("from: " + CHANNEL_ID, 1),
+                getSelfPayment("to: " + CHANNEL_ID_2, 2)
+        ));
+        assertThat(rebalanceService.getSupportAsSourceAmountFromPeer(PUBKEY)).isEqualTo(AMOUNT_PAID);
+    }
+
+    @Test
+    void getSupportAsTargetAmountToChannel() {
+        when(selfPaymentsService.getSelfPaymentsToChannel(CHANNEL_ID_2)).thenReturn(List.of(
+                getSelfPayment("from " + CHANNEL_ID, 0),
+                getSelfPayment("into " + CHANNEL_ID_2, 1),
+                getSelfPayment("to " + CHANNEL_ID_2, 2)
+        ));
+        assertThat(rebalanceService.getSupportAsTargetAmountToChannel(CHANNEL_ID_2)).isEqualTo(AMOUNT_PAID);
+    }
+
+    @Test
+    void getSupportAsTargetAmountToPeer() {
+        when(channelService.getAllChannelsWith(PUBKEY)).thenReturn(Set.of(CLOSED_CHANNEL_2));
+        when(selfPaymentsService.getSelfPaymentsToChannel(CHANNEL_ID_2)).thenReturn(List.of(
+                getSelfPayment("from " + CHANNEL_ID, 0),
+                getSelfPayment("to " + CHANNEL_ID_2, 1),
+                getSelfPayment("to " + CHANNEL_ID_2, 2)
+        ));
+        assertThat(rebalanceService.getSupportAsTargetAmountToPeer(PUBKEY)).isEqualTo(AMOUNT_PAID);
     }
 
     @Test

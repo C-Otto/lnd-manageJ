@@ -65,4 +65,28 @@ public class RebalancesController {
     public long getRebalanceTargetAmountForChannel(@PathVariable ChannelId channelId) {
         return rebalanceService.getAmountToChannel(channelId).milliSatoshis();
     }
+
+    @Timed
+    @GetMapping("/channel/{channelId}/rebalance-support-as-source-amount")
+    public long getRebalanceSupportAsSourceAmountFromChannel(@PathVariable ChannelId channelId) {
+        return rebalanceService.getSupportAsSourceAmountFromChannel(channelId).milliSatoshis();
+    }
+
+    @Timed
+    @GetMapping("/node/{pubkey}/rebalance-support-as-source-amount")
+    public long getRebalanceSupportAsSourceAmountFromPeer(@PathVariable Pubkey pubkey) {
+        return rebalanceService.getSupportAsSourceAmountFromPeer(pubkey).milliSatoshis();
+    }
+
+    @Timed
+    @GetMapping("/channel/{channelId}/rebalance-support-as-target-amount")
+    public long getRebalanceSupportAsTargetAmountToChannel(@PathVariable ChannelId channelId) {
+        return rebalanceService.getSupportAsTargetAmountToChannel(channelId).milliSatoshis();
+    }
+
+    @Timed
+    @GetMapping("/node/{pubkey}/rebalance-support-as-target-amount")
+    public long getRebalanceSupportAsTargetAmountToPeer(@PathVariable Pubkey pubkey) {
+        return rebalanceService.getSupportAsTargetAmountToPeer(pubkey).milliSatoshis();
+    }
 }

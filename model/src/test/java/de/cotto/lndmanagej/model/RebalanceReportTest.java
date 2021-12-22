@@ -9,7 +9,8 @@ class RebalanceReportTest {
 
     @Test
     void empty() {
-        RebalanceReport empty = new RebalanceReport(Coins.NONE, Coins.NONE, Coins.NONE, Coins.NONE);
+        RebalanceReport empty =
+                new RebalanceReport(Coins.NONE, Coins.NONE, Coins.NONE, Coins.NONE, Coins.NONE, Coins.NONE);
         assertThat(RebalanceReport.EMPTY).isEqualTo(empty);
     }
 
@@ -31,5 +32,15 @@ class RebalanceReportTest {
     @Test
     void targetAmount() {
         assertThat(REBALANCE_REPORT.targetAmount()).isEqualTo(Coins.ofSatoshis(991));
+    }
+
+    @Test
+    void supportAsSourceAmount() {
+        assertThat(REBALANCE_REPORT.supportAsSourceAmount()).isEqualTo(Coins.ofSatoshis(100));
+    }
+
+    @Test
+    void supportAsTargetAmount() {
+        assertThat(REBALANCE_REPORT.supportAsTargetAmount()).isEqualTo(Coins.ofSatoshis(200));
     }
 }

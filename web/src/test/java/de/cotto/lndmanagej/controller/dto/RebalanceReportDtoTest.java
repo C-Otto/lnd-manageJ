@@ -12,7 +12,9 @@ class RebalanceReportDtoTest {
             Coins.ofMilliSatoshis(1_234),
             Coins.ofSatoshis(9_000),
             Coins.ofMilliSatoshis(567),
-            Coins.ofSatoshis(1_000)
+            Coins.ofSatoshis(1_000),
+            Coins.ofSatoshis(100),
+            Coins.ofSatoshis(200)
     );
 
     @Test
@@ -36,9 +38,19 @@ class RebalanceReportDtoTest {
     }
 
     @Test
+    void supportAsSourceAmount() {
+        assertThat(REBALANCE_REPORT_DTO.supportAsSourceAmount()).isEqualTo("100000");
+    }
+
+    @Test
+    void supportAsTargetAmount() {
+        assertThat(REBALANCE_REPORT_DTO.supportAsTargetAmount()).isEqualTo("200000");
+    }
+
+    @Test
     void createFromModel() {
         assertThat(RebalanceReportDto.createFromModel(REBALANCE_REPORT)).isEqualTo(
-                new RebalanceReportDto("1000000", "665000", "2000000", "991000")
+                new RebalanceReportDto("1000000", "665000", "2000000", "991000", "100000", "200000")
         );
     }
 }
