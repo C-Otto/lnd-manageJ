@@ -2,7 +2,6 @@ package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.FeeReport;
-import de.cotto.lndmanagej.model.NodeDetailsFixtures;
 import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.model.RebalanceReport;
 import org.junit.jupiter.api.Test;
@@ -18,9 +17,13 @@ import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL
 import static de.cotto.lndmanagej.model.FeeReportFixtures.FEE_REPORT;
 import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL_4;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
+import static de.cotto.lndmanagej.model.NodeDetailsFixtures.NODE_DETAILS;
+import static de.cotto.lndmanagej.model.NodeDetailsFixtures.NODE_DETAILS_EMPTY;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_PEER;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
+import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT;
+import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT_OFFLINE;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL_TO_NODE_3;
@@ -50,6 +53,9 @@ class NodeDetailsServiceTest {
     @Mock
     private RebalanceService rebalanceService;
 
+    @Mock
+    private OnlinePeersService onlinePeersService;
+
     @Test
     void getDetails_no_channel() {
         when(nodeService.getNode(PUBKEY)).thenReturn(NODE);
@@ -57,7 +63,8 @@ class NodeDetailsServiceTest {
         when(onChainCostService.getOnChainCostsForPeer(PUBKEY)).thenReturn(OnChainCosts.NONE);
         when(feeService.getFeeReportForPeer(PUBKEY)).thenReturn(FeeReport.EMPTY);
         when(rebalanceService.getReportForPeer(PUBKEY)).thenReturn(RebalanceReport.EMPTY);
-        assertThat(nodeDetailsService.getDetails(PUBKEY)).isEqualTo(NodeDetailsFixtures.NODE_DETAILS_EMPTY);
+        when(onlinePeersService.getOnlineReport(NODE_PEER)).thenReturn(ONLINE_REPORT_OFFLINE);
+        assertThat(nodeDetailsService.getDetails(PUBKEY)).isEqualTo(NODE_DETAILS_EMPTY);
     }
 
     @Test
@@ -71,6 +78,7 @@ class NodeDetailsServiceTest {
         when(channelService.getForceClosingChannelsWith(PUBKEY)).thenReturn(Set.of(FORCE_CLOSING_CHANNEL_4));
         when(feeService.getFeeReportForPeer(PUBKEY)).thenReturn(FEE_REPORT);
         when(rebalanceService.getReportForPeer(PUBKEY)).thenReturn(REBALANCE_REPORT);
-        assertThat(nodeDetailsService.getDetails(PUBKEY)).isEqualTo(NodeDetailsFixtures.NODE_DETAILS);
+        when(onlinePeersService.getOnlineReport(NODE_PEER)).thenReturn(ONLINE_REPORT);
+        assertThat(nodeDetailsService.getDetails(PUBKEY)).isEqualTo(NODE_DETAILS);
     }
 }

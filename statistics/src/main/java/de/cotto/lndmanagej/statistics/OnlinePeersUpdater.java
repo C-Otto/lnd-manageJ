@@ -1,13 +1,17 @@
 package de.cotto.lndmanagej.statistics;
 
 import de.cotto.lndmanagej.model.LocalChannel;
+import de.cotto.lndmanagej.model.Node;
+import de.cotto.lndmanagej.model.OnlineStatus;
+import de.cotto.lndmanagej.onlinepeers.OnlinePeersDao;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -24,12 +28,20 @@ public class OnlinePeersUpdater {
 
     @Scheduled(fixedRate = 5, timeUnit = TimeUnit.MINUTES)
     public void storePeerOnlineStatus() {
-        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
         channelService.getOpenChannels().stream()
                 .map(LocalChannel::getRemotePubkey)
                 .distinct()
                 .map(nodeService::getNode)
-                .filter(node -> dao.getMostRecentOnlineStatus(node.pubkey()).orElse(!node.online()) != node.online())
+                .filter(this::shouldUpdate)
                 .forEach(node -> dao.saveOnlineStatus(node.pubkey(), node.online(), now));
+    }
+
+    private boolean shouldUpdate(Node node) {
+        Optional<OnlineStatus> mostRecentOnlineStatus = dao.getMostRecentOnlineStatus(node.pubkey());
+        if (mostRecentOnlineStatus.isEmpty()) {
+            return true;
+        }
+        return mostRecentOnlineStatus.get().online() != node.online();
     }
 }

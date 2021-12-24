@@ -11,7 +11,7 @@ public record NodeDetails(
         List<ChannelId> pendingForceClosingChannels,
         OnChainCosts onChainCosts,
         BalanceInformation balanceInformation,
-        boolean online,
+        OnlineReport onlineReport,
         FeeReport feeReport,
         RebalanceReport rebalanceReport
 ) {

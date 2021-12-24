@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.statistics;
 
+import de.cotto.lndmanagej.onlinepeers.OnlinePeersDao;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +18,8 @@ import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHAN
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_2;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_2_PEER;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_3_PEER;
+import static de.cotto.lndmanagej.model.OnlineStatusFixtures.ONLINE_STATUS;
+import static de.cotto.lndmanagej.model.OnlineStatusFixtures.ONLINE_STATUS_OFFLINE;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static org.mockito.ArgumentMatchers.any;
@@ -65,7 +68,7 @@ class OnlinePeersUpdaterTest {
 
     @Test
     void saveOnlineStatus_online_to_offline() {
-        when(dao.getMostRecentOnlineStatus(PUBKEY_2)).thenReturn(Optional.of(true));
+        when(dao.getMostRecentOnlineStatus(PUBKEY_2)).thenReturn(Optional.of(ONLINE_STATUS));
         when(nodeService.getNode(PUBKEY_2)).thenReturn(NODE_2);
 
         onlinePeersUpdater.storePeerOnlineStatus();
@@ -75,7 +78,7 @@ class OnlinePeersUpdaterTest {
 
     @Test
     void saveOnlineStatus_offline_to_online() {
-        when(dao.getMostRecentOnlineStatus(PUBKEY_2)).thenReturn(Optional.of(false));
+        when(dao.getMostRecentOnlineStatus(PUBKEY_2)).thenReturn(Optional.of(ONLINE_STATUS_OFFLINE));
         when(nodeService.getNode(PUBKEY_2)).thenReturn(NODE_2_PEER);
 
         onlinePeersUpdater.storePeerOnlineStatus();
@@ -85,7 +88,7 @@ class OnlinePeersUpdaterTest {
 
     @Test
     void saveOnlineStatus_still_offline() {
-        when(dao.getMostRecentOnlineStatus(PUBKEY_2)).thenReturn(Optional.of(false));
+        when(dao.getMostRecentOnlineStatus(PUBKEY_2)).thenReturn(Optional.of(ONLINE_STATUS_OFFLINE));
         when(nodeService.getNode(PUBKEY_2)).thenReturn(NODE_2);
 
         onlinePeersUpdater.storePeerOnlineStatus();
@@ -95,7 +98,7 @@ class OnlinePeersUpdaterTest {
 
     @Test
     void saveOnlineStatus_still_online() {
-        when(dao.getMostRecentOnlineStatus(PUBKEY_2)).thenReturn(Optional.of(true));
+        when(dao.getMostRecentOnlineStatus(PUBKEY_2)).thenReturn(Optional.of(ONLINE_STATUS));
         when(nodeService.getNode(PUBKEY_2)).thenReturn(NODE_2_PEER);
 
         onlinePeersUpdater.storePeerOnlineStatus();

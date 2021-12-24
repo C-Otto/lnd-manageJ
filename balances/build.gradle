@@ -1,0 +1,10 @@
+plugins {
+    id 'lnd-manageJ.java-library-conventions'
+}
+
+dependencies {
+    implementation project(':model')
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    testRuntimeOnly 'com.h2database:h2'
+    testFixturesApi testFixtures(project(':model'))
+}

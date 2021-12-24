@@ -100,7 +100,8 @@ class NodeControllerIT {
                 .andExpect(jsonPath("$.onChainCosts.openCosts", is("1000")))
                 .andExpect(jsonPath("$.onChainCosts.closeCosts", is("2000")))
                 .andExpect(jsonPath("$.onChainCosts.sweepCosts", is("3000")))
-                .andExpect(jsonPath("$.online", is(true)));
+                .andExpect(jsonPath("$.onlineReport.online", is(true)))
+                .andExpect(jsonPath("$.onlineReport.since", is("2021-12-23T01:02:03Z")));
     }
 
     @Test

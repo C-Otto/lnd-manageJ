@@ -15,9 +15,7 @@ public record ClosedChannelDetailsDto(String initiator, int height, boolean forc
     }
 
     public static ClosedChannelDetailsDto createFromModel(LocalChannel localChannel) {
-        boolean closed = localChannel instanceof ClosedChannel;
-        if (closed) {
-            ClosedChannel closedChannel = (ClosedChannel) localChannel;
+        if (localChannel instanceof ClosedChannel closedChannel) {
             boolean forceClosed = closedChannel instanceof ForceClosedChannel;
             boolean breach = forceClosed && closedChannel instanceof BreachForceClosedChannel;
             return new ClosedChannelDetailsDto(

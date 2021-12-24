@@ -7,6 +7,7 @@ import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.NodeDetails;
 import de.cotto.lndmanagej.model.OnChainCosts;
+import de.cotto.lndmanagej.model.OnlineReport;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.RebalanceReport;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,7 @@ public class NodeDetailsService {
     private final BalanceService balanceService;
     private final FeeService feeService;
     private final RebalanceService rebalanceService;
+    private final OnlinePeersService onlinePeersService;
 
     public NodeDetailsService(
             ChannelService channelService,
@@ -31,7 +33,8 @@ public class NodeDetailsService {
             OnChainCostService onChainCostService,
             BalanceService balanceService,
             FeeService feeService,
-            RebalanceService rebalanceService
+            RebalanceService rebalanceService,
+            OnlinePeersService onlinePeersService
     ) {
         this.channelService = channelService;
         this.nodeService = nodeService;
@@ -39,10 +42,12 @@ public class NodeDetailsService {
         this.balanceService = balanceService;
         this.feeService = feeService;
         this.rebalanceService = rebalanceService;
+        this.onlinePeersService = onlinePeersService;
     }
 
     public NodeDetails getDetails(Pubkey pubkey) {
         CompletableFuture<Node> node = getNode(pubkey);
+        CompletableFuture<OnlineReport> onlineReport = node.thenApply(onlinePeersService::getOnlineReport);
         CompletableFuture<OnChainCosts> onChainCosts = getOnChainCosts(pubkey);
         CompletableFuture<BalanceInformation> balanceInformation = getBalanceInformation(pubkey);
         CompletableFuture<FeeReport> feeReport = getFeeReport(pubkey);
@@ -65,7 +70,7 @@ public class NodeDetailsService {
                     forceClosingChannelIds,
                     onChainCosts.get(),
                     balanceInformation.get(),
-                    node.get().online(),
+                    onlineReport.get(),
                     feeReport.get(),
                     rebalanceReport.get()
             );

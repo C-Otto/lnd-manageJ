@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.statistics;
 
+import de.cotto.lndmanagej.privatechannels.PrivateChannelsDao;
 import de.cotto.lndmanagej.service.ChannelService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

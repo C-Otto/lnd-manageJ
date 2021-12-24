@@ -10,6 +10,8 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_4;
 import static de.cotto.lndmanagej.model.FeeReportFixtures.FEE_REPORT;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
+import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT;
+import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT_OFFLINE;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 
@@ -23,7 +25,7 @@ public class NodeDetailsFixtures {
             List.of(CHANNEL_ID_4),
             ON_CHAIN_COSTS,
             BALANCE_INFORMATION_2,
-            true,
+            ONLINE_REPORT,
             FEE_REPORT,
             REBALANCE_REPORT
     );
@@ -36,7 +38,7 @@ public class NodeDetailsFixtures {
             List.of(),
             OnChainCosts.NONE,
             BalanceInformation.EMPTY,
-            false,
+            ONLINE_REPORT_OFFLINE,
             FeeReport.EMPTY,
             RebalanceReport.EMPTY
     );

@@ -11,6 +11,7 @@ import static de.cotto.lndmanagej.model.FeeReportFixtures.FEE_REPORT;
 import static de.cotto.lndmanagej.model.NodeDetailsFixtures.NODE_DETAILS;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
+import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,11 +58,12 @@ class NodeDetailsTest {
     }
 
     @Test
-    void online() {
-        assertThat(NODE_DETAILS.online()).isTrue();
+    void onlineReport() {
+        assertThat(NODE_DETAILS.onlineReport()).isEqualTo(ONLINE_REPORT);
     }
 
     @Test
+
     void feeReport() {
         assertThat(NODE_DETAILS.feeReport()).isEqualTo(FEE_REPORT);
     }

@@ -17,7 +17,7 @@ public record NodeDetailsDto(
         List<ChannelId> pendingForceClosingChannels,
         OnChainCostsDto onChainCosts,
         BalanceInformationDto balance,
-        boolean online,
+        OnlineReportDto onlineReport,
         FeeReportDto feeReport,
         RebalanceReportDto rebalanceReport
 ) {
@@ -31,7 +31,7 @@ public record NodeDetailsDto(
                 nodeDetails.pendingForceClosingChannels(),
                 OnChainCostsDto.createFromModel(nodeDetails.onChainCosts()),
                 BalanceInformationDto.createFromModel(nodeDetails.balanceInformation()),
-                nodeDetails.online(),
+                OnlineReportDto.createFromModel(nodeDetails.onlineReport()),
                 FeeReportDto.createFromModel(nodeDetails.feeReport()),
                 RebalanceReportDto.createFromModel(nodeDetails.rebalanceReport())
         );
