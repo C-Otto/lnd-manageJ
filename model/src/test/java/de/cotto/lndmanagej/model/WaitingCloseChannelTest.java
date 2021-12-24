@@ -11,7 +11,6 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 class WaitingCloseChannelTest {
     @Test
@@ -65,18 +64,6 @@ class WaitingCloseChannelTest {
     void getStatus() {
         assertThat(WAITING_CLOSE_CHANNEL.getStatus())
                 .isEqualTo(new ChannelStatus(false, false, false, WAITING_CLOSE));
-    }
-
-    @Test
-    void isClosed() {
-        assertThat(WAITING_CLOSE_CHANNEL.isClosed()).isFalse();
-    }
-
-    @Test
-    void getAsClosedChannel() {
-        assertThatIllegalStateException()
-                .isThrownBy(WAITING_CLOSE_CHANNEL::getAsClosedChannel)
-                .withMessage("Channel is not closed");
     }
 
     @Test

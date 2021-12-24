@@ -63,24 +63,6 @@ class ChannelServiceTest {
     }
 
     @Test
-    void isForceClosed_false() {
-        when(grpcClosedChannels.getClosedChannels()).thenReturn(Set.of(CLOSED_CHANNEL_2));
-        assertThat(channelService.isForceClosed(CHANNEL_ID)).isFalse();
-    }
-
-    @Test
-    void isForceClosed_closed_but_not_force_closed() {
-        when(grpcClosedChannels.getClosedChannels()).thenReturn(Set.of(CLOSED_CHANNEL));
-        assertThat(channelService.isForceClosed(CHANNEL_ID)).isFalse();
-    }
-
-    @Test
-    void isForceClosed() {
-        when(grpcClosedChannels.getClosedChannels()).thenReturn(Set.of(FORCE_CLOSED_CHANNEL));
-        assertThat(channelService.isForceClosed(CHANNEL_ID)).isTrue();
-    }
-
-    @Test
     void getLocalChannel_unknown() {
         assertThat(channelService.getLocalChannel(CHANNEL_ID)).isEmpty();
     }

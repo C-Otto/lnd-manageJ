@@ -1,7 +1,9 @@
 package de.cotto.lndmanagej.controller.dto;
 
+import de.cotto.lndmanagej.model.BreachForceClosedChannel;
 import de.cotto.lndmanagej.model.CloseInitiator;
 import de.cotto.lndmanagej.model.ClosedChannel;
+import de.cotto.lndmanagej.model.ForceClosedChannel;
 import de.cotto.lndmanagej.model.LocalChannel;
 
 public record ClosedChannelDetailsDto(String initiator, int height, boolean force, boolean breach) {
@@ -13,11 +15,11 @@ public record ClosedChannelDetailsDto(String initiator, int height, boolean forc
     }
 
     public static ClosedChannelDetailsDto createFromModel(LocalChannel localChannel) {
-        boolean closed = localChannel.isClosed();
+        boolean closed = localChannel instanceof ClosedChannel;
         if (closed) {
-            ClosedChannel closedChannel = localChannel.getAsClosedChannel();
-            boolean forceClosed = closedChannel.isForceClosed();
-            boolean breach = forceClosed && closedChannel.getAsForceClosedChannel().isBreach();
+            ClosedChannel closedChannel = (ClosedChannel) localChannel;
+            boolean forceClosed = closedChannel instanceof ForceClosedChannel;
+            boolean breach = forceClosed && closedChannel instanceof BreachForceClosedChannel;
             return new ClosedChannelDetailsDto(
                     closedChannel.getCloseInitiator(), closedChannel.getCloseHeight(), forceClosed, breach
             );

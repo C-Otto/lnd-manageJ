@@ -38,14 +38,6 @@ public abstract class LocalChannel extends Channel {
 
     public abstract Coins getTotalReceived();
 
-    public boolean isClosed() {
-        return getStatus().closed();
-    }
-
-    public ClosedChannel getAsClosedChannel() {
-        throw new IllegalStateException("Channel is not closed");
-    }
-
     @Override
     @SuppressWarnings("CPD-START")
     public boolean equals(Object other) {

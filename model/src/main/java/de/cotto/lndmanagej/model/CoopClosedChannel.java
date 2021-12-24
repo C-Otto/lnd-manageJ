@@ -22,9 +22,4 @@ public class CoopClosedChannel extends ClosedChannel {
                 isPrivate
         );
     }
-
-    @Override
-    public boolean isForceClosed() {
-        return false;
-    }
 }

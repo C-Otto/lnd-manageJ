@@ -326,19 +326,8 @@ class OnChainCostServiceTest {
     class GetSweepCosts {
         private static final Coins ANCHOR_SIZE = Coins.ofSatoshis(330);
 
-        @BeforeEach
-        void setUp() {
-            lenient().when(channelService.isForceClosed(CHANNEL_ID)).thenReturn(true);
-        }
-
-        @Test
-        void by_channel_id_not_resolved() {
-            assertThat(onChainCostService.getSweepCostsForChannelId(CHANNEL_ID)).isEmpty();
-        }
-
         @Test
         void by_channel_id_not_force_closed() {
-            when(channelService.isForceClosed(CHANNEL_ID)).thenReturn(false);
             assertThat(onChainCostService.getSweepCostsForChannelId(CHANNEL_ID)).contains(Coins.NONE);
         }
 
@@ -412,7 +401,6 @@ class OnChainCostServiceTest {
         ChannelId channelId = FORCE_CLOSED_CHANNEL.getId();
         when(transactionService.getTransaction(any())).thenReturn(Optional.empty());
         when(transactionService.getTransaction(TRANSACTION_HASH_3)).thenReturn(Optional.of(TRANSACTION));
-        when(channelService.isForceClosed(channelId)).thenReturn(true);
         when(channelService.getForceClosedChannel(channelId)).thenReturn(Optional.of(FORCE_CLOSED_CHANNEL));
         return channelId;
     }

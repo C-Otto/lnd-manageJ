@@ -2,7 +2,6 @@ package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelPoint;
-import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.ClosedOrClosingChannel;
 import de.cotto.lndmanagej.model.ForceClosedChannel;
 import de.cotto.lndmanagej.model.Resolution;
@@ -62,9 +61,7 @@ public class TransactionBackgroundLoader {
     }
 
     private Stream<TransactionHash> getSweepTransactionHashes() {
-        return channelService.getClosedChannels().stream()
-                .filter(ClosedChannel::isForceClosed)
-                .map(ClosedChannel::getAsForceClosedChannel)
+        return channelService.getForceClosedChannels().stream()
                 .map(ForceClosedChannel::getResolutions)
                 .flatMap(Collection::stream)
                 .filter(Resolution::sweepTransactionClaimsFunds)

@@ -88,16 +88,6 @@ class ForceClosedChannelTest {
     }
 
     @Test
-    void isForceClosed() {
-        assertThat(FORCE_CLOSED_CHANNEL_REMOTE.isForceClosed()).isTrue();
-    }
-
-    @Test
-    void getAsForceClosedChannel() {
-        assertThat(FORCE_CLOSED_CHANNEL_REMOTE.getAsForceClosedChannel()).isEqualTo(FORCE_CLOSED_CHANNEL_REMOTE);
-    }
-
-    @Test
     void getCloseHeight() {
         assertThat(FORCE_CLOSED_CHANNEL_REMOTE.getCloseHeight()).isEqualTo(987_654);
     }
@@ -109,24 +99,9 @@ class ForceClosedChannelTest {
     }
 
     @Test
-    void isClosed() {
-        assertThat(FORCE_CLOSED_CHANNEL_REMOTE.isClosed()).isTrue();
-    }
-
-    @Test
-    void getAsClosedChannel() {
-        assertThat(FORCE_CLOSED_CHANNEL_REMOTE.getAsClosedChannel()).isEqualTo(FORCE_CLOSED_CHANNEL_REMOTE);
-    }
-
-    @Test
     void getResolutions() {
         assertThat(FORCE_CLOSED_CHANNEL.getResolutions())
                 .containsExactlyInAnyOrder(INCOMING_HTLC_CLAIMED, COMMIT_CLAIMED);
-    }
-
-    @Test
-    void isBreach() {
-        assertThat(FORCE_CLOSED_CHANNEL.isBreach()).isFalse();
     }
 
     @Test

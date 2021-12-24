@@ -15,7 +15,6 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 class CoopClosedChannelTest {
     @Test
@@ -102,18 +101,6 @@ class CoopClosedChannelTest {
     }
 
     @Test
-    void isForceClosed() {
-        assertThat(CLOSED_CHANNEL.isForceClosed()).isFalse();
-    }
-
-    @Test
-    void getAsForceClosedChannel() {
-        assertThatIllegalStateException()
-                .isThrownBy(CLOSED_CHANNEL::getAsForceClosedChannel)
-                .withMessage("Channel is not force-closed");
-    }
-
-    @Test
     void getCloseHeight() {
         assertThat(CLOSED_CHANNEL.getCloseHeight()).isEqualTo(987_654);
     }
@@ -122,16 +109,6 @@ class CoopClosedChannelTest {
     void getStatus() {
         assertThat(CLOSED_CHANNEL.getStatus())
                 .isEqualTo(new ChannelStatus(false, false, true, CLOSED));
-    }
-
-    @Test
-    void isClosed() {
-        assertThat(CLOSED_CHANNEL.isClosed()).isTrue();
-    }
-
-    @Test
-    void getAsClosedChannel() {
-        assertThat(CLOSED_CHANNEL.getAsClosedChannel()).isEqualTo(CLOSED_CHANNEL);
     }
 
     @Test

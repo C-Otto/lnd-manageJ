@@ -25,9 +25,4 @@ public class BreachForceClosedChannel extends ForceClosedChannel {
                 isPrivate
         );
     }
-
-    @Override
-    public boolean isBreach() {
-        return true;
-    }
 }

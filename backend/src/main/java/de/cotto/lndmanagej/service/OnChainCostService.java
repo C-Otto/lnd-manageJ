@@ -99,10 +99,11 @@ public class OnChainCostService {
 
     @Timed
     public Optional<Coins> getSweepCostsForChannelId(ChannelId channelId) {
-        if (channelService.isForceClosed(channelId)) {
-            return channelService.getForceClosedChannel(channelId).map(this::getSweepCostsForChannel);
+        ForceClosedChannel forceClosedChannel = channelService.getForceClosedChannel(channelId).orElse(null);
+        if (forceClosedChannel == null) {
+            return Optional.of(Coins.NONE);
         }
-        return Optional.of(Coins.NONE);
+        return Optional.ofNullable(getSweepCostsForChannel(forceClosedChannel));
     }
 
     @Timed

@@ -21,8 +21,6 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT_2;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT_3;
-import static de.cotto.lndmanagej.model.ChannelPointFixtures.TRANSACTION_HASH;
-import static de.cotto.lndmanagej.model.ChannelPointFixtures.TRANSACTION_HASH_2;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.TRANSACTION_HASH_3;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_CHANNEL;
@@ -37,6 +35,7 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -144,19 +143,16 @@ class TransactionBackgroundLoaderTest {
 
     @Test
     void update_from_force_closed_channels_sweep_transaction() {
-        when(transactionService.isUnknown(TRANSACTION_HASH)).thenReturn(false);
-        when(transactionService.isUnknown(TRANSACTION_HASH_2)).thenReturn(false);
         when(transactionService.isUnknown(TRANSACTION_HASH_3)).thenReturn(true);
-        when(channelService.getClosedChannels()).thenReturn(Set.of(FORCE_CLOSED_CHANNEL));
+        when(channelService.getForceClosedChannels()).thenReturn(Set.of(FORCE_CLOSED_CHANNEL));
         transactionBackgroundLoader.loadTransactionForOneChannel();
         verify(transactionService).getTransaction(TRANSACTION_HASH_3);
     }
 
     @Test
     void update_from_force_closed_channels_sweep_transaction_ignores_peer_sweeps() {
-        when(transactionService.isUnknown(TRANSACTION_HASH)).thenReturn(false);
-        when(transactionService.isUnknown(TRANSACTION_HASH_2)).thenReturn(false);
-        when(channelService.getClosedChannels()).thenReturn(Set.of(FORCE_CLOSED_CHANNEL_2));
+        lenient().when(transactionService.isUnknown(any())).thenReturn(true);
+        when(channelService.getForceClosedChannels()).thenReturn(Set.of(FORCE_CLOSED_CHANNEL_2));
         transactionBackgroundLoader.loadTransactionForOneChannel();
         verify(transactionService, never()).getTransaction(any());
     }

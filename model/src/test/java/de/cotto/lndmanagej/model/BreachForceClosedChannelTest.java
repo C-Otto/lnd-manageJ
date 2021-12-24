@@ -70,11 +70,6 @@ class BreachForceClosedChannelTest {
     }
 
     @Test
-    void isForceClosed() {
-        assertThat(FORCE_CLOSED_CHANNEL_BREACH.isForceClosed()).isTrue();
-    }
-
-    @Test
     void getCloseInitiator() {
         assertThat(FORCE_CLOSED_CHANNEL_BREACH.getCloseInitiator()).isEqualTo(CloseInitiator.REMOTE);
     }
@@ -91,28 +86,8 @@ class BreachForceClosedChannelTest {
     }
 
     @Test
-    void isClosed() {
-        assertThat(FORCE_CLOSED_CHANNEL_BREACH.isClosed()).isTrue();
-    }
-
-    @Test
-    void getAsClosedChannel() {
-        assertThat(FORCE_CLOSED_CHANNEL_BREACH.getAsClosedChannel()).isEqualTo(FORCE_CLOSED_CHANNEL_BREACH);
-    }
-
-    @Test
-    void getAsForceClosedChannel() {
-        assertThat(FORCE_CLOSED_CHANNEL_BREACH.getAsForceClosedChannel()).isEqualTo(FORCE_CLOSED_CHANNEL_BREACH);
-    }
-
-    @Test
     void getResolutions() {
         assertThat(FORCE_CLOSED_CHANNEL_BREACH.getResolutions()).containsExactlyInAnyOrder(COMMIT_CLAIMED);
-    }
-
-    @Test
-    void isBreach() {
-        assertThat(FORCE_CLOSED_CHANNEL_BREACH.isBreach()).isTrue();
     }
 
     @Test

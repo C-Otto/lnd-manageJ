@@ -20,8 +20,9 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toSet;
 
 @Component
 public class ChannelService {
@@ -60,11 +61,6 @@ public class ChannelService {
     }
 
     @Timed
-    public boolean isForceClosed(ChannelId channelId) {
-        return getClosedChannel(channelId).filter(ClosedChannel::isForceClosed).isPresent();
-    }
-
-    @Timed
     public Optional<LocalChannel> getLocalChannel(ChannelId channelId) {
         return getAllLocalChannels()
                 .filter(c -> channelId.equals(c.getId()))
@@ -87,6 +83,14 @@ public class ChannelService {
     }
 
     @Timed
+    public Set<ForceClosedChannel> getForceClosedChannels() {
+        return getClosedChannels().stream()
+                .filter(c -> c instanceof ForceClosedChannel)
+                .map(c -> (ForceClosedChannel) c)
+                .collect(toSet());
+    }
+
+    @Timed
     public Optional<ClosedChannel> getClosedChannel(ChannelId channelId) {
         return getClosedChannels().stream()
                 .filter(c -> channelId.equals(c.getId()))
@@ -95,10 +99,8 @@ public class ChannelService {
 
     @Timed
     public Optional<ForceClosedChannel> getForceClosedChannel(ChannelId channelId) {
-        return getClosedChannels().stream()
+        return getForceClosedChannels().stream()
                 .filter(c -> channelId.equals(c.getId()))
-                .filter(ClosedChannel::isForceClosed)
-                .map(ClosedChannel::getAsForceClosedChannel)
                 .findFirst();
     }
 
@@ -123,35 +125,35 @@ public class ChannelService {
     public Set<LocalOpenChannel> getOpenChannelsWith(Pubkey peer) {
         return getOpenChannels().stream()
                 .filter(c -> peer.equals(c.getRemotePubkey()))
-                .collect(Collectors.toSet());
+                .collect(toSet());
     }
 
     @Timed
     public Set<ClosedChannel> getClosedChannelsWith(Pubkey peer) {
         return getClosedChannels().stream()
                 .filter(c -> peer.equals(c.getRemotePubkey()))
-                .collect(Collectors.toSet());
+                .collect(toSet());
     }
 
     @Timed
     public Set<WaitingCloseChannel> getWaitingCloseChannelsWith(Pubkey peer) {
         return getWaitingCloseChannels().stream()
                 .filter(c -> peer.equals(c.getRemotePubkey()))
-                .collect(Collectors.toSet());
+                .collect(toSet());
     }
 
     @Timed
     public Set<ForceClosingChannel> getForceClosingChannelsWith(Pubkey peer) {
         return getForceClosingChannels().stream()
                 .filter(c -> peer.equals(c.getRemotePubkey()))
-                .collect(Collectors.toSet());
+                .collect(toSet());
     }
 
     @Timed
     public Set<LocalChannel> getAllChannelsWith(Pubkey peer) {
         return getAllLocalChannels()
                 .filter(c -> peer.equals(c.getRemotePubkey()))
-                .collect(Collectors.toSet());
+                .collect(toSet());
     }
 
     @Timed
