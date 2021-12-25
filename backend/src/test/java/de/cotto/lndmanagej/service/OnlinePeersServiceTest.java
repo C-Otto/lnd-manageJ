@@ -21,6 +21,7 @@ import static de.cotto.lndmanagej.model.OnlineStatusFixtures.ONLINE_STATUS;
 import static de.cotto.lndmanagej.model.OnlineStatusFixtures.ONLINE_STATUS_OFFLINE;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.Offset.offset;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -103,7 +104,7 @@ class OnlinePeersServiceTest {
                 new OnlineStatus(true, oneHourAgo),
                 new OnlineStatus(false, twoHoursAgo)
         ));
-        assertThat(onlinePeersService.getOnlinePercentageLastWeek(PUBKEY)).isEqualTo(50);
+        assertThat(onlinePeersService.getOnlinePercentageLastWeek(PUBKEY)).isCloseTo(50, offset(1));
     }
 
     @Test
@@ -114,7 +115,7 @@ class OnlinePeersServiceTest {
                 new OnlineStatus(false, oneHourAgo),
                 new OnlineStatus(true, twoHoursAgo)
         ));
-        assertThat(onlinePeersService.getOnlinePercentageLastWeek(PUBKEY)).isEqualTo(49);
+        assertThat(onlinePeersService.getOnlinePercentageLastWeek(PUBKEY)).isCloseTo(50, offset(1));
     }
 
     @Test
@@ -127,13 +128,13 @@ class OnlinePeersServiceTest {
                 new OnlineStatus(false, oneYearAgo),
                 new OnlineStatus(true, twoYearsAgo)
         ));
-        assertThat(onlinePeersService.getOnlinePercentageLastWeek(PUBKEY)).isEqualTo(85);
+        assertThat(onlinePeersService.getOnlinePercentageLastWeek(PUBKEY)).isCloseTo(85, offset(1));
     }
 
     @Test
     void getOnlinePercentageLastWeek_is_rounded() {
         mockFor23PercentOffline();
-        assertThat(onlinePeersService.getOnlinePercentageLastWeek(PUBKEY)).isEqualTo(77);
+        assertThat(onlinePeersService.getOnlinePercentageLastWeek(PUBKEY)).isCloseTo(77, offset(1));
     }
 
     private void assertVeryRecentSince(OnlineReport report) {
