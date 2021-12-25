@@ -51,4 +51,22 @@ class OnlinePeersRepositoryIT {
         assertThat(repository.findTopByPubkeyOrderByTimestampDesc(PUBKEY.toString()))
                 .map(OnlinePeerJpaDto::isOnline).contains(true);
     }
+
+    @Test
+    void findByPubkeyOrderByTimestampDesc() {
+        repository.save(new OnlinePeerJpaDto(PUBKEY, true, TIMESTAMP));
+        repository.save(new OnlinePeerJpaDto(PUBKEY, false, TIMESTAMP.minusSeconds(1)));
+        repository.save(new OnlinePeerJpaDto(PUBKEY_2, false, TIMESTAMP));
+        assertThat(repository.findByPubkeyOrderByTimestampDesc(PUBKEY.toString())).hasSize(2);
+    }
+
+    @Test
+    void findByPubkeyOrderByTimestampDesc_ordered_new_to_old() {
+        repository.save(new OnlinePeerJpaDto(PUBKEY, false, TIMESTAMP.minusSeconds(1)));
+        repository.save(new OnlinePeerJpaDto(PUBKEY, false, TIMESTAMP.plusSeconds(1)));
+        repository.save(new OnlinePeerJpaDto(PUBKEY, true, TIMESTAMP));
+        long timestamp = TIMESTAMP.toEpochSecond();
+        assertThat(repository.findByPubkeyOrderByTimestampDesc(PUBKEY.toString())).map(OnlinePeerJpaDto::getTimestamp)
+                .containsExactlyInAnyOrder(timestamp + 1, timestamp, timestamp - 1);
+    }
 }

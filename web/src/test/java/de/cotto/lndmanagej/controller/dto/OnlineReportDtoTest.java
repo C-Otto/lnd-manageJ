@@ -9,7 +9,11 @@ class OnlineReportDtoTest {
     @Test
     void createFromModel() {
         assertThat(OnlineReportDto.createFromModel(ONLINE_REPORT)).isEqualTo(
-                new OnlineReportDto(ONLINE_REPORT.online(), ONLINE_REPORT.since().toString())
+                new OnlineReportDto(
+                        ONLINE_REPORT.online(),
+                        ONLINE_REPORT.since().toString(),
+                        ONLINE_REPORT.onlinePercentageLastWeek()
+                )
         );
     }
 

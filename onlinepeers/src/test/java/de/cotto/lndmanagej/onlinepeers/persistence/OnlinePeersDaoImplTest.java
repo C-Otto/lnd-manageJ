@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -51,6 +52,14 @@ class OnlinePeersDaoImplTest {
         OnlinePeerJpaDto dto = new OnlinePeerJpaDto(PUBKEY, true, TIMESTAMP);
         when(repository.findTopByPubkeyOrderByTimestampDesc(PUBKEY.toString())).thenReturn(Optional.of(dto));
         assertThat(dao.getMostRecentOnlineStatus(PUBKEY)).contains(ONLINE_STATUS);
+    }
+
+    @Test
+    void getAllForPeer() {
+        OnlinePeerJpaDto dto1 = new OnlinePeerJpaDto(PUBKEY, true, TIMESTAMP);
+        OnlinePeerJpaDto dto2 = new OnlinePeerJpaDto(PUBKEY, false, TIMESTAMP.plusSeconds(1));
+        when(repository.findByPubkeyOrderByTimestampDesc(PUBKEY.toString())).thenReturn(List.of(dto1, dto2));
+        assertThat(dao.getAllForPeer(PUBKEY)).containsExactly(dto1.toModel(), dto2.toModel());
     }
 
     private void verifySave(Pubkey pubkey, boolean expected) {

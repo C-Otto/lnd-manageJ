@@ -22,7 +22,12 @@ class OnlineReportTest {
     }
 
     @Test
+    void onlinePercentageLastWeek() {
+        assertThat(ONLINE_REPORT.onlinePercentageLastWeek()).isEqualTo(77);
+    }
+
+    @Test
     void createFromOnlineStatus() {
-        assertThat(OnlineReport.createFromStatus(ONLINE_STATUS)).isEqualTo(ONLINE_REPORT);
+        assertThat(OnlineReport.createFromStatus(ONLINE_STATUS, 77)).isEqualTo(ONLINE_REPORT);
     }
 }

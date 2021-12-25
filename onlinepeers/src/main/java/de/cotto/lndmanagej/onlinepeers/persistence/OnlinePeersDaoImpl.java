@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -26,5 +27,12 @@ class OnlinePeersDaoImpl implements OnlinePeersDao {
     @Override
     public Optional<OnlineStatus> getMostRecentOnlineStatus(Pubkey pubkey) {
         return repository.findTopByPubkeyOrderByTimestampDesc(pubkey.toString()).map(OnlinePeerJpaDto::toModel);
+    }
+
+    @Override
+    public List<OnlineStatus> getAllForPeer(Pubkey pubkey) {
+        return repository.findByPubkeyOrderByTimestampDesc(pubkey.toString()).stream()
+                .map(OnlinePeerJpaDto::toModel)
+                .toList();
     }
 }

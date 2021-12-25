@@ -52,4 +52,8 @@ public class OnlinePeerJpaDto {
     public String getPubkey() {
         return pubkey;
     }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
 }
