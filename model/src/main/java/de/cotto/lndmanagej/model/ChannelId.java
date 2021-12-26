@@ -15,7 +15,7 @@ public final class ChannelId implements Comparable<ChannelId> {
 
     public static ChannelId fromShortChannelId(long shortChannelId) {
         if (shortChannelId < NOT_BEFORE) {
-            throw new IllegalArgumentException("Illegal channel ID");
+            throw new IllegalArgumentException("Illegal channel ID " + shortChannelId);
         }
         return new ChannelId(shortChannelId);
     }

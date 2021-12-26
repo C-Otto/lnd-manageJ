@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 
 class ChannelIdTest {
 
-    private static final String ILLEGAL_CHANNEL_ID = "Illegal channel ID";
+    private static final String ILLEGAL_CHANNEL_ID = "Illegal channel ID ";
     private static final String UNEXPECTED_FORMAT = "Unexpected format for compact channel ID";
 
     @Nested
@@ -28,7 +28,7 @@ class ChannelIdTest {
         void before_2016() {
             assertThatIllegalArgumentException().isThrownBy(
                     () -> ChannelId.fromCompactForm("391176:999:999")
-            ).withMessage(ILLEGAL_CHANNEL_ID);
+            ).withMessageStartingWith(ILLEGAL_CHANNEL_ID);
         }
 
         @Test
@@ -70,21 +70,21 @@ class ChannelIdTest {
         void negative() {
             assertThatIllegalArgumentException().isThrownBy(
                     () -> ChannelId.fromShortChannelId(-1L)
-            ).withMessage(ILLEGAL_CHANNEL_ID);
+            ).withMessageStartingWith(ILLEGAL_CHANNEL_ID);
         }
 
         @Test
         void zero() {
             assertThatIllegalArgumentException().isThrownBy(
                     () -> ChannelId.fromShortChannelId(0L)
-            ).withMessage(ILLEGAL_CHANNEL_ID);
+            ).withMessageStartingWith(ILLEGAL_CHANNEL_ID);
         }
 
         @Test
         void before_2016() {
             assertThatIllegalArgumentException().isThrownBy(
                     () -> ChannelId.fromShortChannelId(430_103_660_018_532_351L)
-            ).withMessage(ILLEGAL_CHANNEL_ID);
+            ).withMessageStartingWith(ILLEGAL_CHANNEL_ID);
         }
 
         @Test
