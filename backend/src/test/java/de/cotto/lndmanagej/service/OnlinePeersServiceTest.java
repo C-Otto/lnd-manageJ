@@ -108,6 +108,23 @@ class OnlinePeersServiceTest {
     }
 
     @Test
+    void getOnlinePercentageLastWeek_many_state_changes() {
+        ZonedDateTime fiveHoursAgo = NOW.minusHours(5);
+        ZonedDateTime fourHoursAgo = NOW.minusHours(4);
+        ZonedDateTime threeHoursAgo = NOW.minusHours(3);
+        ZonedDateTime twoHoursAgo = NOW.minusHours(2);
+        ZonedDateTime oneHourAgo = NOW.minusHours(1);
+        when(dao.getAllForPeer(PUBKEY)).thenReturn(List.of(
+                new OnlineStatus(true, oneHourAgo),
+                new OnlineStatus(false, twoHoursAgo),
+                new OnlineStatus(true, threeHoursAgo),
+                new OnlineStatus(false, fourHoursAgo),
+                new OnlineStatus(true, fiveHoursAgo)
+        ));
+        assertThat(onlinePeersService.getOnlinePercentageLastWeek(PUBKEY)).isCloseTo(60, offset(1));
+    }
+
+    @Test
     void getOnlinePercentageLastWeek_limited_data_offline_then_online() {
         ZonedDateTime twoHoursAgo = NOW.minusHours(2);
         ZonedDateTime oneHourAgo = NOW.minusHours(1);
