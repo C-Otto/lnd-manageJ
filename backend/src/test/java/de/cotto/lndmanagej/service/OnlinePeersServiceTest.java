@@ -155,9 +155,9 @@ class OnlinePeersServiceTest {
     }
 
     private void assertVeryRecentSince(OnlineReport report) {
-        assertThat(report.since())
-                .isAfter(NOW.minusSeconds(1))
-                .asString().hasSize(20);
+        ZonedDateTime since = report.since();
+        assertThat(since).isAfter(NOW.minusSeconds(1));
+        assertThat(since.getNano()).isZero();
     }
 
     private void mockFor23PercentOffline() {
