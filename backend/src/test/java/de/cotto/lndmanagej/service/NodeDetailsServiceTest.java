@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.FeeReport;
+import de.cotto.lndmanagej.model.NodeWarnings;
 import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.model.RebalanceReport;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ import static de.cotto.lndmanagej.model.NodeDetailsFixtures.NODE_DETAILS;
 import static de.cotto.lndmanagej.model.NodeDetailsFixtures.NODE_DETAILS_EMPTY;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_PEER;
+import static de.cotto.lndmanagej.model.NodeWarningsFixtures.NODE_WARNINGS;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT;
 import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT_OFFLINE;
@@ -56,6 +58,9 @@ class NodeDetailsServiceTest {
     @Mock
     private OnlinePeersService onlinePeersService;
 
+    @Mock
+    private NodeWarningsService nodeWarningsService;
+
     @Test
     void getDetails_no_channel() {
         when(nodeService.getNode(PUBKEY)).thenReturn(NODE);
@@ -64,6 +69,7 @@ class NodeDetailsServiceTest {
         when(feeService.getFeeReportForPeer(PUBKEY)).thenReturn(FeeReport.EMPTY);
         when(rebalanceService.getReportForPeer(PUBKEY)).thenReturn(RebalanceReport.EMPTY);
         when(onlinePeersService.getOnlineReport(NODE_PEER)).thenReturn(ONLINE_REPORT_OFFLINE);
+        when(nodeWarningsService.getNodeWarnings(PUBKEY)).thenReturn(NodeWarnings.NONE);
         assertThat(nodeDetailsService.getDetails(PUBKEY)).isEqualTo(NODE_DETAILS_EMPTY);
     }
 
@@ -79,6 +85,7 @@ class NodeDetailsServiceTest {
         when(feeService.getFeeReportForPeer(PUBKEY)).thenReturn(FEE_REPORT);
         when(rebalanceService.getReportForPeer(PUBKEY)).thenReturn(REBALANCE_REPORT);
         when(onlinePeersService.getOnlineReport(NODE_PEER)).thenReturn(ONLINE_REPORT);
+        when(nodeWarningsService.getNodeWarnings(PUBKEY)).thenReturn(NODE_WARNINGS);
         assertThat(nodeDetailsService.getDetails(PUBKEY)).isEqualTo(NODE_DETAILS);
     }
 }

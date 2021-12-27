@@ -6,6 +6,7 @@ import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.NodeDetails;
+import de.cotto.lndmanagej.model.NodeWarnings;
 import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.model.OnlineReport;
 import de.cotto.lndmanagej.model.Pubkey;
@@ -26,6 +27,7 @@ public class NodeDetailsService {
     private final FeeService feeService;
     private final RebalanceService rebalanceService;
     private final OnlinePeersService onlinePeersService;
+    private final NodeWarningsService warningsService;
 
     public NodeDetailsService(
             ChannelService channelService,
@@ -34,7 +36,8 @@ public class NodeDetailsService {
             BalanceService balanceService,
             FeeService feeService,
             RebalanceService rebalanceService,
-            OnlinePeersService onlinePeersService
+            OnlinePeersService onlinePeersService,
+            NodeWarningsService warningsService
     ) {
         this.channelService = channelService;
         this.nodeService = nodeService;
@@ -43,6 +46,7 @@ public class NodeDetailsService {
         this.feeService = feeService;
         this.rebalanceService = rebalanceService;
         this.onlinePeersService = onlinePeersService;
+        this.warningsService = warningsService;
     }
 
     public NodeDetails getDetails(Pubkey pubkey) {
@@ -52,6 +56,7 @@ public class NodeDetailsService {
         CompletableFuture<BalanceInformation> balanceInformation = getBalanceInformation(pubkey);
         CompletableFuture<FeeReport> feeReport = getFeeReport(pubkey);
         CompletableFuture<RebalanceReport> rebalanceReport = getRebalanceReport(pubkey);
+        CompletableFuture<NodeWarnings> nodeWarnings = getNodeWarnings(pubkey);
         List<ChannelId> openChannelIds =
                 getSortedChannelIds(channelService.getOpenChannelsWith(pubkey));
         List<ChannelId> closedChannelIds =
@@ -72,7 +77,8 @@ public class NodeDetailsService {
                     balanceInformation.get(),
                     onlineReport.get(),
                     feeReport.get(),
-                    rebalanceReport.get()
+                    rebalanceReport.get(),
+                    nodeWarnings.get()
             );
         } catch (InterruptedException | ExecutionException exception) {
             throw new IllegalStateException("Unable to compute node details for " + pubkey, exception);
@@ -93,6 +99,10 @@ public class NodeDetailsService {
 
     private CompletableFuture<RebalanceReport> getRebalanceReport(Pubkey pubkey) {
         return CompletableFuture.supplyAsync(() -> rebalanceService.getReportForPeer(pubkey));
+    }
+
+    private CompletableFuture<NodeWarnings> getNodeWarnings(Pubkey pubkey) {
+        return CompletableFuture.supplyAsync(() -> warningsService.getNodeWarnings(pubkey));
     }
 
     private CompletableFuture<BalanceInformation> getBalanceInformation(Pubkey pubkey) {

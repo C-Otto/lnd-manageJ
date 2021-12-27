@@ -97,6 +97,7 @@ class NodeControllerIT {
                 .andExpect(jsonPath("$.balance.remoteAvailable", is("203")))
                 .andExpect(jsonPath("$.feeReport.earned", is("1234")))
                 .andExpect(jsonPath("$.feeReport.sourced", is("567")))
+                .andExpect(jsonPath("$.nodeWarnings[0].onlinePercentage", is(51)))
                 .andExpect(jsonPath("$.onChainCosts.openCosts", is("1000")))
                 .andExpect(jsonPath("$.onChainCosts.closeCosts", is("2000")))
                 .andExpect(jsonPath("$.onChainCosts.sweepCosts", is("3000")))
