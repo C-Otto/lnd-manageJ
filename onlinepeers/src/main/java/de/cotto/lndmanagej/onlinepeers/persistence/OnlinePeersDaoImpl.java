@@ -6,7 +6,10 @@ import de.cotto.lndmanagej.onlinepeers.OnlinePeersDao;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,9 +33,19 @@ class OnlinePeersDaoImpl implements OnlinePeersDao {
     }
 
     @Override
-    public List<OnlineStatus> getAllForPeer(Pubkey pubkey) {
-        return repository.findByPubkeyOrderByTimestampDesc(pubkey.toString()).stream()
+    public List<OnlineStatus> getAllForPeerUpToAgeInDays(Pubkey pubkey, int maximumAgeInDays) {
+        ZonedDateTime threshold = ZonedDateTime.now(ZoneOffset.UTC).minusDays(maximumAgeInDays);
+        List<OnlineStatus> result = new ArrayList<>();
+        Iterator<OnlineStatus> iterator = repository.findByPubkeyOrderByTimestampDesc(pubkey.toString())
                 .map(OnlinePeerJpaDto::toModel)
-                .toList();
+                .iterator();
+        while (iterator.hasNext()) {
+            OnlineStatus onlineStatus = iterator.next();
+            result.add(onlineStatus);
+            if (onlineStatus.since().isBefore(threshold)) {
+                break;
+            }
+        }
+        return result;
     }
 }

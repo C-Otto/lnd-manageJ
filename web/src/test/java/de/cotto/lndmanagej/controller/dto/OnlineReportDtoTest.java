@@ -16,7 +16,8 @@ class OnlineReportDtoTest {
                 new OnlineReportDto(
                         ONLINE_REPORT.online(),
                         ONLINE_REPORT.since().toString(),
-                        ONLINE_REPORT.onlinePercentageLastWeek()
+                        ONLINE_REPORT.onlinePercentageLastWeek(),
+                        ONLINE_REPORT.changesLastWeek()
                 )
         );
     }
@@ -29,7 +30,7 @@ class OnlineReportDtoTest {
     @Test
     void since_zero_seconds() {
         ZonedDateTime timeWithZeroSeconds = ZonedDateTime.of(2021, 12, 23, 1, 2, 0, 0, ZoneOffset.UTC);
-        OnlineReport onlineReport = new OnlineReport(true, timeWithZeroSeconds, 77);
+        OnlineReport onlineReport = new OnlineReport(true, timeWithZeroSeconds, 77, 123);
         assertThat(OnlineReportDto.createFromModel(onlineReport).since()).isEqualTo("2021-12-23T01:02:00Z");
     }
 }

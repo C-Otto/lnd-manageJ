@@ -13,17 +13,18 @@ import java.time.Duration;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Objects;
 
 @Component
 public class OnlinePeersService {
     private static final int DAYS_FOR_OFFLINE_PERCENTAGE = 7;
+    private static final int DAYS_FOR_CHANGES = 7;
     private static final Duration CACHE_REFRESH = Duration.ofMinutes(1);
     private static final Duration CACHE_EXPIRY = Duration.ofMinutes(2);
 
     private final OnlinePeersDao dao;
     private final LoadingCache<Pubkey, Integer> onlinePercentageCache;
+    private final LoadingCache<Pubkey, Integer> changesCache;
 
     public OnlinePeersService(OnlinePeersDao dao) {
         this.dao = dao;
@@ -31,6 +32,10 @@ public class OnlinePeersService {
                 .withRefresh(CACHE_REFRESH)
                 .withExpiry(CACHE_EXPIRY)
                 .build(this::getOnlinePercentageLastWeekWithoutCache);
+        changesCache = new CacheBuilder()
+                .withRefresh(CACHE_REFRESH)
+                .withExpiry(CACHE_EXPIRY)
+                .build(this::getChangesLastWeekWithoutCache);
     }
 
     public OnlineReport getOnlineReport(Node node) {
@@ -38,14 +43,19 @@ public class OnlinePeersService {
         OnlineStatus mostRecentOnlineStatus = dao.getMostRecentOnlineStatus(node.pubkey())
                 .orElse(new OnlineStatus(online, now()));
         int onlinePercentageLastWeek = getOnlinePercentageLastWeek(node.pubkey());
+        int changesLastWeek = getChangesLastWeek(node.pubkey());
         if (mostRecentOnlineStatus.online() == online) {
-            return OnlineReport.createFromStatus(mostRecentOnlineStatus, onlinePercentageLastWeek);
+            return OnlineReport.createFromStatus(mostRecentOnlineStatus, onlinePercentageLastWeek, changesLastWeek);
         }
-        return new OnlineReport(online, now(), onlinePercentageLastWeek);
+        return new OnlineReport(online, now(), onlinePercentageLastWeek, changesLastWeek);
     }
 
     public int getOnlinePercentageLastWeek(Pubkey pubkey) {
         return Objects.requireNonNull(onlinePercentageCache.get(pubkey));
+    }
+
+    public int getChangesLastWeek(Pubkey pubkey) {
+        return Objects.requireNonNull(changesCache.get(pubkey));
     }
 
     private int getOnlinePercentageLastWeekWithoutCache(Pubkey pubkey) {
@@ -53,14 +63,10 @@ public class OnlinePeersService {
         Duration online = Duration.ZERO;
         ZonedDateTime intervalStart = ZonedDateTime.now(ZoneOffset.UTC);
         ZonedDateTime cutoff = intervalStart.minusDays(DAYS_FOR_OFFLINE_PERCENTAGE);
-        boolean shouldContinue = true;
-        List<OnlineStatus> allForPeer = dao.getAllForPeer(pubkey);
-        for (int i = 0; i < allForPeer.size() && shouldContinue; i++) {
-            OnlineStatus onlineStatus = allForPeer.get(i);
+        for (OnlineStatus onlineStatus : dao.getAllForPeerUpToAgeInDays(pubkey, DAYS_FOR_OFFLINE_PERCENTAGE)) {
             ZonedDateTime intervalEnd = onlineStatus.since();
             if (intervalEnd.isBefore(cutoff)) {
                 intervalEnd = cutoff;
-                shouldContinue = false;
             }
             Duration difference = Duration.between(intervalEnd, intervalStart);
             total = total.plus(difference);
@@ -77,6 +83,19 @@ public class OnlinePeersService {
 
     private int getRoundedPercentage(Duration total, Duration offline) {
         return (int) (offline.getSeconds() * 100.0 / total.getSeconds());
+    }
+
+    private int getChangesLastWeekWithoutCache(Pubkey pubkey) {
+        Boolean lastKnownStatus = null;
+        int changes = -1;
+        for (OnlineStatus onlineStatus : dao.getAllForPeerUpToAgeInDays(pubkey, DAYS_FOR_CHANGES)) {
+            boolean status = onlineStatus.online();
+            if (lastKnownStatus == null || status != lastKnownStatus) {
+                changes++;
+                lastKnownStatus = status;
+            }
+        }
+        return Math.max(0, changes);
     }
 
     private ZonedDateTime now() {

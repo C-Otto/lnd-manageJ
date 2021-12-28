@@ -98,11 +98,13 @@ class NodeControllerIT {
                 .andExpect(jsonPath("$.feeReport.earned", is("1234")))
                 .andExpect(jsonPath("$.feeReport.sourced", is("567")))
                 .andExpect(jsonPath("$.nodeWarnings[0].onlinePercentage", is(51)))
+                .andExpect(jsonPath("$.nodeWarnings[1].changes", is(123)))
                 .andExpect(jsonPath("$.onChainCosts.openCosts", is("1000")))
                 .andExpect(jsonPath("$.onChainCosts.closeCosts", is("2000")))
                 .andExpect(jsonPath("$.onChainCosts.sweepCosts", is("3000")))
                 .andExpect(jsonPath("$.onlineReport.online", is(true)))
                 .andExpect(jsonPath("$.onlineReport.onlinePercentageLastWeek", is(77)))
+                .andExpect(jsonPath("$.onlineReport.changesLastWeek", is(5)))
                 .andExpect(jsonPath("$.onlineReport.since", is("2021-12-23T01:02:03Z")));
     }
 

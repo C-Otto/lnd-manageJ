@@ -12,5 +12,5 @@ public interface OnlinePeersDao {
 
     Optional<OnlineStatus> getMostRecentOnlineStatus(Pubkey pubkey);
 
-    List<OnlineStatus> getAllForPeer(Pubkey pubkey);
+    List<OnlineStatus> getAllForPeerUpToAgeInDays(Pubkey pubkey, int dayThreshold);
 }
