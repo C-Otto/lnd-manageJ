@@ -1,5 +1,7 @@
 package de.cotto.lndmanagej.service;
 
+import com.github.benmanes.caffeine.cache.LoadingCache;
+import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.OnlineReport;
 import de.cotto.lndmanagej.model.OnlineStatus;
@@ -12,14 +14,23 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class OnlinePeersService {
     private static final int DAYS_FOR_OFFLINE_PERCENTAGE = 7;
+    private static final Duration CACHE_REFRESH = Duration.ofMinutes(1);
+    private static final Duration CACHE_EXPIRY = Duration.ofMinutes(2);
+
     private final OnlinePeersDao dao;
+    private final LoadingCache<Pubkey, Integer> onlinePercentageCache;
 
     public OnlinePeersService(OnlinePeersDao dao) {
         this.dao = dao;
+        onlinePercentageCache = new CacheBuilder()
+                .withRefresh(CACHE_REFRESH)
+                .withExpiry(CACHE_EXPIRY)
+                .build(this::getOnlinePercentageLastWeekWithoutCache);
     }
 
     public OnlineReport getOnlineReport(Node node) {
@@ -34,6 +45,10 @@ public class OnlinePeersService {
     }
 
     public int getOnlinePercentageLastWeek(Pubkey pubkey) {
+        return Objects.requireNonNull(onlinePercentageCache.get(pubkey));
+    }
+
+    private int getOnlinePercentageLastWeekWithoutCache(Pubkey pubkey) {
         Duration total = Duration.ZERO;
         Duration online = Duration.ZERO;
         ZonedDateTime intervalStart = ZonedDateTime.now(ZoneOffset.UTC);
