@@ -24,6 +24,6 @@ public class MetricsConfiguration extends MetricsConfigurerAdapter {
                 .convertRatesTo(TimeUnit.SECONDS)
                 .convertDurationsTo(TimeUnit.MILLISECONDS)
                 .build();
-        registerReporter(reporter).start(1, TimeUnit.MINUTES);
+        registerReporter(reporter).start(10, TimeUnit.MINUTES);
     }
 }
