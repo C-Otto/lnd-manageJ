@@ -76,7 +76,7 @@ class BreachForceClosedChannelTest {
 
     @Test
     void getCloseHeight() {
-        assertThat(FORCE_CLOSED_CHANNEL_BREACH.getCloseHeight()).isEqualTo(987_654);
+        assertThat(FORCE_CLOSED_CHANNEL_BREACH.getCloseHeight()).isEqualTo(600_000);
     }
 
     @Test

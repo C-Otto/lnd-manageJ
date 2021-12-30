@@ -89,7 +89,7 @@ class ForceClosedChannelTest {
 
     @Test
     void getCloseHeight() {
-        assertThat(FORCE_CLOSED_CHANNEL_REMOTE.getCloseHeight()).isEqualTo(987_654);
+        assertThat(FORCE_CLOSED_CHANNEL_REMOTE.getCloseHeight()).isEqualTo(600_000);
     }
 
     @Test

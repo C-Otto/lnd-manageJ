@@ -8,7 +8,7 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 
 public final class ClosedChannelFixtures {
-    public static final int CLOSE_HEIGHT = 987_654;
+    public static final int CLOSE_HEIGHT = 600_000;
 
     private ClosedChannelFixtures() {
         // do not instantiate

@@ -14,7 +14,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.Period;
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 
@@ -149,7 +149,7 @@ class NodeControllerIT {
 
     @Test
     void getFeeReport_last_days() throws Exception {
-        when(feeService.getFeeReportForPeer(PUBKEY, Period.ofDays(123))).thenReturn(FEE_REPORT);
+        when(feeService.getFeeReportForPeer(PUBKEY, Duration.ofDays(123))).thenReturn(FEE_REPORT);
         mockMvc.perform(get(NODE_PREFIX + "/fee-report/last-days/123"))
                 .andExpect(jsonPath("$.earned", is("1234")))
                 .andExpect(jsonPath("$.sourced", is("567")));

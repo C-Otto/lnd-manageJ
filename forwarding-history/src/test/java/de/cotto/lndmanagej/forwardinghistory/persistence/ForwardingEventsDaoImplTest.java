@@ -8,8 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Duration;
 import java.time.Instant;
-import java.time.Period;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ForwardingEventsDaoImplTest {
-    private static final Period MAX_AGE = Period.ofYears(Integer.MAX_VALUE);
+    private static final Duration MAX_AGE = Duration.ofDays(365 * 1_000);
 
     @InjectMocks
     private ForwardingEventsDaoImpl dao;
@@ -81,7 +81,7 @@ class ForwardingEventsDaoImplTest {
 
     @Test
     void getEventsWithOutgoingChannel_uses_max_age() {
-        Period maxAge = Period.ofDays(10);
+        Duration maxAge = Duration.ofDays(10);
         long timestampAfter = Instant.now().minus(maxAge).getEpochSecond() * 1_000;
         when(repository.findByChannelOutgoingAndTimestampGreaterThan(eq(CHANNEL_ID_2.getShortChannelId()), anyLong()))
                 .thenReturn(List.of(ForwardingEventJpaDto.createFromModel(FORWARDING_EVENT_2)));
@@ -111,7 +111,7 @@ class ForwardingEventsDaoImplTest {
 
     @Test
     void getEventsWithIncomingChannel_uses_max_age() {
-        Period maxAge = Period.ofDays(10);
+        Duration maxAge = Duration.ofDays(10);
         long timestampAfter = Instant.now().minus(maxAge).getEpochSecond() * 1_000;
         when(repository.findByChannelIncomingAndTimestampGreaterThan(eq(CHANNEL_ID_2.getShortChannelId()), anyLong()))
                 .thenReturn(List.of(ForwardingEventJpaDto.createFromModel(FORWARDING_EVENT)));

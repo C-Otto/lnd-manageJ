@@ -102,7 +102,7 @@ class CoopClosedChannelTest {
 
     @Test
     void getCloseHeight() {
-        assertThat(CLOSED_CHANNEL.getCloseHeight()).isEqualTo(987_654);
+        assertThat(CLOSED_CHANNEL.getCloseHeight()).isEqualTo(600_000);
     }
 
     @Test

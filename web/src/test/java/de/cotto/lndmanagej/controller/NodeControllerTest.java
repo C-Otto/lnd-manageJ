@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Duration;
 import java.time.Period;
 import java.util.List;
 import java.util.Set;
@@ -115,7 +116,7 @@ class NodeControllerTest {
 
     @Test
     void getFeeReportLastDays() {
-        when(feeService.getFeeReportForPeer(PUBKEY, Period.ofDays(123))).thenReturn(FEE_REPORT);
+        when(feeService.getFeeReportForPeer(PUBKEY, Duration.ofDays(123))).thenReturn(FEE_REPORT);
         assertThat(nodeController.getFeeReport(PUBKEY, 123)).isEqualTo(FeeReportDto.createFromModel(FEE_REPORT));
     }
 }

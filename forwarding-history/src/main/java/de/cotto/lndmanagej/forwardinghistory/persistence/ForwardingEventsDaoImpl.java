@@ -6,6 +6,7 @@ import de.cotto.lndmanagej.model.ForwardingEvent;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.Period;
 import java.time.temporal.ChronoUnit;
@@ -15,7 +16,6 @@ import java.util.List;
 @Component
 @Transactional
 public class ForwardingEventsDaoImpl implements ForwardingEventsDao {
-    private static final int MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1_000;
     private final ForwardingEventsRepository repository;
 
     public ForwardingEventsDaoImpl(ForwardingEventsRepository repository) {
@@ -36,7 +36,7 @@ public class ForwardingEventsDaoImpl implements ForwardingEventsDao {
     }
 
     @Override
-    public List<ForwardingEvent> getEventsWithOutgoingChannel(ChannelId channelId, Period maxAge) {
+    public List<ForwardingEvent> getEventsWithOutgoingChannel(ChannelId channelId, Duration maxAge) {
         return repository.findByChannelOutgoingAndTimestampGreaterThan(
                         channelId.getShortChannelId(),
                         getAfterEpochMilliSeconds(maxAge)
@@ -46,7 +46,7 @@ public class ForwardingEventsDaoImpl implements ForwardingEventsDao {
     }
 
     @Override
-    public List<ForwardingEvent> getEventsWithIncomingChannel(ChannelId channelId, Period maxAge) {
+    public List<ForwardingEvent> getEventsWithIncomingChannel(ChannelId channelId, Duration maxAge) {
         return repository.findByChannelIncomingAndTimestampGreaterThan(
                         channelId.getShortChannelId(),
                         getAfterEpochMilliSeconds(maxAge)
@@ -55,7 +55,7 @@ public class ForwardingEventsDaoImpl implements ForwardingEventsDao {
                 .toList();
     }
 
-    private long getAfterEpochMilliSeconds(Period maxAge) {
-        return Instant.now().toEpochMilli() - maxAge.get(ChronoUnit.DAYS) * MILLISECONDS_PER_DAY;
+    private long getAfterEpochMilliSeconds(Duration maxAge) {
+        return Instant.now().toEpochMilli() - maxAge.getSeconds() * 1_000;
     }
 }

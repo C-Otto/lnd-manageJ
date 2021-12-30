@@ -109,7 +109,7 @@ class ChannelControllerIT {
                 .andExpect(jsonPath("$.totalSent", is("0")))
                 .andExpect(jsonPath("$.totalReceived", is("0")))
                 .andExpect(jsonPath("$.closeDetails.initiator", is("REMOTE")))
-                .andExpect(jsonPath("$.closeDetails.height", is(987_654)))
+                .andExpect(jsonPath("$.closeDetails.height", is(600_000)))
                 .andExpect(jsonPath("$.status.active", is(false)))
                 .andExpect(jsonPath("$.status.closed", is(true)))
                 .andExpect(jsonPath("$.status.openClosed", is("CLOSED")));
@@ -171,7 +171,7 @@ class ChannelControllerIT {
         when(channelDetailsService.getDetails(CLOSED_CHANNEL)).thenReturn(CHANNEL_DETAILS_CLOSED);
         mockMvc.perform(get(DETAILS_PREFIX))
                 .andExpect(jsonPath("$.closeDetails.initiator", is("REMOTE")))
-                .andExpect(jsonPath("$.closeDetails.height", is(987_654)))
+                .andExpect(jsonPath("$.closeDetails.height", is(600_000)))
                 .andExpect(jsonPath("$.status.openClosed", is("CLOSED")))
                 .andExpect(jsonPath("$.totalSent", is("0")))
                 .andExpect(jsonPath("$.totalReceived", is("0")))
@@ -224,7 +224,7 @@ class ChannelControllerIT {
         when(channelService.getClosedChannel(CHANNEL_ID)).thenReturn(Optional.of(CLOSED_CHANNEL));
         mockMvc.perform(get(CHANNEL_PREFIX + "/close-details"))
                 .andExpect(jsonPath("$.initiator", is("REMOTE")))
-                .andExpect(jsonPath("$.height", is(987_654)))
+                .andExpect(jsonPath("$.height", is(600_000)))
                 .andExpect(jsonPath("$.force", is(false)))
                 .andExpect(jsonPath("$.breach", is(false)));
     }
@@ -234,7 +234,7 @@ class ChannelControllerIT {
         when(channelService.getClosedChannel(CHANNEL_ID)).thenReturn(Optional.of(FORCE_CLOSED_CHANNEL));
         mockMvc.perform(get(CHANNEL_PREFIX + "/close-details"))
                 .andExpect(jsonPath("$.initiator", is("REMOTE")))
-                .andExpect(jsonPath("$.height", is(987_654)))
+                .andExpect(jsonPath("$.height", is(600_000)))
                 .andExpect(jsonPath("$.force", is(true)))
                 .andExpect(jsonPath("$.breach", is(false)));
     }
@@ -245,7 +245,7 @@ class ChannelControllerIT {
         mockMvc.perform(get(CHANNEL_PREFIX + "/close-details"))
                 .andExpect(jsonPath("$.breach", is(true)))
                 .andExpect(jsonPath("$.initiator", is("REMOTE")))
-                .andExpect(jsonPath("$.height", is(987_654)))
+                .andExpect(jsonPath("$.height", is(600_000)))
                 .andExpect(jsonPath("$.force", is(true)));
     }
 

@@ -3,7 +3,8 @@ package de.cotto.lndmanagej.forwardinghistory;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ForwardingEvent;
 
-import java.time.Period;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.List;
 
@@ -12,7 +13,7 @@ public interface ForwardingEventsDao {
 
     int getOffset();
 
-    List<ForwardingEvent> getEventsWithOutgoingChannel(ChannelId channelId, Period maxAge);
+    List<ForwardingEvent> getEventsWithOutgoingChannel(ChannelId channelId, Duration maxAge);
 
-    List<ForwardingEvent> getEventsWithIncomingChannel(ChannelId channelId, Period maxAge);
+    List<ForwardingEvent> getEventsWithIncomingChannel(ChannelId channelId, Duration maxAge);
 }
