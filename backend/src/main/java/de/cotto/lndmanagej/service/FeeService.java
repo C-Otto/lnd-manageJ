@@ -42,7 +42,10 @@ public class FeeService {
 
     @Timed
     public FeeReport getFeeReportForPeer(Pubkey pubkey, Period maxAge) {
-        return new FeeReport(getEarnedFeesForPeer(pubkey, maxAge), getSourcedFeesForPeer(pubkey, maxAge));
+        return channelService.getAllChannelsWith(pubkey).parallelStream()
+                .map(Channel::getId)
+                .map(channelId -> getFeeReportForChannel(channelId, maxAge))
+                .reduce(FeeReport.EMPTY, FeeReport::add);
     }
 
     public FeeReport getFeeReportForChannel(ChannelId channelId) {
@@ -63,20 +66,6 @@ public class FeeService {
                 getEarnedFeesForChannel(cacheKey.channelId(), cacheKey.maxAge()),
                 getSourcedFeesForChannel(cacheKey.channelId(), cacheKey.maxAge())
         );
-    }
-
-    private Coins getEarnedFeesForPeer(Pubkey peer, Period maxAge) {
-        return channelService.getAllChannelsWith(peer).parallelStream()
-                .map(Channel::getId)
-                .map(channelId -> getEarnedFeesForChannel(channelId, maxAge))
-                .reduce(Coins.NONE, Coins::add);
-    }
-
-    private Coins getSourcedFeesForPeer(Pubkey peer, Period maxAge) {
-        return channelService.getAllChannelsWith(peer).parallelStream()
-                .map(Channel::getId)
-                .map(channelId -> getSourcedFeesForChannel(channelId, maxAge))
-                .reduce(Coins.NONE, Coins::add);
     }
 
     private Coins getEarnedFeesForChannel(ChannelId channelId, Period maxAge) {
