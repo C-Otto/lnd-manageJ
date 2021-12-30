@@ -44,7 +44,7 @@ public class GrpcForwardingHistory {
     }
 
     private ForwardingEvent toForwardingEvent(lnrpc.ForwardingEvent lndForwardingEvent, int index) {
-        Instant timestamp = Instant.ofEpochMilli(lndForwardingEvent.getTimestampNs() / 1_000);
+        Instant timestamp = Instant.ofEpochMilli(lndForwardingEvent.getTimestampNs() / 1_000_000);
         return new ForwardingEvent(
                 index,
                 Coins.ofMilliSatoshis(lndForwardingEvent.getAmtInMsat()),

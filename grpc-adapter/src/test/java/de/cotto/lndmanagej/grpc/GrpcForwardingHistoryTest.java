@@ -80,7 +80,7 @@ class GrpcForwardingHistoryTest {
                 .setAmtOutMsat(forwardingEvent.amountOut().milliSatoshis())
                 .setChanIdIn(forwardingEvent.channelIn().getShortChannelId())
                 .setChanIdOut(forwardingEvent.channelOut().getShortChannelId())
-                .setTimestampNs(forwardingEvent.timestamp().toInstant(ZoneOffset.UTC).toEpochMilli() * 1_000)
+                .setTimestampNs(forwardingEvent.timestamp().toInstant(ZoneOffset.UTC).toEpochMilli() * 1_000_000)
                 .build();
     }
 }
