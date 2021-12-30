@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Period;
 import java.util.List;
 import java.util.Set;
 
@@ -85,6 +86,12 @@ public class NodeController {
     @GetMapping("/fee-report")
     public FeeReportDto getFeeReport(@PathVariable Pubkey pubkey) {
         return FeeReportDto.createFromModel(feeService.getFeeReportForPeer(pubkey));
+    }
+
+    @Timed
+    @GetMapping("/fee-report/last-days/{lastDays}")
+    public FeeReportDto getFeeReport(@PathVariable Pubkey pubkey, @PathVariable int lastDays) {
+        return FeeReportDto.createFromModel(feeService.getFeeReportForPeer(pubkey, Period.ofDays(lastDays)));
     }
 
     private List<ChannelId> toSortedList(Set<? extends Channel> channels) {
