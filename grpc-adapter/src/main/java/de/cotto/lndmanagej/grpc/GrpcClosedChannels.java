@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.grpc;
 
 import de.cotto.lndmanagej.hardcoded.HardcodedService;
 import de.cotto.lndmanagej.model.BreachForceClosedChannelBuilder;
+import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.ChannelPoint;
@@ -22,10 +23,12 @@ import lnrpc.ChannelCloseSummary.ClosureType;
 import lnrpc.Initiator;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static lnrpc.ChannelCloseSummary.ClosureType.LOCAL_FORCE_CLOSE;
 import static lnrpc.ChannelCloseSummary.ClosureType.REMOTE_FORCE_CLOSE;
@@ -56,13 +59,13 @@ public class GrpcClosedChannels extends GrpcChannelsBase {
         this.hardcodedService = hardcodedService;
     }
 
-    public Set<ClosedChannel> getClosedChannels() {
+    public Map<ChannelId, ClosedChannel> getClosedChannels() {
         Pubkey ownPubkey = grpcGetInfo.getPubkey();
         return grpcService.getClosedChannels().stream()
                 .filter(this::hasSupportedCloseType)
                 .map(channelCloseSummary -> toClosedChannel(channelCloseSummary, ownPubkey))
                 .flatMap(Optional::stream)
-                .collect(toSet());
+                .collect(toMap(Channel::getId, c -> c));
     }
 
     private boolean hasSupportedCloseType(ChannelCloseSummary channelCloseSummary) {

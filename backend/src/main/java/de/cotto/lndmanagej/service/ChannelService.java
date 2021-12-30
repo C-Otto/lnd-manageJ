@@ -17,6 +17,8 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -31,7 +33,7 @@ public class ChannelService {
 
     private final GrpcChannels grpcChannels;
     private final LoadingCache<Object, Set<LocalOpenChannel>> localOpenChannelsCache;
-    private final LoadingCache<Object, Set<ClosedChannel>> closedChannelsCache;
+    private final LoadingCache<Object, Map<ChannelId, ClosedChannel>> closedChannelsCache;
     private final LoadingCache<Object, Set<ForceClosingChannel>> forceClosingChannelsCache;
     private final LoadingCache<Object, Set<WaitingCloseChannel>> waitingCloseChannelsCache;
 
@@ -78,8 +80,8 @@ public class ChannelService {
     }
 
     @Timed
-    public Set<ClosedChannel> getClosedChannels() {
-        return closedChannelsCache.get("");
+    public Collection<ClosedChannel> getClosedChannels() {
+        return Objects.requireNonNull(closedChannelsCache.get("")).values();
     }
 
     @Timed
@@ -92,28 +94,20 @@ public class ChannelService {
 
     @Timed
     public Optional<ClosedChannel> getClosedChannel(ChannelId channelId) {
-        return getClosedChannels().stream()
-                .filter(c -> channelId.equals(c.getId()))
-                .findFirst();
+        Map<ChannelId, ClosedChannel> closedChannels = Objects.requireNonNull(closedChannelsCache.get(""));
+        return Optional.ofNullable(closedChannels.get(channelId));
     }
 
     @Timed
     public Optional<ForceClosedChannel> getForceClosedChannel(ChannelId channelId) {
-        return getForceClosedChannels().stream()
-                .filter(c -> channelId.equals(c.getId()))
-                .findFirst();
+        return getClosedChannel(channelId)
+                .filter(c -> c instanceof ForceClosedChannel)
+                .map(c -> (ForceClosedChannel) c);
     }
 
     @Timed
     public Set<ForceClosingChannel> getForceClosingChannels() {
         return forceClosingChannelsCache.get("");
-    }
-
-    @Timed
-    public Optional<ForceClosingChannel> getForceClosingChannel(ChannelId channelId) {
-        return getForceClosingChannels().stream()
-                .filter(c -> channelId.equals(c.getId()))
-                .findFirst();
     }
 
     @Timed
@@ -159,7 +153,7 @@ public class ChannelService {
     @Timed
     public Stream<LocalChannel> getAllLocalChannels() {
         Supplier<Set<LocalOpenChannel>> openChannels = this::getOpenChannels;
-        Supplier<Set<ClosedChannel>> closedChannels = this::getClosedChannels;
+        Supplier<Collection<ClosedChannel>> closedChannels = this::getClosedChannels;
         Supplier<Set<WaitingCloseChannel>> waitingCloseChannels = this::getWaitingCloseChannels;
         Supplier<Set<ForceClosingChannel>> forceClosingChannels = this::getForceClosingChannels;
         return Stream.of(
