@@ -20,4 +20,15 @@ class FeeReportTest {
     void empty() {
         assertThat(FeeReport.EMPTY).isEqualTo(new FeeReport(Coins.NONE, Coins.NONE));
     }
+
+    @Test
+    void add_empty_to_empty() {
+        assertThat(FeeReport.EMPTY.add(FeeReport.EMPTY)).isEqualTo(FeeReport.EMPTY);
+    }
+
+    @Test
+    void add() {
+        assertThat(FEE_REPORT.add(new FeeReport(Coins.ofSatoshis(1), Coins.ofSatoshis(2))))
+                .isEqualTo(new FeeReport(Coins.ofMilliSatoshis(2_234), Coins.ofMilliSatoshis(2_567)));
+    }
 }
