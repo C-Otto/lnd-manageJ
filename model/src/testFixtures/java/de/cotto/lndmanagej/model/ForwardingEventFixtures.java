@@ -34,4 +34,13 @@ public class ForwardingEventFixtures {
             CHANNEL_ID_4,
             LocalDateTime.of(2021, 11, 29, 18, 30, 2)
     );
+
+    public static final ForwardingEvent FORWARDING_EVENT_OLD = new ForwardingEvent(
+            1,
+            Coins.ofMilliSatoshis(1_000),
+            Coins.ofMilliSatoshis(900),
+            CHANNEL_ID,
+            CHANNEL_ID_2,
+            LocalDateTime.of(2000, 11, 29, 18, 30, 0, 500_000_000)
+    );
 }

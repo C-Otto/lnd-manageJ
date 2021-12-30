@@ -10,7 +10,7 @@ public interface ForwardingEventsRepository extends JpaRepository<ForwardingEven
     @Query("SELECT max(eventIndex) FROM ForwardingEventJpaDto")
     Optional<Integer> findMaxIndex();
 
-    List<ForwardingEventJpaDto> findByChannelIncoming(long channelId);
+    List<ForwardingEventJpaDto> findByChannelIncomingAndTimestampGreaterThan(long channelId, long after);
 
-    List<ForwardingEventJpaDto> findByChannelOutgoing(long channelId);
+    List<ForwardingEventJpaDto> findByChannelOutgoingAndTimestampGreaterThan(long channelId, long after);
 }

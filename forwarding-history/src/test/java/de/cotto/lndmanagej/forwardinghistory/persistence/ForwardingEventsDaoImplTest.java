@@ -8,6 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Instant;
+import java.time.Period;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -18,12 +20,17 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ForwardingEventFixtures.FORWARDING_EVENT;
 import static de.cotto.lndmanagej.model.ForwardingEventFixtures.FORWARDING_EVENT_2;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.longThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ForwardingEventsDaoImplTest {
+    private static final Period MAX_AGE = Period.ofYears(Integer.MAX_VALUE);
+
     @InjectMocks
     private ForwardingEventsDaoImpl dao;
 
@@ -58,32 +65,66 @@ class ForwardingEventsDaoImplTest {
 
     @Test
     void getEventsWithOutgoingChannel_empty() {
-        assertThat(dao.getEventsWithOutgoingChannel(CHANNEL_ID)).isEmpty();
+        assertThat(dao.getEventsWithOutgoingChannel(CHANNEL_ID, MAX_AGE)).isEmpty();
     }
 
     @Test
     void getEventsWithOutgoingChannel() {
-        when(repository.findByChannelOutgoing(CHANNEL_ID_2.getShortChannelId())).thenReturn(List.of(
-                ForwardingEventJpaDto.createFromModel(FORWARDING_EVENT),
-                ForwardingEventJpaDto.createFromModel(FORWARDING_EVENT_2)
-        ));
-        assertThat(dao.getEventsWithOutgoingChannel(CHANNEL_ID_2))
+        when(repository.findByChannelOutgoingAndTimestampGreaterThan(eq(CHANNEL_ID_2.getShortChannelId()), anyLong()))
+                .thenReturn(List.of(
+                        ForwardingEventJpaDto.createFromModel(FORWARDING_EVENT),
+                        ForwardingEventJpaDto.createFromModel(FORWARDING_EVENT_2)
+                ));
+        assertThat(dao.getEventsWithOutgoingChannel(CHANNEL_ID_2, MAX_AGE))
                 .containsExactly(FORWARDING_EVENT, FORWARDING_EVENT_2);
+    }
+
+    @Test
+    void getEventsWithOutgoingChannel_uses_max_age() {
+        Period maxAge = Period.ofDays(10);
+        long timestampAfter = Instant.now().minus(maxAge).getEpochSecond() * 1_000;
+        when(repository.findByChannelOutgoingAndTimestampGreaterThan(eq(CHANNEL_ID_2.getShortChannelId()), anyLong()))
+                .thenReturn(List.of(ForwardingEventJpaDto.createFromModel(FORWARDING_EVENT_2)));
+        assertThat(dao.getEventsWithOutgoingChannel(CHANNEL_ID_2, maxAge))
+                .containsExactly(FORWARDING_EVENT_2);
+        verify(repository).findByChannelOutgoingAndTimestampGreaterThan(
+                anyLong(),
+                longThat(isWithinAFewSeconds(timestampAfter))
+        );
     }
 
     @Test
     void getEventsWithIncomingChannel_empty() {
-        assertThat(dao.getEventsWithIncomingChannel(CHANNEL_ID)).isEmpty();
+        assertThat(dao.getEventsWithIncomingChannel(CHANNEL_ID, MAX_AGE)).isEmpty();
     }
 
     @Test
     void getEventsWithIncomingChannel() {
-        when(repository.findByChannelIncoming(CHANNEL_ID_2.getShortChannelId())).thenReturn(List.of(
-                ForwardingEventJpaDto.createFromModel(FORWARDING_EVENT),
-                ForwardingEventJpaDto.createFromModel(FORWARDING_EVENT_2)
-        ));
-        assertThat(dao.getEventsWithIncomingChannel(CHANNEL_ID_2))
+        when(repository.findByChannelIncomingAndTimestampGreaterThan(eq(CHANNEL_ID_2.getShortChannelId()), anyLong()))
+                .thenReturn(List.of(
+                        ForwardingEventJpaDto.createFromModel(FORWARDING_EVENT),
+                        ForwardingEventJpaDto.createFromModel(FORWARDING_EVENT_2)
+                ));
+        assertThat(dao.getEventsWithIncomingChannel(CHANNEL_ID_2, MAX_AGE))
                 .containsExactly(FORWARDING_EVENT, FORWARDING_EVENT_2);
+    }
+
+    @Test
+    void getEventsWithIncomingChannel_uses_max_age() {
+        Period maxAge = Period.ofDays(10);
+        long timestampAfter = Instant.now().minus(maxAge).getEpochSecond() * 1_000;
+        when(repository.findByChannelIncomingAndTimestampGreaterThan(eq(CHANNEL_ID_2.getShortChannelId()), anyLong()))
+                .thenReturn(List.of(ForwardingEventJpaDto.createFromModel(FORWARDING_EVENT)));
+        assertThat(dao.getEventsWithIncomingChannel(CHANNEL_ID_2, maxAge)).containsExactly(FORWARDING_EVENT);
+        verify(repository).findByChannelIncomingAndTimestampGreaterThan(
+                anyLong(),
+                longThat(isWithinAFewSeconds(timestampAfter))
+        );
+    }
+
+    @SuppressWarnings("PMD.LinguisticNaming")
+    private ArgumentMatcher<Long> isWithinAFewSeconds(long timestampAfter) {
+        return value -> Math.abs(value - timestampAfter) < 10_000;
     }
 
     @SuppressWarnings("PMD.LinguisticNaming")

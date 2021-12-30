@@ -13,13 +13,15 @@ import de.cotto.lndmanagej.model.Pubkey;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.time.Period;
 
 @Component
 public class FeeService {
+    private static final Period DEFAULT_MAX_AGE = Period.ofYears(Integer.MAX_VALUE);
     private final ForwardingEventsDao forwardingEventsDao;
     private final ChannelService channelService;
-    private final LoadingCache<ChannelId, FeeReport> cacheForOpenChannels;
-    private final LoadingCache<ChannelId, FeeReport> cacheForClosedChannels;
+    private final LoadingCache<CacheKey, FeeReport> cacheForOpenChannels;
+    private final LoadingCache<CacheKey, FeeReport> cacheForClosedChannels;
 
     public FeeService(ForwardingEventsDao forwardingEventsDao, ChannelService channelService) {
         this.forwardingEventsDao = forwardingEventsDao;
@@ -34,47 +36,62 @@ public class FeeService {
                 .build(this::getFeeReportForChannelWithoutCache);
     }
 
-    @Timed
     public FeeReport getFeeReportForPeer(Pubkey pubkey) {
-        return new FeeReport(getEarnedFeesForPeer(pubkey), getSourcedFeesForPeer(pubkey));
+        return getFeeReportForPeer(pubkey, DEFAULT_MAX_AGE);
     }
 
     @Timed
+    public FeeReport getFeeReportForPeer(Pubkey pubkey, Period maxAge) {
+        return new FeeReport(getEarnedFeesForPeer(pubkey, maxAge), getSourcedFeesForPeer(pubkey, maxAge));
+    }
+
     public FeeReport getFeeReportForChannel(ChannelId channelId) {
+        return getFeeReportForChannel(channelId, DEFAULT_MAX_AGE);
+    }
+
+    @Timed
+    public FeeReport getFeeReportForChannel(ChannelId channelId, Period maxAge) {
+        CacheKey cacheKey = new CacheKey(channelId, maxAge);
         if (channelService.isClosed(channelId)) {
-            return cacheForClosedChannels.get(channelId);
+            return cacheForClosedChannels.get(cacheKey);
         }
-        return cacheForOpenChannels.get(channelId);
+        return cacheForOpenChannels.get(cacheKey);
     }
 
-    private FeeReport getFeeReportForChannelWithoutCache(ChannelId channelId) {
-        return new FeeReport(getEarnedFeesForChannel(channelId), getSourcedFeesForChannel(channelId));
+    private FeeReport getFeeReportForChannelWithoutCache(CacheKey cacheKey) {
+        return new FeeReport(
+                getEarnedFeesForChannel(cacheKey.channelId(), cacheKey.maxAge()),
+                getSourcedFeesForChannel(cacheKey.channelId(), cacheKey.maxAge())
+        );
     }
 
-    private Coins getEarnedFeesForPeer(Pubkey peer) {
+    private Coins getEarnedFeesForPeer(Pubkey peer, Period maxAge) {
         return channelService.getAllChannelsWith(peer).parallelStream()
                 .map(Channel::getId)
-                .map(this::getEarnedFeesForChannel)
+                .map(channelId -> getEarnedFeesForChannel(channelId, maxAge))
                 .reduce(Coins.NONE, Coins::add);
     }
 
-    private Coins getSourcedFeesForPeer(Pubkey peer) {
+    private Coins getSourcedFeesForPeer(Pubkey peer, Period maxAge) {
         return channelService.getAllChannelsWith(peer).parallelStream()
                 .map(Channel::getId)
-                .map(this::getSourcedFeesForChannel)
+                .map(channelId -> getSourcedFeesForChannel(channelId, maxAge))
                 .reduce(Coins.NONE, Coins::add);
     }
 
-    private Coins getEarnedFeesForChannel(ChannelId channelId) {
-        return forwardingEventsDao.getEventsWithOutgoingChannel(channelId).parallelStream()
+    private Coins getEarnedFeesForChannel(ChannelId channelId, Period maxAge) {
+        return forwardingEventsDao.getEventsWithOutgoingChannel(channelId, maxAge).parallelStream()
                 .map(ForwardingEvent::fees)
                 .reduce(Coins.NONE, Coins::add);
     }
 
-    private Coins getSourcedFeesForChannel(ChannelId channelId) {
-        return forwardingEventsDao.getEventsWithIncomingChannel(channelId).parallelStream()
+    private Coins getSourcedFeesForChannel(ChannelId channelId, Period maxAge) {
+        return forwardingEventsDao.getEventsWithIncomingChannel(channelId, maxAge).parallelStream()
                 .map(ForwardingEvent::fees)
                 .reduce(Coins.NONE, Coins::add);
     }
 
+    @SuppressWarnings("UnusedVariable")
+    private record CacheKey(ChannelId channelId, Period maxAge) {
+    }
 }
