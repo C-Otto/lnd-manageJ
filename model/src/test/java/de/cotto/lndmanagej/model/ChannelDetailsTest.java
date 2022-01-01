@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.ChannelDetailsFixtures.CHANNEL_DETAILS;
 import static de.cotto.lndmanagej.model.FeeReportFixtures.FEE_REPORT;
+import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
@@ -41,6 +42,11 @@ class ChannelDetailsTest {
     @Test
     void feeReport() {
         assertThat(CHANNEL_DETAILS.feeReport()).isEqualTo(FEE_REPORT);
+    }
+
+    @Test
+    void flowReport() {
+        assertThat(CHANNEL_DETAILS.flowReport()).isEqualTo(FLOW_REPORT);
     }
 
     @Test

@@ -162,7 +162,18 @@ class ChannelControllerIT {
                 .andExpect(jsonPath("$.policies.remote.feeRatePpm", is(222)))
                 .andExpect(jsonPath("$.policies.remote.baseFeeMilliSat", is(0)))
                 .andExpect(jsonPath("$.feeReport.earned", is("1234")))
-                .andExpect(jsonPath("$.feeReport.sourced", is("567")));
+                .andExpect(jsonPath("$.feeReport.sourced", is("567")))
+                .andExpect(jsonPath("$.flowReport.forwardedSent", is("1000")))
+                .andExpect(jsonPath("$.flowReport.forwardedReceived", is("2000")))
+                .andExpect(jsonPath("$.flowReport.forwardingFeesReceived", is("10")))
+                .andExpect(jsonPath("$.flowReport.rebalanceSent", is("60000")))
+                .andExpect(jsonPath("$.flowReport.rebalanceFeesSent", is("4")))
+                .andExpect(jsonPath("$.flowReport.rebalanceReceived", is("61000")))
+                .andExpect(jsonPath("$.flowReport.rebalanceSupportSent", is("9000")))
+                .andExpect(jsonPath("$.flowReport.rebalanceSupportFeesSent", is("2")))
+                .andExpect(jsonPath("$.flowReport.rebalanceSupportReceived", is("10")))
+                .andExpect(jsonPath("$.flowReport.totalSent", is("70006")))
+                .andExpect(jsonPath("$.flowReport.totalReceived", is("63020")));
     }
 
     @Test

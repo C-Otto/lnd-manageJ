@@ -8,6 +8,7 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_4;
 import static de.cotto.lndmanagej.model.FeeReportFixtures.FEE_REPORT;
+import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT;
 import static de.cotto.lndmanagej.model.NodeDetailsFixtures.NODE_DETAILS;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
@@ -63,9 +64,13 @@ class NodeDetailsTest {
     }
 
     @Test
-
     void feeReport() {
         assertThat(NODE_DETAILS.feeReport()).isEqualTo(FEE_REPORT);
+    }
+
+    @Test
+    void flowReport() {
+        assertThat(NODE_DETAILS.flowReport()).isEqualTo(FLOW_REPORT);
     }
 
     @Test

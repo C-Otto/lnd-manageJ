@@ -14,6 +14,7 @@ import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
+import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
@@ -37,6 +38,7 @@ class ChannelDetailsDtoTest {
             ON_CHAIN_COSTS,
             Policies.UNKNOWN,
             FEE_REPORT,
+            FLOW_REPORT,
             REBALANCE_REPORT
     );
 
@@ -49,6 +51,7 @@ class ChannelDetailsDtoTest {
                 ON_CHAIN_COSTS,
                 POLICIES,
                 FEE_REPORT,
+                FLOW_REPORT,
                 REBALANCE_REPORT
         );
         assertThat(ChannelDetailsDto.createFromModel(CHANNEL_DETAILS)).isEqualTo(expected);
@@ -108,6 +111,7 @@ class ChannelDetailsDtoTest {
                 ON_CHAIN_COSTS,
                 Policies.UNKNOWN,
                 FEE_REPORT,
+                FLOW_REPORT,
                 RebalanceReport.EMPTY
         );
         ChannelStatusDto channelStatusDto =
@@ -128,6 +132,11 @@ class ChannelDetailsDtoTest {
     @Test
     void feeReport() {
         assertThat(CHANNEL_DETAILS_DTO.feeReport()).isEqualTo(FeeReportDto.createFromModel(FEE_REPORT));
+    }
+
+    @Test
+    void flowReport() {
+        assertThat(CHANNEL_DETAILS_DTO.flowReport()).isEqualTo(FlowReportDto.createFromModel(FLOW_REPORT));
     }
 
     @Test

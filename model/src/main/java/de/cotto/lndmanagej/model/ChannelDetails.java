@@ -7,6 +7,7 @@ public record ChannelDetails(
         OnChainCosts onChainCosts,
         Policies policies,
         FeeReport feeReport,
+        FlowReport flowReport,
         RebalanceReport rebalanceReport
 ) {
 }

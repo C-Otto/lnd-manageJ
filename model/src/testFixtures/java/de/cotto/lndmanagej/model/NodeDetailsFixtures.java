@@ -8,6 +8,7 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_4;
 import static de.cotto.lndmanagej.model.FeeReportFixtures.FEE_REPORT;
+import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.NodeWarningsFixtures.NODE_WARNINGS;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
@@ -28,6 +29,7 @@ public class NodeDetailsFixtures {
             BALANCE_INFORMATION_2,
             ONLINE_REPORT,
             FEE_REPORT,
+            FLOW_REPORT,
             REBALANCE_REPORT,
             NODE_WARNINGS
     );
@@ -42,6 +44,7 @@ public class NodeDetailsFixtures {
             BalanceInformation.EMPTY,
             ONLINE_REPORT_OFFLINE,
             FeeReport.EMPTY,
+            FlowReport.EMPTY,
             RebalanceReport.EMPTY,
             NodeWarnings.NONE
     );

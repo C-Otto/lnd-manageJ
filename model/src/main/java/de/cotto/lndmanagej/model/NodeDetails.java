@@ -13,6 +13,7 @@ public record NodeDetails(
         BalanceInformation balanceInformation,
         OnlineReport onlineReport,
         FeeReport feeReport,
+        FlowReport flowReport,
         RebalanceReport rebalanceReport,
         NodeWarnings nodeWarnings
 ) {

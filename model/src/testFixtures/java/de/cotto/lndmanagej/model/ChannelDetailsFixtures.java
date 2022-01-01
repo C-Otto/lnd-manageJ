@@ -3,6 +3,8 @@ package de.cotto.lndmanagej.model;
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.FeeReportFixtures.FEE_REPORT;
+import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT;
+import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
@@ -18,6 +20,7 @@ public class ChannelDetailsFixtures {
             ON_CHAIN_COSTS,
             POLICIES,
             FEE_REPORT,
+            FLOW_REPORT,
             REBALANCE_REPORT
     );
 
@@ -28,6 +31,7 @@ public class ChannelDetailsFixtures {
             ON_CHAIN_COSTS,
             POLICIES,
             FEE_REPORT,
+            FLOW_REPORT_2,
             REBALANCE_REPORT_2
     );
 
@@ -38,6 +42,7 @@ public class ChannelDetailsFixtures {
             ON_CHAIN_COSTS,
             Policies.UNKNOWN,
             FEE_REPORT,
+            FLOW_REPORT,
             REBALANCE_REPORT
     );
 }

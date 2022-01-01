@@ -20,6 +20,7 @@ public record NodeDetailsDto(
         BalanceInformationDto balance,
         OnlineReportDto onlineReport,
         FeeReportDto feeReport,
+        FlowReportDto flowReport,
         RebalanceReportDto rebalanceReport,
         List<NodeWarning> nodeWarnings
 ) {
@@ -35,6 +36,7 @@ public record NodeDetailsDto(
                 BalanceInformationDto.createFromModel(nodeDetails.balanceInformation()),
                 OnlineReportDto.createFromModel(nodeDetails.onlineReport()),
                 FeeReportDto.createFromModel(nodeDetails.feeReport()),
+                FlowReportDto.createFromModel(nodeDetails.flowReport()),
                 RebalanceReportDto.createFromModel(nodeDetails.rebalanceReport()),
                 nodeDetails.nodeWarnings().warnings()
         );

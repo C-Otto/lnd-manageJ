@@ -10,6 +10,7 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_4;
 import static de.cotto.lndmanagej.model.FeeReportFixtures.FEE_REPORT;
+import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT;
 import static de.cotto.lndmanagej.model.NodeDetailsFixtures.NODE_DETAILS;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.NodeWarningsFixtures.NODE_WARNINGS;
@@ -33,6 +34,7 @@ class NodeDetailsDtoTest {
                 BalanceInformationDto.createFromModel(BALANCE_INFORMATION_2),
                 OnlineReportDto.createFromModel(ONLINE_REPORT),
                 FeeReportDto.createFromModel(FEE_REPORT),
+                FlowReportDto.createFromModel(FLOW_REPORT),
                 RebalanceReportDto.createFromModel(REBALANCE_REPORT),
                 NODE_WARNINGS.warnings()
         );

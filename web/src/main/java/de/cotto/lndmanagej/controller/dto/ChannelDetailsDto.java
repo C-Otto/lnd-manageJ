@@ -4,6 +4,7 @@ import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelDetails;
 import de.cotto.lndmanagej.model.ChannelPoint;
 import de.cotto.lndmanagej.model.FeeReport;
+import de.cotto.lndmanagej.model.FlowReport;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.model.OpenInitiator;
@@ -29,6 +30,7 @@ public record ChannelDetailsDto(
         PoliciesDto policies,
         ClosedChannelDetailsDto closeDetails,
         FeeReportDto feeReport,
+        FlowReportDto flowReport,
         RebalanceReportDto rebalanceReport
 ) {
     public ChannelDetailsDto(
@@ -38,6 +40,7 @@ public record ChannelDetailsDto(
             OnChainCosts onChainCosts,
             Policies policies,
             FeeReport feeReport,
+            FlowReport flowReport,
             RebalanceReport rebalanceReport
     ) {
         this(
@@ -58,6 +61,7 @@ public record ChannelDetailsDto(
                 PoliciesDto.createFromModel(policies),
                 channelDto.closeDetails(),
                 FeeReportDto.createFromModel(feeReport),
+                FlowReportDto.createFromModel(flowReport),
                 RebalanceReportDto.createFromModel(rebalanceReport)
         );
     }
@@ -69,6 +73,7 @@ public record ChannelDetailsDto(
             OnChainCosts onChainCosts,
             Policies policies,
             FeeReport feeReport,
+            FlowReport flowReport,
             RebalanceReport rebalanceReport
     ) {
         this(
@@ -78,6 +83,7 @@ public record ChannelDetailsDto(
                 onChainCosts,
                 policies,
                 feeReport,
+                flowReport,
                 rebalanceReport
         );
     }
@@ -90,6 +96,7 @@ public record ChannelDetailsDto(
                 channelDetails.onChainCosts(),
                 channelDetails.policies(),
                 channelDetails.feeReport(),
+                channelDetails.flowReport(),
                 channelDetails.rebalanceReport()
         );
     }

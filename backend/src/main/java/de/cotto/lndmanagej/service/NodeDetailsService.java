@@ -4,6 +4,7 @@ import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.FeeReport;
+import de.cotto.lndmanagej.model.FlowReport;
 import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.NodeDetails;
 import de.cotto.lndmanagej.model.NodeWarnings;
@@ -28,6 +29,7 @@ public class NodeDetailsService {
     private final RebalanceService rebalanceService;
     private final OnlinePeersService onlinePeersService;
     private final NodeWarningsService warningsService;
+    private final FlowService flowService;
 
     public NodeDetailsService(
             ChannelService channelService,
@@ -37,7 +39,8 @@ public class NodeDetailsService {
             FeeService feeService,
             RebalanceService rebalanceService,
             OnlinePeersService onlinePeersService,
-            NodeWarningsService warningsService
+            NodeWarningsService warningsService,
+            FlowService flowService
     ) {
         this.channelService = channelService;
         this.nodeService = nodeService;
@@ -47,6 +50,7 @@ public class NodeDetailsService {
         this.rebalanceService = rebalanceService;
         this.onlinePeersService = onlinePeersService;
         this.warningsService = warningsService;
+        this.flowService = flowService;
     }
 
     public NodeDetails getDetails(Pubkey pubkey) {
@@ -55,6 +59,7 @@ public class NodeDetailsService {
         CompletableFuture<OnChainCosts> onChainCosts = getOnChainCosts(pubkey);
         CompletableFuture<BalanceInformation> balanceInformation = getBalanceInformation(pubkey);
         CompletableFuture<FeeReport> feeReport = getFeeReport(pubkey);
+        CompletableFuture<FlowReport> flowReport = getFlowReport(pubkey);
         CompletableFuture<RebalanceReport> rebalanceReport = getRebalanceReport(pubkey);
         CompletableFuture<NodeWarnings> nodeWarnings = getNodeWarnings(pubkey);
         List<ChannelId> openChannelIds =
@@ -77,6 +82,7 @@ public class NodeDetailsService {
                     balanceInformation.get(),
                     onlineReport.get(),
                     feeReport.get(),
+                    flowReport.get(),
                     rebalanceReport.get(),
                     nodeWarnings.get()
             );
@@ -95,6 +101,10 @@ public class NodeDetailsService {
 
     private CompletableFuture<FeeReport> getFeeReport(Pubkey pubkey) {
         return CompletableFuture.supplyAsync(() -> feeService.getFeeReportForPeer(pubkey));
+    }
+
+    private CompletableFuture<FlowReport> getFlowReport(Pubkey pubkey) {
+        return CompletableFuture.supplyAsync(() -> flowService.getFlowReportForPeer(pubkey));
     }
 
     private CompletableFuture<RebalanceReport> getRebalanceReport(Pubkey pubkey) {

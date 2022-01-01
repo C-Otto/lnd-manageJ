@@ -18,6 +18,7 @@ import static de.cotto.lndmanagej.model.ChannelDetailsFixtures.CHANNEL_DETAILS;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.FeeReportFixtures.FEE_REPORT;
+import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
@@ -51,6 +52,9 @@ class ChannelDetailsServiceTest {
     private FeeService feeService;
 
     @Mock
+    private FlowService flowService;
+
+    @Mock
     private PolicyService policyService;
 
     @BeforeEach
@@ -58,6 +62,7 @@ class ChannelDetailsServiceTest {
         lenient().when(onChainCostService.getOnChainCostsForChannelId(CHANNEL_ID)).thenReturn(ON_CHAIN_COSTS);
         lenient().when(rebalanceService.getReportForChannel(CHANNEL_ID)).thenReturn(RebalanceReport.EMPTY);
         lenient().when(feeService.getFeeReportForChannel(CHANNEL_ID)).thenReturn(FEE_REPORT);
+        lenient().when(flowService.getFlowReportForChannel(CHANNEL_ID)).thenReturn(FLOW_REPORT);
         lenient().when(policyService.getPolicies(CHANNEL_ID)).thenReturn(POLICIES);
     }
 
@@ -79,6 +84,7 @@ class ChannelDetailsServiceTest {
                 ON_CHAIN_COSTS,
                 POLICIES,
                 FEE_REPORT,
+                FLOW_REPORT,
                 RebalanceReport.EMPTY
         );
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
@@ -110,6 +116,7 @@ class ChannelDetailsServiceTest {
                 ON_CHAIN_COSTS,
                 Policies.UNKNOWN,
                 FEE_REPORT,
+                FLOW_REPORT,
                 RebalanceReport.EMPTY
         );
     }

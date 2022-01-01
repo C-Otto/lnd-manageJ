@@ -141,6 +141,13 @@ public class RebalanceService {
         return amountSourceTotal.subtract(amountRebalanceSource);
     }
 
+    @Timed
+    public Coins getSupportAsSourceCostsFromChannel(ChannelId channelId, Duration maxAge) {
+        Coins costsSourceTotal = getSumOfFees(selfPaymentsService.getSelfPaymentsFromChannel(channelId, maxAge));
+        Coins costsRebalanceSource = getSourceCostsForChannel(channelId, maxAge);
+        return costsSourceTotal.subtract(costsRebalanceSource);
+    }
+
     public Coins getSupportAsTargetAmountToChannel(ChannelId channelId) {
         return getSupportAsTargetAmountToChannel(channelId, DEFAULT_MAX_AGE);
     }
@@ -210,7 +217,7 @@ public class RebalanceService {
                 .reduce(Coins.NONE, Coins::add);
     }
 
-    private Coins getSumOfFees(Set<SelfPayment> selfPayments) {
+    private Coins getSumOfFees(Collection<SelfPayment> selfPayments) {
         return selfPayments.stream()
                 .map(SelfPayment::fees)
                 .reduce(Coins.NONE, Coins::add);

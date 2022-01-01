@@ -410,7 +410,7 @@ class RebalanceServiceTest {
     void getSupportAsSourceAmountFromChannel() {
         when(selfPaymentsService.getSelfPaymentsFromChannel(CHANNEL_ID, DEFAULT_MAX_AGE)).thenReturn(List.of(
                 getSelfPayment("out of " + CHANNEL_ID, 0),
-                getSelfPayment("emptying " + CHANNEL_ID, 1),
+                getSelfPayment(String.valueOf(CHANNEL_ID), 1),
                 getSelfPayment("rebalancing " + CHANNEL_ID_2, 2)
         ));
         assertThat(rebalanceService.getSupportAsSourceAmountFromChannel(CHANNEL_ID)).isEqualTo(AMOUNT_PAID);
@@ -425,6 +425,15 @@ class RebalanceServiceTest {
                 getSelfPayment("rebalancing " + CHANNEL_ID_2, 2)
         ));
         assertThat(rebalanceService.getSupportAsSourceAmountFromChannel(CHANNEL_ID, maxAge)).isEqualTo(AMOUNT_PAID);
+    }
+
+    @Test
+    void getSupportAsSourceCostsFromChannel() {
+        Duration maxAge = Duration.ofDays(11);
+        when(selfPaymentsService.getSelfPaymentsFromChannel(CHANNEL_ID, maxAge)).thenReturn(List.of(
+                getSelfPayment(String.valueOf(CHANNEL_ID_2), 2)
+        ));
+        assertThat(rebalanceService.getSupportAsSourceCostsFromChannel(CHANNEL_ID, maxAge)).isEqualTo(PAYMENT_FEES);
     }
 
     @Test

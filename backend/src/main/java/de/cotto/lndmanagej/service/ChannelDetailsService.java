@@ -4,6 +4,7 @@ import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelDetails;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.FeeReport;
+import de.cotto.lndmanagej.model.FlowReport;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.model.OpenCloseStatus;
@@ -23,6 +24,7 @@ public class ChannelDetailsService {
     private final BalanceService balanceService;
     private final PolicyService policyService;
     private final FeeService feeService;
+    private final FlowService flowService;
 
     public ChannelDetailsService(
             OnChainCostService onChainCostService,
@@ -30,7 +32,8 @@ public class ChannelDetailsService {
             NodeService nodeService,
             BalanceService balanceService,
             PolicyService policyService,
-            FeeService feeService
+            FeeService feeService,
+            FlowService flowService
     ) {
         this.onChainCostService = onChainCostService;
         this.rebalanceService = rebalanceService;
@@ -38,6 +41,7 @@ public class ChannelDetailsService {
         this.balanceService = balanceService;
         this.policyService = policyService;
         this.feeService = feeService;
+        this.flowService = flowService;
     }
 
     public ChannelDetails getDetails(LocalChannel localChannel) {
@@ -48,6 +52,7 @@ public class ChannelDetailsService {
         CompletableFuture<OnChainCosts> onChainCosts = getOnChainCosts(channelId);
         CompletableFuture<Policies> policies = getPoliciesForChannel(localChannel);
         CompletableFuture<FeeReport> feeReport = getFeeReport(channelId);
+        CompletableFuture<FlowReport> flowReport = getFlowReport(channelId);
         CompletableFuture<RebalanceReport> rebalanceReport = getRebalanceReport(localChannel);
         try {
             return new ChannelDetails(
@@ -57,6 +62,7 @@ public class ChannelDetailsService {
                     onChainCosts.get(),
                     policies.get(),
                     feeReport.get(),
+                    flowReport.get(),
                     rebalanceReport.get()
             );
         } catch (InterruptedException | ExecutionException exception) {
@@ -70,6 +76,10 @@ public class ChannelDetailsService {
 
     private CompletableFuture<FeeReport> getFeeReport(ChannelId channelId) {
         return CompletableFuture.supplyAsync(() -> feeService.getFeeReportForChannel(channelId));
+    }
+
+    private CompletableFuture<FlowReport> getFlowReport(ChannelId channelId) {
+        return CompletableFuture.supplyAsync(() -> flowService.getFlowReportForChannel(channelId));
     }
 
     private CompletableFuture<OnChainCosts> getOnChainCosts(ChannelId channelId) {
