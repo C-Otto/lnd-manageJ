@@ -104,6 +104,14 @@ class CacheBuilderTest {
         assertThat(first).isNotEqualTo(third);
     }
 
+    @Test
+    void withSoftValues() {
+        LoadingCache<Object, Long> cache = new CacheBuilder()
+                .withSoftValues(true)
+                .build(System::nanoTime);
+        assertThat(cache.get("")).isNotNull();
+    }
+
     private void assertIsCached(LoadingCache<Object, Long> cache) {
         Long first = cache.get("");
         Long second = cache.get("");

@@ -31,18 +31,22 @@ public class ForwardingEventsService {
         this.channelService = channelService;
         this.ownNodeService = ownNodeService;
         cacheIncomingForOpenChannels = new CacheBuilder()
+                .withSoftValues(true)
                 .withRefresh(Duration.ofSeconds(5))
                 .withExpiry(Duration.ofSeconds(10))
                 .build(this::getEventsWithIncomingChannelWithoutCache);
         cacheOutgoingForOpenChannels = new CacheBuilder()
+                .withSoftValues(true)
                 .withRefresh(Duration.ofSeconds(5))
                 .withExpiry(Duration.ofSeconds(10))
                 .build(this::getEventsWithOutgoingChannelWithoutCache);
         cacheIncomingForClosedChannels = new CacheBuilder()
+                .withSoftValues(true)
                 .withRefresh(Duration.ofHours(12))
                 .withExpiry(Duration.ofHours(24))
                 .build(this::getEventsWithIncomingChannelWithoutCache);
         cacheOutgoingForClosedChannels = new CacheBuilder()
+                .withSoftValues(true)
                 .withRefresh(Duration.ofHours(12))
                 .withExpiry(Duration.ofHours(24))
                 .build(this::getEventsWithOutgoingChannelWithoutCache);

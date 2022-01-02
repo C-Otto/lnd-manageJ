@@ -5,3 +5,7 @@ plugins {
 dependencies {
     api 'com.github.ben-manes.caffeine:caffeine:3.0.4'
 }
+
+pitest {
+    testStrengthThreshold = 90
+}

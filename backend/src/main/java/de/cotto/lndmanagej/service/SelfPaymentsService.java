@@ -32,18 +32,22 @@ public class SelfPaymentsService {
         this.dao = dao;
         this.channelService = channelService;
         cacheFrom = new CacheBuilder()
+                .withSoftValues(true)
                 .withExpiry(EXPIRY)
                 .withRefresh(REFRESH)
                 .build(this::getSelfPaymentsFromChannelWithoutCache);
         cacheTo = new CacheBuilder()
+                .withSoftValues(true)
                 .withExpiry(EXPIRY)
                 .withRefresh(REFRESH)
                 .build(this::getSelfPaymentsToChannelWithoutCache);
         cacheFromClosed = new CacheBuilder()
+                .withSoftValues(true)
                 .withExpiry(EXPIRY_CLOSED)
                 .withRefresh(REFRESH_CLOSED)
                 .build(this::getSelfPaymentsFromChannelWithoutCache);
         cacheToClosed = new CacheBuilder()
+                .withSoftValues(true)
                 .withExpiry(EXPIRY_CLOSED)
                 .withRefresh(REFRESH_CLOSED)
                 .build(this::getSelfPaymentsToChannelWithoutCache);

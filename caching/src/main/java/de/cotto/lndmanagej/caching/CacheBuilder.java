@@ -17,6 +17,8 @@ public class CacheBuilder {
     @Nullable
     private Duration refresh;
 
+    private boolean softValues;
+
     public CacheBuilder() {
         expiry = Duration.ofMinutes(10);
     }
@@ -36,6 +38,11 @@ public class CacheBuilder {
         return this;
     }
 
+    public CacheBuilder withSoftValues(boolean softValues) {
+        this.softValues = softValues;
+        return this;
+    }
+
     public <I, O> LoadingCache<I, O> build(CacheLoader<I, O> function) {
         Caffeine<Object, Object> builder = Caffeine.newBuilder()
                 .expireAfterWrite(expiry);
@@ -44,6 +51,9 @@ public class CacheBuilder {
         }
         if (this.maximumSize != null) {
             builder.maximumSize(maximumSize);
+        }
+        if (softValues) {
+            builder.softValues();
         }
         return builder.build(function);
     }
