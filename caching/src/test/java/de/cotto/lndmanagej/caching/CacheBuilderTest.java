@@ -40,19 +40,19 @@ class CacheBuilderTest {
     @Test
     void withRefresh_cached_value_async_refresh() throws InterruptedException {
         LoadingCache<Object, Long> cache = new CacheBuilder()
-                .withRefresh(Duration.ofMillis(1))
+                .withRefresh(Duration.ofMillis(10))
                 .build(() -> {
                     try {
-                        Thread.sleep(2);
+                        Thread.sleep(20);
                     } catch (InterruptedException e) {
                         // ignored
                     }
                     return System.nanoTime();
                 });
         Long first = cache.get("");
-        Thread.sleep(1);
+        Thread.sleep(10);
         Long second = cache.get("");
-        Thread.sleep(5);
+        Thread.sleep(50);
         Long third = cache.get("");
         assertThat(first).isEqualTo(second);
         assertThat(first).isNotEqualTo(third);
