@@ -43,8 +43,8 @@ public class RebalanceService {
                 getAmountFromPeer(pubkey),
                 getTargetCostsForPeer(pubkey),
                 getAmountToPeer(pubkey),
-                Coins.NONE,
-                Coins.NONE
+                getSupportAsSourceAmountFromPeer(pubkey),
+                getSupportAsTargetAmountToPeer(pubkey)
         );
     }
 
