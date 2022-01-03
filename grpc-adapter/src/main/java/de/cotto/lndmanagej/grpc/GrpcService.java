@@ -90,6 +90,7 @@ public class GrpcService extends GrpcBase {
         return get(() -> lightningStub.getInfo(lnrpc.GetInfoRequest.getDefaultInstance()));
     }
 
+    @Timed
     public List<Peer> listPeers() {
         return listPeersCache.get("");
     }
@@ -115,6 +116,7 @@ public class GrpcService extends GrpcBase {
         return get(() -> lightningStub.getChanInfo(build));
     }
 
+    @Timed
     public List<Channel> getChannels() {
         return channelsCache.get("");
     }
@@ -125,18 +127,21 @@ public class GrpcService extends GrpcBase {
                 .orElse(List.of());
     }
 
+    @Timed
     public List<ForceClosedChannel> getForceClosingChannels() {
         return getPendingChannels()
                 .map(PendingChannelsResponse::getPendingForceClosingChannelsList)
                 .orElse(List.of());
     }
 
+    @Timed
     public List<PendingChannelsResponse.WaitingCloseChannel> getWaitingCloseChannels() {
         return getPendingChannels()
                 .map(PendingChannelsResponse::getWaitingCloseChannelsList)
                 .orElse(List.of());
     }
 
+    @Timed
     public Optional<List<Transaction>> getTransactions() {
         return getTransactionsCache.get("");
     }
@@ -177,27 +182,23 @@ public class GrpcService extends GrpcBase {
                 .build()));
     }
 
-    @Timed
-    public List<Peer> listPeersWithoutCache() {
-        return get(() -> lightningStub.listPeers(ListPeersRequest.getDefaultInstance()).getPeersList())
-                .orElse(List.of());
-    }
-
-    @Timed
-    public Optional<List<Transaction>> getTransactionsWithoutCache() {
+    private Optional<List<Transaction>> getTransactionsWithoutCache() {
         return get(
                 () -> lightningStub.getTransactions(GetTransactionsRequest.getDefaultInstance()).getTransactionsList()
         );
     }
 
-    @Timed
-    public Optional<PendingChannelsResponse> getPendingChannelsWithoutCache() {
+    private Optional<PendingChannelsResponse> getPendingChannelsWithoutCache() {
         return get(() -> lightningStub.pendingChannels(PendingChannelsRequest.getDefaultInstance()));
     }
 
-    @Timed
-    public List<Channel> getChannelsWithoutCache() {
+    private List<Channel> getChannelsWithoutCache() {
         return get(() -> lightningStub.listChannels(ListChannelsRequest.getDefaultInstance()).getChannelsList())
+                .orElse(List.of());
+    }
+
+    private List<Peer> listPeersWithoutCache() {
+        return get(() -> lightningStub.listPeers(ListPeersRequest.getDefaultInstance()).getPeersList())
                 .orElse(List.of());
     }
 
