@@ -9,6 +9,7 @@ import de.cotto.lndmanagej.model.RebalanceReport;
 import de.cotto.lndmanagej.model.SelfPayment;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Set;
 
@@ -16,6 +17,7 @@ import static java.util.stream.Collectors.toSet;
 
 @Component
 public class RebalanceService {
+    private static final Duration DEFAULT_MAX_AGE = Duration.ofDays(365 * 1_000);
     private final SelfPaymentsService selfPaymentsService;
     private final ChannelService channelService;
 
@@ -24,124 +26,180 @@ public class RebalanceService {
         this.channelService = channelService;
     }
 
-    @Timed
     public RebalanceReport getReportForChannel(ChannelId channelId) {
-        return new RebalanceReport(
-                getSourceCostsForChannel(channelId),
-                getAmountFromChannel(channelId),
-                getTargetCostsForChannel(channelId),
-                getAmountToChannel(channelId),
-                getSupportAsSourceAmountFromChannel(channelId),
-                getSupportAsTargetAmountToChannel(channelId)
-        );
+        return getReportForChannel(channelId, DEFAULT_MAX_AGE);
     }
 
     @Timed
+    public RebalanceReport getReportForChannel(ChannelId channelId, Duration maxAge) {
+        return new RebalanceReport(
+                getSourceCostsForChannel(channelId, maxAge),
+                getAmountFromChannel(channelId, maxAge),
+                getTargetCostsForChannel(channelId, maxAge),
+                getAmountToChannel(channelId, maxAge),
+                getSupportAsSourceAmountFromChannel(channelId, maxAge),
+                getSupportAsTargetAmountToChannel(channelId, maxAge)
+        );
+    }
+
     public RebalanceReport getReportForPeer(Pubkey pubkey) {
+        return getReportForPeer(pubkey, DEFAULT_MAX_AGE);
+    }
+
+    @Timed
+    public RebalanceReport getReportForPeer(Pubkey pubkey, Duration maxAge) {
         return new RebalanceReport(
-                getSourceCostsForPeer(pubkey),
-                getAmountFromPeer(pubkey),
-                getTargetCostsForPeer(pubkey),
-                getAmountToPeer(pubkey),
-                getSupportAsSourceAmountFromPeer(pubkey),
-                getSupportAsTargetAmountToPeer(pubkey)
+                getSourceCostsForPeer(pubkey, maxAge),
+                getAmountFromPeer(pubkey, maxAge),
+                getTargetCostsForPeer(pubkey, maxAge),
+                getAmountToPeer(pubkey, maxAge),
+                getSupportAsSourceAmountFromPeer(pubkey, maxAge),
+                getSupportAsTargetAmountToPeer(pubkey, maxAge)
         );
     }
 
-    @Timed
     public Coins getSourceCostsForChannel(ChannelId channelId) {
-        return getSumOfFees(getRebalancesFromChannel(channelId));
+        return getSourceCostsForChannel(channelId, DEFAULT_MAX_AGE);
     }
 
     @Timed
+    public Coins getSourceCostsForChannel(ChannelId channelId, Duration maxAge) {
+        return getSumOfFees(getRebalancesFromChannel(channelId, maxAge));
+    }
+
     public Coins getSourceCostsForPeer(Pubkey pubkey) {
-        return getSumOfFees(getRebalancesFromPeer(pubkey));
+        return getSourceCostsForPeer(pubkey, DEFAULT_MAX_AGE);
     }
 
     @Timed
+    public Coins getSourceCostsForPeer(Pubkey pubkey, Duration maxAge) {
+        return getSumOfFees(getRebalancesFromPeer(pubkey, maxAge));
+    }
+
     public Coins getTargetCostsForChannel(ChannelId channelId) {
-        return getSumOfFees(getRebalancesToChannel(channelId));
+        return getTargetCostsForChannel(channelId, DEFAULT_MAX_AGE);
     }
 
     @Timed
+    public Coins getTargetCostsForChannel(ChannelId channelId, Duration maxAge) {
+        return getSumOfFees(getRebalancesToChannel(channelId, maxAge));
+    }
+
     public Coins getTargetCostsForPeer(Pubkey pubkey) {
-        return getSumOfFees(getRebalancesToPeer(pubkey));
+        return getTargetCostsForPeer(pubkey, DEFAULT_MAX_AGE);
     }
 
     @Timed
+    public Coins getTargetCostsForPeer(Pubkey pubkey, Duration maxAge) {
+        return getSumOfFees(getRebalancesToPeer(pubkey, maxAge));
+    }
+
     public Coins getAmountFromChannel(ChannelId channelId) {
-        return getSumOfAmountPaid(getRebalancesFromChannel(channelId));
+        return getAmountFromChannel(channelId, DEFAULT_MAX_AGE);
     }
 
     @Timed
+    public Coins getAmountFromChannel(ChannelId channelId, Duration maxAge) {
+        return getSumOfAmountPaid(getRebalancesFromChannel(channelId, maxAge));
+    }
+
     public Coins getAmountFromPeer(Pubkey pubkey) {
-        return getSumOfAmountPaid(getRebalancesFromPeer(pubkey));
+        return getAmountFromPeer(pubkey, DEFAULT_MAX_AGE);
     }
 
     @Timed
+    public Coins getAmountFromPeer(Pubkey pubkey, Duration maxAge) {
+        return getSumOfAmountPaid(getRebalancesFromPeer(pubkey, maxAge));
+    }
+
     public Coins getAmountToChannel(ChannelId channelId) {
-        return getSumOfAmountPaid(getRebalancesToChannel(channelId));
+        return getAmountToChannel(channelId, DEFAULT_MAX_AGE);
     }
 
     @Timed
+    public Coins getAmountToChannel(ChannelId channelId, Duration maxAge) {
+        return getSumOfAmountPaid(getRebalancesToChannel(channelId, maxAge));
+    }
+
     public Coins getAmountToPeer(Pubkey pubkey) {
-        return getSumOfAmountPaid(getRebalancesToPeer(pubkey));
+        return getAmountToPeer(pubkey, DEFAULT_MAX_AGE);
     }
 
     @Timed
+    public Coins getAmountToPeer(Pubkey pubkey, Duration maxAge) {
+        return getSumOfAmountPaid(getRebalancesToPeer(pubkey, maxAge));
+    }
+
     public Coins getSupportAsSourceAmountFromChannel(ChannelId channelId) {
-        Coins amountSourceTotal = getSumOfAmountPaid(selfPaymentsService.getSelfPaymentsFromChannel(channelId));
-        Coins amountRebalanceSource = getAmountFromChannel(channelId);
+        return getSupportAsSourceAmountFromChannel(channelId, DEFAULT_MAX_AGE);
+    }
+
+    @Timed
+    public Coins getSupportAsSourceAmountFromChannel(ChannelId channelId, Duration maxAge) {
+        Coins amountSourceTotal = getSumOfAmountPaid(selfPaymentsService.getSelfPaymentsFromChannel(channelId, maxAge));
+        Coins amountRebalanceSource = getAmountFromChannel(channelId, maxAge);
         return amountSourceTotal.subtract(amountRebalanceSource);
     }
 
-    @Timed
     public Coins getSupportAsTargetAmountToChannel(ChannelId channelId) {
-        Coins amountTargetTotal = getSumOfAmountPaid(selfPaymentsService.getSelfPaymentsToChannel(channelId));
-        Coins amountRebalanceTarget = getAmountToChannel(channelId);
+        return getSupportAsTargetAmountToChannel(channelId, DEFAULT_MAX_AGE);
+    }
+
+    @Timed
+    public Coins getSupportAsTargetAmountToChannel(ChannelId channelId, Duration maxAge) {
+        Coins amountTargetTotal = getSumOfAmountPaid(selfPaymentsService.getSelfPaymentsToChannel(channelId, maxAge));
+        Coins amountRebalanceTarget = getAmountToChannel(channelId, maxAge);
         return amountTargetTotal.subtract(amountRebalanceTarget);
     }
 
-    @Timed
     public Coins getSupportAsSourceAmountFromPeer(Pubkey pubkey) {
-        return channelService.getAllChannelsWith(pubkey).parallelStream()
-                .map(Channel::getId)
-                .map(this::getSupportAsSourceAmountFromChannel)
-                .reduce(Coins.NONE, Coins::add);
+        return getSupportAsSourceAmountFromPeer(pubkey, DEFAULT_MAX_AGE);
     }
 
     @Timed
-    public Coins getSupportAsTargetAmountToPeer(Pubkey pubkey) {
+    public Coins getSupportAsSourceAmountFromPeer(Pubkey pubkey, Duration maxAge) {
         return channelService.getAllChannelsWith(pubkey).parallelStream()
                 .map(Channel::getId)
-                .map(this::getSupportAsTargetAmountToChannel)
+                .map(channelId -> getSupportAsSourceAmountFromChannel(channelId, maxAge))
                 .reduce(Coins.NONE, Coins::add);
     }
 
-    private Set<SelfPayment> getRebalancesFromChannel(ChannelId channelId) {
-        return selfPaymentsService.getSelfPaymentsFromChannel(channelId).stream()
+    public Coins getSupportAsTargetAmountToPeer(Pubkey pubkey) {
+        return getSupportAsTargetAmountToPeer(pubkey, DEFAULT_MAX_AGE);
+    }
+
+    @Timed
+    public Coins getSupportAsTargetAmountToPeer(Pubkey pubkey, Duration maxAge) {
+        return channelService.getAllChannelsWith(pubkey).parallelStream()
+                .map(Channel::getId)
+                .map(channelId -> getSupportAsTargetAmountToChannel(channelId, maxAge))
+                .reduce(Coins.NONE, Coins::add);
+    }
+
+    private Set<SelfPayment> getRebalancesFromChannel(ChannelId channelId, Duration maxAge) {
+        return selfPaymentsService.getSelfPaymentsFromChannel(channelId, maxAge).stream()
                 .filter(selfPayment -> memoMentionsChannel(selfPayment, channelId))
                 .collect(toSet());
     }
 
-    private Set<SelfPayment> getRebalancesToChannel(ChannelId channelId) {
-        return selfPaymentsService.getSelfPaymentsToChannel(channelId).stream()
+    private Set<SelfPayment> getRebalancesToChannel(ChannelId channelId, Duration maxAge) {
+        return selfPaymentsService.getSelfPaymentsToChannel(channelId, maxAge).stream()
                 .filter(this::memoDoesNotMentionFirstHopChannel)
                 .collect(toSet());
     }
 
-    private Set<SelfPayment> getRebalancesFromPeer(Pubkey pubkey) {
+    private Set<SelfPayment> getRebalancesFromPeer(Pubkey pubkey, Duration maxAge) {
         return channelService.getAllChannelsWith(pubkey).parallelStream()
                 .map(Channel::getId)
-                .map(this::getRebalancesFromChannel)
+                .map(channelId -> getRebalancesFromChannel(channelId, maxAge))
                 .flatMap(Set::stream)
                 .collect(toSet());
     }
 
-    private Set<SelfPayment> getRebalancesToPeer(Pubkey pubkey) {
+    private Set<SelfPayment> getRebalancesToPeer(Pubkey pubkey, Duration maxAge) {
         return channelService.getAllChannelsWith(pubkey).parallelStream()
                 .map(Channel::getId)
-                .map(this::getRebalancesToChannel)
+                .map(channelId -> getRebalancesToChannel(channelId, maxAge))
                 .flatMap(Set::stream)
                 .collect(toSet());
     }

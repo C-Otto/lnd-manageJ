@@ -29,8 +29,9 @@ public interface SelfPaymentsRepository extends JpaRepository<SelfPaymentsReposi
             "JOIN route.hops hop " +
             "WHERE INDEX(route) = 0 AND INDEX(hop) = 0 " +
             "AND i.receivedVia = ?1 " +
+            "AND i.settleDate >= ?2 " +
             "ORDER BY i.settleDate ASC")
-    List<SelfPaymentJpaDto> getSelfPaymentsToChannel(long channelId);
+    List<SelfPaymentJpaDto> getSelfPaymentsToChannel(long channelId, long minimumSettleDate);
 
     @Query("SELECT NEW de.cotto.lndmanagej.selfpayments.persistence.SelfPaymentJpaDto(" +
             "i.memo, i.settleDate, i.amountPaid, p.fees, hop.channelId, i.receivedVia" +
@@ -40,8 +41,9 @@ public interface SelfPaymentsRepository extends JpaRepository<SelfPaymentsReposi
             "JOIN p.routes route " +
             "JOIN route.hops hop " +
             "WHERE INDEX(route) = 0 AND hop.channelId = ?1 AND INDEX(hop) = 0 " +
+            "AND i.settleDate >= ?2 " +
             "ORDER BY i.settleDate ASC")
-    List<SelfPaymentJpaDto> getSelfPaymentsFromChannel(long channelId);
+    List<SelfPaymentJpaDto> getSelfPaymentsFromChannel(long channelId, long minimumSettleDate);
 
     @Entity
     @Table(name = "dummy")

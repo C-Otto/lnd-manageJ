@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 
@@ -21,6 +22,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SelfPaymentsServiceTest {
+    private static final Duration DEFAULT_MAX_AGE = Duration.ofDays(365 * 1_000);
+
     @InjectMocks
     private SelfPaymentsService selfPaymentsService;
 
@@ -31,50 +34,61 @@ class SelfPaymentsServiceTest {
     private ChannelService channelService;
 
     @Test
+    void getSelfPaymentsFromChannel_default_max_age() {
+        when(selfPaymentsDao.getSelfPaymentsFromChannel(CHANNEL_ID, DEFAULT_MAX_AGE)).thenReturn(List.of(SELF_PAYMENT));
+        assertThat(selfPaymentsService.getSelfPaymentsFromChannel(CHANNEL_ID)).containsExactly(SELF_PAYMENT);
+    }
+
+    @Test
     void getSelfPaymentsFromChannel() {
-        when(selfPaymentsDao.getSelfPaymentsFromChannel(CHANNEL_ID)).thenReturn(List.of(SELF_PAYMENT));
+        when(selfPaymentsDao.getSelfPaymentsFromChannel(CHANNEL_ID, DEFAULT_MAX_AGE)).thenReturn(List.of(SELF_PAYMENT));
         assertThat(selfPaymentsService.getSelfPaymentsFromChannel(CHANNEL_ID)).containsExactly(SELF_PAYMENT);
     }
 
     @Test
     void getSelfPaymentsFromChannel_closed() {
         when(channelService.isClosed(CHANNEL_ID)).thenReturn(true);
-        when(selfPaymentsDao.getSelfPaymentsFromChannel(CHANNEL_ID)).thenReturn(List.of(SELF_PAYMENT));
+        when(selfPaymentsDao.getSelfPaymentsFromChannel(CHANNEL_ID, DEFAULT_MAX_AGE)).thenReturn(List.of(SELF_PAYMENT));
         assertThat(selfPaymentsService.getSelfPaymentsFromChannel(CHANNEL_ID)).containsExactly(SELF_PAYMENT);
     }
 
     @Test
     void getSelfPaymentsFromChannel_no_duplicates() {
-        when(selfPaymentsDao.getSelfPaymentsFromChannel(CHANNEL_ID)).thenReturn(List.of(SELF_PAYMENT, SELF_PAYMENT));
+        when(selfPaymentsDao.getSelfPaymentsFromChannel(CHANNEL_ID, DEFAULT_MAX_AGE))
+                .thenReturn(List.of(SELF_PAYMENT, SELF_PAYMENT));
         assertThat(selfPaymentsService.getSelfPaymentsFromChannel(CHANNEL_ID)).containsExactly(SELF_PAYMENT);
     }
 
     @Test
     void getSelfPaymentsFromPeer() {
         when(channelService.getAllChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, CLOSED_CHANNEL_2));
-        when(selfPaymentsDao.getSelfPaymentsFromChannel(LOCAL_OPEN_CHANNEL.getId())).thenReturn(List.of(SELF_PAYMENT));
-        when(selfPaymentsDao.getSelfPaymentsFromChannel(CLOSED_CHANNEL_2.getId())).thenReturn(List.of(SELF_PAYMENT_2));
+        when(selfPaymentsDao.getSelfPaymentsFromChannel(LOCAL_OPEN_CHANNEL.getId(), DEFAULT_MAX_AGE))
+                .thenReturn(List.of(SELF_PAYMENT));
+        when(selfPaymentsDao.getSelfPaymentsFromChannel(CLOSED_CHANNEL_2.getId(), DEFAULT_MAX_AGE))
+                .thenReturn(List.of(SELF_PAYMENT_2));
         assertThat(selfPaymentsService.getSelfPaymentsFromPeer(PUBKEY)).containsExactly(SELF_PAYMENT, SELF_PAYMENT_2);
     }
 
     @Test
     void getSelfPaymentsToChannel() {
-        when(selfPaymentsDao.getSelfPaymentsToChannel(CHANNEL_ID)).thenReturn(List.of(SELF_PAYMENT));
+        when(selfPaymentsDao.getSelfPaymentsToChannel(CHANNEL_ID, DEFAULT_MAX_AGE)).thenReturn(List.of(SELF_PAYMENT));
         assertThat(selfPaymentsService.getSelfPaymentsToChannel(CHANNEL_ID)).containsExactly(SELF_PAYMENT);
     }
 
     @Test
     void getSelfPaymentsToChannel_closed() {
         when(channelService.isClosed(CHANNEL_ID)).thenReturn(true);
-        when(selfPaymentsDao.getSelfPaymentsToChannel(CHANNEL_ID)).thenReturn(List.of(SELF_PAYMENT));
+        when(selfPaymentsDao.getSelfPaymentsToChannel(CHANNEL_ID, DEFAULT_MAX_AGE)).thenReturn(List.of(SELF_PAYMENT));
         assertThat(selfPaymentsService.getSelfPaymentsToChannel(CHANNEL_ID)).containsExactly(SELF_PAYMENT);
     }
 
     @Test
     void getSelfPaymentsToPeer() {
         when(channelService.getAllChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, CLOSED_CHANNEL_2));
-        when(selfPaymentsDao.getSelfPaymentsToChannel(LOCAL_OPEN_CHANNEL.getId())).thenReturn(List.of(SELF_PAYMENT));
-        when(selfPaymentsDao.getSelfPaymentsToChannel(CLOSED_CHANNEL_2.getId())).thenReturn(List.of(SELF_PAYMENT_2));
+        when(selfPaymentsDao.getSelfPaymentsToChannel(LOCAL_OPEN_CHANNEL.getId(), DEFAULT_MAX_AGE))
+                .thenReturn(List.of(SELF_PAYMENT));
+        when(selfPaymentsDao.getSelfPaymentsToChannel(CLOSED_CHANNEL_2.getId(), DEFAULT_MAX_AGE))
+                .thenReturn(List.of(SELF_PAYMENT_2));
         assertThat(selfPaymentsService.getSelfPaymentsToPeer(PUBKEY)).containsExactly(SELF_PAYMENT, SELF_PAYMENT_2);
     }
 }

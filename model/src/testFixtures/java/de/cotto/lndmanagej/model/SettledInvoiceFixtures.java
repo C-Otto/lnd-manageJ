@@ -13,16 +13,20 @@ public class SettledInvoiceFixtures {
     public static final int ADD_INDEX = 2;
     public static final int ADD_INDEX_2 = 1;
     public static final int ADD_INDEX_3 = 3;
+    public static final int ADD_INDEX_4 = 4;
     public static final int SETTLE_INDEX = 1;
     public static final int SETTLE_INDEX_2 = 2;
     public static final int SETTLE_INDEX_3 = 3;
+    public static final int SETTLE_INDEX_4 = 4;
     public static final String HASH = "1234";
     public static final String HASH_2 = "aaa0";
-    public static final String HASH_3 = "010101";
+    public static final String HASH_3 = "aaa1";
+    public static final String HASH_4 = "aaa2";
     public static final Coins AMOUNT_PAID = Coins.ofMilliSatoshis(123);
     public static final Coins AMOUNT_PAID_2 = Coins.ofMilliSatoshis(4_567);
     public static final String MEMO = "this is a memo";
     public static final String MEMO_2 = "yet another memo";
+    public static final String MEMO_3 = "memo 3";
     public static final String KEYSEND_MESSAGE = "hello world";
 
     public static final SettledInvoice SETTLED_INVOICE = new SettledInvoice(
@@ -61,7 +65,7 @@ public class SettledInvoiceFixtures {
     public static final SettledInvoice SETTLED_INVOICE_2 = new SettledInvoice(
             ADD_INDEX_2,
             SETTLE_INDEX_2,
-            SETTLE_DATE.plusSeconds(1),
+            SETTLE_DATE.plusDays(1),
             HASH_2,
             AMOUNT_PAID_2,
             MEMO_2,
@@ -72,10 +76,21 @@ public class SettledInvoiceFixtures {
     public static final SettledInvoice SETTLED_INVOICE_3 = new SettledInvoice(
             ADD_INDEX_3,
             SETTLE_INDEX_3,
-            SETTLE_DATE.plusSeconds(2),
+            SETTLE_DATE.plusDays(2),
             HASH_3,
             AMOUNT_PAID_2,
-            MEMO_2,
+            MEMO_3,
+            Optional.empty(),
+            Optional.of(CHANNEL_ID_2)
+    );
+
+    public static final SettledInvoice SETTLED_INVOICE_4 = new SettledInvoice(
+            ADD_INDEX_4,
+            SETTLE_INDEX_4,
+            SETTLE_DATE.plusDays(3),
+            HASH_4,
+            AMOUNT_PAID_2,
+            MEMO_3,
             Optional.empty(),
             Optional.of(CHANNEL_ID_4)
     );

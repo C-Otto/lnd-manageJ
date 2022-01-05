@@ -17,10 +17,10 @@ public class ForwardingEventsService {
     private final ForwardingEventsDao forwardingEventsDao;
     private final ChannelService channelService;
     private final OwnNodeService ownNodeService;
-    private final LoadingCache<CacheKey, List<ForwardingEvent>> cacheIncomingForOpenChannels;
-    private final LoadingCache<CacheKey, List<ForwardingEvent>> cacheIncomingForClosedChannels;
-    private final LoadingCache<CacheKey, List<ForwardingEvent>> cacheOutgoingForOpenChannels;
-    private final LoadingCache<CacheKey, List<ForwardingEvent>> cacheOutgoingForClosedChannels;
+    private final LoadingCache<ChannelIdAndMaxAge, List<ForwardingEvent>> cacheIncomingForOpenChannels;
+    private final LoadingCache<ChannelIdAndMaxAge, List<ForwardingEvent>> cacheIncomingForClosedChannels;
+    private final LoadingCache<ChannelIdAndMaxAge, List<ForwardingEvent>> cacheOutgoingForOpenChannels;
+    private final LoadingCache<ChannelIdAndMaxAge, List<ForwardingEvent>> cacheOutgoingForClosedChannels;
 
     public ForwardingEventsService(
             ForwardingEventsDao forwardingEventsDao,
@@ -65,18 +65,18 @@ public class ForwardingEventsService {
     private List<ForwardingEvent> getEvents(
             ChannelId channelId,
             Duration maxAge,
-            LoadingCache<CacheKey, List<ForwardingEvent>> cacheOpen,
-            LoadingCache<CacheKey, List<ForwardingEvent>> cacheClosed
+            LoadingCache<ChannelIdAndMaxAge, List<ForwardingEvent>> cacheOpen,
+            LoadingCache<ChannelIdAndMaxAge, List<ForwardingEvent>> cacheClosed
     ) {
-        CacheKey cacheKey = new CacheKey(channelId, maxAge);
+        ChannelIdAndMaxAge channelIdAndMaxAge = new ChannelIdAndMaxAge(channelId, maxAge);
         ClosedChannel closedChannel = channelService.getClosedChannel(channelId).orElse(null);
         if (closedChannel == null) {
-            return cacheOpen.get(cacheKey);
+            return cacheOpen.get(channelIdAndMaxAge);
         }
         if (isClosedLongerThan(closedChannel, maxAge)) {
             return List.of();
         }
-        return cacheClosed.get(cacheKey);
+        return cacheClosed.get(channelIdAndMaxAge);
     }
 
     private boolean isClosedLongerThan(ClosedChannel closedChannel, Duration maxAge) {
@@ -85,15 +85,17 @@ public class ForwardingEventsService {
         return maxAge.minus(Duration.ofDays(daysClosedWithSafetyMargin)).isNegative();
     }
 
-    private List<ForwardingEvent> getEventsWithIncomingChannelWithoutCache(CacheKey cacheKey) {
-        return forwardingEventsDao.getEventsWithIncomingChannel(cacheKey.channelId(), cacheKey.maxAge());
+    private List<ForwardingEvent> getEventsWithIncomingChannelWithoutCache(ChannelIdAndMaxAge channelIdAndMaxAge) {
+        return forwardingEventsDao.getEventsWithIncomingChannel(
+                channelIdAndMaxAge.channelId(),
+                channelIdAndMaxAge.maxAge()
+        );
     }
 
-    private List<ForwardingEvent> getEventsWithOutgoingChannelWithoutCache(CacheKey cacheKey) {
-        return forwardingEventsDao.getEventsWithOutgoingChannel(cacheKey.channelId(), cacheKey.maxAge());
-    }
-
-    @SuppressWarnings("UnusedVariable")
-    private record CacheKey(ChannelId channelId, Duration maxAge) {
+    private List<ForwardingEvent> getEventsWithOutgoingChannelWithoutCache(ChannelIdAndMaxAge channelIdAndMaxAge) {
+        return forwardingEventsDao.getEventsWithOutgoingChannel(
+                channelIdAndMaxAge.channelId(),
+                channelIdAndMaxAge.maxAge()
+        );
     }
 }

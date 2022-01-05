@@ -16,6 +16,7 @@ import java.util.function.Function;
 
 @Component
 public class SelfPaymentsService {
+    private static final Duration DEFAULT_MAX_AGE = Duration.ofDays(365 * 1_000);
     private static final Duration EXPIRY = Duration.ofSeconds(30);
     private static final Duration REFRESH = Duration.ofSeconds(15);
     private static final Duration EXPIRY_CLOSED = Duration.ofHours(24);
@@ -23,10 +24,10 @@ public class SelfPaymentsService {
 
     private final SelfPaymentsDao dao;
     private final ChannelService channelService;
-    private final LoadingCache<ChannelId, List<SelfPayment>> cacheFrom;
-    private final LoadingCache<ChannelId, List<SelfPayment>> cacheFromClosed;
-    private final LoadingCache<ChannelId, List<SelfPayment>> cacheTo;
-    private final LoadingCache<ChannelId, List<SelfPayment>> cacheToClosed;
+    private final LoadingCache<ChannelIdAndMaxAge, List<SelfPayment>> cacheFrom;
+    private final LoadingCache<ChannelIdAndMaxAge, List<SelfPayment>> cacheFromClosed;
+    private final LoadingCache<ChannelIdAndMaxAge, List<SelfPayment>> cacheTo;
+    private final LoadingCache<ChannelIdAndMaxAge, List<SelfPayment>> cacheToClosed;
 
     public SelfPaymentsService(SelfPaymentsDao dao, ChannelService channelService) {
         this.dao = dao;
@@ -54,10 +55,15 @@ public class SelfPaymentsService {
     }
 
     public List<SelfPayment> getSelfPaymentsFromChannel(ChannelId channelId) {
+        return getSelfPaymentsFromChannel(channelId, DEFAULT_MAX_AGE);
+    }
+
+    public List<SelfPayment> getSelfPaymentsFromChannel(ChannelId channelId, Duration maxAge) {
+        ChannelIdAndMaxAge channelIdAndMaxAge = new ChannelIdAndMaxAge(channelId, maxAge);
         if (channelService.isClosed(channelId)) {
-            return cacheFromClosed.get(channelId);
+            return cacheFromClosed.get(channelIdAndMaxAge);
         }
-        return cacheFrom.get(channelId);
+        return cacheFrom.get(channelIdAndMaxAge);
     }
 
     public List<SelfPayment> getSelfPaymentsFromPeer(Pubkey pubkey) {
@@ -65,10 +71,15 @@ public class SelfPaymentsService {
     }
 
     public List<SelfPayment> getSelfPaymentsToChannel(ChannelId channelId) {
+        return getSelfPaymentsToChannel(channelId, DEFAULT_MAX_AGE);
+    }
+
+    public List<SelfPayment> getSelfPaymentsToChannel(ChannelId channelId, Duration maxAge) {
+        ChannelIdAndMaxAge channelIdAndMaxAge = new ChannelIdAndMaxAge(channelId, maxAge);
         if (channelService.isClosed(channelId)) {
-            return cacheToClosed.get(channelId);
+            return cacheToClosed.get(channelIdAndMaxAge);
         }
-        return cacheTo.get(channelId);
+        return cacheTo.get(channelIdAndMaxAge);
     }
 
     public List<SelfPayment> getSelfPaymentsToPeer(Pubkey pubkey) {
@@ -87,11 +98,13 @@ public class SelfPaymentsService {
                 .toList();
     }
 
-    private List<SelfPayment> getSelfPaymentsFromChannelWithoutCache(ChannelId channelId) {
-        return dao.getSelfPaymentsFromChannel(channelId).stream().distinct().toList();
+    private List<SelfPayment> getSelfPaymentsFromChannelWithoutCache(ChannelIdAndMaxAge channelIdAndMaxAge) {
+        return dao.getSelfPaymentsFromChannel(channelIdAndMaxAge.channelId(), channelIdAndMaxAge.maxAge()).stream()
+                .distinct()
+                .toList();
     }
 
-    private List<SelfPayment> getSelfPaymentsToChannelWithoutCache(ChannelId channelId) {
-        return dao.getSelfPaymentsToChannel(channelId);
+    private List<SelfPayment> getSelfPaymentsToChannelWithoutCache(ChannelIdAndMaxAge channelIdAndMaxAge) {
+        return dao.getSelfPaymentsToChannel(channelIdAndMaxAge.channelId(), channelIdAndMaxAge.maxAge());
     }
 }
