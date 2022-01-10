@@ -34,15 +34,16 @@ class SelfPaymentsServiceTest {
     private ChannelService channelService;
 
     @Test
-    void getSelfPaymentsFromChannel_default_max_age() {
+    void getSelfPaymentsFromChannel() {
         when(selfPaymentsDao.getSelfPaymentsFromChannel(CHANNEL_ID, DEFAULT_MAX_AGE)).thenReturn(List.of(SELF_PAYMENT));
         assertThat(selfPaymentsService.getSelfPaymentsFromChannel(CHANNEL_ID)).containsExactly(SELF_PAYMENT);
     }
 
     @Test
-    void getSelfPaymentsFromChannel() {
-        when(selfPaymentsDao.getSelfPaymentsFromChannel(CHANNEL_ID, DEFAULT_MAX_AGE)).thenReturn(List.of(SELF_PAYMENT));
-        assertThat(selfPaymentsService.getSelfPaymentsFromChannel(CHANNEL_ID)).containsExactly(SELF_PAYMENT);
+    void getSelfPaymentsFromChannel_with_max_age() {
+        Duration maxAge = Duration.ofDays(1);
+        when(selfPaymentsDao.getSelfPaymentsFromChannel(CHANNEL_ID, maxAge)).thenReturn(List.of(SELF_PAYMENT));
+        assertThat(selfPaymentsService.getSelfPaymentsFromChannel(CHANNEL_ID, maxAge)).containsExactly(SELF_PAYMENT);
     }
 
     @Test
@@ -73,6 +74,13 @@ class SelfPaymentsServiceTest {
     void getSelfPaymentsToChannel() {
         when(selfPaymentsDao.getSelfPaymentsToChannel(CHANNEL_ID, DEFAULT_MAX_AGE)).thenReturn(List.of(SELF_PAYMENT));
         assertThat(selfPaymentsService.getSelfPaymentsToChannel(CHANNEL_ID)).containsExactly(SELF_PAYMENT);
+    }
+
+    @Test
+    void getSelfPaymentsToChannel_with_max_age() {
+        Duration maxAge = Duration.ofDays(23);
+        when(selfPaymentsDao.getSelfPaymentsToChannel(CHANNEL_ID, maxAge)).thenReturn(List.of(SELF_PAYMENT));
+        assertThat(selfPaymentsService.getSelfPaymentsToChannel(CHANNEL_ID, maxAge)).containsExactly(SELF_PAYMENT);
     }
 
     @Test
