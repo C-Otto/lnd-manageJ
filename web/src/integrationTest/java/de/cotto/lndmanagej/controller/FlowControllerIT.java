@@ -1,0 +1,85 @@
+package de.cotto.lndmanagej.controller;
+
+import de.cotto.lndmanagej.model.ChannelIdResolver;
+import de.cotto.lndmanagej.service.FlowService;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.MockMvc;
+
+import java.time.Duration;
+
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT;
+import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT_2;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
+import static org.hamcrest.core.Is.is;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@WebMvcTest(controllers = FlowController.class)
+class FlowControllerIT {
+    private static final String NODE_PREFIX = "/api/node/" + PUBKEY;
+    private static final String CHANNEL_PREFIX = "/api/channel/" + CHANNEL_ID.getShortChannelId();
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private FlowService flowService;
+
+    @MockBean
+    @SuppressWarnings("unused")
+    private ChannelIdResolver channelIdResolver;
+
+    @Test
+    void getFlowReport_for_channel() throws Exception {
+        when(flowService.getFlowReportForChannel(CHANNEL_ID)).thenReturn(FLOW_REPORT_2);
+        mockMvc.perform(get(CHANNEL_PREFIX + "/flow-report"))
+                .andExpect(jsonPath("$.forwardedSent", is("1000")))
+                .andExpect(jsonPath("$.forwardedReceived", is("2000")))
+                .andExpect(jsonPath("$.forwardingFeesReceived", is("10")))
+                .andExpect(jsonPath("$.rebalanceSent", is("60000")))
+                .andExpect(jsonPath("$.rebalanceFeesSent", is("4")))
+                .andExpect(jsonPath("$.rebalanceReceived", is("61000")))
+                .andExpect(jsonPath("$.rebalanceSupportSent", is("9000")))
+                .andExpect(jsonPath("$.rebalanceSupportFeesSent", is("2")))
+                .andExpect(jsonPath("$.rebalanceSupportReceived", is("10")))
+                .andExpect(jsonPath("$.totalSent", is("70006")))
+                .andExpect(jsonPath("$.totalReceived", is("63020")));
+    }
+
+    @Test
+    void getFlowReport_for_channel_with_max_age() throws Exception {
+        when(flowService.getFlowReportForChannel(CHANNEL_ID, Duration.ofDays(1))).thenReturn(FLOW_REPORT);
+        mockMvc.perform(get(CHANNEL_PREFIX + "/flow-report/last-days/1"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void getFlowReport_for_peer() throws Exception {
+        when(flowService.getFlowReportForPeer(PUBKEY)).thenReturn(FLOW_REPORT);
+        mockMvc.perform(get(NODE_PREFIX + "/flow-report"))
+                .andExpect(jsonPath("$.forwardedSent", is("1050000")))
+                .andExpect(jsonPath("$.forwardedReceived", is("9001000")))
+                .andExpect(jsonPath("$.forwardingFeesReceived", is("1")))
+                .andExpect(jsonPath("$.rebalanceSent", is("50000")))
+                .andExpect(jsonPath("$.rebalanceFeesSent", is("5")))
+                .andExpect(jsonPath("$.rebalanceReceived", is("51000")))
+                .andExpect(jsonPath("$.rebalanceSupportSent", is("123")))
+                .andExpect(jsonPath("$.rebalanceSupportFeesSent", is("1")))
+                .andExpect(jsonPath("$.rebalanceSupportReceived", is("456")))
+                .andExpect(jsonPath("$.totalSent", is("1100129")))
+                .andExpect(jsonPath("$.totalReceived", is("9052457")));
+    }
+
+    @Test
+    void getFlowReport_for_peer_with_max_age() throws Exception {
+        when(flowService.getFlowReportForPeer(PUBKEY, Duration.ofDays(1))).thenReturn(FLOW_REPORT);
+        mockMvc.perform(get(NODE_PREFIX + "/flow-report/last-days/1"))
+                .andExpect(status().isOk());
+    }
+}
