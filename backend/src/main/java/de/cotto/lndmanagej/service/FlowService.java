@@ -1,6 +1,8 @@
 package de.cotto.lndmanagej.service;
 
 import com.codahale.metrics.annotation.Timed;
+import com.github.benmanes.caffeine.cache.LoadingCache;
+import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
@@ -15,9 +17,12 @@ import java.util.List;
 @Component
 public class FlowService {
     private static final Duration DEFAULT_MAX_AGE = Duration.ofDays(365 * 1_000);
+    private static final Duration EXPIRY = Duration.ofMinutes(10);
+    private static final Duration REFRESH = Duration.ofMinutes(5);
     private final ForwardingEventsService forwardingEventsService;
     private final ChannelService channelService;
     private final RebalanceService rebalanceService;
+    private final LoadingCache<ChannelIdAndMaxAge, FlowReport> cache;
 
     public FlowService(
             ForwardingEventsService forwardingEventsService,
@@ -27,6 +32,10 @@ public class FlowService {
         this.forwardingEventsService = forwardingEventsService;
         this.channelService = channelService;
         this.rebalanceService = rebalanceService;
+        cache = new CacheBuilder()
+                .withExpiry(EXPIRY)
+                .withRefresh(REFRESH)
+                .build(this::getFlowReportForChannelWithoutCache);
     }
 
     public FlowReport getFlowReportForPeer(Pubkey pubkey) {
@@ -47,6 +56,12 @@ public class FlowService {
 
     @Timed
     public FlowReport getFlowReportForChannel(ChannelId channelId, Duration maxAge) {
+        return cache.get(new ChannelIdAndMaxAge(channelId, maxAge));
+    }
+
+    private FlowReport getFlowReportForChannelWithoutCache(ChannelIdAndMaxAge channelIdAndMaxAge) {
+        ChannelId channelId = channelIdAndMaxAge.channelId();
+        Duration maxAge = channelIdAndMaxAge.maxAge();
         Coins forwardedSent =
                 getSumOfAmounts(forwardingEventsService.getEventsWithOutgoingChannel(channelId, maxAge));
         List<ForwardingEvent> incomingEvents = forwardingEventsService.getEventsWithIncomingChannel(channelId, maxAge);
