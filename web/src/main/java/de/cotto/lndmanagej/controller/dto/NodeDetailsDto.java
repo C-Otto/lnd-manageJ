@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.NodeDetails;
-import de.cotto.lndmanagej.model.NodeWarning;
 import de.cotto.lndmanagej.model.Pubkey;
 
 import java.util.List;
+import java.util.Set;
 
 public record NodeDetailsDto(
         @JsonSerialize(using = ToStringSerializer.class) Pubkey node,
@@ -22,7 +22,7 @@ public record NodeDetailsDto(
         FeeReportDto feeReport,
         FlowReportDto flowReport,
         RebalanceReportDto rebalanceReport,
-        List<NodeWarning> nodeWarnings
+        Set<String> nodeWarnings
 ) {
     public static NodeDetailsDto createFromModel(NodeDetails nodeDetails) {
         return new NodeDetailsDto(
@@ -38,7 +38,7 @@ public record NodeDetailsDto(
                 FeeReportDto.createFromModel(nodeDetails.feeReport()),
                 FlowReportDto.createFromModel(nodeDetails.flowReport()),
                 RebalanceReportDto.createFromModel(nodeDetails.rebalanceReport()),
-                nodeDetails.nodeWarnings().warnings()
+                nodeDetails.nodeWarnings().descriptions()
         );
     }
 }

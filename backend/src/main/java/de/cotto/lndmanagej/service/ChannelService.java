@@ -5,6 +5,7 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.grpc.GrpcChannels;
 import de.cotto.lndmanagej.grpc.GrpcClosedChannels;
+import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.ForceClosedChannel;
@@ -12,7 +13,10 @@ import de.cotto.lndmanagej.model.ForceClosingChannel;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.model.TransactionHash;
 import de.cotto.lndmanagej.model.WaitingCloseChannel;
+import de.cotto.lndmanagej.transactions.model.Transaction;
+import de.cotto.lndmanagej.transactions.service.TransactionService;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -32,17 +36,23 @@ public class ChannelService {
     private static final Duration CACHE_REFRESH = Duration.ofSeconds(30);
 
     private final GrpcChannels grpcChannels;
+    private final TransactionService transactionService;
     private final LoadingCache<Object, Set<LocalOpenChannel>> localOpenChannelsCache;
     private final LoadingCache<Object, Map<ChannelId, ClosedChannel>> closedChannelsCache;
     private final LoadingCache<Object, Set<ForceClosingChannel>> forceClosingChannelsCache;
     private final LoadingCache<Object, Set<WaitingCloseChannel>> waitingCloseChannelsCache;
 
-    public ChannelService(GrpcChannels grpcChannels, GrpcClosedChannels grpcClosedChannels) {
+    public ChannelService(
+            TransactionService transactionService,
+            GrpcChannels grpcChannels,
+            GrpcClosedChannels grpcClosedChannels
+    ) {
         this.grpcChannels = grpcChannels;
         localOpenChannelsCache = new CacheBuilder()
                 .withRefresh(CACHE_REFRESH)
                 .withExpiry(CACHE_EXPIRY)
                 .build(grpcChannels::getChannels);
+        this.transactionService = transactionService;
         closedChannelsCache = new CacheBuilder()
                 .withRefresh(CACHE_REFRESH)
                 .withExpiry(CACHE_EXPIRY)
@@ -162,5 +172,10 @@ public class ChannelService {
                 waitingCloseChannels,
                 forceClosingChannels
         ).parallel().map(Supplier::get).flatMap(Collection::stream);
+    }
+
+    public Optional<Integer> getOpenHeight(Channel channel) {
+        TransactionHash openTransactionHash = channel.getChannelPoint().getTransactionHash();
+        return transactionService.getTransaction(openTransactionHash).map(Transaction::blockHeight);
     }
 }

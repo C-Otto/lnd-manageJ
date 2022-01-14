@@ -1,4 +1,4 @@
-package de.cotto.lndmanagej.model;
+package de.cotto.lndmanagej.model.warnings;
 
 import org.junit.jupiter.api.Test;
 
@@ -9,5 +9,11 @@ class NodeOnlineChangesWarningTest {
     @Test
     void name() {
         assertThat(NODE_ONLINE_CHANGES_WARNING.changes()).isEqualTo(123);
+    }
+
+    @Test
+    void description() {
+        assertThat(NODE_ONLINE_CHANGES_WARNING.description())
+                .isEqualTo("Node changed between online and offline 123 times");
     }
 }
