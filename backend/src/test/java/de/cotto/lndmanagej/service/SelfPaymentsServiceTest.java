@@ -9,15 +9,20 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.SelfPaymentFixtures.SELF_PAYMENT;
 import static de.cotto.lndmanagej.model.SelfPaymentFixtures.SELF_PAYMENT_2;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,6 +37,9 @@ class SelfPaymentsServiceTest {
 
     @Mock
     private ChannelService channelService;
+
+    @Mock
+    private OwnNodeService ownNodeService;
 
     @Test
     void getSelfPaymentsFromChannel() {
@@ -48,9 +56,18 @@ class SelfPaymentsServiceTest {
 
     @Test
     void getSelfPaymentsFromChannel_closed() {
-        when(channelService.isClosed(CHANNEL_ID)).thenReturn(true);
+        when(channelService.getClosedChannel(CHANNEL_ID)).thenReturn(Optional.of(CLOSED_CHANNEL));
+        when(ownNodeService.getBlockHeight()).thenReturn(1_000 + CLOSED_CHANNEL.getCloseHeight());
         when(selfPaymentsDao.getSelfPaymentsFromChannel(CHANNEL_ID, DEFAULT_MAX_AGE)).thenReturn(List.of(SELF_PAYMENT));
         assertThat(selfPaymentsService.getSelfPaymentsFromChannel(CHANNEL_ID)).containsExactly(SELF_PAYMENT);
+    }
+
+    @Test
+    void getSelfPaymentsFromChannel_closed_long_time_ago() {
+        when(channelService.getClosedChannel(CHANNEL_ID)).thenReturn(Optional.of(CLOSED_CHANNEL));
+        when(ownNodeService.getBlockHeight()).thenReturn(1_000 + CLOSED_CHANNEL.getCloseHeight());
+        assertThat(selfPaymentsService.getSelfPaymentsFromChannel(CHANNEL_ID, Duration.ofDays(1))).isEmpty();
+        verify(selfPaymentsDao, never()).getSelfPaymentsFromChannel(any(), any());
     }
 
     @Test
@@ -85,9 +102,18 @@ class SelfPaymentsServiceTest {
 
     @Test
     void getSelfPaymentsToChannel_closed() {
-        when(channelService.isClosed(CHANNEL_ID)).thenReturn(true);
+        when(channelService.getClosedChannel(CHANNEL_ID)).thenReturn(Optional.of(CLOSED_CHANNEL));
+        when(ownNodeService.getBlockHeight()).thenReturn(1_000 + CLOSED_CHANNEL.getCloseHeight());
         when(selfPaymentsDao.getSelfPaymentsToChannel(CHANNEL_ID, DEFAULT_MAX_AGE)).thenReturn(List.of(SELF_PAYMENT));
         assertThat(selfPaymentsService.getSelfPaymentsToChannel(CHANNEL_ID)).containsExactly(SELF_PAYMENT);
+    }
+
+    @Test
+    void getSelfPaymentsToChannel_closed_long_time_ago() {
+        when(channelService.getClosedChannel(CHANNEL_ID)).thenReturn(Optional.of(CLOSED_CHANNEL));
+        when(ownNodeService.getBlockHeight()).thenReturn(1_000 + CLOSED_CHANNEL.getCloseHeight());
+        assertThat(selfPaymentsService.getSelfPaymentsToChannel(CHANNEL_ID, Duration.ofDays(1))).isEmpty();
+        verify(selfPaymentsDao, never()).getSelfPaymentsToChannel(any(), any());
     }
 
     @Test

@@ -1,10 +1,9 @@
 package de.cotto.lndmanagej.service;
 
 import com.codahale.metrics.annotation.Timed;
-import com.github.benmanes.caffeine.cache.LoadingCache;
-import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.ChannelIdAndMaxAge;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FlowReport;
 import de.cotto.lndmanagej.model.ForwardingEvent;
@@ -22,20 +21,21 @@ public class FlowService {
     private final ForwardingEventsService forwardingEventsService;
     private final ChannelService channelService;
     private final RebalanceService rebalanceService;
-    private final LoadingCache<ChannelIdAndMaxAge, FlowReport> cache;
+    private final ClosedChannelAwareCache<FlowReport> cache;
 
     public FlowService(
             ForwardingEventsService forwardingEventsService,
             ChannelService channelService,
-            RebalanceService rebalanceService
+            RebalanceService rebalanceService,
+            OwnNodeService ownNodeService
     ) {
         this.forwardingEventsService = forwardingEventsService;
         this.channelService = channelService;
         this.rebalanceService = rebalanceService;
-        cache = new CacheBuilder()
+        cache = ClosedChannelAwareCache.builder(channelService, ownNodeService)
                 .withExpiry(EXPIRY)
                 .withRefresh(REFRESH)
-                .build(this::getFlowReportForChannelWithoutCache);
+                .build(FlowReport.EMPTY, this::getFlowReportForChannelWithoutCache);
     }
 
     public FlowReport getFlowReportForPeer(Pubkey pubkey) {

@@ -1,9 +1,8 @@
 package de.cotto.lndmanagej.service;
 
-import com.github.benmanes.caffeine.cache.LoadingCache;
-import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.ChannelIdAndMaxAge;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.SelfPayment;
 import de.cotto.lndmanagej.selfpayments.SelfPaymentsDao;
@@ -19,39 +18,21 @@ public class SelfPaymentsService {
     private static final Duration DEFAULT_MAX_AGE = Duration.ofDays(365 * 1_000);
     private static final Duration EXPIRY = Duration.ofSeconds(30);
     private static final Duration REFRESH = Duration.ofSeconds(15);
-    private static final Duration EXPIRY_CLOSED = Duration.ofHours(24);
-    private static final Duration REFRESH_CLOSED = Duration.ofHours(12);
 
     private final SelfPaymentsDao dao;
     private final ChannelService channelService;
-    private final LoadingCache<ChannelIdAndMaxAge, List<SelfPayment>> cacheFrom;
-    private final LoadingCache<ChannelIdAndMaxAge, List<SelfPayment>> cacheFromClosed;
-    private final LoadingCache<ChannelIdAndMaxAge, List<SelfPayment>> cacheTo;
-    private final LoadingCache<ChannelIdAndMaxAge, List<SelfPayment>> cacheToClosed;
+    private final ClosedChannelAwareCache<List<SelfPayment>> cacheFrom;
+    private final ClosedChannelAwareCache<List<SelfPayment>> cacheTo;
 
-    public SelfPaymentsService(SelfPaymentsDao dao, ChannelService channelService) {
+    public SelfPaymentsService(SelfPaymentsDao dao, ChannelService channelService, OwnNodeService ownNodeService) {
         this.dao = dao;
         this.channelService = channelService;
-        cacheFrom = new CacheBuilder()
+        ClosedChannelAwareCache.Builder builder = ClosedChannelAwareCache.builder(channelService, ownNodeService)
                 .withSoftValues(true)
                 .withExpiry(EXPIRY)
-                .withRefresh(REFRESH)
-                .build(this::getSelfPaymentsFromChannelWithoutCache);
-        cacheTo = new CacheBuilder()
-                .withSoftValues(true)
-                .withExpiry(EXPIRY)
-                .withRefresh(REFRESH)
-                .build(this::getSelfPaymentsToChannelWithoutCache);
-        cacheFromClosed = new CacheBuilder()
-                .withSoftValues(true)
-                .withExpiry(EXPIRY_CLOSED)
-                .withRefresh(REFRESH_CLOSED)
-                .build(this::getSelfPaymentsFromChannelWithoutCache);
-        cacheToClosed = new CacheBuilder()
-                .withSoftValues(true)
-                .withExpiry(EXPIRY_CLOSED)
-                .withRefresh(REFRESH_CLOSED)
-                .build(this::getSelfPaymentsToChannelWithoutCache);
+                .withRefresh(REFRESH);
+        cacheFrom = builder.build(List.of(), this::getSelfPaymentsFromChannelWithoutCache);
+        cacheTo = builder.build(List.of(), this::getSelfPaymentsToChannelWithoutCache);
     }
 
     public List<SelfPayment> getSelfPaymentsFromChannel(ChannelId channelId) {
@@ -59,11 +40,7 @@ public class SelfPaymentsService {
     }
 
     public List<SelfPayment> getSelfPaymentsFromChannel(ChannelId channelId, Duration maxAge) {
-        ChannelIdAndMaxAge channelIdAndMaxAge = new ChannelIdAndMaxAge(channelId, maxAge);
-        if (channelService.isClosed(channelId)) {
-            return cacheFromClosed.get(channelIdAndMaxAge);
-        }
-        return cacheFrom.get(channelIdAndMaxAge);
+        return cacheFrom.get(channelId, maxAge);
     }
 
     public List<SelfPayment> getSelfPaymentsFromPeer(Pubkey pubkey) {
@@ -75,11 +52,7 @@ public class SelfPaymentsService {
     }
 
     public List<SelfPayment> getSelfPaymentsToChannel(ChannelId channelId, Duration maxAge) {
-        ChannelIdAndMaxAge channelIdAndMaxAge = new ChannelIdAndMaxAge(channelId, maxAge);
-        if (channelService.isClosed(channelId)) {
-            return cacheToClosed.get(channelIdAndMaxAge);
-        }
-        return cacheTo.get(channelIdAndMaxAge);
+        return cacheTo.get(channelId, maxAge);
     }
 
     public List<SelfPayment> getSelfPaymentsToPeer(Pubkey pubkey) {

@@ -4,42 +4,16 @@ import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
-import javax.annotation.Nullable;
-import java.time.Duration;
 import java.util.function.Supplier;
 
-public class CacheBuilder {
-    private Duration expiry;
-
-    @Nullable
-    private Integer maximumSize;
-
-    @Nullable
-    private Duration refresh;
-
-    private boolean softValues;
+public class CacheBuilder extends CacheBuilderBase<CacheBuilder> {
 
     public CacheBuilder() {
-        expiry = Duration.ofMinutes(10);
+        super();
     }
 
-    public CacheBuilder withExpiry(Duration expiry) {
-        this.expiry = expiry;
-        return this;
-    }
-
-    public CacheBuilder withRefresh(Duration refresh) {
-        this.refresh = refresh;
-        return this;
-    }
-
-    public CacheBuilder withMaximumSize(int maximumSize) {
-        this.maximumSize = maximumSize;
-        return this;
-    }
-
-    public CacheBuilder withSoftValues(boolean softValues) {
-        this.softValues = softValues;
+    @Override
+    protected CacheBuilder getThis() {
         return this;
     }
 
