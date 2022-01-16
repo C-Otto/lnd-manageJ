@@ -48,10 +48,10 @@ class NodeFlowWarningsProviderTest {
     }
 
     @Test
-    void getNodeWarnings_no_flow() {
+    void getNodeWarnings_no_flow_old_channel() {
         when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL));
         when(channelService.getOpenHeight(LOCAL_OPEN_CHANNEL)).thenReturn(Optional.of(BLOCK_HEIGHT));
-        assertThat(warningsProvider.getNodeWarnings(PUBKEY)).containsExactly(new NodeNoFlowWarning(60));
+        assertThat(warningsProvider.getNodeWarnings(PUBKEY)).containsExactly(new NodeNoFlowWarning(90));
     }
 
     @Test
@@ -62,8 +62,8 @@ class NodeFlowWarningsProviderTest {
 
     @Test
     void getNodeWarnings_no_flow_young_channel() {
-        mockOpenChannelWithAgeInBlocks(17 * EXPECTED_BLOCKS_PER_DAY);
-        assertThat(warningsProvider.getNodeWarnings(PUBKEY)).containsExactly(new NodeNoFlowWarning(17));
+        mockOpenChannelWithAgeInBlocks(45 * EXPECTED_BLOCKS_PER_DAY);
+        assertThat(warningsProvider.getNodeWarnings(PUBKEY)).containsExactly(new NodeNoFlowWarning(45));
     }
 
     @Test
@@ -75,10 +75,10 @@ class NodeFlowWarningsProviderTest {
     @Test
     void getNodeWarnings_no_flow_then_some_flow() {
         mockOpenChannelWithAgeInBlocks(100 * EXPECTED_BLOCKS_PER_DAY);
-        when(flowService.getFlowReportForPeer(PUBKEY, Duration.ofDays(14))).thenReturn(FlowReport.EMPTY);
-        when(flowService.getFlowReportForPeer(PUBKEY, Duration.ofDays(15))).thenReturn(FlowReport.EMPTY);
-        when(flowService.getFlowReportForPeer(PUBKEY, Duration.ofDays(16))).thenReturn(FLOW_REPORT);
-        assertThat(warningsProvider.getNodeWarnings(PUBKEY)).containsExactly(new NodeNoFlowWarning(15));
+        when(flowService.getFlowReportForPeer(PUBKEY, Duration.ofDays(30))).thenReturn(FlowReport.EMPTY);
+        when(flowService.getFlowReportForPeer(PUBKEY, Duration.ofDays(31))).thenReturn(FlowReport.EMPTY);
+        when(flowService.getFlowReportForPeer(PUBKEY, Duration.ofDays(32))).thenReturn(FLOW_REPORT);
+        assertThat(warningsProvider.getNodeWarnings(PUBKEY)).containsExactly(new NodeNoFlowWarning(31));
     }
 
     @Test

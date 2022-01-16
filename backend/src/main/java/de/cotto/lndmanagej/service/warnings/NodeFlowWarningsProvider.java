@@ -20,8 +20,8 @@ import java.util.stream.Stream;
 public class NodeFlowWarningsProvider implements NodeWarningsProvider {
     private static final int EXPECTED_MINUTES_PER_BLOCK = 10;
     private static final int MINUTES_PER_DAY = 1_440;
-    private static final int MINIMUM_DAYS_FOR_WARNING = 14;
-    private static final int MAX_DAYS_TO_CONSIDER = 60;
+    private static final int MINIMUM_DAYS_FOR_WARNING = 30;
+    private static final int MAX_DAYS_TO_CONSIDER = 90;
     private final FlowService flowService;
     private final ChannelService channelService;
     private final OwnNodeService ownNodeService;
