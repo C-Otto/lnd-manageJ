@@ -35,17 +35,19 @@ public class NodeOnlineWarningsProvider implements NodeWarningsProvider {
     }
 
     private Optional<NodeWarning> getOnlinePercentageWarning(Pubkey pubkey) {
-        int percentage = onlinePeersService.getOnlinePercentageLastWeek(pubkey);
-        if (percentage < ONLINE_PERCENTAGE_THRESHOLD) {
-            return Optional.of(new NodeOnlinePercentageWarning(percentage));
+        int onlinePercentage = onlinePeersService.getOnlinePercentage(pubkey);
+        int daysForOnlinePercentage = onlinePeersService.getDaysForOnlinePercentage();
+        if (onlinePercentage < ONLINE_PERCENTAGE_THRESHOLD) {
+            return Optional.of(new NodeOnlinePercentageWarning(onlinePercentage, daysForOnlinePercentage));
         }
         return Optional.empty();
     }
 
     private Optional<NodeWarning> getOnlineChangesWarning(Pubkey pubkey) {
-        int changes = onlinePeersService.getChangesLastWeek(pubkey);
+        int changes = onlinePeersService.getChanges(pubkey);
+        int daysForChanges = onlinePeersService.getDaysForChanges();
         if (changes > ONLINE_CHANGES_THRESHOLD) {
-            return Optional.of(new NodeOnlineChangesWarning(changes));
+            return Optional.of(new NodeOnlineChangesWarning(changes, daysForChanges));
         }
         return Optional.empty();
     }

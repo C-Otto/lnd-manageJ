@@ -12,8 +12,8 @@ class NodeWarningsDtoTest {
     void createFromModel() {
         assertThat(NodeWarningsDto.createFromModel(NODE_WARNINGS)).isEqualTo(new NodeWarningsDto(Set.of(
                 "No flow in the past 16 days",
-                "Node has been online 51% in the last week",
-                "Node changed between online and offline 123 times"
+                "Node has been online 51% in the past 7 days",
+                "Node changed between online and offline 123 times in the past 7 days"
         )));
     }
 }

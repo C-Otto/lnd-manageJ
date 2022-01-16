@@ -17,7 +17,7 @@ import java.util.Objects;
 
 @Component
 public class OnlinePeersService {
-    private static final int DAYS_FOR_OFFLINE_PERCENTAGE = 7;
+    private static final int DAYS_FOR_ONLINE_PERCENTAGE = 7;
     private static final int DAYS_FOR_CHANGES = 7;
     private static final Duration CACHE_REFRESH = Duration.ofMinutes(1);
     private static final Duration CACHE_EXPIRY = Duration.ofMinutes(2);
@@ -31,39 +31,60 @@ public class OnlinePeersService {
         onlinePercentageCache = new CacheBuilder()
                 .withRefresh(CACHE_REFRESH)
                 .withExpiry(CACHE_EXPIRY)
-                .build(this::getOnlinePercentageLastWeekWithoutCache);
+                .build(this::getOnlinePercentageWithoutCache);
         changesCache = new CacheBuilder()
                 .withRefresh(CACHE_REFRESH)
                 .withExpiry(CACHE_EXPIRY)
-                .build(this::getChangesLastWeekWithoutCache);
+                .build(this::getChangesWithoutCache);
     }
 
     public OnlineReport getOnlineReport(Node node) {
         boolean online = node.online();
         OnlineStatus mostRecentOnlineStatus = dao.getMostRecentOnlineStatus(node.pubkey())
                 .orElse(new OnlineStatus(online, now()));
-        int onlinePercentageLastWeek = getOnlinePercentageLastWeek(node.pubkey());
-        int changesLastWeek = getChangesLastWeek(node.pubkey());
+        int onlinePercentage = getOnlinePercentage(node.pubkey());
+        int changes = getChanges(node.pubkey());
         if (mostRecentOnlineStatus.online() == online) {
-            return OnlineReport.createFromStatus(mostRecentOnlineStatus, onlinePercentageLastWeek, changesLastWeek);
+            return OnlineReport.createFromStatus(
+                    mostRecentOnlineStatus,
+                    onlinePercentage,
+                    DAYS_FOR_ONLINE_PERCENTAGE,
+                    changes,
+                    DAYS_FOR_CHANGES
+            );
         }
-        return new OnlineReport(online, now(), onlinePercentageLastWeek, changesLastWeek);
+        return new OnlineReport(
+                online,
+                now(),
+                onlinePercentage,
+                DAYS_FOR_ONLINE_PERCENTAGE,
+                changes,
+                DAYS_FOR_CHANGES
+        );
     }
 
-    public int getOnlinePercentageLastWeek(Pubkey pubkey) {
+    public int getDaysForOnlinePercentage() {
+        return DAYS_FOR_ONLINE_PERCENTAGE;
+    }
+
+    public int getOnlinePercentage(Pubkey pubkey) {
         return Objects.requireNonNull(onlinePercentageCache.get(pubkey));
     }
 
-    public int getChangesLastWeek(Pubkey pubkey) {
+    public int getDaysForChanges() {
+        return DAYS_FOR_CHANGES;
+    }
+
+    public int getChanges(Pubkey pubkey) {
         return Objects.requireNonNull(changesCache.get(pubkey));
     }
 
-    private int getOnlinePercentageLastWeekWithoutCache(Pubkey pubkey) {
+    private int getOnlinePercentageWithoutCache(Pubkey pubkey) {
         Duration total = Duration.ZERO;
         Duration online = Duration.ZERO;
         ZonedDateTime intervalStart = ZonedDateTime.now(ZoneOffset.UTC);
-        ZonedDateTime cutoff = intervalStart.minusDays(DAYS_FOR_OFFLINE_PERCENTAGE);
-        for (OnlineStatus onlineStatus : dao.getAllForPeerUpToAgeInDays(pubkey, DAYS_FOR_OFFLINE_PERCENTAGE)) {
+        ZonedDateTime cutoff = intervalStart.minusDays(DAYS_FOR_ONLINE_PERCENTAGE);
+        for (OnlineStatus onlineStatus : dao.getAllForPeerUpToAgeInDays(pubkey, DAYS_FOR_ONLINE_PERCENTAGE)) {
             ZonedDateTime intervalEnd = onlineStatus.since();
             if (intervalEnd.isBefore(cutoff)) {
                 intervalEnd = cutoff;
@@ -85,7 +106,7 @@ public class OnlinePeersService {
         return (int) (offline.getSeconds() * 100.0 / total.getSeconds());
     }
 
-    private int getChangesLastWeekWithoutCache(Pubkey pubkey) {
+    private int getChangesWithoutCache(Pubkey pubkey) {
         Boolean lastKnownStatus = null;
         int changes = -1;
         for (OnlineStatus onlineStatus : dao.getAllForPeerUpToAgeInDays(pubkey, DAYS_FOR_CHANGES)) {

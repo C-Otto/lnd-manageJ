@@ -22,18 +22,33 @@ class OnlineReportTest {
     }
 
     @Test
-    void onlinePercentageLastWeek() {
-        assertThat(ONLINE_REPORT.onlinePercentageLastWeek()).isEqualTo(77);
+    void onlinePercentage() {
+        assertThat(ONLINE_REPORT.onlinePercentage()).isEqualTo(77);
     }
 
     @Test
-    void changesLastWeek() {
-        assertThat(ONLINE_REPORT.changesLastWeek()).isEqualTo(5);
+    void daysForOnlinePercentage() {
+        assertThat(ONLINE_REPORT.daysForOnlinePercentage()).isEqualTo(7);
+    }
+
+    @Test
+    void changes() {
+        assertThat(ONLINE_REPORT.changes()).isEqualTo(5);
+    }
+
+    @Test
+    void daysForChanges() {
+        assertThat(ONLINE_REPORT.daysForChanges()).isEqualTo(7);
     }
 
     @Test
     void createFromOnlineStatus() {
-        assertThat(OnlineReport.createFromStatus(ONLINE_STATUS, 77, 5))
-                .isEqualTo(ONLINE_REPORT);
+        assertThat(OnlineReport.createFromStatus(
+                ONLINE_STATUS,
+                77,
+                7,
+                5,
+                7
+        )).isEqualTo(ONLINE_REPORT);
     }
 }

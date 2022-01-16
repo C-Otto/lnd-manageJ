@@ -24,22 +24,24 @@ class NodeOnlineWarningsProviderTest {
 
     @BeforeEach
     void setUp() {
-        when(onlinePeersService.getOnlinePercentageLastWeek(PUBKEY)).thenReturn(80);
-        when(onlinePeersService.getChangesLastWeek(PUBKEY)).thenReturn(50);
+        when(onlinePeersService.getOnlinePercentage(PUBKEY)).thenReturn(80);
+        when(onlinePeersService.getChanges(PUBKEY)).thenReturn(50);
     }
 
     @Test
     void getNodeWarnings_online_below_threshold() {
-        when(onlinePeersService.getOnlinePercentageLastWeek(PUBKEY)).thenReturn(79);
+        when(onlinePeersService.getOnlinePercentage(PUBKEY)).thenReturn(79);
+        when(onlinePeersService.getDaysForOnlinePercentage()).thenReturn(456);
         assertThat(warningsProvider.getNodeWarnings(PUBKEY))
-                .containsExactly(new NodeOnlinePercentageWarning(79));
+                .containsExactly(new NodeOnlinePercentageWarning(79, 456));
     }
 
     @Test
     void getNodeWarnings_online_changes_above_threshold() {
-        when(onlinePeersService.getChangesLastWeek(PUBKEY)).thenReturn(51);
+        when(onlinePeersService.getChanges(PUBKEY)).thenReturn(51);
+        when(onlinePeersService.getDaysForChanges()).thenReturn(123);
         assertThat(warningsProvider.getNodeWarnings(PUBKEY))
-                .containsExactly(new NodeOnlineChangesWarning(51));
+                .containsExactly(new NodeOnlineChangesWarning(51, 123));
     }
 
     @Test

@@ -40,8 +40,14 @@ class OnlinePeersServiceTest {
     void with_time_if_given_status_matches_last_known_status() {
         when(dao.getMostRecentOnlineStatus(PUBKEY)).thenReturn(Optional.of(ONLINE_STATUS));
         mockFor23PercentOffline();
-        assertThat(onlinePeersService.getOnlineReport(NODE_PEER))
-                .isEqualTo(new OnlineReport(true, OnlineReportFixtures.TIMESTAMP, 77, 1));
+        assertThat(onlinePeersService.getOnlineReport(NODE_PEER)).isEqualTo(new OnlineReport(
+                true,
+                OnlineReportFixtures.TIMESTAMP,
+                77,
+                7,
+                1,
+                7
+        ));
     }
 
     @Test
@@ -67,55 +73,60 @@ class OnlinePeersServiceTest {
     }
 
     @Test
-    void getOnlinePercentageLastWeek_no_data() {
-        assertThat(onlinePeersService.getOnlinePercentageLastWeek(PUBKEY)).isZero();
+    void getDaysForOnlinePercentage() {
+        assertThat(onlinePeersService.getDaysForOnlinePercentage()).isEqualTo(7);
     }
 
     @Test
-    void getOnlinePercentageLastWeek_always_online() {
+    void getOnlinePercentage_no_data() {
+        assertThat(onlinePeersService.getOnlinePercentage(PUBKEY)).isZero();
+    }
+
+    @Test
+    void getOnlinePercentage_always_online() {
         ZonedDateTime early = ZonedDateTime.of(2018, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
         when(dao.getAllForPeerUpToAgeInDays(PUBKEY, SEVEN_DAYS))
                 .thenReturn(List.of(new OnlineStatus(true, early)));
-        assertThat(onlinePeersService.getOnlinePercentageLastWeek(PUBKEY)).isEqualTo(100);
+        assertThat(onlinePeersService.getOnlinePercentage(PUBKEY)).isEqualTo(100);
     }
 
     @Test
-    void getOnlinePercentageLastWeek_always_offline() {
+    void getOnlinePercentage_always_offline() {
         ZonedDateTime early = ZonedDateTime.of(2018, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
         when(dao.getAllForPeerUpToAgeInDays(PUBKEY, SEVEN_DAYS))
                 .thenReturn(List.of(new OnlineStatus(false, early)));
-        assertThat(onlinePeersService.getOnlinePercentageLastWeek(PUBKEY)).isZero();
+        assertThat(onlinePeersService.getOnlinePercentage(PUBKEY)).isZero();
     }
 
     @Test
-    void getOnlinePercentageLastWeek_limited_data_offline() {
+    void getOnlinePercentage_limited_data_offline() {
         ZonedDateTime oneHourAgo = NOW.minusHours(1);
         when(dao.getAllForPeerUpToAgeInDays(PUBKEY, SEVEN_DAYS))
                 .thenReturn(List.of(new OnlineStatus(false, oneHourAgo)));
-        assertThat(onlinePeersService.getOnlinePercentageLastWeek(PUBKEY)).isZero();
+        assertThat(onlinePeersService.getOnlinePercentage(PUBKEY)).isZero();
     }
 
     @Test
-    void getOnlinePercentageLastWeek_limited_data_online() {
+    void getOnlinePercentage_limited_data_online() {
         ZonedDateTime oneHourAgo = NOW.minusHours(1);
         when(dao.getAllForPeerUpToAgeInDays(PUBKEY, SEVEN_DAYS))
                 .thenReturn(List.of(new OnlineStatus(true, oneHourAgo)));
-        assertThat(onlinePeersService.getOnlinePercentageLastWeek(PUBKEY)).isEqualTo(100);
+        assertThat(onlinePeersService.getOnlinePercentage(PUBKEY)).isEqualTo(100);
     }
 
     @Test
-    void getOnlinePercentageLastWeek_limited_data_online_then_offline() {
+    void getOnlinePercentage_limited_data_online_then_offline() {
         ZonedDateTime twoHoursAgo = NOW.minusHours(2);
         ZonedDateTime oneHourAgo = NOW.minusHours(1);
         when(dao.getAllForPeerUpToAgeInDays(PUBKEY, SEVEN_DAYS)).thenReturn(List.of(
                 new OnlineStatus(true, oneHourAgo),
                 new OnlineStatus(false, twoHoursAgo)
         ));
-        assertThat(onlinePeersService.getOnlinePercentageLastWeek(PUBKEY)).isCloseTo(50, offset(1));
+        assertThat(onlinePeersService.getOnlinePercentage(PUBKEY)).isCloseTo(50, offset(1));
     }
 
     @Test
-    void getOnlinePercentageLastWeek_many_state_changes() {
+    void getOnlinePercentage_many_state_changes() {
         ZonedDateTime fiveHoursAgo = NOW.minusHours(5);
         ZonedDateTime fourHoursAgo = NOW.minusHours(4);
         ZonedDateTime threeHoursAgo = NOW.minusHours(3);
@@ -128,22 +139,22 @@ class OnlinePeersServiceTest {
                 new OnlineStatus(false, fourHoursAgo),
                 new OnlineStatus(true, fiveHoursAgo)
         ));
-        assertThat(onlinePeersService.getOnlinePercentageLastWeek(PUBKEY)).isCloseTo(60, offset(1));
+        assertThat(onlinePeersService.getOnlinePercentage(PUBKEY)).isCloseTo(60, offset(1));
     }
 
     @Test
-    void getOnlinePercentageLastWeek_limited_data_offline_then_online() {
+    void getOnlinePercentage_limited_data_offline_then_online() {
         ZonedDateTime twoHoursAgo = NOW.minusHours(2);
         ZonedDateTime oneHourAgo = NOW.minusHours(1);
         when(dao.getAllForPeerUpToAgeInDays(PUBKEY, SEVEN_DAYS)).thenReturn(List.of(
                 new OnlineStatus(false, oneHourAgo),
                 new OnlineStatus(true, twoHoursAgo)
         ));
-        assertThat(onlinePeersService.getOnlinePercentageLastWeek(PUBKEY)).isCloseTo(50, offset(1));
+        assertThat(onlinePeersService.getOnlinePercentage(PUBKEY)).isCloseTo(50, offset(1));
     }
 
     @Test
-    void getOnlinePercentageLastWeek_cuts_off_old_data() {
+    void getOnlinePercentage_cuts_off_old_data() {
         ZonedDateTime twoYearsAgo = NOW.minusYears(2);
         ZonedDateTime oneYearAgo = NOW.minusYears(1);
         ZonedDateTime thirteenDaysAgo = NOW.minusDays(6);
@@ -152,51 +163,56 @@ class OnlinePeersServiceTest {
                 new OnlineStatus(false, oneYearAgo),
                 new OnlineStatus(true, twoYearsAgo)
         ));
-        assertThat(onlinePeersService.getOnlinePercentageLastWeek(PUBKEY)).isCloseTo(85, offset(1));
+        assertThat(onlinePeersService.getOnlinePercentage(PUBKEY)).isCloseTo(85, offset(1));
     }
 
     @Test
-    void getOnlinePercentageLastWeek_is_rounded() {
+    void getOnlinePercentage_is_rounded() {
         mockFor23PercentOffline();
-        assertThat(onlinePeersService.getOnlinePercentageLastWeek(PUBKEY)).isCloseTo(77, offset(1));
+        assertThat(onlinePeersService.getOnlinePercentage(PUBKEY)).isCloseTo(77, offset(1));
     }
 
     @Test
-    void getChangesLastWeek_no_data() {
-        assertThat(onlinePeersService.getChangesLastWeek(PUBKEY)).isZero();
+    void getDaysForChanges() {
+        assertThat(onlinePeersService.getDaysForChanges()).isEqualTo(7);
     }
 
     @Test
-    void getChangesLastWeek_one_old_entry() {
+    void getChanges_no_data() {
+        assertThat(onlinePeersService.getChanges(PUBKEY)).isZero();
+    }
+
+    @Test
+    void getChanges_one_old_entry() {
         ZonedDateTime oneYearAgo = NOW.minusYears(1);
         when(dao.getAllForPeerUpToAgeInDays(PUBKEY, SEVEN_DAYS)).thenReturn(List.of(
                 new OnlineStatus(true, oneYearAgo)
         ));
-        assertThat(onlinePeersService.getChangesLastWeek(PUBKEY)).isZero();
+        assertThat(onlinePeersService.getChanges(PUBKEY)).isZero();
     }
 
     @Test
-    void getChangesLastWeek_one_recent_entry() {
+    void getChanges_one_recent_entry() {
         ZonedDateTime oneHourAgo = NOW.minusHours(1);
         when(dao.getAllForPeerUpToAgeInDays(PUBKEY, SEVEN_DAYS)).thenReturn(List.of(
                 new OnlineStatus(true, oneHourAgo)
         ));
-        assertThat(onlinePeersService.getChangesLastWeek(PUBKEY)).isZero();
+        assertThat(onlinePeersService.getChanges(PUBKEY)).isZero();
     }
 
     @Test
-    void getChangesLastWeek_two_recent_entries() {
+    void getChanges_two_recent_entries() {
         ZonedDateTime twoHoursAgo = NOW.minusHours(2);
         ZonedDateTime oneHourAgo = NOW.minusHours(1);
         when(dao.getAllForPeerUpToAgeInDays(PUBKEY, SEVEN_DAYS)).thenReturn(List.of(
                 new OnlineStatus(false, oneHourAgo),
                 new OnlineStatus(true, twoHoursAgo)
         ));
-        assertThat(onlinePeersService.getChangesLastWeek(PUBKEY)).isOne();
+        assertThat(onlinePeersService.getChanges(PUBKEY)).isOne();
     }
 
     @Test
-    void getChangesLastWeek_many_recent_entries() {
+    void getChanges_many_recent_entries() {
         ZonedDateTime fourHoursAgo = NOW.minusHours(4);
         ZonedDateTime threeHoursAgo = NOW.minusHours(3);
         ZonedDateTime twoHoursAgo = NOW.minusHours(2);
@@ -207,11 +223,11 @@ class OnlinePeersServiceTest {
                 new OnlineStatus(false, threeHoursAgo),
                 new OnlineStatus(true, fourHoursAgo)
         ));
-        assertThat(onlinePeersService.getChangesLastWeek(PUBKEY)).isEqualTo(3);
+        assertThat(onlinePeersService.getChanges(PUBKEY)).isEqualTo(3);
     }
 
     @Test
-    void getChangesLastWeek_many_recent_entries_not_all_are_changes() {
+    void getChanges_many_recent_entries_not_all_are_changes() {
         ZonedDateTime fourHoursAgo = NOW.minusHours(4);
         ZonedDateTime threeHoursAgo = NOW.minusHours(3);
         ZonedDateTime twoHoursAgo = NOW.minusHours(2);
@@ -222,7 +238,7 @@ class OnlinePeersServiceTest {
                 new OnlineStatus(false, threeHoursAgo),
                 new OnlineStatus(true, fourHoursAgo)
         ));
-        assertThat(onlinePeersService.getChangesLastWeek(PUBKEY)).isOne();
+        assertThat(onlinePeersService.getChanges(PUBKEY)).isOne();
     }
 
     private void assertVeryRecentSince(OnlineReport report) {

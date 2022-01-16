@@ -30,6 +30,7 @@ import static de.cotto.lndmanagej.model.NodeDetailsFixtures.NODE_DETAILS;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -109,17 +110,19 @@ class NodeControllerIT {
                 .andExpect(jsonPath("$.balance.remoteAvailable", is("203")))
                 .andExpect(jsonPath("$.feeReport.earned", is("1234")))
                 .andExpect(jsonPath("$.feeReport.sourced", is("567")))
-                .andExpect(jsonPath("$.nodeWarnings", is(List.of(
-                        "Node has been online 51% in the last week",
-                        "Node changed between online and offline 123 times",
+                .andExpect(jsonPath("$.nodeWarnings", containsInAnyOrder(
+                        "Node has been online 51% in the past 7 days",
+                        "Node changed between online and offline 123 times in the past 7 days",
                         "No flow in the past 16 days"
-                ))))
+                )))
                 .andExpect(jsonPath("$.onChainCosts.openCosts", is("1000")))
                 .andExpect(jsonPath("$.onChainCosts.closeCosts", is("2000")))
                 .andExpect(jsonPath("$.onChainCosts.sweepCosts", is("3000")))
                 .andExpect(jsonPath("$.onlineReport.online", is(true)))
-                .andExpect(jsonPath("$.onlineReport.onlinePercentageLastWeek", is(77)))
-                .andExpect(jsonPath("$.onlineReport.changesLastWeek", is(5)))
+                .andExpect(jsonPath("$.onlineReport.onlinePercentage", is(77)))
+                .andExpect(jsonPath("$.onlineReport.daysForOnlinePercentage", is(7)))
+                .andExpect(jsonPath("$.onlineReport.changes", is(5)))
+                .andExpect(jsonPath("$.onlineReport.daysForChanges", is(7)))
                 .andExpect(jsonPath("$.onlineReport.since", is("2021-12-23T01:02:03Z")));
     }
 
