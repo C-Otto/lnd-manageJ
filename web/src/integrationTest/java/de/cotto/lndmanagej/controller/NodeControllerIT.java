@@ -111,7 +111,7 @@ class NodeControllerIT {
                 .andExpect(jsonPath("$.feeReport.earned", is("1234")))
                 .andExpect(jsonPath("$.feeReport.sourced", is("567")))
                 .andExpect(jsonPath("$.nodeWarnings", containsInAnyOrder(
-                        "Node has been online 51% in the past 7 days",
+                        "Node has been online 51% in the past 14 days",
                         "Node changed between online and offline 123 times in the past 7 days",
                         "No flow in the past 16 days"
                 )))
@@ -120,7 +120,7 @@ class NodeControllerIT {
                 .andExpect(jsonPath("$.onChainCosts.sweepCosts", is("3000")))
                 .andExpect(jsonPath("$.onlineReport.online", is(true)))
                 .andExpect(jsonPath("$.onlineReport.onlinePercentage", is(77)))
-                .andExpect(jsonPath("$.onlineReport.daysForOnlinePercentage", is(7)))
+                .andExpect(jsonPath("$.onlineReport.daysForOnlinePercentage", is(14)))
                 .andExpect(jsonPath("$.onlineReport.changes", is(5)))
                 .andExpect(jsonPath("$.onlineReport.daysForChanges", is(7)))
                 .andExpect(jsonPath("$.onlineReport.since", is("2021-12-23T01:02:03Z")));

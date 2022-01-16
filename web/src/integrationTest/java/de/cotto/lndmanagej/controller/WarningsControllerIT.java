@@ -37,7 +37,7 @@ class WarningsControllerIT {
         mockMvc.perform(get(NODE_PREFIX + "/warnings"))
                 .andExpect(jsonPath("$.nodeWarnings", containsInAnyOrder(
                         "No flow in the past 16 days",
-                        "Node has been online 51% in the past 7 days",
+                        "Node has been online 51% in the past 14 days",
                         "Node changed between online and offline 123 times in the past 7 days"
                 )));
     }

@@ -28,7 +28,7 @@ class OnlineReportTest {
 
     @Test
     void daysForOnlinePercentage() {
-        assertThat(ONLINE_REPORT.daysForOnlinePercentage()).isEqualTo(7);
+        assertThat(ONLINE_REPORT.daysForOnlinePercentage()).isEqualTo(14);
     }
 
     @Test
@@ -46,7 +46,7 @@ class OnlineReportTest {
         assertThat(OnlineReport.createFromStatus(
                 ONLINE_STATUS,
                 77,
-                7,
+                14,
                 5,
                 7
         )).isEqualTo(ONLINE_REPORT);

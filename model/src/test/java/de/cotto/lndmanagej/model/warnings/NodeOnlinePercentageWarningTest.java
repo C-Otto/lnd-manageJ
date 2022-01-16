@@ -20,12 +20,12 @@ class NodeOnlinePercentageWarningTest {
     @Test
     void description() {
         assertThat(NODE_ONLINE_PERCENTAGE_WARNING.description())
-                .isEqualTo("Node has been online 51% in the past 7 days");
+                .isEqualTo("Node has been online 51% in the past 14 days");
     }
 
     @Test
     void description_2() {
         assertThat(NODE_ONLINE_PERCENTAGE_WARNING_2.description())
-                .isEqualTo("Node has been online 1% in the past 14 days");
+                .isEqualTo("Node has been online 1% in the past 21 days");
     }
 }

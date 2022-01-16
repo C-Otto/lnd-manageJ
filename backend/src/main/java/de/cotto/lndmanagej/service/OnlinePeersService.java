@@ -17,7 +17,7 @@ import java.util.Objects;
 
 @Component
 public class OnlinePeersService {
-    private static final int DAYS_FOR_ONLINE_PERCENTAGE = 7;
+    private static final int DAYS_FOR_ONLINE_PERCENTAGE = 14;
     private static final int DAYS_FOR_CHANGES = 7;
     private static final Duration CACHE_REFRESH = Duration.ofMinutes(1);
     private static final Duration CACHE_EXPIRY = Duration.ofMinutes(2);
