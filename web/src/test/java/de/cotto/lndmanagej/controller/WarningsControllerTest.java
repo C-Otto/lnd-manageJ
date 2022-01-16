@@ -56,4 +56,11 @@ class WarningsControllerTest {
                 new NodeWithWarningsDto(descriptions2, ALIAS_2, PUBKEY_2)
         )));
     }
+
+    @Test
+    void getWarnings_sorted_by_pubkey() {
+        when(nodeWarningsService.getNodeWarnings()).thenReturn(Map.of(NODE_2, NODE_WARNINGS_2, NODE, NODE_WARNINGS));
+        assertThat(warningsController.getWarnings().nodesWithWarnings()).map(NodeWithWarningsDto::pubkey)
+                .containsExactly(PUBKEY, PUBKEY_2);
+    }
 }

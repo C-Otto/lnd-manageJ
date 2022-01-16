@@ -42,7 +42,6 @@ public class NodeWarningsService {
     public Map<Node, NodeWarnings> getNodeWarnings() {
         return channelService.getOpenChannels().parallelStream()
                 .map(LocalChannel::getRemotePubkey)
-                .sorted()
                 .map(pubkey -> new AbstractMap.SimpleEntry<>(pubkey, getNodeWarnings(pubkey)))
                 .filter(this::hasWarnings)
                 .map(entry -> new AbstractMap.SimpleEntry<>(nodeService.getNode(entry.getKey()), entry.getValue()))

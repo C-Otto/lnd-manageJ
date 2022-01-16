@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import static java.util.Map.Entry.comparingByKey;
+
 @RestController
 @RequestMapping("/api/")
 @Import(ObjectMapperConfiguration.class)
@@ -37,6 +39,7 @@ public class WarningsController {
     @GetMapping("/warnings")
     public NodesWithWarningsDto getWarnings() {
         List<NodeWithWarningsDto> list = nodeWarningsService.getNodeWarnings().entrySet().stream()
+                .sorted(comparingByKey())
                 .map(entry -> getWarningsDto(entry.getKey(), entry.getValue()))
                 .toList();
         return new NodesWithWarningsDto(list);
