@@ -40,13 +40,13 @@ public class NodeFixtures {
 
     public static final Node NODE_3 = Node.builder()
             .withPubkey(PUBKEY_3)
-            .withAlias(ALIAS_2)
+            .withAlias(ALIAS_3)
             .withLastUpdate(LAST_UPDATE)
             .build();
 
     public static final Node NODE_3_PEER = Node.builder()
             .withPubkey(PUBKEY_3)
-            .withAlias(ALIAS_2)
+            .withAlias(ALIAS_3)
             .withLastUpdate(LAST_UPDATE)
             .withOnlineStatus(true)
             .build();

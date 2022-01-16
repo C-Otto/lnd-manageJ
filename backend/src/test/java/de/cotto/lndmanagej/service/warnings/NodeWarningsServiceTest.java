@@ -1,55 +1,107 @@
 package de.cotto.lndmanagej.service.warnings;
 
 import de.cotto.lndmanagej.model.NodeWarnings;
+import de.cotto.lndmanagej.service.ChannelService;
+import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.NodeWarningsProvider;
 import de.cotto.lndmanagej.service.NodeWarningsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_TO_NODE_3;
+import static de.cotto.lndmanagej.model.NodeFixtures.NODE_2;
+import static de.cotto.lndmanagej.model.NodeFixtures.NODE_3;
 import static de.cotto.lndmanagej.model.NodeWarningFixtures.NODE_NO_FLOW_WARNING;
 import static de.cotto.lndmanagej.model.NodeWarningFixtures.NODE_ONLINE_CHANGES_WARNING;
 import static de.cotto.lndmanagej.model.NodeWarningFixtures.NODE_ONLINE_PERCENTAGE_WARNING;
-import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class NodeWarningsServiceTest {
     private NodeWarningsService nodeWarningsService;
+
+    @Mock
     private NodeWarningsProvider provider1;
+
+    @Mock
     private NodeWarningsProvider provider2;
+
+    @Mock
+    private NodeService nodeService;
+
+    @Mock
+    private ChannelService channelService;
 
     @BeforeEach
     void setUp() {
-        provider1 = mock(NodeWarningsProvider.class);
-        provider2 = mock(NodeWarningsProvider.class);
-        nodeWarningsService = new NodeWarningsService(Set.of(provider1, provider2));
+        nodeWarningsService = new NodeWarningsService(Set.of(provider1, provider2), channelService, nodeService);
+        lenient().when(provider1.getNodeWarnings(PUBKEY_2)).thenReturn(Stream.of());
+        lenient().when(provider1.getNodeWarnings(PUBKEY_3)).thenReturn(Stream.of());
+        lenient().when(provider2.getNodeWarnings(PUBKEY_2)).thenReturn(Stream.of());
+        lenient().when(provider2.getNodeWarnings(PUBKEY_3)).thenReturn(Stream.of());
+        lenient().when(nodeService.getNode(PUBKEY_2)).thenReturn(NODE_2);
+        lenient().when(nodeService.getNode(PUBKEY_3)).thenReturn(NODE_3);
     }
 
     @Test
-    void getNodeWarnings_no_warning() {
-        when(provider1.getNodeWarnings(PUBKEY)).thenReturn(Stream.of());
-        when(provider2.getNodeWarnings(PUBKEY)).thenReturn(Stream.of());
-        assertThat(nodeWarningsService.getNodeWarnings(PUBKEY)).isEqualTo(NodeWarnings.NONE);
+    void getNodeWarnings_for_one_node_no_warning() {
+        assertThat(nodeWarningsService.getNodeWarnings(PUBKEY_2)).isEqualTo(NodeWarnings.NONE);
     }
 
     @Test
-    void getNodeWarnings() {
-        when(provider1.getNodeWarnings(PUBKEY))
+    void getNodeWarnings_for_one_node() {
+        when(provider1.getNodeWarnings(PUBKEY_2))
                 .thenReturn(Stream.of(NODE_ONLINE_PERCENTAGE_WARNING, NODE_ONLINE_CHANGES_WARNING));
-        when(provider2.getNodeWarnings(PUBKEY))
+        when(provider2.getNodeWarnings(PUBKEY_2))
                 .thenReturn(Stream.of(NODE_NO_FLOW_WARNING));
         NodeWarnings expected = new NodeWarnings(
                 NODE_NO_FLOW_WARNING,
                 NODE_ONLINE_PERCENTAGE_WARNING,
                 NODE_ONLINE_CHANGES_WARNING
         );
-        assertThat(nodeWarningsService.getNodeWarnings(PUBKEY)).isEqualTo(expected);
+        assertThat(nodeWarningsService.getNodeWarnings(PUBKEY_2)).isEqualTo(expected);
+    }
+
+    @Test
+    void getNodeWarnings_no_channel() {
+        when(channelService.getOpenChannels()).thenReturn(Set.of());
+        assertThat(nodeWarningsService.getNodeWarnings()).isEmpty();
+    }
+
+    @Test
+    void getNodeWarnings_no_warnings() {
+        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL));
+        assertThat(nodeWarningsService.getNodeWarnings()).isEmpty();
+    }
+
+    @Test
+    void getNodeWarnings() {
+        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_TO_NODE_3));
+        when(provider1.getNodeWarnings(PUBKEY_2)).thenReturn(Stream.of(NODE_ONLINE_PERCENTAGE_WARNING));
+        when(provider2.getNodeWarnings(PUBKEY_3)).thenReturn(Stream.of(NODE_ONLINE_CHANGES_WARNING));
+        assertThat(nodeWarningsService.getNodeWarnings()).containsExactlyInAnyOrderEntriesOf(Map.of(
+                NODE_2, new NodeWarnings(NODE_ONLINE_PERCENTAGE_WARNING),
+                NODE_3, new NodeWarnings(NODE_ONLINE_CHANGES_WARNING)
+        ));
+    }
+
+    @Test
+    void getNodeWarnings_ordered_by_pubkey() {
+        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_TO_NODE_3));
+        when(provider1.getNodeWarnings(PUBKEY_3)).thenReturn(Stream.of(NODE_NO_FLOW_WARNING));
+        when(provider2.getNodeWarnings(PUBKEY_2)).thenReturn(Stream.of(NODE_ONLINE_PERCENTAGE_WARNING));
+        assertThat(nodeWarningsService.getNodeWarnings()).containsOnlyKeys(NODE_2, NODE_3);
     }
 }
