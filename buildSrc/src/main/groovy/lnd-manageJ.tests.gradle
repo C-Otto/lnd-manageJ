@@ -9,8 +9,15 @@ dependencies {
     testImplementation 'uk.org.lidalia:slf4j-test:1.2.0'
 }
 
+testing {
+    suites {
+        test {
+            useJUnitJupiter()
+        }
+    }
+}
+
 tasks.withType(Test).configureEach {
-    useJUnitPlatform()
     afterTest { descriptor, result ->
         if (result.resultType == TestResult.ResultType.SKIPPED) {
             throw new GradleException('Do not ignore test cases')

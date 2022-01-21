@@ -2,10 +2,22 @@ plugins {
     id 'lnd-manageJ.tests'
 }
 
-sourceSets {
-    integrationTest {
-        compileClasspath += sourceSets.main.output
-        runtimeClasspath += sourceSets.main.output
+testing {
+    suites {
+        integrationTest(JvmTestSuite) {
+            testType = TestSuiteType.INTEGRATION_TEST
+            dependencies {
+                implementation project
+            }
+
+            targets {
+                all {
+                    testTask.configure {
+                        shouldRunAfter(test)
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -14,15 +26,9 @@ configurations {
     integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
 }
 
-task integrationTest(type: Test) {
-    description = 'Runs integration tests.'
-    group = 'verification'
-
-    testClassesDirs = sourceSets.integrationTest.output.classesDirs
-    classpath = sourceSets.integrationTest.runtimeClasspath
-    shouldRunAfter test
+tasks.named('check') {
+    dependsOn(testing.suites.integrationTest)
 }
-check.dependsOn integrationTest
 
 dependencies {
     testImplementation 'com.tngtech.archunit:archunit:0.21.0'
