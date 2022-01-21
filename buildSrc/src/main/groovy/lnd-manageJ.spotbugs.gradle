@@ -13,7 +13,6 @@ tasks.withType(com.github.spotbugs.snom.SpotBugsTask).forEach { spotbugsTask ->
 
 spotbugs {
     excludeFilter = file("${rootDir}/config/spotbugs-exclude.xml")
-    onlyAnalyze = ['de.cotto.*']
 }
 
 tasks.withType(Test).forEach { testTask ->
