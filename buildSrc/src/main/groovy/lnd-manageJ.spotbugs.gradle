@@ -2,14 +2,15 @@ plugins {
     id 'com.github.spotbugs'
 }
 
-spotbugsMain.reports.configure {
-    xml.enabled = false
-    html.enabled = true
+tasks.withType(com.github.spotbugs.snom.SpotBugsTask).forEach { spotbugsTask ->
+    spotbugsTask.configure {
+        reports.configure {
+            xml.enabled = false
+            html.enabled = true
+        }
+    }
 }
-spotbugsTest.reports.configure {
-    xml.enabled = false
-    html.enabled = true
-}
+
 spotbugs {
     excludeFilter = file("${rootDir}/config/spotbugs-exclude.xml")
     onlyAnalyze = ['de.cotto.*']

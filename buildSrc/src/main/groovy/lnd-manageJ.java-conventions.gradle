@@ -6,12 +6,12 @@ plugins {
     id 'lnd-manageJ.tests'
     id 'lnd-manageJ.mutationtests'
     id 'lnd-manageJ.integration-tests'
-    id 'lnd-manageJ.spotbugs'
     id 'lnd-manageJ.pmd'
     id 'lnd-manageJ.jacoco'
     id 'org.springframework.boot'
     id 'io.spring.dependency-management'
     id 'java-test-fixtures'
+    id 'lnd-manageJ.spotbugs'
 }
 
 java {
