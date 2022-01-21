@@ -22,10 +22,10 @@ class IniFileReaderTest {
     @Test
     void file_does_not_exist() throws IOException {
         File file = createTempFile();
-        //noinspection ResultOfMethodCallIgnored
-        file.delete();
+        boolean deleted = file.delete();
         IniFileReader iniFileReader = new IniFileReader(file.getPath());
         assertThat(iniFileReader.getValues(SECTION)).isEmpty();
+        assertThat(deleted).isTrue();
     }
 
     @Test
