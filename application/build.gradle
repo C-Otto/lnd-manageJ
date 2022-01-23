@@ -10,9 +10,10 @@ dependencies {
     runtimeOnly project(':statistics')
     runtimeOnly project(':selfpayments')
     runtimeOnly 'org.postgresql:postgresql'
-    testRuntimeOnly 'com.h2database:h2'
-    testImplementation project(':backend')
-    testImplementation project(':grpc-adapter')
+    integrationTestRuntimeOnly 'com.h2database:h2'
+    integrationTestImplementation 'com.ryantenney.metrics:metrics-spring:3.1.3'
+    integrationTestImplementation project(':backend')
+    integrationTestImplementation project(':grpc-adapter')
 }
 
 bootJar {

@@ -7,6 +7,10 @@ dependencies {
     implementation project(':model')
     implementation project(':invoices')
     implementation project(':payments')
-    testRuntimeOnly 'com.h2database:h2'
     testFixturesApi testFixtures(project(':model'))
+    integrationTestRuntimeOnly 'com.h2database:h2'
+    integrationTestImplementation project(':invoices')
+    integrationTestImplementation project(':payments')
+    integrationTestImplementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    integrationTestImplementation testFixtures(project(':model'))
 }

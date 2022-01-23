@@ -3,16 +3,19 @@ plugins {
     id 'com.adarshr.test-logger'
 }
 
-dependencies {
-    testImplementation 'nl.jqno.equalsverifier:equalsverifier:3.7.2'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'uk.org.lidalia:slf4j-test:1.2.0'
-}
-
 testing {
     suites {
         test {
             useJUnitJupiter()
+            dependencies {
+                implementation 'nl.jqno.equalsverifier:equalsverifier:3.8.2'
+                implementation 'uk.org.lidalia:slf4j-test:1.2.0'
+            }
+        }
+        withType(JvmTestSuite) {
+            dependencies {
+                implementation 'org.springframework.boot:spring-boot-starter-test'
+            }
         }
     }
 }
