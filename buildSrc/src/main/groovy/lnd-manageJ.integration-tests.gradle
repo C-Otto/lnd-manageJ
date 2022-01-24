@@ -27,11 +27,6 @@ tasks.named('check') {
     dependsOn(testing.suites.integrationTest)
 }
 
-dependencies {
-//    configurations.getByName('integrationTestRuntimeOnly').exclude group: 'ch.qos.logback', module: 'logback-classic'
-//    configurations.getByName('integrationTestRuntimeOnly').exclude group: 'org.slf4j', module: 'slf4j-nop'
-}
-
 integrationTest {
     testlogger {
         slowThreshold 2000
