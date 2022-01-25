@@ -14,6 +14,7 @@ import java.util.Optional;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,6 +38,13 @@ class GrpcChannelsBaseTest {
     @Test
     void getOpenInitiator_remote() {
         assertThat(grpcChannelsBase.getOpenInitiator(Initiator.INITIATOR_REMOTE)).isEqualTo(OpenInitiator.REMOTE);
+    }
+
+    @Test
+    void getOpenInitiator_unsupported_state() {
+        assertThatExceptionOfType(IllegalStateException.class).isThrownBy(
+                () -> grpcChannelsBase.getOpenInitiator(Initiator.INITIATOR_BOTH)
+        );
     }
 
     @Test
