@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.controller.dto;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import de.cotto.lndmanagej.model.ChannelId;
@@ -26,6 +27,8 @@ public class ObjectMapperConfiguration {
         module.addSerializer(ChannelId.class, new ToStringSerializer());
         module.addSerializer(ChannelPoint.class, new ToStringSerializer());
         module.addSerializer(ZonedDateTime.class, new ToStringSerializer());
-        return new ObjectMapper().registerModule(module);
+        ObjectMapper objectMapper = new ObjectMapper().registerModule(module);
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        return objectMapper;
     }
 }
