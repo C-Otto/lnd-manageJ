@@ -38,7 +38,7 @@ class ArchUnitIT {
     @Test
     void services_must_not_access_spring_data_repositories_directly() {
         ArchRule rule = ArchRuleDefinition.classes().that()
-                .areAssignableTo("org.springframework.data.repository.Repository.class")
+                .areAssignableTo("org.springframework.data.repository.Repository")
                 .should()
                 .onlyHaveDependentClassesThat().haveSimpleNameNotEndingWith("Service");
         assertThat(importedClasses).isNotEmpty();
