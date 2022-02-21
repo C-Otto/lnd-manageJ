@@ -27,10 +27,10 @@ class ArchUnitIT {
 
     @Test
     void services_must_not_access_dto_classes_directly() {
-        ArchRule rule = ArchRuleDefinition.classes().that()
+        ArchRule rule = ArchRuleDefinition.noClasses().that()
                 .haveSimpleNameEndingWith("Dto").or().haveSimpleNameEndingWith("DTO")
                 .should()
-                .onlyHaveDependentClassesThat().haveSimpleNameNotEndingWith("Service");
+                .dependOnClassesThat().haveSimpleNameEndingWith("Service");
         assertThat(importedClasses).isNotEmpty();
         rule.check(importedClasses);
     }
