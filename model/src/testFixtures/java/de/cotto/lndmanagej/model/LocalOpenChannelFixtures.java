@@ -17,7 +17,7 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 
 public class LocalOpenChannelFixtures {
-    public static final long NUM_UPDATES = 99_999L;
+    public static final long NUM_UPDATES = 100_200_300_400L;
 
     public static final Coins TOTAL_SENT = Coins.ofSatoshis(1_001);
     public static final Coins TOTAL_SENT_2 = Coins.ofSatoshis(101);

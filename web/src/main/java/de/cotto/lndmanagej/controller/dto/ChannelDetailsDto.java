@@ -31,7 +31,8 @@ public record ChannelDetailsDto(
         ClosedChannelDetailsDto closeDetails,
         FeeReportDto feeReport,
         FlowReportDto flowReport,
-        RebalanceReportDto rebalanceReport
+        RebalanceReportDto rebalanceReport,
+        long numUpdates
 ) {
     public ChannelDetailsDto(
             ChannelDto channelDto,
@@ -62,7 +63,8 @@ public record ChannelDetailsDto(
                 channelDto.closeDetails(),
                 FeeReportDto.createFromModel(feeReport),
                 FlowReportDto.createFromModel(flowReport),
-                RebalanceReportDto.createFromModel(rebalanceReport)
+                RebalanceReportDto.createFromModel(rebalanceReport),
+                channelDto.numUpdates()
         );
     }
 

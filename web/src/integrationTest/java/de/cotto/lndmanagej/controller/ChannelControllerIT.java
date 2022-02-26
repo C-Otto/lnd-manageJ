@@ -30,6 +30,7 @@ import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.NUM_UPDATES;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_RECEIVED;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_RECEIVED_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_SENT;
@@ -99,7 +100,8 @@ class ChannelControllerIT {
                 .andExpect(jsonPath("$.status.private", is(false)))
                 .andExpect(jsonPath("$.status.active", is(false)))
                 .andExpect(jsonPath("$.status.closed", is(false)))
-                .andExpect(jsonPath("$.status.openClosed", is("OPEN")));
+                .andExpect(jsonPath("$.status.openClosed", is("OPEN")))
+                .andExpect(jsonPath("$.numUpdates", is(NUM_UPDATES)));
     }
 
     @Test
@@ -140,6 +142,7 @@ class ChannelControllerIT {
                 .andExpect(jsonPath("$.status.active", is(true)))
                 .andExpect(jsonPath("$.status.closed", is(false)))
                 .andExpect(jsonPath("$.status.openClosed", is("OPEN")))
+                .andExpect(jsonPath("$.numUpdates", is(NUM_UPDATES)))
                 .andExpect(jsonPath("$.onChainCosts.openCosts", is("1000")))
                 .andExpect(jsonPath("$.onChainCosts.closeCosts", is("2000")))
                 .andExpect(jsonPath("$.onChainCosts.sweepCosts", is("3000")))
