@@ -28,6 +28,7 @@ import static de.cotto.lndmanagej.model.ForceClosedChannelFixtures.FORCE_CLOSED_
 import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.FORCE_CLOSING_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.NUM_UPDATES;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_RECEIVED;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_SENT;
 import static de.cotto.lndmanagej.model.OpenInitiator.LOCAL;
@@ -168,7 +169,8 @@ class TransactionBackgroundLoaderTest {
                 TOTAL_SENT,
                 TOTAL_RECEIVED,
                 false,
-                true
+                true,
+                NUM_UPDATES
         );
         LocalOpenChannel channel2 = new LocalOpenChannel(
                 new ChannelCoreInformation(CHANNEL_ID_2, CHANNEL_POINT_2, CAPACITY),
@@ -179,7 +181,8 @@ class TransactionBackgroundLoaderTest {
                 TOTAL_SENT,
                 TOTAL_RECEIVED,
                 false,
-                true
+                true,
+                NUM_UPDATES
         );
         LocalOpenChannel channel3 = new LocalOpenChannel(
                 new ChannelCoreInformation(CHANNEL_ID_3, CHANNEL_POINT_3, CAPACITY),
@@ -190,7 +193,8 @@ class TransactionBackgroundLoaderTest {
                 TOTAL_SENT,
                 TOTAL_RECEIVED,
                 false,
-                true
+                true,
+                NUM_UPDATES
         );
         when(channelService.getOpenChannels()).thenReturn(Set.of(channel1, channel2, channel3));
         TransactionHash unknownHash = CHANNEL_POINT_3.getTransactionHash();

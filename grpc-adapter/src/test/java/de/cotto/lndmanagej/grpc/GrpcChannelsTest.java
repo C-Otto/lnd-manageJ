@@ -36,6 +36,7 @@ import static de.cotto.lndmanagej.model.ForceClosingChannelFixtures.HTLC_OUTPOIN
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.NUM_UPDATES;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_RECEIVED;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_RECEIVED_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_SENT;
@@ -200,6 +201,7 @@ class GrpcChannelsTest {
                 .setTotalSatoshisReceived(totalReceived.satoshis())
                 .setPrivate(isPrivate)
                 .setActive(isActive)
+                .setNumUpdates(NUM_UPDATES)
                 .build();
     }
 

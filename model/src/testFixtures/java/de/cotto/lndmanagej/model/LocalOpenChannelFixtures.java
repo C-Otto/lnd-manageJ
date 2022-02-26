@@ -16,7 +16,9 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 
-public  class LocalOpenChannelFixtures {
+public class LocalOpenChannelFixtures {
+    public static final long NUM_UPDATES = 99_999L;
+
     public static final Coins TOTAL_SENT = Coins.ofSatoshis(1_001);
     public static final Coins TOTAL_SENT_2 = Coins.ofSatoshis(101);
     public static final Coins TOTAL_RECEIVED = Coins.ofSatoshis(2_002);
@@ -32,7 +34,8 @@ public  class LocalOpenChannelFixtures {
                     TOTAL_SENT,
                     TOTAL_RECEIVED,
                     false,
-                    true
+                    true,
+                    NUM_UPDATES
             );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_MORE_BALANCE =
             new LocalOpenChannel(
@@ -44,7 +47,8 @@ public  class LocalOpenChannelFixtures {
                     TOTAL_SENT,
                     TOTAL_RECEIVED,
                     false,
-                    true
+                    true,
+                    NUM_UPDATES
             );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_PRIVATE =
             new LocalOpenChannel(
@@ -56,7 +60,8 @@ public  class LocalOpenChannelFixtures {
                     TOTAL_SENT,
                     TOTAL_RECEIVED,
                     true,
-                    true
+                    true,
+                    NUM_UPDATES
             );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_2 =
             new LocalOpenChannel(
@@ -68,7 +73,8 @@ public  class LocalOpenChannelFixtures {
                     TOTAL_SENT_2,
                     TOTAL_RECEIVED_2,
                     false,
-                    false
+                    false,
+                    NUM_UPDATES
             );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_MORE_BALANCE_2 =
             new LocalOpenChannel(
@@ -80,7 +86,8 @@ public  class LocalOpenChannelFixtures {
                     TOTAL_SENT,
                     TOTAL_RECEIVED,
                     false,
-                    true
+                    true,
+                    NUM_UPDATES
             );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_3 =
             new LocalOpenChannel(
@@ -92,7 +99,8 @@ public  class LocalOpenChannelFixtures {
                     TOTAL_SENT,
                     TOTAL_RECEIVED,
                     false,
-                    true
+                    true,
+                    NUM_UPDATES
             );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_TO_NODE_3 =
             new LocalOpenChannel(
@@ -104,6 +112,7 @@ public  class LocalOpenChannelFixtures {
                     TOTAL_SENT,
                     TOTAL_RECEIVED,
                     false,
-                    true
+                    true,
+                    NUM_UPDATES
             );
 }

@@ -14,6 +14,7 @@ import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.NUM_UPDATES;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_RECEIVED;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_SENT;
 import static de.cotto.lndmanagej.model.OpenCloseStatus.OPEN;
@@ -39,7 +40,8 @@ class LocalOpenChannelTest {
                 TOTAL_SENT,
                 TOTAL_RECEIVED,
                 false,
-                true
+                true,
+                NUM_UPDATES
         );
         assertThat(localOpenChannel.getRemotePubkey()).isEqualTo(PUBKEY);
     }
@@ -100,6 +102,11 @@ class LocalOpenChannelTest {
     void getStatus_inactive() {
         assertThat(LOCAL_OPEN_CHANNEL_2.getStatus())
                 .isEqualTo(new ChannelStatus(false, false, false, OPEN));
+    }
+
+    @Test
+    void getNumUpdates() {
+        assertThat(LOCAL_OPEN_CHANNEL_2.getNumUpdates()).isEqualTo(NUM_UPDATES);
     }
 
     @Test

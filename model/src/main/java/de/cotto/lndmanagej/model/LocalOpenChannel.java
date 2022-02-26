@@ -7,7 +7,9 @@ public class LocalOpenChannel extends LocalChannel {
     private final Coins totalSent;
     private final Coins totalReceived;
     private final boolean active;
+    private final long numUpdates;
 
+    @SuppressWarnings("PMD.ExcessiveParameterList")
     public LocalOpenChannel(
             ChannelCoreInformation channelCoreInformation,
             Pubkey ownPubkey,
@@ -17,17 +19,23 @@ public class LocalOpenChannel extends LocalChannel {
             Coins totalSent,
             Coins totalReceived,
             boolean isPrivate,
-            boolean active
+            boolean active,
+            long numUpdates
     ) {
         super(channelCoreInformation, ownPubkey, remotePubkey, openInitiator, isPrivate);
         this.balanceInformation = balanceInformation;
         this.totalSent = totalSent;
         this.totalReceived = totalReceived;
         this.active = active;
+        this.numUpdates = numUpdates;
     }
 
     public BalanceInformation getBalanceInformation() {
         return balanceInformation;
+    }
+
+    public long getNumUpdates() {
+        return numUpdates;
     }
 
     @Override
@@ -61,11 +69,12 @@ public class LocalOpenChannel extends LocalChannel {
         return active == that.active
                 && Objects.equals(balanceInformation, that.balanceInformation)
                 && Objects.equals(totalSent, that.totalSent)
-                && Objects.equals(totalReceived, that.totalReceived);
+                && Objects.equals(totalReceived, that.totalReceived)
+                && numUpdates == that.numUpdates;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), balanceInformation, totalSent, totalReceived, active);
+        return Objects.hash(super.hashCode(), balanceInformation, totalSent, totalReceived, active, numUpdates);
     }
 }
