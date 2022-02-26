@@ -39,6 +39,7 @@ import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -176,7 +177,10 @@ class ChannelControllerIT {
                 .andExpect(jsonPath("$.flowReport.rebalanceSupportFeesSent", is("2")))
                 .andExpect(jsonPath("$.flowReport.rebalanceSupportReceived", is("10")))
                 .andExpect(jsonPath("$.flowReport.totalSent", is("70006")))
-                .andExpect(jsonPath("$.flowReport.totalReceived", is("63020")));
+                .andExpect(jsonPath("$.flowReport.totalReceived", is("63020")))
+                .andExpect(jsonPath("$.warnings", containsInAnyOrder(
+                        "Channel has accumulated 101,000 updates"
+                )));
     }
 
     @Test

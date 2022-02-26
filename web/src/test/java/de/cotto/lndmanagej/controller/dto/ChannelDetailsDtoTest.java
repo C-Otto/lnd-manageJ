@@ -6,6 +6,7 @@ import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.OpenInitiator;
 import de.cotto.lndmanagej.model.Policies;
 import de.cotto.lndmanagej.model.RebalanceReport;
+import de.cotto.lndmanagej.model.warnings.ChannelWarnings;
 import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
@@ -23,6 +24,7 @@ import static de.cotto.lndmanagej.model.OpenCloseStatus.OPEN;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
+import static de.cotto.lndmanagej.model.warnings.ChannelWarningsFixtures.CHANNEL_WARNINGS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ChannelDetailsDtoTest {
@@ -39,7 +41,8 @@ class ChannelDetailsDtoTest {
             Policies.UNKNOWN,
             FEE_REPORT,
             FLOW_REPORT,
-            REBALANCE_REPORT
+            REBALANCE_REPORT,
+            CHANNEL_WARNINGS
     );
 
     @Test
@@ -52,7 +55,8 @@ class ChannelDetailsDtoTest {
                 POLICIES,
                 FEE_REPORT,
                 FLOW_REPORT,
-                REBALANCE_REPORT
+                REBALANCE_REPORT,
+                CHANNEL_WARNINGS
         );
         assertThat(ChannelDetailsDto.createFromModel(CHANNEL_DETAILS)).isEqualTo(expected);
     }
@@ -112,7 +116,8 @@ class ChannelDetailsDtoTest {
                 Policies.UNKNOWN,
                 FEE_REPORT,
                 FLOW_REPORT,
-                RebalanceReport.EMPTY
+                RebalanceReport.EMPTY,
+                ChannelWarnings.NONE
         );
         ChannelStatusDto channelStatusDto =
                 ChannelStatusDto.createFromModel(new ChannelStatus(false, true, false, OPEN));

@@ -1,7 +1,5 @@
 package de.cotto.lndmanagej.controller.dto;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.NodeDetails;
 import de.cotto.lndmanagej.model.Pubkey;
@@ -10,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 public record NodeDetailsDto(
-        @JsonSerialize(using = ToStringSerializer.class) Pubkey node,
+        Pubkey node,
         String alias,
         List<ChannelId> channels,
         List<ChannelId> closedChannels,
@@ -22,7 +20,7 @@ public record NodeDetailsDto(
         FeeReportDto feeReport,
         FlowReportDto flowReport,
         RebalanceReportDto rebalanceReport,
-        Set<String> nodeWarnings
+        Set<String> warnings
 ) {
     public static NodeDetailsDto createFromModel(NodeDetails nodeDetails) {
         return new NodeDetailsDto(
@@ -38,7 +36,7 @@ public record NodeDetailsDto(
                 FeeReportDto.createFromModel(nodeDetails.feeReport()),
                 FlowReportDto.createFromModel(nodeDetails.flowReport()),
                 RebalanceReportDto.createFromModel(nodeDetails.rebalanceReport()),
-                nodeDetails.nodeWarnings().descriptions()
+                nodeDetails.warnings().descriptions()
         );
     }
 }

@@ -1,5 +1,7 @@
 package de.cotto.lndmanagej.model;
 
+import de.cotto.lndmanagej.model.warnings.NodeWarnings;
+
 import java.util.List;
 
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION_2;

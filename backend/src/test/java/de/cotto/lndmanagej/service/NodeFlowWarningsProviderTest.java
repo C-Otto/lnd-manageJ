@@ -1,10 +1,7 @@
-package de.cotto.lndmanagej.service.warnings;
+package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.model.FlowReport;
 import de.cotto.lndmanagej.model.warnings.NodeNoFlowWarning;
-import de.cotto.lndmanagej.service.ChannelService;
-import de.cotto.lndmanagej.service.FlowService;
-import de.cotto.lndmanagej.service.OwnNodeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

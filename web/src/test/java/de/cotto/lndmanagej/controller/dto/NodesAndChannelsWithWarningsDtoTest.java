@@ -6,9 +6,10 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class NodesWithWarningsDtoTest {
+class NodesAndChannelsWithWarningsDtoTest {
     @Test
     void none() {
-        assertThat(NodesWithWarningsDto.NONE).isEqualTo(new NodesWithWarningsDto(List.of()));
+        assertThat(NodesAndChannelsWithWarningsDto.NONE)
+                .isEqualTo(new NodesAndChannelsWithWarningsDto(List.of(), List.of()));
     }
 }

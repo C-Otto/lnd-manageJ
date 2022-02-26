@@ -11,6 +11,7 @@ import de.cotto.lndmanagej.model.OpenCloseStatus;
 import de.cotto.lndmanagej.model.Policies;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.RebalanceReport;
+import de.cotto.lndmanagej.model.warnings.ChannelWarnings;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.CompletableFuture;
@@ -25,6 +26,7 @@ public class ChannelDetailsService {
     private final PolicyService policyService;
     private final FeeService feeService;
     private final FlowService flowService;
+    private final ChannelWarningsService channelWarningsService;
 
     public ChannelDetailsService(
             OnChainCostService onChainCostService,
@@ -33,7 +35,8 @@ public class ChannelDetailsService {
             BalanceService balanceService,
             PolicyService policyService,
             FeeService feeService,
-            FlowService flowService
+            FlowService flowService,
+            ChannelWarningsService channelWarningsService
     ) {
         this.onChainCostService = onChainCostService;
         this.rebalanceService = rebalanceService;
@@ -42,6 +45,7 @@ public class ChannelDetailsService {
         this.policyService = policyService;
         this.feeService = feeService;
         this.flowService = flowService;
+        this.channelWarningsService = channelWarningsService;
     }
 
     public ChannelDetails getDetails(LocalChannel localChannel) {
@@ -54,6 +58,7 @@ public class ChannelDetailsService {
         CompletableFuture<FeeReport> feeReport = getFeeReport(channelId);
         CompletableFuture<FlowReport> flowReport = getFlowReport(channelId);
         CompletableFuture<RebalanceReport> rebalanceReport = getRebalanceReport(localChannel);
+        CompletableFuture<ChannelWarnings> channelWarnings = getChannelWarnings(localChannel);
         try {
             return new ChannelDetails(
                     localChannel,
@@ -63,11 +68,16 @@ public class ChannelDetailsService {
                     policies.get(),
                     feeReport.get(),
                     flowReport.get(),
-                    rebalanceReport.get()
+                    rebalanceReport.get(),
+                    channelWarnings.get()
             );
         } catch (InterruptedException | ExecutionException exception) {
             throw new IllegalStateException("Unable to compute channel details for " + channelId, exception);
         }
+    }
+
+    private CompletableFuture<ChannelWarnings> getChannelWarnings(LocalChannel localChannel) {
+        return CompletableFuture.supplyAsync(() -> channelWarningsService.getChannelWarnings(localChannel.getId()));
     }
 
     private CompletableFuture<RebalanceReport> getRebalanceReport(LocalChannel localChannel) {

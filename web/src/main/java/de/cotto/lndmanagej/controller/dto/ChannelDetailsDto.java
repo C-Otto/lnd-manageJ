@@ -11,6 +11,9 @@ import de.cotto.lndmanagej.model.OpenInitiator;
 import de.cotto.lndmanagej.model.Policies;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.RebalanceReport;
+import de.cotto.lndmanagej.model.warnings.ChannelWarnings;
+
+import java.util.Set;
 
 public record ChannelDetailsDto(
         String channelIdShort,
@@ -32,7 +35,8 @@ public record ChannelDetailsDto(
         FeeReportDto feeReport,
         FlowReportDto flowReport,
         RebalanceReportDto rebalanceReport,
-        long numUpdates
+        long numUpdates,
+        Set<String> warnings
 ) {
     public ChannelDetailsDto(
             ChannelDto channelDto,
@@ -42,7 +46,8 @@ public record ChannelDetailsDto(
             Policies policies,
             FeeReport feeReport,
             FlowReport flowReport,
-            RebalanceReport rebalanceReport
+            RebalanceReport rebalanceReport,
+            ChannelWarnings channelWarnings
     ) {
         this(
                 channelDto.channelIdShort(),
@@ -64,7 +69,8 @@ public record ChannelDetailsDto(
                 FeeReportDto.createFromModel(feeReport),
                 FlowReportDto.createFromModel(flowReport),
                 RebalanceReportDto.createFromModel(rebalanceReport),
-                channelDto.numUpdates()
+                channelDto.numUpdates(),
+                channelWarnings.descriptions()
         );
     }
 
@@ -76,7 +82,8 @@ public record ChannelDetailsDto(
             Policies policies,
             FeeReport feeReport,
             FlowReport flowReport,
-            RebalanceReport rebalanceReport
+            RebalanceReport rebalanceReport,
+            ChannelWarnings channelWarnings
     ) {
         this(
                 new ChannelDto(localChannel),
@@ -86,7 +93,8 @@ public record ChannelDetailsDto(
                 policies,
                 feeReport,
                 flowReport,
-                rebalanceReport
+                rebalanceReport,
+                channelWarnings
         );
     }
 
@@ -99,7 +107,8 @@ public record ChannelDetailsDto(
                 channelDetails.policies(),
                 channelDetails.feeReport(),
                 channelDetails.flowReport(),
-                channelDetails.rebalanceReport()
+                channelDetails.rebalanceReport(),
+                channelDetails.warnings()
         );
     }
 }

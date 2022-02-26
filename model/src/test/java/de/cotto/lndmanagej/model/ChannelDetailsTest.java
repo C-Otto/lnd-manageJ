@@ -11,6 +11,7 @@ import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
+import static de.cotto.lndmanagej.model.warnings.ChannelWarningsFixtures.CHANNEL_WARNINGS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ChannelDetailsTest {
@@ -52,5 +53,10 @@ class ChannelDetailsTest {
     @Test
     void rebalanceReport() {
         assertThat(CHANNEL_DETAILS.rebalanceReport()).isEqualTo(REBALANCE_REPORT);
+    }
+
+    @Test
+    void warnings() {
+        assertThat(CHANNEL_DETAILS.warnings()).isEqualTo(CHANNEL_WARNINGS);
     }
 }

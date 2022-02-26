@@ -2,9 +2,10 @@ package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.Node;
-import de.cotto.lndmanagej.model.NodeWarnings;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.warnings.NodeWarning;
+import de.cotto.lndmanagej.model.warnings.NodeWarnings;
+import de.cotto.lndmanagej.service.warnings.NodeWarningsProvider;
 import org.springframework.stereotype.Component;
 
 import java.util.AbstractMap;
@@ -48,7 +49,7 @@ public class NodeWarningsService {
                 .collect(toMap(Entry::getKey, Entry::getValue));
     }
 
-    private boolean hasWarnings(Entry<Pubkey, NodeWarnings> entry) {
+    private boolean hasWarnings(Entry<?, NodeWarnings> entry) {
         return !entry.getValue().warnings().isEmpty();
     }
 }

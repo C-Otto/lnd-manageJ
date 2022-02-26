@@ -1,10 +1,7 @@
-package de.cotto.lndmanagej.service.warnings;
+package de.cotto.lndmanagej.service;
 
-import de.cotto.lndmanagej.model.NodeWarnings;
-import de.cotto.lndmanagej.service.ChannelService;
-import de.cotto.lndmanagej.service.NodeService;
-import de.cotto.lndmanagej.service.NodeWarningsProvider;
-import de.cotto.lndmanagej.service.NodeWarningsService;
+import de.cotto.lndmanagej.model.warnings.NodeWarnings;
+import de.cotto.lndmanagej.service.warnings.NodeWarningsProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,11 +16,11 @@ import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHAN
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_TO_NODE_3;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_2;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_3;
-import static de.cotto.lndmanagej.model.NodeWarningFixtures.NODE_NO_FLOW_WARNING;
-import static de.cotto.lndmanagej.model.NodeWarningFixtures.NODE_ONLINE_CHANGES_WARNING;
-import static de.cotto.lndmanagej.model.NodeWarningFixtures.NODE_ONLINE_PERCENTAGE_WARNING;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
+import static de.cotto.lndmanagej.model.warnings.NodeWarningFixtures.NODE_NO_FLOW_WARNING;
+import static de.cotto.lndmanagej.model.warnings.NodeWarningFixtures.NODE_ONLINE_CHANGES_WARNING;
+import static de.cotto.lndmanagej.model.warnings.NodeWarningFixtures.NODE_ONLINE_PERCENTAGE_WARNING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;

@@ -1,5 +1,7 @@
 package de.cotto.lndmanagej.model;
 
+import de.cotto.lndmanagej.model.warnings.NodeWarnings;
+
 import java.util.List;
 
 public record NodeDetails(
@@ -15,6 +17,6 @@ public record NodeDetails(
         FeeReport feeReport,
         FlowReport flowReport,
         RebalanceReport rebalanceReport,
-        NodeWarnings nodeWarnings
+        NodeWarnings warnings
 ) {
 }

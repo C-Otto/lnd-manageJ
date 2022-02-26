@@ -1,8 +1,4 @@
-package de.cotto.lndmanagej.model;
-
-import de.cotto.lndmanagej.model.warnings.NodeNoFlowWarning;
-import de.cotto.lndmanagej.model.warnings.NodeOnlineChangesWarning;
-import de.cotto.lndmanagej.model.warnings.NodeOnlinePercentageWarning;
+package de.cotto.lndmanagej.model.warnings;
 
 public class NodeWarningFixtures {
     public static final NodeOnlinePercentageWarning NODE_ONLINE_PERCENTAGE_WARNING =

@@ -1,8 +1,7 @@
-package de.cotto.lndmanagej.service.warnings;
+package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.model.warnings.NodeOnlineChangesWarning;
 import de.cotto.lndmanagej.model.warnings.NodeOnlinePercentageWarning;
-import de.cotto.lndmanagej.service.OnlinePeersService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

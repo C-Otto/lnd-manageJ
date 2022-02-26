@@ -1,5 +1,7 @@
 package de.cotto.lndmanagej.model;
 
+import de.cotto.lndmanagej.model.warnings.ChannelWarnings;
+
 public record ChannelDetails(
         LocalChannel localChannel,
         String remoteAlias,
@@ -8,6 +10,7 @@ public record ChannelDetails(
         Policies policies,
         FeeReport feeReport,
         FlowReport flowReport,
-        RebalanceReport rebalanceReport
+        RebalanceReport rebalanceReport,
+        ChannelWarnings warnings
 ) {
 }

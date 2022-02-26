@@ -110,7 +110,7 @@ class NodeControllerIT {
                 .andExpect(jsonPath("$.balance.remoteAvailable", is("203")))
                 .andExpect(jsonPath("$.feeReport.earned", is("1234")))
                 .andExpect(jsonPath("$.feeReport.sourced", is("567")))
-                .andExpect(jsonPath("$.nodeWarnings", containsInAnyOrder(
+                .andExpect(jsonPath("$.warnings", containsInAnyOrder(
                         "Node has been online 51% in the past 14 days",
                         "Node changed between online and offline 123 times in the past 7 days",
                         "No flow in the past 16 days"

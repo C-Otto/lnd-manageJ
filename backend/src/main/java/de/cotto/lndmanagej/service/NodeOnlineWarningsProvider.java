@@ -1,11 +1,10 @@
-package de.cotto.lndmanagej.service.warnings;
+package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.warnings.NodeOnlineChangesWarning;
 import de.cotto.lndmanagej.model.warnings.NodeOnlinePercentageWarning;
 import de.cotto.lndmanagej.model.warnings.NodeWarning;
-import de.cotto.lndmanagej.service.NodeWarningsProvider;
-import de.cotto.lndmanagej.service.OnlinePeersService;
+import de.cotto.lndmanagej.service.warnings.NodeWarningsProvider;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;

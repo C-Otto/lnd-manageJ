@@ -1,4 +1,4 @@
-package de.cotto.lndmanagej.service;
+package de.cotto.lndmanagej.service.warnings;
 
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.warnings.NodeWarning;

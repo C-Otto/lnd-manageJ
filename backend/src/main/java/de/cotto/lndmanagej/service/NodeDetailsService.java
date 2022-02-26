@@ -7,11 +7,11 @@ import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.FlowReport;
 import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.NodeDetails;
-import de.cotto.lndmanagej.model.NodeWarnings;
 import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.model.OnlineReport;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.RebalanceReport;
+import de.cotto.lndmanagej.model.warnings.NodeWarnings;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

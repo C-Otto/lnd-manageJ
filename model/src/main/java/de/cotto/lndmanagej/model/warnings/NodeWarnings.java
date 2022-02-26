@@ -1,6 +1,4 @@
-package de.cotto.lndmanagej.model;
-
-import de.cotto.lndmanagej.model.warnings.NodeWarning;
+package de.cotto.lndmanagej.model.warnings;
 
 import java.util.Arrays;
 import java.util.Set;

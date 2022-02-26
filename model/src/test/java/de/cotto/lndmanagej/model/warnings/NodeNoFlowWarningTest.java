@@ -2,7 +2,7 @@ package de.cotto.lndmanagej.model.warnings;
 
 import org.junit.jupiter.api.Test;
 
-import static de.cotto.lndmanagej.model.NodeWarningFixtures.NODE_NO_FLOW_WARNING;
+import static de.cotto.lndmanagej.model.warnings.NodeWarningFixtures.NODE_NO_FLOW_WARNING;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class NodeNoFlowWarningTest {

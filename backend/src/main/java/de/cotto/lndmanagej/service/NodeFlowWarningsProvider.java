@@ -1,14 +1,11 @@
-package de.cotto.lndmanagej.service.warnings;
+package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FlowReport;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.warnings.NodeNoFlowWarning;
 import de.cotto.lndmanagej.model.warnings.NodeWarning;
-import de.cotto.lndmanagej.service.ChannelService;
-import de.cotto.lndmanagej.service.FlowService;
-import de.cotto.lndmanagej.service.NodeWarningsProvider;
-import de.cotto.lndmanagej.service.OwnNodeService;
+import de.cotto.lndmanagej.service.warnings.NodeWarningsProvider;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
