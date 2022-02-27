@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.service;
 
+import de.cotto.lndmanagej.balances.BalancesDao;
 import de.cotto.lndmanagej.grpc.GrpcChannels;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Coins;
@@ -32,6 +33,9 @@ class BalanceServiceTest {
 
     @Mock
     private ChannelService channelService;
+
+    @Mock
+    private BalancesDao balancesDao;
 
     @Test
     void getBalanceInformation_for_pubkey() {
@@ -102,6 +106,32 @@ class BalanceServiceTest {
     @Test
     void getAvailableRemoteBalance_peer_empty() {
         assertThat(balanceService.getAvailableRemoteBalanceForPeer(PUBKEY)).isEqualTo(Coins.NONE);
+    }
+
+    @Test
+    void getLocalBalanceMinimum_empty() {
+        assertThat(balanceService.getLocalBalanceMinimum(CHANNEL_ID, 7)).isEmpty();
+    }
+
+    @Test
+    void getLocalBalanceMinimum() {
+        int days = 7;
+        Coins coins = Coins.ofSatoshis(123);
+        when(balancesDao.getLocalBalanceMinimum(CHANNEL_ID, days)).thenReturn(Optional.of(coins));
+        assertThat(balanceService.getLocalBalanceMinimum(CHANNEL_ID, days)).contains(coins);
+    }
+
+    @Test
+    void getLocalBalanceMaximum_empty() {
+        assertThat(balanceService.getLocalBalanceMaximum(CHANNEL_ID, 7)).isEmpty();
+    }
+
+    @Test
+    void getLocalBalanceMaximum() {
+        int days = 7;
+        Coins coins = Coins.ofSatoshis(123);
+        when(balancesDao.getLocalBalanceMaximum(CHANNEL_ID, days)).thenReturn(Optional.of(coins));
+        assertThat(balanceService.getLocalBalanceMaximum(CHANNEL_ID, days)).contains(coins);
     }
 
     private void mockChannels() {

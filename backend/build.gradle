@@ -7,6 +7,7 @@ dependencies {
     implementation project(':forwarding-history')
     implementation project(':grpc-adapter')
     implementation project(':model')
+    implementation project(':balances')
     implementation project(':onlinepeers')
     implementation project(':selfpayments')
     implementation project(':transactions')

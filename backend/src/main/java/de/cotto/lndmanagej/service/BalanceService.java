@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.service;
 
 import com.codahale.metrics.annotation.Timed;
+import de.cotto.lndmanagej.balances.BalancesDao;
 import de.cotto.lndmanagej.grpc.GrpcChannels;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Channel;
@@ -16,10 +17,16 @@ import java.util.Optional;
 public class BalanceService {
     private final GrpcChannels grpcChannels;
     private final ChannelService channelService;
+    private final BalancesDao balancesDao;
 
-    public BalanceService(GrpcChannels grpcChannels, ChannelService channelService) {
+    public BalanceService(
+            GrpcChannels grpcChannels,
+            ChannelService channelService,
+            BalancesDao balancesDao
+    ) {
         this.grpcChannels = grpcChannels;
         this.channelService = channelService;
+        this.balancesDao = balancesDao;
     }
 
     @Timed
@@ -65,5 +72,15 @@ public class BalanceService {
     public Optional<BalanceInformation> getBalanceInformation(ChannelId channelId) {
         return grpcChannels.getChannel(channelId)
                 .map(LocalOpenChannel::getBalanceInformation);
+    }
+
+    @Timed
+    public Optional<Coins> getLocalBalanceMinimum(ChannelId channelId, int days) {
+        return balancesDao.getLocalBalanceMinimum(channelId, days);
+    }
+
+    @Timed
+    public Optional<Coins> getLocalBalanceMaximum(ChannelId channelId, int days) {
+        return balancesDao.getLocalBalanceMaximum(channelId, days);
     }
 }
