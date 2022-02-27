@@ -8,7 +8,7 @@ testing {
             testType = TestSuiteType.INTEGRATION_TEST
             dependencies {
                 implementation project
-                implementation 'com.tngtech.archunit:archunit:0.23.0'
+                implementation 'com.tngtech.archunit:archunit:0.23.1'
                 implementation 'org.awaitility:awaitility:4.1.1'
             }
 
