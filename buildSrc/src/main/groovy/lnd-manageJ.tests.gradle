@@ -33,6 +33,6 @@ tasks.withType(Test).configureEach {
 testlogger {
     theme 'standard-parallel'
     slowThreshold 1000
-    showPassed false
     showSimpleNames true
+    showOnlySlow true
 }
