@@ -7,7 +7,7 @@ public record ChannelBalanceFluctuationWarning(
 ) implements ChannelWarning {
     @Override
     public String description() {
-        return "Channel balance fluctuated between %d%% and %d%% in the past %d days".formatted(
+        return "Channel balance ranged from %d%% to %d%% in the past %d days".formatted(
                 minLocalBalancePercentage,
                 maxLocalBalancePercentage,
                 days

@@ -24,6 +24,6 @@ class ChannelBalanceFluctuationWarningTest {
     @Test
     void description() {
         assertThat(CHANNEL_BALANCE_FLUCTUATION_WARNING.description())
-                .isEqualTo("Channel balance fluctuated between 2% and 97% in the past 7 days");
+                .isEqualTo("Channel balance ranged from 2% to 97% in the past 7 days");
     }
 }
