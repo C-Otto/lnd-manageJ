@@ -45,7 +45,7 @@ Status: `/api/status/` followed by...
 
 Channel specific: `/api/channel/{ID}/` (where `{ID}` is the channel ID) followed by...
  * (nothing): basic channel information (open height, remote pubkey, capacity, status, ...)
-   * For closed private channels the `private` field is only set to `false` if this information could be collected before the channel was closed (it is only available while the channel is still open)
+   * For closed private channels the `private` field is only set to `true` if this information could be collected before the channel was closed (it is only available while the channel is still open)
  * `balance`: the channel balance (for local/remote each: balance, available, reserve)
  * `policies`: local and remote fee rate, base fee, and enabled boolean
  * `close-details` (only for closed channels): close initiator, close height, force boolean, breach boolean
