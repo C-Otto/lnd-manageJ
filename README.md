@@ -62,7 +62,9 @@ Channel specific: `/api/channel/{ID}/` (where `{ID}` is the channel ID) followed
  * `rebalance-support-as-target-amount`: TODO
  * `self-payments-from-channel`: TODO
  * `self-payments-to-channel`: TODO
- * `warnings`: TODO
+ * `warnings`: shows the following warnings, if applicable
+   * "Channel balance ranged from `X`% to `Y`% in the past 14 days" (if `X` < 10 and `Y` > 90)
+   * "Channel has accumulated `X` updates" (if `X` > 100,000)
  * `details`: all of the above
 
 **Note**: the channel ID can be supplied in any of the following formats:
@@ -91,7 +93,10 @@ Node specific: `/api/node/{PUBKEY}/` (where `{PUBKEY}` is the node pubkey) follo
  * `rebalance-support-as-target-amount`: TODO
  * `self-payments-from-peer`: TODO
  * `self-payments-to-peer`: TODO
- * `warnings`: TODO
+ * `warnings`: shows the following warnings, if applicable
+   * "No flow in the past `X` days" (if `X` >= 30)
+   * "Node has been online `X`% in the past 7 days" (if `X` < 80)
+   * "Node changed between online and offline `X` times in the past 7 days" (if `X` > 50)
  * `details`: all of the above
 
 Warnings:
