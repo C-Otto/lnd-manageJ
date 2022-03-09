@@ -42,7 +42,7 @@ public class StatusController {
     }
 
     @Timed
-    @GetMapping("/open-channels/")
+    @GetMapping("/open-channels")
     public ChannelsDto getOpenChannels() {
         List<ChannelId> channelIds = channelService.getOpenChannels().stream()
                 .map(LocalOpenChannel::getId)
@@ -64,7 +64,7 @@ public class StatusController {
     }
 
     @Timed
-    @GetMapping("/all-channels/")
+    @GetMapping("/all-channels")
     public ChannelsDto getAllChannels() {
         List<ChannelId> channelIds = channelService.getAllLocalChannels()
                 .map(LocalChannel::getId)
