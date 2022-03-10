@@ -8,8 +8,8 @@ import java.time.ZonedDateTime;
 public record SelfPaymentDto(
         ZonedDateTime settleDate,
         String memo,
-        String amountPaid,
-        String fees,
+        String amountPaidMilliSat,
+        String feesMilliSat,
         ChannelId firstChannel,
         ChannelId lastChannel
 ) {

@@ -4,12 +4,12 @@ import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Coins;
 
 public record BalanceInformationDto(
-        String localBalance,
-        String localReserve,
-        String localAvailable,
-        String remoteBalance,
-        String remoteReserve,
-        String remoteAvailable
+        String localBalanceSat,
+        String localReserveSat,
+        String localAvailableSat,
+        String remoteBalanceSat,
+        String remoteReserveSat,
+        String remoteAvailableSat
 ) {
     public static BalanceInformationDto createFromModel(BalanceInformation balanceInformation) {
         return new BalanceInformationDto(

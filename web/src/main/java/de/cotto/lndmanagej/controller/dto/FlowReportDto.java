@@ -4,17 +4,17 @@ import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FlowReport;
 
 public record FlowReportDto(
-        String forwardedSent,
-        String forwardedReceived,
-        String forwardingFeesReceived,
-        String rebalanceSent,
-        String rebalanceFeesSent,
-        String rebalanceReceived,
-        String rebalanceSupportSent,
-        String rebalanceSupportFeesSent,
-        String rebalanceSupportReceived,
-        String totalSent,
-        String totalReceived
+        String forwardedSentMilliSat,
+        String forwardedReceivedMilliSat,
+        String forwardingFeesReceivedMilliSat,
+        String rebalanceSentMilliSat,
+        String rebalanceFeesSentMilliSat,
+        String rebalanceReceivedMilliSat,
+        String rebalanceSupportSentMilliSat,
+        String rebalanceSupportFeesSentMilliSat,
+        String rebalanceSupportReceivedMilliSat,
+        String totalSentMilliSat,
+        String totalReceivedMilliSat
 ) {
     @SuppressWarnings("PMD.ExcessiveParameterList")
     public FlowReportDto(

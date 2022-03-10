@@ -47,8 +47,8 @@ class SelfPaymentsControllerIT {
         mockMvc.perform(get(CHANNEL_PREFIX + "/self-payments-from-channel/"))
                 .andExpect(jsonPath("$.selfPayments[0].memo", is(SELF_PAYMENT_2.memo())))
                 .andExpect(jsonPath("$.selfPayments[1].memo", is(SELF_PAYMENT.memo())))
-                .andExpect(jsonPath("$.fees", is("20")))
-                .andExpect(jsonPath("$.amountPaid", is("4690")));
+                .andExpect(jsonPath("$.feesMilliSat", is("20")))
+                .andExpect(jsonPath("$.amountPaidMilliSat", is("4690")));
     }
 
     @Test
@@ -58,8 +58,8 @@ class SelfPaymentsControllerIT {
         mockMvc.perform(get(NODE_PREFIX + "/self-payments-from-peer/"))
                 .andExpect(jsonPath("$.selfPayments[0].memo", is(SELF_PAYMENT_2.memo())))
                 .andExpect(jsonPath("$.selfPayments[1].memo", is(SELF_PAYMENT.memo())))
-                .andExpect(jsonPath("$.fees", is("20")))
-                .andExpect(jsonPath("$.amountPaid", is("4690")));
+                .andExpect(jsonPath("$.feesMilliSat", is("20")))
+                .andExpect(jsonPath("$.amountPaidMilliSat", is("4690")));
     }
 
     @Test
@@ -69,18 +69,18 @@ class SelfPaymentsControllerIT {
         mockMvc.perform(get(CHANNEL_PREFIX + "/self-payments-to-channel/"))
                 .andExpect(jsonPath("$.selfPayments[0].memo", is(SELF_PAYMENT.memo())))
                 .andExpect(jsonPath("$.selfPayments[0].settleDate", is(SELF_PAYMENT.settleDate().toString())))
-                .andExpect(jsonPath("$.selfPayments[0].amountPaid", is(msat(SELF_PAYMENT.amountPaid()))))
-                .andExpect(jsonPath("$.selfPayments[0].fees", is(msat(SELF_PAYMENT.fees()))))
+                .andExpect(jsonPath("$.selfPayments[0].amountPaidMilliSat", is(msat(SELF_PAYMENT.amountPaid()))))
+                .andExpect(jsonPath("$.selfPayments[0].feesMilliSat", is(msat(SELF_PAYMENT.fees()))))
                 .andExpect(jsonPath("$.selfPayments[0].firstChannel", is(CHANNEL_ID_4.toString())))
                 .andExpect(jsonPath("$.selfPayments[0].lastChannel", is(CHANNEL_ID_2.toString())))
                 .andExpect(jsonPath("$.selfPayments[1].memo", is(SELF_PAYMENT_2.memo())))
                 .andExpect(jsonPath("$.selfPayments[1].settleDate", is(SELF_PAYMENT_2.settleDate().toString())))
-                .andExpect(jsonPath("$.selfPayments[1].amountPaid", is(msat(SELF_PAYMENT_2.amountPaid()))))
-                .andExpect(jsonPath("$.selfPayments[1].fees", is(msat(SELF_PAYMENT_2.fees()))))
+                .andExpect(jsonPath("$.selfPayments[1].amountPaidMilliSat", is(msat(SELF_PAYMENT_2.amountPaid()))))
+                .andExpect(jsonPath("$.selfPayments[1].feesMilliSat", is(msat(SELF_PAYMENT_2.fees()))))
                 .andExpect(jsonPath("$.selfPayments[1].firstChannel", is(not(empty()))))
                 .andExpect(jsonPath("$.selfPayments[1].lastChannel", is(CHANNEL_ID.toString())))
-                .andExpect(jsonPath("$.fees", is("20")))
-                .andExpect(jsonPath("$.amountPaid", is("4690")));
+                .andExpect(jsonPath("$.feesMilliSat", is("20")))
+                .andExpect(jsonPath("$.amountPaidMilliSat", is("4690")));
     }
 
     @Test
@@ -90,8 +90,8 @@ class SelfPaymentsControllerIT {
         mockMvc.perform(get(NODE_PREFIX + "/self-payments-to-peer/"))
                 .andExpect(jsonPath("$.selfPayments[0].memo", is(SELF_PAYMENT_2.memo())))
                 .andExpect(jsonPath("$.selfPayments[1].memo", is(SELF_PAYMENT.memo())))
-                .andExpect(jsonPath("$.fees", is("20")))
-                .andExpect(jsonPath("$.amountPaid", is("4690")));
+                .andExpect(jsonPath("$.feesMilliSat", is("20")))
+                .andExpect(jsonPath("$.amountPaidMilliSat", is("4690")));
     }
 
     private String msat(Coins value) {

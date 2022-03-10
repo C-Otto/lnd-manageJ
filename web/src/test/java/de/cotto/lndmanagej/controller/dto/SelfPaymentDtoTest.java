@@ -21,12 +21,12 @@ class SelfPaymentDtoTest {
 
     @Test
     void amountPaid() {
-        assertThat(dto.amountPaid()).isEqualTo(String.valueOf(SELF_PAYMENT.amountPaid().milliSatoshis()));
+        assertThat(dto.amountPaidMilliSat()).isEqualTo(String.valueOf(SELF_PAYMENT.amountPaid().milliSatoshis()));
     }
 
     @Test
     void fees() {
-        assertThat(dto.fees()).isEqualTo(String.valueOf(SELF_PAYMENT.fees().milliSatoshis()));
+        assertThat(dto.feesMilliSat()).isEqualTo(String.valueOf(SELF_PAYMENT.fees().milliSatoshis()));
     }
 
     @Test

@@ -20,13 +20,13 @@ class SelfPaymentsDtoTest {
     void amountPaid() {
         SelfPaymentsDto empty = new SelfPaymentsDto(List.of(SELF_PAYMENT, SELF_PAYMENT_2));
         String expected = String.valueOf(SELF_PAYMENT.amountPaid().add(SELF_PAYMENT_2.amountPaid()).milliSatoshis());
-        assertThat(empty.amountPaid()).isEqualTo(expected);
+        assertThat(empty.amountPaidMilliSat()).isEqualTo(expected);
     }
 
     @Test
     void fees() {
         SelfPaymentsDto empty = new SelfPaymentsDto(List.of(SELF_PAYMENT, SELF_PAYMENT_2));
         String expected = String.valueOf(SELF_PAYMENT.fees().add(SELF_PAYMENT_2.fees()).milliSatoshis());
-        assertThat(empty.fees()).isEqualTo(expected);
+        assertThat(empty.feesMilliSat()).isEqualTo(expected);
     }
 }

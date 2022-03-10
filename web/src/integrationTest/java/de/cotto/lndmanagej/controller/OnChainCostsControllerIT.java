@@ -40,9 +40,9 @@ class OnChainCostsControllerIT {
     void on_chain_costs_for_peer() throws Exception {
         when(onChainCostService.getOnChainCostsForPeer(PUBKEY)).thenReturn(ON_CHAIN_COSTS);
         mockMvc.perform(get(PEER_PREFIX + "/on-chain-costs"))
-                .andExpect(jsonPath("$.openCosts", is("1000")))
-                .andExpect(jsonPath("$.closeCosts", is("2000")))
-                .andExpect(jsonPath("$.sweepCosts", is("3000")));
+                .andExpect(jsonPath("$.openCostsSat", is("1000")))
+                .andExpect(jsonPath("$.closeCostsSat", is("2000")))
+                .andExpect(jsonPath("$.sweepCostsSat", is("3000")));
     }
 
     @Test

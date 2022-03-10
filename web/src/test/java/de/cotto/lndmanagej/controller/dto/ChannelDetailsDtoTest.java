@@ -97,8 +97,8 @@ class ChannelDetailsDtoTest {
     }
 
     @Test
-    void capacity() {
-        assertThat(CHANNEL_DETAILS_DTO.capacity()).isEqualTo(String.valueOf(CAPACITY.satoshis()));
+    void capacitySat() {
+        assertThat(CHANNEL_DETAILS_DTO.capacitySat()).isEqualTo(String.valueOf(CAPACITY.satoshis()));
     }
 
     @Test

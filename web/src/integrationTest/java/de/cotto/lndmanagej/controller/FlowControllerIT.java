@@ -39,17 +39,17 @@ class FlowControllerIT {
     void getFlowReport_for_channel() throws Exception {
         when(flowService.getFlowReportForChannel(CHANNEL_ID)).thenReturn(FLOW_REPORT_2);
         mockMvc.perform(get(CHANNEL_PREFIX + "/flow-report"))
-                .andExpect(jsonPath("$.forwardedSent", is("1000")))
-                .andExpect(jsonPath("$.forwardedReceived", is("2000")))
-                .andExpect(jsonPath("$.forwardingFeesReceived", is("10")))
-                .andExpect(jsonPath("$.rebalanceSent", is("60000")))
-                .andExpect(jsonPath("$.rebalanceFeesSent", is("4")))
-                .andExpect(jsonPath("$.rebalanceReceived", is("61000")))
-                .andExpect(jsonPath("$.rebalanceSupportSent", is("9000")))
-                .andExpect(jsonPath("$.rebalanceSupportFeesSent", is("2")))
-                .andExpect(jsonPath("$.rebalanceSupportReceived", is("10")))
-                .andExpect(jsonPath("$.totalSent", is("70006")))
-                .andExpect(jsonPath("$.totalReceived", is("63020")));
+                .andExpect(jsonPath("$.forwardedSentMilliSat", is("1000")))
+                .andExpect(jsonPath("$.forwardedReceivedMilliSat", is("2000")))
+                .andExpect(jsonPath("$.forwardingFeesReceivedMilliSat", is("10")))
+                .andExpect(jsonPath("$.rebalanceSentMilliSat", is("60000")))
+                .andExpect(jsonPath("$.rebalanceFeesSentMilliSat", is("4")))
+                .andExpect(jsonPath("$.rebalanceReceivedMilliSat", is("61000")))
+                .andExpect(jsonPath("$.rebalanceSupportSentMilliSat", is("9000")))
+                .andExpect(jsonPath("$.rebalanceSupportFeesSentMilliSat", is("2")))
+                .andExpect(jsonPath("$.rebalanceSupportReceivedMilliSat", is("10")))
+                .andExpect(jsonPath("$.totalSentMilliSat", is("70006")))
+                .andExpect(jsonPath("$.totalReceivedMilliSat", is("63020")));
     }
 
     @Test
@@ -63,17 +63,17 @@ class FlowControllerIT {
     void getFlowReport_for_peer() throws Exception {
         when(flowService.getFlowReportForPeer(PUBKEY)).thenReturn(FLOW_REPORT);
         mockMvc.perform(get(NODE_PREFIX + "/flow-report"))
-                .andExpect(jsonPath("$.forwardedSent", is("1050000")))
-                .andExpect(jsonPath("$.forwardedReceived", is("9001000")))
-                .andExpect(jsonPath("$.forwardingFeesReceived", is("1")))
-                .andExpect(jsonPath("$.rebalanceSent", is("50000")))
-                .andExpect(jsonPath("$.rebalanceFeesSent", is("5")))
-                .andExpect(jsonPath("$.rebalanceReceived", is("51000")))
-                .andExpect(jsonPath("$.rebalanceSupportSent", is("123")))
-                .andExpect(jsonPath("$.rebalanceSupportFeesSent", is("1")))
-                .andExpect(jsonPath("$.rebalanceSupportReceived", is("456")))
-                .andExpect(jsonPath("$.totalSent", is("1100129")))
-                .andExpect(jsonPath("$.totalReceived", is("9052457")));
+                .andExpect(jsonPath("$.forwardedSentMilliSat", is("1050000")))
+                .andExpect(jsonPath("$.forwardedReceivedMilliSat", is("9001000")))
+                .andExpect(jsonPath("$.forwardingFeesReceivedMilliSat", is("1")))
+                .andExpect(jsonPath("$.rebalanceSentMilliSat", is("50000")))
+                .andExpect(jsonPath("$.rebalanceFeesSentMilliSat", is("5")))
+                .andExpect(jsonPath("$.rebalanceReceivedMilliSat", is("51000")))
+                .andExpect(jsonPath("$.rebalanceSupportSentMilliSat", is("123")))
+                .andExpect(jsonPath("$.rebalanceSupportFeesSentMilliSat", is("1")))
+                .andExpect(jsonPath("$.rebalanceSupportReceivedMilliSat", is("456")))
+                .andExpect(jsonPath("$.totalSentMilliSat", is("1100129")))
+                .andExpect(jsonPath("$.totalReceivedMilliSat", is("9052457")));
     }
 
     @Test

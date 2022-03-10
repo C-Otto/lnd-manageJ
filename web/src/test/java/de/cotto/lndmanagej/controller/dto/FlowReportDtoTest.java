@@ -37,61 +37,68 @@ class FlowReportDtoTest {
 
     @Test
     void forwardedSent() {
-        assertThat(FLOW_REPORT_DTO.forwardedSent()).isEqualTo(String.valueOf(FORWARDED_SENT.milliSatoshis()));
+        assertThat(FLOW_REPORT_DTO.forwardedSentMilliSat())
+                .isEqualTo(String.valueOf(FORWARDED_SENT.milliSatoshis()));
     }
 
     @Test
     void forwardedReceived() {
-        assertThat(FLOW_REPORT_DTO.forwardedReceived()).isEqualTo(String.valueOf(FORWARDED_RECEIVED.milliSatoshis()));
+        assertThat(FLOW_REPORT_DTO.forwardedReceivedMilliSat())
+                .isEqualTo(String.valueOf(FORWARDED_RECEIVED.milliSatoshis()));
     }
 
     @Test
     void forwardingFeesReceived() {
-        assertThat(FLOW_REPORT_DTO.forwardingFeesReceived())
+        assertThat(FLOW_REPORT_DTO.forwardingFeesReceivedMilliSat())
                 .isEqualTo(String.valueOf(FORWARDING_FEES_RECEIVED.milliSatoshis()));
     }
 
     @Test
     void rebalanceSent() {
-        assertThat(FLOW_REPORT_DTO.rebalanceSent()).isEqualTo(String.valueOf(REBALANCE_SENT.milliSatoshis()));
+        assertThat(FLOW_REPORT_DTO.rebalanceSentMilliSat())
+                .isEqualTo(String.valueOf(REBALANCE_SENT.milliSatoshis()));
     }
 
     @Test
     void rebalanceFeesSent() {
-        assertThat(FLOW_REPORT_DTO.rebalanceFeesSent()).isEqualTo(String.valueOf(REBALANCE_FEES_SENT.milliSatoshis()));
+        assertThat(FLOW_REPORT_DTO.rebalanceFeesSentMilliSat())
+                .isEqualTo(String.valueOf(REBALANCE_FEES_SENT.milliSatoshis()));
     }
 
     @Test
     void rebalanceReceived() {
-        assertThat(FLOW_REPORT_DTO.rebalanceReceived()).isEqualTo(String.valueOf(REBALANCE_RECEIVED.milliSatoshis()));
+        assertThat(FLOW_REPORT_DTO.rebalanceReceivedMilliSat())
+                .isEqualTo(String.valueOf(REBALANCE_RECEIVED.milliSatoshis()));
     }
 
     @Test
     void rebalanceSupportSent() {
-        assertThat(FLOW_REPORT_DTO.rebalanceSupportSent())
+        assertThat(FLOW_REPORT_DTO.rebalanceSupportSentMilliSat())
                 .isEqualTo(String.valueOf(REBALANCE_SUPPORT_SENT.milliSatoshis()));
     }
 
     @Test
     void rebalanceSupportFeesSent() {
-        assertThat(FLOW_REPORT_DTO.rebalanceSupportFeesSent())
+        assertThat(FLOW_REPORT_DTO.rebalanceSupportFeesSentMilliSat())
                 .isEqualTo(String.valueOf(REBALANCE_SUPPORT_FEES_SENT.milliSatoshis()));
     }
 
     @Test
     void rebalanceSupportReceived() {
-        assertThat(FLOW_REPORT_DTO.rebalanceSupportReceived())
+        assertThat(FLOW_REPORT_DTO.rebalanceSupportReceivedMilliSat())
                 .isEqualTo(String.valueOf(REBALANCE_SUPPORT_RECEIVED.milliSatoshis()));
     }
 
     @Test
     void totalSent() {
-        assertThat(FLOW_REPORT_DTO.totalSent()).isEqualTo(String.valueOf(TOTAL_SENT.milliSatoshis()));
+        assertThat(FLOW_REPORT_DTO.totalSentMilliSat())
+                .isEqualTo(String.valueOf(TOTAL_SENT.milliSatoshis()));
     }
 
     @Test
     void totalReceived() {
-        assertThat(FLOW_REPORT_DTO.totalReceived()).isEqualTo(String.valueOf(TOTAL_RECEIVED.milliSatoshis()));
+        assertThat(FLOW_REPORT_DTO.totalReceivedMilliSat())
+                .isEqualTo(String.valueOf(TOTAL_RECEIVED.milliSatoshis()));
     }
 
     @Test

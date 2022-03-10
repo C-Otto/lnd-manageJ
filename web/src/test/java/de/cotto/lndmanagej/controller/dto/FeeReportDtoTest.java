@@ -13,12 +13,12 @@ class FeeReportDtoTest {
 
     @Test
     void earned() {
-        assertThat(FEE_REPORT_DTO.earned()).isEqualTo("1234");
+        assertThat(FEE_REPORT_DTO.earnedMilliSat()).isEqualTo("1234");
     }
 
     @Test
     void sourced() {
-        assertThat(FEE_REPORT_DTO.sourced()).isEqualTo("567");
+        assertThat(FEE_REPORT_DTO.sourcedMilliSat()).isEqualTo("567");
     }
 
     @Test

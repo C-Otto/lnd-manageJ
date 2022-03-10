@@ -52,18 +52,18 @@ class ChannelDtoTest {
 
     @Test
     void capacity() {
-        assertThat(CHANNEL_DTO.capacity()).isEqualTo(String.valueOf(CAPACITY.satoshis()));
+        assertThat(CHANNEL_DTO.capacitySat()).isEqualTo(String.valueOf(CAPACITY.satoshis()));
     }
 
     @Test
-    void totalSent() {
-        assertThat(new ChannelDto(LOCAL_OPEN_CHANNEL).totalSent())
+    void totalSentSat() {
+        assertThat(new ChannelDto(LOCAL_OPEN_CHANNEL).totalSentSat())
                 .isEqualTo(String.valueOf(TOTAL_SENT.satoshis()));
     }
 
     @Test
-    void totalReceived() {
-        assertThat(new ChannelDto(LOCAL_OPEN_CHANNEL).totalReceived())
+    void totalReceivedSat() {
+        assertThat(new ChannelDto(LOCAL_OPEN_CHANNEL).totalReceivedSat())
                 .isEqualTo(String.valueOf(TOTAL_RECEIVED.satoshis()));
     }
 

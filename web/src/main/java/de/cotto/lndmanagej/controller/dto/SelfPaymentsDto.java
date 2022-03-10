@@ -6,7 +6,7 @@ import de.cotto.lndmanagej.model.SelfPayment;
 import java.util.List;
 import java.util.function.Function;
 
-public record SelfPaymentsDto(List<SelfPaymentDto> selfPayments, String amountPaid, String fees) {
+public record SelfPaymentsDto(List<SelfPaymentDto> selfPayments, String amountPaidMilliSat, String feesMilliSat) {
     public SelfPaymentsDto(List<SelfPayment> selfPayments) {
         this(
                 selfPayments.stream().map(SelfPaymentDto::createFromModel).toList(),

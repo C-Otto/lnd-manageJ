@@ -91,33 +91,33 @@ class NodeControllerIT {
                 .andExpect(jsonPath("$.rebalanceReport.targetAmount", is("991000")))
                 .andExpect(jsonPath("$.rebalanceReport.supportAsSourceAmount", is("100000")))
                 .andExpect(jsonPath("$.rebalanceReport.supportAsTargetAmount", is("200000")))
-                .andExpect(jsonPath("$.flowReport.forwardedSent", is("1050000")))
-                .andExpect(jsonPath("$.flowReport.forwardedReceived", is("9001000")))
-                .andExpect(jsonPath("$.flowReport.forwardingFeesReceived", is("1")))
-                .andExpect(jsonPath("$.flowReport.rebalanceSent", is("50000")))
-                .andExpect(jsonPath("$.flowReport.rebalanceFeesSent", is("5")))
-                .andExpect(jsonPath("$.flowReport.rebalanceReceived", is("51000")))
-                .andExpect(jsonPath("$.flowReport.rebalanceSupportSent", is("123")))
-                .andExpect(jsonPath("$.flowReport.rebalanceSupportFeesSent", is("1")))
-                .andExpect(jsonPath("$.flowReport.rebalanceSupportReceived", is("456")))
-                .andExpect(jsonPath("$.flowReport.totalSent", is("1100129")))
-                .andExpect(jsonPath("$.flowReport.totalReceived", is("9052457")))
-                .andExpect(jsonPath("$.balance.localBalance", is("2000")))
-                .andExpect(jsonPath("$.balance.localReserve", is("200")))
-                .andExpect(jsonPath("$.balance.localAvailable", is("1800")))
-                .andExpect(jsonPath("$.balance.remoteBalance", is("223")))
-                .andExpect(jsonPath("$.balance.remoteReserve", is("20")))
-                .andExpect(jsonPath("$.balance.remoteAvailable", is("203")))
-                .andExpect(jsonPath("$.feeReport.earned", is("1234")))
-                .andExpect(jsonPath("$.feeReport.sourced", is("567")))
+                .andExpect(jsonPath("$.flowReport.forwardedSentMilliSat", is("1050000")))
+                .andExpect(jsonPath("$.flowReport.forwardedReceivedMilliSat", is("9001000")))
+                .andExpect(jsonPath("$.flowReport.forwardingFeesReceivedMilliSat", is("1")))
+                .andExpect(jsonPath("$.flowReport.rebalanceSentMilliSat", is("50000")))
+                .andExpect(jsonPath("$.flowReport.rebalanceFeesSentMilliSat", is("5")))
+                .andExpect(jsonPath("$.flowReport.rebalanceReceivedMilliSat", is("51000")))
+                .andExpect(jsonPath("$.flowReport.rebalanceSupportSentMilliSat", is("123")))
+                .andExpect(jsonPath("$.flowReport.rebalanceSupportFeesSentMilliSat", is("1")))
+                .andExpect(jsonPath("$.flowReport.rebalanceSupportReceivedMilliSat", is("456")))
+                .andExpect(jsonPath("$.flowReport.totalSentMilliSat", is("1100129")))
+                .andExpect(jsonPath("$.flowReport.totalReceivedMilliSat", is("9052457")))
+                .andExpect(jsonPath("$.balance.localBalanceSat", is("2000")))
+                .andExpect(jsonPath("$.balance.localReserveSat", is("200")))
+                .andExpect(jsonPath("$.balance.localAvailableSat", is("1800")))
+                .andExpect(jsonPath("$.balance.remoteBalanceSat", is("223")))
+                .andExpect(jsonPath("$.balance.remoteReserveSat", is("20")))
+                .andExpect(jsonPath("$.balance.remoteAvailableSat", is("203")))
+                .andExpect(jsonPath("$.feeReport.earnedMilliSat", is("1234")))
+                .andExpect(jsonPath("$.feeReport.sourcedMilliSat", is("567")))
                 .andExpect(jsonPath("$.warnings", containsInAnyOrder(
                         "Node has been online 51% in the past 14 days",
                         "Node changed between online and offline 123 times in the past 7 days",
                         "No flow in the past 16 days"
                 )))
-                .andExpect(jsonPath("$.onChainCosts.openCosts", is("1000")))
-                .andExpect(jsonPath("$.onChainCosts.closeCosts", is("2000")))
-                .andExpect(jsonPath("$.onChainCosts.sweepCosts", is("3000")))
+                .andExpect(jsonPath("$.onChainCosts.openCostsSat", is("1000")))
+                .andExpect(jsonPath("$.onChainCosts.closeCostsSat", is("2000")))
+                .andExpect(jsonPath("$.onChainCosts.sweepCostsSat", is("3000")))
                 .andExpect(jsonPath("$.onlineReport.online", is(true)))
                 .andExpect(jsonPath("$.onlineReport.onlinePercentage", is(77)))
                 .andExpect(jsonPath("$.onlineReport.daysForOnlinePercentage", is(14)))
@@ -148,27 +148,27 @@ class NodeControllerIT {
     void getBalance() throws Exception {
         when(balanceService.getBalanceInformationForPeer(PUBKEY)).thenReturn(BALANCE_INFORMATION);
         mockMvc.perform(get(NODE_PREFIX + "/balance"))
-                .andExpect(jsonPath("$.localBalance", is("1000")))
-                .andExpect(jsonPath("$.localReserve", is("100")))
-                .andExpect(jsonPath("$.localAvailable", is("900")))
-                .andExpect(jsonPath("$.remoteBalance", is("123")))
-                .andExpect(jsonPath("$.remoteReserve", is("10")))
-                .andExpect(jsonPath("$.remoteAvailable", is("113")));
+                .andExpect(jsonPath("$.localBalanceSat", is("1000")))
+                .andExpect(jsonPath("$.localReserveSat", is("100")))
+                .andExpect(jsonPath("$.localAvailableSat", is("900")))
+                .andExpect(jsonPath("$.remoteBalanceSat", is("123")))
+                .andExpect(jsonPath("$.remoteReserveSat", is("10")))
+                .andExpect(jsonPath("$.remoteAvailableSat", is("113")));
     }
 
     @Test
     void getFeeReport() throws Exception {
         when(feeService.getFeeReportForPeer(PUBKEY)).thenReturn(FEE_REPORT);
         mockMvc.perform(get(NODE_PREFIX + "/fee-report"))
-                .andExpect(jsonPath("$.earned", is("1234")))
-                .andExpect(jsonPath("$.sourced", is("567")));
+                .andExpect(jsonPath("$.earnedMilliSat", is("1234")))
+                .andExpect(jsonPath("$.sourcedMilliSat", is("567")));
     }
 
     @Test
     void getFeeReport_last_days() throws Exception {
         when(feeService.getFeeReportForPeer(PUBKEY, Duration.ofDays(123))).thenReturn(FEE_REPORT);
         mockMvc.perform(get(NODE_PREFIX + "/fee-report/last-days/123"))
-                .andExpect(jsonPath("$.earned", is("1234")))
-                .andExpect(jsonPath("$.sourced", is("567")));
+                .andExpect(jsonPath("$.earnedMilliSat", is("1234")))
+                .andExpect(jsonPath("$.sourcedMilliSat", is("567")));
     }
 }

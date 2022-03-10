@@ -62,18 +62,18 @@ Channel specific: `/api/channel/{ID}/` (where `{ID}` is the channel ID) followed
  * `balance`: the channel balance (for local/remote each: balance, available, reserve)
  * `policies`: local and remote fee rate, base fee, and enabled boolean
  * `close-details` (only for closed channels): close initiator, close height, force boolean, breach boolean
- * `fee-report`: satoshis earned by forwarding payments leaving out through the channel (`earned`) or coming in from the channel (`sourced`)
+ * `fee-report`: milli-satoshis earned by forwarding payments leaving out through the channel (`earnedMilliSat`) or coming in from the channel (`sourcedMilliSat`)
  * `flow-report`: amounts flowing through the channel, broken down into different categories
  * `flow-report/last-days/{DAYS}`: as above, but limited to the last `{DAYS}` days
- * `open-costs`: the on-chain costs you paid to open the channel
- * `close-costs`: the on-chain costs you paid to close the channel
- * `sweep-costs`: the on-chain costs you paid to sweep funds after a force-close (this may be negative)
- * `rebalance-source-costs`: the fees you paid to rebalance the channel, taking funds out of it
- * `rebalance-source-amount`: the amount of funds you took out of the channel as part of rebalancing
- * `rebalance-target-costs`: the fees you paid to rebalance the channel, putting funds into it
- * `rebalance-target-amount`: the amount of funds you put into the channel as part of rebalancing
- * `rebalance-support-as-source-amount`: the amount of funds you took out of the channel as part of rebalancing another channel
- * `rebalance-support-as-target-amount`: the amount of funds you put into the channel as part of rebalancing another channel
+ * `open-costs`: the on-chain costs you paid to open the channel (in satoshis)
+ * `close-costs`: the on-chain costs you paid to close the channel (in satoshis)
+ * `sweep-costs`: the on-chain costs you paid to sweep funds after a force-close (this may be negative) (in satoshis)
+ * `rebalance-source-costs`: the fees you paid to rebalance the channel, taking funds out of it (in milli-satoshis)
+ * `rebalance-source-amount`: the amount of funds you took out of the channel as part of rebalancing (in milli-satoshis)
+ * `rebalance-target-costs`: the fees you paid to rebalance the channel, putting funds into it (in milli-satoshis)
+ * `rebalance-target-amount`: the amount of funds you put into the channel as part of rebalancing (in milli-satoshis)
+ * `rebalance-support-as-source-amount`: the amount of funds you took out of the channel as part of rebalancing another channel (in milli-satoshis)
+ * `rebalance-support-as-target-amount`: the amount of funds you put into the channel as part of rebalancing another channel (in milli-satoshis)
  * `self-payments-from-channel`: a list of all self-payments taking funds out of the channel (including payment details and a summary)
  * `self-payments-to-channel`: a list of all self-payments putting funds into the channel (including payment details and a summary)
  * `warnings`: shows the following warnings, if applicable
