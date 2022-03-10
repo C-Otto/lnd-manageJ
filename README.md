@@ -1,5 +1,18 @@
 # lnd-manageJ
 
+## What is the purpose of lnd-manageJ?
+
+In the far future, you can run lnd-manageJ in the background and constantly gather information from your
+[lnd](https://github.com/lightningnetwork/lnd) node.
+This information is condensed and analyzed so that
+
+- you can see your node's and each peer's/channel's forwarding activity
+- you can understand each channel's/peer's forwarding characteristics (is it a sink? a source? bidirectional?)
+- you can tweak the forwarding fees based on previous and forecasted routing activity
+
+In short, lnd-manageJ helps you understand and manage the inner workings of your lnd node.
+
+
 ## Privacy and external API usage
 This service requests transaction details from public APIs (Bitaps and Blockcypher).
 As such, information about the channels associated with your node are leaked, possibly revealing your IP address and
@@ -52,17 +65,17 @@ Channel specific: `/api/channel/{ID}/` (where `{ID}` is the channel ID) followed
  * `fee-report`: satoshis earned by forwarding payments leaving out through the channel (`earned`) or coming in from the channel (`sourced`)
  * `flow-report`: amounts flowing through the channel, broken down into different categories
  * `flow-report/last-days/{DAYS}`: as above, but limited to the last `{DAYS}` days
- * `open-costs`: TODO
- * `close-costs`: TODO
- * `sweep-costs`: TODO
- * `rebalance-source-costs`: TODO
- * `rebalance-source-amount`: TODO
- * `rebalance-target-costs`: TODO
- * `rebalance-target-amount`: TODO
- * `rebalance-support-as-source-amount`: TODO
- * `rebalance-support-as-target-amount`: TODO
- * `self-payments-from-channel`: TODO
- * `self-payments-to-channel`: TODO
+ * `open-costs`: the on-chain costs you paid to open the channel
+ * `close-costs`: the on-chain costs you paid to close the channel
+ * `sweep-costs`: the on-chain costs you paid to sweep funds after a force-close (this may be negative)
+ * `rebalance-source-costs`: the fees you paid to rebalance the channel, taking funds out of it
+ * `rebalance-source-amount`: the amount of funds you took out of the channel as part of rebalancing
+ * `rebalance-target-costs`: the fees you paid to rebalance the channel, putting funds into it
+ * `rebalance-target-amount`: the amount of funds you put into the channel as part of rebalancing
+ * `rebalance-support-as-source-amount`: the amount of funds you took out of the channel as part of rebalancing another channel
+ * `rebalance-support-as-target-amount`: the amount of funds you put into the channel as part of rebalancing another channel
+ * `self-payments-from-channel`: a list of all self-payments taking funds out of the channel (including payment details and a summary)
+ * `self-payments-to-channel`: a list of all self-payments putting funds into the channel (including payment details and a summary)
  * `warnings`: shows the following warnings, if applicable
    * "Channel balance ranged from `X`% to `Y`% in the past 14 days" (if `X` < 10 and `Y` > 90)
    * "Channel has accumulated `X` updates" (if `X` > 100,000)
@@ -128,18 +141,6 @@ channel(s).
 
 No. If you're interested in creating one, please get in touch or just create a pull request!
 If you have ideas for API improvements, please raise issues in GitHub.
-
-## What is the purpose of lnd-manageJ?
-
-In the far future, you can run lnd-manageJ in the background and constantly gather information from your
-[lnd](https://github.com/lightningnetwork/lnd) node.
-This information is condensed and analyzed so that
-
- - you can see your node's and each peer's/channel's forwarding activity
- - you can understand each channel's/peer's forwarding characteristics (is it a sink? a source? bidirectional?)  
- - you can tweak the forwarding fees based on previous and forecasted routing activity
-
-In short, lnd-manageJ helps you understand and manage the inner workings of your lnd node.
 
 ## How can I run lnd-manageJ?
 
