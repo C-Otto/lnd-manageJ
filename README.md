@@ -85,7 +85,7 @@ Channel specific: `/api/channel/{ID}/` (where `{ID}` is the channel ID) followed
  - `123456:123:1` (lnd specific compact format)
  - `123456x123x1` (compact format)
  - `135741307526774785` (short ID format)
- - `1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef:1` (outpoint)
+ - `1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef:1` (channel point)
 
 Node specific: `/api/node/{PUBKEY}/` (where `{PUBKEY}` is the node pubkey) followed by...
 
