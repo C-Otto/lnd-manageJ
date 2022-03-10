@@ -98,15 +98,15 @@ Node specific: `/api/node/{PUBKEY}/` (where `{PUBKEY}` is the node pubkey) follo
  * `fee-report/last-days/{DAYS}`: as above, but limited to the last `{DAYS}` days
  * `flow-report`: the aggregated flow report (see channel endpoint)
  * `flow-report/last-days/{DAYS}`: as above, but limited to the last `{DAYS}` days
- * `on-chain-costs`: TODO
- * `rebalance-source-costs`: TODO
- * `rebalance-source-amount`: TODO
- * `rebalance-target-costs`: TODO
- * `rebalance-target-amount`: TODO
- * `rebalance-support-as-source-amount`: TODO
- * `rebalance-support-as-target-amount`: TODO
- * `self-payments-from-peer`: TODO
- * `self-payments-to-peer`: TODO
+ * `on-chain-costs`: aggregated on-chain costs (see channel endpoints `open-costs`, `close-costs`, `sweep-costs`)
+ * `rebalance-source-costs`: aggregated costs (see channel endpoint)
+ * `rebalance-source-amount`: aggregated amount (see channel endpoint)
+ * `rebalance-target-costs`: aggregated costs (see channel endpoint)
+ * `rebalance-target-amount`: aggregated amount (see channel endpoint)
+ * `rebalance-support-as-source-amount`: aggregated amount (see channel endpoint)
+ * `rebalance-support-as-target-amount`: aggregated amount (see channel endpoint)
+ * `self-payments-from-peer`: aggregated list (see channel endpoint `self-payments-from-channel`)
+ * `self-payments-to-peer`: aggregated list (see channel endpoint `self-payments-to-channel`)
  * `warnings`: shows the following warnings, if applicable
    * "No flow in the past `X` days" (if `X` >= 30)
    * "Node has been online `X`% in the past 7 days" (if `X` < 80)
@@ -145,10 +145,12 @@ If you have ideas for API improvements, please raise issues in GitHub.
 ## How can I run lnd-manageJ?
 
 Install PostgreSQL (Debian: `apt install postgresql`) and create a database named `lndmanagej` and a user `bitcoin`.
-Configure the database so that the user `bitcoin` can access `lndmanagej` without a password at `jdbc:postgresql://localhost:5432/lndmanagej`.
 You can tweak these settings in `application/src/main/resources/application.properties`.
+Configure the database so that the user `bitcoin` can access `lndmanagej` without a password at `jdbc:postgresql://localhost:5432/lndmanagej` (`pg_hba.conf`: `local lndmanagej bitcoin trust`).
 
 Install Java 17 and run `./start.sh`.
+The service is intended to run 24/7 to collect statistics about your node.
+You may restart both the service and lnd at any time.
 
 ## Disclaimer
 This project is not related to bitromortac's Python based [lndmanage](https://github.com/bitromortac/lndmanage).
