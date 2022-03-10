@@ -4,12 +4,12 @@ import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.RebalanceReport;
 
 public record RebalanceReportDto(
-        String sourceCosts,
-        String sourceAmount,
-        String targetCosts,
-        String targetAmount,
-        String supportAsSourceAmount,
-        String supportAsTargetAmount
+        String sourceCostsMilliSat,
+        String sourceAmountMilliSat,
+        String targetCostsMilliSat,
+        String targetAmountMilliSat,
+        String supportAsSourceAmountMilliSat,
+        String supportAsTargetAmountMilliSat
 ) {
     public RebalanceReportDto(
             Coins sourceCost,

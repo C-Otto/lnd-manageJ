@@ -19,32 +19,32 @@ class RebalanceReportDtoTest {
 
     @Test
     void sourceCosts() {
-        assertThat(REBALANCE_REPORT_DTO.sourceCosts()).isEqualTo("1234");
+        assertThat(REBALANCE_REPORT_DTO.sourceCostsMilliSat()).isEqualTo("1234");
     }
 
     @Test
     void sourceAmount() {
-        assertThat(REBALANCE_REPORT_DTO.sourceAmount()).isEqualTo("9000000");
+        assertThat(REBALANCE_REPORT_DTO.sourceAmountMilliSat()).isEqualTo("9000000");
     }
 
     @Test
     void targetCosts() {
-        assertThat(REBALANCE_REPORT_DTO.targetCosts()).isEqualTo("567");
+        assertThat(REBALANCE_REPORT_DTO.targetCostsMilliSat()).isEqualTo("567");
     }
 
     @Test
     void targetAmount() {
-        assertThat(REBALANCE_REPORT_DTO.targetAmount()).isEqualTo("1000000");
+        assertThat(REBALANCE_REPORT_DTO.targetAmountMilliSat()).isEqualTo("1000000");
     }
 
     @Test
     void supportAsSourceAmount() {
-        assertThat(REBALANCE_REPORT_DTO.supportAsSourceAmount()).isEqualTo("100000");
+        assertThat(REBALANCE_REPORT_DTO.supportAsSourceAmountMilliSat()).isEqualTo("100000");
     }
 
     @Test
     void supportAsTargetAmount() {
-        assertThat(REBALANCE_REPORT_DTO.supportAsTargetAmount()).isEqualTo("200000");
+        assertThat(REBALANCE_REPORT_DTO.supportAsTargetAmountMilliSat()).isEqualTo("200000");
     }
 
     @Test
