@@ -12,6 +12,8 @@ import lnrpc.ChanInfoRequest;
 import lnrpc.Channel;
 import lnrpc.ChannelCloseSummary;
 import lnrpc.ChannelEdge;
+import lnrpc.ChannelGraph;
+import lnrpc.ChannelGraphRequest;
 import lnrpc.ClosedChannelsRequest;
 import lnrpc.ForwardingHistoryRequest;
 import lnrpc.ForwardingHistoryResponse;
@@ -180,6 +182,14 @@ public class GrpcService extends GrpcBase {
         return get(() -> lightningStub.subscribeInvoices(InvoiceSubscription.newBuilder()
                 .setSettleIndex(settleIndex)
                 .build()));
+    }
+
+    @Timed
+    public Optional<ChannelGraph> describeGraph() {
+        ChannelGraphRequest request = ChannelGraphRequest.newBuilder()
+                .setIncludeUnannounced(true)
+                .build();
+        return get(() -> lightningStub.describeGraph(request));
     }
 
     private Optional<List<Transaction>> getTransactionsWithoutCache() {
