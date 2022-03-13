@@ -15,13 +15,13 @@ jacocoTestCoverageVerification {
         rules.forEach {rule ->
             rule.limits.forEach {limit ->
                 if (limit.counter == 'INSTRUCTION') {
-                    limit.minimum = 0.85
+                    limit.minimum = 0.86
                 }
                 if (limit.counter == 'METHOD') {
                     limit.minimum = 0.78
                 }
                 if (limit.counter == 'BRANCH') {
-                    limit.minimum = 0.93
+                    limit.minimum = 0.95
                 }
             }
         }
