@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 
 class PubkeyTest {
     private static final String VALID_PUBKEY_STRING =
-            "027abc123abc123abc123abc123123abc123abc123abc123abc123abc123abc123";
+            "027abc123abc123abc123abc123123abc123abc123abc123abc123abc123abc121";
 
     @Test
     void empty() {
@@ -46,7 +46,7 @@ class PubkeyTest {
 
     @Test
     void testToString_from_uppercase() {
-        assertThat(Pubkey.create("027ABC123ABC123ABC123ABC123123ABC123ABC123ABC123ABC123ABC123ABC123"))
+        assertThat(Pubkey.create("027ABC123ABC123ABC123ABC123123ABC123ABC123ABC123ABC123ABC123ABC121"))
                 .hasToString(VALID_PUBKEY_STRING);
     }
 
@@ -73,7 +73,7 @@ class PubkeyTest {
 
     @Test
     void testEquals_from_uppercase() {
-        assertThat(Pubkey.create("027ABC123ABC123ABC123ABC123123ABC123ABC123ABC123ABC123ABC123ABC123"))
+        assertThat(Pubkey.create("027ABC123ABC123ABC123ABC123123ABC123ABC123ABC123ABC123ABC123ABC121"))
                 .isEqualTo(PUBKEY);
     }
 
