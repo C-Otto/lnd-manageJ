@@ -118,6 +118,7 @@ class CoinsTest {
     @Test
     void getSatoshis_with_fraction() {
         long milliSatoshis = 1_234L;
+        //noinspection ResultOfMethodCallIgnored
         assertThatExceptionOfType(IllegalStateException.class).isThrownBy(
                 () -> Coins.ofMilliSatoshis(milliSatoshis).satoshis()
         );
@@ -177,5 +178,32 @@ class CoinsTest {
     @Test
     void manyCoins_negative() {
         assertThat(Coins.ofSatoshis(-321_000_678_100L)).hasToString("-321,000,678,100.000");
+    }
+
+    @Test
+    void minimum_first() {
+        assertThat(Coins.ofMilliSatoshis(1).minimum(Coins.ofMilliSatoshis(2))).isEqualTo(Coins.ofMilliSatoshis(1));
+    }
+
+    @Test
+    void minimum_second() {
+        assertThat(Coins.ofMilliSatoshis(100).minimum(Coins.ofMilliSatoshis(50))).isEqualTo(Coins.ofMilliSatoshis(50));
+    }
+
+    @Test
+    void minimum_same() {
+        assertThat(Coins.ofMilliSatoshis(1).minimum(Coins.ofMilliSatoshis(1))).isEqualTo(Coins.ofMilliSatoshis(1));
+    }
+
+    @Test
+    void minimum_same_prefers_this() {
+        Coins first = Coins.ofMilliSatoshis(1);
+        Coins second = Coins.ofMilliSatoshis(1);
+        assertThat(first.minimum(second)).isSameAs(first);
+    }
+
+    @Test
+    void minimum_null() {
+        assertThat(Coins.ofMilliSatoshis(1).minimum(null)).isEqualTo(Coins.ofMilliSatoshis(1));
     }
 }

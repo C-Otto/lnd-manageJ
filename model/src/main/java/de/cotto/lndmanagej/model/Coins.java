@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.model;
 
+import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.Locale;
 
@@ -37,6 +38,13 @@ public record Coins(long milliSatoshis) implements Comparable<Coins> {
     @Override
     public int compareTo(Coins other) {
         return Long.compare(milliSatoshis, other.milliSatoshis);
+    }
+
+    public Coins minimum(@Nullable Coins other) {
+        if (other == null || compareTo(other) <= 0) {
+            return this;
+        }
+        return other;
     }
 
     public boolean isPositive() {
