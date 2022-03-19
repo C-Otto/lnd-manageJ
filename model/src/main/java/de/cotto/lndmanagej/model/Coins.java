@@ -47,6 +47,10 @@ public record Coins(long milliSatoshis) implements Comparable<Coins> {
         return other;
     }
 
+    public Coins negate() {
+        return Coins.ofMilliSatoshis(-milliSatoshis);
+    }
+
     public boolean isPositive() {
         return compareTo(NONE) > 0;
     }

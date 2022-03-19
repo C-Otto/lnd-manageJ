@@ -206,4 +206,19 @@ class CoinsTest {
     void minimum_null() {
         assertThat(Coins.ofMilliSatoshis(1).minimum(null)).isEqualTo(Coins.ofMilliSatoshis(1));
     }
+
+    @Test
+    void negate_zero() {
+        assertThat(Coins.NONE.negate()).isEqualTo(Coins.NONE);
+    }
+
+    @Test
+    void negate_positive() {
+        assertThat(Coins.ofMilliSatoshis(123).negate()).isEqualTo(Coins.ofMilliSatoshis(-123));
+    }
+
+    @Test
+    void negate_negative() {
+        assertThat(Coins.ofSatoshis(-1).negate()).isEqualTo(Coins.ofMilliSatoshis(1_000));
+    }
 }

@@ -8,7 +8,6 @@ import de.cotto.lndmanagej.model.MissionControlEntry;
 import de.cotto.lndmanagej.model.Pubkey;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Nullable;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -62,16 +61,6 @@ public class MissionControlService {
 
     private void setMinimum(Map<Pubkey, Map<Pubkey, Coins>> map, Pubkey source, Pubkey target, Coins amount) {
         Map<Pubkey, Coins> innerMap = map.compute(source, (k, v) -> v == null ? new LinkedHashMap<>() : v);
-        innerMap.compute(target, (k, v) -> minimum(v, amount));
-    }
-
-    private Coins minimum(@Nullable Coins existingValue, Coins newAmount) {
-        if (existingValue == null) {
-            return newAmount;
-        }
-        if (existingValue.compareTo(newAmount) <= 0) {
-            return existingValue;
-        }
-        return newAmount;
+        innerMap.compute(target, (k, v) -> amount.minimum(v));
     }
 }

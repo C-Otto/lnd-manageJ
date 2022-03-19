@@ -1,0 +1,13 @@
+plugins {
+    id 'lnd-manageJ.java-library-conventions'
+}
+
+dependencies {
+    implementation project(':backend')
+    implementation project(':caching')
+    implementation project(':model')
+    implementation project(':grpc-adapter')
+    implementation 'com.google.ortools:ortools-java:9.2.9972'
+    testImplementation testFixtures(project(':model'))
+    testFixturesImplementation testFixtures(project(':model'))
+}
