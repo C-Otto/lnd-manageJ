@@ -38,3 +38,7 @@ jacocoTestCoverageVerification {
 pitest {
     testStrengthThreshold = 0
 }
+
+bootJar {
+    requiresUnpack '**/ortools-darwin*.jar', '**/ortools-win32*.jar', '**/ortools-linux*.jar'
+}
