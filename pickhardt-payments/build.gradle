@@ -12,6 +12,7 @@ dependencies {
     testFixturesImplementation testFixtures(project(':model'))
 }
 
-pitest {
-    excludedMethods = ['solve']
+task deleteCrashLogs(type: Delete) {
+    delete fileTree(dir:project.projectDir, include: 'hs_err_pid*.log')
 }
+tasks.findByName('pitest').finalizedBy(deleteCrashLogs)
