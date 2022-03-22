@@ -8,7 +8,7 @@ import de.cotto.lndmanagej.model.FlowReport;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.model.OpenInitiator;
-import de.cotto.lndmanagej.model.Policies;
+import de.cotto.lndmanagej.model.PoliciesForLocalChannel;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.RebalanceReport;
 import de.cotto.lndmanagej.model.warnings.ChannelWarnings;
@@ -43,7 +43,7 @@ public record ChannelDetailsDto(
             String remoteAlias,
             BalanceInformation balanceInformation,
             OnChainCosts onChainCosts,
-            Policies policies,
+            PoliciesForLocalChannel policiesForLocalChannel,
             FeeReport feeReport,
             FlowReport flowReport,
             RebalanceReport rebalanceReport,
@@ -64,7 +64,7 @@ public record ChannelDetailsDto(
                 channelDto.status(),
                 BalanceInformationDto.createFromModel(balanceInformation),
                 OnChainCostsDto.createFromModel(onChainCosts),
-                PoliciesDto.createFromModel(policies),
+                PoliciesDto.createFromModel(policiesForLocalChannel),
                 channelDto.closeDetails(),
                 FeeReportDto.createFromModel(feeReport),
                 FlowReportDto.createFromModel(flowReport),
@@ -79,7 +79,7 @@ public record ChannelDetailsDto(
             String remoteAlias,
             BalanceInformation balanceInformation,
             OnChainCosts onChainCosts,
-            Policies policies,
+            PoliciesForLocalChannel policiesForLocalChannel,
             FeeReport feeReport,
             FlowReport flowReport,
             RebalanceReport rebalanceReport,
@@ -90,7 +90,7 @@ public record ChannelDetailsDto(
                 remoteAlias,
                 balanceInformation,
                 onChainCosts,
-                policies,
+                policiesForLocalChannel,
                 feeReport,
                 flowReport,
                 rebalanceReport,

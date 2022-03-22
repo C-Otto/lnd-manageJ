@@ -10,7 +10,7 @@ import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
-import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES;
+import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES_FOR_LOCAL_CHANNEL;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT_2;
 import static de.cotto.lndmanagej.model.warnings.ChannelWarningsFixtures.CHANNEL_WARNINGS;
@@ -21,7 +21,7 @@ public class ChannelDetailsFixtures {
             ALIAS,
             BALANCE_INFORMATION,
             ON_CHAIN_COSTS,
-            POLICIES,
+            POLICIES_FOR_LOCAL_CHANNEL,
             FEE_REPORT,
             FLOW_REPORT,
             REBALANCE_REPORT,
@@ -33,7 +33,7 @@ public class ChannelDetailsFixtures {
             ALIAS,
             BALANCE_INFORMATION,
             ON_CHAIN_COSTS,
-            POLICIES,
+            POLICIES_FOR_LOCAL_CHANNEL,
             FEE_REPORT,
             FLOW_REPORT_2,
             REBALANCE_REPORT_2,
@@ -45,7 +45,7 @@ public class ChannelDetailsFixtures {
             ALIAS,
             BalanceInformation.EMPTY,
             ON_CHAIN_COSTS,
-            Policies.UNKNOWN,
+            PoliciesForLocalChannel.UNKNOWN,
             FEE_REPORT,
             FLOW_REPORT,
             REBALANCE_REPORT,

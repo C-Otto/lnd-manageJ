@@ -4,7 +4,7 @@ import de.cotto.lndmanagej.model.ChannelStatus;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.OpenInitiator;
-import de.cotto.lndmanagej.model.Policies;
+import de.cotto.lndmanagej.model.PoliciesForLocalChannel;
 import de.cotto.lndmanagej.model.RebalanceReport;
 import de.cotto.lndmanagej.model.warnings.ChannelWarnings;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHAN
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.OpenCloseStatus.OPEN;
-import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES;
+import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES_FOR_LOCAL_CHANNEL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static de.cotto.lndmanagej.model.warnings.ChannelWarningsFixtures.CHANNEL_WARNINGS;
@@ -38,7 +38,7 @@ class ChannelDetailsDtoTest {
             ALIAS,
             BALANCE_INFORMATION,
             ON_CHAIN_COSTS,
-            Policies.UNKNOWN,
+            PoliciesForLocalChannel.UNKNOWN,
             FEE_REPORT,
             FLOW_REPORT,
             REBALANCE_REPORT,
@@ -52,7 +52,7 @@ class ChannelDetailsDtoTest {
                 ALIAS,
                 BALANCE_INFORMATION,
                 ON_CHAIN_COSTS,
-                POLICIES,
+                POLICIES_FOR_LOCAL_CHANNEL,
                 FEE_REPORT,
                 FLOW_REPORT,
                 REBALANCE_REPORT,
@@ -113,7 +113,7 @@ class ChannelDetailsDtoTest {
                 ALIAS,
                 BALANCE_INFORMATION,
                 ON_CHAIN_COSTS,
-                Policies.UNKNOWN,
+                PoliciesForLocalChannel.UNKNOWN,
                 FEE_REPORT,
                 FLOW_REPORT,
                 RebalanceReport.EMPTY,

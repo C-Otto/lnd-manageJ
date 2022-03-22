@@ -4,7 +4,8 @@ import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.grpc.GrpcFees;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
-import de.cotto.lndmanagej.model.Policies;
+import de.cotto.lndmanagej.model.LocalChannel;
+import de.cotto.lndmanagej.model.PoliciesForLocalChannel;
 import de.cotto.lndmanagej.model.Policy;
 import org.springframework.stereotype.Component;
 
@@ -17,8 +18,9 @@ public class PolicyService {
     }
 
     @Timed
-    public Policies getPolicies(ChannelId channelId) {
-        return new Policies(
+    public PoliciesForLocalChannel getPolicies(LocalChannel localChannel) {
+        ChannelId channelId = localChannel.getId();
+        return new PoliciesForLocalChannel(
                 new Policy(getOutgoingFeeRate(channelId), getOutgoingBaseFee(channelId), isEnabledLocal(channelId)),
                 new Policy(getIncomingFeeRate(channelId), getIncomingBaseFee(channelId), isEnabledRemote(channelId))
         );

@@ -13,7 +13,7 @@ import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.OpenCloseStatus;
-import de.cotto.lndmanagej.model.Policies;
+import de.cotto.lndmanagej.model.PoliciesForLocalChannel;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelDetailsService;
 import de.cotto.lndmanagej.service.ChannelService;
@@ -83,9 +83,9 @@ public class ChannelController {
     public PoliciesDto getPolicies(@PathVariable ChannelId channelId) {
         LocalChannel localChannel = channelService.getLocalChannel(channelId).orElse(null);
         if (localChannel == null || localChannel.getStatus().openCloseStatus() != OpenCloseStatus.OPEN) {
-            return PoliciesDto.createFromModel(Policies.UNKNOWN);
+            return PoliciesDto.createFromModel(PoliciesForLocalChannel.UNKNOWN);
         }
-        return PoliciesDto.createFromModel(policyService.getPolicies(localChannel.getId()));
+        return PoliciesDto.createFromModel(policyService.getPolicies(localChannel));
     }
 
     @Timed

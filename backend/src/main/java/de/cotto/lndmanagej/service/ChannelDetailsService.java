@@ -8,7 +8,7 @@ import de.cotto.lndmanagej.model.FlowReport;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.model.OpenCloseStatus;
-import de.cotto.lndmanagej.model.Policies;
+import de.cotto.lndmanagej.model.PoliciesForLocalChannel;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.RebalanceReport;
 import de.cotto.lndmanagej.model.warnings.ChannelWarnings;
@@ -54,7 +54,7 @@ public class ChannelDetailsService {
         CompletableFuture<String> remoteAlias = getAlias(remotePubkey);
         CompletableFuture<BalanceInformation> balanceInformation = getBalanceInformation(channelId);
         CompletableFuture<OnChainCosts> onChainCosts = getOnChainCosts(channelId);
-        CompletableFuture<Policies> policies = getPoliciesForChannel(localChannel);
+        CompletableFuture<PoliciesForLocalChannel> policies = getPoliciesForChannel(localChannel);
         CompletableFuture<FeeReport> feeReport = getFeeReport(channelId);
         CompletableFuture<FlowReport> flowReport = getFlowReport(channelId);
         CompletableFuture<RebalanceReport> rebalanceReport = getRebalanceReport(localChannel);
@@ -106,10 +106,10 @@ public class ChannelDetailsService {
         );
     }
 
-    private CompletableFuture<Policies> getPoliciesForChannel(LocalChannel channel) {
+    private CompletableFuture<PoliciesForLocalChannel> getPoliciesForChannel(LocalChannel channel) {
         if (channel.getStatus().openCloseStatus() != OpenCloseStatus.OPEN) {
-            return CompletableFuture.completedFuture(Policies.UNKNOWN);
+            return CompletableFuture.completedFuture(PoliciesForLocalChannel.UNKNOWN);
         }
-        return CompletableFuture.supplyAsync(() -> policyService.getPolicies(channel.getId()));
+        return CompletableFuture.supplyAsync(() -> policyService.getPolicies(channel));
     }
 }

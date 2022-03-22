@@ -9,7 +9,7 @@ import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FeeReport;
-import de.cotto.lndmanagej.model.Policies;
+import de.cotto.lndmanagej.model.PoliciesForLocalChannel;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelDetailsService;
 import de.cotto.lndmanagej.service.ChannelService;
@@ -28,7 +28,7 @@ import static de.cotto.lndmanagej.model.ChannelDetailsFixtures.CHANNEL_DETAILS;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
-import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES;
+import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES_FOR_LOCAL_CHANNEL;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -36,7 +36,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ChannelControllerTest {
-    private static final PoliciesDto POLICIES_DTO = PoliciesDto.createFromModel(POLICIES);
+    private static final PoliciesDto POLICIES_DTO = PoliciesDto.createFromModel(POLICIES_FOR_LOCAL_CHANNEL);
     private static final ClosedChannelDetailsDto CLOSED_CHANNEL_DETAILS_DTO =
             ClosedChannelDetailsDto.createFromModel(CLOSED_CHANNEL);
     private static final FeeReport FEE_REPORT = new FeeReport(Coins.ofMilliSatoshis(1_234), Coins.ofMilliSatoshis(567));
@@ -111,19 +111,21 @@ class ChannelControllerTest {
     @Test
     void getPolicies() {
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
-        when(policyService.getPolicies(CHANNEL_ID)).thenReturn(POLICIES);
+        when(policyService.getPolicies(LOCAL_OPEN_CHANNEL)).thenReturn(POLICIES_FOR_LOCAL_CHANNEL);
         assertThat(channelController.getPolicies(CHANNEL_ID)).isEqualTo(POLICIES_DTO);
     }
 
     @Test
     void getPolicies_waiting_close() {
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(WAITING_CLOSE_CHANNEL));
-        assertThat(channelController.getPolicies(CHANNEL_ID)).isEqualTo(PoliciesDto.createFromModel(Policies.UNKNOWN));
+        assertThat(channelController.getPolicies(CHANNEL_ID))
+                .isEqualTo(PoliciesDto.createFromModel(PoliciesForLocalChannel.UNKNOWN));
     }
 
     @Test
     void getPolicies_channel_not_found() {
-        assertThat(channelController.getPolicies(CHANNEL_ID)).isEqualTo(PoliciesDto.createFromModel(Policies.UNKNOWN));
+        assertThat(channelController.getPolicies(CHANNEL_ID))
+                .isEqualTo(PoliciesDto.createFromModel(PoliciesForLocalChannel.UNKNOWN));
     }
 
     @Test

@@ -37,7 +37,7 @@ import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_SENT;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_SENT_2;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
-import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES;
+import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES_FOR_LOCAL_CHANNEL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.core.Is.is;
@@ -227,7 +227,7 @@ class ChannelControllerIT {
     @Test
     void getPolicies() throws Exception {
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
-        when(policyService.getPolicies(CHANNEL_ID)).thenReturn(POLICIES);
+        when(policyService.getPolicies(LOCAL_OPEN_CHANNEL)).thenReturn(POLICIES_FOR_LOCAL_CHANNEL);
         mockMvc.perform(get(CHANNEL_PREFIX + "/policies"))
                 .andExpect(jsonPath("$.local.feeRatePpm", is(100)))
                 .andExpect(jsonPath("$.local.baseFeeMilliSat", is(10)))

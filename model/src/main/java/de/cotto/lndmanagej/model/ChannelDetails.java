@@ -7,7 +7,7 @@ public record ChannelDetails(
         String remoteAlias,
         BalanceInformation balanceInformation,
         OnChainCosts onChainCosts,
-        Policies policies,
+        PoliciesForLocalChannel policies,
         FeeReport feeReport,
         FlowReport flowReport,
         RebalanceReport rebalanceReport,

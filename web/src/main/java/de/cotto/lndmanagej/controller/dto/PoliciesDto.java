@@ -1,15 +1,15 @@
 package de.cotto.lndmanagej.controller.dto;
 
-import de.cotto.lndmanagej.model.Policies;
+import de.cotto.lndmanagej.model.PoliciesForLocalChannel;
 
 public record PoliciesDto(
         PolicyDto local,
         PolicyDto remote
 ) {
-    public static PoliciesDto createFromModel(Policies policies) {
+    public static PoliciesDto createFromModel(PoliciesForLocalChannel policiesForLocalChannel) {
         return new PoliciesDto(
-                PolicyDto.createFromModel(policies.local()),
-                PolicyDto.createFromModel(policies.remote())
+                PolicyDto.createFromModel(policiesForLocalChannel.local()),
+                PolicyDto.createFromModel(policiesForLocalChannel.remote())
         );
     }
 }
