@@ -122,6 +122,29 @@ class GrpcChannelPolicyTest {
         assertThat(grpcChannelPolicy.getRemotePolicy(CHANNEL_ID)).isEmpty();
     }
 
+    @Test
+    void getOtherPubkey_edge_not_found() {
+        assertThat(grpcChannelPolicy.getOtherPubkey(CHANNEL_ID, PUBKEY_4)).isEmpty();
+    }
+
+    @Test
+    void getOtherPubkey_given_first() {
+        when(grpcService.getChannelEdge(CHANNEL_ID)).thenReturn(Optional.of(channelEdge(PUBKEY_2, PUBKEY_3)));
+        assertThat(grpcChannelPolicy.getOtherPubkey(CHANNEL_ID, PUBKEY_2)).contains(PUBKEY_3);
+    }
+
+    @Test
+    void getOtherPubkey_given_second() {
+        when(grpcService.getChannelEdge(CHANNEL_ID)).thenReturn(Optional.of(channelEdge(PUBKEY_2, PUBKEY_3)));
+        assertThat(grpcChannelPolicy.getOtherPubkey(CHANNEL_ID, PUBKEY_3)).contains(PUBKEY_2);
+    }
+
+    @Test
+    void getOtherPubkey_no_matching_pubkey() {
+        when(grpcService.getChannelEdge(CHANNEL_ID)).thenReturn(Optional.of(channelEdge(PUBKEY_2, PUBKEY_3)));
+        assertThat(grpcChannelPolicy.getOtherPubkey(CHANNEL_ID, PUBKEY_4)).isEmpty();
+    }
+
     private ChannelEdge channelEdge(Pubkey firstPubkey, Pubkey secondPubkey) {
         return ChannelEdge.newBuilder()
                 .setNode1Pub(firstPubkey.toString())

@@ -25,6 +25,20 @@ public class GrpcChannelPolicy {
                 .build(this::getChannelEdgeWithoutCache);
     }
 
+    public Optional<Pubkey> getOtherPubkey(ChannelId channelId, Pubkey pubkey) {
+        ChannelEdge channelEdge = getChannelEdge(channelId).orElse(null);
+        if (channelEdge == null) {
+            return Optional.empty();
+        }
+        if (pubkey.toString().equals(channelEdge.getNode1Pub())) {
+            return Optional.of(Pubkey.create(channelEdge.getNode2Pub()));
+        }
+        if (pubkey.toString().equals(channelEdge.getNode2Pub())) {
+            return Optional.of(Pubkey.create(channelEdge.getNode1Pub()));
+        }
+        return Optional.empty();
+    }
+
     public Optional<RoutingPolicy> getLocalPolicy(ChannelId channelId) {
         Pubkey ownPubkey = grpcGetInfo.getPubkey();
         return getPolicyFrom(channelId, ownPubkey);
