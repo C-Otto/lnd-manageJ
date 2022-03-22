@@ -8,7 +8,7 @@ testing {
         test {
             useJUnitJupiter()
             dependencies {
-                implementation 'nl.jqno.equalsverifier:equalsverifier:3.9.1'
+                implementation 'nl.jqno.equalsverifier:equalsverifier:3.10'
                 implementation 'uk.org.lidalia:slf4j-test:1.2.0'
                 configurations.getByName('testRuntimeOnly').exclude group: 'ch.qos.logback', module: 'logback-classic'
                 configurations.getByName('testRuntimeOnly').exclude group: 'org.slf4j', module: 'slf4j-nop'
