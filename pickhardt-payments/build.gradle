@@ -11,3 +11,7 @@ dependencies {
     testImplementation testFixtures(project(':model'))
     testFixturesImplementation testFixtures(project(':model'))
 }
+
+pitest {
+    excludedMethods = ['solve']
+}
