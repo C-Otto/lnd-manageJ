@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.grpc;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.Pubkey;
 import lnrpc.ChannelEdge;
 import lnrpc.RoutingPolicy;
 import org.springframework.stereotype.Component;
@@ -25,12 +26,22 @@ public class GrpcChannelPolicy {
     }
 
     public Optional<RoutingPolicy> getLocalPolicy(ChannelId channelId) {
-        String ownPubkey = grpcGetInfo.getPubkey().toString();
+        Pubkey ownPubkey = grpcGetInfo.getPubkey();
+        return getPolicyFrom(channelId, ownPubkey);
+    }
+
+    public Optional<RoutingPolicy> getRemotePolicy(ChannelId channelId) {
+        Pubkey ownPubkey = grpcGetInfo.getPubkey();
+        return getPolicyTo(channelId, ownPubkey);
+    }
+
+    public Optional<RoutingPolicy> getPolicyFrom(ChannelId channelId, Pubkey source) {
+        String sourcePubkey = source.toString();
         return getChannelEdge(channelId).map(
                 channelEdge -> {
-                    if (ownPubkey.equals(channelEdge.getNode1Pub())) {
+                    if (sourcePubkey.equals(channelEdge.getNode1Pub())) {
                         return channelEdge.getNode1Policy();
-                    } else if (ownPubkey.equals(channelEdge.getNode2Pub())) {
+                    } else if (sourcePubkey.equals(channelEdge.getNode2Pub())) {
                         return channelEdge.getNode2Policy();
                     } else {
                         return null;
@@ -39,13 +50,13 @@ public class GrpcChannelPolicy {
         );
     }
 
-    public Optional<RoutingPolicy> getRemotePolicy(ChannelId channelId) {
-        String ownPubkey = grpcGetInfo.getPubkey().toString();
+    public Optional<RoutingPolicy> getPolicyTo(ChannelId channelId, Pubkey target) {
+        String targetPubkey = target.toString();
         return getChannelEdge(channelId).map(
                 channelEdge -> {
-                    if (ownPubkey.equals(channelEdge.getNode2Pub())) {
+                    if (targetPubkey.equals(channelEdge.getNode2Pub())) {
                         return channelEdge.getNode1Policy();
-                    } else if (ownPubkey.equals(channelEdge.getNode1Pub())) {
+                    } else if (targetPubkey.equals(channelEdge.getNode1Pub())) {
                         return channelEdge.getNode2Policy();
                     } else {
                         return null;
@@ -61,5 +72,4 @@ public class GrpcChannelPolicy {
     private Optional<ChannelEdge> getChannelEdgeWithoutCache(ChannelId channelId) {
         return grpcService.getChannelEdge(channelId);
     }
-
 }

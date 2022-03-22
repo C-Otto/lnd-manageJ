@@ -16,7 +16,9 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_4;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,7 +37,7 @@ class GrpcChannelPolicyTest {
 
     @BeforeEach
     void setUp() {
-        when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY);
+        lenient().when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY);
     }
 
     @Test
@@ -77,6 +79,42 @@ class GrpcChannelPolicyTest {
     void getRemotePolicy_not_local() {
         when(grpcService.getChannelEdge(CHANNEL_ID)).thenReturn(Optional.of(channelEdge(PUBKEY_2, PUBKEY_3)));
         assertThat(grpcChannelPolicy.getRemotePolicy(CHANNEL_ID)).isEmpty();
+    }
+
+    @Test
+    void getPolicyFrom_first() {
+        when(grpcService.getChannelEdge(CHANNEL_ID)).thenReturn(Optional.of(channelEdge(PUBKEY_2, PUBKEY_3)));
+        assertThat(grpcChannelPolicy.getPolicyFrom(CHANNEL_ID, PUBKEY_2)).contains(routingPolicy(FEE_RATE_FIRST));
+    }
+
+    @Test
+    void getPolicyFrom_second() {
+        when(grpcService.getChannelEdge(CHANNEL_ID)).thenReturn(Optional.of(channelEdge(PUBKEY_2, PUBKEY_3)));
+        assertThat(grpcChannelPolicy.getPolicyFrom(CHANNEL_ID, PUBKEY_3)).contains(routingPolicy(FEE_RATE_SECOND));
+    }
+
+    @Test
+    void getPolicyFrom_neither() {
+        when(grpcService.getChannelEdge(CHANNEL_ID)).thenReturn(Optional.of(channelEdge(PUBKEY_2, PUBKEY_3)));
+        assertThat(grpcChannelPolicy.getPolicyFrom(CHANNEL_ID, PUBKEY_4)).isEmpty();
+    }
+
+    @Test
+    void getPolicyTo_first() {
+        when(grpcService.getChannelEdge(CHANNEL_ID)).thenReturn(Optional.of(channelEdge(PUBKEY_2, PUBKEY_3)));
+        assertThat(grpcChannelPolicy.getPolicyTo(CHANNEL_ID, PUBKEY_3)).contains(routingPolicy(FEE_RATE_FIRST));
+    }
+
+    @Test
+    void getPolicyTo_second() {
+        when(grpcService.getChannelEdge(CHANNEL_ID)).thenReturn(Optional.of(channelEdge(PUBKEY_2, PUBKEY_3)));
+        assertThat(grpcChannelPolicy.getPolicyTo(CHANNEL_ID, PUBKEY_2)).contains(routingPolicy(FEE_RATE_SECOND));
+    }
+
+    @Test
+    void getPolicyTo_neither() {
+        when(grpcService.getChannelEdge(CHANNEL_ID)).thenReturn(Optional.of(channelEdge(PUBKEY_2, PUBKEY_3)));
+        assertThat(grpcChannelPolicy.getPolicyTo(CHANNEL_ID, PUBKEY_4)).isEmpty();
     }
 
     @Test
