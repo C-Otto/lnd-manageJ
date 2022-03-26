@@ -48,7 +48,7 @@ class ArcInitializer {
         int startNode = pubkeyToIntegerMapping.getMappedInteger(edgeWithLiquidityInformation.edge().startNode());
         int endNode = pubkeyToIntegerMapping.getMappedInteger(edgeWithLiquidityInformation.edge().endNode());
         long capacity = capacitySat / quantization;
-        long unitCost = maximumCapacity.satoshis() / quantization / capacity;
+        long unitCost = maximumCapacity.satoshis() / capacitySat;
         long capacityPiece = capacity / piecewiseLinearApproximations;
         for (int i = 1; i <= piecewiseLinearApproximations; i++) {
             int arcIndex = minCostFlow.addArcWithCapacityAndUnitCost(
