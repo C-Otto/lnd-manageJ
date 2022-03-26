@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.pickhardtpayments.model;
 
+import de.cotto.lndmanagej.model.Coins;
 import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPaymentFixtures.MULTI_PATH_PAYMENT;
@@ -20,5 +21,10 @@ class MultiPathPaymentTest {
     @Test
     void routes() {
         assertThat(MULTI_PATH_PAYMENT.routes()).containsExactly(ROUTE);
+    }
+
+    @Test
+    void fees() {
+        assertThat(MULTI_PATH_PAYMENT.fees()).isEqualTo(Coins.ofMilliSatoshis(20));
     }
 }

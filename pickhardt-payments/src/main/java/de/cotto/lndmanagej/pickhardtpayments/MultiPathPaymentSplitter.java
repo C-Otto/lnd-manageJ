@@ -31,9 +31,8 @@ public class MultiPathPaymentSplitter {
         if (flows.isEmpty()) {
             return MultiPathPayment.FAILURE;
         }
-        double probability = flows.getProbability();
         Set<Route> routes = Routes.fromFlows(source, target, flows);
         Routes.ensureTotalAmount(routes, amount);
-        return new MultiPathPayment(amount, probability, routes);
+        return new MultiPathPayment(routes);
     }
 }

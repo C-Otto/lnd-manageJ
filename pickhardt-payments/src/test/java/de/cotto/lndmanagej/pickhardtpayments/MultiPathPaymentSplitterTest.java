@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.pickhardtpayments;
 
 import de.cotto.lndmanagej.grpc.GrpcGetInfo;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.pickhardtpayments.model.Edge;
 import de.cotto.lndmanagej.pickhardtpayments.model.Flow;
 import de.cotto.lndmanagej.pickhardtpayments.model.Flows;
 import de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPayment;
@@ -16,11 +17,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Set;
 
+import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
+import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY_2;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
+import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_1;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_4;
 import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE;
-import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE_3_2;
 import static de.cotto.lndmanagej.pickhardtpayments.model.FlowFixtures.FLOW;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assumptions.assumeThat;
@@ -63,8 +68,7 @@ class MultiPathPaymentSplitterTest {
         when(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, AMOUNT)).thenReturn(new Flows(FLOW));
         when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY);
         MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY_2, AMOUNT);
-        MultiPathPayment expected =
-                new MultiPathPayment(AMOUNT, FLOW.getProbability(), Set.of(new Route(List.of(EDGE), AMOUNT)));
+        MultiPathPayment expected = new MultiPathPayment(Set.of(new Route(List.of(EDGE), AMOUNT)));
         assertThat(multiPathPayment).isEqualTo(expected);
     }
 
@@ -73,9 +77,10 @@ class MultiPathPaymentSplitterTest {
         long capacitySat = EDGE.capacity().satoshis();
         Coins halfOfCapacity = Coins.ofSatoshis(capacitySat / 2);
         Flow flow = new Flow(EDGE, halfOfCapacity);
-        when(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, AMOUNT)).thenReturn(new Flows(flow));
+        when(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, halfOfCapacity)).thenReturn(new Flows(flow));
 
-        MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_2, AMOUNT);
+        MultiPathPayment multiPathPayment =
+                multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_2, halfOfCapacity);
 
         assertThat(multiPathPayment.probability())
                 .isEqualTo((1.0 * halfOfCapacity.satoshis() + 1) / (capacitySat + 1));
@@ -83,16 +88,18 @@ class MultiPathPaymentSplitterTest {
 
     @Test
     void getMultiPathPayment_two_flows_probability() {
-        long capacitySat = EDGE.capacity().satoshis();
+        long capacitySat = CAPACITY.satoshis();
         Coins halfOfCapacity = Coins.ofSatoshis(capacitySat / 2);
-        Flow flow1 = new Flow(EDGE, halfOfCapacity);
-        Flow flow2 = new Flow(EDGE_3_2, EDGE_3_2.capacity());
-        when(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, AMOUNT)).thenReturn(new Flows(flow1, flow2));
+        Flow flow1 = new Flow(new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1), halfOfCapacity);
+        Flow flow2 = new Flow(new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, CAPACITY_2, POLICY_1), CAPACITY_2);
+        Coins totalAmount = halfOfCapacity.add(CAPACITY_2);
+        when(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, totalAmount)).thenReturn(new Flows(flow1, flow2));
 
-        MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_2, AMOUNT);
+        MultiPathPayment multiPathPayment =
+                multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_2, totalAmount);
 
         double probabilityFlow1 = (1.0 * halfOfCapacity.satoshis() + 1) / (capacitySat + 1);
-        double probabilityFlow2 = 1.0 / (EDGE_3_2.capacity().satoshis() + 1);
+        double probabilityFlow2 = 1.0 / (CAPACITY_2.satoshis() + 1);
         assertThat(multiPathPayment.probability()).isEqualTo(probabilityFlow1 * probabilityFlow2);
     }
 
@@ -102,9 +109,10 @@ class MultiPathPaymentSplitterTest {
         Coins halfOfCapacity = Coins.ofSatoshis(capacitySat / 2);
         Flow flow1 = new Flow(EDGE, halfOfCapacity);
         Flow flow2 = new Flow(EDGE, halfOfCapacity);
-        when(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, AMOUNT)).thenReturn(new Flows(flow1, flow2));
+        when(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, EDGE.capacity())).thenReturn(new Flows(flow1, flow2));
 
-        MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_2, AMOUNT);
+        MultiPathPayment multiPathPayment =
+                multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_2, EDGE.capacity());
 
         assertThat(multiPathPayment.probability()).isEqualTo(1.0 / (capacitySat + 1));
     }
