@@ -64,7 +64,8 @@ class ArcInitializer {
 
     private Coins getMaximumCapacity(Collection<EdgeWithLiquidityInformation> edgesWithCapacityInformation) {
         return edgesWithCapacityInformation.stream()
-                .map(EdgeWithLiquidityInformation::availableLiquidityUpperBound)
+                .map(EdgeWithLiquidityInformation::edge)
+                .map(Edge::capacity)
                 .max(Comparator.naturalOrder())
                 .orElse(Coins.NONE);
     }

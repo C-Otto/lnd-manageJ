@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.pickhardtpayments.model;
 
+import de.cotto.lndmanagej.model.Coins;
 import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
@@ -34,5 +35,12 @@ class EdgeTest {
     @Test
     void policy() {
         assertThat(EDGE.policy()).isEqualTo(POLICY_1);
+    }
+
+    @Test
+    void withCapacity() {
+        Coins newCapacity = Coins.ofSatoshis(1);
+        Edge expected = new Edge(EDGE.channelId(), EDGE.startNode(), EDGE.endNode(), newCapacity, EDGE.policy());
+        assertThat(EDGE.withCapacity(newCapacity)).isEqualTo(expected);
     }
 }
