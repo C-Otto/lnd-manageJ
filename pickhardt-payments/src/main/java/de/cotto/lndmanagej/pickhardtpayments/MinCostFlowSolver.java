@@ -32,7 +32,7 @@ class MinCostFlowSolver {
     }
 
     public MinCostFlowSolver(
-            Collection<EdgeWithLiquidityInformation> edgesWithCapacityInformation,
+            Collection<EdgeWithLiquidityInformation> edgesWithLiquidityInformation,
             Map<Pubkey, Coins> sources,
             Map<Pubkey, Coins> sinks,
             long quantization,
@@ -46,7 +46,7 @@ class MinCostFlowSolver {
                 quantization,
                 piecewiseLinearApproximations
         );
-        arcInitializer.addArcs(edgesWithCapacityInformation);
+        arcInitializer.addArcs(edgesWithLiquidityInformation);
         setSupply(sources, sinks);
     }
 

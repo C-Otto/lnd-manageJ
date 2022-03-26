@@ -33,9 +33,9 @@ class ArcInitializer {
         this.piecewiseLinearApproximations = piecewiseLinearApproximations;
     }
 
-    public void addArcs(Collection<EdgeWithLiquidityInformation> edgesWithCapacityInformation) {
-        Coins maximumCapacity = getMaximumCapacity(edgesWithCapacityInformation);
-        for (EdgeWithLiquidityInformation edgeWithLiquidityInformation : edgesWithCapacityInformation) {
+    public void addArcs(Collection<EdgeWithLiquidityInformation> edgesWithLiquidityInformation) {
+        Coins maximumCapacity = getMaximumCapacity(edgesWithLiquidityInformation);
+        for (EdgeWithLiquidityInformation edgeWithLiquidityInformation : edgesWithLiquidityInformation) {
             addArcs(edgeWithLiquidityInformation, maximumCapacity);
         }
     }
@@ -62,8 +62,8 @@ class ArcInitializer {
         }
     }
 
-    private Coins getMaximumCapacity(Collection<EdgeWithLiquidityInformation> edgesWithCapacityInformation) {
-        return edgesWithCapacityInformation.stream()
+    private Coins getMaximumCapacity(Collection<EdgeWithLiquidityInformation> edgesWithLiquidityInformation) {
+        return edgesWithLiquidityInformation.stream()
                 .map(EdgeWithLiquidityInformation::edge)
                 .map(Edge::capacity)
                 .max(Comparator.naturalOrder())
