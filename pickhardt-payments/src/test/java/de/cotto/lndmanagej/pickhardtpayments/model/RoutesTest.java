@@ -11,6 +11,7 @@ import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
+import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_1;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
@@ -67,7 +68,7 @@ class RoutesTest {
     void fromFlows_two_channels_joining() {
         Edge edge1a = createEdgeWithChannelId(CHANNEL_ID);
         Edge edge1b = createEdgeWithChannelId(CHANNEL_ID_2);
-        Edge edge2 = new Edge(CHANNEL_ID, PUBKEY_2, PUBKEY_3, CAPACITY);
+        Edge edge2 = new Edge(CHANNEL_ID, PUBKEY_2, PUBKEY_3, CAPACITY, POLICY_1);
         flows.add(edge1a, Coins.ofSatoshis(10));
         flows.add(edge1b, Coins.ofSatoshis(10));
         flows.add(edge2, Coins.ofSatoshis(20));
@@ -88,20 +89,20 @@ class RoutesTest {
     @Test
     void ensureTotalAmount_adds_to_route_with_highest_probability() {
         Flows flows = new Flows();
-        flows.add(new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY), Coins.ofSatoshis(2));
-        flows.add(new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, CAPACITY), Coins.ofSatoshis(1));
-        flows.add(new Edge(CHANNEL_ID_3, PUBKEY, PUBKEY_2, CAPACITY), Coins.ofSatoshis(3));
+        flows.add(new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1), Coins.ofSatoshis(2));
+        flows.add(new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1), Coins.ofSatoshis(1));
+        flows.add(new Edge(CHANNEL_ID_3, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1), Coins.ofSatoshis(3));
         Set<Route> routes = Routes.fromFlows(PUBKEY, PUBKEY_2, flows);
         Routes.ensureTotalAmount(routes, Coins.ofSatoshis(7));
         assertThat(routes).containsExactlyInAnyOrder(
-                new Route(List.of(new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY)), Coins.ofSatoshis(2)),
-                new Route(List.of(new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, CAPACITY)), Coins.ofSatoshis(2)),
-                new Route(List.of(new Edge(CHANNEL_ID_3, PUBKEY, PUBKEY_2, CAPACITY)), Coins.ofSatoshis(3))
+                new Route(List.of(new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1)), Coins.ofSatoshis(2)),
+                new Route(List.of(new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1)), Coins.ofSatoshis(2)),
+                new Route(List.of(new Edge(CHANNEL_ID_3, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1)), Coins.ofSatoshis(3))
         );
     }
 
     private Edge createEdgeWithChannelId(ChannelId channelId) {
-        return new Edge(channelId, PUBKEY, PUBKEY_2, CAPACITY);
+        return new Edge(channelId, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1);
     }
 
 }

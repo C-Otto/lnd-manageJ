@@ -10,6 +10,7 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_4;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_5;
+import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_1;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
@@ -158,11 +159,11 @@ class FlowsTest {
     @Test
     void getShortestPath_complex() {
         Coins coins = Coins.ofSatoshis(1);
-        Edge edge1to2 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY);
-        Edge edge2to3 = new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_3, CAPACITY);
-        Edge edge2to1 = new Edge(CHANNEL_ID_3, PUBKEY_2, PUBKEY, CAPACITY);
-        Edge edge1to3 = new Edge(CHANNEL_ID_4, PUBKEY, PUBKEY_3, CAPACITY);
-        Edge edge3to4 = new Edge(CHANNEL_ID_5, PUBKEY_3, PUBKEY_4, CAPACITY);
+        Edge edge1to2 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1);
+        Edge edge2to3 = new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_3, CAPACITY, POLICY_1);
+        Edge edge2to1 = new Edge(CHANNEL_ID_3, PUBKEY_2, PUBKEY, CAPACITY, POLICY_1);
+        Edge edge1to3 = new Edge(CHANNEL_ID_4, PUBKEY, PUBKEY_3, CAPACITY, POLICY_1);
+        Edge edge3to4 = new Edge(CHANNEL_ID_5, PUBKEY_3, PUBKEY_4, CAPACITY, POLICY_1);
         Flows flows = new Flows(
                 new Flow(edge1to2, coins),
                 new Flow(edge2to3, coins),

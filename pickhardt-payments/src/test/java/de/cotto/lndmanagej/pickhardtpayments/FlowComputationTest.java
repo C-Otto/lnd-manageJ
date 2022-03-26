@@ -26,6 +26,7 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_1;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_2;
+import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_DISABLED;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
@@ -82,8 +83,9 @@ class FlowComputationTest {
 
     @Test
     void solve_edge_disabled() {
-        DirectedChannelEdge disabledEdge = new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY, PUBKEY_2, POLICY_1);
-        assumeThat(POLICY_1.enabled()).isFalse();
+        DirectedChannelEdge disabledEdge =
+                new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY, PUBKEY_2, POLICY_DISABLED);
+        assumeThat(POLICY_DISABLED.enabled()).isFalse();
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(disabledEdge)));
         assertThat(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, Coins.ofSatoshis(1))).isEqualTo(new Flows());
     }
@@ -93,7 +95,7 @@ class FlowComputationTest {
         Coins amount = Coins.ofSatoshis(1);
         DirectedChannelEdge enabledEdge = new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY, PUBKEY_2, POLICY_2);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(enabledEdge)));
-        Flow expectedFlow = new Flow(new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY), amount);
+        Flow expectedFlow = new Flow(new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, POLICY_2), amount);
         assertThat(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, amount)).isEqualTo(new Flows(expectedFlow));
     }
 
@@ -105,14 +107,14 @@ class FlowComputationTest {
         when(balanceService.getAvailableLocalBalance(CHANNEL_ID)).thenReturn(Coins.ofSatoshis(1));
         Coins amount = Coins.ofSatoshis(100);
         DirectedChannelEdge largerButDepletedChannel =
-                new DirectedChannelEdge(CHANNEL_ID, LARGE, PUBKEY, PUBKEY_2, POLICY_2);
+                new DirectedChannelEdge(CHANNEL_ID, LARGE, PUBKEY, PUBKEY_2, POLICY_1);
         DirectedChannelEdge smallerChannel =
                 new DirectedChannelEdge(CHANNEL_ID_2, SMALL, PUBKEY, PUBKEY_2, POLICY_2);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(
                 largerButDepletedChannel,
                 smallerChannel
         )));
-        Flow expectedFlow = new Flow(new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, SMALL), amount);
+        Flow expectedFlow = new Flow(new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, SMALL, POLICY_2), amount);
         assertThat(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, amount)).isEqualTo(new Flows(expectedFlow));
     }
 
@@ -124,14 +126,14 @@ class FlowComputationTest {
         when(balanceService.getAvailableRemoteBalance(CHANNEL_ID)).thenReturn(Coins.ofSatoshis(1));
         Coins amount = Coins.ofSatoshis(100);
         DirectedChannelEdge largerButDepletedChannel =
-                new DirectedChannelEdge(CHANNEL_ID, LARGE, PUBKEY_2, PUBKEY, POLICY_2);
+                new DirectedChannelEdge(CHANNEL_ID, LARGE, PUBKEY_2, PUBKEY, POLICY_1);
         DirectedChannelEdge smallerChannel =
                 new DirectedChannelEdge(CHANNEL_ID_2, SMALL, PUBKEY_2, PUBKEY, POLICY_2);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(
                 largerButDepletedChannel,
                 smallerChannel
         )));
-        Flow expectedFlow = new Flow(new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY, SMALL), amount);
+        Flow expectedFlow = new Flow(new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY, SMALL, POLICY_2), amount);
         assertThat(flowComputation.getOptimalFlows(PUBKEY_2, PUBKEY, amount)).isEqualTo(new Flows(expectedFlow));
     }
 
@@ -140,20 +142,20 @@ class FlowComputationTest {
         Coins amount = Coins.ofSatoshis(100);
         DirectedChannelEdge edge = new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY_2, PUBKEY_3, POLICY_2);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));
-        Flow expectedFlow = new Flow(new Edge(CHANNEL_ID, PUBKEY_2, PUBKEY_3, CAPACITY), amount);
+        Flow expectedFlow = new Flow(new Edge(CHANNEL_ID, PUBKEY_2, PUBKEY_3, CAPACITY, POLICY_2), amount);
         assertThat(flowComputation.getOptimalFlows(PUBKEY_2, PUBKEY_3, amount)).isEqualTo(new Flows(expectedFlow));
     }
 
     @Test
     void solve_with_recent_mission_control_failure_as_upper_bound() {
         Coins amount = Coins.ofSatoshis(100);
-        DirectedChannelEdge edge1a = new DirectedChannelEdge(CHANNEL_ID, LARGE, PUBKEY_2, PUBKEY_3, POLICY_2);
-        DirectedChannelEdge edge1b = new DirectedChannelEdge(CHANNEL_ID_2, LARGE, PUBKEY_3, PUBKEY_4, POLICY_2);
+        DirectedChannelEdge edge1a = new DirectedChannelEdge(CHANNEL_ID, LARGE, PUBKEY_2, PUBKEY_3, POLICY_1);
+        DirectedChannelEdge edge1b = new DirectedChannelEdge(CHANNEL_ID_2, LARGE, PUBKEY_3, PUBKEY_4, POLICY_1);
         DirectedChannelEdge edge2 = new DirectedChannelEdge(CHANNEL_ID_3, SMALL, PUBKEY_2, PUBKEY_4, POLICY_2);
         when(missionControlService.getMinimumOfRecentFailures(PUBKEY_2, PUBKEY_3))
                 .thenReturn(Optional.of(Coins.ofSatoshis(100)));
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge1a, edge1b, edge2)));
-        Flow expectedFlow = new Flow(new Edge(CHANNEL_ID_3, PUBKEY_2, PUBKEY_4, SMALL), amount);
+        Flow expectedFlow = new Flow(new Edge(CHANNEL_ID_3, PUBKEY_2, PUBKEY_4, SMALL, POLICY_2), amount);
         assertThat(flowComputation.getOptimalFlows(PUBKEY_2, PUBKEY_4, amount)).isEqualTo(new Flows(expectedFlow));
     }
 
@@ -166,8 +168,8 @@ class FlowComputationTest {
         when(missionControlService.getMinimumOfRecentFailures(PUBKEY_3, PUBKEY_4))
                 .thenReturn(Optional.of(Coins.ofSatoshis(5_000_000)));
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge1a, edge1b, edge2)));
-        Flow expectedFlow1 = new Flow(new Edge(CHANNEL_ID, PUBKEY_3, PUBKEY_4, LARGE), amount);
-        Flow expectedFlow2 = new Flow(new Edge(CHANNEL_ID_2, PUBKEY_4, PUBKEY, LARGE), amount);
+        Flow expectedFlow1 = new Flow(new Edge(CHANNEL_ID, PUBKEY_3, PUBKEY_4, LARGE, POLICY_2), amount);
+        Flow expectedFlow2 = new Flow(new Edge(CHANNEL_ID_2, PUBKEY_4, PUBKEY, LARGE, POLICY_2), amount);
         assertThat(flowComputation.getOptimalFlows(PUBKEY_3, PUBKEY, amount))
                 .isEqualTo(new Flows(expectedFlow1, expectedFlow2));
     }

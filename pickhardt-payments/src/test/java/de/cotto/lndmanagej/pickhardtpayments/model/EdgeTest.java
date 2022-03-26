@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_1;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE;
@@ -28,5 +29,10 @@ class EdgeTest {
     @Test
     void capacity() {
         assertThat(EDGE.capacity()).isEqualTo(CAPACITY);
+    }
+
+    @Test
+    void policy() {
+        assertThat(EDGE.policy()).isEqualTo(POLICY_1);
     }
 }

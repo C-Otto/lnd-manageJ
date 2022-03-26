@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.model;
 import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_1;
+import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_DISABLED;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PolicyTest {
@@ -18,7 +19,12 @@ class PolicyTest {
 
     @Test
     void enabled() {
-        assertThat(POLICY_1.enabled()).isFalse();
+        assertThat(POLICY_1.enabled()).isTrue();
+    }
+
+    @Test
+    void disabled() {
+        assertThat(POLICY_DISABLED.enabled()).isFalse();
     }
 
     @Test

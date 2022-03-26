@@ -75,7 +75,7 @@ public class FlowComputation {
             ChannelId channelId = channelEdge.channelId();
             Pubkey pubkey1 = channelEdge.source();
             Pubkey pubkey2 = channelEdge.target();
-            Edge edge = new Edge(channelId, pubkey1, pubkey2, channelEdge.capacity());
+            Edge edge = new Edge(channelId, pubkey1, pubkey2, channelEdge.capacity(), channelEdge.policy());
             Coins availableCapacity = getAvailableCapacity(channelEdge, ownPubkey);
             EdgeWithCapacityInformation edgeWithCapacityInformation =
                     new EdgeWithCapacityInformation(edge, availableCapacity);

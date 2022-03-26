@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_1;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE;
 import static de.cotto.lndmanagej.pickhardtpayments.model.FlowFixtures.FLOW;
@@ -29,7 +30,7 @@ class FlowTest {
     @Test
     void source_and_target_must_be_different() {
         assertThatIllegalArgumentException().isThrownBy(
-                () -> new Flow(new Edge(CHANNEL_ID, PUBKEY, PUBKEY, CAPACITY), Coins.ofSatoshis(1))
+                () -> new Flow(new Edge(CHANNEL_ID, PUBKEY, PUBKEY, CAPACITY, POLICY_1), Coins.ofSatoshis(1))
         ).withMessage("Source and target must be different");
     }
 
