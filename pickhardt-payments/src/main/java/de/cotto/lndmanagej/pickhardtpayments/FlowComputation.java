@@ -71,7 +71,7 @@ public class FlowComputation {
         Set<EdgeWithLiquidityInformation> edgesWithLiquidityInformation = new LinkedHashSet<>();
         Pubkey ownPubkey = grpcGetInfo.getPubkey();
         for (DirectedChannelEdge channelEdge : channelEdges) {
-            if (!channelEdge.policy().enabled()) {
+            if (channelEdge.policy().disabled()) {
                 continue;
             }
             ChannelId channelId = channelEdge.channelId();

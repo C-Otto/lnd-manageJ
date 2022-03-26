@@ -20,11 +20,13 @@ class PolicyTest {
     @Test
     void enabled() {
         assertThat(POLICY_1.enabled()).isTrue();
+        assertThat(POLICY_1.disabled()).isFalse();
     }
 
     @Test
     void disabled() {
         assertThat(POLICY_DISABLED.enabled()).isFalse();
+        assertThat(POLICY_DISABLED.disabled()).isTrue();
     }
 
     @Test
