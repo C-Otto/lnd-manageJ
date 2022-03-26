@@ -7,7 +7,7 @@ import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.DirectedChannelEdge;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.model.Edge;
-import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithCapacityInformation;
+import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.Flows;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 @Component
@@ -61,13 +62,13 @@ public class FlowComputation {
         return minCostFlowSolver.solve();
     }
 
-    private Set<EdgeWithCapacityInformation> getEdges() {
+    private Set<EdgeWithLiquidityInformation> getEdges() {
         Set<DirectedChannelEdge> channelEdges = grpcGraph.getChannelEdges().orElse(null);
         if (channelEdges == null) {
             logger.warn("Unable to get graph");
             return Set.of();
         }
-        Set<EdgeWithCapacityInformation> edgesWithCapacityInformation = new LinkedHashSet<>();
+        Set<EdgeWithLiquidityInformation> edgesWithLiquidityInformation = new LinkedHashSet<>();
         Pubkey ownPubkey = grpcGetInfo.getPubkey();
         for (DirectedChannelEdge channelEdge : channelEdges) {
             if (!channelEdge.policy().enabled()) {
@@ -77,37 +78,32 @@ public class FlowComputation {
             Pubkey pubkey1 = channelEdge.source();
             Pubkey pubkey2 = channelEdge.target();
             Edge edge = new Edge(channelId, pubkey1, pubkey2, channelEdge.capacity(), channelEdge.policy());
-            Coins availableCapacity = getAvailableCapacity(channelEdge, ownPubkey);
-            EdgeWithCapacityInformation edgeWithCapacityInformation =
-                    new EdgeWithCapacityInformation(edge, availableCapacity);
-            edgesWithCapacityInformation.add(edgeWithCapacityInformation);
+            edgesWithLiquidityInformation.add(getEdgeWithLiquidityInformation(edge, ownPubkey));
         }
-        return edgesWithCapacityInformation;
+        return edgesWithLiquidityInformation;
     }
 
-    private Coins getAvailableCapacity(DirectedChannelEdge channelEdge, Pubkey ownPubKey) {
-        Pubkey source = channelEdge.source();
-        Coins capacity = channelEdge.capacity();
-        ChannelId channelId = channelEdge.channelId();
+    private EdgeWithLiquidityInformation getEdgeWithLiquidityInformation(Edge edge, Pubkey ownPubkey) {
+        Coins knownLiquidity = getKnownLiquidity(edge, ownPubkey).orElse(null);
+        if (knownLiquidity == null) {
+            Coins availableLiquidityUpperBound = getAvailableLiquidityUpperBound(edge);
+            return EdgeWithLiquidityInformation.forUpperBound(edge, availableLiquidityUpperBound);
+        }
+        return EdgeWithLiquidityInformation.forKnownLiquidity(edge, knownLiquidity);
+    }
+
+    private Optional<Coins> getKnownLiquidity(Edge edge, Pubkey ownPubKey) {
+        Pubkey source = edge.startNode();
+        Coins capacity = edge.capacity();
+        ChannelId channelId = edge.channelId();
         if (ownPubKey.equals(source)) {
-            return getLocalChannelAvailableLocal(capacity, channelId);
+            return Optional.of(getLocalChannelAvailableLocal(capacity, channelId));
         }
-        Pubkey target = channelEdge.target();
+        Pubkey target = edge.endNode();
         if (ownPubKey.equals(target)) {
-            return getLocalChannelAvailableRemote(capacity, channelId);
+            return Optional.of(getLocalChannelAvailableRemote(capacity, channelId));
         }
-        Coins failureAmount = missionControlService.getMinimumOfRecentFailures(source, target).orElse(null);
-        if (failureAmount == null) {
-            return capacity;
-        }
-        return getAvailableUpperBoundBelowRecentFailure(capacity, failureAmount);
-    }
-
-    private Coins getAvailableUpperBoundBelowRecentFailure(Coins capacity, Coins failureAmount) {
-        long satsCapacity = capacity.satoshis();
-        long satsNotAvailable = failureAmount.milliSatoshis() / 1_000;
-        long satsAvailable = Math.max(Math.min(satsNotAvailable - 1, satsCapacity), 0);
-        return Coins.ofSatoshis(satsAvailable);
+        return Optional.empty();
     }
 
     private Coins getLocalChannelAvailableLocal(Coins capacity, ChannelId channelId) {
@@ -120,5 +116,18 @@ public class FlowComputation {
         return channelService.getLocalChannel(channelId)
                 .map(c -> balanceService.getAvailableRemoteBalance(channelId))
                 .orElse(capacity);
+    }
+
+    private Coins getAvailableLiquidityUpperBound(Edge edge) {
+        Pubkey source = edge.startNode();
+        Pubkey target = edge.endNode();
+        Coins failureAmount = missionControlService.getMinimumOfRecentFailures(source, target).orElse(null);
+        if (failureAmount == null) {
+            return edge.capacity();
+        }
+        long satsCapacity = edge.capacity().satoshis();
+        long satsNotAvailable = failureAmount.milliSatoshis() / 1_000;
+        long satsAvailable = Math.max(Math.min(satsNotAvailable - 1, satsCapacity), 0);
+        return Coins.ofSatoshis(satsAvailable);
     }
 }

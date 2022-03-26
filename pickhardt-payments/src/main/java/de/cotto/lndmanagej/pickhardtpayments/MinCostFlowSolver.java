@@ -6,7 +6,7 @@ import com.google.ortools.graph.MinCostFlowBase;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.model.Edge;
-import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithCapacityInformation;
+import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.Flow;
 import de.cotto.lndmanagej.pickhardtpayments.model.Flows;
 import de.cotto.lndmanagej.pickhardtpayments.model.IntegerMapping;
@@ -32,7 +32,7 @@ class MinCostFlowSolver {
     }
 
     public MinCostFlowSolver(
-            Collection<EdgeWithCapacityInformation> edgesWithCapacityInformation,
+            Collection<EdgeWithLiquidityInformation> edgesWithCapacityInformation,
             Map<Pubkey, Coins> sources,
             Map<Pubkey, Coins> sinks,
             long quantization,

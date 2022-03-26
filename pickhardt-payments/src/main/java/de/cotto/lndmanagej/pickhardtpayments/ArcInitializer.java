@@ -4,7 +4,7 @@ import com.google.ortools.graph.MinCostFlow;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.model.Edge;
-import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithCapacityInformation;
+import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.IntegerMapping;
 
 import java.util.Collection;
@@ -33,20 +33,20 @@ class ArcInitializer {
         this.piecewiseLinearApproximations = piecewiseLinearApproximations;
     }
 
-    public void addArcs(Collection<EdgeWithCapacityInformation> edgesWithCapacityInformation) {
+    public void addArcs(Collection<EdgeWithLiquidityInformation> edgesWithCapacityInformation) {
         Coins maximumCapacity = getMaximumCapacity(edgesWithCapacityInformation);
-        for (EdgeWithCapacityInformation edgeWithCapacityInformation : edgesWithCapacityInformation) {
-            addArcs(edgeWithCapacityInformation, maximumCapacity);
+        for (EdgeWithLiquidityInformation edgeWithLiquidityInformation : edgesWithCapacityInformation) {
+            addArcs(edgeWithLiquidityInformation, maximumCapacity);
         }
     }
 
-    private void addArcs(EdgeWithCapacityInformation edgeWithCapacityInformation, Coins maximumCapacity) {
-        long capacitySat = edgeWithCapacityInformation.availableCapacity().satoshis();
+    private void addArcs(EdgeWithLiquidityInformation edgeWithLiquidityInformation, Coins maximumCapacity) {
+        long capacitySat = edgeWithLiquidityInformation.availableLiquidityUpperBound().satoshis();
         if (capacitySat < quantization) {
             return;
         }
-        int startNode = pubkeyToIntegerMapping.getMappedInteger(edgeWithCapacityInformation.edge().startNode());
-        int endNode = pubkeyToIntegerMapping.getMappedInteger(edgeWithCapacityInformation.edge().endNode());
+        int startNode = pubkeyToIntegerMapping.getMappedInteger(edgeWithLiquidityInformation.edge().startNode());
+        int endNode = pubkeyToIntegerMapping.getMappedInteger(edgeWithLiquidityInformation.edge().endNode());
         long capacity = capacitySat / quantization;
         long unitCost = maximumCapacity.satoshis() / quantization / capacity;
         long capacityPiece = capacity / piecewiseLinearApproximations;
@@ -57,13 +57,13 @@ class ArcInitializer {
                     capacityPiece,
                     i * unitCost
             );
-            edgeMapping.put(arcIndex, edgeWithCapacityInformation.edge());
+            edgeMapping.put(arcIndex, edgeWithLiquidityInformation.edge());
         }
     }
 
-    private Coins getMaximumCapacity(Collection<EdgeWithCapacityInformation> edgesWithCapacityInformation) {
+    private Coins getMaximumCapacity(Collection<EdgeWithLiquidityInformation> edgesWithCapacityInformation) {
         return edgesWithCapacityInformation.stream()
-                .map(EdgeWithCapacityInformation::availableCapacity)
+                .map(EdgeWithLiquidityInformation::availableLiquidityUpperBound)
                 .max(Comparator.naturalOrder())
                 .orElse(Coins.NONE);
     }

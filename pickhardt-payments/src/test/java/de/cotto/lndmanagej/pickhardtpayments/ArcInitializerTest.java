@@ -5,7 +5,7 @@ import com.google.ortools.graph.MinCostFlow;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.model.Edge;
-import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithCapacityInformation;
+import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.IntegerMapping;
 import org.junit.jupiter.api.Test;
 
@@ -47,7 +47,7 @@ class ArcInitializerTest {
 
     @Test
     void ignores_edge_with_zero_capacity() {
-        arcInitializer.addArcs(Set.of(new EdgeWithCapacityInformation(EDGE, Coins.NONE)));
+        arcInitializer.addArcs(Set.of(EdgeWithLiquidityInformation.forUpperBound(EDGE, Coins.NONE)));
         assertThat(minCostFlow.getNumArcs()).isZero();
     }
 
@@ -61,7 +61,9 @@ class ArcInitializerTest {
                 quantization,
                 PIECEWISE_LINEAR_APPROXIMATIONS
         );
-        arcInitializer.addArcs(Set.of(new EdgeWithCapacityInformation(EDGE, Coins.ofSatoshis(quantization))));
+        EdgeWithLiquidityInformation edgeWithLiquidityInformation =
+                EdgeWithLiquidityInformation.forUpperBound(EDGE, Coins.ofSatoshis(quantization));
+        arcInitializer.addArcs(Set.of(edgeWithLiquidityInformation));
         assertThat(minCostFlow.getNumArcs()).isOne();
     }
 
@@ -76,8 +78,8 @@ class ArcInitializerTest {
                 piecesPerChannel
         );
         arcInitializer.addArcs(List.of(
-                new EdgeWithCapacityInformation(EDGE, Coins.ofSatoshis(100)),
-                new EdgeWithCapacityInformation(EDGE_2_3, Coins.ofSatoshis(200))
+                EdgeWithLiquidityInformation.forUpperBound(EDGE, Coins.ofSatoshis(100)),
+                EdgeWithLiquidityInformation.forUpperBound(EDGE_2_3, Coins.ofSatoshis(200))
         ));
         assertThat(edgeMapping.get(0)).isEqualTo(EDGE);
         assertThat(edgeMapping.get(piecesPerChannel)).isEqualTo(EDGE_2_3);
@@ -93,7 +95,9 @@ class ArcInitializerTest {
                 quantization,
                 PIECEWISE_LINEAR_APPROXIMATIONS
         );
-        arcInitializer.addArcs(Set.of(new EdgeWithCapacityInformation(EDGE, Coins.ofSatoshis(quantization - 1))));
+        EdgeWithLiquidityInformation edgeWithLiquidityInformation =
+                EdgeWithLiquidityInformation.forUpperBound(EDGE, Coins.ofSatoshis(quantization - 1));
+        arcInitializer.addArcs(Set.of(edgeWithLiquidityInformation));
         assertThat(minCostFlow.getNumArcs()).isZero();
     }
 
@@ -107,7 +111,7 @@ class ArcInitializerTest {
                 quantization,
                 PIECEWISE_LINEAR_APPROXIMATIONS
         );
-        arcInitializer.addArcs(Set.of(new EdgeWithCapacityInformation(EDGE, Coins.ofSatoshis(20_123))));
+        arcInitializer.addArcs(Set.of(EdgeWithLiquidityInformation.forUpperBound(EDGE, Coins.ofSatoshis(20_123))));
         assertThat(minCostFlow.getCapacity(0)).isEqualTo(201);
     }
 
@@ -122,15 +126,15 @@ class ArcInitializerTest {
                 PIECEWISE_LINEAR_APPROXIMATIONS
         );
         arcInitializer.addArcs(List.of(
-                new EdgeWithCapacityInformation(EDGE, Coins.ofSatoshis(20_123)),
-                new EdgeWithCapacityInformation(EDGE_3_4, Coins.ofSatoshis(1_000_000))
+                EdgeWithLiquidityInformation.forUpperBound(EDGE, Coins.ofSatoshis(20_123)),
+                EdgeWithLiquidityInformation.forUpperBound(EDGE_3_4, Coins.ofSatoshis(1_000_000))
         ));
         assertThat(minCostFlow.getUnitCost(0)).isEqualTo(49);
     }
 
     @Test
     void one_edge() {
-        arcInitializer.addArcs(Set.of(new EdgeWithCapacityInformation(EDGE, Coins.ofSatoshis(1))));
+        arcInitializer.addArcs(Set.of(EdgeWithLiquidityInformation.forUpperBound(EDGE, Coins.ofSatoshis(1))));
         assertThat(minCostFlow.getNumArcs()).isOne();
     }
 
@@ -146,8 +150,8 @@ class ArcInitializerTest {
                 piecewiseLinearApproximations
         );
         arcInitializer.addArcs(List.of(
-                new EdgeWithCapacityInformation(EDGE, Coins.ofSatoshis(10_000)),
-                new EdgeWithCapacityInformation(EDGE_2_3, Coins.ofSatoshis(30_000))
+                EdgeWithLiquidityInformation.forUpperBound(EDGE, Coins.ofSatoshis(10_000)),
+                EdgeWithLiquidityInformation.forUpperBound(EDGE_2_3, Coins.ofSatoshis(30_000))
         ));
         assertThat(minCostFlow.getNumArcs()).isEqualTo(10);
         assertThat(minCostFlow.getUnitCost(0)).isEqualTo(3);
@@ -164,23 +168,23 @@ class ArcInitializerTest {
 
     @Test
     void two_edges() {
-        EdgeWithCapacityInformation edge1 = new EdgeWithCapacityInformation(EDGE, Coins.ofSatoshis(1));
-        EdgeWithCapacityInformation edge2 = new EdgeWithCapacityInformation(EDGE_1_3, Coins.ofSatoshis(2));
+        EdgeWithLiquidityInformation edge1 = EdgeWithLiquidityInformation.forUpperBound(EDGE, Coins.ofSatoshis(1));
+        EdgeWithLiquidityInformation edge2 = EdgeWithLiquidityInformation.forUpperBound(EDGE_1_3, Coins.ofSatoshis(2));
         arcInitializer.addArcs(Set.of(edge1, edge2));
         assertThat(minCostFlow.getNumArcs()).isEqualTo(2);
     }
 
     @Test
     void parallel_edges_are_not_combined() {
-        EdgeWithCapacityInformation edge = new EdgeWithCapacityInformation(EDGE, Coins.ofSatoshis(1));
+        EdgeWithLiquidityInformation edge = EdgeWithLiquidityInformation.forUpperBound(EDGE, Coins.ofSatoshis(1));
         arcInitializer.addArcs(List.of(edge, edge));
         assertThat(minCostFlow.getNumArcs()).isEqualTo(2);
     }
 
     @Test
     void computes_unit_cost_based_on_maximum_capacity() {
-        EdgeWithCapacityInformation edge1 = new EdgeWithCapacityInformation(EDGE, Coins.ofSatoshis(3));
-        EdgeWithCapacityInformation edge2 = new EdgeWithCapacityInformation(EDGE_1_3, Coins.ofSatoshis(21));
+        EdgeWithLiquidityInformation edge1 = EdgeWithLiquidityInformation.forUpperBound(EDGE, Coins.ofSatoshis(3));
+        EdgeWithLiquidityInformation edge2 = EdgeWithLiquidityInformation.forUpperBound(EDGE_1_3, Coins.ofSatoshis(21));
         arcInitializer.addArcs(List.of(edge1, edge2));
         assertThat(minCostFlow.getUnitCost(0)).isEqualTo(7L);
         assertThat(minCostFlow.getUnitCost(1)).isEqualTo(1L);
@@ -188,17 +192,17 @@ class ArcInitializerTest {
 
     @Test
     void unit_cost_is_rounded_down() {
-        EdgeWithCapacityInformation edge1 = new EdgeWithCapacityInformation(EDGE, Coins.ofSatoshis(3));
-        EdgeWithCapacityInformation edge2 = new EdgeWithCapacityInformation(EDGE_1_3, Coins.ofSatoshis(20));
+        EdgeWithLiquidityInformation edge1 = EdgeWithLiquidityInformation.forUpperBound(EDGE, Coins.ofSatoshis(3));
+        EdgeWithLiquidityInformation edge2 = EdgeWithLiquidityInformation.forUpperBound(EDGE_1_3, Coins.ofSatoshis(20));
         arcInitializer.addArcs(List.of(edge1, edge2));
         assertThat(minCostFlow.getUnitCost(0)).isEqualTo(6L);
     }
 
     @Test
     void computes_unit_cost_based_on_maximum_capacity_without_combining_parallel_edges() {
-        EdgeWithCapacityInformation edge1 = new EdgeWithCapacityInformation(EDGE, Coins.ofSatoshis(2));
-        EdgeWithCapacityInformation edge2 = new EdgeWithCapacityInformation(EDGE_1_3, Coins.ofSatoshis(20));
-        EdgeWithCapacityInformation edge3 = new EdgeWithCapacityInformation(EDGE_1_3, Coins.ofSatoshis(10));
+        EdgeWithLiquidityInformation edge1 = EdgeWithLiquidityInformation.forUpperBound(EDGE, Coins.ofSatoshis(2));
+        EdgeWithLiquidityInformation edge2 = EdgeWithLiquidityInformation.forUpperBound(EDGE_1_3, Coins.ofSatoshis(20));
+        EdgeWithLiquidityInformation edge3 = EdgeWithLiquidityInformation.forUpperBound(EDGE_1_3, Coins.ofSatoshis(10));
         arcInitializer.addArcs(List.of(edge1, edge2, edge3));
         assertThat(minCostFlow.getUnitCost(0)).isEqualTo(10L);
     }
