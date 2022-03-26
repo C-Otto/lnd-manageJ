@@ -55,7 +55,8 @@ public class FlowComputation {
                 getEdges(),
                 Map.of(source, amount),
                 Map.of(target, amount),
-                quantization, piecewiseLinearApproximations
+                quantization,
+                piecewiseLinearApproximations
         );
         return minCostFlowSolver.solve();
     }
