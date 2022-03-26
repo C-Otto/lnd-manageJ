@@ -45,8 +45,9 @@ class ArcInitializer {
         if (capacitySat < quantization) {
             return;
         }
-        int startNode = pubkeyToIntegerMapping.getMappedInteger(edgeWithLiquidityInformation.edge().startNode());
-        int endNode = pubkeyToIntegerMapping.getMappedInteger(edgeWithLiquidityInformation.edge().endNode());
+        Edge edge = edgeWithLiquidityInformation.edge();
+        int startNode = pubkeyToIntegerMapping.getMappedInteger(edge.startNode());
+        int endNode = pubkeyToIntegerMapping.getMappedInteger(edge.endNode());
         long capacity = capacitySat / quantization;
         long unitCost = maximumCapacity.satoshis() / capacitySat;
         long capacityPiece = capacity / piecewiseLinearApproximations;
@@ -57,7 +58,7 @@ class ArcInitializer {
                     capacityPiece,
                     i * unitCost
             );
-            edgeMapping.put(arcIndex, edgeWithLiquidityInformation.edge());
+            edgeMapping.put(arcIndex, edge);
         }
     }
 
