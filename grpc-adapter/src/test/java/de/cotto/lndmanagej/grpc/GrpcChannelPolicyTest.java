@@ -1,5 +1,7 @@
 package de.cotto.lndmanagej.grpc;
 
+import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.Policy;
 import de.cotto.lndmanagej.model.Pubkey;
 import lnrpc.ChannelEdge;
 import lnrpc.RoutingPolicy;
@@ -43,13 +45,15 @@ class GrpcChannelPolicyTest {
     @Test
     void getLocalPolicy_local_first() {
         when(grpcService.getChannelEdge(CHANNEL_ID)).thenReturn(Optional.of(channelEdge(PUBKEY, PUBKEY_2)));
-        assertThat(grpcChannelPolicy.getLocalPolicy(CHANNEL_ID)).contains(routingPolicy(FEE_RATE_FIRST));
+        assertThat(grpcChannelPolicy.getLocalPolicy(CHANNEL_ID))
+                .contains(new Policy(FEE_RATE_FIRST, Coins.NONE, true));
     }
 
     @Test
     void getLocalPolicy_local_second() {
         when(grpcService.getChannelEdge(CHANNEL_ID)).thenReturn(Optional.of(channelEdge(PUBKEY_2, PUBKEY)));
-        assertThat(grpcChannelPolicy.getLocalPolicy(CHANNEL_ID)).contains(routingPolicy(FEE_RATE_SECOND));
+        assertThat(grpcChannelPolicy.getLocalPolicy(CHANNEL_ID))
+                .contains(new Policy(FEE_RATE_SECOND, Coins.NONE, true));
     }
 
     @Test
@@ -66,13 +70,15 @@ class GrpcChannelPolicyTest {
     @Test
     void getRemotePolicy_local_first() {
         when(grpcService.getChannelEdge(CHANNEL_ID)).thenReturn(Optional.of(channelEdge(PUBKEY, PUBKEY_2)));
-        assertThat(grpcChannelPolicy.getRemotePolicy(CHANNEL_ID)).contains(routingPolicy(FEE_RATE_SECOND));
+        assertThat(grpcChannelPolicy.getRemotePolicy(CHANNEL_ID))
+                .contains(new Policy(FEE_RATE_SECOND, Coins.NONE, true));
     }
 
     @Test
     void getRemotePolicy_local_second() {
         when(grpcService.getChannelEdge(CHANNEL_ID)).thenReturn(Optional.of(channelEdge(PUBKEY_2, PUBKEY)));
-        assertThat(grpcChannelPolicy.getRemotePolicy(CHANNEL_ID)).contains(routingPolicy(FEE_RATE_FIRST));
+        assertThat(grpcChannelPolicy.getRemotePolicy(CHANNEL_ID))
+                .contains(new Policy(FEE_RATE_FIRST, Coins.NONE, true));
     }
 
     @Test
@@ -84,13 +90,15 @@ class GrpcChannelPolicyTest {
     @Test
     void getPolicyFrom_first() {
         when(grpcService.getChannelEdge(CHANNEL_ID)).thenReturn(Optional.of(channelEdge(PUBKEY_2, PUBKEY_3)));
-        assertThat(grpcChannelPolicy.getPolicyFrom(CHANNEL_ID, PUBKEY_2)).contains(routingPolicy(FEE_RATE_FIRST));
+        assertThat(grpcChannelPolicy.getPolicyFrom(CHANNEL_ID, PUBKEY_2))
+                .contains(new Policy(FEE_RATE_FIRST, Coins.NONE, true));
     }
 
     @Test
     void getPolicyFrom_second() {
         when(grpcService.getChannelEdge(CHANNEL_ID)).thenReturn(Optional.of(channelEdge(PUBKEY_2, PUBKEY_3)));
-        assertThat(grpcChannelPolicy.getPolicyFrom(CHANNEL_ID, PUBKEY_3)).contains(routingPolicy(FEE_RATE_SECOND));
+        assertThat(grpcChannelPolicy.getPolicyFrom(CHANNEL_ID, PUBKEY_3))
+                .contains(new Policy(FEE_RATE_SECOND, Coins.NONE, true));
     }
 
     @Test
@@ -102,13 +110,15 @@ class GrpcChannelPolicyTest {
     @Test
     void getPolicyTo_first() {
         when(grpcService.getChannelEdge(CHANNEL_ID)).thenReturn(Optional.of(channelEdge(PUBKEY_2, PUBKEY_3)));
-        assertThat(grpcChannelPolicy.getPolicyTo(CHANNEL_ID, PUBKEY_3)).contains(routingPolicy(FEE_RATE_FIRST));
+        assertThat(grpcChannelPolicy.getPolicyTo(CHANNEL_ID, PUBKEY_3))
+                .contains(new Policy(FEE_RATE_FIRST, Coins.NONE, true));
     }
 
     @Test
     void getPolicyTo_second() {
         when(grpcService.getChannelEdge(CHANNEL_ID)).thenReturn(Optional.of(channelEdge(PUBKEY_2, PUBKEY_3)));
-        assertThat(grpcChannelPolicy.getPolicyTo(CHANNEL_ID, PUBKEY_2)).contains(routingPolicy(FEE_RATE_SECOND));
+        assertThat(grpcChannelPolicy.getPolicyTo(CHANNEL_ID, PUBKEY_2))
+                .contains(new Policy(FEE_RATE_SECOND, Coins.NONE, true));
     }
 
     @Test

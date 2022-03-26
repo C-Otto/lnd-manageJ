@@ -1,9 +1,8 @@
 package de.cotto.lndmanagej.service;
 
-import de.cotto.lndmanagej.grpc.GrpcFees;
-import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.grpc.GrpcChannelPolicy;
 import de.cotto.lndmanagej.model.PoliciesForLocalChannel;
-import de.cotto.lndmanagej.model.Policy;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,6 +13,9 @@ import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
+import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_1;
+import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_2;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.Mockito.when;
@@ -24,45 +26,50 @@ class PolicyServiceTest {
     private PolicyService policyService;
 
     @Mock
-    private GrpcFees grpcFees;
+    private GrpcChannelPolicy grpcChannelPolicy;
 
-    @Test
-    void getPolicies() {
-        PoliciesForLocalChannel expected = new PoliciesForLocalChannel(
-                new Policy(789, Coins.ofMilliSatoshis(111), true),
-                new Policy(123, Coins.ofMilliSatoshis(456), false)
-        );
+    @Nested
+    class ForLocalChannel {
+        @Test
+        void getPolicies() {
+            PoliciesForLocalChannel expected = new PoliciesForLocalChannel(POLICY_1, POLICY_2);
 
-        mockFees();
-        when(grpcFees.isEnabledLocal(CHANNEL_ID)).thenReturn(Optional.of(true));
-        when(grpcFees.isEnabledRemote(CHANNEL_ID)).thenReturn(Optional.of(false));
+            when(grpcChannelPolicy.getLocalPolicy(LOCAL_OPEN_CHANNEL.getId())).thenReturn(Optional.of(POLICY_1));
+            when(grpcChannelPolicy.getRemotePolicy(LOCAL_OPEN_CHANNEL.getId())).thenReturn(Optional.of(POLICY_2));
 
-        assertThat(policyService.getPolicies(LOCAL_OPEN_CHANNEL)).isEqualTo(expected);
+            assertThat(policyService.getPolicies(LOCAL_OPEN_CHANNEL)).isEqualTo(expected);
+        }
+
+        @Test
+        void getPolicies_not_found() {
+            assertThatIllegalStateException().isThrownBy(() -> policyService.getPolicies(LOCAL_OPEN_CHANNEL));
+        }
     }
 
-    @Test
-    void getPolicies_enabled_disabled_swapped() {
-        PoliciesForLocalChannel expected = new PoliciesForLocalChannel(
-                new Policy(789, Coins.ofMilliSatoshis(111), false),
-                new Policy(123, Coins.ofMilliSatoshis(456), true)
-        );
+    @Nested
+    class ForDirectedChannel {
+        @Test
+        void getPolicyFrom_edge_not_found() {
+            when(grpcChannelPolicy.getPolicyFrom(CHANNEL_ID, PUBKEY)).thenReturn(Optional.empty());
+            assertThat(policyService.getPolicyFrom(CHANNEL_ID, PUBKEY)).isEmpty();
+        }
 
-        mockFees();
-        when(grpcFees.isEnabledLocal(CHANNEL_ID)).thenReturn(Optional.of(false));
-        when(grpcFees.isEnabledRemote(CHANNEL_ID)).thenReturn(Optional.of(true));
+        @Test
+        void getPolicyFrom() {
+            when(grpcChannelPolicy.getPolicyFrom(CHANNEL_ID, PUBKEY)).thenReturn(Optional.of(POLICY_1));
+            assertThat(policyService.getPolicyFrom(CHANNEL_ID, PUBKEY)).contains(POLICY_1);
+        }
 
-        assertThat(policyService.getPolicies(LOCAL_OPEN_CHANNEL)).isEqualTo(expected);
-    }
+        @Test
+        void getPolicyTo_edge_not_found() {
+            when(grpcChannelPolicy.getPolicyTo(CHANNEL_ID, PUBKEY)).thenReturn(Optional.empty());
+            assertThat(policyService.getPolicyTo(CHANNEL_ID, PUBKEY)).isEmpty();
+        }
 
-    @Test
-    void getPolicies_not_found() {
-        assertThatIllegalStateException().isThrownBy(() -> policyService.getPolicies(LOCAL_OPEN_CHANNEL));
-    }
-
-    private void mockFees() {
-        when(grpcFees.getOutgoingFeeRate(CHANNEL_ID)).thenReturn(Optional.of(789L));
-        when(grpcFees.getOutgoingBaseFee(CHANNEL_ID)).thenReturn(Optional.of(Coins.ofMilliSatoshis(111)));
-        when(grpcFees.getIncomingFeeRate(CHANNEL_ID)).thenReturn(Optional.of(123L));
-        when(grpcFees.getIncomingBaseFee(CHANNEL_ID)).thenReturn(Optional.of(Coins.ofMilliSatoshis(456)));
+        @Test
+        void getPolicyTo() {
+            when(grpcChannelPolicy.getPolicyTo(CHANNEL_ID, PUBKEY)).thenReturn(Optional.of(POLICY_1));
+            assertThat(policyService.getPolicyTo(CHANNEL_ID, PUBKEY)).contains(POLICY_1);
+        }
     }
 }

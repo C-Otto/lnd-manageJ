@@ -3,6 +3,8 @@ package de.cotto.lndmanagej.grpc;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.Policy;
 import de.cotto.lndmanagej.model.Pubkey;
 import lnrpc.ChannelEdge;
 import lnrpc.RoutingPolicy;
@@ -40,24 +42,24 @@ public class GrpcChannelPolicy {
         return Optional.empty();
     }
 
-    public Optional<RoutingPolicy> getLocalPolicy(ChannelId channelId) {
+    public Optional<Policy> getLocalPolicy(ChannelId channelId) {
         Pubkey ownPubkey = grpcGetInfo.getPubkey();
         return getPolicyFrom(channelId, ownPubkey);
     }
 
-    public Optional<RoutingPolicy> getRemotePolicy(ChannelId channelId) {
+    public Optional<Policy> getRemotePolicy(ChannelId channelId) {
         Pubkey ownPubkey = grpcGetInfo.getPubkey();
         return getPolicyTo(channelId, ownPubkey);
     }
 
-    public Optional<RoutingPolicy> getPolicyFrom(ChannelId channelId, Pubkey source) {
+    public Optional<Policy> getPolicyFrom(ChannelId channelId, Pubkey source) {
         String sourcePubkey = source.toString();
         return getChannelEdge(channelId).map(
                 channelEdge -> {
                     if (sourcePubkey.equals(channelEdge.getNode1Pub())) {
-                        return channelEdge.getNode1Policy();
+                        return toPolicy(channelEdge.getNode1Policy());
                     } else if (sourcePubkey.equals(channelEdge.getNode2Pub())) {
-                        return channelEdge.getNode2Policy();
+                        return toPolicy(channelEdge.getNode2Policy());
                     } else {
                         return null;
                     }
@@ -65,18 +67,26 @@ public class GrpcChannelPolicy {
         );
     }
 
-    public Optional<RoutingPolicy> getPolicyTo(ChannelId channelId, Pubkey target) {
+    public Optional<Policy> getPolicyTo(ChannelId channelId, Pubkey target) {
         String targetPubkey = target.toString();
         return getChannelEdge(channelId).map(
                 channelEdge -> {
                     if (targetPubkey.equals(channelEdge.getNode2Pub())) {
-                        return channelEdge.getNode1Policy();
+                        return toPolicy(channelEdge.getNode1Policy());
                     } else if (targetPubkey.equals(channelEdge.getNode1Pub())) {
-                        return channelEdge.getNode2Policy();
+                        return toPolicy(channelEdge.getNode2Policy());
                     } else {
                         return null;
                     }
                 }
+        );
+    }
+
+    private Policy toPolicy(RoutingPolicy routingPolicy) {
+        return new Policy(
+                routingPolicy.getFeeRateMilliMsat(),
+                Coins.ofMilliSatoshis(routingPolicy.getFeeBaseMsat()),
+                !routingPolicy.getDisabled()
         );
     }
 
