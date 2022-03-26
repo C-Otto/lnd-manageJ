@@ -29,10 +29,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class MultiPathPaymentComputationTest {
+class MultiPathPaymentSplitterTest {
     private static final Coins AMOUNT = Coins.ofSatoshis(1_234);
     @InjectMocks
-    private MultiPathPaymentComputation multiPathPaymentComputation;
+    private MultiPathPaymentSplitter multiPathPaymentSplitter;
 
     @Mock
     private FlowComputation flowComputation;
@@ -48,13 +48,13 @@ class MultiPathPaymentComputationTest {
     @Test
     void getMultiPathPaymentTo_uses_own_pubkey_as_source() {
         when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY_4);
-        multiPathPaymentComputation.getMultiPathPaymentTo(PUBKEY_2, AMOUNT);
+        multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY_2, AMOUNT);
         verify(flowComputation).getOptimalFlows(PUBKEY_4, PUBKEY_2, AMOUNT);
     }
 
     @Test
     void getMultiPathPayment_failure() {
-        MultiPathPayment multiPathPayment = multiPathPaymentComputation.getMultiPathPayment(PUBKEY, PUBKEY_2, AMOUNT);
+        MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_2, AMOUNT);
         assertThat(multiPathPayment.probability()).isZero();
     }
 
@@ -62,7 +62,7 @@ class MultiPathPaymentComputationTest {
     void getMultiPathPaymentTo() {
         when(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, AMOUNT)).thenReturn(new Flows(FLOW));
         when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY);
-        MultiPathPayment multiPathPayment = multiPathPaymentComputation.getMultiPathPaymentTo(PUBKEY_2, AMOUNT);
+        MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY_2, AMOUNT);
         MultiPathPayment expected =
                 new MultiPathPayment(AMOUNT, FLOW.getProbability(), Set.of(new Route(List.of(EDGE), AMOUNT)));
         assertThat(multiPathPayment).isEqualTo(expected);
@@ -75,7 +75,7 @@ class MultiPathPaymentComputationTest {
         Flow flow = new Flow(EDGE, halfOfCapacity);
         when(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, AMOUNT)).thenReturn(new Flows(flow));
 
-        MultiPathPayment multiPathPayment = multiPathPaymentComputation.getMultiPathPayment(PUBKEY, PUBKEY_2, AMOUNT);
+        MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_2, AMOUNT);
 
         assertThat(multiPathPayment.probability())
                 .isEqualTo((1.0 * halfOfCapacity.satoshis() + 1) / (capacitySat + 1));
@@ -89,7 +89,7 @@ class MultiPathPaymentComputationTest {
         Flow flow2 = new Flow(EDGE_3_2, EDGE_3_2.capacity());
         when(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, AMOUNT)).thenReturn(new Flows(flow1, flow2));
 
-        MultiPathPayment multiPathPayment = multiPathPaymentComputation.getMultiPathPayment(PUBKEY, PUBKEY_2, AMOUNT);
+        MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_2, AMOUNT);
 
         double probabilityFlow1 = (1.0 * halfOfCapacity.satoshis() + 1) / (capacitySat + 1);
         double probabilityFlow2 = 1.0 / (EDGE_3_2.capacity().satoshis() + 1);
@@ -104,7 +104,7 @@ class MultiPathPaymentComputationTest {
         Flow flow2 = new Flow(EDGE, halfOfCapacity);
         when(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, AMOUNT)).thenReturn(new Flows(flow1, flow2));
 
-        MultiPathPayment multiPathPayment = multiPathPaymentComputation.getMultiPathPayment(PUBKEY, PUBKEY_2, AMOUNT);
+        MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_2, AMOUNT);
 
         assertThat(multiPathPayment.probability()).isEqualTo(1.0 / (capacitySat + 1));
     }
@@ -113,7 +113,7 @@ class MultiPathPaymentComputationTest {
     void getMultiPathPayment_adds_remainder_to_route() {
         when(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, AMOUNT)).thenReturn(new Flows(FLOW));
         assumeThat(FLOW.amount()).isLessThan(AMOUNT);
-        MultiPathPayment multiPathPayment = multiPathPaymentComputation.getMultiPathPayment(PUBKEY, PUBKEY_2, AMOUNT);
+        MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_2, AMOUNT);
         assertThat(multiPathPayment.routes().iterator().next().amount()).isEqualTo(AMOUNT);
     }
 }

@@ -4,7 +4,7 @@ import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.controller.dto.MultiPathPaymentDto;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Pubkey;
-import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentComputation;
+import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSplitter;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/beta/pickhardt-payments/")
 public class PickhardtPaymentsController {
-    private final MultiPathPaymentComputation multiPathPaymentComputation;
+    private final MultiPathPaymentSplitter multiPathPaymentSplitter;
 
-    public PickhardtPaymentsController(MultiPathPaymentComputation multiPathPaymentComputation) {
-        this.multiPathPaymentComputation = multiPathPaymentComputation;
+    public PickhardtPaymentsController(MultiPathPaymentSplitter multiPathPaymentSplitter) {
+        this.multiPathPaymentSplitter = multiPathPaymentSplitter;
     }
 
     @Timed
@@ -26,7 +26,7 @@ public class PickhardtPaymentsController {
             @PathVariable long amount
     ) {
         Coins coins = Coins.ofSatoshis(amount);
-        return MultiPathPaymentDto.fromModel(multiPathPaymentComputation.getMultiPathPaymentTo(pubkey, coins));
+        return MultiPathPaymentDto.fromModel(multiPathPaymentSplitter.getMultiPathPaymentTo(pubkey, coins));
     }
 
     @Timed
@@ -37,6 +37,6 @@ public class PickhardtPaymentsController {
             @PathVariable long amount
     ) {
         Coins coins = Coins.ofSatoshis(amount);
-        return MultiPathPaymentDto.fromModel(multiPathPaymentComputation.getMultiPathPayment(source, target, coins));
+        return MultiPathPaymentDto.fromModel(multiPathPaymentSplitter.getMultiPathPayment(source, target, coins));
     }
 }

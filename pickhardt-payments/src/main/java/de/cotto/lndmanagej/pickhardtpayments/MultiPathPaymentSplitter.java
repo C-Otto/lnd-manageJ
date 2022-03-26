@@ -12,11 +12,11 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 
 @Component
-public class MultiPathPaymentComputation {
+public class MultiPathPaymentSplitter {
     private final GrpcGetInfo grpcGetInfo;
     private final FlowComputation flowComputation;
 
-    public MultiPathPaymentComputation(GrpcGetInfo grpcGetInfo, FlowComputation flowComputation) {
+    public MultiPathPaymentSplitter(GrpcGetInfo grpcGetInfo, FlowComputation flowComputation) {
         this.flowComputation = flowComputation;
         this.grpcGetInfo = grpcGetInfo;
     }

@@ -3,7 +3,7 @@ package de.cotto.lndmanagej.controller;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.Coins;
-import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentComputation;
+import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSplitter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -31,7 +31,7 @@ class PickhardtPaymentsControllerIT {
     private MockMvc mockMvc;
 
     @MockBean
-    private MultiPathPaymentComputation multiPathPaymentComputation;
+    private MultiPathPaymentSplitter multiPathPaymentSplitter;
 
     @MockBean
     @SuppressWarnings("unused")
@@ -42,7 +42,7 @@ class PickhardtPaymentsControllerIT {
         Coins amount = MULTI_PATH_PAYMENT.amount();
         String amountAsString = String.valueOf(amount.satoshis());
         double expectedProbability = MULTI_PATH_PAYMENT.probability();
-        when(multiPathPaymentComputation.getMultiPathPaymentTo(PUBKEY, amount))
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, amount))
                 .thenReturn(MULTI_PATH_PAYMENT);
         mockMvc.perform(get(PREFIX + "/to/" + PUBKEY + "/amount/" + amount.satoshis()))
                 .andExpect(jsonPath("$.probability", is(expectedProbability)))
@@ -58,9 +58,9 @@ class PickhardtPaymentsControllerIT {
         Coins amount = MULTI_PATH_PAYMENT.amount();
         String amountAsString = String.valueOf(amount.satoshis());
         double expectedProbability = MULTI_PATH_PAYMENT.probability();
-        when(multiPathPaymentComputation.getMultiPathPaymentTo(PUBKEY, amount))
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, amount))
                 .thenReturn(MULTI_PATH_PAYMENT);
-        when(multiPathPaymentComputation.getMultiPathPayment(PUBKEY, PUBKEY_2, Coins.ofSatoshis(1_234)))
+        when(multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_2, Coins.ofSatoshis(1_234)))
                 .thenReturn(MULTI_PATH_PAYMENT);
         mockMvc.perform(get(PREFIX + "/from/" + PUBKEY + "/to/" + PUBKEY_2 + "/amount/" + 1_234))
                 .andExpect(jsonPath("$.probability", is(expectedProbability)))
