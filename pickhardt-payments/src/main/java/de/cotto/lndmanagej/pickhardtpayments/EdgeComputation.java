@@ -1,5 +1,7 @@
 package de.cotto.lndmanagej.pickhardtpayments;
 
+import com.github.benmanes.caffeine.cache.LoadingCache;
+import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.grpc.GrpcGetInfo;
 import de.cotto.lndmanagej.grpc.GrpcGraph;
 import de.cotto.lndmanagej.model.ChannelId;
@@ -15,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -28,6 +31,10 @@ public class EdgeComputation {
     private final ChannelService channelService;
     private final BalanceService balanceService;
     private final MissionControlService missionControlService;
+    private final LoadingCache<Object, Set<EdgeWithLiquidityInformation>> cache = new CacheBuilder()
+            .withExpiry(Duration.ofSeconds(10))
+            .withRefresh(Duration.ofSeconds(5))
+            .build(this::getEdgesWithoutCache);
 
     public EdgeComputation(
             GrpcGraph grpcGraph,
@@ -44,6 +51,10 @@ public class EdgeComputation {
     }
 
     public Set<EdgeWithLiquidityInformation> getEdges() {
+        return cache.get("");
+    }
+
+    private Set<EdgeWithLiquidityInformation> getEdgesWithoutCache() {
         Set<DirectedChannelEdge> channelEdges = grpcGraph.getChannelEdges().orElse(null);
         if (channelEdges == null) {
             logger.warn("Unable to get graph");
