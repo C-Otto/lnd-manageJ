@@ -8,11 +8,13 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+import static de.cotto.lndmanagej.pickhardtpayments.PickhardtPaymentsConfiguration.DEFAULT_FEE_RATE_FACTOR;
+
 @Component
 public class FlowComputation {
+    private final EdgeComputation edgeComputation;
     private final long quantization;
     private final int piecewiseLinearApproximations;
-    private final EdgeComputation edgeComputation;
 
     public FlowComputation(
             EdgeComputation edgeComputation,
@@ -25,12 +27,17 @@ public class FlowComputation {
     }
 
     public Flows getOptimalFlows(Pubkey source, Pubkey target, Coins amount) {
+        return getOptimalFlows(source, target, amount, DEFAULT_FEE_RATE_FACTOR);
+    }
+
+    public Flows getOptimalFlows(Pubkey source, Pubkey target, Coins amount, int feeRateFactor) {
         MinCostFlowSolver minCostFlowSolver = new MinCostFlowSolver(
                 edgeComputation.getEdges(),
                 Map.of(source, amount),
                 Map.of(target, amount),
                 quantization,
-                piecewiseLinearApproximations
+                piecewiseLinearApproximations,
+                feeRateFactor
         );
         return minCostFlowSolver.solve();
     }

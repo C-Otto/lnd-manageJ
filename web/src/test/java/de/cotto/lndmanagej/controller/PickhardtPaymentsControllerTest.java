@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
+import static de.cotto.lndmanagej.pickhardtpayments.PickhardtPaymentsConfiguration.DEFAULT_FEE_RATE_FACTOR;
 import static de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPaymentFixtures.MULTI_PATH_PAYMENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -26,17 +27,43 @@ class PickhardtPaymentsControllerTest {
 
     @Test
     void sendTo() {
-        when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, Coins.ofSatoshis(456)))
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, Coins.ofSatoshis(456), DEFAULT_FEE_RATE_FACTOR))
                 .thenReturn(MULTI_PATH_PAYMENT);
         assertThat(controller.sendTo(PUBKEY, 456))
                 .isEqualTo(MultiPathPaymentDto.fromModel(MULTI_PATH_PAYMENT));
     }
 
     @Test
-    void send() {
-        when(multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_2, Coins.ofSatoshis(123)))
+    void sendTo_with_fee_rate_factor() {
+        int feeRateFactor = 10;
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, Coins.ofSatoshis(456), feeRateFactor))
                 .thenReturn(MULTI_PATH_PAYMENT);
+        assertThat(controller.sendTo(PUBKEY, 456, feeRateFactor))
+                .isEqualTo(MultiPathPaymentDto.fromModel(MULTI_PATH_PAYMENT));
+    }
+
+    @Test
+    void send() {
+        when(multiPathPaymentSplitter.getMultiPathPayment(
+                PUBKEY,
+                PUBKEY_2,
+                Coins.ofSatoshis(123),
+                DEFAULT_FEE_RATE_FACTOR
+        )).thenReturn(MULTI_PATH_PAYMENT);
         assertThat(controller.send(PUBKEY, PUBKEY_2, 123))
+                .isEqualTo(MultiPathPaymentDto.fromModel(MULTI_PATH_PAYMENT));
+    }
+
+    @Test
+    void send_with_fee_rate_factor() {
+        int feeRateFactor = 20;
+        when(multiPathPaymentSplitter.getMultiPathPayment(
+                PUBKEY,
+                PUBKEY_2,
+                Coins.ofSatoshis(123),
+                feeRateFactor
+        )).thenReturn(MULTI_PATH_PAYMENT);
+        assertThat(controller.send(PUBKEY, PUBKEY_2, 123, feeRateFactor))
                 .isEqualTo(MultiPathPaymentDto.fromModel(MULTI_PATH_PAYMENT));
     }
 }

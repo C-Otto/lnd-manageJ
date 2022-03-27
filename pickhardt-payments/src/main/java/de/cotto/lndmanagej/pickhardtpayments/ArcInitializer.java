@@ -18,19 +18,22 @@ class ArcInitializer {
     private final Map<Integer, Edge> edgeMapping;
     private final long quantization;
     private final int piecewiseLinearApproximations;
+    private final int feeRateFactor;
 
     public ArcInitializer(
             MinCostFlow minCostFlow,
             IntegerMapping<Pubkey> integerMapping,
             Map<Integer, Edge> edgeMapping,
             long quantization,
-            int piecewiseLinearApproximations
+            int piecewiseLinearApproximations,
+            int feeRateFactor
     ) {
         this.minCostFlow = minCostFlow;
         this.pubkeyToIntegerMapping = integerMapping;
         this.edgeMapping = edgeMapping;
         this.quantization = quantization;
         this.piecewiseLinearApproximations = piecewiseLinearApproximations;
+        this.feeRateFactor = feeRateFactor;
     }
 
     public void addArcs(Collection<EdgeWithLiquidityInformation> edgesWithLiquidityInformation) {
@@ -59,12 +62,13 @@ class ArcInitializer {
             return;
         }
         long unitCost = quantize(maximumCapacity) / uncertainButPossibleLiquidity;
+        long feeRateAdditionSummand = feeRateFactor * edge.policy().feeRate();
         for (int i = 1; i <= remainingPieces; i++) {
             int arcIndex = minCostFlow.addArcWithCapacityAndUnitCost(
                     startNode,
                     endNode,
                     capacityPiece,
-                    i * unitCost
+                    i * unitCost + feeRateAdditionSummand
             );
             edgeMapping.put(arcIndex, edge);
         }

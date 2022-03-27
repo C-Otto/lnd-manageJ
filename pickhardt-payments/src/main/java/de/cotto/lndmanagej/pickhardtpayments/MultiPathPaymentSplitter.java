@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
+import static de.cotto.lndmanagej.pickhardtpayments.PickhardtPaymentsConfiguration.DEFAULT_FEE_RATE_FACTOR;
 import static java.util.stream.Collectors.toSet;
 
 @Component
@@ -35,8 +36,17 @@ public class MultiPathPaymentSplitter {
         return getMultiPathPayment(source, target, amount);
     }
 
+    public MultiPathPayment getMultiPathPaymentTo(Pubkey target, Coins amount, int feeRateFactor) {
+        Pubkey source = grpcGetInfo.getPubkey();
+        return getMultiPathPayment(source, target, amount, feeRateFactor);
+    }
+
     public MultiPathPayment getMultiPathPayment(Pubkey source, Pubkey target, Coins amount) {
-        Flows flows = flowComputation.getOptimalFlows(source, target, amount);
+        return getMultiPathPayment(source, target, amount, DEFAULT_FEE_RATE_FACTOR);
+    }
+
+    public MultiPathPayment getMultiPathPayment(Pubkey source, Pubkey target, Coins amount, int feeRateFactor) {
+        Flows flows = flowComputation.getOptimalFlows(source, target, amount, feeRateFactor);
         if (flows.isEmpty()) {
             return MultiPathPayment.FAILURE;
         }

@@ -28,6 +28,7 @@ class MinCostFlowSolverTest {
 
     private static final long QUANTIZATION = 1;
     private static final int PIECEWISE_LINEAR_APPROXIMATIONS = 1;
+    private static final int FEE_RATE_FACTOR = 0;
     private static final Coins ONE_SAT = Coins.ofSatoshis(PIECEWISE_LINEAR_APPROXIMATIONS);
     private static final Coins TWO_SATS = ONE_SAT.add(ONE_SAT);
     private static final Coins MANY_SATS = Coins.ofSatoshis(100_000_000);
@@ -48,7 +49,8 @@ class MinCostFlowSolverTest {
                         sources,
                         sinks,
                         QUANTIZATION,
-                        PIECEWISE_LINEAR_APPROXIMATIONS
+                        PIECEWISE_LINEAR_APPROXIMATIONS,
+                        FEE_RATE_FACTOR
                 )
         ).doesNotThrowAnyException();
     }
@@ -65,7 +67,8 @@ class MinCostFlowSolverTest {
                         sources,
                         sinks,
                         QUANTIZATION,
-                        PIECEWISE_LINEAR_APPROXIMATIONS
+                        PIECEWISE_LINEAR_APPROXIMATIONS,
+                        FEE_RATE_FACTOR
                 )
         ).doesNotThrowAnyException();
     }
@@ -82,7 +85,8 @@ class MinCostFlowSolverTest {
                         sources,
                         sinks,
                         QUANTIZATION,
-                        PIECEWISE_LINEAR_APPROXIMATIONS
+                        PIECEWISE_LINEAR_APPROXIMATIONS,
+                        FEE_RATE_FACTOR
                 )
         );
     }
@@ -99,7 +103,8 @@ class MinCostFlowSolverTest {
                         sources,
                         sinks,
                         QUANTIZATION,
-                        PIECEWISE_LINEAR_APPROXIMATIONS
+                        PIECEWISE_LINEAR_APPROXIMATIONS,
+                        FEE_RATE_FACTOR
                 )
         );
     }
@@ -116,7 +121,8 @@ class MinCostFlowSolverTest {
                         sources,
                         sinks,
                         QUANTIZATION,
-                        PIECEWISE_LINEAR_APPROXIMATIONS
+                        PIECEWISE_LINEAR_APPROXIMATIONS,
+                        FEE_RATE_FACTOR
                 )
         );
     }
@@ -159,7 +165,8 @@ class MinCostFlowSolverTest {
                 sources,
                 sinks,
                 quantization,
-                PIECEWISE_LINEAR_APPROXIMATIONS
+                PIECEWISE_LINEAR_APPROXIMATIONS,
+                FEE_RATE_FACTOR
         ).solve();
 
         assertThat(flows).isEqualTo(new Flows(new Flow(EDGE_2_3, amount)));
@@ -179,7 +186,8 @@ class MinCostFlowSolverTest {
                 sources,
                 sinks,
                 quantization,
-                PIECEWISE_LINEAR_APPROXIMATIONS
+                PIECEWISE_LINEAR_APPROXIMATIONS,
+                FEE_RATE_FACTOR
         ).solve();
 
         assertThat(flows).isEqualTo(new Flows(new Flow(EDGE_3_4, Coins.ofSatoshis(120_000))));
@@ -198,7 +206,8 @@ class MinCostFlowSolverTest {
                 sources,
                 sinks,
                 quantization,
-                PIECEWISE_LINEAR_APPROXIMATIONS
+                PIECEWISE_LINEAR_APPROXIMATIONS,
+                FEE_RATE_FACTOR
         ).solve();
 
         assertThat(flows).isEqualTo(new Flows());
@@ -218,7 +227,8 @@ class MinCostFlowSolverTest {
                         sources,
                         sinks,
                         QUANTIZATION,
-                        PIECEWISE_LINEAR_APPROXIMATIONS
+                        PIECEWISE_LINEAR_APPROXIMATIONS,
+                        FEE_RATE_FACTOR
                 );
 
         assertThat(minCostFlowSolver.solve()).isEqualTo(new Flows(FLOW_1_2, FLOW_3_4));
@@ -237,7 +247,8 @@ class MinCostFlowSolverTest {
                 sources,
                 sinks,
                 QUANTIZATION,
-                PIECEWISE_LINEAR_APPROXIMATIONS
+                PIECEWISE_LINEAR_APPROXIMATIONS,
+                FEE_RATE_FACTOR
         );
 
         assertThat(minCostFlowSolver.solve()).isEqualTo(new Flows(FLOW_1_2, FLOW_1_3));
@@ -281,7 +292,8 @@ class MinCostFlowSolverTest {
                 sources,
                 sinks,
                 QUANTIZATION,
-                PIECEWISE_LINEAR_APPROXIMATIONS
+                PIECEWISE_LINEAR_APPROXIMATIONS,
+                FEE_RATE_FACTOR
         ).solve();
     }
 }

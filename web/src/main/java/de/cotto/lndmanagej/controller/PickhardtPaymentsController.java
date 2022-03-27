@@ -5,10 +5,13 @@ import de.cotto.lndmanagej.controller.dto.MultiPathPaymentDto;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSplitter;
+import de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPayment;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import static de.cotto.lndmanagej.pickhardtpayments.PickhardtPaymentsConfiguration.DEFAULT_FEE_RATE_FACTOR;
 
 @RestController
 @RequestMapping("/beta/pickhardt-payments/")
@@ -20,13 +23,39 @@ public class PickhardtPaymentsController {
     }
 
     @Timed
+    @GetMapping("/to/{pubkey}/amount/{amount}/fee-rate-factor/{feeRateFactor}")
+    public MultiPathPaymentDto sendTo(
+            @PathVariable Pubkey pubkey,
+            @PathVariable long amount,
+            @PathVariable int feeRateFactor
+    ) {
+        Coins coins = Coins.ofSatoshis(amount);
+        MultiPathPayment multiPathPaymentTo =
+                multiPathPaymentSplitter.getMultiPathPaymentTo(pubkey, coins, feeRateFactor);
+        return MultiPathPaymentDto.fromModel(multiPathPaymentTo);
+    }
+
+    @Timed
     @GetMapping("/to/{pubkey}/amount/{amount}")
     public MultiPathPaymentDto sendTo(
             @PathVariable Pubkey pubkey,
             @PathVariable long amount
     ) {
+        return sendTo(pubkey, amount, DEFAULT_FEE_RATE_FACTOR);
+    }
+
+    @Timed
+    @GetMapping("/from/{source}/to/{target}/amount/{amount}/fee-rate-factor/{feeRateFactor}")
+    public MultiPathPaymentDto send(
+            @PathVariable Pubkey source,
+            @PathVariable Pubkey target,
+            @PathVariable long amount,
+            @PathVariable int feeRateFactor
+    ) {
         Coins coins = Coins.ofSatoshis(amount);
-        return MultiPathPaymentDto.fromModel(multiPathPaymentSplitter.getMultiPathPaymentTo(pubkey, coins));
+        MultiPathPayment multiPathPayment =
+                multiPathPaymentSplitter.getMultiPathPayment(source, target, coins, feeRateFactor);
+        return MultiPathPaymentDto.fromModel(multiPathPayment);
     }
 
     @Timed
@@ -36,7 +65,6 @@ public class PickhardtPaymentsController {
             @PathVariable Pubkey target,
             @PathVariable long amount
     ) {
-        Coins coins = Coins.ofSatoshis(amount);
-        return MultiPathPaymentDto.fromModel(multiPathPaymentSplitter.getMultiPathPayment(source, target, coins));
+        return send(source, target, amount, DEFAULT_FEE_RATE_FACTOR);
     }
 }
