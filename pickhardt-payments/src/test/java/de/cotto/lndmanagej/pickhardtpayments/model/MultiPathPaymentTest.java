@@ -27,4 +27,9 @@ class MultiPathPaymentTest {
     void fees() {
         assertThat(MULTI_PATH_PAYMENT.fees()).isEqualTo(Coins.ofMilliSatoshis(20));
     }
+
+    @Test
+    void feeRate() {
+        assertThat(MULTI_PATH_PAYMENT.getFeeRate()).isEqualTo(200);
+    }
 }

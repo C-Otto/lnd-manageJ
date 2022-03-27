@@ -15,4 +15,8 @@ public record MultiPathPayment(Coins amount, Coins fees, double probability, Set
                 routes
         );
     }
+
+    public long getFeeRate() {
+        return fees.milliSatoshis() * 1_000_000 / amount.milliSatoshis();
+    }
 }
