@@ -18,6 +18,7 @@ class MultiPathPaymentDtoTest {
                 amountSat,
                 probability,
                 String.valueOf(MULTI_PATH_PAYMENT.fees().milliSatoshis()),
+                MULTI_PATH_PAYMENT.getFeeRate(),
                 List.of(new RouteDto(amountSat, List.of(CHANNEL_ID), probability, feesMilliSat)))
         );
     }
