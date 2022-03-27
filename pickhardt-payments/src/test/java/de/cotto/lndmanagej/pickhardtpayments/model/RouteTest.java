@@ -168,7 +168,7 @@ class RouteTest {
                 EdgeWithLiquidityInformation.forUpperBound(EDGE, Coins.ofSatoshis(123))
         ));
         Coins newAmount = Coins.ofSatoshis(1_000);
-        Coins updateFees = Coins.ofMilliSatoshis(110);
+        Coins updateFees = Coins.ofMilliSatoshis(200);
         assertThat(original.getForAmount(newAmount))
                 .isEqualTo(new Route(original.edges(), newAmount, updateFees, original.liquidityInformation()));
     }

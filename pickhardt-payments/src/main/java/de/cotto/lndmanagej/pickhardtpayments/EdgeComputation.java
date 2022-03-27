@@ -7,6 +7,7 @@ import de.cotto.lndmanagej.grpc.GrpcGraph;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.DirectedChannelEdge;
+import de.cotto.lndmanagej.model.Policy;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.model.Edge;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithLiquidityInformation;
@@ -77,7 +78,7 @@ public class EdgeComputation {
         Set<EdgeWithLiquidityInformation> edgesWithLiquidityInformation = new LinkedHashSet<>();
         Pubkey ownPubkey = grpcGetInfo.getPubkey();
         for (DirectedChannelEdge channelEdge : channelEdges) {
-            if (channelEdge.policy().disabled()) {
+            if (shouldIgnore(channelEdge)) {
                 continue;
             }
             ChannelId channelId = channelEdge.channelId();
@@ -87,6 +88,11 @@ public class EdgeComputation {
             edgesWithLiquidityInformation.add(getEdgeWithLiquidityInformation(edge, ownPubkey));
         }
         return edgesWithLiquidityInformation;
+    }
+
+    private boolean shouldIgnore(DirectedChannelEdge channelEdge) {
+        Policy policy = channelEdge.policy();
+        return policy.disabled() ||  policy.baseFee().isPositive();
     }
 
     private Optional<Coins> getKnownLiquidity(Edge edge, Pubkey ownPubKey) {

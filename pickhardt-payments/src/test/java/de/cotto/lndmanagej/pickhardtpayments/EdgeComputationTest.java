@@ -23,6 +23,7 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_1;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_DISABLED;
+import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_WITH_BASE_FEE;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_4;
@@ -66,6 +67,14 @@ class EdgeComputationTest {
     @Test
     void does_not_add_edge_for_disabled_channel() {
         DirectedChannelEdge edge = new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY, PUBKEY_2, POLICY_DISABLED);
+        when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));
+        assertThat(edgeComputation.getEdges()).isEmpty();
+    }
+
+    @Test
+    void does_not_add_edge_for_channel_with_base_fee() {
+        DirectedChannelEdge edge =
+                new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY, PUBKEY_2, POLICY_WITH_BASE_FEE);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));
         assertThat(edgeComputation.getEdges()).isEmpty();
     }

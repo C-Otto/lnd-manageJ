@@ -161,9 +161,9 @@ class ChannelControllerIT {
                 .andExpect(jsonPath("$.balance.remoteAvailableSat", is("113")))
                 .andExpect(jsonPath("$.policies.local.enabled", is(false)))
                 .andExpect(jsonPath("$.policies.remote.enabled", is(true)))
-                .andExpect(jsonPath("$.policies.local.feeRatePpm", is(100)))
-                .andExpect(jsonPath("$.policies.local.baseFeeMilliSat", is(10)))
-                .andExpect(jsonPath("$.policies.remote.feeRatePpm", is(222)))
+                .andExpect(jsonPath("$.policies.local.feeRatePpm", is(200)))
+                .andExpect(jsonPath("$.policies.local.baseFeeMilliSat", is(0)))
+                .andExpect(jsonPath("$.policies.remote.feeRatePpm", is(300)))
                 .andExpect(jsonPath("$.policies.remote.baseFeeMilliSat", is(0)))
                 .andExpect(jsonPath("$.feeReport.earnedMilliSat", is("1234")))
                 .andExpect(jsonPath("$.feeReport.sourcedMilliSat", is("567")))
@@ -229,9 +229,9 @@ class ChannelControllerIT {
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         when(policyService.getPolicies(LOCAL_OPEN_CHANNEL)).thenReturn(POLICIES_FOR_LOCAL_CHANNEL);
         mockMvc.perform(get(CHANNEL_PREFIX + "/policies"))
-                .andExpect(jsonPath("$.local.feeRatePpm", is(100)))
-                .andExpect(jsonPath("$.local.baseFeeMilliSat", is(10)))
-                .andExpect(jsonPath("$.remote.feeRatePpm", is(222)))
+                .andExpect(jsonPath("$.local.feeRatePpm", is(200)))
+                .andExpect(jsonPath("$.local.baseFeeMilliSat", is(0)))
+                .andExpect(jsonPath("$.remote.feeRatePpm", is(300)))
                 .andExpect(jsonPath("$.remote.baseFeeMilliSat", is(0)))
                 .andExpect(jsonPath("$.local.enabled", is(false)))
                 .andExpect(jsonPath("$.remote.enabled", is(true)));
