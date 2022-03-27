@@ -7,6 +7,8 @@ import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.model.Edge;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.IntegerMapping;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
@@ -65,6 +67,118 @@ class ArcInitializerTest {
                 edge(EDGE, Coins.ofSatoshis(quantization));
         arcInitializer.addArcs(Set.of(edgeWithLiquidityInformation));
         assertThat(minCostFlow.getNumArcs()).isOne();
+    }
+
+    @Test
+    @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
+    void edge_with_known_liquidity_is_added_as_arc_without_cost() {
+        Coins capacity = Coins.ofSatoshis(100);
+        Coins knownLiquidity = Coins.ofSatoshis(25);
+        EdgeWithLiquidityInformation edgeWithLiquidityInformation =
+                EdgeWithLiquidityInformation.forKnownLiquidity(EDGE.withCapacity(capacity), knownLiquidity);
+
+        arcInitializer.addArcs(Set.of(edgeWithLiquidityInformation));
+
+        assertThat(minCostFlow.getNumArcs()).isEqualTo(1);
+        assertThat(minCostFlow.getUnitCost(0)).isEqualTo(0);
+        assertThat(minCostFlow.getCapacity(0)).isEqualTo(25);
+    }
+
+    @Nested
+    class EdgeWithLowerAndUpperBound {
+        private EdgeWithLiquidityInformation edgeWithLiquidityInformation;
+
+        @BeforeEach
+        void setUp() {
+            Coins capacity = Coins.ofSatoshis(100);
+            Coins knownLiquidity = Coins.ofSatoshis(25);
+            edgeWithLiquidityInformation = EdgeWithLiquidityInformation.forLowerAndUpperBound(
+                    EDGE.withCapacity(capacity),
+                    knownLiquidity,
+                    capacity
+            );
+        }
+
+        @Test
+        void added_as_arc_without_cost() {
+            arcInitializer.addArcs(Set.of(edgeWithLiquidityInformation));
+            assertThat(minCostFlow.getUnitCost(0)).isEqualTo(0);
+            assertThat(minCostFlow.getCapacity(0)).isEqualTo(25);
+        }
+
+        @Test
+        void adds_uncertain_liquidity_as_second_arc() {
+            arcInitializer.addArcs(Set.of(edgeWithLiquidityInformation));
+            assertThat(minCostFlow.getUnitCost(1)).isEqualTo(1);
+            assertThat(minCostFlow.getCapacity(1)).isEqualTo(75);
+        }
+
+        @Test
+        void splits_uncertain_liquidity_as_additional_arcs() {
+            ArcInitializer arcInitializer = new ArcInitializer(
+                    minCostFlow,
+                    integerMapping,
+                    edgeMapping,
+                    QUANTIZATION,
+                    5
+            );
+            arcInitializer.addArcs(Set.of(edgeWithLiquidityInformation));
+            assertThat(minCostFlow.getNumArcs()).isEqualTo(6);
+        }
+
+        @Test
+        void known_amount_matches_quantization() {
+            ArcInitializer arcInitializer = new ArcInitializer(
+                    minCostFlow,
+                    integerMapping,
+                    edgeMapping,
+                    edgeWithLiquidityInformation.availableLiquidityLowerBound().satoshis(),
+                    PIECEWISE_LINEAR_APPROXIMATIONS
+            );
+            arcInitializer.addArcs(Set.of(edgeWithLiquidityInformation));
+            assertThat(minCostFlow.getUnitCost(0)).isEqualTo(0);
+        }
+
+        @Test
+        void known_amount_rounded_due_to_quantization() {
+            ArcInitializer arcInitializer = new ArcInitializer(
+                    minCostFlow,
+                    integerMapping,
+                    edgeMapping,
+                    20,
+                    PIECEWISE_LINEAR_APPROXIMATIONS
+            );
+            arcInitializer.addArcs(Set.of(edgeWithLiquidityInformation));
+            assertThat(minCostFlow.getCapacity(0)).isEqualTo(1);
+        }
+
+        @Test
+        void splits_remaining_liquidity_after_rounding_known_liquidity() {
+            ArcInitializer arcInitializer = new ArcInitializer(
+                    minCostFlow,
+                    integerMapping,
+                    edgeMapping,
+                    10,
+                    QUANTIZATION
+            );
+            arcInitializer.addArcs(Set.of(edgeWithLiquidityInformation));
+            // one arc for the known liquidity (25 / 10 = 2), 100 / 10 - 2 = 8 remaining
+            assertThat(minCostFlow.getCapacity(1)).isEqualTo(8);
+        }
+
+        @Test
+        void does_not_add_arcs_without_capacity() {
+            ArcInitializer arcInitializer = new ArcInitializer(
+                    minCostFlow,
+                    integerMapping,
+                    edgeMapping,
+                    20,
+                    5
+            );
+            arcInitializer.addArcs(Set.of(edgeWithLiquidityInformation));
+            // one arc for the known liquidity (25 / 20 = 1), 100 / 20 - 1 = 4 remaining: 4 < 5, no additional arc added
+            assertThat(minCostFlow.getNumArcs()).isEqualTo(1);
+        }
     }
 
     @Test

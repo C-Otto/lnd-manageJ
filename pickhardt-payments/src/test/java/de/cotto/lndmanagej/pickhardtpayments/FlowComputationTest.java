@@ -100,11 +100,10 @@ class FlowComputationTest {
     }
 
     @Test
-    void solve_avoids_sending_from_local_channel_lacking_capacity() {
-        // TODO use balance of local channel as known balance, not upper bound
+    void solve_avoids_sending_from_depleted_local_channel() {
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         when(channelService.getLocalChannel(CHANNEL_ID_2)).thenReturn(Optional.empty());
-        when(balanceService.getAvailableLocalBalance(CHANNEL_ID)).thenReturn(Coins.ofSatoshis(1));
+        when(balanceService.getAvailableLocalBalance(CHANNEL_ID)).thenReturn(Coins.NONE);
         Coins amount = Coins.ofSatoshis(100);
         DirectedChannelEdge largerButDepletedChannel =
                 new DirectedChannelEdge(CHANNEL_ID, LARGE, PUBKEY, PUBKEY_2, POLICY_1);
@@ -119,11 +118,10 @@ class FlowComputationTest {
     }
 
     @Test
-    void solve_avoids_sending_to_local_channel_lacking_capacity() {
-        // TODO use balance of local channel as known balance, not upper bound
+    void solve_avoids_sending_to_depleted_local_channel() {
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         when(channelService.getLocalChannel(CHANNEL_ID_2)).thenReturn(Optional.empty());
-        when(balanceService.getAvailableRemoteBalance(CHANNEL_ID)).thenReturn(Coins.ofSatoshis(1));
+        when(balanceService.getAvailableRemoteBalance(CHANNEL_ID)).thenReturn(Coins.NONE);
         Coins amount = Coins.ofSatoshis(100);
         DirectedChannelEdge largerButDepletedChannel =
                 new DirectedChannelEdge(CHANNEL_ID, LARGE, PUBKEY_2, PUBKEY, POLICY_1);

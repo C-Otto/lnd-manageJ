@@ -94,28 +94,25 @@ public class FlowComputation {
 
     private Optional<Coins> getKnownLiquidity(Edge edge, Pubkey ownPubKey) {
         Pubkey source = edge.startNode();
-        Coins capacity = edge.capacity();
         ChannelId channelId = edge.channelId();
         if (ownPubKey.equals(source)) {
-            return Optional.of(getLocalChannelAvailableLocal(capacity, channelId));
+            return getLocalChannelAvailableLocal(channelId);
         }
         Pubkey target = edge.endNode();
         if (ownPubKey.equals(target)) {
-            return Optional.of(getLocalChannelAvailableRemote(capacity, channelId));
+            return getLocalChannelAvailableRemote(channelId);
         }
         return Optional.empty();
     }
 
-    private Coins getLocalChannelAvailableLocal(Coins capacity, ChannelId channelId) {
+    private Optional<Coins> getLocalChannelAvailableLocal(ChannelId channelId) {
         return channelService.getLocalChannel(channelId)
-                .map(c -> balanceService.getAvailableLocalBalance(channelId))
-                .orElse(capacity);
+                .map(c -> balanceService.getAvailableLocalBalance(channelId));
     }
 
-    private Coins getLocalChannelAvailableRemote(Coins capacity, ChannelId channelId) {
+    private Optional<Coins> getLocalChannelAvailableRemote(ChannelId channelId) {
         return channelService.getLocalChannel(channelId)
-                .map(c -> balanceService.getAvailableRemoteBalance(channelId))
-                .orElse(capacity);
+                .map(c -> balanceService.getAvailableRemoteBalance(channelId));
     }
 
     private Coins getAvailableLiquidityUpperBound(Edge edge) {

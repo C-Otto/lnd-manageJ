@@ -41,16 +41,21 @@ class ArcInitializer {
     }
 
     private void addArcs(EdgeWithLiquidityInformation edgeWithLiquidityInformation, Coins maximumCapacity) {
-        long capacitySat = edgeWithLiquidityInformation.availableLiquidityUpperBound().satoshis();
-        if (capacitySat < quantization) {
-            return;
-        }
         Edge edge = edgeWithLiquidityInformation.edge();
         int startNode = pubkeyToIntegerMapping.getMappedInteger(edge.startNode());
         int endNode = pubkeyToIntegerMapping.getMappedInteger(edge.endNode());
-        long capacity = capacitySat / quantization;
-        long unitCost = maximumCapacity.satoshis() / capacitySat;
-        long capacityPiece = capacity / piecewiseLinearApproximations;
+
+        long quantizedLowerBound = quantize(edgeWithLiquidityInformation.availableLiquidityLowerBound());
+        addArcForKnownLiquidity(edge, startNode, endNode, quantizedLowerBound);
+
+        Coins upperBound = edgeWithLiquidityInformation.availableLiquidityUpperBound();
+        long quantizedUpperBound = quantize(upperBound);
+        long uncertainButPossibleLiquidity = quantizedUpperBound - quantizedLowerBound;
+        long capacityPiece = uncertainButPossibleLiquidity / piecewiseLinearApproximations;
+        if (capacityPiece == 0) {
+            return;
+        }
+        long unitCost = quantize(maximumCapacity) / uncertainButPossibleLiquidity;
         for (int i = 1; i <= piecewiseLinearApproximations; i++) {
             int arcIndex = minCostFlow.addArcWithCapacityAndUnitCost(
                     startNode,
@@ -62,11 +67,23 @@ class ArcInitializer {
         }
     }
 
+    private void addArcForKnownLiquidity(Edge edge, int startNode, int endNode, long quantizedLowerBound) {
+        if (quantizedLowerBound <= 0) {
+            return;
+        }
+        int arcIndex = minCostFlow.addArcWithCapacityAndUnitCost(startNode, endNode, quantizedLowerBound, 0);
+        edgeMapping.put(arcIndex, edge);
+    }
+
     private Coins getMaximumCapacity(Collection<EdgeWithLiquidityInformation> edgesWithLiquidityInformation) {
         return edgesWithLiquidityInformation.stream()
                 .map(EdgeWithLiquidityInformation::edge)
                 .map(Edge::capacity)
                 .max(Comparator.naturalOrder())
                 .orElse(Coins.NONE);
+    }
+
+    private long quantize(Coins coins) {
+        return coins.milliSatoshis() / 1_000 / quantization;
     }
 }
