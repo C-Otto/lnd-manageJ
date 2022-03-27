@@ -53,7 +53,9 @@ class PickhardtPaymentsControllerIT {
                 .andExpect(jsonPath("$.routes", hasSize(1)))
                 .andExpect(jsonPath("$.routes[0].amountSat", is(amountAsString)))
                 .andExpect(jsonPath("$.routes[0].channelIds", contains(CHANNEL_ID.toString())))
-                .andExpect(jsonPath("$.routes[0].probability", is(expectedProbability)));
+                .andExpect(jsonPath("$.routes[0].probability", is(expectedProbability)))
+                .andExpect(jsonPath("$.routes[0].feesMilliSat", is(feesAsString)))
+                .andExpect(jsonPath("$.routes[0].feeRate", is(200)));
     }
 
     @Test
@@ -74,6 +76,8 @@ class PickhardtPaymentsControllerIT {
                 .andExpect(jsonPath("$.routes", hasSize(1)))
                 .andExpect(jsonPath("$.routes[0].amountSat", is(amountAsString)))
                 .andExpect(jsonPath("$.routes[0].channelIds", contains(CHANNEL_ID.toString())))
-                .andExpect(jsonPath("$.routes[0].probability", is(expectedProbability)));
+                .andExpect(jsonPath("$.routes[0].probability", is(expectedProbability)))
+                .andExpect(jsonPath("$.routes[0].feesMilliSat", is(feesAsString)))
+                .andExpect(jsonPath("$.routes[0].feeRate", is(200)));
     }
 }

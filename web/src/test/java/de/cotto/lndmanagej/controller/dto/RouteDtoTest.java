@@ -15,7 +15,8 @@ class RouteDtoTest {
                 "100",
                 List.of(CHANNEL_ID),
                 ROUTE.getProbability(),
-                String.valueOf(ROUTE.fees().milliSatoshis())
+                String.valueOf(ROUTE.fees().milliSatoshis()),
+                ROUTE.getFeeRate()
         );
         assertThat(RouteDto.fromModel(ROUTE))
                 .isEqualTo(expected);

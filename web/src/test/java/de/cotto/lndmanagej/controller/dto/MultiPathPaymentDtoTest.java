@@ -6,6 +6,7 @@ import java.util.List;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPaymentFixtures.MULTI_PATH_PAYMENT;
+import static de.cotto.lndmanagej.pickhardtpayments.model.RouteFixtures.ROUTE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class MultiPathPaymentDtoTest {
@@ -19,7 +20,7 @@ class MultiPathPaymentDtoTest {
                 probability,
                 String.valueOf(MULTI_PATH_PAYMENT.fees().milliSatoshis()),
                 MULTI_PATH_PAYMENT.getFeeRate(),
-                List.of(new RouteDto(amountSat, List.of(CHANNEL_ID), probability, feesMilliSat)))
+                List.of(new RouteDto(amountSat, List.of(CHANNEL_ID), probability, feesMilliSat, ROUTE.getFeeRate())))
         );
     }
 }
