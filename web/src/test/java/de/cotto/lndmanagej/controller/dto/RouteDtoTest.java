@@ -11,7 +11,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RouteDtoTest {
     @Test
     void fromModel() {
+        RouteDto expected = new RouteDto(
+                "100",
+                List.of(CHANNEL_ID),
+                ROUTE.getProbability(),
+                String.valueOf(ROUTE.fees().milliSatoshis())
+        );
         assertThat(RouteDto.fromModel(ROUTE))
-                .isEqualTo(new RouteDto("100", List.of(CHANNEL_ID), ROUTE.getProbability()));
+                .isEqualTo(expected);
     }
 }

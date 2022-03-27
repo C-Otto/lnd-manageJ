@@ -13,11 +13,12 @@ class MultiPathPaymentDtoTest {
     void fromModel() {
         double probability = 0.999_995_238_095_464_9;
         String amountSat = "100";
+        String feesMilliSat = "20";
         assertThat(MultiPathPaymentDto.fromModel(MULTI_PATH_PAYMENT)).isEqualTo(new MultiPathPaymentDto(
                 amountSat,
                 probability,
                 String.valueOf(MULTI_PATH_PAYMENT.fees().milliSatoshis()),
-                List.of(new RouteDto(amountSat, List.of(CHANNEL_ID), probability)))
+                List.of(new RouteDto(amountSat, List.of(CHANNEL_ID), probability, feesMilliSat)))
         );
     }
 }
