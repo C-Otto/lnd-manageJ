@@ -108,6 +108,13 @@ class ArcInitializerTest {
 
         @Test
         void adds_uncertain_liquidity_as_second_arc() {
+            ArcInitializer arcInitializer = new ArcInitializer(
+                    minCostFlow,
+                    integerMapping,
+                    edgeMapping,
+                    QUANTIZATION,
+                    2
+            );
             arcInitializer.addArcs(Set.of(edgeWithLiquidityInformation));
             assertThat(minCostFlow.getUnitCost(1)).isEqualTo(1);
             assertThat(minCostFlow.getCapacity(1)).isEqualTo(75);
@@ -123,7 +130,7 @@ class ArcInitializerTest {
                     5
             );
             arcInitializer.addArcs(Set.of(edgeWithLiquidityInformation));
-            assertThat(minCostFlow.getNumArcs()).isEqualTo(6);
+            assertThat(minCostFlow.getNumArcs()).isEqualTo(5);
         }
 
         @Test
@@ -159,7 +166,7 @@ class ArcInitializerTest {
                     integerMapping,
                     edgeMapping,
                     10,
-                    QUANTIZATION
+                    2
             );
             arcInitializer.addArcs(Set.of(edgeWithLiquidityInformation));
             // one arc for the known liquidity (25 / 10 = 2), 100 / 10 - 2 = 8 remaining
@@ -173,7 +180,7 @@ class ArcInitializerTest {
                     integerMapping,
                     edgeMapping,
                     20,
-                    5
+                    6
             );
             arcInitializer.addArcs(Set.of(edgeWithLiquidityInformation));
             // one arc for the known liquidity (25 / 20 = 1), 100 / 20 - 1 = 4 remaining: 4 < 5, no additional arc added

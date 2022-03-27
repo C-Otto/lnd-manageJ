@@ -46,17 +46,20 @@ class ArcInitializer {
         int endNode = pubkeyToIntegerMapping.getMappedInteger(edge.endNode());
 
         long quantizedLowerBound = quantize(edgeWithLiquidityInformation.availableLiquidityLowerBound());
-        addArcForKnownLiquidity(edge, startNode, endNode, quantizedLowerBound);
+        int remainingPieces = addArcForKnownLiquidity(edge, startNode, endNode, quantizedLowerBound);
+        if (remainingPieces == 0) {
+            return;
+        }
 
         Coins upperBound = edgeWithLiquidityInformation.availableLiquidityUpperBound();
         long quantizedUpperBound = quantize(upperBound);
         long uncertainButPossibleLiquidity = quantizedUpperBound - quantizedLowerBound;
-        long capacityPiece = uncertainButPossibleLiquidity / piecewiseLinearApproximations;
+        long capacityPiece = uncertainButPossibleLiquidity / remainingPieces;
         if (capacityPiece == 0) {
             return;
         }
         long unitCost = quantize(maximumCapacity) / uncertainButPossibleLiquidity;
-        for (int i = 1; i <= piecewiseLinearApproximations; i++) {
+        for (int i = 1; i <= remainingPieces; i++) {
             int arcIndex = minCostFlow.addArcWithCapacityAndUnitCost(
                     startNode,
                     endNode,
@@ -67,12 +70,13 @@ class ArcInitializer {
         }
     }
 
-    private void addArcForKnownLiquidity(Edge edge, int startNode, int endNode, long quantizedLowerBound) {
+    private int addArcForKnownLiquidity(Edge edge, int startNode, int endNode, long quantizedLowerBound) {
         if (quantizedLowerBound <= 0) {
-            return;
+            return piecewiseLinearApproximations;
         }
         int arcIndex = minCostFlow.addArcWithCapacityAndUnitCost(startNode, endNode, quantizedLowerBound, 0);
         edgeMapping.put(arcIndex, edge);
+        return piecewiseLinearApproximations - 1;
     }
 
     private Coins getMaximumCapacity(Collection<EdgeWithLiquidityInformation> edgesWithLiquidityInformation) {
