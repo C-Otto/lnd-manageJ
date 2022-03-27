@@ -16,6 +16,7 @@ class MultiPathPaymentDtoTest {
         assertThat(MultiPathPaymentDto.fromModel(MULTI_PATH_PAYMENT)).isEqualTo(new MultiPathPaymentDto(
                 amountSat,
                 probability,
+                String.valueOf(MULTI_PATH_PAYMENT.fees().milliSatoshis()),
                 List.of(new RouteDto(amountSat, List.of(CHANNEL_ID), probability)))
         );
     }

@@ -7,11 +7,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public record MultiPathPaymentDto(String amountSat, double probability, List<RouteDto> routes) {
+public record MultiPathPaymentDto(String amountSat, double probability, String feesMilliSat, List<RouteDto> routes) {
     public static MultiPathPaymentDto fromModel(MultiPathPayment multiPathPayment) {
         return new MultiPathPaymentDto(
                 String.valueOf(multiPathPayment.amount().satoshis()),
                 multiPathPayment.probability(),
+                String.valueOf(multiPathPayment.fees().milliSatoshis()),
                 getRoutes(multiPathPayment.routes())
         );
     }

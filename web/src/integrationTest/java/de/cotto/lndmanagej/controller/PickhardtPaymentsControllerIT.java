@@ -41,12 +41,14 @@ class PickhardtPaymentsControllerIT {
     void sendTo() throws Exception {
         Coins amount = MULTI_PATH_PAYMENT.amount();
         String amountAsString = String.valueOf(amount.satoshis());
+        String feesAsString = String.valueOf(MULTI_PATH_PAYMENT.fees().milliSatoshis());
         double expectedProbability = MULTI_PATH_PAYMENT.probability();
         when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, amount))
                 .thenReturn(MULTI_PATH_PAYMENT);
         mockMvc.perform(get(PREFIX + "/to/" + PUBKEY + "/amount/" + amount.satoshis()))
                 .andExpect(jsonPath("$.probability", is(expectedProbability)))
                 .andExpect(jsonPath("$.amountSat", is(amountAsString)))
+                .andExpect(jsonPath("$.feesMilliSat", is(feesAsString)))
                 .andExpect(jsonPath("$.routes", hasSize(1)))
                 .andExpect(jsonPath("$.routes[0].amountSat", is(amountAsString)))
                 .andExpect(jsonPath("$.routes[0].channelIds", contains(CHANNEL_ID.toString())))
