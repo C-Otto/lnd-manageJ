@@ -96,27 +96,6 @@ class FlowsTest {
     }
 
     @Test
-    void getProbability() {
-        Flows flows = new Flows(FLOW);
-        assertThat(flows.getProbability()).isEqualTo(FLOW.getProbability());
-    }
-
-    @Test
-    void getProbability_two_separate_flows() {
-        Flows flows = new Flows(FLOW, FLOW_2);
-        assertThat(flows.getProbability()).isEqualTo(FLOW.getProbability() * FLOW_2.getProbability());
-    }
-
-    @Test
-    void getProbability_added_amount() {
-        Flows flows = new Flows(FLOW, FLOW);
-        long flowAmount = 2 * FLOW.amount().satoshis();
-        long capacitySat = FLOW.edge().capacity().satoshis();
-        double expected = 1.0 * (capacitySat + 1 - flowAmount) / (capacitySat + 1);
-        assertThat(flows.getProbability()).isEqualTo(expected);
-    }
-
-    @Test
     void getCopy() {
         Flows original = new Flows(FLOW);
         Flows copy = original.getCopy();

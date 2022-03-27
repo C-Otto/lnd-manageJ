@@ -37,13 +37,6 @@ public class Flows {
         return flow.amount();
     }
 
-    public double getProbability() {
-        return map.values().stream()
-                .flatMap(i -> i.values().stream())
-                .mapToDouble(Flow::getProbability)
-                .reduce(1.0, (d1, d2) -> d1 * d2);
-    }
-
     public void add(Flow flow) {
         add(flow.edge(), flow.amount());
     }
