@@ -44,6 +44,10 @@ public record Route(
         return (1.0 * (upperBoundSat + 1 - amountSat)) / (upperBoundSat + 1 - lowerBoundSat);
     }
 
+    public long getFeeRate() {
+        return fees().milliSatoshis() * 1_000_000 / amount.milliSatoshis();
+    }
+
     public Route getForAmount(Coins newAmount) {
         return new Route(edges, newAmount).withLiquidityInformation(liquidityInformation.values());
     }

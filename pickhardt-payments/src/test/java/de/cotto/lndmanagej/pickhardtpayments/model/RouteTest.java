@@ -117,6 +117,36 @@ class RouteTest {
     }
 
     @Test
+    void feeRate_one_hop_without_base_fee() {
+        int feeRate = 987;
+        Policy policy = new Policy(feeRate, Coins.ofMilliSatoshis(0), true);
+        Coins amount = Coins.ofSatoshis(1_234_000);
+        assertThat(new Route(List.of(new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy)), amount).getFeeRate())
+                .isEqualTo(feeRate);
+    }
+
+    @Test
+    void feeRate_one_hop_with_base_fee() {
+        int feeRate = 987;
+        Policy policy = new Policy(feeRate, Coins.ofSatoshis(10_000), true);
+        Coins amount = Coins.ofSatoshis(1_234_567);
+        assertThat(new Route(List.of(new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy)), amount).getFeeRate())
+                .isEqualTo(9087);
+    }
+
+    @Test
+    void feeRate_two_hops() {
+        int feeRate1 = 100;
+        int feeRate2 = 350;
+        Policy policy1 = new Policy(feeRate1, Coins.ofMilliSatoshis(0), true);
+        Policy policy2 = new Policy(feeRate2, Coins.ofMilliSatoshis(0), true);
+        Coins amount = Coins.ofSatoshis(1_234_567);
+        Edge hop1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy1);
+        Edge hop2 = new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_3, CAPACITY, policy2);
+        assertThat(new Route(List.of(hop1, hop2), amount).getFeeRate()).isEqualTo(feeRate1 + feeRate2);
+    }
+
+    @Test
     void zero_amount() {
         assertThatIllegalArgumentException().isThrownBy(() -> new Route(List.of(), Coins.NONE));
     }
