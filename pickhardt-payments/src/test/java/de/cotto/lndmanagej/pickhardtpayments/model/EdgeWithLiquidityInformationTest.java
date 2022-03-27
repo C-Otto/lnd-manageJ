@@ -61,4 +61,15 @@ class EdgeWithLiquidityInformationTest {
     void availableLiquidityLowerBound() {
         assertThat(EDGE_WITH_LIQUIDITY_INFORMATION.availableLiquidityLowerBound()).isEqualTo(Coins.NONE);
     }
+
+    @Test
+    void isKnownLiquidity_false() {
+        assertThat(EDGE_WITH_LIQUIDITY_INFORMATION.isKnownLiquidity()).isFalse();
+    }
+
+    @Test
+    void isKnownLiquidity_true() {
+        assertThat(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, Coins.ofSatoshis(1)).isKnownLiquidity())
+                .isTrue();
+    }
 }

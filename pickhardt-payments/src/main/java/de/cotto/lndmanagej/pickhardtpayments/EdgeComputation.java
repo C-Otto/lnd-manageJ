@@ -54,6 +54,20 @@ public class EdgeComputation {
         return cache.get("");
     }
 
+    public EdgeWithLiquidityInformation getEdgeWithLiquidityInformation(Edge edge) {
+        Pubkey ownPubkey = grpcGetInfo.getPubkey();
+        return getEdgeWithLiquidityInformation(edge, ownPubkey);
+    }
+
+    private EdgeWithLiquidityInformation getEdgeWithLiquidityInformation(Edge edge, Pubkey ownPubkey) {
+        Coins knownLiquidity = getKnownLiquidity(edge, ownPubkey).orElse(null);
+        if (knownLiquidity == null) {
+            Coins availableLiquidityUpperBound = getAvailableLiquidityUpperBound(edge);
+            return EdgeWithLiquidityInformation.forUpperBound(edge, availableLiquidityUpperBound);
+        }
+        return EdgeWithLiquidityInformation.forKnownLiquidity(edge, knownLiquidity);
+    }
+
     private Set<EdgeWithLiquidityInformation> getEdgesWithoutCache() {
         Set<DirectedChannelEdge> channelEdges = grpcGraph.getChannelEdges().orElse(null);
         if (channelEdges == null) {
@@ -73,15 +87,6 @@ public class EdgeComputation {
             edgesWithLiquidityInformation.add(getEdgeWithLiquidityInformation(edge, ownPubkey));
         }
         return edgesWithLiquidityInformation;
-    }
-
-    private EdgeWithLiquidityInformation getEdgeWithLiquidityInformation(Edge edge, Pubkey ownPubkey) {
-        Coins knownLiquidity = getKnownLiquidity(edge, ownPubkey).orElse(null);
-        if (knownLiquidity == null) {
-            Coins availableLiquidityUpperBound = getAvailableLiquidityUpperBound(edge);
-            return EdgeWithLiquidityInformation.forUpperBound(edge, availableLiquidityUpperBound);
-        }
-        return EdgeWithLiquidityInformation.forKnownLiquidity(edge, knownLiquidity);
     }
 
     private Optional<Coins> getKnownLiquidity(Edge edge, Pubkey ownPubKey) {

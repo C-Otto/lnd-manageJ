@@ -5,15 +5,18 @@ import de.cotto.lndmanagej.model.Policy;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Set;
 
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
+import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_1;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE;
 import static de.cotto.lndmanagej.pickhardtpayments.model.RouteFixtures.ROUTE;
+import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
@@ -26,6 +29,58 @@ class RouteTest {
         long capacitySat = EDGE.capacity().satoshis();
         assertThat(ROUTE.getProbability())
                 .isEqualTo(1.0 * (capacitySat + 1 - ROUTE.amount().satoshis()) / (capacitySat + 1));
+    }
+
+    @Test
+    void getProbability_within_known_liquidity() {
+        long availableLiquiditySat = 100;
+        Coins capacity = Coins.ofSatoshis(200);
+        Coins amount = Coins.ofSatoshis(90);
+        Edge edge = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, capacity, POLICY_1);
+        Route route = new Route(List.of(edge), amount);
+        EdgeWithLiquidityInformation edgeWithLiquidityInformation =
+                EdgeWithLiquidityInformation.forKnownLiquidity(edge, Coins.ofSatoshis(availableLiquiditySat));
+        assertThat(route.withLiquidityInformation(Set.of(edgeWithLiquidityInformation)).getProbability())
+                .isEqualTo(1.0);
+    }
+
+    @Test
+    void getProbability_exactly_known_liquidity() {
+        Route route = routeForAmountAndCapacityAndKnownLiquidity(100, 200, 100);
+        assertThat(route.getProbability())
+                .isEqualTo(1.0);
+    }
+
+    @Test
+    void getProbability_above_known_liquidity() {
+        Route route = routeForAmountAndCapacityAndKnownLiquidity(250, 300, 200);
+        assertThat(route.getProbability()).isEqualTo(0.0);
+    }
+
+    @Test
+    void getProbability_above_known_lower_bound_for_liquidity() {
+        long lowerBoundSat = 100;
+        long capacitySat = 200;
+        int amountSat = 150;
+        Edge edge = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, Coins.ofSatoshis(capacitySat), POLICY_1);
+        Route route = new Route(List.of(edge), Coins.ofSatoshis(amountSat));
+        EdgeWithLiquidityInformation edgeWithLiquidityInformation =
+                EdgeWithLiquidityInformation.forLowerBound(edge, Coins.ofSatoshis(lowerBoundSat));
+        assertThat(route.withLiquidityInformation(Set.of(edgeWithLiquidityInformation)).getProbability())
+                .isEqualTo(1.0 * (capacitySat + 1 - amountSat) / (capacitySat + 1 - lowerBoundSat));
+    }
+
+    @Test
+    void getProbability_below_known_upper_bound_for_liquidity() {
+        long upperBoundSat = 100;
+        Coins capacity = Coins.ofSatoshis(200);
+        Coins amount = Coins.ofSatoshis(80);
+        Edge edge = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, capacity, POLICY_1);
+        Route route = new Route(List.of(edge), amount);
+        EdgeWithLiquidityInformation edgeWithLiquidityInformation =
+                EdgeWithLiquidityInformation.forUpperBound(edge, Coins.ofSatoshis(upperBoundSat));
+        assertThat(route.withLiquidityInformation(Set.of(edgeWithLiquidityInformation)).getProbability())
+                .isEqualTo(1.0 * (upperBoundSat + 1 - amount.satoshis()) / (upperBoundSat + 1));
     }
 
     @Test
@@ -75,5 +130,41 @@ class RouteTest {
     void getRouteForAmount() {
         Coins newAmount = Coins.ofSatoshis(1_000);
         assertThat(ROUTE.getForAmount(newAmount)).isEqualTo(new Route(ROUTE.edges(), newAmount));
+    }
+
+    @Test
+    void getRouteForAmount_retains_liquidity_information() {
+        Route original = ROUTE.withLiquidityInformation(Set.of(
+                EdgeWithLiquidityInformation.forUpperBound(EDGE, Coins.ofSatoshis(123))
+        ));
+        Coins newAmount = Coins.ofSatoshis(1_000);
+        Coins updateFees = Coins.ofMilliSatoshis(110);
+        assertThat(original.getForAmount(newAmount))
+                .isEqualTo(new Route(original.edges(), newAmount, updateFees, original.liquidityInformation()));
+    }
+
+    @Test
+    void liquidityInformation_default() {
+        assertThat(new Route(List.of(EDGE), Coins.ofSatoshis(1)).liquidityInformation()).isEmpty();
+    }
+
+    @Test
+    void withLiquidityInformation() {
+        Route route = new Route(List.of(EDGE), Coins.ofSatoshis(4));
+        EdgeWithLiquidityInformation edgeWithLiquidityInformation =
+                EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, Coins.ofSatoshis(2));
+        Set<EdgeWithLiquidityInformation> providedLiquidityInformation = Set.of(edgeWithLiquidityInformation);
+        assertThat(route.withLiquidityInformation(providedLiquidityInformation).liquidityInformation())
+                .containsExactly(entry(EDGE, edgeWithLiquidityInformation));
+    }
+
+    private Route routeForAmountAndCapacityAndKnownLiquidity(int amountSat, int capacitySat, int knownLiquiditySat) {
+        Coins capacity = Coins.ofSatoshis(capacitySat);
+        Coins amount = Coins.ofSatoshis(amountSat);
+        Edge edge = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, capacity, POLICY_1);
+        Route route = new Route(List.of(edge), amount);
+        EdgeWithLiquidityInformation edgeWithLiquidityInformation =
+                EdgeWithLiquidityInformation.forKnownLiquidity(edge, Coins.ofSatoshis(knownLiquiditySat));
+        return route.withLiquidityInformation(Set.of(edgeWithLiquidityInformation));
     }
 }

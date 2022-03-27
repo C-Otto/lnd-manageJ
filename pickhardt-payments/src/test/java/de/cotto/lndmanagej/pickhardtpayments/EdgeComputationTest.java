@@ -110,6 +110,44 @@ class EdgeComputationTest {
                 .contains(EdgeWithLiquidityInformation.forUpperBound(EDGE, EDGE.capacity()));
     }
 
+    @Test
+    void getEdgeWithLiquidityInformation_default() {
+        when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY_4);
+        assertThat(edgeComputation.getEdgeWithLiquidityInformation(EDGE))
+                .isEqualTo(EdgeWithLiquidityInformation.forUpperBound(EDGE, EDGE.capacity()));
+    }
+
+    @Test
+    void getEdgeWithLiquidityInformation_first_node_is_own_node() {
+        when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY);
+        Coins knownLiquidity = Coins.ofSatoshis(456);
+        when(channelService.getLocalChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+        when(balanceService.getAvailableLocalBalance(EDGE.channelId())).thenReturn(knownLiquidity);
+        assertThat(edgeComputation.getEdgeWithLiquidityInformation(EDGE))
+                .isEqualTo(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, knownLiquidity));
+    }
+
+    @Test
+    void getEdgeWithLiquidityInformation_second_node_is_own_node() {
+        when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY_2);
+        Coins knownLiquidity = Coins.ofSatoshis(456);
+        when(channelService.getLocalChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+        when(balanceService.getAvailableRemoteBalance(EDGE.channelId())).thenReturn(knownLiquidity);
+        assertThat(edgeComputation.getEdgeWithLiquidityInformation(EDGE))
+                .isEqualTo(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, knownLiquidity));
+    }
+
+    @Test
+    void getEdgeWithLiquidityInformation_with_data_from_mission_control() {
+        when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY_4);
+        Coins recentFailureAmount = Coins.ofSatoshis(456);
+        Coins upperBound = Coins.ofSatoshis(455);
+        when(missionControlService.getMinimumOfRecentFailures(EDGE.startNode(), EDGE.endNode()))
+                .thenReturn(Optional.of(recentFailureAmount));
+        assertThat(edgeComputation.getEdgeWithLiquidityInformation(EDGE))
+                .isEqualTo(EdgeWithLiquidityInformation.forUpperBound(EDGE, upperBound));
+    }
+
     private void mockEdge() {
         DirectedChannelEdge edge = new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY, PUBKEY_2, POLICY_1);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));

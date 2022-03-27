@@ -2,11 +2,20 @@ package de.cotto.lndmanagej.pickhardtpayments.model;
 
 import de.cotto.lndmanagej.model.Coins;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
-public record Route(List<Edge> edges, Coins amount, Coins fees) {
+import static java.util.stream.Collectors.toMap;
+
+public record Route(
+        List<Edge> edges,
+        Coins amount,
+        Coins fees,
+        Map<Edge, EdgeWithLiquidityInformation> liquidityInformation
+) {
     public Route(List<Edge> edges, Coins amount) {
-        this(edges, amount, computeFees(edges, amount));
+        this(edges, amount, computeFees(edges, amount), Map.of());
     }
 
     public Route {
@@ -16,14 +25,33 @@ public record Route(List<Edge> edges, Coins amount, Coins fees) {
     }
 
     public double getProbability() {
-        return edges.stream().map(edge -> {
-            long capacitySat = edge.capacity().satoshis();
-            return (1.0 * (capacitySat + 1 - amount.satoshis())) / (capacitySat + 1);
-        }).reduce(1.0, (a, b) -> a * b);
+        return edges.stream().map(this::getProbability).reduce(1.0, (a, b) -> a * b);
+    }
+
+    private Double getProbability(Edge edge) {
+        EdgeWithLiquidityInformation edgeWithLiquidityInformation =
+                liquidityInformation.getOrDefault(edge, getDefault(edge));
+        boolean knownLiquidity = edgeWithLiquidityInformation.isKnownLiquidity();
+        if (knownLiquidity) {
+            if (amount.compareTo(edgeWithLiquidityInformation.availableLiquidityLowerBound()) <= 0) {
+                return 1.0;
+            }
+            return 0.0;
+        }
+        long upperBoundSat = edgeWithLiquidityInformation.availableLiquidityUpperBound().milliSatoshis() / 1_000;
+        long lowerBoundSat = edgeWithLiquidityInformation.availableLiquidityLowerBound().milliSatoshis() / 1_000;
+        long amountSat = amount.milliSatoshis() / 1_000;
+        return (1.0 * (upperBoundSat + 1 - amountSat)) / (upperBoundSat + 1 - lowerBoundSat);
     }
 
     public Route getForAmount(Coins newAmount) {
-        return new Route(edges, newAmount);
+        return new Route(edges, newAmount).withLiquidityInformation(liquidityInformation.values());
+    }
+
+    public Route withLiquidityInformation(Collection<EdgeWithLiquidityInformation> liquidityInformation) {
+        Map<Edge, EdgeWithLiquidityInformation> map =
+                liquidityInformation.stream().collect(toMap(EdgeWithLiquidityInformation::edge, e -> e));
+        return new Route(edges, amount, fees, map);
     }
 
     private static Coins computeFees(List<Edge> edges, Coins amount) {
@@ -39,5 +67,9 @@ public record Route(List<Edge> edges, Coins amount, Coins fees) {
             fees = fees.add(feesForHop);
         }
         return fees;
+    }
+
+    private EdgeWithLiquidityInformation getDefault(Edge edge) {
+        return new EdgeWithLiquidityInformation(edge, Coins.NONE, edge.capacity());
     }
 }

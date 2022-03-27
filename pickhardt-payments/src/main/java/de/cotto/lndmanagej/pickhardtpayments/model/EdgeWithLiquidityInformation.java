@@ -32,4 +32,8 @@ public record EdgeWithLiquidityInformation(
     ) {
         return new EdgeWithLiquidityInformation(edge, availableLiquidityLowerBound, availableLiquidityUpperBound);
     }
+
+    public boolean isKnownLiquidity() {
+        return availableLiquidityLowerBound.equals(availableLiquidityUpperBound);
+    }
 }
