@@ -112,6 +112,11 @@
                       value="//ClassOrInterfaceDeclaration[ends-with(@SimpleName, 'Dto') or ends-with(@SimpleName, 'DTO')]"/>
         </properties>
     </rule>
+    <rule ref="category/java/design.xml/ImmutableField">
+        <properties>
+            <property name="ignoredAnnotations" value="org.springframework.beans.factory.annotation.Autowired|org.springframework.boot.test.mock.mockito.MockBean|org.mockito.Mock|org.mockito.InjectMocks|javax.persistence.Id" />
+        </properties>
+    </rule>
 
     <rule ref="category/java/documentation.xml">
         <exclude name="CommentRequired"/>
