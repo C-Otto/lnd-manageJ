@@ -14,6 +14,16 @@ class MultiPathPaymentTest {
     }
 
     @Test
+    void feeRate_failure() {
+        assertThat(MultiPathPayment.FAILURE.getFeeRate()).isZero();
+    }
+
+    @Test
+    void fees_failure() {
+        assertThat(MultiPathPayment.FAILURE.fees()).isEqualTo(Coins.NONE);
+    }
+
+    @Test
     void amount() {
         assertThat(MULTI_PATH_PAYMENT.amount()).isEqualTo(ROUTE.amount());
     }

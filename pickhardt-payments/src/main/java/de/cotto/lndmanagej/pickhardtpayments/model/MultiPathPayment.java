@@ -17,6 +17,9 @@ public record MultiPathPayment(Coins amount, Coins fees, double probability, Set
     }
 
     public long getFeeRate() {
-        return fees.milliSatoshis() * 1_000_000 / amount.milliSatoshis();
+        if (amount.isPositive()) {
+            return fees.milliSatoshis() * 1_000_000 / amount.milliSatoshis();
+        }
+        return 0;
     }
 }
