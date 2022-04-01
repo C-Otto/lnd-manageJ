@@ -47,6 +47,13 @@ public record Coins(long milliSatoshis) implements Comparable<Coins> {
         return other;
     }
 
+    public Coins maximum(@Nullable Coins other) {
+        if (other == null || compareTo(other) >= 0) {
+            return this;
+        }
+        return other;
+    }
+
     public Coins negate() {
         return Coins.ofMilliSatoshis(-milliSatoshis);
     }

@@ -12,6 +12,8 @@ import java.util.Comparator;
 import java.util.Map;
 
 class ArcInitializer {
+    // 50 BTC
+    private static final Coins ASSUMED_MAXIMUM = Coins.ofSatoshis(5_000_000_000L);
 
     private final MinCostFlow minCostFlow;
     private final IntegerMapping<Pubkey> pubkeyToIntegerMapping;
@@ -85,11 +87,12 @@ class ArcInitializer {
     }
 
     private Coins getMaximumCapacity(Collection<EdgeWithLiquidityInformation> edgesWithLiquidityInformation) {
-        return edgesWithLiquidityInformation.stream()
+        Coins realMaximum = edgesWithLiquidityInformation.stream()
                 .map(EdgeWithLiquidityInformation::edge)
                 .map(Edge::capacity)
                 .max(Comparator.naturalOrder())
                 .orElse(Coins.NONE);
+        return realMaximum.maximum(ASSUMED_MAXIMUM);
     }
 
     private long quantize(Coins coins) {

@@ -208,6 +208,33 @@ class CoinsTest {
     }
 
     @Test
+    void maximum_first() {
+        assertThat(Coins.ofMilliSatoshis(2).maximum(Coins.ofMilliSatoshis(1))).isEqualTo(Coins.ofMilliSatoshis(2));
+    }
+
+    @Test
+    void maximum_second() {
+        assertThat(Coins.ofMilliSatoshis(50).maximum(Coins.ofMilliSatoshis(100))).isEqualTo(Coins.ofMilliSatoshis(100));
+    }
+
+    @Test
+    void maximum_same() {
+        assertThat(Coins.ofMilliSatoshis(1).maximum(Coins.ofMilliSatoshis(1))).isEqualTo(Coins.ofMilliSatoshis(1));
+    }
+
+    @Test
+    void maximum_same_prefers_this() {
+        Coins first = Coins.ofMilliSatoshis(1);
+        Coins second = Coins.ofMilliSatoshis(1);
+        assertThat(first.maximum(second)).isSameAs(first);
+    }
+
+    @Test
+    void maximum_null() {
+        assertThat(Coins.ofMilliSatoshis(1).maximum(null)).isEqualTo(Coins.ofMilliSatoshis(1));
+    }
+
+    @Test
     void negate_zero() {
         assertThat(Coins.NONE.negate()).isEqualTo(Coins.NONE);
     }
