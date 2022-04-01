@@ -18,7 +18,7 @@ class ArcInitializer {
     private final Map<Integer, Edge> edgeMapping;
     private final long quantization;
     private final int piecewiseLinearApproximations;
-    private final int feeRateFactor;
+    private final int feeRateWeight;
 
     public ArcInitializer(
             MinCostFlow minCostFlow,
@@ -26,14 +26,14 @@ class ArcInitializer {
             Map<Integer, Edge> edgeMapping,
             long quantization,
             int piecewiseLinearApproximations,
-            int feeRateFactor
+            int feeRateWeight
     ) {
         this.minCostFlow = minCostFlow;
         this.pubkeyToIntegerMapping = integerMapping;
         this.edgeMapping = edgeMapping;
         this.quantization = quantization;
         this.piecewiseLinearApproximations = piecewiseLinearApproximations;
-        this.feeRateFactor = feeRateFactor;
+        this.feeRateWeight = feeRateWeight;
     }
 
     public void addArcs(Collection<EdgeWithLiquidityInformation> edgesWithLiquidityInformation) {
@@ -61,14 +61,14 @@ class ArcInitializer {
         if (capacityPiece == 0) {
             return;
         }
-        long unitCost = quantize(maximumCapacity) / uncertainButPossibleLiquidity;
-        long feeRateAdditionSummand = feeRateFactor * edge.policy().feeRate();
+        long unitCost = 10 * quantize(maximumCapacity) / uncertainButPossibleLiquidity;
+        long feeRateSummand = feeRateWeight * edge.policy().feeRate();
         for (int i = 1; i <= remainingPieces; i++) {
             int arcIndex = minCostFlow.addArcWithCapacityAndUnitCost(
                     startNode,
                     endNode,
                     capacityPiece,
-                    i * unitCost + feeRateAdditionSummand
+                    i * unitCost + feeRateSummand
             );
             edgeMapping.put(arcIndex, edge);
         }
@@ -78,7 +78,8 @@ class ArcInitializer {
         if (quantizedLowerBound <= 0) {
             return piecewiseLinearApproximations;
         }
-        int arcIndex = minCostFlow.addArcWithCapacityAndUnitCost(startNode, endNode, quantizedLowerBound, 0);
+        long feeRateCost = feeRateWeight * edge.policy().feeRate();
+        int arcIndex = minCostFlow.addArcWithCapacityAndUnitCost(startNode, endNode, quantizedLowerBound, feeRateCost);
         edgeMapping.put(arcIndex, edge);
         return piecewiseLinearApproximations - 1;
     }

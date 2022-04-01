@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
-import static de.cotto.lndmanagej.pickhardtpayments.PickhardtPaymentsConfiguration.DEFAULT_FEE_RATE_FACTOR;
+import static de.cotto.lndmanagej.pickhardtpayments.PickhardtPaymentsConfiguration.DEFAULT_FEE_RATE_WEIGHT;
 import static java.util.stream.Collectors.toSet;
 
 @Component
@@ -36,17 +36,17 @@ public class MultiPathPaymentSplitter {
         return getMultiPathPayment(source, target, amount);
     }
 
-    public MultiPathPayment getMultiPathPaymentTo(Pubkey target, Coins amount, int feeRateFactor) {
+    public MultiPathPayment getMultiPathPaymentTo(Pubkey target, Coins amount, int feeRateWeight) {
         Pubkey source = grpcGetInfo.getPubkey();
-        return getMultiPathPayment(source, target, amount, feeRateFactor);
+        return getMultiPathPayment(source, target, amount, feeRateWeight);
     }
 
     public MultiPathPayment getMultiPathPayment(Pubkey source, Pubkey target, Coins amount) {
-        return getMultiPathPayment(source, target, amount, DEFAULT_FEE_RATE_FACTOR);
+        return getMultiPathPayment(source, target, amount, DEFAULT_FEE_RATE_WEIGHT);
     }
 
-    public MultiPathPayment getMultiPathPayment(Pubkey source, Pubkey target, Coins amount, int feeRateFactor) {
-        Flows flows = flowComputation.getOptimalFlows(source, target, amount, feeRateFactor);
+    public MultiPathPayment getMultiPathPayment(Pubkey source, Pubkey target, Coins amount, int feeRateWeight) {
+        Flows flows = flowComputation.getOptimalFlows(source, target, amount, feeRateWeight);
         if (flows.isEmpty()) {
             return MultiPathPayment.FAILURE;
         }

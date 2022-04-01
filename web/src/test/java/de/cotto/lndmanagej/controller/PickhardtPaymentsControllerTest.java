@@ -11,7 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
-import static de.cotto.lndmanagej.pickhardtpayments.PickhardtPaymentsConfiguration.DEFAULT_FEE_RATE_FACTOR;
+import static de.cotto.lndmanagej.pickhardtpayments.PickhardtPaymentsConfiguration.DEFAULT_FEE_RATE_WEIGHT;
 import static de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPaymentFixtures.MULTI_PATH_PAYMENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -27,18 +27,18 @@ class PickhardtPaymentsControllerTest {
 
     @Test
     void sendTo() {
-        when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, Coins.ofSatoshis(456), DEFAULT_FEE_RATE_FACTOR))
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, Coins.ofSatoshis(456), DEFAULT_FEE_RATE_WEIGHT))
                 .thenReturn(MULTI_PATH_PAYMENT);
         assertThat(controller.sendTo(PUBKEY, 456))
                 .isEqualTo(MultiPathPaymentDto.fromModel(MULTI_PATH_PAYMENT));
     }
 
     @Test
-    void sendTo_with_fee_rate_factor() {
-        int feeRateFactor = 10;
-        when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, Coins.ofSatoshis(456), feeRateFactor))
+    void sendTo_with_fee_rate_weight() {
+        int feeRateWeight = 10;
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, Coins.ofSatoshis(456), feeRateWeight))
                 .thenReturn(MULTI_PATH_PAYMENT);
-        assertThat(controller.sendTo(PUBKEY, 456, feeRateFactor))
+        assertThat(controller.sendTo(PUBKEY, 456, feeRateWeight))
                 .isEqualTo(MultiPathPaymentDto.fromModel(MULTI_PATH_PAYMENT));
     }
 
@@ -48,22 +48,22 @@ class PickhardtPaymentsControllerTest {
                 PUBKEY,
                 PUBKEY_2,
                 Coins.ofSatoshis(123),
-                DEFAULT_FEE_RATE_FACTOR
+                DEFAULT_FEE_RATE_WEIGHT
         )).thenReturn(MULTI_PATH_PAYMENT);
         assertThat(controller.send(PUBKEY, PUBKEY_2, 123))
                 .isEqualTo(MultiPathPaymentDto.fromModel(MULTI_PATH_PAYMENT));
     }
 
     @Test
-    void send_with_fee_rate_factor() {
-        int feeRateFactor = 20;
+    void send_with_fee_rate_weight() {
+        int feeRateWeight = 20;
         when(multiPathPaymentSplitter.getMultiPathPayment(
                 PUBKEY,
                 PUBKEY_2,
                 Coins.ofSatoshis(123),
-                feeRateFactor
+                feeRateWeight
         )).thenReturn(MULTI_PATH_PAYMENT);
-        assertThat(controller.send(PUBKEY, PUBKEY_2, 123, feeRateFactor))
+        assertThat(controller.send(PUBKEY, PUBKEY_2, 123, feeRateWeight))
                 .isEqualTo(MultiPathPaymentDto.fromModel(MULTI_PATH_PAYMENT));
     }
 }

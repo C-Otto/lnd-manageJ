@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-import static de.cotto.lndmanagej.pickhardtpayments.PickhardtPaymentsConfiguration.DEFAULT_FEE_RATE_FACTOR;
+import static de.cotto.lndmanagej.pickhardtpayments.PickhardtPaymentsConfiguration.DEFAULT_FEE_RATE_WEIGHT;
 
 @Component
 public class FlowComputation {
@@ -27,17 +27,17 @@ public class FlowComputation {
     }
 
     public Flows getOptimalFlows(Pubkey source, Pubkey target, Coins amount) {
-        return getOptimalFlows(source, target, amount, DEFAULT_FEE_RATE_FACTOR);
+        return getOptimalFlows(source, target, amount, DEFAULT_FEE_RATE_WEIGHT);
     }
 
-    public Flows getOptimalFlows(Pubkey source, Pubkey target, Coins amount, int feeRateFactor) {
+    public Flows getOptimalFlows(Pubkey source, Pubkey target, Coins amount, int feeRateWeight) {
         MinCostFlowSolver minCostFlowSolver = new MinCostFlowSolver(
                 edgeComputation.getEdges(),
                 Map.of(source, amount),
                 Map.of(target, amount),
                 quantization,
                 piecewiseLinearApproximations,
-                feeRateFactor
+                feeRateWeight
         );
         return minCostFlowSolver.solve();
     }

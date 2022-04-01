@@ -37,7 +37,7 @@ class MinCostFlowSolver {
             Map<Pubkey, Coins> sinks,
             long quantization,
             int piecewiseLinearApproximations,
-            int feeRateFactor
+            int feeRateWeight
     ) {
         this.quantization = quantization;
         ArcInitializer arcInitializer = new ArcInitializer(
@@ -46,7 +46,7 @@ class MinCostFlowSolver {
                 edgeMapping,
                 quantization,
                 piecewiseLinearApproximations,
-                feeRateFactor
+                feeRateWeight
         );
         arcInitializer.addArcs(edgesWithLiquidityInformation);
         setSupply(sources, sinks);
