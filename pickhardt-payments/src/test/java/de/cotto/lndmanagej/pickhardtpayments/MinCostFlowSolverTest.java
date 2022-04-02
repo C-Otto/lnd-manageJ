@@ -3,13 +3,12 @@ package de.cotto.lndmanagej.pickhardtpayments;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithLiquidityInformation;
+import de.cotto.lndmanagej.pickhardtpayments.model.EdgesWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.Flow;
 import de.cotto.lndmanagej.pickhardtpayments.model.Flows;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
@@ -40,7 +39,7 @@ class MinCostFlowSolverTest {
 
     @Test
     void no_edge() {
-        Set<EdgeWithLiquidityInformation> edgesWithLiquidityInformation = Set.of();
+        EdgesWithLiquidityInformation edgesWithLiquidityInformation = EdgesWithLiquidityInformation.EMPTY;
         Map<Pubkey, Coins> sources = Map.of(PUBKEY, ONE_SAT);
         Map<Pubkey, Coins> sinks = Map.of(PUBKEY_2, ONE_SAT);
         assertThatCode(
@@ -57,8 +56,8 @@ class MinCostFlowSolverTest {
 
     @Test
     void no_sink_and_no_source() {
-        Set<EdgeWithLiquidityInformation> edgesWithLiquidityInformation =
-                Set.of(EdgeWithLiquidityInformation.forUpperBound(EDGE, ONE_SAT));
+        EdgesWithLiquidityInformation edgesWithLiquidityInformation =
+                new EdgesWithLiquidityInformation(EdgeWithLiquidityInformation.forUpperBound(EDGE, ONE_SAT));
         Map<Pubkey, Coins> sources = Map.of();
         Map<Pubkey, Coins> sinks = Map.of();
         assertThatCode(
@@ -75,8 +74,9 @@ class MinCostFlowSolverTest {
 
     @Test
     void no_source() {
-        Set<EdgeWithLiquidityInformation> edgesWithLiquidityInformation =
-                Set.of(EdgeWithLiquidityInformation.forUpperBound(EDGE_2_3, ONE_SAT));
+        EdgesWithLiquidityInformation edgesWithLiquidityInformation = new EdgesWithLiquidityInformation(
+                EdgeWithLiquidityInformation.forUpperBound(EDGE_2_3, ONE_SAT)
+        );
         Map<Pubkey, Coins> sources = Map.of();
         Map<Pubkey, Coins> sinks = Map.of(PUBKEY_3, ONE_SAT);
         assertThatIllegalArgumentException().isThrownBy(
@@ -93,8 +93,9 @@ class MinCostFlowSolverTest {
 
     @Test
     void no_sink() {
-        Set<EdgeWithLiquidityInformation> edgesWithLiquidityInformation =
-                Set.of(EdgeWithLiquidityInformation.forUpperBound(EDGE_2_3, ONE_SAT));
+        EdgesWithLiquidityInformation edgesWithLiquidityInformation = new EdgesWithLiquidityInformation(
+                EdgeWithLiquidityInformation.forUpperBound(EDGE_2_3, ONE_SAT)
+        );
         Map<Pubkey, Coins> sources = Map.of(PUBKEY_2, ONE_SAT);
         Map<Pubkey, Coins> sinks = Map.of();
         assertThatIllegalArgumentException().isThrownBy(
@@ -111,8 +112,8 @@ class MinCostFlowSolverTest {
 
     @Test
     void sink_amount_does_not_match_source_amount() {
-        Set<EdgeWithLiquidityInformation> edgesWithLiquidityInformation =
-                Set.of(EdgeWithLiquidityInformation.forUpperBound(EDGE, ONE_SAT));
+        EdgesWithLiquidityInformation edgesWithLiquidityInformation =
+                new EdgesWithLiquidityInformation(EdgeWithLiquidityInformation.forUpperBound(EDGE, ONE_SAT));
         Map<Pubkey, Coins> sources = Map.of(PUBKEY, ONE_SAT);
         Map<Pubkey, Coins> sinks = Map.of(PUBKEY_2, TWO_SATS);
         assertThatIllegalArgumentException().isThrownBy(
@@ -130,8 +131,9 @@ class MinCostFlowSolverTest {
     @Test
     void solve_simple() {
         Coins amount = Coins.ofSatoshis(PIECEWISE_LINEAR_APPROXIMATIONS);
-        List<EdgeWithLiquidityInformation> edgesWithLiquidityInformation =
-                List.of(EdgeWithLiquidityInformation.forUpperBound(EDGE_2_3, amount));
+        EdgesWithLiquidityInformation edgesWithLiquidityInformation = new EdgesWithLiquidityInformation(
+                EdgeWithLiquidityInformation.forUpperBound(EDGE_2_3, amount)
+        );
 
         Flows flows = solve(edgesWithLiquidityInformation, PUBKEY_2, PUBKEY_3, amount);
 
@@ -141,7 +143,7 @@ class MinCostFlowSolverTest {
     @Test
     void solve_no_solution_due_to_gap() {
         Coins amount = Coins.ofSatoshis(PIECEWISE_LINEAR_APPROXIMATIONS);
-        List<EdgeWithLiquidityInformation> edgesWithLiquidityInformation = List.of(
+        EdgesWithLiquidityInformation edgesWithLiquidityInformation = new EdgesWithLiquidityInformation(
                 EdgeWithLiquidityInformation.forUpperBound(EDGE, amount),
                 EdgeWithLiquidityInformation.forUpperBound(EDGE_3_4, amount)
         );
@@ -155,8 +157,8 @@ class MinCostFlowSolverTest {
     void solve_with_quantization() {
         int quantization = 10_000;
         Coins amount = Coins.ofSatoshis(100_000);
-        Set<EdgeWithLiquidityInformation> edgesWithLiquidityInformation =
-                Set.of(EdgeWithLiquidityInformation.forUpperBound(EDGE_2_3, amount));
+        EdgesWithLiquidityInformation edgesWithLiquidityInformation =
+                new EdgesWithLiquidityInformation(EdgeWithLiquidityInformation.forUpperBound(EDGE_2_3, amount));
 
         Map<Pubkey, Coins> sources = Map.of(PUBKEY_2, amount);
         Map<Pubkey, Coins> sinks = Map.of(PUBKEY_3, amount);
@@ -176,8 +178,9 @@ class MinCostFlowSolverTest {
     void solve_with_quantization_but_requested_amount_not_divisible() {
         int quantization = 10_000;
         Coins amount = Coins.ofSatoshis(123_456);
-        Set<EdgeWithLiquidityInformation> edgesWithLiquidityInformation =
-                Set.of(EdgeWithLiquidityInformation.forUpperBound(EDGE_3_4, MANY_SATS));
+        EdgesWithLiquidityInformation edgesWithLiquidityInformation = new EdgesWithLiquidityInformation(
+                EdgeWithLiquidityInformation.forUpperBound(EDGE_3_4, MANY_SATS)
+        );
 
         Map<Pubkey, Coins> sources = Map.of(PUBKEY_3, amount);
         Map<Pubkey, Coins> sinks = Map.of(PUBKEY_4, amount);
@@ -196,8 +199,9 @@ class MinCostFlowSolverTest {
     @Test
     void quantization_larger_than_smallest_channel() {
         int quantization = 10_000;
-        Set<EdgeWithLiquidityInformation> edgesWithLiquidityInformation =
-                Set.of(EdgeWithLiquidityInformation.forUpperBound(EDGE_2_3, ONE_SAT));
+        EdgesWithLiquidityInformation edgesWithLiquidityInformation = new EdgesWithLiquidityInformation(
+                EdgeWithLiquidityInformation.forUpperBound(EDGE_2_3, ONE_SAT)
+        );
 
         Map<Pubkey, Coins> sources = Map.of(PUBKEY_2, ONE_SAT);
         Map<Pubkey, Coins> sinks = Map.of(PUBKEY_3, ONE_SAT);
@@ -216,27 +220,27 @@ class MinCostFlowSolverTest {
     @Test
     void solve_two_sources_two_sinks() {
         Coins amount = Coins.ofSatoshis(PIECEWISE_LINEAR_APPROXIMATIONS);
-        List<EdgeWithLiquidityInformation> edgesWithLiquidityInformation = List.of(
+        EdgesWithLiquidityInformation edgesWithLiquidityInformation = new EdgesWithLiquidityInformation(
                 EdgeWithLiquidityInformation.forUpperBound(EDGE, amount),
                 EdgeWithLiquidityInformation.forUpperBound(EDGE_3_4, amount)
         );
         Map<Pubkey, Coins> sources = Map.of(PUBKEY, amount, PUBKEY_3, amount);
         Map<Pubkey, Coins> sinks = Map.of(PUBKEY_2, amount, PUBKEY_4, amount);
         MinCostFlowSolver minCostFlowSolver = new MinCostFlowSolver(
-                        edgesWithLiquidityInformation,
-                        sources,
-                        sinks,
-                        QUANTIZATION,
-                        PIECEWISE_LINEAR_APPROXIMATIONS,
+                edgesWithLiquidityInformation,
+                sources,
+                sinks,
+                QUANTIZATION,
+                PIECEWISE_LINEAR_APPROXIMATIONS,
                 FEE_RATE_WEIGHT
-                );
+        );
 
         assertThat(minCostFlowSolver.solve()).isEqualTo(new Flows(FLOW_1_2, FLOW_3_4));
     }
 
     @Test
     void solve_one_source_two_sinks() {
-        List<EdgeWithLiquidityInformation> edgesWithLiquidityInformation = List.of(
+        EdgesWithLiquidityInformation edgesWithLiquidityInformation = new EdgesWithLiquidityInformation(
                 EdgeWithLiquidityInformation.forUpperBound(EDGE, ONE_SAT),
                 EdgeWithLiquidityInformation.forUpperBound(EDGE_1_3, ONE_SAT)
         );
@@ -256,7 +260,7 @@ class MinCostFlowSolverTest {
 
     @Test
     void solve_long_path() {
-        List<EdgeWithLiquidityInformation> edgesWithLiquidityInformation = List.of(
+        EdgesWithLiquidityInformation edgesWithLiquidityInformation = new EdgesWithLiquidityInformation(
                 EdgeWithLiquidityInformation.forUpperBound(EDGE, ONE_SAT),
                 EdgeWithLiquidityInformation.forUpperBound(EDGE_2_3, MANY_SATS),
                 EdgeWithLiquidityInformation.forUpperBound(EDGE_3_4, ONE_SAT)
@@ -268,7 +272,7 @@ class MinCostFlowSolverTest {
 
     @Test
     void solve_long_path_with_cycle() {
-        List<EdgeWithLiquidityInformation> edgesWithLiquidityInformation = List.of(
+        EdgesWithLiquidityInformation edgesWithLiquidityInformation = new EdgesWithLiquidityInformation(
                 EdgeWithLiquidityInformation.forUpperBound(EDGE, TWO_SATS),
                 EdgeWithLiquidityInformation.forUpperBound(EDGE_2_3, MANY_SATS),
                 EdgeWithLiquidityInformation.forUpperBound(EDGE_3_2, MANY_SATS),
@@ -280,7 +284,7 @@ class MinCostFlowSolverTest {
     }
 
     private Flows solve(
-            List<EdgeWithLiquidityInformation> edgesWithLiquidityInformation,
+            EdgesWithLiquidityInformation edgesWithLiquidityInformation,
             Pubkey source,
             Pubkey target,
             Coins amount

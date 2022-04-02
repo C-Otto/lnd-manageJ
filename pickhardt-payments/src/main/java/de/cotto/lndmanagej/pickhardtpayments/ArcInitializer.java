@@ -5,9 +5,9 @@ import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.model.Edge;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithLiquidityInformation;
+import de.cotto.lndmanagej.pickhardtpayments.model.EdgesWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.IntegerMapping;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Map;
 
@@ -38,9 +38,9 @@ class ArcInitializer {
         this.feeRateWeight = feeRateWeight;
     }
 
-    public void addArcs(Collection<EdgeWithLiquidityInformation> edgesWithLiquidityInformation) {
+    public void addArcs(EdgesWithLiquidityInformation edgesWithLiquidityInformation) {
         Coins maximumCapacity = getMaximumCapacity(edgesWithLiquidityInformation);
-        for (EdgeWithLiquidityInformation edgeWithLiquidityInformation : edgesWithLiquidityInformation) {
+        for (EdgeWithLiquidityInformation edgeWithLiquidityInformation : edgesWithLiquidityInformation.edges()) {
             addArcs(edgeWithLiquidityInformation, maximumCapacity);
         }
     }
@@ -86,8 +86,8 @@ class ArcInitializer {
         return piecewiseLinearApproximations - 1;
     }
 
-    private Coins getMaximumCapacity(Collection<EdgeWithLiquidityInformation> edgesWithLiquidityInformation) {
-        Coins realMaximum = edgesWithLiquidityInformation.stream()
+    private Coins getMaximumCapacity(EdgesWithLiquidityInformation edgesWithLiquidityInformation) {
+        Coins realMaximum = edgesWithLiquidityInformation.edges().stream()
                 .map(EdgeWithLiquidityInformation::edge)
                 .map(Edge::capacity)
                 .max(Comparator.naturalOrder())

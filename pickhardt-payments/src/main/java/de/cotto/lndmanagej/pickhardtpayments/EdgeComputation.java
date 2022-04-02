@@ -11,6 +11,7 @@ import de.cotto.lndmanagej.model.Policy;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.model.Edge;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithLiquidityInformation;
+import de.cotto.lndmanagej.pickhardtpayments.model.EdgesWithLiquidityInformation;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.MissionControlService;
@@ -32,7 +33,7 @@ public class EdgeComputation {
     private final ChannelService channelService;
     private final BalanceService balanceService;
     private final MissionControlService missionControlService;
-    private final LoadingCache<Object, Set<EdgeWithLiquidityInformation>> cache = new CacheBuilder()
+    private final LoadingCache<Object, EdgesWithLiquidityInformation> cache = new CacheBuilder()
             .withExpiry(Duration.ofSeconds(10))
             .withRefresh(Duration.ofSeconds(5))
             .build(this::getEdgesWithoutCache);
@@ -51,7 +52,7 @@ public class EdgeComputation {
         this.missionControlService = missionControlService;
     }
 
-    public Set<EdgeWithLiquidityInformation> getEdges() {
+    public EdgesWithLiquidityInformation getEdges() {
         return cache.get("");
     }
 
@@ -69,11 +70,11 @@ public class EdgeComputation {
         return EdgeWithLiquidityInformation.forKnownLiquidity(edge, knownLiquidity);
     }
 
-    private Set<EdgeWithLiquidityInformation> getEdgesWithoutCache() {
+    private EdgesWithLiquidityInformation getEdgesWithoutCache() {
         Set<DirectedChannelEdge> channelEdges = grpcGraph.getChannelEdges().orElse(null);
         if (channelEdges == null) {
             logger.warn("Unable to get graph");
-            return Set.of();
+            return EdgesWithLiquidityInformation.EMPTY;
         }
         Set<EdgeWithLiquidityInformation> edgesWithLiquidityInformation = new LinkedHashSet<>();
         Pubkey ownPubkey = grpcGetInfo.getPubkey();
@@ -87,7 +88,7 @@ public class EdgeComputation {
             Edge edge = new Edge(channelId, pubkey1, pubkey2, channelEdge.capacity(), channelEdge.policy());
             edgesWithLiquidityInformation.add(getEdgeWithLiquidityInformation(edge, ownPubkey));
         }
-        return edgesWithLiquidityInformation;
+        return new EdgesWithLiquidityInformation(edgesWithLiquidityInformation);
     }
 
     private boolean shouldIgnore(DirectedChannelEdge channelEdge) {

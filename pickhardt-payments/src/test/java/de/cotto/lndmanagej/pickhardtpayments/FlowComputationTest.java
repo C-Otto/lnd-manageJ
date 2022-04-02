@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.pickhardtpayments;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.pickhardtpayments.model.Edge;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithLiquidityInformation;
+import de.cotto.lndmanagej.pickhardtpayments.model.EdgesWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.Flow;
 import de.cotto.lndmanagej.pickhardtpayments.model.Flows;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,8 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Set;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
@@ -48,13 +47,8 @@ class FlowComputationTest {
     }
 
     @Test
-    void solve_no_graph() {
-        assertThat(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, Coins.ofSatoshis(1))).isEqualTo(new Flows());
-    }
-
-    @Test
     void solve_no_edge() {
-        when(edgeComputation.getEdges()).thenReturn(Set.of());
+        when(edgeComputation.getEdges()).thenReturn(EdgesWithLiquidityInformation.EMPTY);
         assertThat(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, Coins.ofSatoshis(1))).isEqualTo(new Flows());
     }
 
@@ -62,7 +56,7 @@ class FlowComputationTest {
     void solve() {
         Coins amount = Coins.ofSatoshis(1);
         EdgeWithLiquidityInformation edge = EdgeWithLiquidityInformation.forUpperBound(EDGE, EDGE.capacity());
-        when(edgeComputation.getEdges()).thenReturn(Set.of(edge));
+        when(edgeComputation.getEdges()).thenReturn(new EdgesWithLiquidityInformation(edge));
         Flow expectedFlow = new Flow(EDGE, amount);
         assertThat(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, amount)).isEqualTo(new Flows(expectedFlow));
     }
@@ -71,7 +65,7 @@ class FlowComputationTest {
     void solve_avoids_sending_from_depleted_local_channel() {
         Edge edge1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, LARGE, POLICY_1);
         Edge edge2 = new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, SMALL, POLICY_2);
-        when(edgeComputation.getEdges()).thenReturn(Set.of(
+        when(edgeComputation.getEdges()).thenReturn(new EdgesWithLiquidityInformation(
                 EdgeWithLiquidityInformation.forKnownLiquidity(edge1, Coins.NONE),
                 EdgeWithLiquidityInformation.forUpperBound(edge2, SMALL)
         ));
@@ -86,7 +80,7 @@ class FlowComputationTest {
         Edge edge1a = new Edge(CHANNEL_ID, PUBKEY_2, PUBKEY_3, LARGE, POLICY_1);
         Edge edge1b = new Edge(CHANNEL_ID_2, PUBKEY_3, PUBKEY_4, LARGE, POLICY_1);
         Edge edge2 = new Edge(CHANNEL_ID_3, PUBKEY_2, PUBKEY_4, SMALL, POLICY_2);
-        when(edgeComputation.getEdges()).thenReturn(Set.of(
+        when(edgeComputation.getEdges()).thenReturn(new EdgesWithLiquidityInformation(
                 EdgeWithLiquidityInformation.forUpperBound(edge1a, amount),
                 EdgeWithLiquidityInformation.forUpperBound(edge1b, LARGE),
                 EdgeWithLiquidityInformation.forUpperBound(edge2, SMALL)
@@ -101,7 +95,7 @@ class FlowComputationTest {
         Edge edge1a = new Edge(CHANNEL_ID, PUBKEY_3, PUBKEY_4, LARGE, POLICY_2);
         Edge edge1b = new Edge(CHANNEL_ID_2, PUBKEY_4, PUBKEY, LARGE, POLICY_2);
         Edge edge2 = new Edge(CHANNEL_ID_3, PUBKEY_3, PUBKEY, SMALL, POLICY_1);
-        when(edgeComputation.getEdges()).thenReturn(Set.of(
+        when(edgeComputation.getEdges()).thenReturn(new EdgesWithLiquidityInformation(
                 EdgeWithLiquidityInformation.forUpperBound(edge1a, Coins.ofSatoshis(5_000_000)),
                 EdgeWithLiquidityInformation.forUpperBound(edge1b, LARGE),
                 EdgeWithLiquidityInformation.forUpperBound(edge2, SMALL)

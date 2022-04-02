@@ -61,14 +61,14 @@ class EdgeComputationTest {
 
     @Test
     void no_graph() {
-        assertThat(edgeComputation.getEdges()).isEmpty();
+        assertThat(edgeComputation.getEdges().edges()).isEmpty();
     }
 
     @Test
     void does_not_add_edge_for_disabled_channel() {
         DirectedChannelEdge edge = new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY, PUBKEY_2, POLICY_DISABLED);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));
-        assertThat(edgeComputation.getEdges()).isEmpty();
+        assertThat(edgeComputation.getEdges().edges()).isEmpty();
     }
 
     @Test
@@ -76,7 +76,7 @@ class EdgeComputationTest {
         DirectedChannelEdge edge =
                 new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY, PUBKEY_2, POLICY_WITH_BASE_FEE);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));
-        assertThat(edgeComputation.getEdges()).isEmpty();
+        assertThat(edgeComputation.getEdges().edges()).isEmpty();
     }
 
     @Test
@@ -87,7 +87,7 @@ class EdgeComputationTest {
         Coins knownLiquidity = Coins.ofSatoshis(456);
         when(balanceService.getAvailableLocalBalance(EDGE.channelId())).thenReturn(knownLiquidity);
 
-        assertThat(edgeComputation.getEdges())
+        assertThat(edgeComputation.getEdges().edges())
                 .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, knownLiquidity));
     }
 
@@ -99,7 +99,7 @@ class EdgeComputationTest {
         Coins knownLiquidity = Coins.ofSatoshis(456);
         when(balanceService.getAvailableRemoteBalance(EDGE.channelId())).thenReturn(knownLiquidity);
 
-        assertThat(edgeComputation.getEdges())
+        assertThat(edgeComputation.getEdges().edges())
                 .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, knownLiquidity));
     }
 
@@ -108,14 +108,14 @@ class EdgeComputationTest {
         mockEdge();
         when(missionControlService.getMinimumOfRecentFailures(EDGE.startNode(), EDGE.endNode()))
                 .thenReturn(Optional.of(Coins.ofSatoshis(100)));
-        assertThat(edgeComputation.getEdges())
+        assertThat(edgeComputation.getEdges().edges())
                 .contains(EdgeWithLiquidityInformation.forUpperBound(EDGE, Coins.ofSatoshis(99)));
     }
 
     @Test
     void default_if_no_liquidity_information_is_known() {
         mockEdge();
-        assertThat(edgeComputation.getEdges())
+        assertThat(edgeComputation.getEdges().edges())
                 .contains(EdgeWithLiquidityInformation.forUpperBound(EDGE, EDGE.capacity()));
     }
 

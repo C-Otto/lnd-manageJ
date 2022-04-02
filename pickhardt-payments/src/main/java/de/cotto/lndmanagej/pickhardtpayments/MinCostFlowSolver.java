@@ -6,14 +6,13 @@ import com.google.ortools.graph.MinCostFlowBase;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.model.Edge;
-import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithLiquidityInformation;
+import de.cotto.lndmanagej.pickhardtpayments.model.EdgesWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.Flow;
 import de.cotto.lndmanagej.pickhardtpayments.model.Flows;
 import de.cotto.lndmanagej.pickhardtpayments.model.IntegerMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -32,7 +31,7 @@ class MinCostFlowSolver {
     }
 
     public MinCostFlowSolver(
-            Collection<EdgeWithLiquidityInformation> edgesWithLiquidityInformation,
+            EdgesWithLiquidityInformation edgesWithLiquidityInformation,
             Map<Pubkey, Coins> sources,
             Map<Pubkey, Coins> sinks,
             long quantization,
