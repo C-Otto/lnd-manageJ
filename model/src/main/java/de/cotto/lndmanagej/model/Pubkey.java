@@ -1,15 +1,18 @@
 package de.cotto.lndmanagej.model;
 
+import java.util.Arrays;
+import java.util.HexFormat;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 public final class Pubkey implements Comparable<Pubkey> {
     private static final Pattern PATTERN = Pattern.compile("[0-9a-fA-F]{66}");
     private final String string;
+    private final byte[] byteArray;
 
     private Pubkey(String string) {
         this.string = string;
+        byteArray = HexFormat.of().parseHex(string);
     }
 
     public static Pubkey create(String string) {
@@ -38,11 +41,11 @@ public final class Pubkey implements Comparable<Pubkey> {
             return false;
         }
         Pubkey pubkey = (Pubkey) other;
-        return Objects.equals(string, pubkey.string);
+        return Arrays.equals(byteArray, pubkey.byteArray);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(string);
+        return Arrays.hashCode(byteArray);
     }
 }

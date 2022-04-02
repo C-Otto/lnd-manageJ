@@ -79,6 +79,9 @@ class PubkeyTest {
 
     @Test
     void testEquals() {
-        EqualsVerifier.forClass(Pubkey.class).usingGetClass().verify();
+        EqualsVerifier.forClass(Pubkey.class)
+                .withIgnoredFields("string")
+                .usingGetClass()
+                .verify();
     }
 }
