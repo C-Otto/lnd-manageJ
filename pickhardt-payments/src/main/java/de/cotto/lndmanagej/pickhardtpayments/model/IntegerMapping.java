@@ -5,8 +5,9 @@ import java.util.Map;
 import java.util.Objects;
 
 public class IntegerMapping<K> {
-    private final Map<K, Integer> mapping = new LinkedHashMap<>();
-    private final Map<Integer, K> reverseMapping = new LinkedHashMap<>();
+    private static final int INITIAL_CAPACITY = 10_000;
+    private final Map<K, Integer> mapping = new LinkedHashMap<>(INITIAL_CAPACITY);
+    private final Map<Integer, K> reverseMapping = new LinkedHashMap<>(INITIAL_CAPACITY);
     private int counter;
 
     public IntegerMapping() {
