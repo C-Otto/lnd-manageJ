@@ -20,14 +20,28 @@ class PubkeyTest {
     @Test
     void too_short() {
         assertThatIllegalArgumentException().isThrownBy(
-                () -> Pubkey.create("027abc123abc123abc123abc123123abc123abc123abc123abc123abc123abc12")
+                () -> Pubkey.create("027abc123abc123abc123abc123123abc123abc123abc123abc123abc123abc1")
+        );
+    }
+
+    @Test
+    void odd_number_of_characters() {
+        assertThatIllegalArgumentException().isThrownBy(
+                () -> Pubkey.create("0")
+        );
+    }
+
+    @Test
+    void not_hex() {
+        assertThatIllegalArgumentException().isThrownBy(
+                () -> Pubkey.create("fg")
         );
     }
 
     @Test
     void too_long() {
         assertThatIllegalArgumentException().isThrownBy(
-                () -> Pubkey.create("027abc123abc123abc123abc123123abc123abc123abc123abc123abc123abc123a")
+                () -> Pubkey.create("027abc123abc123abc123abc123123abc123abc123abc123abc123abc123abc123aa")
         );
     }
 

@@ -3,10 +3,10 @@ package de.cotto.lndmanagej.model;
 import java.util.Arrays;
 import java.util.HexFormat;
 import java.util.Locale;
-import java.util.regex.Pattern;
 
 public final class Pubkey implements Comparable<Pubkey> {
-    private static final Pattern PATTERN = Pattern.compile("[0-9a-fA-F]{66}");
+    private static final int EXPECTED_NUMBER_OF_BYTES = 33;
+
     private final String string;
     private final byte[] byteArray;
     private final int hash;
@@ -15,12 +15,12 @@ public final class Pubkey implements Comparable<Pubkey> {
         this.string = string;
         byteArray = HexFormat.of().parseHex(string);
         hash = Arrays.hashCode(byteArray);
+        if (byteArray.length != EXPECTED_NUMBER_OF_BYTES) {
+            throw new IllegalArgumentException();
+        }
     }
 
     public static Pubkey create(String string) {
-        if (!PATTERN.matcher(string).matches()) {
-            throw new IllegalArgumentException("Pubkey must have 66 hex characters");
-        }
         return new Pubkey(string.toLowerCase(Locale.US));
     }
 
