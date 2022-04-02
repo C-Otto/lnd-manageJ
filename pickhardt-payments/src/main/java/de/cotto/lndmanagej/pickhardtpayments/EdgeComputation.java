@@ -7,6 +7,7 @@ import de.cotto.lndmanagej.grpc.GrpcGraph;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.DirectedChannelEdge;
+import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.Policy;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.model.Edge;
@@ -15,6 +16,7 @@ import de.cotto.lndmanagej.pickhardtpayments.model.EdgesWithLiquidityInformation
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.MissionControlService;
+import de.cotto.lndmanagej.service.NodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -23,6 +25,7 @@ import java.time.Duration;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 @Component
 public class EdgeComputation {
@@ -31,6 +34,7 @@ public class EdgeComputation {
     private final GrpcGraph grpcGraph;
     private final GrpcGetInfo grpcGetInfo;
     private final ChannelService channelService;
+    private final NodeService nodeService;
     private final BalanceService balanceService;
     private final MissionControlService missionControlService;
     private final LoadingCache<Object, EdgesWithLiquidityInformation> cache = new CacheBuilder()
@@ -42,12 +46,14 @@ public class EdgeComputation {
             GrpcGraph grpcGraph,
             GrpcGetInfo grpcGetInfo,
             ChannelService channelService,
+            NodeService nodeService,
             BalanceService balanceService,
             MissionControlService missionControlService
     ) {
         this.grpcGraph = grpcGraph;
         this.grpcGetInfo = grpcGetInfo;
         this.channelService = channelService;
+        this.nodeService = nodeService;
         this.balanceService = balanceService;
         this.missionControlService = missionControlService;
     }
@@ -110,13 +116,22 @@ public class EdgeComputation {
     }
 
     private Optional<Coins> getLocalChannelAvailableLocal(ChannelId channelId) {
-        return channelService.getLocalChannel(channelId)
-                .map(c -> balanceService.getAvailableLocalBalance(channelId));
+        return getLocalChannelAvailable(channelId, balanceService::getAvailableLocalBalance);
     }
 
     private Optional<Coins> getLocalChannelAvailableRemote(ChannelId channelId) {
-        return channelService.getLocalChannel(channelId)
-                .map(c -> balanceService.getAvailableRemoteBalance(channelId));
+        return getLocalChannelAvailable(channelId, balanceService::getAvailableRemoteBalance);
+    }
+
+    private Optional<Coins> getLocalChannelAvailable(ChannelId channelId, Function<ChannelId, Coins> balanceProvider) {
+        LocalChannel localChannel = channelService.getLocalChannel(channelId).orElse(null);
+        if (localChannel == null) {
+            return Optional.of(Coins.NONE);
+        }
+        if (nodeService.getNode(localChannel.getRemotePubkey()).online()) {
+            return Optional.of(balanceProvider.apply(channelId));
+        }
+        return Optional.of(Coins.NONE);
     }
 
     private Coins getAvailableLiquidityUpperBound(Edge edge) {

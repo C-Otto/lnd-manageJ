@@ -4,10 +4,13 @@ import de.cotto.lndmanagej.grpc.GrpcGetInfo;
 import de.cotto.lndmanagej.grpc.GrpcGraph;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.DirectedChannelEdge;
+import de.cotto.lndmanagej.model.Node;
+import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.MissionControlService;
+import de.cotto.lndmanagej.service.NodeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +24,7 @@ import java.util.Set;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
+import static de.cotto.lndmanagej.model.NodeFixtures.NODE_PEER;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_1;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_DISABLED;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_WITH_BASE_FEE;
@@ -31,6 +35,8 @@ import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,10 +59,14 @@ class EdgeComputationTest {
     @Mock
     private MissionControlService missionControlService;
 
+    @Mock
+    private NodeService nodeService;
+
     @BeforeEach
     void setUp() {
         lenient().when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY_4);
         lenient().when(missionControlService.getMinimumOfRecentFailures(any(), any())).thenReturn(Optional.empty());
+        lenient().when(nodeService.getNode(any())).thenReturn(NODE_PEER);
     }
 
     @Test
@@ -92,6 +102,26 @@ class EdgeComputationTest {
     }
 
     @Test
+    void local_channel_not_found_as_end_node() {
+        mockEdge();
+        when(grpcGetInfo.getPubkey()).thenReturn(EDGE.startNode());
+
+        assertThat(edgeComputation.getEdges().edges())
+                .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, Coins.NONE));
+    }
+
+    @Test
+    void reduces_liquidity_to_zero_for_offline_peer_as_end_node() {
+        mockEdge();
+        mockOfflinePeer();
+        when(grpcGetInfo.getPubkey()).thenReturn(EDGE.startNode());
+
+        assertThat(edgeComputation.getEdges().edges())
+                .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, Coins.NONE));
+        verify(balanceService, never()).getAvailableLocalBalance(EDGE.channelId());
+    }
+
+    @Test
     void adds_liquidity_information_for_local_channel_as_target() {
         mockEdge();
         when(grpcGetInfo.getPubkey()).thenReturn(EDGE.endNode());
@@ -101,6 +131,32 @@ class EdgeComputationTest {
 
         assertThat(edgeComputation.getEdges().edges())
                 .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, knownLiquidity));
+    }
+
+    @Test
+    void local_channel_not_found_as_start_node() {
+        mockEdge();
+        when(grpcGetInfo.getPubkey()).thenReturn(EDGE.endNode());
+
+        assertThat(edgeComputation.getEdges().edges())
+                .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, Coins.NONE));
+    }
+
+    @Test
+    void reduces_liquidity_to_zero_for_offline_peer_as_start_node() {
+        mockEdge();
+        mockOfflinePeer();
+        when(grpcGetInfo.getPubkey()).thenReturn(EDGE.endNode());
+
+        assertThat(edgeComputation.getEdges().edges())
+                .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, Coins.NONE));
+        verify(balanceService, never()).getAvailableLocalBalance(EDGE.channelId());
+    }
+
+    private void mockOfflinePeer() {
+        Pubkey remotePubkey = LOCAL_OPEN_CHANNEL.getRemotePubkey();
+        when(nodeService.getNode(remotePubkey)).thenReturn(new Node(remotePubkey, "", 0, false));
+        when(channelService.getLocalChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
     }
 
     @Test
