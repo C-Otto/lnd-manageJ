@@ -8,12 +8,10 @@ import de.cotto.lndmanagej.pickhardtpayments.model.Edge;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgesWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.IntegerMapping;
+import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE;
 import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE_1_3;
@@ -32,7 +30,7 @@ class ArcInitializerTest {
 
     private final MinCostFlow minCostFlow = new MinCostFlow();
     private final IntegerMapping<Pubkey> integerMapping = new IntegerMapping<>();
-    private final Map<Integer, Edge> edgeMapping = new LinkedHashMap<>();
+    private final IntObjectHashMap<Edge> edgeMapping = new IntObjectHashMap<>();
     private final ArcInitializer arcInitializer = new ArcInitializer(
             minCostFlow,
             integerMapping,

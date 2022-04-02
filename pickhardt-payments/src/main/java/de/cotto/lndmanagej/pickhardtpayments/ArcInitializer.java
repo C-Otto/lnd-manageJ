@@ -7,8 +7,7 @@ import de.cotto.lndmanagej.pickhardtpayments.model.Edge;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgesWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.IntegerMapping;
-
-import java.util.Map;
+import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
 
 class ArcInitializer {
     // 50 BTC
@@ -16,7 +15,7 @@ class ArcInitializer {
 
     private final MinCostFlow minCostFlow;
     private final IntegerMapping<Pubkey> pubkeyToIntegerMapping;
-    private final Map<Integer, Edge> edgeMapping;
+    private final IntObjectHashMap<Edge> edgeMapping;
     private final long quantization;
     private final int piecewiseLinearApproximations;
     private final int feeRateWeight;
@@ -24,7 +23,7 @@ class ArcInitializer {
     public ArcInitializer(
             MinCostFlow minCostFlow,
             IntegerMapping<Pubkey> integerMapping,
-            Map<Integer, Edge> edgeMapping,
+            IntObjectHashMap<Edge> edgeMapping,
             long quantization,
             int piecewiseLinearApproximations,
             int feeRateWeight

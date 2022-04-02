@@ -10,10 +10,10 @@ import de.cotto.lndmanagej.pickhardtpayments.model.EdgesWithLiquidityInformation
 import de.cotto.lndmanagej.pickhardtpayments.model.Flow;
 import de.cotto.lndmanagej.pickhardtpayments.model.Flows;
 import de.cotto.lndmanagej.pickhardtpayments.model.IntegerMapping;
+import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -23,7 +23,8 @@ class MinCostFlowSolver {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final MinCostFlow minCostFlow = new MinCostFlow();
     private final IntegerMapping<Pubkey> integerMapping = new IntegerMapping<>();
-    private final Map<Integer, Edge> edgeMapping = new LinkedHashMap<>();
+    private final IntObjectHashMap<Edge> edgeMapping;
+
     private final long quantization;
 
     static {
@@ -39,6 +40,8 @@ class MinCostFlowSolver {
             int feeRateWeight
     ) {
         this.quantization = quantization;
+        int initialCapacity = edgesWithLiquidityInformation.edges().size() * (piecewiseLinearApproximations - 1);
+        edgeMapping = new IntObjectHashMap<>(initialCapacity);
         ArcInitializer arcInitializer = new ArcInitializer(
                 minCostFlow,
                 integerMapping,

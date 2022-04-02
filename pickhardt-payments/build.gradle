@@ -8,6 +8,7 @@ dependencies {
     implementation project(':model')
     implementation project(':grpc-adapter')
     implementation 'com.google.ortools:ortools-java:9.3.10497'
+    implementation 'org.eclipse.collections:eclipse-collections:11.0.0'
     testImplementation testFixtures(project(':model'))
     testFixturesImplementation testFixtures(project(':model'))
 }
@@ -16,3 +17,7 @@ task deleteCrashLogs(type: Delete) {
     delete fileTree(dir:project.projectDir, include: 'hs_err_pid*.log')
 }
 tasks.findByName('pitest').finalizedBy(deleteCrashLogs)
+
+pitest {
+    testStrengthThreshold = 99
+}
