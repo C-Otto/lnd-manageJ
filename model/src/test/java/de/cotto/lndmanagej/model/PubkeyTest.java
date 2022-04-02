@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.model;
 
-import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
@@ -72,16 +71,37 @@ class PubkeyTest {
     }
 
     @Test
-    void testEquals_from_uppercase() {
+    void equals_from_uppercase() {
         assertThat(Pubkey.create("027ABC123ABC123ABC123ABC123123ABC123ABC123ABC123ABC123ABC123ABC121"))
                 .isEqualTo(PUBKEY);
     }
 
     @Test
-    void testEquals() {
-        EqualsVerifier.forClass(Pubkey.class)
-                .withIgnoredFields("string")
-                .usingGetClass()
-                .verify();
+    void equals_identical() {
+        assertThat(Pubkey.create("027abc123abc123abc123abc123123abc123abc123abc123abc123abc123abc121"))
+                .isEqualTo(PUBKEY);
+    }
+
+    @Test
+    void equals_not_equal() {
+        assertThat(Pubkey.create("127abc123abc123abc123abc123123abc123abc123abc123abc123abc123abc121"))
+                .isNotEqualTo(PUBKEY);
+    }
+
+    @Test
+    void equals_null() {
+        assertThat(PUBKEY).isNotEqualTo(null);
+    }
+
+    @Test
+    void hashCode_identical() {
+        assertThat(Pubkey.create("027abc123abc123abc123abc123123abc123abc123abc123abc123abc123abc121").hashCode())
+                .isEqualTo(PUBKEY.hashCode());
+    }
+
+    @Test
+    void hashCode_not_equal() {
+        assertThat(Pubkey.create("127abc123abc123abc123abc123123abc123abc123abc123abc123abc123abc121").hashCode())
+                .isNotEqualTo(PUBKEY.hashCode());
     }
 }

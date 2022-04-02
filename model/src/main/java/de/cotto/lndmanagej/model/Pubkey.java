@@ -9,10 +9,12 @@ public final class Pubkey implements Comparable<Pubkey> {
     private static final Pattern PATTERN = Pattern.compile("[0-9a-fA-F]{66}");
     private final String string;
     private final byte[] byteArray;
+    private final int hash;
 
     private Pubkey(String string) {
         this.string = string;
         byteArray = HexFormat.of().parseHex(string);
+        hash = Arrays.hashCode(byteArray);
     }
 
     public static Pubkey create(String string) {
@@ -46,6 +48,6 @@ public final class Pubkey implements Comparable<Pubkey> {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(byteArray);
+        return hash;
     }
 }
