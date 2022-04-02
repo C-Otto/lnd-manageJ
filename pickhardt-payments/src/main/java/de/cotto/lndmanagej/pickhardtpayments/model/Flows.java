@@ -20,6 +20,10 @@ public class Flows {
     public static final Flows NONE = new Flows();
     private final Map<Pubkey, Map<Edge, Flow>> map;
 
+    public Flows() {
+        map = new LinkedHashMap<>();
+    }
+
     public Flows(Flow... flows) {
         map = new LinkedHashMap<>();
         Arrays.stream(flows).forEach(this::add);
