@@ -8,7 +8,6 @@ import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgesWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.IntegerMapping;
 
-import java.util.Comparator;
 import java.util.Map;
 
 class ArcInitializer {
@@ -39,7 +38,7 @@ class ArcInitializer {
     }
 
     public void addArcs(EdgesWithLiquidityInformation edgesWithLiquidityInformation) {
-        Coins maximumCapacity = getMaximumCapacity(edgesWithLiquidityInformation);
+        Coins maximumCapacity = edgesWithLiquidityInformation.maximumCapacity().maximum(ASSUMED_MAXIMUM);
         for (EdgeWithLiquidityInformation edgeWithLiquidityInformation : edgesWithLiquidityInformation.edges()) {
             addArcs(edgeWithLiquidityInformation, maximumCapacity);
         }
@@ -84,15 +83,6 @@ class ArcInitializer {
         int arcIndex = minCostFlow.addArcWithCapacityAndUnitCost(startNode, endNode, quantizedLowerBound, feeRateCost);
         edgeMapping.put(arcIndex, edge);
         return piecewiseLinearApproximations - 1;
-    }
-
-    private Coins getMaximumCapacity(EdgesWithLiquidityInformation edgesWithLiquidityInformation) {
-        Coins realMaximum = edgesWithLiquidityInformation.edges().stream()
-                .map(EdgeWithLiquidityInformation::edge)
-                .map(Edge::capacity)
-                .max(Comparator.naturalOrder())
-                .orElse(Coins.NONE);
-        return realMaximum.maximum(ASSUMED_MAXIMUM);
     }
 
     private long quantize(Coins coins) {
