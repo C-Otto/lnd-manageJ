@@ -32,6 +32,7 @@
         <exclude name="UnnecessaryConstructor"/>
         <exclude name="CommentDefaultAccessModifier"/>
         <exclude name="TooManyStaticImports"/>
+        <exclude name="GenericsNaming"/>
     </rule>
     <rule ref="category/java/codestyle.xml/MethodNamingConventions">
         <properties>

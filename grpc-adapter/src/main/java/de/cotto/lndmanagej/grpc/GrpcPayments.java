@@ -37,9 +37,7 @@ public class GrpcPayments {
         if (list == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable(list.getPaymentsList().stream()
-                .map(this::toPayment)
-                .toList());
+        return Optional.of(list.getPaymentsList().stream().map(this::toPayment).toList());
     }
 
     private Payment toPayment(lnrpc.Payment lndPayment) {

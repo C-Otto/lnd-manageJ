@@ -2,6 +2,7 @@ package de.cotto.lndmanagej;
 
 import de.cotto.lndmanagej.grpc.GrpcRouterService;
 import de.cotto.lndmanagej.grpc.GrpcService;
+import de.cotto.lndmanagej.grpc.middleware.GrpcMiddlewareService;
 import de.cotto.lndmanagej.service.ChannelService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,10 @@ class ApplicationContextIT {
     @MockBean
     @SuppressWarnings("unused")
     private GrpcService grpcService;
+
+    @MockBean
+    @SuppressWarnings("unused")
+    private GrpcMiddlewareService grpcMiddlewareService;
 
     @MockBean
     @SuppressWarnings("unused")

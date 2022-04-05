@@ -8,6 +8,7 @@ import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import io.grpc.stub.StreamObserver;
 import lnrpc.ChanInfoRequest;
 import lnrpc.Channel;
 import lnrpc.ChannelCloseSummary;
@@ -34,6 +35,8 @@ import lnrpc.Peer;
 import lnrpc.PendingChannelsRequest;
 import lnrpc.PendingChannelsResponse;
 import lnrpc.PendingChannelsResponse.ForceClosedChannel;
+import lnrpc.RPCMiddlewareRequest;
+import lnrpc.RPCMiddlewareResponse;
 import lnrpc.Transaction;
 import org.springframework.stereotype.Component;
 
@@ -60,6 +63,7 @@ public class GrpcService extends GrpcBase {
     private static final Duration TRANSACTIONS_CACHE_EXPIRY = Duration.ofSeconds(30);
 
     private final LightningGrpc.LightningBlockingStub lightningStub;
+    private final LightningGrpc.LightningStub nonBlockingLightningStub;
     private final LoadingCache<Object, List<Channel>> channelsCache = new CacheBuilder()
             .withRefresh(CHANNELS_CACHE_REFRESH)
             .withExpiry(CHANNELS_CACHE_EXPIRY)
@@ -80,6 +84,7 @@ public class GrpcService extends GrpcBase {
     public GrpcService(LndConfiguration lndConfiguration) throws IOException {
         super(lndConfiguration);
         lightningStub = stubCreator.getLightningStub();
+        nonBlockingLightningStub = stubCreator.getNonBlockingLightningStub();
     }
 
     @PreDestroy
@@ -190,6 +195,12 @@ public class GrpcService extends GrpcBase {
                 .setIncludeUnannounced(true)
                 .build();
         return get(() -> lightningStub.describeGraph(request));
+    }
+
+    public StreamObserver<RPCMiddlewareResponse> registerMiddleware(
+            StreamObserver<RPCMiddlewareRequest> responseObserver
+    ) {
+        return nonBlockingLightningStub.registerRPCMiddleware(responseObserver);
     }
 
     private Optional<List<Transaction>> getTransactionsWithoutCache() {
