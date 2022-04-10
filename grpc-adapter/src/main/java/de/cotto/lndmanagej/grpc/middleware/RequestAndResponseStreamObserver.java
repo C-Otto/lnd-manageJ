@@ -11,6 +11,8 @@ import lnrpc.RPCMiddlewareResponse;
 
 import javax.annotation.CheckForNull;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 class RequestAndResponseStreamObserver implements StreamObserver<RPCMiddlewareRequest> {
     private static final String MIDDLEWARE_NAME = "lnd-manageJ";
@@ -27,6 +29,7 @@ class RequestAndResponseStreamObserver implements StreamObserver<RPCMiddlewareRe
     private StreamObserver<RPCMiddlewareResponse> responseObserver;
     private final Multimap<String, RequestListener<?>> requestListeners = ArrayListMultimap.create();
     private final Multimap<String, ResponseListener<?>> responseListeners = ArrayListMultimap.create();
+    private final ExecutorService executorService = Executors.newCachedThreadPool();
 
     public RequestAndResponseStreamObserver() {
         // default constructor
@@ -40,10 +43,13 @@ class RequestAndResponseStreamObserver implements StreamObserver<RPCMiddlewareRe
     }
 
     @Override
+    @SuppressWarnings("FutureReturnValueIgnored")
     public void onNext(RPCMiddlewareRequest value) {
         respondWithDoNotReplace(value.getMsgId());
-        handleRequest(value);
-        handleResponse(value);
+        executorService.submit(() -> {
+            handleRequest(value);
+            handleResponse(value);
+        });
     }
 
     @Override

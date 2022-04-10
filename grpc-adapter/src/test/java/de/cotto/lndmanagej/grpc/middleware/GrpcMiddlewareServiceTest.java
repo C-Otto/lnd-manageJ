@@ -14,7 +14,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -68,7 +70,9 @@ class GrpcMiddlewareServiceTest {
         RPCMiddlewareRequest message =
                 RPCMiddlewareRequest.newBuilder().setMsgId(123).setRequestId(456).setRequest(request).build();
         streamRequestObserver.onNext(message);
-        verify(requestListener).acceptRequest(expectedPayload, 456);
+        await().atMost(1, TimeUnit.SECONDS).untilAsserted(
+                () -> verify(requestListener).acceptRequest(expectedPayload, 456)
+        );
     }
 
     @Test
@@ -78,7 +82,9 @@ class GrpcMiddlewareServiceTest {
         RPCMiddlewareRequest message =
                 RPCMiddlewareRequest.newBuilder().setMsgId(123).setRequestId(456).setResponse(response).build();
         streamRequestObserver.onNext(message);
-        verify(responseListener).acceptResponse(expectedPayload, 456);
+        await().atMost(1, TimeUnit.SECONDS).untilAsserted(
+                () -> verify(responseListener).acceptResponse(expectedPayload, 456)
+        );
     }
 
     private boolean isRegistrationMessage(RPCMiddlewareResponse value) {

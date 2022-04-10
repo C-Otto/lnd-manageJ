@@ -13,8 +13,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.concurrent.TimeUnit;
+
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
@@ -73,14 +75,18 @@ class RequestAndResponseStreamObserverTest {
             long messageId = MESSAGE_ID;
             String payload = "request-payload";
             observer.onNext(createRequestMessage(REQUEST_LISTENER_TYPE, messageId, payload));
-            verify(requestListener).acceptRequest(ByteString.copyFromUtf8(payload), messageId);
+            await().atMost(1, TimeUnit.SECONDS).untilAsserted(
+                    () -> verify(requestListener).acceptRequest(ByteString.copyFromUtf8(payload), messageId)
+            );
         }
 
         @Test
         void ignores_listener_with_other_type_for_request() {
             observer.addRequestListener(requestListener);
             observer.onNext(createRequestMessage("not-listener-type", MESSAGE_ID, "xxx"));
-            verify(requestListener, never()).acceptRequest(any(ByteString.class), anyLong());
+            await().atLeast(100, TimeUnit.MILLISECONDS).untilAsserted(
+                    () -> verify(requestListener, never()).acceptRequest(any(ByteString.class), anyLong())
+            );
         }
 
         @Test
@@ -89,31 +95,37 @@ class RequestAndResponseStreamObserverTest {
             long messageId = 456;
             String payload = "response-payload";
             observer.onNext(createResponseMessage(RESPONSE_LISTENER_TYPE, messageId, payload));
-            verify(responseListener).acceptResponse(ByteString.copyFromUtf8(payload), messageId);
+            await().atMost(1, TimeUnit.SECONDS).untilAsserted(
+                    () -> verify(responseListener).acceptResponse(ByteString.copyFromUtf8(payload), messageId)
+            );
         }
 
         @Test
         void ignores_listener_with_other_type_for_response() {
             observer.addResponseListener(responseListener);
             observer.onNext(createResponseMessage("not-listener-type", 456, "yyy"));
-            verify(responseListener, never()).acceptResponse(any(ByteString.class), anyLong());
+            await().atLeast(100, TimeUnit.MILLISECONDS).untilAsserted(
+                    () -> verify(responseListener, never()).acceptResponse(any(ByteString.class), anyLong())
+            );
         }
 
         @Test
         void acknowledges_message() {
             observer.addResponseListener(responseListener);
             observer.onNext(createResponseMessage("foo", 100, "zzz"));
-            verify(responseObserver).onNext(ackMessage());
+            await().atMost(1, TimeUnit.SECONDS).untilAsserted(
+                    () -> verify(responseObserver).onNext(ackMessage())
+            );
         }
 
         @Test
         void acknowledges_message_also_if_listener_crashes() {
             observer.addResponseListener(responseListener);
             doThrow(new NullPointerException()).when(responseListener).acceptResponse(any(ByteString.class), anyLong());
-            assertThatExceptionOfType(NullPointerException.class).isThrownBy(() ->
-                observer.onNext(createResponseMessage(RESPONSE_LISTENER_TYPE, 100, "crash"))
+            observer.onNext(createResponseMessage(RESPONSE_LISTENER_TYPE, 100, "crash"));
+            await().atMost(1, TimeUnit.SECONDS).untilAsserted(
+                    () -> verify(responseObserver).onNext(ackMessage())
             );
-            verify(responseObserver).onNext(ackMessage());
         }
 
         private RPCMiddlewareResponse ackMessage() {

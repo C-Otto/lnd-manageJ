@@ -7,6 +7,7 @@ dependencies {
     implementation project(':grpc-client')
     implementation project(':hardcoded')
     implementation project(':model')
+    testImplementation 'org.awaitility:awaitility:4.1.1'
     testImplementation testFixtures(project(':model'))
 }
 
