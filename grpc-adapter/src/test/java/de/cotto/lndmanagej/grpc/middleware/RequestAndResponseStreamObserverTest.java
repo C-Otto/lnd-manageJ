@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.grpc.middleware;
 
 import com.google.protobuf.ByteString;
+import lnrpc.InterceptFeedback;
 import lnrpc.RPCMessage;
 import lnrpc.RPCMiddlewareRequest;
 import lnrpc.RPCMiddlewareResponse;
@@ -13,8 +14,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -24,6 +27,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 class RequestAndResponseStreamObserverTest {
     private static final String REQUEST_LISTENER_TYPE = "request-listener-type";
     private static final String RESPONSE_LISTENER_TYPE = "response-listener-type";
+    private static final int MESSAGE_ID = 123;
 
     @InjectMocks
     private RequestAndResponseStreamObserver observer;
@@ -66,7 +70,7 @@ class RequestAndResponseStreamObserverTest {
         @Test
         void forwards_request_with_id() {
             observer.addRequestListener(requestListener);
-            long messageId = 123;
+            long messageId = MESSAGE_ID;
             String payload = "request-payload";
             observer.onNext(createRequestMessage(REQUEST_LISTENER_TYPE, messageId, payload));
             verify(requestListener).acceptRequest(ByteString.copyFromUtf8(payload), messageId);
@@ -75,7 +79,7 @@ class RequestAndResponseStreamObserverTest {
         @Test
         void ignores_listener_with_other_type_for_request() {
             observer.addRequestListener(requestListener);
-            observer.onNext(createRequestMessage("not-listener-type", 123, "xxx"));
+            observer.onNext(createRequestMessage("not-listener-type", MESSAGE_ID, "xxx"));
             verify(requestListener, never()).acceptRequest(any(ByteString.class), anyLong());
         }
 
@@ -95,16 +99,42 @@ class RequestAndResponseStreamObserverTest {
             verify(responseListener, never()).acceptResponse(any(ByteString.class), anyLong());
         }
 
+        @Test
+        void acknowledges_message() {
+            observer.addResponseListener(responseListener);
+            observer.onNext(createResponseMessage("foo", 100, "zzz"));
+            verify(responseObserver).onNext(ackMessage());
+        }
+
+        @Test
+        void acknowledges_message_also_if_listener_crashes() {
+            observer.addResponseListener(responseListener);
+            doThrow(new NullPointerException()).when(responseListener).acceptResponse(any(ByteString.class), anyLong());
+            assertThatExceptionOfType(NullPointerException.class).isThrownBy(() ->
+                observer.onNext(createResponseMessage(RESPONSE_LISTENER_TYPE, 100, "crash"))
+            );
+            verify(responseObserver).onNext(ackMessage());
+        }
+
+        private RPCMiddlewareResponse ackMessage() {
+            return RPCMiddlewareResponse.newBuilder()
+                    .setRefMsgId(MESSAGE_ID)
+                    .setFeedback(InterceptFeedback.newBuilder()
+                            .setReplaceResponse(false)
+                            .build())
+                    .build();
+        }
+
         private RPCMiddlewareRequest createRequestMessage(String type, long messageId, String payload) {
             return RPCMiddlewareRequest.newBuilder()
                     .setRequest(createMessage(type, payload))
-                    .setMsgId(123).setRequestId(messageId).build();
+                    .setMsgId(MESSAGE_ID).setRequestId(messageId).build();
         }
 
         private RPCMiddlewareRequest createResponseMessage(String type, long messageId, String payload) {
             return RPCMiddlewareRequest.newBuilder()
                     .setResponse(createMessage(type, payload))
-                    .setMsgId(123).setRequestId(messageId).build();
+                    .setMsgId(MESSAGE_ID).setRequestId(messageId).build();
         }
 
         private RPCMessage createMessage(String type, String payload) {

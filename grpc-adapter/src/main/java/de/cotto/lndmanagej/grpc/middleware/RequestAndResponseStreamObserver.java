@@ -41,9 +41,9 @@ class RequestAndResponseStreamObserver implements StreamObserver<RPCMiddlewareRe
 
     @Override
     public void onNext(RPCMiddlewareRequest value) {
+        respondWithDoNotReplace(value.getMsgId());
         handleRequest(value);
         handleResponse(value);
-        respondWithDoNotReplace(value.getMsgId());
     }
 
     @Override
