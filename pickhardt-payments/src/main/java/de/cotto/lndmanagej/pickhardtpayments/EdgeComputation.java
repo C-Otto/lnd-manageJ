@@ -15,7 +15,7 @@ import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgesWithLiquidityInformation;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
-import de.cotto.lndmanagej.service.MissionControlService;
+import de.cotto.lndmanagej.service.LiquidityBoundsService;
 import de.cotto.lndmanagej.service.NodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +36,7 @@ public class EdgeComputation {
     private final ChannelService channelService;
     private final NodeService nodeService;
     private final BalanceService balanceService;
-    private final MissionControlService missionControlService;
+    private final LiquidityBoundsService liquidityBoundsService;
     private final LoadingCache<Object, EdgesWithLiquidityInformation> cache = new CacheBuilder()
             .withExpiry(Duration.ofSeconds(10))
             .withRefresh(Duration.ofSeconds(5))
@@ -48,14 +48,14 @@ public class EdgeComputation {
             ChannelService channelService,
             NodeService nodeService,
             BalanceService balanceService,
-            MissionControlService missionControlService
+            LiquidityBoundsService liquidityBoundsService
     ) {
         this.grpcGraph = grpcGraph;
         this.grpcGetInfo = grpcGetInfo;
         this.channelService = channelService;
         this.nodeService = nodeService;
         this.balanceService = balanceService;
-        this.missionControlService = missionControlService;
+        this.liquidityBoundsService = liquidityBoundsService;
     }
 
     public EdgesWithLiquidityInformation getEdges() {
@@ -70,8 +70,9 @@ public class EdgeComputation {
     private EdgeWithLiquidityInformation getEdgeWithLiquidityInformation(Edge edge, Pubkey ownPubkey) {
         Coins knownLiquidity = getKnownLiquidity(edge, ownPubkey).orElse(null);
         if (knownLiquidity == null) {
-            Coins availableLiquidityUpperBound = getAvailableLiquidityUpperBound(edge);
-            return EdgeWithLiquidityInformation.forUpperBound(edge, availableLiquidityUpperBound);
+            Coins lowerBound = liquidityBoundsService.getAssumedLiquidityLowerBound(edge.startNode(), edge.endNode());
+            Coins upperBound = getAvailableLiquidityUpperBound(edge);
+            return EdgeWithLiquidityInformation.forLowerAndUpperBound(edge, lowerBound, upperBound);
         }
         return EdgeWithLiquidityInformation.forKnownLiquidity(edge, knownLiquidity);
     }
@@ -137,13 +138,7 @@ public class EdgeComputation {
     private Coins getAvailableLiquidityUpperBound(Edge edge) {
         Pubkey source = edge.startNode();
         Pubkey target = edge.endNode();
-        Coins failureAmount = missionControlService.getMinimumOfRecentFailures(source, target).orElse(null);
-        if (failureAmount == null) {
-            return edge.capacity();
-        }
-        long satsCapacity = edge.capacity().satoshis();
-        long satsNotAvailable = failureAmount.milliSatoshis() / 1_000;
-        long satsAvailable = Math.max(Math.min(satsNotAvailable - 1, satsCapacity), 0);
-        return Coins.ofSatoshis(satsAvailable);
+        Coins upperBound = liquidityBoundsService.getAssumedLiquidityUpperBound(source, target).orElse(null);
+        return edge.capacity().minimum(upperBound);
     }
 }

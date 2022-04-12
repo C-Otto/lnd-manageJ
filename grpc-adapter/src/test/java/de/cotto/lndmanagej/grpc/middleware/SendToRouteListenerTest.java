@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.grpc.middleware;
 import com.google.protobuf.ByteString;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.FailureCode;
 import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.model.PaymentAttemptHop;
 import de.cotto.lndmanagej.model.PaymentListener;
@@ -125,7 +126,7 @@ class SendToRouteListenerTest {
                                 .setFailureSourceIndex(3)
                                 .build())
                 .build(), REQUEST_ID);
-        verify(paymentListener).failure(paymentAttemptHops, 15, 3);
+        verify(paymentListener).failure(paymentAttemptHops, FailureCode.TEMPORARY_CHANNEL_FAILURE, 3);
         verifyNoMoreInteractions(paymentListener);
     }
 

@@ -5,5 +5,5 @@ import java.util.List;
 public interface PaymentListener {
     void success(HexString preimage, List<PaymentAttemptHop> paymentAttemptHops);
 
-    void failure(List<PaymentAttemptHop> paymentAttemptHops, int failureCode, int failureSourceIndex);
+    void failure(List<PaymentAttemptHop> paymentAttemptHops, FailureCode failureCode, int failureSourceIndex);
 }

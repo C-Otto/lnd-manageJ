@@ -9,7 +9,7 @@ import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
-import de.cotto.lndmanagej.service.MissionControlService;
+import de.cotto.lndmanagej.service.LiquidityBoundsService;
 import de.cotto.lndmanagej.service.NodeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,16 +57,16 @@ class EdgeComputationTest {
     private GrpcGraph grpcGraph;
 
     @Mock
-    private MissionControlService missionControlService;
+    private NodeService nodeService;
 
     @Mock
-    private NodeService nodeService;
+    private LiquidityBoundsService liquidityBoundsService;
 
     @BeforeEach
     void setUp() {
         lenient().when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY_4);
-        lenient().when(missionControlService.getMinimumOfRecentFailures(any(), any())).thenReturn(Optional.empty());
         lenient().when(nodeService.getNode(any())).thenReturn(NODE_PEER);
+        lenient().when(liquidityBoundsService.getAssumedLiquidityLowerBound(any(), any())).thenReturn(Coins.NONE);
     }
 
     @Test
@@ -160,12 +160,13 @@ class EdgeComputationTest {
     }
 
     @Test
-    void adds_upper_bound_from_mission_control() {
+    void adds_upper_bound_from_liquidity_bounds_service() {
         mockEdge();
-        when(missionControlService.getMinimumOfRecentFailures(EDGE.startNode(), EDGE.endNode()))
-                .thenReturn(Optional.of(Coins.ofSatoshis(100)));
+        Coins upperBound = Coins.ofSatoshis(100);
+        when(liquidityBoundsService.getAssumedLiquidityUpperBound(EDGE.startNode(), EDGE.endNode()))
+                .thenReturn(Optional.of(upperBound));
         assertThat(edgeComputation.getEdges().edges())
-                .contains(EdgeWithLiquidityInformation.forUpperBound(EDGE, Coins.ofSatoshis(99)));
+                .contains(EdgeWithLiquidityInformation.forUpperBound(EDGE, upperBound));
     }
 
     @Test
@@ -203,14 +204,46 @@ class EdgeComputationTest {
     }
 
     @Test
-    void getEdgeWithLiquidityInformation_with_data_from_mission_control() {
+    void getEdgeWithLiquidityInformation_with_upper_bound() {
         when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY_4);
-        Coins recentFailureAmount = Coins.ofSatoshis(456);
         Coins upperBound = Coins.ofSatoshis(455);
-        when(missionControlService.getMinimumOfRecentFailures(EDGE.startNode(), EDGE.endNode()))
-                .thenReturn(Optional.of(recentFailureAmount));
+        when(liquidityBoundsService.getAssumedLiquidityUpperBound(EDGE.startNode(), EDGE.endNode()))
+                .thenReturn(Optional.of(upperBound));
         assertThat(edgeComputation.getEdgeWithLiquidityInformation(EDGE))
                 .isEqualTo(EdgeWithLiquidityInformation.forUpperBound(EDGE, upperBound));
+    }
+
+    @Test
+    void getEdgeWithLiquidityInformation_with_upper_bound_above_capacity() {
+        when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY_4);
+        Coins upperBound = EDGE.capacity().add(Coins.ofSatoshis(1));
+        when(liquidityBoundsService.getAssumedLiquidityUpperBound(EDGE.startNode(), EDGE.endNode()))
+                .thenReturn(Optional.of(upperBound));
+        assertThat(edgeComputation.getEdgeWithLiquidityInformation(EDGE))
+                .isEqualTo(EdgeWithLiquidityInformation.forUpperBound(EDGE, EDGE.capacity()));
+    }
+
+    @Test
+    void getEdgeWithLiquidityInformation_with_lower_bound() {
+        when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY_4);
+        Coins lowerBound = Coins.ofSatoshis(455);
+        when(liquidityBoundsService.getAssumedLiquidityLowerBound(EDGE.startNode(), EDGE.endNode()))
+                .thenReturn(lowerBound);
+        assertThat(edgeComputation.getEdgeWithLiquidityInformation(EDGE))
+                .isEqualTo(EdgeWithLiquidityInformation.forLowerBound(EDGE, lowerBound));
+    }
+
+    @Test
+    void getEdgeWithLiquidityInformation_with_lower_and_upper_bound() {
+        when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY_4);
+        Coins lowerBound = Coins.ofSatoshis(100);
+        Coins upperBound = Coins.ofSatoshis(455);
+        when(liquidityBoundsService.getAssumedLiquidityLowerBound(EDGE.startNode(), EDGE.endNode()))
+                .thenReturn(lowerBound);
+        when(liquidityBoundsService.getAssumedLiquidityUpperBound(EDGE.startNode(), EDGE.endNode()))
+                .thenReturn(Optional.of(upperBound));
+        assertThat(edgeComputation.getEdgeWithLiquidityInformation(EDGE))
+                .isEqualTo(EdgeWithLiquidityInformation.forLowerAndUpperBound(EDGE, lowerBound, upperBound));
     }
 
     private void mockEdge() {

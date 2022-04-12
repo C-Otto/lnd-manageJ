@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.grpc.middleware;
 import com.google.protobuf.ByteString;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.FailureCode;
 import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.model.PaymentAttemptHop;
 import de.cotto.lndmanagej.model.PaymentListener;
@@ -51,7 +52,7 @@ public class SendToRouteListener extends RequestResponseListener<SendToRouteRequ
                 .toList();
         if (preimage.isEmpty()) {
             Failure failure = response.getFailure();
-            int failureCode = failure.getCodeValue();
+            FailureCode failureCode = new FailureCode(failure.getCodeValue());
             int failureSourceIndex = failure.getFailureSourceIndex();
             paymentListeners.forEach(
                     paymentListener -> paymentListener.failure(paymentAttemptHops, failureCode, failureSourceIndex)
