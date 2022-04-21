@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.hardcoded;
 
 import com.google.common.base.Splitter;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.Resolution;
 import de.cotto.lndmanagej.model.TransactionHash;
 import org.springframework.stereotype.Component;
@@ -19,11 +20,18 @@ public class HardcodedService {
     private static final int EXPECTED_NUMBER_OF_COMPONENTS = 3;
     private static final String RESOLUTIONS_SECTION = "resolutions";
     private static final Splitter SPLITTER = Splitter.on(":");
+    private static final String ALIASES_SECTION = "aliases";
 
     private final IniFileReader iniFileReader;
 
     public HardcodedService(IniFileReader iniFileReader) {
         this.iniFileReader = iniFileReader;
+    }
+
+    public String getAliasOrDefault(Pubkey pubkey, String defaultAlias) {
+        Map<String, Set<String>> values = iniFileReader.getValues(ALIASES_SECTION);
+        Set<String> alias = values.getOrDefault(pubkey.toString(), Set.of());
+        return alias.stream().findFirst().orElse(defaultAlias);
     }
 
     public Set<Resolution> getResolutions(ChannelId channelId) {
