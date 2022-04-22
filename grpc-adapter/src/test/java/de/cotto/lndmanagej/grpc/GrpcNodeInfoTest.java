@@ -1,5 +1,7 @@
 package de.cotto.lndmanagej.grpc;
 
+import de.cotto.lndmanagej.hardcoded.HardcodedService;
+import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.Pubkey;
 import lnrpc.LightningNode;
 import lnrpc.NodeInfo;
@@ -31,6 +33,9 @@ class GrpcNodeInfoTest {
     @Mock
     private GrpcService grpcService;
 
+    @Mock
+    private HardcodedService hardcodedService;
+
     @BeforeEach
     void setUp() {
         NodeInfo.Builder node = NodeInfo.newBuilder().setNode(LightningNode.newBuilder()
@@ -47,9 +52,26 @@ class GrpcNodeInfoTest {
     }
 
     @Test
+    void getNode_with_hardcoded_alias() {
+        String expectedAlias = hardcodedAlias();
+        Node expectedNode = Node.builder().withPubkey(NODE.pubkey()).withAlias(expectedAlias).build();
+        assertThat(grpcNodeInfo.getNode(NODE.pubkey())).isEqualTo(expectedNode);
+        verify(grpcService, never()).listPeers();
+    }
+
+    @Test
     void getNode_not_found() {
         when(grpcService.getNodeInfo(NODE.pubkey())).thenReturn(Optional.empty());
         assertThat(grpcNodeInfo.getNode(NODE.pubkey())).isEqualTo(NODE_WITHOUT_ALIAS);
+    }
+
+    @Test
+    void getNode_not_found_hardcoded_alias() {
+        String expectedAlias = "foobar";
+        Node expectedNode = Node.builder().withPubkey(NODE.pubkey()).withAlias(expectedAlias).build();
+        when(hardcodedService.getAlias(NODE.pubkey())).thenReturn(Optional.of(expectedAlias));
+        when(grpcService.getNodeInfo(NODE.pubkey())).thenReturn(Optional.empty());
+        assertThat(grpcNodeInfo.getNode(NODE.pubkey())).isEqualTo(expectedNode);
     }
 
     @Test
@@ -70,14 +92,33 @@ class GrpcNodeInfoTest {
     }
 
     @Test
+    void getNodeWithOnlineStatus_uses_hardcoded_alias() {
+        String expectedAlias = hardcodedAlias();
+        assertThat(grpcNodeInfo.getNodeWithOnlineStatus(NODE.pubkey()).alias()).isEqualTo(expectedAlias);
+    }
+
+    @Test
     void getNodeWithOnlineStatus_sets_last_update() {
         assertThat(grpcNodeInfo.getNodeWithOnlineStatus(NODE.pubkey()).lastUpdate()).isEqualTo(NODE.lastUpdate());
     }
 
     @Test
-    void getNodeWithOnlineStatus_error() {
+    void getNodeWithOnlineStatus_not_known() {
         when(grpcService.getNodeInfo(NODE.pubkey())).thenReturn(Optional.empty());
         assertThat(grpcNodeInfo.getNodeWithOnlineStatus(NODE.pubkey()).alias()).isEqualTo(NODE.pubkey().toString());
+    }
+
+    @Test
+    void getNodeWithOnlineStatus_not_known_with_hardcoded_alias() {
+        String expectedAlias = hardcodedAlias();
+        when(grpcService.getNodeInfo(NODE.pubkey())).thenReturn(Optional.empty());
+        assertThat(grpcNodeInfo.getNodeWithOnlineStatus(NODE.pubkey()).alias()).isEqualTo(expectedAlias);
+    }
+
+    private String hardcodedAlias() {
+        String expectedAlias = "foobar";
+        when(hardcodedService.getAlias(NODE.pubkey())).thenReturn(Optional.of(expectedAlias));
+        return expectedAlias;
     }
 
     private lnrpc.Peer peer(Pubkey pubkey) {

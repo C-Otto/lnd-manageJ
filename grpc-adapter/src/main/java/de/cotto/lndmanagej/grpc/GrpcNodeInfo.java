@@ -8,6 +8,8 @@ import lnrpc.NodeInfo;
 import lnrpc.Peer;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
 public class GrpcNodeInfo {
     private final GrpcService grpcService;
@@ -21,13 +23,12 @@ public class GrpcNodeInfo {
     public Node getNode(Pubkey pubkey) {
         NodeInfo nodeInfo = grpcService.getNodeInfo(pubkey).orElse(null);
         if (nodeInfo == null) {
-            return Node.forPubkey(pubkey);
+            return createNode(pubkey);
         }
         LightningNode node = nodeInfo.getNode();
-        String alias = hardcodedService.getAliasOrDefault(pubkey, node.getAlias());
         return Node.builder()
                 .withPubkey(pubkey)
-                .withAlias(alias)
+                .withAlias(getAlias(pubkey, node))
                 .withLastUpdate(node.getLastUpdate())
                 .build();
     }
@@ -35,19 +36,30 @@ public class GrpcNodeInfo {
     public Node getNodeWithOnlineStatus(Pubkey pubkey) {
         NodeInfo nodeInfo = grpcService.getNodeInfo(pubkey).orElse(null);
         if (nodeInfo == null) {
-            return Node.forPubkey(pubkey);
+            return createNode(pubkey);
         }
         LightningNode node = nodeInfo.getNode();
         boolean isPeer = grpcService.listPeers().stream()
                 .map(Peer::getPubKey)
                 .map(Pubkey::create)
                 .anyMatch(pubkey::equals);
-        String alias = hardcodedService.getAliasOrDefault(pubkey, node.getAlias());
         return Node.builder()
                 .withPubkey(pubkey)
-                .withAlias(alias)
+                .withAlias(getAlias(pubkey, node))
                 .withLastUpdate(node.getLastUpdate())
                 .withOnlineStatus(isPeer)
                 .build();
+    }
+
+    private String getAlias(Pubkey pubkey, LightningNode node) {
+        return hardcodedService.getAlias(pubkey).orElse(node.getAlias());
+    }
+
+    private Node createNode(Pubkey pubkey) {
+        Optional<String> hardcodedAlias = hardcodedService.getAlias(pubkey);
+        if (hardcodedAlias.isEmpty()) {
+            return Node.forPubkey(pubkey);
+        }
+        return Node.builder().withPubkey(pubkey).withAlias(hardcodedAlias.get()).build();
     }
 }

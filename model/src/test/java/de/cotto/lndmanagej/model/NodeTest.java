@@ -14,26 +14,6 @@ import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 class NodeTest {
     @Test
-    void known_alias_for_Chivo() {
-        Node node = Node.builder()
-                .withPubkey(Pubkey.create("02f72978d40efeffca537139ad6ac9f09970c000a2dbc0d7aa55a71327c4577a80"))
-                .withAlias("02f72978d40efeffca53")
-                .withLastUpdate(LAST_UPDATE)
-                .build();
-        assertThat(node.alias()).isEqualTo("Chivo IBEX_a0");
-    }
-
-    @Test
-    void known_alias_for_Bluewallet() {
-        Node node = Node.builder()
-                .withPubkey(Pubkey.create("037cc5f9f1da20ac0d60e83989729a204a33cc2d8e80438969fadf35c1c5f1233b"))
-                .withAlias("037cc5f9f1da20ac0d60")
-                .withLastUpdate(LAST_UPDATE)
-                .build();
-        assertThat(node.alias()).isEqualTo("BlueWallet");
-    }
-
-    @Test
     void forPubkey() {
         assertThat(Node.forPubkey(PUBKEY)).isEqualTo(Node.builder().withPubkey(PUBKEY).build());
     }

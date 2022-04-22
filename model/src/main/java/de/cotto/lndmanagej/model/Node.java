@@ -2,7 +2,6 @@ package de.cotto.lndmanagej.model;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Map;
 import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
