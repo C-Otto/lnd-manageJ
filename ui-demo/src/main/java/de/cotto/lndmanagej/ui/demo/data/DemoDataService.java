@@ -10,6 +10,7 @@ import de.cotto.lndmanagej.model.ChannelRating;
 import de.cotto.lndmanagej.model.ChannelRatingFixtures;
 import de.cotto.lndmanagej.model.ChannelStatus;
 import de.cotto.lndmanagej.model.OnlineReport;
+import de.cotto.lndmanagej.model.OpenInitiator;
 import de.cotto.lndmanagej.model.PeerRating;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.ui.UiDataService;
@@ -19,6 +20,7 @@ import de.cotto.lndmanagej.ui.dto.ClosedChannelDto;
 import de.cotto.lndmanagej.ui.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
+import de.cotto.lndmanagej.ui.dto.PendingOpenChannelDto;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
@@ -106,6 +108,20 @@ public class DemoDataService extends UiDataService {
             18_099_100,
             900_900);
 
+    public static final PendingOpenChannelDto PENDING_OPEN_CHANNEL = new PendingOpenChannelDto(
+            TRY_BITCOIN.remoteAlias(),
+            TRY_BITCOIN.remotePubkey(),
+            1_000_000,
+            false,
+            OpenInitiator.LOCAL);
+
+    public static final PendingOpenChannelDto PENDING_OPEN_CHANNEL_2 = new PendingOpenChannelDto(
+            C_OTTO.remoteAlias(),
+            C_OTTO.remotePubkey(),
+            2_000_000,
+            true,
+            OpenInitiator.REMOTE);
+
     public static final ChannelId CLOSED_CHANNEL = ChannelId.fromCompactForm("712345x124x1");
     public static final RatingDto RATING = RatingDto.fromModel(ChannelRatingFixtures.ratingWithValue(700));
 
@@ -114,6 +130,11 @@ public class DemoDataService extends UiDataService {
     public DemoDataService(DemoWarningService warningService) {
         super();
         this.warningService = warningService;
+    }
+
+    @Override
+    public List<PendingOpenChannelDto> getPendingOpenChannels() {
+        return List.of(PENDING_OPEN_CHANNEL, PENDING_OPEN_CHANNEL_2);
     }
 
     @Override

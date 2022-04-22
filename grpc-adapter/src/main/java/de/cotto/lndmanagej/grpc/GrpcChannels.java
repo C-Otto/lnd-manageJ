@@ -9,6 +9,7 @@ import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.ForceClosingChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.OpenInitiator;
+import de.cotto.lndmanagej.model.PendingOpenChannel;
 import de.cotto.lndmanagej.model.PrivateResolver;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.TransactionHash;
@@ -44,6 +45,13 @@ public class GrpcChannels extends GrpcChannelsBase {
         Pubkey ownPubkey = grpcGetInfo.getPubkey();
         return grpcService.getChannels().stream()
                 .map(lndChannel -> toLocalOpenChannel(lndChannel, ownPubkey))
+                .collect(toSet());
+    }
+
+    public Set<PendingOpenChannel> getPendingOpenChannels() {
+        Pubkey ownPubkey = grpcGetInfo.getPubkey();
+        return grpcService.getPendingOpenChannels().stream()
+                .map(pendingOpenChannel -> toPendingOpenChannel(ownPubkey, pendingOpenChannel.getChannel()))
                 .collect(toSet());
     }
 
@@ -108,6 +116,17 @@ public class GrpcChannels extends GrpcChannelsBase {
                 .map(PendingHTLC::getOutpoint)
                 .map(ChannelPoint::create)
                 .collect(toSet());
+    }
+
+    private PendingOpenChannel toPendingOpenChannel(Pubkey ownPubkey, PendingChannel pendingChannel) {
+        return new PendingOpenChannel(
+                ChannelPoint.create(pendingChannel.getChannelPoint()),
+                Coins.ofSatoshis(pendingChannel.getCapacity()),
+                ownPubkey,
+                Pubkey.create(pendingChannel.getRemoteNodePub()),
+                getOpenInitiator(pendingChannel.getInitiator()),
+                pendingChannel.getPrivate()
+        );
     }
 
     private LocalOpenChannel toLocalOpenChannel(Channel lndChannel, Pubkey ownPubkey) {

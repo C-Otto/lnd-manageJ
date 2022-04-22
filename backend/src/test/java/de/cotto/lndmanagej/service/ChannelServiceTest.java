@@ -26,6 +26,7 @@ import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHAN
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_3;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_TO_NODE_3;
+import static de.cotto.lndmanagej.model.PendingOpenChannelFixtures.PENDING_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL_2;
@@ -93,6 +94,12 @@ class ChannelServiceTest {
     void getLocalChannel_closed() {
         when(grpcClosedChannels.getClosedChannels()).thenReturn(Map.of(CLOSED_CHANNEL.getId(), CLOSED_CHANNEL));
         assertThat(channelService.getLocalChannel(CHANNEL_ID)).contains(CLOSED_CHANNEL);
+    }
+
+    @Test
+    void getPendingOpenChannel() {
+        when(grpcChannels.getPendingOpenChannels()).thenReturn(Set.of(PENDING_OPEN_CHANNEL));
+        assertThat(channelService.getPendingOpenChannels()).contains(PENDING_OPEN_CHANNEL);
     }
 
     @Test

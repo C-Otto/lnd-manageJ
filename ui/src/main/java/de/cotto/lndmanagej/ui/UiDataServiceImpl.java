@@ -11,6 +11,7 @@ import de.cotto.lndmanagej.model.ChannelRating;
 import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.Node;
+import de.cotto.lndmanagej.model.PendingOpenChannel;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.Rating;
 import de.cotto.lndmanagej.service.ChannelService;
@@ -24,6 +25,7 @@ import de.cotto.lndmanagej.ui.dto.ClosedChannelDto;
 import de.cotto.lndmanagej.ui.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
+import de.cotto.lndmanagej.ui.dto.PendingOpenChannelDto;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -65,6 +67,22 @@ public class UiDataServiceImpl extends UiDataService {
     @Override
     public Set<Pubkey> getPubkeys() {
         return channelService.getOpenChannels().stream().map(LocalChannel::getRemotePubkey).collect(toSet());
+    }
+
+    @Override
+    public List<PendingOpenChannelDto> getPendingOpenChannels() {
+        return channelService.getPendingOpenChannels().parallelStream()
+                .map(this::toPendingOpenChannelDto)
+                .toList();
+    }
+
+    private PendingOpenChannelDto toPendingOpenChannelDto(PendingOpenChannel pendingOpenChannel) {
+        return new PendingOpenChannelDto(
+                nodeController.getAlias(pendingOpenChannel.remotePubkey()),
+                pendingOpenChannel.remotePubkey(),
+                pendingOpenChannel.capacity().satoshis(),
+                pendingOpenChannel.isPrivate(),
+                pendingOpenChannel.openInitiator());
     }
 
     @Override
