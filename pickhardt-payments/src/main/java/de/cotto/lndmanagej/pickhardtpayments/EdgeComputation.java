@@ -100,7 +100,7 @@ public class EdgeComputation {
 
     private boolean shouldIgnore(DirectedChannelEdge channelEdge) {
         Policy policy = channelEdge.policy();
-        return policy.disabled() ||  policy.baseFee().isPositive();
+        return policy.disabled() || policy.baseFee().isPositive();
     }
 
     private Optional<Coins> getKnownLiquidity(Edge edge, Pubkey ownPubKey) {
