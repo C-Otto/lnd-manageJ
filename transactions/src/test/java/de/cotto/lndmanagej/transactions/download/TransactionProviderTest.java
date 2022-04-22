@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.transactions.download;
 
+import de.cotto.lndmanagej.grpc.GrpcGetInfo;
 import feign.FeignException;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +18,8 @@ import static de.cotto.lndmanagej.transactions.download.BlockcypherTransactionDt
 import static de.cotto.lndmanagej.transactions.model.TransactionFixtures.TRANSACTION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,9 +32,13 @@ class TransactionProviderTest {
     @Mock
     private BitapsClient bitapsClient;
 
+    @Mock
+    private GrpcGetInfo grpcGetInfo;
+
     @BeforeEach
     void setUp() {
-        transactionProvider = new TransactionProvider(List.of(blockcypherClient, bitapsClient));
+        transactionProvider = new TransactionProvider(grpcGetInfo, List.of(blockcypherClient, bitapsClient));
+        lenient().when(grpcGetInfo.isTestnet()).thenReturn(Optional.of(false));
     }
 
     @Test
@@ -64,5 +71,23 @@ class TransactionProviderTest {
     void success_second_client() {
         when(bitapsClient.getTransaction(TRANSACTION_HASH.getHash())).thenReturn(Optional.of(BITAPS_TRANSACTION));
         assertThat(transactionProvider.get(TRANSACTION_HASH)).contains(TRANSACTION);
+    }
+
+    @Test
+    void testnet() {
+        when(grpcGetInfo.isTestnet()).thenReturn(Optional.of(true));
+        lenient().when(blockcypherClient.getTransactionTestnet(TRANSACTION_HASH.getHash()))
+                .thenReturn(Optional.of(BLOCKCYPHER_TRANSACTION));
+        lenient().when(bitapsClient.getTransactionTestnet(TRANSACTION_HASH.getHash()))
+                .thenReturn(Optional.of(BITAPS_TRANSACTION));
+        assertThat(transactionProvider.get(TRANSACTION_HASH)).contains(TRANSACTION);
+    }
+
+    @Test
+    void network_not_known() {
+        when(grpcGetInfo.isTestnet()).thenReturn(Optional.empty());
+        assertThat(transactionProvider.get(TRANSACTION_HASH)).isEmpty();
+        verifyNoInteractions(blockcypherClient);
+        verifyNoInteractions(bitapsClient);
     }
 }

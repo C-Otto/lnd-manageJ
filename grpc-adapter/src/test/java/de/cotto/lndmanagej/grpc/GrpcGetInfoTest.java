@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.grpc;
 
+import lnrpc.Chain;
 import lnrpc.GetInfoResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,10 @@ class GrpcGetInfoTest {
     private static final String VERSION = "version";
     private static final String COMMIT_HASH = "commit";
     private static final String BLOCK_HASH = "block";
+    private static final String BITCOIN = "bitcoin";
+    private static final String LITECOIN = "litecoin";
+    private static final String MAINNET = "mainnet";
+    private static final String TESTNET = "testnet";
     private static final int NUMBER_OF_PEERS = 100;
     private static final int NUMBER_OF_ACTIVE_CHANNELS = 200;
     private static final int NUMBER_OF_INACTIVE_CHANNELS = 300;
@@ -50,6 +55,7 @@ class GrpcGetInfoTest {
                 .setBlockHeight(BLOCK_HEIGHT)
                 .setSyncedToChain(syncedToChain)
                 .setSyncedToGraph(syncedToGraph)
+                .addChains(Chain.newBuilder().setChain(BITCOIN).setNetwork(MAINNET).build())
                 .build();
     }
 
@@ -137,6 +143,43 @@ class GrpcGetInfoTest {
     void isSyncedToGraph_false() {
         when(grpcService.getInfo()).thenReturn(Optional.of(createResponse(true, false)));
         assertThat(grpcGetInfo.isSyncedToGraph()).contains(false);
+    }
+
+    @Test
+    void isTestnet_true() {
+        when(grpcService.getInfo()).thenReturn(Optional.of(GetInfoResponse.newBuilder()
+                .addChains(Chain.newBuilder().setChain(BITCOIN).setNetwork(TESTNET).build())
+                .build()));
+        assertThat(grpcGetInfo.isTestnet()).contains(true);
+    }
+
+    @Test
+    void isTestnet_testnet_and_mainnet() {
+        when(grpcService.getInfo()).thenReturn(Optional.of(GetInfoResponse.newBuilder()
+                .addChains(Chain.newBuilder().setChain(BITCOIN).setNetwork(TESTNET).build())
+                .addChains(Chain.newBuilder().setChain(BITCOIN).setNetwork(MAINNET).build())
+                .build()));
+        assertThat(grpcGetInfo.isTestnet()).isEmpty();
+    }
+
+    @Test
+    void isTestnet_mainnet_in_litecoin() {
+        when(grpcService.getInfo()).thenReturn(Optional.of(GetInfoResponse.newBuilder()
+                .addChains(Chain.newBuilder().setChain(LITECOIN).setNetwork(MAINNET).build())
+                .build()));
+        assertThat(grpcGetInfo.isTestnet()).isEmpty();
+    }
+
+    @Test
+    void isTestnet_false() {
+        when(grpcService.getInfo()).thenReturn(Optional.of(createResponse(true, false)));
+        assertThat(grpcGetInfo.isTestnet()).contains(false);
+    }
+
+    @Test
+    void isTestnet_empty() {
+        when(grpcService.getInfo()).thenReturn(Optional.empty());
+        assertThat(grpcGetInfo.isTestnet()).isEmpty();
     }
 
     @Test

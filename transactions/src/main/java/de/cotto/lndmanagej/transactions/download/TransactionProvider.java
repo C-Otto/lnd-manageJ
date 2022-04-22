@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.transactions.download;
 
+import de.cotto.lndmanagej.grpc.GrpcGetInfo;
 import de.cotto.lndmanagej.model.TransactionHash;
 import de.cotto.lndmanagej.transactions.model.Transaction;
 import feign.FeignException;
@@ -15,10 +16,12 @@ import java.util.Optional;
 
 @Component
 public class TransactionProvider {
+    private final GrpcGetInfo grpcGetInfo;
     private final List<TransactionDetailsClient> clients;
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    public TransactionProvider(List<TransactionDetailsClient> clients) {
+    public TransactionProvider(GrpcGetInfo grpcGetInfo, List<TransactionDetailsClient> clients) {
+        this.grpcGetInfo = grpcGetInfo;
         this.clients = clients;
     }
 
@@ -40,6 +43,13 @@ public class TransactionProvider {
             TransactionDetailsClient client
     ) {
         try {
+            Boolean isTestnet = grpcGetInfo.isTestnet().orElse(null);
+            if (isTestnet == null) {
+                return Optional.empty();
+            }
+            if (isTestnet) {
+                return client.getTransactionTestnet(transactionHash.getHash());
+            }
             return client.getTransaction(transactionHash.getHash());
         } catch (FeignException feignException) {
             logger.warn("Feign exception: ", feignException);

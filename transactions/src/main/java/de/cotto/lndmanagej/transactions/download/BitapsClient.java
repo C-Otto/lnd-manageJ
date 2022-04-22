@@ -15,4 +15,8 @@ public interface BitapsClient extends TransactionDetailsClient {
     @Override
     @GetMapping("/btc/v1/blockchain/transaction/{transactionHash}")
     Optional<BitapsTransactionDto> getTransaction(@PathVariable String transactionHash);
+
+    @Override
+    @GetMapping("/btc/testnet/v1/blockchain/transaction/{transactionHash}")
+    Optional<BitapsTransactionDto> getTransactionTestnet(@PathVariable String transactionHash);
 }

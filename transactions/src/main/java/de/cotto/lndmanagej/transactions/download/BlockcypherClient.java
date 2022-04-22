@@ -15,4 +15,8 @@ public interface BlockcypherClient extends TransactionDetailsClient {
     @Override
     @GetMapping("/v1/btc/main/txs/{transactionHash}")
     Optional<BlockcypherTransactionDto> getTransaction(@PathVariable String transactionHash);
+
+    @Override
+    @GetMapping("/v1/btc/test3/txs/{transactionHash}")
+    Optional<BlockcypherTransactionDto> getTransactionTestnet(@PathVariable String transactionHash);
 }
