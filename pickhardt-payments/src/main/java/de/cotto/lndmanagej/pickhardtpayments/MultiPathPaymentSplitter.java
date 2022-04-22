@@ -10,7 +10,10 @@ import de.cotto.lndmanagej.pickhardtpayments.model.Route;
 import de.cotto.lndmanagej.pickhardtpayments.model.Routes;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static de.cotto.lndmanagej.pickhardtpayments.PickhardtPaymentsConfiguration.DEFAULT_FEE_RATE_WEIGHT;
 import static java.util.stream.Collectors.toSet;
@@ -50,14 +53,14 @@ public class MultiPathPaymentSplitter {
         if (flows.isEmpty()) {
             return MultiPathPayment.FAILURE;
         }
-        Set<Route> routes = Routes.fromFlows(source, target, flows);
-        Set<Route> routesWithLiquidityInformation = getWithLiquidityInformation(routes);
+        List<Route> routes = Routes.fromFlows(source, target, flows);
+        List<Route> routesWithLiquidityInformation = getWithLiquidityInformation(routes);
         Routes.ensureTotalAmount(routesWithLiquidityInformation, amount);
         return new MultiPathPayment(routesWithLiquidityInformation);
     }
 
-    private Set<Route> getWithLiquidityInformation(Set<Route> routes) {
-        return routes.stream().map(this::getWithLiquidityInformation).collect(toSet());
+    private List<Route> getWithLiquidityInformation(List<Route> routes) {
+        return routes.stream().map(this::getWithLiquidityInformation).collect(Collectors.toCollection(ArrayList::new));
     }
 
     private Route getWithLiquidityInformation(Route route) {

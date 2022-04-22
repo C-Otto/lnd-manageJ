@@ -12,10 +12,13 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_5;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.pickhardtpayments.PickhardtPaymentsConfiguration.DEFAULT_FEE_RATE_WEIGHT;
 import static de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPaymentFixtures.MULTI_PATH_PAYMENT;
+import static de.cotto.lndmanagej.pickhardtpayments.model.RouteFixtures.ROUTE;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
@@ -43,7 +46,9 @@ class PickhardtPaymentsControllerIT {
     void sendTo() throws Exception {
         Coins amount = MULTI_PATH_PAYMENT.amount();
         String amountAsString = String.valueOf(amount.satoshis());
+        String route1AmountAsString = String.valueOf(ROUTE.amount().satoshis());
         String feesAsString = String.valueOf(MULTI_PATH_PAYMENT.fees().milliSatoshis());
+        String feesWithFirstHopAsString = String.valueOf(MULTI_PATH_PAYMENT.feesWithFirstHop().milliSatoshis());
         double expectedProbability = MULTI_PATH_PAYMENT.probability();
         when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, amount, DEFAULT_FEE_RATE_WEIGHT))
                 .thenReturn(MULTI_PATH_PAYMENT);
@@ -51,13 +56,26 @@ class PickhardtPaymentsControllerIT {
                 .andExpect(jsonPath("$.probability", is(expectedProbability)))
                 .andExpect(jsonPath("$.amountSat", is(amountAsString)))
                 .andExpect(jsonPath("$.feesMilliSat", is(feesAsString)))
-                .andExpect(jsonPath("$.feeRate", is(200)))
-                .andExpect(jsonPath("$.routes", hasSize(1)))
-                .andExpect(jsonPath("$.routes[0].amountSat", is(amountAsString)))
-                .andExpect(jsonPath("$.routes[0].channelIds", contains(CHANNEL_ID.toString())))
-                .andExpect(jsonPath("$.routes[0].probability", is(expectedProbability)))
-                .andExpect(jsonPath("$.routes[0].feesMilliSat", is(feesAsString)))
-                .andExpect(jsonPath("$.routes[0].feeRate", is(200)));
+                .andExpect(jsonPath("$.feesWithFirstHopMilliSat", is(feesWithFirstHopAsString)))
+                .andExpect(jsonPath("$.feeRate", is(266)))
+                .andExpect(jsonPath("$.feeRateWithFirstHop", is(466)))
+                .andExpect(jsonPath("$.routes", hasSize(2)))
+                .andExpect(jsonPath("$.routes[0].amountSat", is(route1AmountAsString)))
+                .andExpect(jsonPath("$.routes[0].channelIds", contains(
+                        CHANNEL_ID.toString(),
+                        CHANNEL_ID_3.toString(),
+                        CHANNEL_ID_5.toString()
+                )))
+                .andExpect(jsonPath("$.routes[0].probability",
+                        is(ROUTE.getProbability())))
+                .andExpect(jsonPath("$.routes[0].feesMilliSat",
+                        is(String.valueOf(ROUTE.fees().milliSatoshis()))))
+                .andExpect(jsonPath("$.routes[0].feesWithFirstHopMilliSat",
+                        is(String.valueOf(ROUTE.feesWithFirstHop().milliSatoshis()))))
+                .andExpect(jsonPath("$.routes[0].feeRate",
+                        is((int) ROUTE.getFeeRate())))
+                .andExpect(jsonPath("$.routes[0].feeRateWithFirstHop",
+                        is((int) ROUTE.getFeeRateWithFirstHop())));
     }
 
     @Test
@@ -89,13 +107,8 @@ class PickhardtPaymentsControllerIT {
                 .andExpect(jsonPath("$.probability", is(expectedProbability)))
                 .andExpect(jsonPath("$.amountSat", is(amountAsString)))
                 .andExpect(jsonPath("$.feesMilliSat", is(feesAsString)))
-                .andExpect(jsonPath("$.feeRate", is(200)))
-                .andExpect(jsonPath("$.routes", hasSize(1)))
-                .andExpect(jsonPath("$.routes[0].amountSat", is(amountAsString)))
-                .andExpect(jsonPath("$.routes[0].channelIds", contains(CHANNEL_ID.toString())))
-                .andExpect(jsonPath("$.routes[0].probability", is(expectedProbability)))
-                .andExpect(jsonPath("$.routes[0].feesMilliSat", is(feesAsString)))
-                .andExpect(jsonPath("$.routes[0].feeRate", is(200)));
+                .andExpect(jsonPath("$.feeRate", is(266)))
+                .andExpect(jsonPath("$.routes", hasSize(2)));
     }
 
     @Test

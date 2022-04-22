@@ -2,18 +2,22 @@ package de.cotto.lndmanagej.pickhardtpayments.model;
 
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Policy;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_1;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_4;
 import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE;
 import static de.cotto.lndmanagej.pickhardtpayments.model.RouteFixtures.ROUTE;
 import static java.util.Map.entry;
@@ -26,9 +30,7 @@ class RouteTest {
 
     @Test
     void getProbability() {
-        long capacitySat = EDGE.capacity().satoshis();
-        assertThat(ROUTE.getProbability())
-                .isEqualTo(1.0 * (capacitySat + 1 - ROUTE.amount().satoshis()) / (capacitySat + 1));
+        assertThat(ROUTE.getProbability()).isEqualTo(0.999_985_714_354_421_7);
     }
 
     @Test
@@ -86,64 +88,183 @@ class RouteTest {
     @Test
     void fees_amount_with_milli_sat() {
         Coins amount = Coins.ofMilliSatoshis(1_500_000_111);
-        int ppm = 100;
-        Coins baseFee = Coins.ofMilliSatoshis(10);
+        int ppm1 = 50;
+        int ppm2 = 100;
+        Coins baseFee1 = Coins.ofMilliSatoshis(15);
+        Coins baseFee2 = Coins.ofMilliSatoshis(10);
         Coins expectedFees =
-                Coins.ofMilliSatoshis((long) (amount.milliSatoshis() * 1.0 * ppm / ONE_MILLION))
-                        .add(baseFee);
-        Policy policy = new Policy(ppm, baseFee, true);
-        assertThat(new Route(List.of(new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy)), amount).fees())
+                Coins.ofMilliSatoshis((long) (amount.milliSatoshis() * 1.0 * ppm2 / ONE_MILLION))
+                        .add(baseFee2);
+        Edge hop1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm1, baseFee1, true));
+        Edge hop2 = new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_3, CAPACITY, new Policy(ppm2, baseFee2, true));
+        assertThat(new Route(List.of(hop1, hop2), amount).fees())
                 .isEqualTo(expectedFees);
+    }
+
+    @Test
+    void fees_one_hop() {
+        Coins amount = Coins.ofSatoshis(1_500_000);
+        Coins baseFee = Coins.ofMilliSatoshis(10);
+        int ppm = 100;
+        assertThat(new Route(List.of(
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm, baseFee, true))
+        ), amount).fees()).isEqualTo(Coins.NONE);
     }
 
     @Test
     void fees_two_hops() {
         Coins amount = Coins.ofSatoshis(1_500_000);
         Coins baseFee1 = Coins.ofMilliSatoshis(10);
-        Coins baseFee2 = Coins.ofMilliSatoshis(1);
+        Coins baseFee2 = Coins.ofMilliSatoshis(5);
         int ppm1 = 100;
         int ppm2 = 200;
         Coins expectedFees2 =
                 Coins.ofMilliSatoshis((long) (amount.milliSatoshis() * 1.0 * ppm2 / ONE_MILLION))
                         .add(baseFee2);
-        Coins expectedFees1 =
-                Coins.ofMilliSatoshis((long) (amount.add(expectedFees2).milliSatoshis() * 1.0 * ppm1 / ONE_MILLION))
-                        .add(baseFee1);
+        Coins expectedFees1 = Coins.NONE;
         Coins expectedFees = expectedFees1.add(expectedFees2);
+        Route route = new Route(List.of(
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm1, baseFee1, true)),
+                new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm2, baseFee2, true))
+        ), amount);
+        assertThat(route.fees()).isEqualTo(expectedFees);
+    }
+
+    @Test
+    void fees_three_hops() {
+        Coins amount = Coins.ofSatoshis(3_000_000);
+        Coins baseFee1 = Coins.ofMilliSatoshis(100);
+        Coins baseFee2 = Coins.ofMilliSatoshis(50);
+        Coins baseFee3 = Coins.ofMilliSatoshis(10);
+        int ppm1 = 100;
+        int ppm2 = 200;
+        int ppm3 = 300;
+        Coins expectedFees3 = Coins.NONE;
+        Coins expectedFees2 =
+                Coins.ofMilliSatoshis((long) (amount.milliSatoshis() * 1.0 * ppm3 / ONE_MILLION))
+                        .add(baseFee3);
+        long amountWithFeesLastHop = amount.add(expectedFees2).milliSatoshis();
+        Coins expectedFees1 = Coins.ofMilliSatoshis(
+                (long) (amountWithFeesLastHop * 1.0 * ppm2 / ONE_MILLION)
+        ).add(baseFee2);
+        Coins expectedFees = expectedFees1.add(expectedFees2).add(expectedFees3);
         assertThat(new Route(List.of(
                 new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm1, baseFee1, true)),
-                new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_3, CAPACITY, new Policy(ppm2, baseFee2, true))
+                new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_3, CAPACITY, new Policy(ppm2, baseFee2, true)),
+                new Edge(CHANNEL_ID_3, PUBKEY_3, PUBKEY_4, CAPACITY, new Policy(ppm3, baseFee3, true))
         ), amount).fees()).isEqualTo(expectedFees);
     }
 
     @Test
-    void feeRate_one_hop_without_base_fee() {
-        int feeRate = 987;
-        Policy policy = new Policy(feeRate, Coins.ofMilliSatoshis(0), true);
+    void feesWithFirstHop_empty() {
+        assertThat(new Route(List.of(), Coins.ofSatoshis(1_500_000)).feesWithFirstHop()).isEqualTo(Coins.NONE);
+    }
+
+    @Test
+    void feesWithFirstHop_one_hop() {
+        Coins amount = Coins.ofSatoshis(1_500_000);
+        Coins baseFee = Coins.ofMilliSatoshis(10);
+        int ppm = 100;
+        Coins expectedFees = Coins.ofMilliSatoshis(amount.milliSatoshis() * ppm / ONE_MILLION).add(baseFee);
+        assertThat(new Route(List.of(
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm, baseFee, true))
+        ), amount).feesWithFirstHop()).isEqualTo(expectedFees);
+    }
+
+    @Test
+    void feesWithFirstHop_three_hops() {
+        Coins amount = Coins.ofSatoshis(1_500_000);
+        Coins baseFee1 = Coins.ofMilliSatoshis(10);
+        Coins baseFee2 = Coins.ofMilliSatoshis(5);
+        Coins baseFee3 = Coins.ofMilliSatoshis(1);
+        int ppm1 = 100;
+        int ppm2 = 200;
+        int ppm3 = 300;
+        Coins feesForThirdHop = Coins.ofMilliSatoshis(amount.milliSatoshis() * ppm3 / ONE_MILLION).add(baseFee3);
+        Coins feesForSecondHop =
+                Coins.ofMilliSatoshis(amount.add(feesForThirdHop).milliSatoshis() * ppm2 / ONE_MILLION).add(baseFee2);
+        Coins amountForFirstHop = amount.add(feesForThirdHop).add(feesForSecondHop);
+        Coins feesForFirstHop =
+                Coins.ofMilliSatoshis(amountForFirstHop.milliSatoshis() * ppm1 / ONE_MILLION).add(baseFee1);
+        Coins expectedFees = feesForFirstHop.add(feesForSecondHop).add(feesForThirdHop);
+        assertThat(new Route(List.of(
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm1, baseFee1, true)),
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm2, baseFee2, true)),
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm3, baseFee3, true))
+        ), amount).feesWithFirstHop()).isEqualTo(expectedFees);
+    }
+
+    @Test
+    void feeForHop() {
+        Coins amount = Coins.ofSatoshis(2_000);
+        int ppm1 = 123;
+        int ppm2 = 456;
+        int ppm3 = 789;
+        Coins expectedFees3 = Coins.NONE;
+        Coins expectedFees2 =
+                Coins.ofMilliSatoshis((long) (amount.milliSatoshis() * 1.0 * ppm3 / ONE_MILLION));
+        Coins expectedFees1 =
+                Coins.ofMilliSatoshis((long) (amount.add(expectedFees2).milliSatoshis() * 1.0 * ppm2 / ONE_MILLION));
+        Route route = createRoute(amount, ppm1, ppm2, ppm3);
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(route.feeForHop(2)).isEqualTo(expectedFees3);
+        softly.assertThat(route.feeForHop(1)).isEqualTo(expectedFees2);
+        softly.assertThat(route.feeForHop(0)).isEqualTo(expectedFees1);
+        softly.assertAll();
+    }
+
+    @Test
+    void forwardAmountForHop() {
+        Coins amount = Coins.ofSatoshis(2_000);
+        Route route = createRoute(amount, 123, 456, 789);
+        Coins feeForHop2 = route.feeForHop(1);
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(route.forwardAmountForHop(2)).isEqualTo(amount);
+        softly.assertThat(route.forwardAmountForHop(1)).isEqualTo(amount);
+        softly.assertThat(route.forwardAmountForHop(0)).isEqualTo(amount.add(feeForHop2));
+        softly.assertAll();
+    }
+
+    @Test
+    void feeRate_two_hops_without_base_fee() {
+        int feeRate1 = 100;
+        int feeRate2 = 987;
         Coins amount = Coins.ofSatoshis(1_234_000);
-        assertThat(new Route(List.of(new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy)), amount).getFeeRate())
-                .isEqualTo(feeRate);
+        Route route = createRoute(amount, feeRate1, feeRate2);
+        assertThat(route.getFeeRate()).isEqualTo(feeRate2);
     }
 
     @Test
     void feeRate_one_hop_with_base_fee() {
-        int feeRate = 987;
-        Policy policy = new Policy(feeRate, Coins.ofSatoshis(10_000), true);
+        int feeRate1 = 100;
+        int feeRate2 = 987;
+        Policy policy1 = new Policy(feeRate1, Coins.ofSatoshis(100_000), true);
+        Policy policy2 = new Policy(feeRate2, Coins.ofSatoshis(10_000), true);
         Coins amount = Coins.ofSatoshis(1_234_567);
-        assertThat(new Route(List.of(new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy)), amount).getFeeRate())
+        Edge hop1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy1);
+        Edge hop2 = new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_3, CAPACITY, policy2);
+        assertThat(new Route(List.of(hop1, hop2), amount).getFeeRate())
                 .isEqualTo(9087);
     }
 
     @Test
-    void feeRate_two_hops() {
-        int feeRate1 = 100;
-        int feeRate2 = 350;
-        Policy policy1 = new Policy(feeRate1, Coins.ofMilliSatoshis(0), true);
-        Policy policy2 = new Policy(feeRate2, Coins.ofMilliSatoshis(0), true);
+    void feeRate_three_hops() {
+        int feeRate1 = 50;
+        int feeRate2 = 100;
+        int feeRate3 = 350;
         Coins amount = Coins.ofSatoshis(1_234_567);
-        Edge hop1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy1);
-        Edge hop2 = new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_3, CAPACITY, policy2);
-        assertThat(new Route(List.of(hop1, hop2), amount).getFeeRate()).isEqualTo(feeRate1 + feeRate2);
+        assertThat(createRoute(amount, feeRate1, feeRate2, feeRate3).getFeeRate())
+                .isEqualTo(feeRate2 + feeRate3);
+    }
+
+    @Test
+    void feeRateWithFirstHop_three_hops() {
+        int feeRate1 = 50;
+        int feeRate2 = 100;
+        int feeRate3 = 350;
+        Coins amount = Coins.ofSatoshis(1_234_567);
+        assertThat(createRoute(amount, feeRate1, feeRate2, feeRate3).getFeeRateWithFirstHop())
+                .isEqualTo(feeRate1 + feeRate2 + feeRate3);
     }
 
     @Test
@@ -168,9 +289,9 @@ class RouteTest {
                 EdgeWithLiquidityInformation.forUpperBound(EDGE, Coins.ofSatoshis(123))
         ));
         Coins newAmount = Coins.ofSatoshis(1_000);
-        Coins updateFees = Coins.ofMilliSatoshis(200);
+        List<Coins> updatedFeesForHops = List.of(Coins.ofMilliSatoshis(200), Coins.ofMilliSatoshis(200), Coins.NONE);
         assertThat(original.getForAmount(newAmount))
-                .isEqualTo(new Route(original.edges(), newAmount, updateFees, original.liquidityInformation()));
+                .isEqualTo(new Route(original.edges(), newAmount, updatedFeesForHops, original.liquidityInformation()));
     }
 
     @Test
@@ -196,5 +317,13 @@ class RouteTest {
         EdgeWithLiquidityInformation edgeWithLiquidityInformation =
                 EdgeWithLiquidityInformation.forKnownLiquidity(edge, Coins.ofSatoshis(knownLiquiditySat));
         return route.withLiquidityInformation(Set.of(edgeWithLiquidityInformation));
+    }
+
+    private Route createRoute(Coins amount, int... feeRates) {
+        List<Edge> edges = Arrays.stream(feeRates)
+                .mapToObj(ppm -> new Policy(ppm, Coins.NONE, true))
+                .map(policy -> new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy))
+                .toList();
+        return new Route(edges, amount);
     }
 }

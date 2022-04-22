@@ -84,7 +84,7 @@ class MultiPathPaymentSplitterTest {
         MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY_2, AMOUNT);
 
         Route expectedRoute = new Route(List.of(EDGE), AMOUNT).withLiquidityInformation(Set.of(noInformationFor(EDGE)));
-        MultiPathPayment expected = new MultiPathPayment(Set.of(expectedRoute));
+        MultiPathPayment expected = new MultiPathPayment(List.of(expectedRoute));
         assertThat(multiPathPayment).isEqualTo(expected);
     }
 

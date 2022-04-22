@@ -3,20 +3,19 @@ package de.cotto.lndmanagej.pickhardtpayments.model;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Pubkey;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 public final class Routes {
     private Routes() {
         // do not instantiate me
     }
 
-    public static Set<Route> fromFlows(Pubkey source, Pubkey target, Flows flows) {
+    public static List<Route> fromFlows(Pubkey source, Pubkey target, Flows flows) {
         Flows flowsCopy = flows.getCopy();
-        Set<Route> result = new LinkedHashSet<>();
+        List<Route> result = new ArrayList<>();
         List<Edge> path = flowsCopy.getShortestPath(source, target);
         while (!path.isEmpty()) {
             Coins minimum = path.stream().map(flowsCopy::getFlow).reduce(Coins::minimum).orElseThrow();

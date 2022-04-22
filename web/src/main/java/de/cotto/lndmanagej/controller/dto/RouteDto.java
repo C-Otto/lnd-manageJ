@@ -11,7 +11,9 @@ public record RouteDto(
         List<ChannelId> channelIds,
         double probability,
         String feesMilliSat,
-        long feeRate
+        String feesWithFirstHopMilliSat,
+        long feeRate,
+        long feeRateWithFirstHop
 ) {
     public static RouteDto fromModel(Route route) {
         return new RouteDto(
@@ -19,7 +21,9 @@ public record RouteDto(
                 route.edges().stream().map(Edge::channelId).toList(),
                 route.getProbability(),
                 String.valueOf(route.fees().milliSatoshis()),
-                route.getFeeRate()
+                String.valueOf(route.feesWithFirstHop().milliSatoshis()),
+                route.getFeeRate(),
+                route.getFeeRateWithFirstHop()
         );
     }
 

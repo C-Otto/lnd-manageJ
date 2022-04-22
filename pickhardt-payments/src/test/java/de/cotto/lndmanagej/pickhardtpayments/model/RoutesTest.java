@@ -5,7 +5,6 @@ import de.cotto.lndmanagej.model.Coins;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Set;
 
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
@@ -80,7 +79,7 @@ class RoutesTest {
 
     @Test
     void ensureTotalAmount_adds_to_only_route() {
-        Set<Route> routes = Routes.fromFlows(PUBKEY, PUBKEY_2, FLOWS);
+        List<Route> routes = Routes.fromFlows(PUBKEY, PUBKEY_2, FLOWS);
         assumeThat(routes).containsExactly(new Route(List.of(EDGE), Coins.ofSatoshis(1)));
         Routes.ensureTotalAmount(routes, Coins.ofSatoshis(2));
         assertThat(routes).containsExactly(new Route(List.of(EDGE), Coins.ofSatoshis(2)));
@@ -92,7 +91,7 @@ class RoutesTest {
         flows.add(new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1), Coins.ofSatoshis(2));
         flows.add(new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1), Coins.ofSatoshis(1));
         flows.add(new Edge(CHANNEL_ID_3, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1), Coins.ofSatoshis(3));
-        Set<Route> routes = Routes.fromFlows(PUBKEY, PUBKEY_2, flows);
+        List<Route> routes = Routes.fromFlows(PUBKEY, PUBKEY_2, flows);
         Routes.ensureTotalAmount(routes, Coins.ofSatoshis(7));
         assertThat(routes).containsExactlyInAnyOrder(
                 new Route(List.of(new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1)), Coins.ofSatoshis(2)),

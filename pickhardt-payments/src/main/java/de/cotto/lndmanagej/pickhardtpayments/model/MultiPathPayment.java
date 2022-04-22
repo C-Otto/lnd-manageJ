@@ -2,23 +2,39 @@ package de.cotto.lndmanagej.pickhardtpayments.model;
 
 import de.cotto.lndmanagej.model.Coins;
 
-import java.util.Set;
+import java.util.List;
 
-public record MultiPathPayment(Coins amount, Coins fees, double probability, Set<Route> routes) {
-    public static final MultiPathPayment FAILURE = new MultiPathPayment(Coins.NONE, Coins.NONE, 0.0, Set.of());
+public record MultiPathPayment(
+        Coins amount,
+        Coins fees,
+        Coins feesWithFirstHop,
+        double probability,
+        List<Route> routes
+) {
+    public static final MultiPathPayment FAILURE =
+            new MultiPathPayment(Coins.NONE, Coins.NONE, Coins.NONE, 0.0, List.of());
 
-    public MultiPathPayment(Set<Route> routes) {
+    public MultiPathPayment(List<Route> routes) {
         this(
                 routes.stream().map(Route::amount).reduce(Coins.NONE, Coins::add),
                 routes.stream().map(Route::fees).reduce(Coins.NONE, Coins::add),
+                routes.stream().map(Route::feesWithFirstHop).reduce(Coins.NONE, Coins::add),
                 routes.stream().mapToDouble(Route::getProbability).reduce(1.0, (a, b) -> a * b),
                 routes
         );
     }
 
     public long getFeeRate() {
+        return getFeeRateForFees(fees);
+    }
+
+    public long getFeeRateWithFirstHop() {
+        return getFeeRateForFees(feesWithFirstHop);
+    }
+
+    private long getFeeRateForFees(Coins feesToConsider) {
         if (amount.isPositive()) {
-            return fees.milliSatoshis() * 1_000_000 / amount.milliSatoshis();
+            return feesToConsider.milliSatoshis() * 1_000_000 / amount.milliSatoshis();
         }
         return 0;
     }
