@@ -28,10 +28,10 @@ public class HardcodedService {
         this.iniFileReader = iniFileReader;
     }
 
-    public String getAliasOrDefault(Pubkey pubkey, String defaultAlias) {
+    public Optional<String> getAlias(Pubkey pubkey) {
         Map<String, Set<String>> values = iniFileReader.getValues(ALIASES_SECTION);
         Set<String> alias = values.getOrDefault(pubkey.toString(), Set.of());
-        return alias.stream().findFirst().orElse(defaultAlias);
+        return alias.stream().findFirst();
     }
 
     public Set<Resolution> getResolutions(ChannelId channelId) {
