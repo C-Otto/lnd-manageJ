@@ -6,6 +6,7 @@ import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
+import de.cotto.lndmanagej.ui.dto.PendingOpenChannelDto;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import static de.cotto.lndmanagej.ui.dto.ChannelDetailsDtoFixture.CHANNEL_DETAIL
 import static de.cotto.lndmanagej.ui.dto.NodeDetailsDtoFixture.NODE_DETAILS_MODEL;
 import static de.cotto.lndmanagej.ui.dto.NodeDtoFixture.NODE_DTO;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
+import static de.cotto.lndmanagej.ui.dto.PendingOpenChannelDtoFixture.PENDING_OPEN_CHANNEL_DTO;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class UiDataServiceTest {
@@ -46,6 +48,11 @@ class UiDataServiceTest {
         @Override
         public Set<Pubkey> getPubkeys() {
             return Set.of(PUBKEY);
+        }
+
+        @Override
+        public List<PendingOpenChannelDto> getPendingOpenChannels() {
+            return List.of(PENDING_OPEN_CHANNEL_DTO);
         }
 
         @Override

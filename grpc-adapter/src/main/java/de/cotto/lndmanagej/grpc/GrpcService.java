@@ -136,6 +136,13 @@ public class GrpcService extends GrpcBase {
     }
 
     @Timed
+    public List<PendingChannelsResponse.PendingOpenChannel> getPendingOpenChannels() {
+        return getPendingChannels()
+                .map(PendingChannelsResponse::getPendingOpenChannelsList)
+                .orElse(List.of());
+    }
+
+    @Timed
     public List<ChannelCloseSummary> getClosedChannels() {
         return get(() -> lightningStub.closedChannels(ClosedChannelsRequest.getDefaultInstance()).getChannelsList())
                 .orElse(List.of());

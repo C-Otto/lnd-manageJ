@@ -17,6 +17,7 @@ import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import de.cotto.lndmanagej.ui.dto.warning.DashboardWarningDto;
 import de.cotto.lndmanagej.ui.page.channel.ChannelDetailsPage;
 import de.cotto.lndmanagej.ui.page.channel.ChannelsPage;
+import de.cotto.lndmanagej.ui.page.channel.PendingChannelsPage;
 import de.cotto.lndmanagej.ui.page.general.DashboardPage;
 import de.cotto.lndmanagej.ui.page.general.ErrorPage;
 import de.cotto.lndmanagej.ui.page.node.NodeDetailsPage;
@@ -50,6 +51,7 @@ import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.CAPACITY_SAT;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO2;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.UNANNOUNCED_CHANNEL;
+import static de.cotto.lndmanagej.ui.dto.PendingOpenChannelDtoFixture.PENDING_OPEN_CHANNEL_DTO;
 import static de.cotto.lndmanagej.ui.dto.warning.DashboardWarningsFixture.DASHBOARD_WARNING;
 import static de.cotto.lndmanagej.ui.dto.warning.DashboardWarningsFixture.DASHBOARD_WARNING_2;
 import static de.cotto.lndmanagej.ui.dto.warning.DashboardWarningsFixture.DASHBOARD_WARNING_3;
@@ -188,6 +190,16 @@ class PageServiceTest {
     void error() {
         String errorMessage = "foo";
         assertThat(pageService.error(errorMessage)).usingRecursiveComparison().isEqualTo(new ErrorPage(errorMessage));
+    }
+
+    @Test
+    void pendingChannels() {
+        var channels = List.of(PENDING_OPEN_CHANNEL_DTO);
+        when(dataService.getPendingOpenChannels()).thenReturn(channels);
+        assertThat(pageService.pendingChannels()).usingRecursiveComparison()
+                .isEqualTo(new PendingChannelsPage(channels));
+        assertThat(pageService.pendingChannels().getView())
+                .isEqualTo("pending-channels");
     }
 
     @Nested

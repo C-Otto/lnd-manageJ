@@ -41,6 +41,7 @@ import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_RECEIVED;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_RECEIVED_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_SENT;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_SENT_2;
+import static de.cotto.lndmanagej.model.PendingOpenChannelFixtures.PENDING_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
@@ -91,6 +92,13 @@ class GrpcChannelsTest {
                 channel(CHANNEL_ID, true, true, true, TOTAL_SENT, TOTAL_RECEIVED)
         ));
         assertThat(grpcChannels.getChannels()).containsExactlyInAnyOrder(LOCAL_OPEN_CHANNEL_PRIVATE);
+    }
+
+    @Test
+    void getPendingOpenChannels() {
+        when(grpcService.getPendingOpenChannels())
+                .thenReturn(List.of(pendingOpenChannel()));
+        assertThat(grpcChannels.getPendingOpenChannels()).containsExactlyInAnyOrder(PENDING_OPEN_CHANNEL);
     }
 
     @Test
@@ -228,6 +236,12 @@ class GrpcChannelsTest {
                 .setCapacity(CAPACITY.satoshis())
                 .setChannelPoint(channelPoint.toString())
                 .setInitiator(initiator)
+                .build();
+    }
+
+    private PendingChannelsResponse.PendingOpenChannel pendingOpenChannel() {
+        return PendingChannelsResponse.PendingOpenChannel.newBuilder()
+                .setChannel(pendingChannel(CHANNEL_POINT, Initiator.INITIATOR_LOCAL))
                 .build();
     }
 }

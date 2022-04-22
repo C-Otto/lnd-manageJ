@@ -12,6 +12,7 @@ import de.cotto.lndmanagej.model.ForceClosedChannel;
 import de.cotto.lndmanagej.model.ForceClosingChannel;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
+import de.cotto.lndmanagej.model.PendingOpenChannel;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.WaitingCloseChannel;
 import org.springframework.stereotype.Component;
@@ -33,6 +34,7 @@ public class ChannelService {
     private static final Duration CACHE_REFRESH = Duration.ofSeconds(30);
 
     private final GrpcChannels grpcChannels;
+    private final LoadingCache<Object, Set<PendingOpenChannel>> pendingOpenChannelsCache;
     private final LoadingCache<Object, Set<LocalOpenChannel>> localOpenChannelsCache;
     private final LoadingCache<Object, Map<ChannelId, ClosedChannel>> closedChannelsCache;
     private final LoadingCache<Object, Set<ForceClosingChannel>> forceClosingChannelsCache;
@@ -43,6 +45,10 @@ public class ChannelService {
             GrpcClosedChannels grpcClosedChannels
     ) {
         this.grpcChannels = grpcChannels;
+        pendingOpenChannelsCache = new CacheBuilder()
+                .withRefresh(CACHE_REFRESH)
+                .withExpiry(CACHE_EXPIRY)
+                .build(grpcChannels::getPendingOpenChannels);
         localOpenChannelsCache = new CacheBuilder()
                 .withRefresh(CACHE_REFRESH)
                 .withExpiry(CACHE_EXPIRY)
@@ -76,6 +82,11 @@ public class ChannelService {
     @Timed
     public Set<LocalOpenChannel> getOpenChannels() {
         return localOpenChannelsCache.get("");
+    }
+
+    @Timed
+    public Set<PendingOpenChannel> getPendingOpenChannels() {
+        return pendingOpenChannelsCache.get("");
     }
 
     @Timed

@@ -1,0 +1,74 @@
+<!doctype html>
+
+<html xmlns:th="https://www.thymeleaf.org">
+
+<a th:fragment="ext-link(text, link, title)" class="link-button" style="margin-right: 5px; padding: 2px 6px" target="_blank" th:href="${link}" th:title="${title}">
+    <span th:text="${text}"></span>
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor"
+         class="bi bi-box-arrow-up-right" viewBox="0 0 16 16" style="padding-bottom: 3px;">
+        <path fill-rule="evenodd"
+              d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
+        <path fill-rule="evenodd"
+              d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
+    </svg>
+</a>
+
+<div th:fragment="tile" class="tile title-table col-sm-12">
+    <div class="card border-secondary">
+        <div class="card-header">
+            <div class="fs-4 mb-0">
+                <div th:replace="~{fragments/icons :: list-ul}"/>
+                Pending Channels
+            </div>
+        </div>
+        <div class="card-body">
+            <div th:fragment="channel-table" class="table-responsive table-sm" xmlns:th="https://www.thymeleaf.org">
+                <table class="channel-table table">
+                    <thead>
+                    <tr>
+                        <th scope="col" style="text-align: left;">Public
+                        <th scope="col">Initiator</th>
+                        <th scope="col" style="text-align: right;">
+                            Capacity
+                        </th>
+                        <th scope="col">Alias</th>
+                        <th scope="col">Pubkey</th>
+                        <th scope="col">External Links</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="channel : ${pendingOpenChannels}">
+
+                        <td th:if="${channel.privateChannel}" title="unannounced channel">
+                            <div th:replace="~{fragments/icons :: private}"/>
+                        </td>
+                        <td th:unless="${channel.privateChannel}" title="public channel">
+                            <div th:replace="~{fragments/icons :: public}"/>
+                        </td>
+
+                        <td th:text="${#strings.capitalize(channel.initiator.toString.toLowerCase)}"></td>
+
+                        <td th:text="${@formatter.formatNumber(channel.capacitySat)}" style="text-align: right;"></td>
+
+                        <td th:text="${channel.remoteAlias}"></td>
+
+                        <td>
+                            <a th:text="${channel.remotePubkey}" th:href="@{/node/{id}(id=${channel.remotePubkey})}"></a>
+                        </td>
+
+                        <td>
+                            <div style="white-space: nowrap">
+                                <div th:replace="~{tiles/full/pending-channels :: ext-link('1ML', 'https://1ml.com/node/'+${channel.remotePubkey}, 'View on www.1ml.com')}"/>
+                                <div th:replace="~{tiles/full/pending-channels :: ext-link('Amboss', 'https://amboss.space/node/'+${channel.remotePubkey}, 'View on www.amboss.space')}"/>
+                            </div>
+                        </td>
+
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+</html>

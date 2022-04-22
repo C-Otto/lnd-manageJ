@@ -46,6 +46,7 @@ import static de.cotto.lndmanagej.model.NodeFixtures.NODE_PEER;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.OpenInitiator.LOCAL;
 import static de.cotto.lndmanagej.model.PeerRatingFixtures.PEER_RATING;
+import static de.cotto.lndmanagej.model.PendingOpenChannelFixtures.PENDING_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES_FOR_LOCAL_CHANNEL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
@@ -55,6 +56,7 @@ import static de.cotto.lndmanagej.model.warnings.ChannelWarningFixtures.CHANNEL_
 import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixture.BALANCE_INFORMATION_MODEL;
 import static de.cotto.lndmanagej.ui.dto.NodeDetailsDtoFixture.NODE_DETAILS_MODEL;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.CAPACITY_SAT;
+import static de.cotto.lndmanagej.ui.dto.PendingOpenChannelDtoFixture.PENDING_OPEN_CHANNEL_DTO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.when;
@@ -165,5 +167,12 @@ class UiDataServiceImplTest {
         when(nodeController.getDetails(PUBKEY)).thenReturn(NODE_DETAILS_DTO);
         when(channelService.getClosedChannelsWith(PUBKEY)).thenReturn(Set.of(CLOSED_CHANNEL));
         assertThat(uiDataService.getNodeDetails(PUBKEY)).isEqualTo(NODE_DETAILS_MODEL);
+    }
+
+    @Test
+    void getPendingOpenChannels() {
+        when(nodeController.getAlias(PENDING_OPEN_CHANNEL.remotePubkey())).thenReturn("Albert");
+        when(channelService.getPendingOpenChannels()).thenReturn(Set.of(PENDING_OPEN_CHANNEL));
+        assertThat(uiDataService.getPendingOpenChannels().get(0)).isEqualTo(PENDING_OPEN_CHANNEL_DTO);
     }
 }

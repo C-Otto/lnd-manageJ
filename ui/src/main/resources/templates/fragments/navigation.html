@@ -12,6 +12,12 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link" th:classappend="${page == 'pending-channels' ? 'active' : ''}" href="/pending-channels">
+                    <span data-feather="clock"></span>
+                    Pending Channels
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" th:classappend="${page == 'channels' ? 'active' : ''}" href="/channels">
                     <span data-feather="list"></span>
                     Channels
