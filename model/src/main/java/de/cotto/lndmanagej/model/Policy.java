@@ -6,8 +6,4 @@ public record Policy(long feeRate, Coins baseFee, boolean enabled) {
     public boolean disabled() {
         return !enabled;
     }
-
-    public Policy withFeeRate(int newFeeRate) {
-        return new Policy(newFeeRate, baseFee, enabled);
-    }
 }

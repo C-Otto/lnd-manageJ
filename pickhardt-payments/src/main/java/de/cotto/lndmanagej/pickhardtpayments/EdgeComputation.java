@@ -92,18 +92,10 @@ public class EdgeComputation {
             ChannelId channelId = channelEdge.channelId();
             Pubkey pubkey1 = channelEdge.source();
             Pubkey pubkey2 = channelEdge.target();
-            Policy policy = getPolicy(channelEdge, ownPubkey);
-            Edge edge = new Edge(channelId, pubkey1, pubkey2, channelEdge.capacity(), policy);
+            Edge edge = new Edge(channelId, pubkey1, pubkey2, channelEdge.capacity(), channelEdge.policy());
             edgesWithLiquidityInformation.add(getEdgeWithLiquidityInformation(edge, ownPubkey));
         }
         return new EdgesWithLiquidityInformation(edgesWithLiquidityInformation);
-    }
-
-    private Policy getPolicy(DirectedChannelEdge channelEdge, Pubkey ownPubkey) {
-        if (ownPubkey.equals(channelEdge.source())) {
-            return channelEdge.policy().withFeeRate(0);
-        }
-        return channelEdge.policy();
     }
 
     private boolean shouldIgnore(DirectedChannelEdge channelEdge) {

@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.model;
 
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_1;
@@ -34,14 +33,5 @@ class PolicyTest {
     @Test
     void unknown() {
         assertThat(Policy.UNKNOWN).isEqualTo(new Policy(0, Coins.NONE, false));
-    }
-
-    @Test
-    void withFeeRate() {
-        SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(POLICY_1.withFeeRate(123).feeRate()).isEqualTo(123L);
-        softly.assertThat(POLICY_1.disabled()).isEqualTo(POLICY_1.disabled());
-        softly.assertThat(POLICY_1.baseFee()).isEqualTo(POLICY_1.baseFee());
-        softly.assertAll();
     }
 }
