@@ -19,6 +19,7 @@ class ArcInitializer {
     private final long quantization;
     private final int piecewiseLinearApproximations;
     private final int feeRateWeight;
+    private final Pubkey ownPubkey;
 
     public ArcInitializer(
             MinCostFlow minCostFlow,
@@ -26,7 +27,8 @@ class ArcInitializer {
             IntObjectHashMap<Edge> edgeMapping,
             long quantization,
             int piecewiseLinearApproximations,
-            int feeRateWeight
+            int feeRateWeight,
+            Pubkey ownPubkey
     ) {
         this.minCostFlow = minCostFlow;
         this.pubkeyToIntegerMapping = integerMapping;
@@ -34,6 +36,7 @@ class ArcInitializer {
         this.quantization = quantization;
         this.piecewiseLinearApproximations = piecewiseLinearApproximations;
         this.feeRateWeight = feeRateWeight;
+        this.ownPubkey = ownPubkey;
     }
 
     public void addArcs(EdgesWithLiquidityInformation edgesWithLiquidityInformation) {
@@ -62,7 +65,7 @@ class ArcInitializer {
             return;
         }
         long unitCost = 10 * quantize(maximumCapacity) / uncertainButPossibleLiquidity;
-        long feeRateSummand = feeRateWeight * edge.policy().feeRate();
+        long feeRateSummand = feeRateWeight * getFeeRate(edge);
         for (int i = 1; i <= remainingPieces; i++) {
             int arcIndex = minCostFlow.addArcWithCapacityAndUnitCost(
                     startNode,
@@ -78,10 +81,17 @@ class ArcInitializer {
         if (quantizedLowerBound <= 0) {
             return piecewiseLinearApproximations;
         }
-        long feeRateCost = feeRateWeight * edge.policy().feeRate();
+        long feeRateCost = feeRateWeight * getFeeRate(edge);
         int arcIndex = minCostFlow.addArcWithCapacityAndUnitCost(startNode, endNode, quantizedLowerBound, feeRateCost);
         edgeMapping.put(arcIndex, edge);
         return piecewiseLinearApproximations - 1;
+    }
+
+    private long getFeeRate(Edge edge) {
+        if (ownPubkey.equals(edge.startNode())) {
+            return 0;
+        }
+        return edge.policy().feeRate();
     }
 
     private long quantize(Coins coins) {

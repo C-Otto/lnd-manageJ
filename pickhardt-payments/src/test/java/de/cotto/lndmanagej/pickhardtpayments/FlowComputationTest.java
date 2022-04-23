@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.pickhardtpayments;
 
+import de.cotto.lndmanagej.grpc.GrpcGetInfo;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.pickhardtpayments.model.Edge;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithLiquidityInformation;
@@ -23,6 +24,7 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_4;
 import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,15 +37,20 @@ class FlowComputationTest {
     @Mock
     private EdgeComputation edgeComputation;
 
+    @Mock
+    private GrpcGetInfo grpcGetInfo;
+
     @BeforeEach
     void setUp() {
         int piecewiseLinearApproximations = 1;
         long quantization = 1;
         flowComputation = new FlowComputation(
                 edgeComputation,
+                grpcGetInfo,
                 quantization,
                 piecewiseLinearApproximations
         );
+        lenient().when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY);
     }
 
     @Test

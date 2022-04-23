@@ -13,6 +13,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE;
 import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE_1_3;
 import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE_2_3;
@@ -37,7 +39,8 @@ class ArcInitializerTest {
             edgeMapping,
             QUANTIZATION,
             PIECEWISE_LINEAR_APPROXIMATIONS,
-            FEE_RATE_WEIGHT
+            FEE_RATE_WEIGHT,
+            PUBKEY
     );
 
     @Test
@@ -61,7 +64,8 @@ class ArcInitializerTest {
                 edgeMapping,
                 quantization,
                 PIECEWISE_LINEAR_APPROXIMATIONS,
-                FEE_RATE_WEIGHT
+                FEE_RATE_WEIGHT,
+                PUBKEY
         );
         EdgeWithLiquidityInformation edgeWithLiquidityInformation =
                 edge(EDGE, Coins.ofSatoshis(quantization));
@@ -114,7 +118,8 @@ class ArcInitializerTest {
                     edgeMapping,
                     QUANTIZATION,
                     2,
-                    FEE_RATE_WEIGHT
+                    FEE_RATE_WEIGHT,
+                    PUBKEY
             );
             arcInitializer.addArcs(new EdgesWithLiquidityInformation(edgeWithLiquidityInformation));
             assertThat(minCostFlow.getUnitCost(1)).isEqualTo(10 * 5_000_000_000L / (100 - 25));
@@ -129,7 +134,8 @@ class ArcInitializerTest {
                     edgeMapping,
                     QUANTIZATION,
                     5,
-                    FEE_RATE_WEIGHT
+                    FEE_RATE_WEIGHT,
+                    PUBKEY
             );
             arcInitializer.addArcs(new EdgesWithLiquidityInformation(edgeWithLiquidityInformation));
             assertThat(minCostFlow.getNumArcs()).isEqualTo(5);
@@ -143,7 +149,8 @@ class ArcInitializerTest {
                     edgeMapping,
                     edgeWithLiquidityInformation.availableLiquidityLowerBound().satoshis(),
                     PIECEWISE_LINEAR_APPROXIMATIONS,
-                    FEE_RATE_WEIGHT
+                    FEE_RATE_WEIGHT,
+                    PUBKEY
             );
             arcInitializer.addArcs(new EdgesWithLiquidityInformation(edgeWithLiquidityInformation));
             assertThat(minCostFlow.getUnitCost(0)).isEqualTo(0);
@@ -157,7 +164,8 @@ class ArcInitializerTest {
                     edgeMapping,
                     20,
                     PIECEWISE_LINEAR_APPROXIMATIONS,
-                    FEE_RATE_WEIGHT
+                    FEE_RATE_WEIGHT,
+                    PUBKEY
             );
             arcInitializer.addArcs(new EdgesWithLiquidityInformation(edgeWithLiquidityInformation));
             assertThat(minCostFlow.getCapacity(0)).isEqualTo(1);
@@ -171,7 +179,8 @@ class ArcInitializerTest {
                     edgeMapping,
                     10,
                     2,
-                    FEE_RATE_WEIGHT
+                    FEE_RATE_WEIGHT,
+                    PUBKEY
             );
             arcInitializer.addArcs(new EdgesWithLiquidityInformation(edgeWithLiquidityInformation));
             // one arc for the known liquidity (25 / 10 = 2), 100 / 10 - 2 = 8 remaining
@@ -186,7 +195,8 @@ class ArcInitializerTest {
                     edgeMapping,
                     20,
                     6,
-                    FEE_RATE_WEIGHT
+                    FEE_RATE_WEIGHT,
+                    PUBKEY
             );
             arcInitializer.addArcs(new EdgesWithLiquidityInformation(edgeWithLiquidityInformation));
             // one arc for the known liquidity (25 / 20 = 1), 100 / 20 - 1 = 4 remaining: 4 < 5, no additional arc added
@@ -202,7 +212,8 @@ class ArcInitializerTest {
                     edgeMapping,
                     QUANTIZATION,
                     PIECEWISE_LINEAR_APPROXIMATIONS,
-                    feeRateWeight
+                    feeRateWeight,
+                    PUBKEY_2
             );
             arcInitializer.addArcs(new EdgesWithLiquidityInformation(edgeWithLiquidityInformation));
             assertThat(minCostFlow.getUnitCost(0)).isEqualTo(200);
@@ -218,7 +229,8 @@ class ArcInitializerTest {
                 edgeMapping,
                 QUANTIZATION,
                 piecesPerChannel,
-                FEE_RATE_WEIGHT
+                FEE_RATE_WEIGHT,
+                PUBKEY
         );
         arcInitializer.addArcs(new EdgesWithLiquidityInformation(
                 edge(EDGE, Coins.ofSatoshis(100)),
@@ -237,7 +249,8 @@ class ArcInitializerTest {
                 edgeMapping,
                 quantization,
                 PIECEWISE_LINEAR_APPROXIMATIONS,
-                FEE_RATE_WEIGHT
+                FEE_RATE_WEIGHT,
+                PUBKEY
         );
         EdgeWithLiquidityInformation edgeWithLiquidityInformation =
                 edge(EDGE, Coins.ofSatoshis(quantization - 1));
@@ -254,7 +267,8 @@ class ArcInitializerTest {
                 edgeMapping,
                 quantization,
                 PIECEWISE_LINEAR_APPROXIMATIONS,
-                FEE_RATE_WEIGHT
+                FEE_RATE_WEIGHT,
+                PUBKEY
         );
         arcInitializer.addArcs(new EdgesWithLiquidityInformation(edge(EDGE, Coins.ofSatoshis(20_123))));
         assertThat(minCostFlow.getCapacity(0)).isEqualTo(201);
@@ -269,7 +283,8 @@ class ArcInitializerTest {
                 edgeMapping,
                 quantization,
                 PIECEWISE_LINEAR_APPROXIMATIONS,
-                FEE_RATE_WEIGHT
+                FEE_RATE_WEIGHT,
+                PUBKEY
         );
         arcInitializer.addArcs(new EdgesWithLiquidityInformation(
                 edge(EDGE, Coins.ofSatoshis(20_123)),
@@ -294,7 +309,8 @@ class ArcInitializerTest {
                 edgeMapping,
                 QUANTIZATION,
                 piecewiseLinearApproximations,
-                FEE_RATE_WEIGHT
+                FEE_RATE_WEIGHT,
+                PUBKEY
         );
         arcInitializer.addArcs(new EdgesWithLiquidityInformation(
                 edge(EDGE, Coins.ofSatoshis(10_000)),
@@ -402,6 +418,45 @@ class ArcInitializerTest {
         assertThat(minCostFlow.getUnitCost(0)).isEqualTo(10 * 7_000 / 4 + edge1.edge().policy().feeRate());
     }
 
+    @Test
+    void uses_zero_fee_rate_for_edge_from_own_node_with_unknown_liquidity() {
+        // same as above, but with much larger second channel
+        int feeRateWeight = 1;
+        ArcInitializer arcInitializer1 = new ArcInitializer(
+                minCostFlow,
+                integerMapping,
+                edgeMapping,
+                QUANTIZATION,
+                PIECEWISE_LINEAR_APPROXIMATIONS,
+                feeRateWeight,
+                PUBKEY
+        );
+        EdgeWithLiquidityInformation edge = edge(EDGE, Coins.ofSatoshis(4_000_000));
+        arcInitializer1.addArcs(new EdgesWithLiquidityInformation(edge));
+        assertThat(minCostFlow.getUnitCost(0)).isEqualTo(10 * 5_000 / 4);
+    }
+
+    @Test
+    void uses_zero_fee_rate_for_edge_from_own_node_with_known_liquidity() {
+        // same as above, but with much larger second channel
+        int feeRateWeight = 1;
+        ArcInitializer arcInitializer1 = new ArcInitializer(
+                minCostFlow,
+                integerMapping,
+                edgeMapping,
+                QUANTIZATION,
+                PIECEWISE_LINEAR_APPROXIMATIONS,
+                feeRateWeight,
+                PUBKEY
+        );
+        Coins capacity = Coins.ofSatoshis(4_000_000);
+        Edge edgeWithCapacity = EDGE.withCapacity(capacity);
+        EdgeWithLiquidityInformation edge =
+                EdgeWithLiquidityInformation.forKnownLiquidity(edgeWithCapacity, Coins.ofSatoshis(2_000_000));
+        arcInitializer1.addArcs(new EdgesWithLiquidityInformation(edge));
+        assertThat(minCostFlow.getUnitCost(0)).isEqualTo(0);
+    }
+
     private EdgeWithLiquidityInformation setupWithTwoEdges(long capacitySmaller, long capacityLarger) {
         int feeRateWeight = 1;
         ArcInitializer arcInitializer = new ArcInitializer(
@@ -410,7 +465,8 @@ class ArcInitializerTest {
                 edgeMapping,
                 QUANTIZATION,
                 PIECEWISE_LINEAR_APPROXIMATIONS,
-                feeRateWeight
+                feeRateWeight,
+                PUBKEY_2
         );
         EdgeWithLiquidityInformation edge1 = edge(EDGE, Coins.ofSatoshis(capacitySmaller));
         EdgeWithLiquidityInformation edge2 = edge(EDGE_1_3, Coins.ofSatoshis(capacityLarger));

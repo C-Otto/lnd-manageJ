@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.pickhardtpayments;
 
+import de.cotto.lndmanagej.grpc.GrpcGetInfo;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.model.Flows;
@@ -15,15 +16,18 @@ public class FlowComputation {
     private final EdgeComputation edgeComputation;
     private final long quantization;
     private final int piecewiseLinearApproximations;
+    private final GrpcGetInfo grpcGetInfo;
 
     public FlowComputation(
             EdgeComputation edgeComputation,
+            GrpcGetInfo grpcGetInfo,
             @Value("${lndmanagej.pickhardtpayments.quantization:10000}") long quantization,
             @Value("${lndmanagej.pickhardtpayments.piecewiseLinearApproximations:5}") int piecewiseLinearApproximations
     ) {
         this.edgeComputation = edgeComputation;
         this.quantization = quantization;
         this.piecewiseLinearApproximations = piecewiseLinearApproximations;
+        this.grpcGetInfo = grpcGetInfo;
     }
 
     public Flows getOptimalFlows(Pubkey source, Pubkey target, Coins amount) {
@@ -37,7 +41,8 @@ public class FlowComputation {
                 Map.of(target, amount),
                 quantization,
                 piecewiseLinearApproximations,
-                feeRateWeight
+                feeRateWeight,
+                grpcGetInfo.getPubkey()
         );
         return minCostFlowSolver.solve();
     }
