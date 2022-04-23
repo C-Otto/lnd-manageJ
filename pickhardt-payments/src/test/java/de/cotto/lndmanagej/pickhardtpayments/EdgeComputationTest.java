@@ -32,6 +32,7 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_4;
 import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE;
+import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE_WITH_ZERO_FEE_RATE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
@@ -98,7 +99,16 @@ class EdgeComputationTest {
         when(balanceService.getAvailableLocalBalance(EDGE.channelId())).thenReturn(knownLiquidity);
 
         assertThat(edgeComputation.getEdges().edges())
-                .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, knownLiquidity));
+                .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE_WITH_ZERO_FEE_RATE, knownLiquidity));
+    }
+
+    @Test
+    void uses_zero_fee_rate_policy_for_local_channel_as_source() {
+        mockEdge();
+        when(grpcGetInfo.getPubkey()).thenReturn(EDGE.startNode());
+        when(balanceService.getAvailableLocalBalance(EDGE.channelId())).thenReturn(Coins.ofSatoshis(1));
+        when(channelService.getLocalChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+        assertThat(edgeComputation.getEdges().edges()).map(e -> e.edge().policy().feeRate()).contains(0L);
     }
 
     @Test
@@ -107,7 +117,7 @@ class EdgeComputationTest {
         when(grpcGetInfo.getPubkey()).thenReturn(EDGE.startNode());
 
         assertThat(edgeComputation.getEdges().edges())
-                .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, Coins.NONE));
+                .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE_WITH_ZERO_FEE_RATE, Coins.NONE));
     }
 
     @Test
@@ -117,8 +127,8 @@ class EdgeComputationTest {
         when(grpcGetInfo.getPubkey()).thenReturn(EDGE.startNode());
 
         assertThat(edgeComputation.getEdges().edges())
-                .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, Coins.NONE));
-        verify(balanceService, never()).getAvailableLocalBalance(EDGE.channelId());
+                .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE_WITH_ZERO_FEE_RATE, Coins.NONE));
+        verify(balanceService, never()).getAvailableLocalBalance(CHANNEL_ID);
     }
 
     @Test
