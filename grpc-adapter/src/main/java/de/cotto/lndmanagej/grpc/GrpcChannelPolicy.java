@@ -86,7 +86,8 @@ public class GrpcChannelPolicy {
         return new Policy(
                 routingPolicy.getFeeRateMilliMsat(),
                 Coins.ofMilliSatoshis(routingPolicy.getFeeBaseMsat()),
-                !routingPolicy.getDisabled()
+                !routingPolicy.getDisabled(),
+                routingPolicy.getTimeLockDelta()
         );
     }
 

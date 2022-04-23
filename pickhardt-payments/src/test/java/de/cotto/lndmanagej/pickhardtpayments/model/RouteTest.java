@@ -27,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class RouteTest {
 
     private static final int ONE_MILLION = 1_000_000;
+    private static final int TIME_LOCK_DELTA = 40;
 
     @Test
     void getProbability() {
@@ -95,8 +96,10 @@ class RouteTest {
         Coins expectedFees =
                 Coins.ofMilliSatoshis((long) (amount.milliSatoshis() * 1.0 * ppm2 / ONE_MILLION))
                         .add(baseFee2);
-        Edge hop1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm1, baseFee1, true));
-        Edge hop2 = new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_3, CAPACITY, new Policy(ppm2, baseFee2, true));
+        Policy policy1 = new Policy(ppm1, baseFee1, true, TIME_LOCK_DELTA);
+        Edge hop1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy1);
+        Policy policy2 = new Policy(ppm2, baseFee2, true, TIME_LOCK_DELTA);
+        Edge hop2 = new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_3, CAPACITY, policy2);
         assertThat(new Route(List.of(hop1, hop2), amount).fees())
                 .isEqualTo(expectedFees);
     }
@@ -107,7 +110,7 @@ class RouteTest {
         Coins baseFee = Coins.ofMilliSatoshis(10);
         int ppm = 100;
         assertThat(new Route(List.of(
-                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm, baseFee, true))
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm, baseFee, true, TIME_LOCK_DELTA))
         ), amount).fees()).isEqualTo(Coins.NONE);
     }
 
@@ -124,8 +127,8 @@ class RouteTest {
         Coins expectedFees1 = Coins.NONE;
         Coins expectedFees = expectedFees1.add(expectedFees2);
         Route route = new Route(List.of(
-                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm1, baseFee1, true)),
-                new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm2, baseFee2, true))
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm1, baseFee1, true, TIME_LOCK_DELTA)),
+                new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm2, baseFee2, true, TIME_LOCK_DELTA))
         ), amount);
         assertThat(route.fees()).isEqualTo(expectedFees);
     }
@@ -149,9 +152,9 @@ class RouteTest {
         ).add(baseFee2);
         Coins expectedFees = expectedFees1.add(expectedFees2).add(expectedFees3);
         assertThat(new Route(List.of(
-                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm1, baseFee1, true)),
-                new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_3, CAPACITY, new Policy(ppm2, baseFee2, true)),
-                new Edge(CHANNEL_ID_3, PUBKEY_3, PUBKEY_4, CAPACITY, new Policy(ppm3, baseFee3, true))
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm1, baseFee1, true, TIME_LOCK_DELTA)),
+                new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_3, CAPACITY, new Policy(ppm2, baseFee2, true, TIME_LOCK_DELTA)),
+                new Edge(CHANNEL_ID_3, PUBKEY_3, PUBKEY_4, CAPACITY, new Policy(ppm3, baseFee3, true, TIME_LOCK_DELTA))
         ), amount).fees()).isEqualTo(expectedFees);
     }
 
@@ -167,7 +170,7 @@ class RouteTest {
         int ppm = 100;
         Coins expectedFees = Coins.ofMilliSatoshis(amount.milliSatoshis() * ppm / ONE_MILLION).add(baseFee);
         assertThat(new Route(List.of(
-                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm, baseFee, true))
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm, baseFee, true, TIME_LOCK_DELTA))
         ), amount).feesWithFirstHop()).isEqualTo(expectedFees);
     }
 
@@ -188,9 +191,9 @@ class RouteTest {
                 Coins.ofMilliSatoshis(amountForFirstHop.milliSatoshis() * ppm1 / ONE_MILLION).add(baseFee1);
         Coins expectedFees = feesForFirstHop.add(feesForSecondHop).add(feesForThirdHop);
         assertThat(new Route(List.of(
-                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm1, baseFee1, true)),
-                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm2, baseFee2, true)),
-                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm3, baseFee3, true))
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm1, baseFee1, true, TIME_LOCK_DELTA)),
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm2, baseFee2, true, TIME_LOCK_DELTA)),
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm3, baseFee3, true, TIME_LOCK_DELTA))
         ), amount).feesWithFirstHop()).isEqualTo(expectedFees);
     }
 
@@ -238,8 +241,8 @@ class RouteTest {
     void feeRate_one_hop_with_base_fee() {
         int feeRate1 = 100;
         int feeRate2 = 987;
-        Policy policy1 = new Policy(feeRate1, Coins.ofSatoshis(100_000), true);
-        Policy policy2 = new Policy(feeRate2, Coins.ofSatoshis(10_000), true);
+        Policy policy1 = new Policy(feeRate1, Coins.ofSatoshis(100_000), true, TIME_LOCK_DELTA);
+        Policy policy2 = new Policy(feeRate2, Coins.ofSatoshis(10_000), true, TIME_LOCK_DELTA);
         Coins amount = Coins.ofSatoshis(1_234_567);
         Edge hop1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy1);
         Edge hop2 = new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_3, CAPACITY, policy2);
@@ -321,7 +324,7 @@ class RouteTest {
 
     private Route createRoute(Coins amount, int... feeRates) {
         List<Edge> edges = Arrays.stream(feeRates)
-                .mapToObj(ppm -> new Policy(ppm, Coins.NONE, true))
+                .mapToObj(ppm -> new Policy(ppm, Coins.NONE, true, TIME_LOCK_DELTA))
                 .map(policy -> new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy))
                 .toList();
         return new Route(edges, amount);

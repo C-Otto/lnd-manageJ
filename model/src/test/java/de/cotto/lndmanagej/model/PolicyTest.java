@@ -32,6 +32,6 @@ class PolicyTest {
 
     @Test
     void unknown() {
-        assertThat(Policy.UNKNOWN).isEqualTo(new Policy(0, Coins.NONE, false));
+        assertThat(Policy.UNKNOWN).isEqualTo(new Policy(0, Coins.NONE, false, 0));
     }
 }
