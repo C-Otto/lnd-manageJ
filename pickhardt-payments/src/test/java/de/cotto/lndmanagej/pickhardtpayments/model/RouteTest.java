@@ -28,6 +28,7 @@ class RouteTest {
 
     private static final int ONE_MILLION = 1_000_000;
     private static final int TIME_LOCK_DELTA = 40;
+    private static final int BLOCK_HEIGHT = 700_000;
 
     @Test
     void getProbability() {
@@ -225,6 +226,66 @@ class RouteTest {
         softly.assertThat(route.forwardAmountForHop(2)).isEqualTo(amount);
         softly.assertThat(route.forwardAmountForHop(1)).isEqualTo(amount);
         softly.assertThat(route.forwardAmountForHop(0)).isEqualTo(amount.add(feeForHop2));
+        softly.assertAll();
+    }
+
+    @Test
+    void expiryForHop_route_with_one_hop() {
+        int timeLockDelta = 123;
+        int finalCltvDelta = 456;
+        Policy policy = new Policy(100, Coins.NONE, true, timeLockDelta);
+        List<Edge> edges = List.of(new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy));
+        Route route = new Route(edges, Coins.ofSatoshis(1));
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(route.expiryForHop(0, BLOCK_HEIGHT, finalCltvDelta)).isEqualTo(BLOCK_HEIGHT + finalCltvDelta);
+        softly.assertThat(route.totalTimeLock(BLOCK_HEIGHT, finalCltvDelta)).isEqualTo(BLOCK_HEIGHT + finalCltvDelta);
+        softly.assertAll();
+    }
+
+    @Test
+    void expiry_route_with_two_hops() {
+        int timeLockDelta1 = 40;
+        int timeLockDelta2 = 123;
+        int finalCltvDelta = 456;
+        Policy policy1 = new Policy(100, Coins.NONE, true, timeLockDelta1);
+        Policy policy2 = new Policy(100, Coins.NONE, true, timeLockDelta2);
+        List<Edge> edges = List.of(
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy1),
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy2)
+        );
+        Route route = new Route(edges, Coins.ofSatoshis(100));
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(route.expiryForHop(0, BLOCK_HEIGHT, finalCltvDelta)).isEqualTo(BLOCK_HEIGHT + finalCltvDelta);
+        softly.assertThat(route.expiryForHop(1, BLOCK_HEIGHT, finalCltvDelta)).isEqualTo(BLOCK_HEIGHT + finalCltvDelta);
+        softly.assertThat(route.totalTimeLock(BLOCK_HEIGHT, finalCltvDelta))
+                .isEqualTo(BLOCK_HEIGHT + finalCltvDelta + timeLockDelta1);
+        softly.assertAll();
+    }
+
+    @Test
+    void expiry_route_with_three_hops() {
+        int timeLockDelta1 = 40;
+        int timeLockDelta2 = 123;
+        int timeLockDelta3 = 9;
+        int finalCltvDelta = 456;
+        Policy policy1 = new Policy(100, Coins.NONE, true, timeLockDelta1);
+        Policy policy2 = new Policy(100, Coins.NONE, true, timeLockDelta2);
+        Policy policy3 = new Policy(100, Coins.NONE, true, timeLockDelta3);
+        List<Edge> edges = List.of(
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy1),
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy2),
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy3)
+        );
+        Route route = new Route(edges, Coins.ofSatoshis(1));
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(route.expiryForHop(0, BLOCK_HEIGHT, finalCltvDelta))
+                .isEqualTo(BLOCK_HEIGHT + finalCltvDelta + timeLockDelta2);
+        softly.assertThat(route.expiryForHop(1, BLOCK_HEIGHT, finalCltvDelta))
+                .isEqualTo(BLOCK_HEIGHT + finalCltvDelta);
+        softly.assertThat(route.expiryForHop(2, BLOCK_HEIGHT, finalCltvDelta))
+                .isEqualTo(BLOCK_HEIGHT + finalCltvDelta);
+        softly.assertThat(route.totalTimeLock(BLOCK_HEIGHT, finalCltvDelta))
+                .isEqualTo(BLOCK_HEIGHT + finalCltvDelta + timeLockDelta2 + timeLockDelta1);
         softly.assertAll();
     }
 

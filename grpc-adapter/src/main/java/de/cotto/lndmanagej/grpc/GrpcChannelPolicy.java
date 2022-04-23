@@ -57,9 +57,9 @@ public class GrpcChannelPolicy {
         return getChannelEdge(channelId).map(
                 channelEdge -> {
                     if (sourcePubkey.equals(channelEdge.getNode1Pub())) {
-                        return toPolicy(channelEdge.getNode1Policy());
+                        return toPolicy(channelEdge.getNode1Policy(), channelEdge.getNode2Policy());
                     } else if (sourcePubkey.equals(channelEdge.getNode2Pub())) {
-                        return toPolicy(channelEdge.getNode2Policy());
+                        return toPolicy(channelEdge.getNode2Policy(), channelEdge.getNode1Policy());
                     } else {
                         return null;
                     }
@@ -72,9 +72,9 @@ public class GrpcChannelPolicy {
         return getChannelEdge(channelId).map(
                 channelEdge -> {
                     if (targetPubkey.equals(channelEdge.getNode2Pub())) {
-                        return toPolicy(channelEdge.getNode1Policy());
+                        return toPolicy(channelEdge.getNode1Policy(), channelEdge.getNode2Policy());
                     } else if (targetPubkey.equals(channelEdge.getNode1Pub())) {
-                        return toPolicy(channelEdge.getNode2Policy());
+                        return toPolicy(channelEdge.getNode2Policy(), channelEdge.getNode1Policy());
                     } else {
                         return null;
                     }
@@ -82,12 +82,12 @@ public class GrpcChannelPolicy {
         );
     }
 
-    private Policy toPolicy(RoutingPolicy routingPolicy) {
+    private Policy toPolicy(RoutingPolicy routingPolicy, RoutingPolicy routingPolicyReversed) {
         return new Policy(
                 routingPolicy.getFeeRateMilliMsat(),
                 Coins.ofMilliSatoshis(routingPolicy.getFeeBaseMsat()),
                 !routingPolicy.getDisabled(),
-                routingPolicy.getTimeLockDelta()
+                routingPolicyReversed.getTimeLockDelta()
         );
     }
 

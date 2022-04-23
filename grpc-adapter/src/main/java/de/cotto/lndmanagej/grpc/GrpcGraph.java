@@ -51,14 +51,14 @@ public class GrpcGraph {
                     capacity,
                     node1Pubkey,
                     node2Pubkey,
-                    toPolicy(channelEdge.getNode1Policy())
+                    toPolicy(channelEdge.getNode1Policy(), channelEdge.getNode2Policy())
             );
             DirectedChannelEdge directedChannelEdge2 = new DirectedChannelEdge(
                     channelId,
                     capacity,
                     node2Pubkey,
                     node1Pubkey,
-                    toPolicy(channelEdge.getNode2Policy())
+                    toPolicy(channelEdge.getNode2Policy(), channelEdge.getNode1Policy())
             );
             channelEdges.add(directedChannelEdge1);
             channelEdges.add(directedChannelEdge2);
@@ -66,12 +66,12 @@ public class GrpcGraph {
         return Optional.of(channelEdges);
     }
 
-    private Policy toPolicy(RoutingPolicy routingPolicy) {
+    private Policy toPolicy(RoutingPolicy routingPolicy, RoutingPolicy routingPolicyReversed) {
         return new Policy(
                 routingPolicy.getFeeRateMilliMsat(),
                 Coins.ofMilliSatoshis(routingPolicy.getFeeBaseMsat()),
                 !routingPolicy.getDisabled(),
-                routingPolicy.getTimeLockDelta()
+                routingPolicyReversed.getTimeLockDelta()
         );
     }
 }
