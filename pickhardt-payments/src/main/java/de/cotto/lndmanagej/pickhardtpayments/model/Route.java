@@ -87,28 +87,18 @@ public record Route(
         return amount.add(accumulatedFees);
     }
 
-    @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
     public int expiryForHop(int index, int blockHeight, int finalCltvDelta) {
-        int result = blockHeight + finalCltvDelta;
-        if (edges.size() <= 2) {
-            return result;
+        int timeLockDeltaNext = 0;
+        int timeLockDelta = 0;
+        for (int i = edges.size() - 1; i > index; i--) {
+            timeLockDelta += timeLockDeltaNext;
+            timeLockDeltaNext = edges.get(i).policy().timeLockDelta();
         }
-        for (int i = index; i < edges.size() - 2; i++) {
-            result += edges.get(i + 1).policy().timeLockDeltaOfPeer();
-        }
-        return result;
+        return blockHeight + finalCltvDelta + timeLockDelta;
     }
 
-    @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
     public int totalTimeLock(int blockHeight, int finalCltvDelta) {
-        int result = blockHeight + finalCltvDelta;
-        if (edges.size() <= 1) {
-            return result;
-        }
-        for (int i = 0; i < edges.size() - 1; i++) {
-            result += edges.get(i).policy().timeLockDeltaOfPeer();
-        }
-        return result;
+        return expiryForHop(-1, blockHeight, finalCltvDelta);
     }
 
     private static List<Coins> computeFees(List<Edge> edges, Coins amount) {
