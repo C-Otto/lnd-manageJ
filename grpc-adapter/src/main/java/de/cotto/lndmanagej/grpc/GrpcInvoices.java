@@ -43,7 +43,7 @@ public class GrpcInvoices {
         if (list == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable(list.getInvoicesList().stream()
+        return Optional.of(list.getInvoicesList().stream()
                 .map(this::toSettledInvoice)
                 .toList());
     }

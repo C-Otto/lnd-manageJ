@@ -31,6 +31,8 @@ import lnrpc.ListPaymentsResponse;
 import lnrpc.ListPeersRequest;
 import lnrpc.NodeInfo;
 import lnrpc.NodeInfoRequest;
+import lnrpc.PayReq;
+import lnrpc.PayReqString;
 import lnrpc.Peer;
 import lnrpc.PendingChannelsRequest;
 import lnrpc.PendingChannelsResponse;
@@ -195,6 +197,11 @@ public class GrpcService extends GrpcBase {
                 .setIncludeUnannounced(true)
                 .build();
         return get(() -> lightningStub.describeGraph(request));
+    }
+
+    @Timed
+    public Optional<PayReq> decodePaymentRequest(String paymentRequest) {
+        return get(() -> lightningStub.decodePayReq(PayReqString.newBuilder().setPayReq(paymentRequest).build()));
     }
 
     public StreamObserver<RPCMiddlewareResponse> registerMiddleware(

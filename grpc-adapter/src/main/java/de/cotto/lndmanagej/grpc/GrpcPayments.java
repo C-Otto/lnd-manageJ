@@ -2,9 +2,12 @@ package de.cotto.lndmanagej.grpc;
 
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.DecodedPaymentRequest;
+import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.model.Payment;
 import de.cotto.lndmanagej.model.PaymentHop;
 import de.cotto.lndmanagej.model.PaymentRoute;
+import de.cotto.lndmanagej.model.Pubkey;
 import lnrpc.HTLCAttempt;
 import lnrpc.Hop;
 import lnrpc.ListPaymentsResponse;
@@ -38,6 +41,24 @@ public class GrpcPayments {
             return Optional.empty();
         }
         return Optional.of(list.getPaymentsList().stream().map(this::toPayment).toList());
+    }
+
+    public Optional<DecodedPaymentRequest> decodePaymentRequest(String paymentRequest) {
+        return grpcService.decodePaymentRequest(paymentRequest)
+                .map(payReq -> {
+                    Instant creationTimestamp = Instant.ofEpochSecond(payReq.getTimestamp());
+                    Instant expiryTimestamp = creationTimestamp.plusSeconds(payReq.getExpiry());
+                    return new DecodedPaymentRequest(
+                            paymentRequest,
+                            payReq.getCltvExpiry(),
+                            payReq.getDescription(),
+                            Pubkey.create(payReq.getDestination()),
+                            Coins.ofMilliSatoshis(payReq.getNumMsat()),
+                            new HexString(payReq.getPaymentHash()),
+                            creationTimestamp,
+                            expiryTimestamp
+                    );
+                });
     }
 
     private Payment toPayment(lnrpc.Payment lndPayment) {
