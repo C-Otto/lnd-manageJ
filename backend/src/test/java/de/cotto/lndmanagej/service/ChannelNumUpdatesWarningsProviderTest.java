@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.service;
 
+import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.ChannelCoreInformation;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.warnings.ChannelNumUpdatesWarning;
@@ -25,13 +26,16 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ChannelNumUpdatesWarningsProviderTest {
-    private static final long MAX_NUM_UPDATES = 100_000L;
+    private static final long DEFAULT_MAX_NUM_UPDATES = 100_000L;
 
     @InjectMocks
     private ChannelNumUpdatesWarningsProvider warningsProvider;
 
     @Mock
     private ChannelService channelService;
+
+    @Mock
+    private ConfigurationService configurationService;
 
     @Test
     void getChannelWarnings_open_channel_not_found() {
@@ -41,15 +45,24 @@ class ChannelNumUpdatesWarningsProviderTest {
 
     @Test
     void getChannelWarnings_low_number_of_num_updates() {
-        when(channelService.getOpenChannel(CHANNEL_ID)).thenReturn(Optional.of(createChannel(MAX_NUM_UPDATES)));
+        when(channelService.getOpenChannel(CHANNEL_ID))
+                .thenReturn(Optional.of(createChannel(DEFAULT_MAX_NUM_UPDATES)));
         assertThat(warningsProvider.getChannelWarnings(CHANNEL_ID)).isEmpty();
     }
 
     @Test
     void getChannelWarnings_high_number_of_num_updates() {
-        when(channelService.getOpenChannel(CHANNEL_ID)).thenReturn(Optional.of(createChannel(MAX_NUM_UPDATES + 1)));
-        ChannelNumUpdatesWarning channelNumUpdatesWarning = new ChannelNumUpdatesWarning(MAX_NUM_UPDATES + 1);
+        when(channelService.getOpenChannel(CHANNEL_ID))
+                .thenReturn(Optional.of(createChannel(DEFAULT_MAX_NUM_UPDATES + 1)));
+        ChannelNumUpdatesWarning channelNumUpdatesWarning = new ChannelNumUpdatesWarning(DEFAULT_MAX_NUM_UPDATES + 1);
         assertThat(warningsProvider.getChannelWarnings(CHANNEL_ID)).containsExactly(channelNumUpdatesWarning);
+    }
+
+    @Test
+    void getChannelWarnings_uses_configured_value() {
+        when(configurationService.getMaxNumUpdates()).thenReturn(Optional.of(10));
+        when(channelService.getOpenChannel(CHANNEL_ID)).thenReturn(Optional.of(createChannel(11)));
+        assertThat(warningsProvider.getChannelWarnings(CHANNEL_ID)).hasSize(1);
     }
 
     private LocalOpenChannel createChannel(long numUpdates) {

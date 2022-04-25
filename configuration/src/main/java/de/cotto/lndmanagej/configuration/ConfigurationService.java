@@ -24,6 +24,7 @@ public class ConfigurationService {
     private static final String WARNINGS_SECTION = "warnings";
     private static final String CHANNEL_FLUCTUATION_LOWER_THRESHOLD = "channel_fluctuation_lower_threshold";
     private static final String CHANNEL_FLUCTUATION_UPPER_THRESHOLD = "channel_fluctuation_upper_threshold";
+    private static final String MAX_NUM_UPDATES = "max_num_updates";
 
     private final IniFileReader iniFileReader;
 
@@ -70,6 +71,10 @@ public class ConfigurationService {
 
     public Optional<Integer> getChannelFluctuationWarningUpperThreshold() {
         return getInteger(WARNINGS_SECTION, CHANNEL_FLUCTUATION_UPPER_THRESHOLD);
+    }
+
+    public Optional<Integer> getMaxNumUpdates() {
+        return getInteger(WARNINGS_SECTION, MAX_NUM_UPDATES);
     }
 
     private Optional<Integer> getInteger(String sectionName, String configurationName) {

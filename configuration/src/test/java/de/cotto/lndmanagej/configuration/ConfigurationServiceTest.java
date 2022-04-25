@@ -27,6 +27,7 @@ class ConfigurationServiceTest {
             = "ANCHOR:CLAIMED:abc222abc000abc000abc000abc000abc000abc000abc000abc000abc000abc0";
     private static final String CHANNEL_FLUCTUATION_LOWER_THRESHOLD = "channel_fluctuation_lower_threshold";
     private static final String CHANNEL_FLUCTUATION_UPPER_THRESHOLD = "channel_fluctuation_upper_threshold";
+    private static final String MAX_NUM_UPDATES = "max_num_updates";
 
     @InjectMocks
     private ConfigurationService configurationService;
@@ -102,40 +103,57 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void channelBalanceFluctuationWarningLowerThreshold_defaults_to_empty() {
+    void getChannelBalanceFluctuationWarningLowerThreshold_defaults_to_empty() {
         assertThat(configurationService.getChannelFluctuationWarningLowerThreshold()).isEmpty();
     }
 
     @Test
-    void channelBalanceFluctuationWarningLowerThreshold() {
+    void getChannelBalanceFluctuationWarningLowerThreshold() {
         when(iniFileReader.getValues(WARNINGS_SECTION))
                 .thenReturn(Map.of(CHANNEL_FLUCTUATION_LOWER_THRESHOLD, Set.of("1")));
         assertThat(configurationService.getChannelFluctuationWarningLowerThreshold()).contains(1);
     }
 
     @Test
-    void channelBalanceFluctuationWarningLowerThreshold_not_integer() {
+    void getChannelBalanceFluctuationWarningLowerThreshold_not_integer() {
         when(iniFileReader.getValues(WARNINGS_SECTION))
                 .thenReturn(Map.of(CHANNEL_FLUCTUATION_LOWER_THRESHOLD, Set.of("x")));
         assertThat(configurationService.getChannelFluctuationWarningLowerThreshold()).isEmpty();
     }
 
     @Test
-    void channelBalanceFluctuationWarningUpperThreshold_defaults_to_empty() {
+    void getChannelBalanceFluctuationWarningUpperThreshold_defaults_to_empty() {
         assertThat(configurationService.getChannelFluctuationWarningUpperThreshold()).isEmpty();
     }
 
     @Test
-    void channelBalanceFluctuationWarningUpperThreshold() {
+    void getChannelBalanceFluctuationWarningUpperThreshold() {
         when(iniFileReader.getValues(WARNINGS_SECTION))
                 .thenReturn(Map.of(CHANNEL_FLUCTUATION_UPPER_THRESHOLD, Set.of("99")));
         assertThat(configurationService.getChannelFluctuationWarningUpperThreshold()).contains(99);
     }
 
     @Test
-    void channelBalanceFluctuationWarningUpperThreshold_not_integer() {
+    void getChannelBalanceFluctuationWarningUpperThreshold_not_integer() {
         when(iniFileReader.getValues(WARNINGS_SECTION))
                 .thenReturn(Map.of(CHANNEL_FLUCTUATION_UPPER_THRESHOLD, Set.of("x")));
         assertThat(configurationService.getChannelFluctuationWarningUpperThreshold()).isEmpty();
+    }
+
+    @Test
+    void getMaxNumUpdates_defaults_to_empty() {
+        assertThat(configurationService.getMaxNumUpdates()).isEmpty();
+    }
+
+    @Test
+    void getMaxNumUpdates() {
+        when(iniFileReader.getValues(WARNINGS_SECTION)).thenReturn(Map.of(MAX_NUM_UPDATES, Set.of("99")));
+        assertThat(configurationService.getMaxNumUpdates()).contains(99);
+    }
+
+    @Test
+    void getMaxNumUpdates_not_integer() {
+        when(iniFileReader.getValues(WARNINGS_SECTION)).thenReturn(Map.of(MAX_NUM_UPDATES, Set.of("x")));
+        assertThat(configurationService.getMaxNumUpdates()).isEmpty();
     }
 }
