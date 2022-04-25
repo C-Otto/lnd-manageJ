@@ -1,6 +1,6 @@
 package de.cotto.lndmanagej.grpc;
 
-import de.cotto.lndmanagej.hardcoded.HardcodedService;
+import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.Pubkey;
 import lnrpc.LightningNode;
@@ -13,11 +13,11 @@ import java.util.Optional;
 @Component
 public class GrpcNodeInfo {
     private final GrpcService grpcService;
-    private final HardcodedService hardcodedService;
+    private final ConfigurationService configurationService;
 
-    public GrpcNodeInfo(GrpcService grpcService, HardcodedService hardcodedService) {
+    public GrpcNodeInfo(GrpcService grpcService, ConfigurationService configurationService) {
         this.grpcService = grpcService;
-        this.hardcodedService = hardcodedService;
+        this.configurationService = configurationService;
     }
 
     public Node getNode(Pubkey pubkey) {
@@ -52,11 +52,11 @@ public class GrpcNodeInfo {
     }
 
     private String getAlias(Pubkey pubkey, LightningNode node) {
-        return hardcodedService.getAlias(pubkey).orElse(node.getAlias());
+        return configurationService.getHardcodedAlias(pubkey).orElse(node.getAlias());
     }
 
     private Node createNode(Pubkey pubkey) {
-        Optional<String> hardcodedAlias = hardcodedService.getAlias(pubkey);
+        Optional<String> hardcodedAlias = configurationService.getHardcodedAlias(pubkey);
         if (hardcodedAlias.isEmpty()) {
             return Node.forPubkey(pubkey);
         }

@@ -1,6 +1,6 @@
 package de.cotto.lndmanagej.grpc;
 
-import de.cotto.lndmanagej.hardcoded.HardcodedService;
+import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.CloseInitiator;
 import de.cotto.lndmanagej.model.ClosedChannelFixtures;
@@ -82,7 +82,7 @@ class GrpcClosedChannelsTest {
     private OpenInitiatorResolver openInitiatorResolver;
 
     @Mock
-    private HardcodedService hardcodedService;
+    private ConfigurationService configurationService;
 
     @Mock
     private PrivateResolver privateResolver;
@@ -183,7 +183,7 @@ class GrpcClosedChannelsTest {
 
     @Test
     void getClosedChannels_force_close_with_hardcoded_resolutions() {
-        when(hardcodedService.getResolutions(CHANNEL_ID)).thenReturn(Set.of(COMMIT_CLAIMED));
+        when(configurationService.getHardcodedResolutions(CHANNEL_ID)).thenReturn(Set.of(COMMIT_CLAIMED));
         when(grpcService.getClosedChannels()).thenReturn(List.of(closedChannel(
                 CHANNEL_ID_SHORT,
                 REMOTE_FORCE_CLOSE,

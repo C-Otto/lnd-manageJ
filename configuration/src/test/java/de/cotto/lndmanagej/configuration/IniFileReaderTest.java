@@ -1,4 +1,4 @@
-package de.cotto.lndmanagej.hardcoded;
+package de.cotto.lndmanagej.configuration;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,6 +1,6 @@
 package de.cotto.lndmanagej.grpc;
 
-import de.cotto.lndmanagej.hardcoded.HardcodedService;
+import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.Pubkey;
 import lnrpc.LightningNode;
@@ -34,7 +34,7 @@ class GrpcNodeInfoTest {
     private GrpcService grpcService;
 
     @Mock
-    private HardcodedService hardcodedService;
+    private ConfigurationService configurationService;
 
     @BeforeEach
     void setUp() {
@@ -69,7 +69,7 @@ class GrpcNodeInfoTest {
     void getNode_not_found_hardcoded_alias() {
         String expectedAlias = "foobar";
         Node expectedNode = Node.builder().withPubkey(NODE.pubkey()).withAlias(expectedAlias).build();
-        when(hardcodedService.getAlias(NODE.pubkey())).thenReturn(Optional.of(expectedAlias));
+        when(configurationService.getHardcodedAlias(NODE.pubkey())).thenReturn(Optional.of(expectedAlias));
         when(grpcService.getNodeInfo(NODE.pubkey())).thenReturn(Optional.empty());
         assertThat(grpcNodeInfo.getNode(NODE.pubkey())).isEqualTo(expectedNode);
     }
@@ -117,7 +117,7 @@ class GrpcNodeInfoTest {
 
     private String hardcodedAlias() {
         String expectedAlias = "foobar";
-        when(hardcodedService.getAlias(NODE.pubkey())).thenReturn(Optional.of(expectedAlias));
+        when(configurationService.getHardcodedAlias(NODE.pubkey())).thenReturn(Optional.of(expectedAlias));
         return expectedAlias;
     }
 

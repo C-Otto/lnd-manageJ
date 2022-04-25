@@ -1,6 +1,6 @@
 package de.cotto.lndmanagej.grpc;
 
-import de.cotto.lndmanagej.hardcoded.HardcodedService;
+import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.BreachForceClosedChannelBuilder;
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
@@ -42,7 +42,7 @@ public class GrpcClosedChannels extends GrpcChannelsBase {
     private final GrpcService grpcService;
     private final GrpcGetInfo grpcGetInfo;
     private final OpenInitiatorResolver openInitiatorResolver;
-    private final HardcodedService hardcodedService;
+    private final ConfigurationService configurationService;
 
     public GrpcClosedChannels(
             GrpcService grpcService,
@@ -50,13 +50,13 @@ public class GrpcClosedChannels extends GrpcChannelsBase {
             ChannelIdResolver channelIdResolver,
             PrivateResolver privateResolver,
             OpenInitiatorResolver openInitiatorResolver,
-            HardcodedService hardcodedService
+            ConfigurationService configurationService
     ) {
         super(channelIdResolver, privateResolver);
         this.grpcService = grpcService;
         this.grpcGetInfo = grpcGetInfo;
         this.openInitiatorResolver = openInitiatorResolver;
-        this.hardcodedService = hardcodedService;
+        this.configurationService = configurationService;
     }
 
     public Map<ChannelId, ClosedChannel> getClosedChannels() {
@@ -109,7 +109,7 @@ public class GrpcClosedChannels extends GrpcChannelsBase {
     }
 
     private Set<Resolution> getResolutions(ChannelId channelId, ChannelCloseSummary channelCloseSummary) {
-        Stream<Resolution> hardcodedResolutions = hardcodedService.getResolutions(channelId).stream();
+        Stream<Resolution> hardcodedResolutions = configurationService.getHardcodedResolutions(channelId).stream();
         Stream<Resolution> resolutions = channelCloseSummary.getResolutionsList().stream()
                 .map(lndResolution -> {
                     Optional<TransactionHash> sweepTransaction;

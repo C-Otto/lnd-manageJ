@@ -1,4 +1,4 @@
-package de.cotto.lndmanagej.hardcoded;
+package de.cotto.lndmanagej.configuration;
 
 import com.google.common.base.Splitter;
 import de.cotto.lndmanagej.model.ChannelId;
@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toSet;
 
 @Component
-public class HardcodedService {
+public class ConfigurationService {
     private static final int EXPECTED_NUMBER_OF_COMPONENTS = 3;
     private static final String RESOLUTIONS_SECTION = "resolutions";
     private static final Splitter SPLITTER = Splitter.on(":");
@@ -24,17 +24,17 @@ public class HardcodedService {
 
     private final IniFileReader iniFileReader;
 
-    public HardcodedService(IniFileReader iniFileReader) {
+    public ConfigurationService(IniFileReader iniFileReader) {
         this.iniFileReader = iniFileReader;
     }
 
-    public Optional<String> getAlias(Pubkey pubkey) {
+    public Optional<String> getHardcodedAlias(Pubkey pubkey) {
         Map<String, Set<String>> values = iniFileReader.getValues(ALIASES_SECTION);
         Set<String> alias = values.getOrDefault(pubkey.toString(), Set.of());
         return alias.stream().findFirst();
     }
 
-    public Set<Resolution> getResolutions(ChannelId channelId) {
+    public Set<Resolution> getHardcodedResolutions(ChannelId channelId) {
         Map<String, Set<String>> values = iniFileReader.getValues(RESOLUTIONS_SECTION);
         Set<String> forShortChannelId = values.getOrDefault(String.valueOf(channelId.getShortChannelId()), Set.of());
         Set<String> forCompactForm = values.getOrDefault(channelId.getCompactForm(), Set.of());

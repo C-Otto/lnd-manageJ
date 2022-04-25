@@ -1,4 +1,4 @@
-package de.cotto.lndmanagej.hardcoded;
+package de.cotto.lndmanagej.configuration;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class HardcodedServiceTest {
+class ConfigurationServiceTest {
     private static final String RESOLUTIONS_SECTION = "resolutions";
     private static final String ALIASES_SECTION = "aliases";
     private static final String COMMIT_CLAIMED_STRING
@@ -26,75 +26,75 @@ class HardcodedServiceTest {
             = "ANCHOR:CLAIMED:abc222abc000abc000abc000abc000abc000abc000abc000abc000abc000abc0";
 
     @InjectMocks
-    private HardcodedService hardcodedService;
+    private ConfigurationService configurationService;
 
     @Mock
     private IniFileReader iniFileReader;
 
     @Test
-    void getResolutions_empty() {
+    void getHardcodedResolutions_empty() {
         when(iniFileReader.getValues(RESOLUTIONS_SECTION)).thenReturn(Map.of());
-        assertThat(hardcodedService.getResolutions(CHANNEL_ID)).isEmpty();
+        assertThat(configurationService.getHardcodedResolutions(CHANNEL_ID)).isEmpty();
     }
 
     @Test
-    void getResolutions_one_resolution_short_channel_id() {
+    void getHardcodedResolutions_one_resolution_short_channel_id() {
         when(iniFileReader.getValues(RESOLUTIONS_SECTION))
                 .thenReturn(Map.of(String.valueOf(CHANNEL_ID.getShortChannelId()), Set.of(COMMIT_CLAIMED_STRING)));
-        assertThat(hardcodedService.getResolutions(CHANNEL_ID)).containsExactly(COMMIT_CLAIMED);
+        assertThat(configurationService.getHardcodedResolutions(CHANNEL_ID)).containsExactly(COMMIT_CLAIMED);
     }
 
     @Test
-    void getResolutions_one_resolution_compact_form() {
+    void getHardcodedResolutions_one_resolution_compact_form() {
         when(iniFileReader.getValues(RESOLUTIONS_SECTION))
                 .thenReturn(Map.of(CHANNEL_ID.getCompactForm(), Set.of(COMMIT_CLAIMED_STRING)));
-        assertThat(hardcodedService.getResolutions(CHANNEL_ID)).containsExactly(COMMIT_CLAIMED);
+        assertThat(configurationService.getHardcodedResolutions(CHANNEL_ID)).containsExactly(COMMIT_CLAIMED);
     }
 
     @Test
-    void getResolutions_one_resolution_compact_form_lnd() {
+    void getHardcodedResolutions_one_resolution_compact_form_lnd() {
         when(iniFileReader.getValues(RESOLUTIONS_SECTION))
                 .thenReturn(Map.of(CHANNEL_ID.getCompactFormLnd(), Set.of(COMMIT_CLAIMED_STRING)));
-        assertThat(hardcodedService.getResolutions(CHANNEL_ID)).containsExactly(COMMIT_CLAIMED);
+        assertThat(configurationService.getHardcodedResolutions(CHANNEL_ID)).containsExactly(COMMIT_CLAIMED);
     }
 
     @Test
-    void getResolutions_two_resolutions() {
+    void getHardcodedResolutions_two_resolutions() {
         when(iniFileReader.getValues(RESOLUTIONS_SECTION)).thenReturn(Map.of(
                 CHANNEL_ID.getCompactFormLnd(),
                 Set.of(COMMIT_CLAIMED_STRING, ANCHOR_CLAIMED_STRING)
         ));
-        assertThat(hardcodedService.getResolutions(CHANNEL_ID))
+        assertThat(configurationService.getHardcodedResolutions(CHANNEL_ID))
                 .containsExactlyInAnyOrder(COMMIT_CLAIMED, ANCHOR_CLAIMED);
     }
 
     @Test
-    void getResolutions_bogus_string() {
+    void getHardcodedResolutions_bogus_string() {
         when(iniFileReader.getValues(RESOLUTIONS_SECTION)).thenReturn(Map.of(
                 CHANNEL_ID.getCompactFormLnd(),
                 Set.of("hello", "hello:peter", "a:b:c")
         ));
-        assertThat(hardcodedService.getResolutions(CHANNEL_ID)).isEmpty();
+        assertThat(configurationService.getHardcodedResolutions(CHANNEL_ID)).isEmpty();
     }
 
     @Test
-    void getAlias_not_known() {
-        assertThat(hardcodedService.getAlias(PUBKEY)).isEmpty();
+    void getHardcodedAlias_not_known() {
+        assertThat(configurationService.getHardcodedAlias(PUBKEY)).isEmpty();
     }
 
     @Test
-    void getAlias() {
-        String expected = "hardcoded alias";
+    void getHardcodedAlias() {
+        String expected = "configured alias";
         when(iniFileReader.getValues(ALIASES_SECTION)).thenReturn(Map.of(PUBKEY.toString(), Set.of(expected)));
-        assertThat(hardcodedService.getAlias(PUBKEY)).contains(expected);
+        assertThat(configurationService.getHardcodedAlias(PUBKEY)).contains(expected);
     }
 
     @Test
-    void getAlias_two_in_config() {
+    void getHardcodedAlias_two_in_config() {
         String first = "a";
         String second = "b";
         when(iniFileReader.getValues(ALIASES_SECTION)).thenReturn(Map.of(PUBKEY.toString(), Set.of(first, second)));
-        String actual = hardcodedService.getAlias(PUBKEY).orElseThrow();
+        String actual = configurationService.getHardcodedAlias(PUBKEY).orElseThrow();
         assertThat(Set.of(first, second).contains(actual)).isTrue();
     }
 }

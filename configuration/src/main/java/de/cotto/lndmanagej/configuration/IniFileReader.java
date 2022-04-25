@@ -1,4 +1,4 @@
-package de.cotto.lndmanagej.hardcoded;
+package de.cotto.lndmanagej.configuration;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
@@ -21,7 +21,7 @@ public class IniFileReader {
     private final String path;
     private final LoadingCache<String, Map<String, Set<String>>> cache;
 
-    public IniFileReader(@Value("${lndmanagej.hardcoded-path:}") String path) {
+    public IniFileReader(@Value("${lndmanagej.configuration-path:}") String path) {
         this.path = path;
         cache = new CacheBuilder()
                 .withRefresh(Duration.ofSeconds(5))
