@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.configuration.ConfigurationService;
+import de.cotto.lndmanagej.configuration.WarningsConfigurationSettings;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FlowReport;
 import de.cotto.lndmanagej.model.Pubkey;
@@ -81,10 +82,12 @@ public class NodeFlowWarningsProvider implements NodeWarningsProvider {
     }
 
     private int getMinimumDaysForWarning() {
-        return configurationService.getNodeFlowWarningMinimumDaysForWarning().orElse(DEFAULT_MINIMUM_DAYS_FOR_WARNING);
+        return configurationService.getIntegerValue(WarningsConfigurationSettings.NODE_FLOW_MINIMUM_DAYS_FOR_WARNING)
+                .orElse(DEFAULT_MINIMUM_DAYS_FOR_WARNING);
     }
 
     private int getMaxDaysToConsider() {
-        return configurationService.getNodeFlowWarningMaximumDaysToConsider().orElse(DEFAULT_MAXIMUM_DAYS_TO_CONSIDER);
+        return configurationService.getIntegerValue(WarningsConfigurationSettings.NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER)
+                .orElse(DEFAULT_MAXIMUM_DAYS_TO_CONSIDER);
     }
 }

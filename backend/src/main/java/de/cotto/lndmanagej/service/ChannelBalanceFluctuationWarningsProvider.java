@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.configuration.ConfigurationService;
+import de.cotto.lndmanagej.configuration.WarningsConfigurationSettings;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.LocalChannel;
@@ -56,12 +57,12 @@ public class ChannelBalanceFluctuationWarningsProvider implements ChannelWarning
     }
 
     private int getLowerThreshold() {
-        return configurationService.getChannelFluctuationWarningLowerThreshold()
+        return configurationService.getIntegerValue(WarningsConfigurationSettings.CHANNEL_FLUCTUATION_LOWER_THRESHOLD)
                 .orElse(DEFAULT_LOWER_THRESHOLD);
     }
 
     private int getUpperThreshold() {
-        return configurationService.getChannelFluctuationWarningUpperThreshold()
+        return configurationService.getIntegerValue(WarningsConfigurationSettings.CHANNEL_FLUCTUATION_UPPER_THRESHOLD)
                 .orElse(DEFAULT_UPPER_THRESHOLD);
     }
 }

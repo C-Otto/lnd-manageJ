@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.configuration.ConfigurationService;
+import de.cotto.lndmanagej.configuration.WarningsConfigurationSettings;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.warnings.ChannelNumUpdatesWarning;
@@ -29,8 +30,10 @@ public class ChannelNumUpdatesWarningsProvider implements ChannelWarningsProvide
     }
 
     private Optional<ChannelWarning> getNumUpdatesWarning(ChannelId channelId) {
+        Integer maxNumUpdates = configurationService.getIntegerValue(WarningsConfigurationSettings.MAX_NUM_UPDATES)
+                .orElse(DEFAULT_MAX_NUM_UPDATES);
         long numUpdates = channelService.getOpenChannel(channelId).map(LocalOpenChannel::getNumUpdates).orElse(0L);
-        if (numUpdates <= configurationService.getMaxNumUpdates().orElse(DEFAULT_MAX_NUM_UPDATES)) {
+        if (numUpdates <= maxNumUpdates) {
             return Optional.empty();
         }
         return Optional.of(new ChannelNumUpdatesWarning(numUpdates));

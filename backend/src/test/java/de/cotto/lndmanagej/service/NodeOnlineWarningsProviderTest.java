@@ -12,8 +12,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.ONLINE_CHANGES_THRESHOLD;
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.ONLINE_PERCENTAGE_THRESHOLD;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,6 +35,7 @@ class NodeOnlineWarningsProviderTest {
     void setUp() {
         when(onlinePeersService.getOnlinePercentage(PUBKEY)).thenReturn(80);
         when(onlinePeersService.getChanges(PUBKEY)).thenReturn(50);
+        lenient().when(configurationService.getIntegerValue(any())).thenReturn(Optional.empty());
     }
 
     @Test
@@ -43,7 +48,7 @@ class NodeOnlineWarningsProviderTest {
 
     @Test
     void getNodeWarnings_online_below_configured_threshold() {
-        when(configurationService.getOnlinePercentageThreshold()).thenReturn(Optional.of(99));
+        when(configurationService.getIntegerValue(ONLINE_PERCENTAGE_THRESHOLD)).thenReturn(Optional.of(99));
         when(onlinePeersService.getOnlinePercentage(PUBKEY)).thenReturn(98);
         when(onlinePeersService.getDaysForOnlinePercentage()).thenReturn(456);
         assertThat(warningsProvider.getNodeWarnings(PUBKEY))
@@ -60,7 +65,7 @@ class NodeOnlineWarningsProviderTest {
 
     @Test
     void getNodeWarnings_online_changes_above_configured_threshold() {
-        when(configurationService.getOnlineChangesThreshold()).thenReturn(Optional.of(30));
+        when(configurationService.getIntegerValue(ONLINE_CHANGES_THRESHOLD)).thenReturn(Optional.of(30));
         when(onlinePeersService.getChanges(PUBKEY)).thenReturn(40);
         when(onlinePeersService.getDaysForChanges()).thenReturn(123);
         assertThat(warningsProvider.getNodeWarnings(PUBKEY))

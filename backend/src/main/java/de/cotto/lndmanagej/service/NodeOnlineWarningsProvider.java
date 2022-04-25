@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.configuration.ConfigurationService;
+import de.cotto.lndmanagej.configuration.WarningsConfigurationSettings;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.warnings.NodeOnlineChangesWarning;
 import de.cotto.lndmanagej.model.warnings.NodeOnlinePercentageWarning;
@@ -56,10 +57,12 @@ public class NodeOnlineWarningsProvider implements NodeWarningsProvider {
     }
 
     private int getOnlinePercentageThreshold() {
-        return configurationService.getOnlinePercentageThreshold().orElse(DEFAULT_ONLINE_PERCENTAGE_THRESHOLD);
+        return configurationService.getIntegerValue(WarningsConfigurationSettings.ONLINE_PERCENTAGE_THRESHOLD)
+                .orElse(DEFAULT_ONLINE_PERCENTAGE_THRESHOLD);
     }
 
     private int getOnlineChangesThreshold() {
-        return configurationService.getOnlineChangesThreshold().orElse(DEFAULT_ONLINE_CHANGES_THRESHOLD);
+        return configurationService.getIntegerValue(WarningsConfigurationSettings.ONLINE_CHANGES_THRESHOLD)
+                .orElse(DEFAULT_ONLINE_CHANGES_THRESHOLD);
     }
 }

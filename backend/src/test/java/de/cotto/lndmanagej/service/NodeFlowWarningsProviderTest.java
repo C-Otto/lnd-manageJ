@@ -14,6 +14,8 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
 
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER;
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.NODE_FLOW_MINIMUM_DAYS_FOR_WARNING;
 import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
@@ -47,6 +49,7 @@ class NodeFlowWarningsProviderTest {
     void setUp() {
         lenient().when(flowService.getFlowReportForPeer(eq(PUBKEY), any())).thenReturn(FlowReport.EMPTY);
         lenient().when(ownNodeService.getBlockHeight()).thenReturn(800_000);
+        lenient().when(configurationService.getIntegerValue(any())).thenReturn(Optional.empty());
     }
 
     @Test
@@ -92,14 +95,15 @@ class NodeFlowWarningsProviderTest {
 
     @Test
     void uses_minimum_days_for_warning_from_configuration() {
-        when(configurationService.getNodeFlowWarningMinimumDaysForWarning()).thenReturn(Optional.of(2));
+        when(configurationService.getIntegerValue(NODE_FLOW_MINIMUM_DAYS_FOR_WARNING)).thenReturn(Optional.of(2));
         mockOpenChannelWithAgeInBlocks(3 * EXPECTED_BLOCKS_PER_DAY);
         assertThat(warningsProvider.getNodeWarnings(PUBKEY)).containsExactly(new NodeNoFlowWarning(3));
     }
 
     @Test
     void uses_maximum_days_to_consider_from_configuration() {
-        when(configurationService.getNodeFlowWarningMaximumDaysToConsider()).thenReturn(Optional.of(120));
+        when(configurationService.getIntegerValue(NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER))
+                .thenReturn(Optional.of(120));
         when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL_2));
         when(channelService.getOpenHeight(LOCAL_OPEN_CHANNEL_2)).thenReturn(Optional.of(BLOCK_HEIGHT));
         assertThat(warningsProvider.getNodeWarnings(PUBKEY)).containsExactly(new NodeNoFlowWarning(120));

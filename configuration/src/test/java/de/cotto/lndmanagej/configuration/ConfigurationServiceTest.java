@@ -7,10 +7,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.ONLINE_CHANGES_THRESHOLD;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.ResolutionFixtures.ANCHOR_CLAIMED;
@@ -27,13 +26,6 @@ class ConfigurationServiceTest {
             = "COMMIT:CLAIMED:abc222abc000abc000abc000abc000abc000abc000abc000abc000abc000abc0";
     private static final String ANCHOR_CLAIMED_STRING
             = "ANCHOR:CLAIMED:abc222abc000abc000abc000abc000abc000abc000abc000abc000abc000abc0";
-    private static final String CHANNEL_FLUCTUATION_LOWER_THRESHOLD = "channel_fluctuation_lower_threshold";
-    private static final String CHANNEL_FLUCTUATION_UPPER_THRESHOLD = "channel_fluctuation_upper_threshold";
-    private static final String MAX_NUM_UPDATES = "max_num_updates";
-    private static final String NODE_FLOW_MINIMUM_DAYS_FOR_WARNING = "node_flow_minimum_days_for_warning";
-    private static final String NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER = "node_flow_maximum_days_to_consider";
-    private static final String ONLINE_PERCENTAGE_THRESHOLD = "online_percentage_threshold";
-    private static final String ONLINE_CHANGES_THRESHOLD = "online_changes_threshold";
 
     @InjectMocks
     private ConfigurationService configurationService;
@@ -109,142 +101,24 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void getChannelBalanceFluctuationWarningLowerThreshold_defaults_to_empty() {
-        assertThat(configurationService.getChannelFluctuationWarningLowerThreshold()).isEmpty();
-    }
-
-    @Test
-    void getChannelBalanceFluctuationWarningLowerThreshold() {
-        assertValue(
-                configurationService::getChannelFluctuationWarningLowerThreshold,
-                CHANNEL_FLUCTUATION_LOWER_THRESHOLD
-        );
-    }
-
-    @Test
-    void getChannelBalanceFluctuationWarningLowerThreshold_not_integer() {
-        assertEmptyForNonIntegerValue(
-                configurationService::getChannelFluctuationWarningLowerThreshold,
-                CHANNEL_FLUCTUATION_LOWER_THRESHOLD
-        );
-    }
-
-    @Test
-    void getChannelBalanceFluctuationWarningUpperThreshold_defaults_to_empty() {
-        assertThat(configurationService.getChannelFluctuationWarningUpperThreshold()).isEmpty();
-    }
-
-    @Test
-    void getChannelBalanceFluctuationWarningUpperThreshold() {
-        assertValue(
-                configurationService::getChannelFluctuationWarningUpperThreshold,
-                CHANNEL_FLUCTUATION_UPPER_THRESHOLD
-        );
-    }
-
-    @Test
-    void getChannelBalanceFluctuationWarningUpperThreshold_not_integer() {
-        assertEmptyForNonIntegerValue(
-                configurationService::getChannelFluctuationWarningUpperThreshold,
-                CHANNEL_FLUCTUATION_UPPER_THRESHOLD
-        );
-    }
-
-    @Test
-    void getMaxNumUpdates_defaults_to_empty() {
-        assertThat(configurationService.getMaxNumUpdates()).isEmpty();
-    }
-
-    @Test
-    void getMaxNumUpdates() {
-        assertValue(configurationService::getMaxNumUpdates, MAX_NUM_UPDATES);
-    }
-
-    @Test
-    void getMaxNumUpdates_not_integer() {
-        assertEmptyForNonIntegerValue(configurationService::getMaxNumUpdates, MAX_NUM_UPDATES);
-    }
-
-    @Test
-    void getNodeFlowWarningMinimumDaysForWarning_defaults_to_empty() {
-        assertThat(configurationService.getNodeFlowWarningMinimumDaysForWarning()).isEmpty();
-    }
-
-    @Test
-    void getNodeFlowWarningMinimumDaysForWarning() {
-        assertValue(configurationService::getNodeFlowWarningMinimumDaysForWarning, NODE_FLOW_MINIMUM_DAYS_FOR_WARNING);
-    }
-
-    @Test
-    void getNodeFlowWarningMinimumDaysForWarning_not_integer() {
-        assertEmptyForNonIntegerValue(
-                configurationService::getNodeFlowWarningMinimumDaysForWarning,
-                NODE_FLOW_MINIMUM_DAYS_FOR_WARNING
-        );
-    }
-
-    @Test
-    void getNodeFlowWarningMaximumDaysToConsider_defaults_to_empty() {
-        assertThat(configurationService.getNodeFlowWarningMaximumDaysToConsider()).isEmpty();
-    }
-
-    @Test
-    void getNodeFlowWarningMaximumDaysToConsider() {
-        assertValue(configurationService::getNodeFlowWarningMaximumDaysToConsider, NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER);
-    }
-
-    @Test
-    void getNodeFlowWarningMaximumDaysToConsider_not_integer() {
-        assertEmptyForNonIntegerValue(
-                configurationService::getNodeFlowWarningMaximumDaysToConsider,
-                NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER
-        );
-    }
-
-    @Test
-    void getOnlinePercentageThreshold_defaults_to_empty() {
-        assertThat(configurationService.getOnlinePercentageThreshold()).isEmpty();
-    }
-
-    @Test
-    void getOnlinePercentageThreshold() {
-        assertValue(configurationService::getOnlinePercentageThreshold, ONLINE_PERCENTAGE_THRESHOLD);
-    }
-
-    @Test
-    void getOnlinePercentageThreshold_not_integer() {
-        assertEmptyForNonIntegerValue(
-                configurationService::getOnlinePercentageThreshold,
-                ONLINE_PERCENTAGE_THRESHOLD
-        );
-    }
-
-    @Test
     void getOnlineChangesThreshold_defaults_to_empty() {
-        assertThat(configurationService.getOnlineChangesThreshold()).isEmpty();
+        assertThat(configurationService.getIntegerValue(ONLINE_CHANGES_THRESHOLD)).isEmpty();
     }
 
     @Test
-    void getOnlineChangesThreshold() {
-        assertValue(configurationService::getOnlineChangesThreshold, ONLINE_CHANGES_THRESHOLD);
-    }
-
-    @Test
-    void getOnlineChangesThreshold_not_integer() {
-        assertEmptyForNonIntegerValue(
-                configurationService::getOnlineChangesThreshold,
-                ONLINE_CHANGES_THRESHOLD
-        );
-    }
-
-    private void assertEmptyForNonIntegerValue(Supplier<Optional<Integer>> supplier, String key) {
-        when(iniFileReader.getValues(WARNINGS_SECTION)).thenReturn(Map.of(key, Set.of("x")));
-        assertThat(supplier.get()).isEmpty();
-    }
-
-    private void assertValue(Supplier<Optional<Integer>> supplier, String key) {
+    void getIntegerValue() {
         int expectedValue = 42;
-        when(iniFileReader.getValues(WARNINGS_SECTION)).thenReturn(Map.of(key, Set.of(String.valueOf(expectedValue))));
-        assertThat(supplier.get()).contains(expectedValue);
+        WarningsConfigurationSettings setting = ONLINE_CHANGES_THRESHOLD;
+        String name = setting.getName();
+        when(iniFileReader.getValues(WARNINGS_SECTION)).thenReturn(Map.of(name, Set.of(String.valueOf(expectedValue))));
+        assertThat(configurationService.getIntegerValue(setting)).contains(expectedValue);
+    }
+
+    @Test
+    void getIntegerValue_not_integer() {
+        WarningsConfigurationSettings setting = ONLINE_CHANGES_THRESHOLD;
+        String name = setting.getName();
+        when(iniFileReader.getValues(WARNINGS_SECTION)).thenReturn(Map.of(name, Set.of("x")));
+        assertThat(configurationService.getIntegerValue(setting)).isEmpty();
     }
 }

@@ -22,13 +22,6 @@ public class ConfigurationService {
     private static final String RESOLUTIONS_SECTION = "resolutions";
     private static final String ALIASES_SECTION = "aliases";
     private static final String WARNINGS_SECTION = "warnings";
-    private static final String CHANNEL_FLUCTUATION_LOWER_THRESHOLD = "channel_fluctuation_lower_threshold";
-    private static final String CHANNEL_FLUCTUATION_UPPER_THRESHOLD = "channel_fluctuation_upper_threshold";
-    private static final String MAX_NUM_UPDATES = "max_num_updates";
-    private static final String NODE_FLOW_MINIMUM_DAYS_FOR_WARNING = "node_flow_minimum_days_for_warning";
-    private static final String NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER = "node_flow_maximum_days_to_consider";
-    private static final String ONLINE_PERCENTAGE_THRESHOLD = "online_percentage_threshold";
-    private static final String ONLINE_CHANGES_THRESHOLD = "online_changes_threshold";
 
     private final IniFileReader iniFileReader;
 
@@ -69,32 +62,8 @@ public class ConfigurationService {
         }
     }
 
-    public Optional<Integer> getChannelFluctuationWarningLowerThreshold() {
-        return getInteger(WARNINGS_SECTION, CHANNEL_FLUCTUATION_LOWER_THRESHOLD);
-    }
-
-    public Optional<Integer> getChannelFluctuationWarningUpperThreshold() {
-        return getInteger(WARNINGS_SECTION, CHANNEL_FLUCTUATION_UPPER_THRESHOLD);
-    }
-
-    public Optional<Integer> getMaxNumUpdates() {
-        return getInteger(WARNINGS_SECTION, MAX_NUM_UPDATES);
-    }
-
-    public Optional<Integer> getNodeFlowWarningMinimumDaysForWarning() {
-        return getInteger(WARNINGS_SECTION, NODE_FLOW_MINIMUM_DAYS_FOR_WARNING);
-    }
-
-    public Optional<Integer> getNodeFlowWarningMaximumDaysToConsider() {
-        return getInteger(WARNINGS_SECTION, NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER);
-    }
-
-    public Optional<Integer> getOnlinePercentageThreshold() {
-        return getInteger(WARNINGS_SECTION, ONLINE_PERCENTAGE_THRESHOLD);
-    }
-
-    public Optional<Integer> getOnlineChangesThreshold() {
-        return getInteger(WARNINGS_SECTION, ONLINE_CHANGES_THRESHOLD);
+    public Optional<Integer> getIntegerValue(WarningsConfigurationSettings warningsConfigurationSettings) {
+        return getInteger(WARNINGS_SECTION, warningsConfigurationSettings.getName());
     }
 
     private Optional<Integer> getInteger(String sectionName, String configurationName) {

@@ -13,9 +13,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.CHANNEL_FLUCTUATION_LOWER_THRESHOLD;
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.CHANNEL_FLUCTUATION_UPPER_THRESHOLD;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,6 +43,7 @@ class ChannelBalanceFluctuationWarningsProviderTest {
     @BeforeEach
     void setUp() {
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+        lenient().when(configurationService.getIntegerValue(any())).thenReturn(Optional.empty());
     }
 
     @Test
@@ -93,7 +98,7 @@ class ChannelBalanceFluctuationWarningsProviderTest {
 
     @Test
     void uses_lower_threshold_from_configuration_service() {
-        when(configurationService.getChannelFluctuationWarningLowerThreshold())
+        when(configurationService.getIntegerValue(CHANNEL_FLUCTUATION_LOWER_THRESHOLD))
                 .thenReturn(Optional.of(DEFAULT_LOWER_THRESHOLD - 2));
         mockMinMax(DEFAULT_LOWER_THRESHOLD - 1, DEFAULT_UPPER_THRESHOLD + 1);
         assertThat(warningsProvider.getChannelWarnings(CHANNEL_ID)).isEmpty();
@@ -101,7 +106,7 @@ class ChannelBalanceFluctuationWarningsProviderTest {
 
     @Test
     void uses_upper_threshold_from_configuration_service() {
-        when(configurationService.getChannelFluctuationWarningUpperThreshold())
+        when(configurationService.getIntegerValue(CHANNEL_FLUCTUATION_UPPER_THRESHOLD))
                 .thenReturn(Optional.of(DEFAULT_UPPER_THRESHOLD + 2));
         mockMinMax(DEFAULT_LOWER_THRESHOLD - 1, DEFAULT_UPPER_THRESHOLD + 1);
         assertThat(warningsProvider.getChannelWarnings(CHANNEL_ID)).isEmpty();
