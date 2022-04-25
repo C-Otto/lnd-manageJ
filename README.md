@@ -122,6 +122,11 @@ Legacy:
 `/legacy/open-channels/pretty`: a readable list (not JSON!) of all open channels showing channel ID, pubkey, capacity and alias.
 As the name implies, this endpoint will be removed sooner rather than later.
 
+## Configuration
+Some settings, especially for node/channel warnings, can be configured.
+Please have a look at `example-lnd-manageJ.conf` for further information.
+The configuration file is read every few seconds, so that you can change settings without restarting lnd-manageJ.
+
 ## Caching and Performance
 Most information is cached to improve performance, which is why you might see outdated information.
 Some information like node aliases does not need to be up-to-date and, as such, is cached for several minutes.
