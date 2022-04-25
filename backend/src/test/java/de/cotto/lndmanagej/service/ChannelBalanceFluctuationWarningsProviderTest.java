@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.service;
 
+import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.warnings.ChannelBalanceFluctuationWarning;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,8 +20,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ChannelBalanceFluctuationWarningsProviderTest {
-    private static final int LOWER_THRESHOLD = 10;
-    private static final int UPPER_THRESHOLD = 90;
+    private static final int DEFAULT_LOWER_THRESHOLD = 10;
+    private static final int DEFAULT_UPPER_THRESHOLD = 90;
     private static final int DAYS = 14;
 
     @InjectMocks
@@ -31,6 +32,9 @@ class ChannelBalanceFluctuationWarningsProviderTest {
 
     @Mock
     private BalanceService balanceService;
+
+    @Mock
+    private ConfigurationService configurationService;
 
     @BeforeEach
     void setUp() {
@@ -45,19 +49,19 @@ class ChannelBalanceFluctuationWarningsProviderTest {
 
     @Test
     void getChannelWarnings_both_within_bounds() {
-        mockMinMax(LOWER_THRESHOLD, UPPER_THRESHOLD);
+        mockMinMax(DEFAULT_LOWER_THRESHOLD, DEFAULT_UPPER_THRESHOLD);
         assertThat(warningsProvider.getChannelWarnings(CHANNEL_ID)).isEmpty();
     }
 
     @Test
     void getChannelWarnings_minimum_not_found() {
-        mockMinMax(null, UPPER_THRESHOLD);
+        mockMinMax(null, DEFAULT_UPPER_THRESHOLD);
         assertThat(warningsProvider.getChannelWarnings(CHANNEL_ID)).isEmpty();
     }
 
     @Test
     void getChannelWarnings_maximum_not_found() {
-        mockMinMax(LOWER_THRESHOLD, null);
+        mockMinMax(DEFAULT_LOWER_THRESHOLD, null);
         assertThat(warningsProvider.getChannelWarnings(CHANNEL_ID)).isEmpty();
     }
 
@@ -69,22 +73,38 @@ class ChannelBalanceFluctuationWarningsProviderTest {
 
     @Test
     void getChannelWarnings_just_below_minimum() {
-        mockMinMax(LOWER_THRESHOLD - 1, UPPER_THRESHOLD);
+        mockMinMax(DEFAULT_LOWER_THRESHOLD - 1, DEFAULT_UPPER_THRESHOLD);
         assertThat(warningsProvider.getChannelWarnings(CHANNEL_ID)).isEmpty();
     }
 
     @Test
     void getChannelWarnings_just_above_maximum() {
-        mockMinMax(LOWER_THRESHOLD, UPPER_THRESHOLD + 1);
+        mockMinMax(DEFAULT_LOWER_THRESHOLD, DEFAULT_UPPER_THRESHOLD + 1);
         assertThat(warningsProvider.getChannelWarnings(CHANNEL_ID)).isEmpty();
     }
 
     @Test
     void getChannelWarnings() {
-        mockMinMax(LOWER_THRESHOLD - 1, UPPER_THRESHOLD + 1);
+        mockMinMax(DEFAULT_LOWER_THRESHOLD - 1, DEFAULT_UPPER_THRESHOLD + 1);
         ChannelBalanceFluctuationWarning expectedWarning =
-                new ChannelBalanceFluctuationWarning(LOWER_THRESHOLD - 1, UPPER_THRESHOLD + 1, DAYS);
+                new ChannelBalanceFluctuationWarning(DEFAULT_LOWER_THRESHOLD - 1, DEFAULT_UPPER_THRESHOLD + 1, DAYS);
         assertThat(warningsProvider.getChannelWarnings(CHANNEL_ID)).contains(expectedWarning);
+    }
+
+    @Test
+    void uses_lower_threshold_from_configuration_service() {
+        when(configurationService.getChannelFluctuationWarningLowerThreshold())
+                .thenReturn(Optional.of(DEFAULT_LOWER_THRESHOLD - 2));
+        mockMinMax(DEFAULT_LOWER_THRESHOLD - 1, DEFAULT_UPPER_THRESHOLD + 1);
+        assertThat(warningsProvider.getChannelWarnings(CHANNEL_ID)).isEmpty();
+    }
+
+    @Test
+    void uses_upper_threshold_from_configuration_service() {
+        when(configurationService.getChannelFluctuationWarningUpperThreshold())
+                .thenReturn(Optional.of(DEFAULT_UPPER_THRESHOLD + 2));
+        mockMinMax(DEFAULT_LOWER_THRESHOLD - 1, DEFAULT_UPPER_THRESHOLD + 1);
+        assertThat(warningsProvider.getChannelWarnings(CHANNEL_ID)).isEmpty();
     }
 
     private void mockMinMax(@Nullable Integer min, @Nullable Integer max) {

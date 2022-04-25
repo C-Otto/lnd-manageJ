@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     implementation project(':caching')
+    implementation project(':configuration')
     implementation project(':forwarding-history')
     implementation project(':grpc-adapter')
     implementation project(':model')

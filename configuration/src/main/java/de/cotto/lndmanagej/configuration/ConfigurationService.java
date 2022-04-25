@@ -18,9 +18,12 @@ import static java.util.stream.Collectors.toSet;
 @Component
 public class ConfigurationService {
     private static final int EXPECTED_NUMBER_OF_COMPONENTS = 3;
-    private static final String RESOLUTIONS_SECTION = "resolutions";
     private static final Splitter SPLITTER = Splitter.on(":");
+    private static final String RESOLUTIONS_SECTION = "resolutions";
     private static final String ALIASES_SECTION = "aliases";
+    private static final String WARNINGS_SECTION = "warnings";
+    private static final String CHANNEL_FLUCTUATION_LOWER_THRESHOLD = "channel_fluctuation_lower_threshold";
+    private static final String CHANNEL_FLUCTUATION_UPPER_THRESHOLD = "channel_fluctuation_upper_threshold";
 
     private final IniFileReader iniFileReader;
 
@@ -58,6 +61,31 @@ public class ConfigurationService {
             return Optional.of(new Resolution(Optional.of(sweepTransaction), resolutionType, outcome));
         } catch (IllegalArgumentException exception) {
             return Optional.empty();
+        }
+    }
+
+    public Optional<Integer> getChannelFluctuationWarningLowerThreshold() {
+        return getInteger(WARNINGS_SECTION, CHANNEL_FLUCTUATION_LOWER_THRESHOLD);
+    }
+
+    public Optional<Integer> getChannelFluctuationWarningUpperThreshold() {
+        return getInteger(WARNINGS_SECTION, CHANNEL_FLUCTUATION_UPPER_THRESHOLD);
+    }
+
+    private Optional<Integer> getInteger(String sectionName, String configurationName) {
+        Map<String, Set<String>> values = iniFileReader.getValues(sectionName);
+        return values.getOrDefault(configurationName, Set.of()).stream()
+                .filter(this::isNumber)
+                .map(Integer::valueOf)
+                .findFirst();
+    }
+
+    private boolean isNumber(String string) {
+        try {
+            Integer.parseInt(string);
+            return true;
+        } catch (NumberFormatException exception) {
+            return false;
         }
     }
 }

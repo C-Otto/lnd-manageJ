@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.service;
 
+import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.LocalChannel;
@@ -13,16 +14,22 @@ import java.util.stream.Stream;
 
 @Component
 public class ChannelBalanceFluctuationWarningsProvider implements ChannelWarningsProvider {
-    private static final int LOWER_THRESHOLD = 10;
-    private static final int UPPER_THRESHOLD = 90;
     private static final int DAYS = 14;
+    private static final int DEFAULT_LOWER_THRESHOLD = 10;
+    private static final int DEFAULT_UPPER_THRESHOLD = 90;
 
     private final ChannelService channelService;
     private final BalanceService balanceService;
+    private final ConfigurationService configurationService;
 
-    public ChannelBalanceFluctuationWarningsProvider(ChannelService channelService, BalanceService balanceService) {
+    public ChannelBalanceFluctuationWarningsProvider(
+            ChannelService channelService,
+            BalanceService balanceService,
+            ConfigurationService configurationService
+    ) {
         this.channelService = channelService;
         this.balanceService = balanceService;
+        this.configurationService = configurationService;
     }
 
     @Override
@@ -42,9 +49,19 @@ public class ChannelBalanceFluctuationWarningsProvider implements ChannelWarning
         }
         int minPercentage = (int) (min.milliSatoshis() * 100.0 / capacity.milliSatoshis());
         int maxPercentage = (int) (max.milliSatoshis() * 100.0 / capacity.milliSatoshis());
-        if (minPercentage < LOWER_THRESHOLD && maxPercentage > UPPER_THRESHOLD) {
+        if (minPercentage < getLowerThreshold() && maxPercentage > getUpperThreshold()) {
             return Optional.of(new ChannelBalanceFluctuationWarning(minPercentage, maxPercentage, DAYS));
         }
         return Optional.empty();
+    }
+
+    private int getLowerThreshold() {
+        return configurationService.getChannelFluctuationWarningLowerThreshold()
+                .orElse(DEFAULT_LOWER_THRESHOLD);
+    }
+
+    private int getUpperThreshold() {
+        return configurationService.getChannelFluctuationWarningUpperThreshold()
+                .orElse(DEFAULT_UPPER_THRESHOLD);
     }
 }
