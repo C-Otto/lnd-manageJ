@@ -21,7 +21,6 @@ public class ConfigurationService {
     private static final Splitter SPLITTER = Splitter.on(":");
     private static final String RESOLUTIONS_SECTION = "resolutions";
     private static final String ALIASES_SECTION = "aliases";
-    private static final String WARNINGS_SECTION = "warnings";
 
     private final IniFileReader iniFileReader;
 
@@ -62,8 +61,8 @@ public class ConfigurationService {
         }
     }
 
-    public Optional<Integer> getIntegerValue(WarningsConfigurationSettings warningsConfigurationSettings) {
-        return getInteger(WARNINGS_SECTION, warningsConfigurationSettings.getName());
+    public Optional<Integer> getIntegerValue(ConfigurationSetting configurationSetting) {
+        return getInteger(configurationSetting.getSection(), configurationSetting.getName());
     }
 
     private Optional<Integer> getInteger(String sectionName, String configurationName) {

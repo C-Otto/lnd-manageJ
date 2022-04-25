@@ -1,6 +1,6 @@
 package de.cotto.lndmanagej.configuration;
 
-public enum WarningsConfigurationSettings {
+public enum WarningsConfigurationSettings implements ConfigurationSetting {
     ONLINE_CHANGES_THRESHOLD("online_changes_threshold"),
     ONLINE_PERCENTAGE_THRESHOLD("online_percentage_threshold"),
     CHANNEL_FLUCTUATION_LOWER_THRESHOLD("channel_fluctuation_lower_threshold"),
@@ -15,7 +15,13 @@ public enum WarningsConfigurationSettings {
         this.name = name;
     }
 
-    String getName() {
+    @Override
+    public String getName() {
         return name;
+    }
+
+    @Override
+    public String getSection() {
+        return "warnings";
     }
 }

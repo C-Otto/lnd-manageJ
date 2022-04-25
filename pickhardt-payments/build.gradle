@@ -5,6 +5,7 @@ plugins {
 dependencies {
     implementation project(':backend')
     implementation project(':caching')
+    implementation project(':configuration')
     implementation project(':model')
     implementation project(':grpc-adapter')
     implementation 'com.google.ortools:ortools-java:9.3.10497'

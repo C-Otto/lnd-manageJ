@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.pickhardtpayments;
 
+import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.grpc.GrpcGetInfo;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.pickhardtpayments.model.Edge;
@@ -13,6 +14,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
+
+import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.PIECEWISE_LINEAR_APPROXIMATIONS;
+import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.QUANTIZATION;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
@@ -40,16 +45,14 @@ class FlowComputationTest {
     @Mock
     private GrpcGetInfo grpcGetInfo;
 
+    @Mock
+    private ConfigurationService configurationService;
+
     @BeforeEach
     void setUp() {
-        int piecewiseLinearApproximations = 1;
-        long quantization = 1;
-        flowComputation = new FlowComputation(
-                edgeComputation,
-                grpcGetInfo,
-                quantization,
-                piecewiseLinearApproximations
-        );
+        when(configurationService.getIntegerValue(QUANTIZATION)).thenReturn(Optional.of(1));
+        when(configurationService.getIntegerValue(PIECEWISE_LINEAR_APPROXIMATIONS)).thenReturn(Optional.of(1));
+        flowComputation = new FlowComputation(edgeComputation, grpcGetInfo, configurationService);
         lenient().when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY);
     }
 
