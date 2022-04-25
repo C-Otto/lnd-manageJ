@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.service;
 
+import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.FlowReport;
 import de.cotto.lndmanagej.model.warnings.NodeNoFlowWarning;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +16,7 @@ import java.util.Set;
 
 import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.transactions.model.TransactionFixtures.BLOCK_HEIGHT;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,6 +39,9 @@ class NodeFlowWarningsProviderTest {
 
     @Mock
     private ChannelService channelService;
+
+    @Mock
+    private ConfigurationService configurationService;
 
     @BeforeEach
     void setUp() {
@@ -83,6 +88,21 @@ class NodeFlowWarningsProviderTest {
         mockOpenChannelWithAgeInBlocks(100 * EXPECTED_BLOCKS_PER_DAY);
         when(flowService.getFlowReportForPeer(any(), any())).thenReturn(FLOW_REPORT);
         assertThat(warningsProvider.getNodeWarnings(PUBKEY)).isEmpty();
+    }
+
+    @Test
+    void uses_minimum_days_for_warning_from_configuration() {
+        when(configurationService.getNodeFlowWarningMinimumDaysForWarning()).thenReturn(Optional.of(2));
+        mockOpenChannelWithAgeInBlocks(3 * EXPECTED_BLOCKS_PER_DAY);
+        assertThat(warningsProvider.getNodeWarnings(PUBKEY)).containsExactly(new NodeNoFlowWarning(3));
+    }
+
+    @Test
+    void uses_maximum_days_to_consider_from_configuration() {
+        when(configurationService.getNodeFlowWarningMaximumDaysToConsider()).thenReturn(Optional.of(120));
+        when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL_2));
+        when(channelService.getOpenHeight(LOCAL_OPEN_CHANNEL_2)).thenReturn(Optional.of(BLOCK_HEIGHT));
+        assertThat(warningsProvider.getNodeWarnings(PUBKEY)).containsExactly(new NodeNoFlowWarning(120));
     }
 
     private void mockOpenChannelWithAgeInBlocks(int channelAgeInBlocks) {

@@ -28,6 +28,8 @@ class ConfigurationServiceTest {
     private static final String CHANNEL_FLUCTUATION_LOWER_THRESHOLD = "channel_fluctuation_lower_threshold";
     private static final String CHANNEL_FLUCTUATION_UPPER_THRESHOLD = "channel_fluctuation_upper_threshold";
     private static final String MAX_NUM_UPDATES = "max_num_updates";
+    private static final String NODE_FLOW_MINIMUM_DAYS_FOR_WARNING = "node_flow_minimum_days_for_warning";
+    private static final String NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER = "node_flow_maximum_days_to_consider";
 
     @InjectMocks
     private ConfigurationService configurationService;
@@ -155,5 +157,43 @@ class ConfigurationServiceTest {
     void getMaxNumUpdates_not_integer() {
         when(iniFileReader.getValues(WARNINGS_SECTION)).thenReturn(Map.of(MAX_NUM_UPDATES, Set.of("x")));
         assertThat(configurationService.getMaxNumUpdates()).isEmpty();
+    }
+
+    @Test
+    void getNodeFlowWarningMinimumDaysForWarning_defaults_to_empty() {
+        assertThat(configurationService.getNodeFlowWarningMinimumDaysForWarning()).isEmpty();
+    }
+
+    @Test
+    void getNodeFlowWarningMinimumDaysForWarning() {
+        when(iniFileReader.getValues(WARNINGS_SECTION))
+                .thenReturn(Map.of(NODE_FLOW_MINIMUM_DAYS_FOR_WARNING, Set.of("99")));
+        assertThat(configurationService.getNodeFlowWarningMinimumDaysForWarning()).contains(99);
+    }
+
+    @Test
+    void getNodeFlowWarningMinimumDaysForWarning_not_integer() {
+        when(iniFileReader.getValues(WARNINGS_SECTION))
+                .thenReturn(Map.of(NODE_FLOW_MINIMUM_DAYS_FOR_WARNING, Set.of("x")));
+        assertThat(configurationService.getNodeFlowWarningMinimumDaysForWarning()).isEmpty();
+    }
+
+    @Test
+    void getNodeFlowWarningMaximumDaysToConsider_defaults_to_empty() {
+        assertThat(configurationService.getNodeFlowWarningMaximumDaysToConsider()).isEmpty();
+    }
+
+    @Test
+    void getNodeFlowWarningMaximumDaysToConsider() {
+        when(iniFileReader.getValues(WARNINGS_SECTION))
+                .thenReturn(Map.of(NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER, Set.of("99")));
+        assertThat(configurationService.getNodeFlowWarningMaximumDaysToConsider()).contains(99);
+    }
+
+    @Test
+    void getNodeFlowWarningMaximumDaysToConsider_not_integer() {
+        when(iniFileReader.getValues(WARNINGS_SECTION))
+                .thenReturn(Map.of(NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER, Set.of("x")));
+        assertThat(configurationService.getNodeFlowWarningMaximumDaysToConsider()).isEmpty();
     }
 }

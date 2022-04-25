@@ -25,6 +25,8 @@ public class ConfigurationService {
     private static final String CHANNEL_FLUCTUATION_LOWER_THRESHOLD = "channel_fluctuation_lower_threshold";
     private static final String CHANNEL_FLUCTUATION_UPPER_THRESHOLD = "channel_fluctuation_upper_threshold";
     private static final String MAX_NUM_UPDATES = "max_num_updates";
+    private static final String NODE_FLOW_MINIMUM_DAYS_FOR_WARNING = "node_flow_minimum_days_for_warning";
+    private static final String NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER = "node_flow_maximum_days_to_consider";
 
     private final IniFileReader iniFileReader;
 
@@ -75,6 +77,14 @@ public class ConfigurationService {
 
     public Optional<Integer> getMaxNumUpdates() {
         return getInteger(WARNINGS_SECTION, MAX_NUM_UPDATES);
+    }
+
+    public Optional<Integer> getNodeFlowWarningMinimumDaysForWarning() {
+        return getInteger(WARNINGS_SECTION, NODE_FLOW_MINIMUM_DAYS_FOR_WARNING);
+    }
+
+    public Optional<Integer> getNodeFlowWarningMaximumDaysToConsider() {
+        return getInteger(WARNINGS_SECTION, NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER);
     }
 
     private Optional<Integer> getInteger(String sectionName, String configurationName) {
