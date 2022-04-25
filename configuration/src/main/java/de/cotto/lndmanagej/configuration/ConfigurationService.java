@@ -27,6 +27,8 @@ public class ConfigurationService {
     private static final String MAX_NUM_UPDATES = "max_num_updates";
     private static final String NODE_FLOW_MINIMUM_DAYS_FOR_WARNING = "node_flow_minimum_days_for_warning";
     private static final String NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER = "node_flow_maximum_days_to_consider";
+    private static final String ONLINE_PERCENTAGE_THRESHOLD = "online_percentage_threshold";
+    private static final String ONLINE_CHANGES_THRESHOLD = "online_changes_threshold";
 
     private final IniFileReader iniFileReader;
 
@@ -85,6 +87,14 @@ public class ConfigurationService {
 
     public Optional<Integer> getNodeFlowWarningMaximumDaysToConsider() {
         return getInteger(WARNINGS_SECTION, NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER);
+    }
+
+    public Optional<Integer> getOnlinePercentageThreshold() {
+        return getInteger(WARNINGS_SECTION, ONLINE_PERCENTAGE_THRESHOLD);
+    }
+
+    public Optional<Integer> getOnlineChangesThreshold() {
+        return getInteger(WARNINGS_SECTION, ONLINE_CHANGES_THRESHOLD);
     }
 
     private Optional<Integer> getInteger(String sectionName, String configurationName) {

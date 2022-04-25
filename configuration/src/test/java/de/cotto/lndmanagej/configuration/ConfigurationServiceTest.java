@@ -7,7 +7,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
@@ -30,6 +32,8 @@ class ConfigurationServiceTest {
     private static final String MAX_NUM_UPDATES = "max_num_updates";
     private static final String NODE_FLOW_MINIMUM_DAYS_FOR_WARNING = "node_flow_minimum_days_for_warning";
     private static final String NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER = "node_flow_maximum_days_to_consider";
+    private static final String ONLINE_PERCENTAGE_THRESHOLD = "online_percentage_threshold";
+    private static final String ONLINE_CHANGES_THRESHOLD = "online_changes_threshold";
 
     @InjectMocks
     private ConfigurationService configurationService;
@@ -111,16 +115,18 @@ class ConfigurationServiceTest {
 
     @Test
     void getChannelBalanceFluctuationWarningLowerThreshold() {
-        when(iniFileReader.getValues(WARNINGS_SECTION))
-                .thenReturn(Map.of(CHANNEL_FLUCTUATION_LOWER_THRESHOLD, Set.of("1")));
-        assertThat(configurationService.getChannelFluctuationWarningLowerThreshold()).contains(1);
+        assertValue(
+                configurationService::getChannelFluctuationWarningLowerThreshold,
+                CHANNEL_FLUCTUATION_LOWER_THRESHOLD
+        );
     }
 
     @Test
     void getChannelBalanceFluctuationWarningLowerThreshold_not_integer() {
-        when(iniFileReader.getValues(WARNINGS_SECTION))
-                .thenReturn(Map.of(CHANNEL_FLUCTUATION_LOWER_THRESHOLD, Set.of("x")));
-        assertThat(configurationService.getChannelFluctuationWarningLowerThreshold()).isEmpty();
+        assertEmptyForNonIntegerValue(
+                configurationService::getChannelFluctuationWarningLowerThreshold,
+                CHANNEL_FLUCTUATION_LOWER_THRESHOLD
+        );
     }
 
     @Test
@@ -130,16 +136,18 @@ class ConfigurationServiceTest {
 
     @Test
     void getChannelBalanceFluctuationWarningUpperThreshold() {
-        when(iniFileReader.getValues(WARNINGS_SECTION))
-                .thenReturn(Map.of(CHANNEL_FLUCTUATION_UPPER_THRESHOLD, Set.of("99")));
-        assertThat(configurationService.getChannelFluctuationWarningUpperThreshold()).contains(99);
+        assertValue(
+                configurationService::getChannelFluctuationWarningUpperThreshold,
+                CHANNEL_FLUCTUATION_UPPER_THRESHOLD
+        );
     }
 
     @Test
     void getChannelBalanceFluctuationWarningUpperThreshold_not_integer() {
-        when(iniFileReader.getValues(WARNINGS_SECTION))
-                .thenReturn(Map.of(CHANNEL_FLUCTUATION_UPPER_THRESHOLD, Set.of("x")));
-        assertThat(configurationService.getChannelFluctuationWarningUpperThreshold()).isEmpty();
+        assertEmptyForNonIntegerValue(
+                configurationService::getChannelFluctuationWarningUpperThreshold,
+                CHANNEL_FLUCTUATION_UPPER_THRESHOLD
+        );
     }
 
     @Test
@@ -149,14 +157,12 @@ class ConfigurationServiceTest {
 
     @Test
     void getMaxNumUpdates() {
-        when(iniFileReader.getValues(WARNINGS_SECTION)).thenReturn(Map.of(MAX_NUM_UPDATES, Set.of("99")));
-        assertThat(configurationService.getMaxNumUpdates()).contains(99);
+        assertValue(configurationService::getMaxNumUpdates, MAX_NUM_UPDATES);
     }
 
     @Test
     void getMaxNumUpdates_not_integer() {
-        when(iniFileReader.getValues(WARNINGS_SECTION)).thenReturn(Map.of(MAX_NUM_UPDATES, Set.of("x")));
-        assertThat(configurationService.getMaxNumUpdates()).isEmpty();
+        assertEmptyForNonIntegerValue(configurationService::getMaxNumUpdates, MAX_NUM_UPDATES);
     }
 
     @Test
@@ -166,16 +172,15 @@ class ConfigurationServiceTest {
 
     @Test
     void getNodeFlowWarningMinimumDaysForWarning() {
-        when(iniFileReader.getValues(WARNINGS_SECTION))
-                .thenReturn(Map.of(NODE_FLOW_MINIMUM_DAYS_FOR_WARNING, Set.of("99")));
-        assertThat(configurationService.getNodeFlowWarningMinimumDaysForWarning()).contains(99);
+        assertValue(configurationService::getNodeFlowWarningMinimumDaysForWarning, NODE_FLOW_MINIMUM_DAYS_FOR_WARNING);
     }
 
     @Test
     void getNodeFlowWarningMinimumDaysForWarning_not_integer() {
-        when(iniFileReader.getValues(WARNINGS_SECTION))
-                .thenReturn(Map.of(NODE_FLOW_MINIMUM_DAYS_FOR_WARNING, Set.of("x")));
-        assertThat(configurationService.getNodeFlowWarningMinimumDaysForWarning()).isEmpty();
+        assertEmptyForNonIntegerValue(
+                configurationService::getNodeFlowWarningMinimumDaysForWarning,
+                NODE_FLOW_MINIMUM_DAYS_FOR_WARNING
+        );
     }
 
     @Test
@@ -185,15 +190,61 @@ class ConfigurationServiceTest {
 
     @Test
     void getNodeFlowWarningMaximumDaysToConsider() {
-        when(iniFileReader.getValues(WARNINGS_SECTION))
-                .thenReturn(Map.of(NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER, Set.of("99")));
-        assertThat(configurationService.getNodeFlowWarningMaximumDaysToConsider()).contains(99);
+        assertValue(configurationService::getNodeFlowWarningMaximumDaysToConsider, NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER);
     }
 
     @Test
     void getNodeFlowWarningMaximumDaysToConsider_not_integer() {
-        when(iniFileReader.getValues(WARNINGS_SECTION))
-                .thenReturn(Map.of(NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER, Set.of("x")));
-        assertThat(configurationService.getNodeFlowWarningMaximumDaysToConsider()).isEmpty();
+        assertEmptyForNonIntegerValue(
+                configurationService::getNodeFlowWarningMaximumDaysToConsider,
+                NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER
+        );
+    }
+
+    @Test
+    void getOnlinePercentageThreshold_defaults_to_empty() {
+        assertThat(configurationService.getOnlinePercentageThreshold()).isEmpty();
+    }
+
+    @Test
+    void getOnlinePercentageThreshold() {
+        assertValue(configurationService::getOnlinePercentageThreshold, ONLINE_PERCENTAGE_THRESHOLD);
+    }
+
+    @Test
+    void getOnlinePercentageThreshold_not_integer() {
+        assertEmptyForNonIntegerValue(
+                configurationService::getOnlinePercentageThreshold,
+                ONLINE_PERCENTAGE_THRESHOLD
+        );
+    }
+
+    @Test
+    void getOnlineChangesThreshold_defaults_to_empty() {
+        assertThat(configurationService.getOnlineChangesThreshold()).isEmpty();
+    }
+
+    @Test
+    void getOnlineChangesThreshold() {
+        assertValue(configurationService::getOnlineChangesThreshold, ONLINE_CHANGES_THRESHOLD);
+    }
+
+    @Test
+    void getOnlineChangesThreshold_not_integer() {
+        assertEmptyForNonIntegerValue(
+                configurationService::getOnlineChangesThreshold,
+                ONLINE_CHANGES_THRESHOLD
+        );
+    }
+
+    private void assertEmptyForNonIntegerValue(Supplier<Optional<Integer>> supplier, String key) {
+        when(iniFileReader.getValues(WARNINGS_SECTION)).thenReturn(Map.of(key, Set.of("x")));
+        assertThat(supplier.get()).isEmpty();
+    }
+
+    private void assertValue(Supplier<Optional<Integer>> supplier, String key) {
+        int expectedValue = 42;
+        when(iniFileReader.getValues(WARNINGS_SECTION)).thenReturn(Map.of(key, Set.of(String.valueOf(expectedValue))));
+        assertThat(supplier.get()).contains(expectedValue);
     }
 }
