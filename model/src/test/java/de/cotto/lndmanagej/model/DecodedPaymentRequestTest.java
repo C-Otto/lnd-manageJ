@@ -37,6 +37,11 @@ class DecodedPaymentRequestTest {
     }
 
     @Test
+    void paymentAddress() {
+        assertThat(DECODED_PAYMENT_REQUEST.paymentAddress()).isEqualTo(new HexString("0011AABBCC"));
+    }
+
+    @Test
     void cltvExpiry() {
         assertThat(DECODED_PAYMENT_REQUEST.cltvExpiry()).isEqualTo(144);
     }

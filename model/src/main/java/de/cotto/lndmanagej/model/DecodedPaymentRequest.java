@@ -9,6 +9,7 @@ public record DecodedPaymentRequest(
         Pubkey destination,
         Coins amount,
         HexString paymentHash,
+        HexString paymentAddress,
         Instant creation,
         Instant expiry
 ) {

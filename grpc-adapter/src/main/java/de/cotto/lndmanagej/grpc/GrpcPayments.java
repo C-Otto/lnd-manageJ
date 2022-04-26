@@ -55,6 +55,7 @@ public class GrpcPayments {
                             Pubkey.create(payReq.getDestination()),
                             Coins.ofMilliSatoshis(payReq.getNumMsat()),
                             new HexString(payReq.getPaymentHash()),
+                            new HexString(payReq.getPaymentAddr().toByteArray()),
                             creationTimestamp,
                             expiryTimestamp
                     );
