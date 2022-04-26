@@ -2,8 +2,8 @@ package de.cotto.lndmanagej.grpc;
 
 import com.codahale.metrics.annotation.Timed;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import de.cotto.lndmanagej.LndConfiguration;
 import de.cotto.lndmanagej.caching.CacheBuilder;
+import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
 import io.grpc.Status;
@@ -40,6 +40,7 @@ import lnrpc.PendingChannelsResponse.ForceClosedChannel;
 import lnrpc.RPCMiddlewareRequest;
 import lnrpc.RPCMiddlewareResponse;
 import lnrpc.Transaction;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
@@ -83,8 +84,11 @@ public class GrpcService extends GrpcBase {
             .withExpiry(TRANSACTIONS_CACHE_EXPIRY)
             .build(this::getTransactionsWithoutCache);
 
-    public GrpcService(LndConfiguration lndConfiguration) throws IOException {
-        super(lndConfiguration);
+    public GrpcService(
+            ConfigurationService configurationService,
+            @Value("${user.home}") String homeDirectory
+    ) throws IOException {
+        super(configurationService, homeDirectory);
         lightningStub = stubCreator.getLightningStub();
         nonBlockingLightningStub = stubCreator.getNonBlockingLightningStub();
     }

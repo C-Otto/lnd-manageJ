@@ -21,6 +21,7 @@ public class ConfigurationService {
     private static final Splitter SPLITTER = Splitter.on(":");
     private static final String RESOLUTIONS_SECTION = "resolutions";
     private static final String ALIASES_SECTION = "aliases";
+    private static final String LND_SECTION = "lnd";
 
     private final IniFileReader iniFileReader;
 
@@ -29,9 +30,7 @@ public class ConfigurationService {
     }
 
     public Optional<String> getHardcodedAlias(Pubkey pubkey) {
-        Map<String, Set<String>> values = iniFileReader.getValues(ALIASES_SECTION);
-        Set<String> alias = values.getOrDefault(pubkey.toString(), Set.of());
-        return alias.stream().findFirst();
+        return getStringValue(ALIASES_SECTION, pubkey.toString());
     }
 
     public Set<Resolution> getHardcodedResolutions(ChannelId channelId) {
@@ -44,6 +43,22 @@ public class ConfigurationService {
                 .map(this::parseResolution)
                 .flatMap(Optional::stream)
                 .collect(toSet());
+    }
+
+    public Optional<String> getLndMacaroonFile() {
+        return getStringValue(LND_SECTION, "macaroon_file");
+    }
+
+    public Optional<String> getLndCertFile() {
+        return getStringValue(LND_SECTION, "cert_file");
+    }
+
+    public Optional<Integer> getLndPort() {
+        return getInteger(LND_SECTION, "port");
+    }
+
+    public Optional<String> getLndHost() {
+        return getStringValue(LND_SECTION, "host");
     }
 
     private Optional<Resolution> parseResolution(String encodedResolution) {
@@ -59,6 +74,10 @@ public class ConfigurationService {
         } catch (IllegalArgumentException exception) {
             return Optional.empty();
         }
+    }
+
+    private Optional<String> getStringValue(String section, String key) {
+        return iniFileReader.getValues(section).getOrDefault(key, Set.of()).stream().findFirst();
     }
 
     public Optional<Integer> getIntegerValue(ConfigurationSetting configurationSetting) {

@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.configuration;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,6 +23,7 @@ class ConfigurationServiceTest {
     private static final String RESOLUTIONS_SECTION = "resolutions";
     private static final String ALIASES_SECTION = "aliases";
     private static final String WARNINGS_SECTION = "warnings";
+    private static final String LND_SECTION = "lnd";
     private static final String COMMIT_CLAIMED_STRING
             = "COMMIT:CLAIMED:abc222abc000abc000abc000abc000abc000abc000abc000abc000abc000abc0";
     private static final String ANCHOR_CLAIMED_STRING
@@ -100,8 +102,64 @@ class ConfigurationServiceTest {
         assertThat(Set.of(first, second).contains(actual)).isTrue();
     }
 
+    @Nested
+    class LndConfigurationOptions {
+        @Test
+        void getLndMacaroonFile_defaults_to_empty() {
+            assertThat(configurationService.getLndMacaroonFile()).isEmpty();
+        }
+
+        @Test
+        void getLndMacaroonFile() {
+            when(iniFileReader.getValues(LND_SECTION))
+                    .thenReturn(Map.of("macaroon_file", Set.of("some string")));
+            assertThat(configurationService.getLndMacaroonFile()).contains("some string");
+        }
+
+        @Test
+        void getLndCertFile_defaults_to_empty() {
+            assertThat(configurationService.getLndCertFile()).isEmpty();
+        }
+
+        @Test
+        void getLndCertFile() {
+            when(iniFileReader.getValues(LND_SECTION))
+                    .thenReturn(Map.of("cert_file", Set.of("foo")));
+            assertThat(configurationService.getLndCertFile()).contains("foo");
+        }
+
+        @Test
+        void getLndPort_defaults_to_empty() {
+            assertThat(configurationService.getLndPort()).isEmpty();
+        }
+
+        @Test
+        void getLndPort_defaults_not_integer() {
+            when(iniFileReader.getValues(LND_SECTION)).thenReturn(Map.of("port", Set.of("x")));
+            assertThat(configurationService.getLndPort()).isEmpty();
+        }
+
+        @Test
+        void getLndPort() {
+            when(iniFileReader.getValues(LND_SECTION)).thenReturn(Map.of("port", Set.of("123")));
+            assertThat(configurationService.getLndPort()).contains(123);
+        }
+
+        @Test
+        void getHost_defaults_to_empty() {
+            assertThat(configurationService.getLndHost()).isEmpty();
+        }
+
+        @Test
+        @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
+        void getLndHost() {
+            when(iniFileReader.getValues(LND_SECTION)).thenReturn(Map.of("host", Set.of("10.0.2.2")));
+            assertThat(configurationService.getLndHost()).contains("10.0.2.2");
+        }
+    }
+
     @Test
-    void getOnlineChangesThreshold_defaults_to_empty() {
+    void getIntegerValue_defaults_to_empty() {
         assertThat(configurationService.getIntegerValue(ONLINE_CHANGES_THRESHOLD)).isEmpty();
     }
 

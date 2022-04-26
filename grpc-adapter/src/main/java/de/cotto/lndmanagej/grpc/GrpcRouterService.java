@@ -1,7 +1,8 @@
 package de.cotto.lndmanagej.grpc;
 
 import com.codahale.metrics.annotation.Timed;
-import de.cotto.lndmanagej.LndConfiguration;
+import de.cotto.lndmanagej.configuration.ConfigurationService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import routerrpc.RouterGrpc;
 import routerrpc.RouterOuterClass;
@@ -19,8 +20,11 @@ import java.util.Optional;
 public class GrpcRouterService extends GrpcBase {
     private final RouterGrpc.RouterBlockingStub routerStub;
 
-    public GrpcRouterService(LndConfiguration lndConfiguration) throws IOException {
-        super(lndConfiguration);
+    public GrpcRouterService(
+            ConfigurationService configurationService,
+            @Value("${user.home}") String homeDirectory
+    ) throws IOException {
+        super(configurationService, homeDirectory);
         routerStub = stubCreator.getRouterStub();
     }
 
