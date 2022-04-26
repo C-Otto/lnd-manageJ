@@ -10,6 +10,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class MultiPathPaymentTest {
     @Test
+    void isFailure() {
+        assertThat(MultiPathPayment.FAILURE.isFailure()).isTrue();
+    }
+
+    @Test
+    void isFailure_false() {
+        assertThat(MULTI_PATH_PAYMENT.isFailure()).isFalse();
+    }
+
+    @Test
     void probability_failure() {
         assertThat(MultiPathPayment.FAILURE.probability()).isZero();
     }

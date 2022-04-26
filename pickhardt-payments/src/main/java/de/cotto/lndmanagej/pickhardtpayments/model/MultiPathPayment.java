@@ -24,6 +24,10 @@ public record MultiPathPayment(
         );
     }
 
+    public boolean isFailure() {
+        return equals(FAILURE);
+    }
+
     public long getFeeRate() {
         return getFeeRateForFees(fees);
     }
