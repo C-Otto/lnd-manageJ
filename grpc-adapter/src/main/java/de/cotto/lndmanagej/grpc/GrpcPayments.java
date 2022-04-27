@@ -50,7 +50,7 @@ public class GrpcPayments {
                     Instant expiryTimestamp = creationTimestamp.plusSeconds(payReq.getExpiry());
                     return new DecodedPaymentRequest(
                             paymentRequest,
-                            payReq.getCltvExpiry(),
+                            (int) payReq.getCltvExpiry(),
                             payReq.getDescription(),
                             Pubkey.create(payReq.getDestination()),
                             Coins.ofMilliSatoshis(payReq.getNumMsat()),
