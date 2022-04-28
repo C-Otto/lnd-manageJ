@@ -23,6 +23,7 @@ import java.util.Set;
 
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_PEER;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_1;
@@ -31,7 +32,6 @@ import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_WITH_BASE_FEE;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_4;
-import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;

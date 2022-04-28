@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.pickhardtpayments.model;
 
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.Edge;
 import de.cotto.lndmanagej.model.Pubkey;
 
 import java.util.ArrayDeque;

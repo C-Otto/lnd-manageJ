@@ -3,8 +3,8 @@ package de.cotto.lndmanagej.pickhardtpayments;
 import com.google.ortools.Loader;
 import com.google.ortools.graph.MinCostFlow;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.Edge;
 import de.cotto.lndmanagej.model.Pubkey;
-import de.cotto.lndmanagej.pickhardtpayments.model.Edge;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgesWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.IntegerMapping;
@@ -13,12 +13,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE;
+import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE_1_3;
+import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE_2_3;
+import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE_3_4;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
-import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE;
-import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE_1_3;
-import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE_2_3;
-import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE_3_4;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ArcInitializerTest {

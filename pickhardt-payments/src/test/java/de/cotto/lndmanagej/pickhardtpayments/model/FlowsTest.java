@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.pickhardtpayments.model;
 
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.Edge;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
@@ -10,15 +11,15 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_4;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_5;
+import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE;
+import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE_1_3;
+import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE_2_3;
+import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE_3_4;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_1;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_4;
-import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE;
-import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE_1_3;
-import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE_2_3;
-import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE_3_4;
 import static de.cotto.lndmanagej.pickhardtpayments.model.FlowFixtures.FLOW;
 import static de.cotto.lndmanagej.pickhardtpayments.model.FlowFixtures.FLOW_2;
 import static de.cotto.lndmanagej.pickhardtpayments.model.FlowFixtures.FLOW_3;

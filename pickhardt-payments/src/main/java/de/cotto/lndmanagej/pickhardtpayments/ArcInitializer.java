@@ -2,8 +2,8 @@ package de.cotto.lndmanagej.pickhardtpayments;
 
 import com.google.ortools.graph.MinCostFlow;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.Edge;
 import de.cotto.lndmanagej.model.Pubkey;
-import de.cotto.lndmanagej.pickhardtpayments.model.Edge;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgesWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.IntegerMapping;

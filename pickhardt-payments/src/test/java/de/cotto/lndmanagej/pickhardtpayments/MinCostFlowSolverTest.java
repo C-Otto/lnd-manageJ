@@ -10,15 +10,15 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
+import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE;
+import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE_1_3;
+import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE_2_3;
+import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE_3_2;
+import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE_3_4;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_4;
-import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE;
-import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE_1_3;
-import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE_2_3;
-import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE_3_2;
-import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE_3_4;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;

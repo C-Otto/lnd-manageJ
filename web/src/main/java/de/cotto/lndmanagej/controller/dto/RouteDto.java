@@ -1,7 +1,7 @@
 package de.cotto.lndmanagej.controller.dto;
 
 import de.cotto.lndmanagej.model.ChannelId;
-import de.cotto.lndmanagej.pickhardtpayments.model.Edge;
+import de.cotto.lndmanagej.model.Edge;
 import de.cotto.lndmanagej.pickhardtpayments.model.Route;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package de.cotto.lndmanagej.pickhardtpayments.model;
+package de.cotto.lndmanagej.model;
 
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY_2;

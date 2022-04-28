@@ -3,7 +3,7 @@ package de.cotto.lndmanagej.pickhardtpayments.model;
 import de.cotto.lndmanagej.model.Coins;
 import org.junit.jupiter.api.Test;
 
-import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeFixtures.EDGE;
+import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE;
 import static de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithLiquidityInformationFixtures.EDGE_WITH_LIQUIDITY_INFORMATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
