@@ -1,15 +1,9 @@
 package de.cotto.lndmanagej.pickhardtpayments.model;
 
-import de.cotto.lndmanagej.model.Coins;
-
-import java.util.List;
-
-import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE;
-import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE_1_3;
-import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE_2_3;
-import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE_3_4;
+import static de.cotto.lndmanagej.pickhardtpayments.model.BasicRouteFixtures.BASIC_ROUTE;
+import static de.cotto.lndmanagej.pickhardtpayments.model.BasicRouteFixtures.BASIC_ROUTE_2;
 
 public class RouteFixtures {
-    public static final Route ROUTE = new Route(List.of(EDGE, EDGE_2_3, EDGE_3_4), Coins.ofSatoshis(100));
-    public static final Route ROUTE_2 = new Route(List.of(EDGE_1_3, EDGE_2_3), Coins.ofSatoshis(200));
+    public static final Route ROUTE = new Route(BASIC_ROUTE);
+    public static final Route ROUTE_2 = new Route(BASIC_ROUTE_2);
 }

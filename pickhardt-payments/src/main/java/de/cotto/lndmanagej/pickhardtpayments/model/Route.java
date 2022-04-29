@@ -4,23 +4,42 @@ import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Edge;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-
-import static java.util.stream.Collectors.toMap;
 
 public record Route(
         List<Edge> edges,
+        List<EdgeWithLiquidityInformation> edgesWithLiquidityInformation,
         Coins amount,
-        List<Coins> feesForHops,
-        Map<Edge, EdgeWithLiquidityInformation> liquidityInformation
+        List<Coins> feesForHops
 ) {
-    public Route(List<Edge> edges, Coins amount) {
-        this(edges, amount, computeFees(edges, amount), Map.of());
+    public Route(BasicRoute basicRoute) {
+        this(basicRoute, basicRoute.edges().stream().map(Route::getDefaultLiquidityInformation).toList());
+    }
+
+    public Route(BasicRoute basicRoute, List<EdgeWithLiquidityInformation> edgesWithLiquidityInformation) {
+        this(
+                basicRoute.edges(),
+                edgesWithLiquidityInformation,
+                basicRoute.amount(),
+                computeFees(basicRoute.edges(), basicRoute.amount())
+        );
+    }
+
+    private static EdgeWithLiquidityInformation getDefaultLiquidityInformation(Edge edge) {
+        return new EdgeWithLiquidityInformation(edge, Coins.NONE, edge.capacity());
     }
 
     public Route {
+        if (edges.size() != edgesWithLiquidityInformation.size()) {
+            throw new IllegalArgumentException("Edges must correspond to edges with liquidity information");
+        }
+        for (int i = 0; i < edges.size(); i++) {
+            Edge edge = edges.get(i);
+            EdgeWithLiquidityInformation edgeWithLiquidityInformation = edgesWithLiquidityInformation.get(i);
+            if (!edge.equals(edgeWithLiquidityInformation.edge())) {
+                throw new IllegalArgumentException("Edges must correspond to edges with liquidity information");
+            }
+        }
         if (!amount.isPositive()) {
             throw new IllegalArgumentException("Amount must be positive, is " + amount);
         }
@@ -35,21 +54,19 @@ public record Route(
     }
 
     public double getProbability() {
-        return edges.stream().map(this::getProbability).reduce(1.0, (a, b) -> a * b);
+        return edgesWithLiquidityInformation.stream().map(this::getProbability).reduce(1.0, (a, b) -> a * b);
     }
 
-    private Double getProbability(Edge edge) {
-        EdgeWithLiquidityInformation edgeWithLiquidityInformation =
-                liquidityInformation.getOrDefault(edge, getDefault(edge));
-        boolean knownLiquidity = edgeWithLiquidityInformation.isKnownLiquidity();
+    private Double getProbability(EdgeWithLiquidityInformation edge) {
+        boolean knownLiquidity = edge.isKnownLiquidity();
         if (knownLiquidity) {
-            if (amount.compareTo(edgeWithLiquidityInformation.availableLiquidityLowerBound()) <= 0) {
+            if (amount.compareTo(edge.availableLiquidityLowerBound()) <= 0) {
                 return 1.0;
             }
             return 0.0;
         }
-        long upperBoundSat = edgeWithLiquidityInformation.availableLiquidityUpperBound().milliSatoshis() / 1_000;
-        long lowerBoundSat = edgeWithLiquidityInformation.availableLiquidityLowerBound().milliSatoshis() / 1_000;
+        long upperBoundSat = edge.availableLiquidityUpperBound().milliSatoshis() / 1_000;
+        long lowerBoundSat = edge.availableLiquidityLowerBound().milliSatoshis() / 1_000;
         long amountSat = amount.milliSatoshis() / 1_000;
         return (1.0 * (upperBoundSat + 1 - amountSat)) / (upperBoundSat + 1 - lowerBoundSat);
     }
@@ -67,13 +84,7 @@ public record Route(
     }
 
     public Route getForAmount(Coins newAmount) {
-        return new Route(edges, newAmount).withLiquidityInformation(liquidityInformation.values());
-    }
-
-    public Route withLiquidityInformation(Collection<EdgeWithLiquidityInformation> liquidityInformation) {
-        Map<Edge, EdgeWithLiquidityInformation> map =
-                liquidityInformation.stream().collect(toMap(EdgeWithLiquidityInformation::edge, e -> e));
-        return new Route(edges, amount, feesForHops, map);
+        return new Route(new BasicRoute(edges, newAmount), edgesWithLiquidityInformation);
     }
 
     public Coins feeForHop(int hopIndex) {
@@ -121,9 +132,5 @@ public record Route(
         Coins baseFeeForHop = edge.policy().baseFee();
         Coins relativeFees = Coins.ofMilliSatoshis(feeRate * amountWithFees.milliSatoshis() / 1_000_000);
         return baseFeeForHop.add(relativeFees);
-    }
-
-    private EdgeWithLiquidityInformation getDefault(Edge edge) {
-        return new EdgeWithLiquidityInformation(edge, Coins.NONE, edge.capacity());
     }
 }

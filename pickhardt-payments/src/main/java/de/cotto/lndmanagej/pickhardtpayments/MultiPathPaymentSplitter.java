@@ -3,6 +3,8 @@ package de.cotto.lndmanagej.pickhardtpayments;
 import de.cotto.lndmanagej.grpc.GrpcGetInfo;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.pickhardtpayments.model.BasicRoute;
+import de.cotto.lndmanagej.pickhardtpayments.model.BasicRoutes;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.Flows;
 import de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPayment;
@@ -12,11 +14,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static de.cotto.lndmanagej.pickhardtpayments.PickhardtPaymentsConfiguration.DEFAULT_FEE_RATE_WEIGHT;
-import static java.util.stream.Collectors.toSet;
 
 @Component
 public class MultiPathPaymentSplitter {
@@ -53,20 +53,22 @@ public class MultiPathPaymentSplitter {
         if (flows.isEmpty()) {
             return MultiPathPayment.FAILURE;
         }
-        List<Route> routes = Routes.fromFlows(source, target, flows);
-        List<Route> routesWithLiquidityInformation = getWithLiquidityInformation(routes);
-        Routes.ensureTotalAmount(routesWithLiquidityInformation, amount);
-        return new MultiPathPayment(routesWithLiquidityInformation);
+        List<BasicRoute> basicRoutes = BasicRoutes.fromFlows(source, target, flows);
+        List<Route> routes = getWithLiquidityInformation(basicRoutes);
+        List<Route> fixedRoutes = Routes.getFixedWithTotalAmount(routes, amount);
+        return new MultiPathPayment(fixedRoutes);
     }
 
-    private List<Route> getWithLiquidityInformation(List<Route> routes) {
-        return routes.stream().map(this::getWithLiquidityInformation).collect(Collectors.toCollection(ArrayList::new));
+    private List<Route> getWithLiquidityInformation(List<BasicRoute> basicRoutes) {
+        return basicRoutes.stream()
+                .map(this::getWithLiquidityInformation)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    private Route getWithLiquidityInformation(Route route) {
-        Set<EdgeWithLiquidityInformation> liquidityInformation = route.edges().stream()
+    private Route getWithLiquidityInformation(BasicRoute basicRoute) {
+        List<EdgeWithLiquidityInformation> edgesWithLiquidityInformation = basicRoute.edges().stream()
                 .map(edgeComputation::getEdgeWithLiquidityInformation)
-                .collect(toSet());
-        return route.withLiquidityInformation(liquidityInformation);
+                .toList();
+        return new Route(basicRoute, edgesWithLiquidityInformation);
     }
 }

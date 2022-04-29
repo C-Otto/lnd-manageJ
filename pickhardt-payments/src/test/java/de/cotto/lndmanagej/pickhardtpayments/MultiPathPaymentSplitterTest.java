@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.pickhardtpayments;
 import de.cotto.lndmanagej.grpc.GrpcGetInfo;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Edge;
+import de.cotto.lndmanagej.pickhardtpayments.model.BasicRoute;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.Flow;
 import de.cotto.lndmanagej.pickhardtpayments.model.Flows;
@@ -16,7 +17,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Set;
 
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY_2;
@@ -83,7 +83,8 @@ class MultiPathPaymentSplitterTest {
 
         MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY_2, AMOUNT);
 
-        Route expectedRoute = new Route(List.of(EDGE), AMOUNT).withLiquidityInformation(Set.of(noInformationFor(EDGE)));
+        BasicRoute expectedBasicRoute = new BasicRoute(List.of(EDGE), AMOUNT);
+        Route expectedRoute = new Route(expectedBasicRoute, List.of(noInformationFor(EDGE)));
         MultiPathPayment expected = new MultiPathPayment(List.of(expectedRoute));
         assertThat(multiPathPayment).isEqualTo(expected);
     }
@@ -173,10 +174,11 @@ class MultiPathPaymentSplitterTest {
         when(edgeComputation.getEdgeWithLiquidityInformation(edge)).thenReturn(withLiquidityInformation);
         when(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, amount, DEFAULT_FEE_RATE_WEIGHT))
                 .thenReturn(new Flows(FLOW));
-        Route expected = new Route(List.of(edge), amount).withLiquidityInformation(Set.of(withLiquidityInformation));
+        BasicRoute expectedBasicRoute = new BasicRoute(List.of(edge), amount);
+        Route expectedRoute = new Route(expectedBasicRoute, List.of(withLiquidityInformation));
 
         MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_2, amount);
-        assertThat(multiPathPayment.routes()).containsExactly(expected);
+        assertThat(multiPathPayment.routes()).containsExactly(expectedRoute);
     }
 
     @Test
@@ -201,10 +203,10 @@ class MultiPathPaymentSplitterTest {
                 ));
         assumeThat(FLOW.amount()).isLessThan(AMOUNT);
         MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_2, AMOUNT);
-        Route route1 = new Route(List.of(edgeLargeCapacity), oneSat)
-                .withLiquidityInformation(Set.of(liquidityInformationLarge));
-        Route route2 = new Route(List.of(edgeSmallCapacity), AMOUNT.subtract(oneSat))
-                .withLiquidityInformation(Set.of(liquidityInformationSmall));
+        BasicRoute basicRoute1 = new BasicRoute(List.of(edgeLargeCapacity), oneSat);
+        Route route1 = new Route(basicRoute1, List.of(liquidityInformationLarge));
+        BasicRoute basicRoute2 = new BasicRoute(List.of(edgeSmallCapacity), AMOUNT.subtract(oneSat));
+        Route route2 = new Route(basicRoute2, List.of(liquidityInformationSmall));
         assertThat(multiPathPayment.routes()).containsExactlyInAnyOrder(route1, route2);
     }
 

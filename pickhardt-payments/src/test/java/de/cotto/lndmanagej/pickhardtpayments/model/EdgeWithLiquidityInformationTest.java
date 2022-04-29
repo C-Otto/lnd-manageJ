@@ -15,6 +15,31 @@ class EdgeWithLiquidityInformationTest {
     }
 
     @Test
+    void channelId() {
+        assertThat(EDGE_WITH_LIQUIDITY_INFORMATION.channelId()).isEqualTo(EDGE.channelId());
+    }
+
+    @Test
+    void startNode() {
+        assertThat(EDGE_WITH_LIQUIDITY_INFORMATION.startNode()).isEqualTo(EDGE.startNode());
+    }
+
+    @Test
+    void endNode() {
+        assertThat(EDGE_WITH_LIQUIDITY_INFORMATION.endNode()).isEqualTo(EDGE.endNode());
+    }
+
+    @Test
+    void capacity() {
+        assertThat(EDGE_WITH_LIQUIDITY_INFORMATION.capacity()).isEqualTo(EDGE.capacity());
+    }
+
+    @Test
+    void policy() {
+        assertThat(EDGE_WITH_LIQUIDITY_INFORMATION.policy()).isEqualTo(EDGE.policy());
+    }
+
+    @Test
     void forKnownLiquidity() {
         Coins knownLiquidity = Coins.ofSatoshis(300);
         assertThat(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, knownLiquidity))

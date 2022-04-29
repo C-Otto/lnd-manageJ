@@ -1,7 +1,10 @@
 package de.cotto.lndmanagej.pickhardtpayments.model;
 
+import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Edge;
+import de.cotto.lndmanagej.model.Policy;
+import de.cotto.lndmanagej.model.Pubkey;
 
 public record EdgeWithLiquidityInformation(
         Edge edge,
@@ -32,6 +35,26 @@ public record EdgeWithLiquidityInformation(
             Coins availableLiquidityUpperBound
     ) {
         return new EdgeWithLiquidityInformation(edge, availableLiquidityLowerBound, availableLiquidityUpperBound);
+    }
+
+    public ChannelId channelId() {
+        return edge.channelId();
+    }
+
+    public Pubkey startNode() {
+        return edge.startNode();
+    }
+
+    public Pubkey endNode() {
+        return edge.endNode();
+    }
+
+    public Coins capacity() {
+        return edge.capacity();
+    }
+
+    public Policy policy() {
+        return edge.policy();
     }
 
     public boolean isKnownLiquidity() {

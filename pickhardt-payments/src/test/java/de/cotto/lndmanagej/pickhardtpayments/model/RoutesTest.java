@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.pickhardtpayments.model;
 
-import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Edge;
 import org.junit.jupiter.api.Test;
@@ -15,94 +14,41 @@ import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_1;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
-import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
-import static de.cotto.lndmanagej.pickhardtpayments.model.FlowFixtures.FLOW;
-import static de.cotto.lndmanagej.pickhardtpayments.model.FlowsFixtures.FLOWS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assumptions.assumeThat;
 
 class RoutesTest {
-    private final Flows flows = new Flows();
-
     @Test
-    void fromFlows_empty() {
-        assertThat(Routes.fromFlows(PUBKEY, PUBKEY_2, flows)).isEmpty();
+    void getFixedWithTotalAmount_adds_to_only_route() {
+        BasicRoute basicRoute = new BasicRoute(List.of(EDGE), Coins.ofSatoshis(1));
+        List<Route> routes = List.of(new Route(basicRoute));
+        List<Route> fixedRoutes = Routes.getFixedWithTotalAmount(routes, Coins.ofSatoshis(2));
+        BasicRoute expectedBasicRoute = new BasicRoute(List.of(EDGE), Coins.ofSatoshis(2));
+        Route expectedRoute = new Route(expectedBasicRoute);
+        assertThat(fixedRoutes).containsExactly(expectedRoute);
     }
 
     @Test
-    void fromFlows_source_is_target() {
-        assertThat(Routes.fromFlows(PUBKEY, PUBKEY, FLOWS)).isEmpty();
-    }
+    void getFixedWithTotalAmount_adds_to_route_with_highest_probability() {
+        Edge edge1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1);
+        Edge edge2 = new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1);
+        Edge edge3 = new Edge(CHANNEL_ID_3, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1);
 
-    @Test
-    void fromFlows_simple() {
-        assertThat(Routes.fromFlows(PUBKEY, PUBKEY_2, new Flows(FLOW)))
-                .containsExactly(new Route(List.of(EDGE), Coins.ofSatoshis(1)));
-    }
+        List<BasicRoute> basicRoutes = List.of(
+                new BasicRoute(List.of(edge1), Coins.ofSatoshis(2)),
+                new BasicRoute(List.of(edge2), Coins.ofSatoshis(1)),
+                new BasicRoute(List.of(edge3), Coins.ofSatoshis(3))
+        );
+        List<Route> routes = basicRoutes.stream().map(Route::new).toList();
 
-    @Test
-    void fromFlows_does_not_mutate_flows() {
-        Coins expected = FLOW.amount();
-        Routes.fromFlows(PUBKEY, PUBKEY_2, FLOWS);
-        assertThat(FLOWS.getFlow(EDGE)).isEqualTo(expected);
-    }
+        List<Route> fixedRoutes = Routes.getFixedWithTotalAmount(routes, Coins.ofSatoshis(7));
 
-    @Test
-    void fromFlows_impossible() {
-        assertThat(Routes.fromFlows(PUBKEY_3, PUBKEY, FLOWS)).isEmpty();
-    }
-
-    @Test
-    void fromFlows_two_parallel_channels() {
-        Edge edge1 = createEdgeWithChannelId(CHANNEL_ID);
-        Edge edge2 = createEdgeWithChannelId(CHANNEL_ID_2);
-        flows.add(edge1, Coins.ofSatoshis(10));
-        flows.add(edge2, Coins.ofSatoshis(20));
-        assertThat(Routes.fromFlows(PUBKEY, PUBKEY_2, flows)).containsExactlyInAnyOrder(
-                new Route(List.of(edge1), Coins.ofSatoshis(10)),
-                new Route(List.of(edge2), Coins.ofSatoshis(20))
+        BasicRoute basicRoute1 = new BasicRoute(List.of(edge1), Coins.ofSatoshis(2));
+        BasicRoute basicRoute2 = new BasicRoute(List.of(edge2), Coins.ofSatoshis(2));
+        BasicRoute basicRoute3 = new BasicRoute(List.of(edge3), Coins.ofSatoshis(3));
+        assertThat(fixedRoutes).containsExactlyInAnyOrder(
+                new Route(basicRoute1),
+                new Route(basicRoute2),
+                new Route(basicRoute3)
         );
     }
-
-    @Test
-    void fromFlows_two_channels_joining() {
-        Edge edge1a = createEdgeWithChannelId(CHANNEL_ID);
-        Edge edge1b = createEdgeWithChannelId(CHANNEL_ID_2);
-        Edge edge2 = new Edge(CHANNEL_ID, PUBKEY_2, PUBKEY_3, CAPACITY, POLICY_1);
-        flows.add(edge1a, Coins.ofSatoshis(10));
-        flows.add(edge1b, Coins.ofSatoshis(10));
-        flows.add(edge2, Coins.ofSatoshis(20));
-        assertThat(Routes.fromFlows(PUBKEY, PUBKEY_3, flows)).containsExactlyInAnyOrder(
-                new Route(List.of(edge1a, edge2), Coins.ofSatoshis(10)),
-                new Route(List.of(edge1b, edge2), Coins.ofSatoshis(10))
-        );
-    }
-
-    @Test
-    void ensureTotalAmount_adds_to_only_route() {
-        List<Route> routes = Routes.fromFlows(PUBKEY, PUBKEY_2, FLOWS);
-        assumeThat(routes).containsExactly(new Route(List.of(EDGE), Coins.ofSatoshis(1)));
-        Routes.ensureTotalAmount(routes, Coins.ofSatoshis(2));
-        assertThat(routes).containsExactly(new Route(List.of(EDGE), Coins.ofSatoshis(2)));
-    }
-
-    @Test
-    void ensureTotalAmount_adds_to_route_with_highest_probability() {
-        Flows flows = new Flows();
-        flows.add(new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1), Coins.ofSatoshis(2));
-        flows.add(new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1), Coins.ofSatoshis(1));
-        flows.add(new Edge(CHANNEL_ID_3, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1), Coins.ofSatoshis(3));
-        List<Route> routes = Routes.fromFlows(PUBKEY, PUBKEY_2, flows);
-        Routes.ensureTotalAmount(routes, Coins.ofSatoshis(7));
-        assertThat(routes).containsExactlyInAnyOrder(
-                new Route(List.of(new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1)), Coins.ofSatoshis(2)),
-                new Route(List.of(new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1)), Coins.ofSatoshis(2)),
-                new Route(List.of(new Edge(CHANNEL_ID_3, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1)), Coins.ofSatoshis(3))
-        );
-    }
-
-    private Edge createEdgeWithChannelId(ChannelId channelId) {
-        return new Edge(channelId, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1);
-    }
-
 }
