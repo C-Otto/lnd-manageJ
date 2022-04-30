@@ -7,7 +7,9 @@ public record EdgeWithLiquidityInformation(
 ) {
     public EdgeWithLiquidityInformation {
         if (availableLiquidityLowerBound.compareTo(availableLiquidityUpperBound) > 0) {
-            throw new IllegalArgumentException("lower bound must not be higher than upper bound");
+            throw new IllegalArgumentException("lower bound must not be higher than upper bound" +
+                    " (" + availableLiquidityLowerBound + " <=! " + availableLiquidityUpperBound + " for " + edge + ")"
+            );
         }
     }
 
