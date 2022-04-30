@@ -1,14 +1,14 @@
 package de.cotto.lndmanagej.pickhardtpayments;
 
 import de.cotto.lndmanagej.grpc.GrpcGetInfo;
+import de.cotto.lndmanagej.model.BasicRoute;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.model.Pubkey;
-import de.cotto.lndmanagej.pickhardtpayments.model.BasicRoute;
+import de.cotto.lndmanagej.model.Route;
 import de.cotto.lndmanagej.pickhardtpayments.model.BasicRoutes;
-import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.Flows;
 import de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPayment;
-import de.cotto.lndmanagej.pickhardtpayments.model.Route;
 import de.cotto.lndmanagej.pickhardtpayments.model.Routes;
 import org.springframework.stereotype.Component;
 

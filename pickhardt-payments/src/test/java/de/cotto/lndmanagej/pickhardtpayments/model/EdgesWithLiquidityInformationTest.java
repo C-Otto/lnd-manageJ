@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.pickhardtpayments.model;
 
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.EdgeWithLiquidityInformation;
 import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE;

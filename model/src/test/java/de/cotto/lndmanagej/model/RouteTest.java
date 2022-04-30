@@ -1,8 +1,5 @@
-package de.cotto.lndmanagej.pickhardtpayments.model;
+package de.cotto.lndmanagej.model;
 
-import de.cotto.lndmanagej.model.Coins;
-import de.cotto.lndmanagej.model.Edge;
-import de.cotto.lndmanagej.model.Policy;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
@@ -10,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.List;
 
+import static de.cotto.lndmanagej.model.BasicRouteFixtures.BASIC_ROUTE;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
@@ -22,8 +20,7 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_4;
-import static de.cotto.lndmanagej.pickhardtpayments.model.BasicRouteFixtures.BASIC_ROUTE;
-import static de.cotto.lndmanagej.pickhardtpayments.model.RouteFixtures.ROUTE;
+import static de.cotto.lndmanagej.model.RouteFixtures.ROUTE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 

@@ -1,7 +1,7 @@
 package de.cotto.lndmanagej.controller.dto;
 
+import de.cotto.lndmanagej.model.Route;
 import de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPayment;
-import de.cotto.lndmanagej.pickhardtpayments.model.Route;
 
 import java.util.List;
 

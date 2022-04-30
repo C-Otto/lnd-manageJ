@@ -3,9 +3,9 @@ package de.cotto.lndmanagej.pickhardtpayments.model;
 import de.cotto.lndmanagej.model.Coins;
 import org.junit.jupiter.api.Test;
 
+import static de.cotto.lndmanagej.model.RouteFixtures.ROUTE;
+import static de.cotto.lndmanagej.model.RouteFixtures.ROUTE_2;
 import static de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPaymentFixtures.MULTI_PATH_PAYMENT;
-import static de.cotto.lndmanagej.pickhardtpayments.model.RouteFixtures.ROUTE;
-import static de.cotto.lndmanagej.pickhardtpayments.model.RouteFixtures.ROUTE_2;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class MultiPathPaymentTest {

@@ -4,7 +4,7 @@ import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.grpc.GrpcGetInfo;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Edge;
-import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithLiquidityInformation;
+import de.cotto.lndmanagej.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgesWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.Flow;
 import de.cotto.lndmanagej.pickhardtpayments.model.Flows;

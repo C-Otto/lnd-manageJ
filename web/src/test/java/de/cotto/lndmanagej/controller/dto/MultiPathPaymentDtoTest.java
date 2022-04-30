@@ -8,9 +8,9 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_5;
+import static de.cotto.lndmanagej.model.RouteFixtures.ROUTE;
+import static de.cotto.lndmanagej.model.RouteFixtures.ROUTE_2;
 import static de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPaymentFixtures.MULTI_PATH_PAYMENT;
-import static de.cotto.lndmanagej.pickhardtpayments.model.RouteFixtures.ROUTE;
-import static de.cotto.lndmanagej.pickhardtpayments.model.RouteFixtures.ROUTE_2;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class MultiPathPaymentDtoTest {

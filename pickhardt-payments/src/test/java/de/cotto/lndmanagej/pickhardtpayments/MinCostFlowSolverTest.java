@@ -1,8 +1,8 @@
 package de.cotto.lndmanagej.pickhardtpayments;
 
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.model.Pubkey;
-import de.cotto.lndmanagej.pickhardtpayments.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgesWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.Flow;
 import de.cotto.lndmanagej.pickhardtpayments.model.Flows;

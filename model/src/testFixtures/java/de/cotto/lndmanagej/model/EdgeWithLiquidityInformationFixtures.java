@@ -1,6 +1,4 @@
-package de.cotto.lndmanagej.pickhardtpayments.model;
-
-import de.cotto.lndmanagej.model.Coins;
+package de.cotto.lndmanagej.model;
 
 import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE;
 
