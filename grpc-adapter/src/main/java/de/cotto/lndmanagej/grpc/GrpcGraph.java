@@ -19,6 +19,7 @@ import java.util.Set;
 
 @Component
 public class GrpcGraph {
+    private static final Policy DEFAULT_DISABLED_POLICY = new Policy(0, Coins.NONE, false, 0);
     private final GrpcService grpcService;
     private final LoadingCache<Object, Optional<Set<DirectedChannelEdge>>> channelEdgeCache;
 
@@ -51,19 +52,33 @@ public class GrpcGraph {
                     capacity,
                     node1Pubkey,
                     node2Pubkey,
-                    toPolicy(channelEdge.getNode1Policy())
+                    getNode1Policy(channelEdge)
             );
             DirectedChannelEdge directedChannelEdge2 = new DirectedChannelEdge(
                     channelId,
                     capacity,
                     node2Pubkey,
                     node1Pubkey,
-                    toPolicy(channelEdge.getNode2Policy())
+                    getNode2Policy(channelEdge)
             );
             channelEdges.add(directedChannelEdge1);
             channelEdges.add(directedChannelEdge2);
         }
         return Optional.of(channelEdges);
+    }
+
+    private Policy getNode1Policy(ChannelEdge channelEdge) {
+        if (channelEdge.hasNode1Policy()) {
+            return toPolicy(channelEdge.getNode1Policy());
+        }
+        return DEFAULT_DISABLED_POLICY;
+    }
+
+    private Policy getNode2Policy(ChannelEdge channelEdge) {
+        if (channelEdge.hasNode2Policy()) {
+            return toPolicy(channelEdge.getNode2Policy());
+        }
+        return DEFAULT_DISABLED_POLICY;
     }
 
     private Policy toPolicy(RoutingPolicy routingPolicy) {

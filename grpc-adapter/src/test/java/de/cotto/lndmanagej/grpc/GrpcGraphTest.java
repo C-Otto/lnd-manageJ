@@ -103,6 +103,34 @@ class GrpcGraphTest {
         );
     }
 
+    @Test
+    void missing_policy_results_in_disabled_channel() {
+        ChannelEdge edgeWithMissingPolicy = ChannelEdge.newBuilder()
+                .setChannelId(CHANNEL_ID.getShortChannelId())
+                .setCapacity(CAPACITY.satoshis())
+                .setNode1Pub(PUBKEY.toString())
+                .setNode2Pub(PUBKEY_2.toString())
+                .build();
+        DirectedChannelEdge expectedPolicyForNode1 = new DirectedChannelEdge(
+                CHANNEL_ID,
+                CAPACITY,
+                PUBKEY,
+                PUBKEY_2,
+                new Policy(0, Coins.NONE, false, 0)
+        );
+        DirectedChannelEdge expectedPolicyForNode2 = new DirectedChannelEdge(
+                CHANNEL_ID,
+                CAPACITY,
+                PUBKEY_2,
+                PUBKEY,
+                new Policy(0, Coins.NONE, false, 0)
+        );
+        ChannelGraph channelGraph = ChannelGraph.newBuilder().addEdges(edgeWithMissingPolicy).build();
+        when(grpcService.describeGraph()).thenReturn(Optional.of(channelGraph));
+        assertThat(grpcGraph.getChannelEdges().orElseThrow())
+                .containsExactlyInAnyOrder(expectedPolicyForNode1, expectedPolicyForNode2);
+    }
+
     private RoutingPolicy policy(int feeRate, int baseFee, boolean disabled, int timeLockDelta) {
         return RoutingPolicy.newBuilder()
                 .setFeeRateMilliMsat(feeRate)
