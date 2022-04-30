@@ -41,8 +41,8 @@ class MinCostFlowSolver {
             Pubkey ownPubkey
     ) {
         this.quantization = quantization;
-        int initialCapacity = edgesWithLiquidityInformation.edges().size() * (piecewiseLinearApproximations - 1);
-        edgeMapping = new IntObjectHashMap<>(initialCapacity);
+        int initialMapCapacity = edgesWithLiquidityInformation.edges().size() * (piecewiseLinearApproximations - 1);
+        edgeMapping = new IntObjectHashMap<>(initialMapCapacity);
         ArcInitializer arcInitializer = new ArcInitializer(
                 minCostFlow,
                 integerMapping,
