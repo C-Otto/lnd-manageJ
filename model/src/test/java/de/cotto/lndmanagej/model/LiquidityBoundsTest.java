@@ -2,13 +2,14 @@ package de.cotto.lndmanagej.model;
 
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class LiquidityBoundsTest {
-    private final LiquidityBounds liquidityBounds = new LiquidityBounds();
+    private LiquidityBounds liquidityBounds = new LiquidityBounds();
 
     @Test
     void getLowerBound_initially_zero() {
@@ -139,6 +140,20 @@ class LiquidityBoundsTest {
         Coins lowerMoreRecent = Coins.ofSatoshis(100);
         liquidityBounds.available(higherButOld);
         liquidityBounds.setLowerBoundLastUpdate(oneHourAgo());
+
+        liquidityBounds.available(lowerMoreRecent);
+        assertThat(liquidityBounds.getLowerBound()).isEqualTo(lowerMoreRecent);
+    }
+
+    @Test
+    void available_forgets_lower_bound_after_customized_time() {
+        Duration maxAge = Duration.ofMinutes(30);
+        liquidityBounds = new LiquidityBounds(maxAge);
+
+        Coins higherButOld = Coins.ofSatoshis(200);
+        Coins lowerMoreRecent = Coins.ofSatoshis(100);
+        liquidityBounds.available(higherButOld);
+        liquidityBounds.setLowerBoundLastUpdate(Instant.now().minus(maxAge));
 
         liquidityBounds.available(lowerMoreRecent);
         assertThat(liquidityBounds.getLowerBound()).isEqualTo(lowerMoreRecent);

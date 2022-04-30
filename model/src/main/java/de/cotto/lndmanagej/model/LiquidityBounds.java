@@ -9,7 +9,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 public class LiquidityBounds {
-    private static final Duration MAX_AGE = Duration.of(1, ChronoUnit.HOURS);
+    private static final Duration DEFAULT_MAX_AGE = Duration.of(1, ChronoUnit.HOURS);
+    private final Duration maxAge;
     private Instant lowerBoundLastUpdate;
     private Instant upperBoundLastUpdate;
 
@@ -18,9 +19,14 @@ public class LiquidityBounds {
     private Coins upperBound;
 
     public LiquidityBounds() {
+        this(DEFAULT_MAX_AGE);
+    }
+
+    public LiquidityBounds(Duration maxAge) {
         lowerBound = Coins.NONE;
         lowerBoundLastUpdate = Instant.now();
         upperBoundLastUpdate = Instant.now();
+        this.maxAge = maxAge;
     }
 
     public void move(Coins amount) {
@@ -61,13 +67,13 @@ public class LiquidityBounds {
 
     @SuppressWarnings("PMD.NullAssignment")
     private void resetOldUpperBound() {
-        if (upperBoundLastUpdate.isBefore(Instant.now().minus(MAX_AGE))) {
+        if (upperBoundLastUpdate.isBefore(Instant.now().minus(maxAge))) {
             upperBound = null;
         }
     }
 
     private void resetOldLowerBound() {
-        if (lowerBoundLastUpdate.isBefore(Instant.now().minus(MAX_AGE))) {
+        if (lowerBoundLastUpdate.isBefore(Instant.now().minus(maxAge))) {
             lowerBound = Coins.NONE;
         }
     }
