@@ -17,8 +17,8 @@ class RouteDtoTest {
                 "100",
                 List.of(CHANNEL_ID, CHANNEL_ID_3, CHANNEL_ID_5),
                 ROUTE.getProbability(),
-                String.valueOf(ROUTE.fees().milliSatoshis()),
-                String.valueOf(ROUTE.feesWithFirstHop().milliSatoshis()),
+                String.valueOf(ROUTE.getFees().milliSatoshis()),
+                String.valueOf(ROUTE.getFeesWithFirstHop().milliSatoshis()),
                 ROUTE.getFeeRate(),
                 ROUTE.getFeeRateWithFirstHop()
         );

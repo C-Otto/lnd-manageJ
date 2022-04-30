@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.pickhardtpayments.model;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Edge;
 import de.cotto.lndmanagej.model.Policy;
+import nl.jqno.equalsverifier.EqualsVerifier;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
@@ -17,11 +18,11 @@ import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE;
 import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE_2_3;
 import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE_3_4;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_1;
-import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_4;
+import static de.cotto.lndmanagej.pickhardtpayments.model.BasicRouteFixtures.BASIC_ROUTE;
 import static de.cotto.lndmanagej.pickhardtpayments.model.RouteFixtures.ROUTE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -31,6 +32,31 @@ class RouteTest {
     private static final int ONE_MILLION = 1_000_000;
     private static final int TIME_LOCK_DELTA = 40;
     private static final int BLOCK_HEIGHT = 700_000;
+
+    @Test
+    void amount() {
+        assertThat(ROUTE.getAmount()).isEqualTo(Coins.ofSatoshis(100));
+    }
+
+    @Test
+    void edges() {
+        assertThat(ROUTE.getEdges()).isEqualTo(BASIC_ROUTE.edges());
+    }
+
+    @Test
+    void edgesWithLiquidityInformation_contains_expected_edges() {
+        assertThat(ROUTE.getEdgesWithLiquidityInformation().stream().map(EdgeWithLiquidityInformation::edge).toList())
+                .isEqualTo(BASIC_ROUTE.edges());
+    }
+
+    @Test
+    void edgesWithLiquidityInformation() {
+        assertThat(ROUTE.getEdgesWithLiquidityInformation()).containsExactly(
+                EdgeWithLiquidityInformation.forUpperBound(EDGE, EDGE.capacity()),
+                EdgeWithLiquidityInformation.forUpperBound(EDGE_2_3, EDGE_2_3.capacity()),
+                EdgeWithLiquidityInformation.forUpperBound(EDGE_3_4, EDGE_3_4.capacity())
+        );
+    }
 
     @Test
     void default_liquidity_information() {
@@ -45,44 +71,11 @@ class RouteTest {
         Edge edge1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, Coins.ofSatoshis(99), POLICY_1);
         Edge edge2 = new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, Coins.ofSatoshis(199), POLICY_1);
         BasicRoute basicRoute = new BasicRoute(List.of(edge1, edge2), Coins.ofSatoshis(1));
-        Route route = new Route(basicRoute, List.of(
+        Route route = new Route(List.of(
                 EdgeWithLiquidityInformation.forKnownLiquidity(edge1, Coins.ofSatoshis(99)),
                 EdgeWithLiquidityInformation.forUpperBound(edge2, Coins.ofSatoshis(199))
-        ));
+        ), basicRoute.amount());
         assertThat(route.getProbability()).isEqualTo(1 * 0.995);
-    }
-
-    @Test
-    void explicit_liquidity_information_missing_edge() {
-        Edge edge1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, Coins.ofSatoshis(1), POLICY_1);
-        Edge edge2 = new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, Coins.ofSatoshis(2), POLICY_1);
-        BasicRoute basicRoute = new BasicRoute(List.of(edge1, edge2), Coins.ofSatoshis(1));
-        assertThatIllegalArgumentException().isThrownBy(
-                () -> new Route(basicRoute, List.of(EdgeWithLiquidityInformation.forUpperBound(edge1, edge1.capacity())
-                )));
-    }
-
-    @Test
-    void explicit_liquidity_information_wrong_edge() {
-        Edge edge1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, Coins.ofSatoshis(1), POLICY_1);
-        Edge edge2 = new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, Coins.ofSatoshis(2), POLICY_1);
-        Edge wrongEdge = new Edge(CHANNEL_ID_3, PUBKEY, PUBKEY_2, Coins.ofSatoshis(3), POLICY_1);
-        BasicRoute basicRoute = new BasicRoute(List.of(edge1, edge2), Coins.ofSatoshis(1));
-        assertThatIllegalArgumentException().isThrownBy(() -> new Route(basicRoute, List.of(
-                EdgeWithLiquidityInformation.forLowerBound(edge1, Coins.NONE),
-                EdgeWithLiquidityInformation.forLowerBound(wrongEdge, Coins.NONE)
-        )));
-    }
-
-    @Test
-    void explicit_liquidity_information_additional_edge() {
-        Edge edge1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, Coins.ofSatoshis(1), POLICY_1);
-        Edge additionalEdge = new Edge(CHANNEL_ID_3, PUBKEY_3, PUBKEY_4, Coins.ofSatoshis(3), POLICY_2);
-        BasicRoute basicRoute = new BasicRoute(List.of(edge1), Coins.ofSatoshis(1));
-        assertThatIllegalArgumentException().isThrownBy(() -> new Route(basicRoute, List.of(
-                EdgeWithLiquidityInformation.forLowerBound(edge1, Coins.NONE),
-                EdgeWithLiquidityInformation.forLowerBound(additionalEdge, Coins.NONE)
-        )));
     }
 
     @Test
@@ -99,7 +92,7 @@ class RouteTest {
         BasicRoute basicRoute = new BasicRoute(List.of(edge), amount);
         EdgeWithLiquidityInformation edgeWithLiquidityInformation =
                 EdgeWithLiquidityInformation.forKnownLiquidity(edge, Coins.ofSatoshis(availableLiquiditySat));
-        Route route = new Route(basicRoute, List.of(edgeWithLiquidityInformation));
+        Route route = new Route(List.of(edgeWithLiquidityInformation), basicRoute.amount());
         assertThat(route.getProbability()).isEqualTo(1.0);
     }
 
@@ -125,7 +118,7 @@ class RouteTest {
         BasicRoute basicRoute = new BasicRoute(List.of(edge), Coins.ofSatoshis(amountSat));
         EdgeWithLiquidityInformation edgeWithLiquidityInformation =
                 EdgeWithLiquidityInformation.forLowerBound(edge, Coins.ofSatoshis(lowerBoundSat));
-        Route route = new Route(basicRoute, List.of(edgeWithLiquidityInformation));
+        Route route = new Route(List.of(edgeWithLiquidityInformation), basicRoute.amount());
         assertThat(route.getProbability())
                 .isEqualTo(1.0 * (capacitySat + 1 - amountSat) / (capacitySat + 1 - lowerBoundSat));
     }
@@ -139,7 +132,7 @@ class RouteTest {
         BasicRoute basicRoute = new BasicRoute(List.of(edge), amount);
         EdgeWithLiquidityInformation edgeWithLiquidityInformation =
                 EdgeWithLiquidityInformation.forUpperBound(edge, Coins.ofSatoshis(upperBoundSat));
-        Route route = new Route(basicRoute, List.of(edgeWithLiquidityInformation));
+        Route route = new Route(List.of(edgeWithLiquidityInformation), basicRoute.amount());
         assertThat(route.getProbability())
                 .isEqualTo(1.0 * (upperBoundSat + 1 - amount.satoshis()) / (upperBoundSat + 1));
     }
@@ -160,7 +153,7 @@ class RouteTest {
         Edge hop2 = new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_3, CAPACITY, policy2);
         BasicRoute basicRoute = new BasicRoute(List.of(hop1, hop2), amount);
         Route route = new Route(basicRoute);
-        assertThat(route.fees()).isEqualTo(expectedFees);
+        assertThat(route.getFees()).isEqualTo(expectedFees);
     }
 
     @Test
@@ -172,7 +165,7 @@ class RouteTest {
                 new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm, baseFee, true, TIME_LOCK_DELTA))
         ), amount);
         Route route = new Route(basicRoute);
-        assertThat(route.fees()).isEqualTo(Coins.NONE);
+        assertThat(route.getFees()).isEqualTo(Coins.NONE);
     }
 
     @Test
@@ -192,7 +185,7 @@ class RouteTest {
                 new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm2, baseFee2, true, TIME_LOCK_DELTA))
         ), amount);
         Route route = new Route(basicRoute);
-        assertThat(route.fees()).isEqualTo(expectedFees);
+        assertThat(route.getFees()).isEqualTo(expectedFees);
     }
 
     @Test
@@ -219,14 +212,14 @@ class RouteTest {
                 new Edge(CHANNEL_ID_3, PUBKEY_3, PUBKEY_4, CAPACITY, new Policy(ppm3, baseFee3, true, TIME_LOCK_DELTA))
         ), amount);
         Route route = new Route(basicRoute);
-        assertThat(route.fees()).isEqualTo(expectedFees);
+        assertThat(route.getFees()).isEqualTo(expectedFees);
     }
 
     @Test
     void feesWithFirstHop_empty() {
         BasicRoute basicRoute = new BasicRoute(List.of(), Coins.ofSatoshis(1_500_000));
         Route route = new Route(basicRoute);
-        assertThat(route.feesWithFirstHop()).isEqualTo(Coins.NONE);
+        assertThat(route.getFeesWithFirstHop()).isEqualTo(Coins.NONE);
     }
 
     @Test
@@ -239,7 +232,7 @@ class RouteTest {
                 new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm, baseFee, true, TIME_LOCK_DELTA))
         ), amount);
         Route route = new Route(basicRoute);
-        assertThat(route.feesWithFirstHop()).isEqualTo(expectedFees);
+        assertThat(route.getFeesWithFirstHop()).isEqualTo(expectedFees);
     }
 
     @Test
@@ -264,7 +257,7 @@ class RouteTest {
                 new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, new Policy(ppm3, baseFee3, true, TIME_LOCK_DELTA))
         ), amount);
         Route route = new Route(basicRoute);
-        assertThat(route.feesWithFirstHop()).isEqualTo(expectedFees);
+        assertThat(route.getFeesWithFirstHop()).isEqualTo(expectedFees);
     }
 
     @Test
@@ -280,9 +273,9 @@ class RouteTest {
                 Coins.ofMilliSatoshis((long) (amount.add(expectedFees2).milliSatoshis() * 1.0 * ppm2 / ONE_MILLION));
         Route route = createRoute(amount, ppm1, ppm2, ppm3);
         SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(route.feeForHop(2)).isEqualTo(expectedFees3);
-        softly.assertThat(route.feeForHop(1)).isEqualTo(expectedFees2);
-        softly.assertThat(route.feeForHop(0)).isEqualTo(expectedFees1);
+        softly.assertThat(route.getFeeForHop(2)).isEqualTo(expectedFees3);
+        softly.assertThat(route.getFeeForHop(1)).isEqualTo(expectedFees2);
+        softly.assertThat(route.getFeeForHop(0)).isEqualTo(expectedFees1);
         softly.assertAll();
     }
 
@@ -290,11 +283,11 @@ class RouteTest {
     void forwardAmountForHop() {
         Coins amount = Coins.ofSatoshis(2_000);
         Route route = createRoute(amount, 123, 456, 789);
-        Coins feeForHop2 = route.feeForHop(1);
+        Coins feeForHop2 = route.getFeeForHop(1);
         SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(route.forwardAmountForHop(2)).isEqualTo(amount);
-        softly.assertThat(route.forwardAmountForHop(1)).isEqualTo(amount);
-        softly.assertThat(route.forwardAmountForHop(0)).isEqualTo(amount.add(feeForHop2));
+        softly.assertThat(route.getForwardAmountForHop(2)).isEqualTo(amount);
+        softly.assertThat(route.getForwardAmountForHop(1)).isEqualTo(amount);
+        softly.assertThat(route.getForwardAmountForHop(0)).isEqualTo(amount.add(feeForHop2));
         softly.assertAll();
     }
 
@@ -306,8 +299,10 @@ class RouteTest {
         BasicRoute basicRoute = new BasicRoute(edges, Coins.ofSatoshis(1));
         Route route = new Route(basicRoute);
         SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(route.expiryForHop(0, BLOCK_HEIGHT, finalCltvDelta)).isEqualTo(BLOCK_HEIGHT + finalCltvDelta);
-        softly.assertThat(route.totalTimeLock(BLOCK_HEIGHT, finalCltvDelta)).isEqualTo(BLOCK_HEIGHT + finalCltvDelta);
+        softly.assertThat(route.getExpiryForHop(0, BLOCK_HEIGHT, finalCltvDelta))
+                .isEqualTo(BLOCK_HEIGHT + finalCltvDelta);
+        softly.assertThat(route.getTotalTimeLock(BLOCK_HEIGHT, finalCltvDelta))
+                .isEqualTo(BLOCK_HEIGHT + finalCltvDelta);
         softly.assertAll();
     }
 
@@ -320,9 +315,11 @@ class RouteTest {
         BasicRoute basicRoute = new BasicRoute(edges, Coins.ofSatoshis(100));
         Route route = new Route(basicRoute);
         SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(route.expiryForHop(0, BLOCK_HEIGHT, finalCltvDelta)).isEqualTo(BLOCK_HEIGHT + finalCltvDelta);
-        softly.assertThat(route.expiryForHop(1, BLOCK_HEIGHT, finalCltvDelta)).isEqualTo(BLOCK_HEIGHT + finalCltvDelta);
-        softly.assertThat(route.totalTimeLock(BLOCK_HEIGHT, finalCltvDelta))
+        softly.assertThat(route.getExpiryForHop(0, BLOCK_HEIGHT, finalCltvDelta))
+                .isEqualTo(BLOCK_HEIGHT + finalCltvDelta);
+        softly.assertThat(route.getExpiryForHop(1, BLOCK_HEIGHT, finalCltvDelta))
+                .isEqualTo(BLOCK_HEIGHT + finalCltvDelta);
+        softly.assertThat(route.getTotalTimeLock(BLOCK_HEIGHT, finalCltvDelta))
                 .isEqualTo(BLOCK_HEIGHT + finalCltvDelta + timeLockDelta2);
         softly.assertAll();
     }
@@ -337,13 +334,13 @@ class RouteTest {
         BasicRoute basicRoute = new BasicRoute(edges, Coins.ofSatoshis(2));
         Route route = new Route(basicRoute);
         SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(route.expiryForHop(0, BLOCK_HEIGHT, finalCltvDelta))
+        softly.assertThat(route.getExpiryForHop(0, BLOCK_HEIGHT, finalCltvDelta))
                 .isEqualTo(BLOCK_HEIGHT + finalCltvDelta + timeLockDelta3);
-        softly.assertThat(route.expiryForHop(1, BLOCK_HEIGHT, finalCltvDelta))
+        softly.assertThat(route.getExpiryForHop(1, BLOCK_HEIGHT, finalCltvDelta))
                 .isEqualTo(BLOCK_HEIGHT + finalCltvDelta);
-        softly.assertThat(route.expiryForHop(2, BLOCK_HEIGHT, finalCltvDelta))
+        softly.assertThat(route.getExpiryForHop(2, BLOCK_HEIGHT, finalCltvDelta))
                 .isEqualTo(BLOCK_HEIGHT + finalCltvDelta);
-        softly.assertThat(route.totalTimeLock(BLOCK_HEIGHT, finalCltvDelta))
+        softly.assertThat(route.getTotalTimeLock(BLOCK_HEIGHT, finalCltvDelta))
                 .isEqualTo(BLOCK_HEIGHT + finalCltvDelta + timeLockDelta3 + timeLockDelta2);
         softly.assertAll();
     }
@@ -359,15 +356,15 @@ class RouteTest {
         BasicRoute basicRoute = new BasicRoute(edges, Coins.ofSatoshis(3));
         Route route = new Route(basicRoute);
         SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(route.expiryForHop(0, BLOCK_HEIGHT, finalCltvDelta))
+        softly.assertThat(route.getExpiryForHop(0, BLOCK_HEIGHT, finalCltvDelta))
                 .isEqualTo(BLOCK_HEIGHT + finalCltvDelta + timeLockDelta4 + timeLockDelta3);
-        softly.assertThat(route.expiryForHop(1, BLOCK_HEIGHT, finalCltvDelta))
+        softly.assertThat(route.getExpiryForHop(1, BLOCK_HEIGHT, finalCltvDelta))
                 .isEqualTo(BLOCK_HEIGHT + finalCltvDelta + timeLockDelta4);
-        softly.assertThat(route.expiryForHop(2, BLOCK_HEIGHT, finalCltvDelta))
+        softly.assertThat(route.getExpiryForHop(2, BLOCK_HEIGHT, finalCltvDelta))
                 .isEqualTo(BLOCK_HEIGHT + finalCltvDelta);
-        softly.assertThat(route.expiryForHop(3, BLOCK_HEIGHT, finalCltvDelta))
+        softly.assertThat(route.getExpiryForHop(3, BLOCK_HEIGHT, finalCltvDelta))
                 .isEqualTo(BLOCK_HEIGHT + finalCltvDelta);
-        softly.assertThat(route.totalTimeLock(BLOCK_HEIGHT, finalCltvDelta))
+        softly.assertThat(route.getTotalTimeLock(BLOCK_HEIGHT, finalCltvDelta))
                 .isEqualTo(BLOCK_HEIGHT + finalCltvDelta + timeLockDelta4 + timeLockDelta3 + timeLockDelta2);
         softly.assertAll();
     }
@@ -418,41 +415,37 @@ class RouteTest {
     @Test
     void zero_amount() {
         assertThatIllegalArgumentException()
-                .isThrownBy(() -> new Route(List.of(), List.of(), Coins.NONE, List.of()));
+                .isThrownBy(() -> new Route(List.of(), Coins.NONE));
     }
 
     @Test
     void negative_amount() {
         assertThatIllegalArgumentException()
-                .isThrownBy(() -> new Route(List.of(), List.of(), Coins.ofSatoshis(-1), List.of()));
+                .isThrownBy(() -> new Route(List.of(), Coins.ofSatoshis(-1)));
     }
 
     @Test
     void getForAmount() {
         Coins newAmount = Coins.ofSatoshis(1_000);
         assertThat(ROUTE.getForAmount(newAmount))
-                .isEqualTo(new Route(new BasicRoute(ROUTE.edges(), newAmount), ROUTE.edgesWithLiquidityInformation()));
+                .isEqualTo(new Route(new BasicRoute(BASIC_ROUTE.edges(), newAmount)));
     }
 
     @Test
     void getForAmount_retains_liquidity_information() {
-        BasicRoute basicRoute = new BasicRoute(ROUTE.edges(), ROUTE.amount());
-        Route original = new Route(basicRoute, List.of(
+        Route original = new Route(List.of(
                 EdgeWithLiquidityInformation.forUpperBound(EDGE, Coins.ofSatoshis(123)),
                 EdgeWithLiquidityInformation.forUpperBound(EDGE_2_3, EDGE_2_3.capacity()),
                 EdgeWithLiquidityInformation.forUpperBound(EDGE_3_4, EDGE_3_4.capacity())
-        ));
+        ), BASIC_ROUTE.amount());
         Coins newAmount = Coins.ofSatoshis(1_000);
-        List<Coins> updatedFeesForHops = List.of(Coins.ofMilliSatoshis(200), Coins.ofMilliSatoshis(200), Coins.NONE);
-        Route expectedRoute =
-                new Route(original.edges(), original.edgesWithLiquidityInformation(), newAmount, updatedFeesForHops);
+        Route expectedRoute = new Route(original.getEdgesWithLiquidityInformation(), newAmount);
         assertThat(original.getForAmount(newAmount)).isEqualTo(expectedRoute);
     }
 
     @Test
-    void liquidityInformation_no_default() {
-        assertThatIllegalArgumentException()
-                .isThrownBy(() -> new Route(new BasicRoute(List.of(EDGE), Coins.ofSatoshis(1)), List.of()));
+    void testEquals() {
+        EqualsVerifier.forClass(Route.class).usingGetClass().verify();
     }
 
     private Route routeForAmountAndCapacityAndKnownLiquidity(int amountSat, int capacitySat, int knownLiquiditySat) {
@@ -462,7 +455,7 @@ class RouteTest {
         BasicRoute basicRoute = new BasicRoute(List.of(edge), amount);
         EdgeWithLiquidityInformation edgeWithLiquidityInformation =
                 EdgeWithLiquidityInformation.forKnownLiquidity(edge, Coins.ofSatoshis(knownLiquiditySat));
-        return new Route(basicRoute, List.of(edgeWithLiquidityInformation));
+        return new Route(List.of(edgeWithLiquidityInformation), basicRoute.amount());
     }
 
     private Route createRoute(Coins amount, int... feeRates) {

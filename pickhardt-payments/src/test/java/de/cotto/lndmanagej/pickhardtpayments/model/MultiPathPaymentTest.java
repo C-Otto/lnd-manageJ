@@ -46,7 +46,7 @@ class MultiPathPaymentTest {
 
     @Test
     void amount() {
-        assertThat(MULTI_PATH_PAYMENT.amount()).isEqualTo(ROUTE.amount().add(ROUTE_2.amount()));
+        assertThat(MULTI_PATH_PAYMENT.amount()).isEqualTo(ROUTE.getAmount().add(ROUTE_2.getAmount()));
     }
 
     @Test
@@ -56,13 +56,13 @@ class MultiPathPaymentTest {
 
     @Test
     void fees() {
-        assertThat(MULTI_PATH_PAYMENT.fees()).isEqualTo(ROUTE.fees().add(ROUTE_2.fees()));
+        assertThat(MULTI_PATH_PAYMENT.fees()).isEqualTo(ROUTE.getFees().add(ROUTE_2.getFees()));
     }
 
     @Test
     void feesWithFirstHop() {
         assertThat(MULTI_PATH_PAYMENT.feesWithFirstHop())
-                .isEqualTo(ROUTE.feesWithFirstHop().add(ROUTE_2.feesWithFirstHop()));
+                .isEqualTo(ROUTE.getFeesWithFirstHop().add(ROUTE_2.getFeesWithFirstHop()));
     }
 
     @Test

@@ -46,7 +46,7 @@ class PickhardtPaymentsControllerIT {
     void sendTo() throws Exception {
         Coins amount = MULTI_PATH_PAYMENT.amount();
         String amountAsString = String.valueOf(amount.satoshis());
-        String route1AmountAsString = String.valueOf(ROUTE.amount().satoshis());
+        String route1AmountAsString = String.valueOf(ROUTE.getAmount().satoshis());
         String feesAsString = String.valueOf(MULTI_PATH_PAYMENT.fees().milliSatoshis());
         String feesWithFirstHopAsString = String.valueOf(MULTI_PATH_PAYMENT.feesWithFirstHop().milliSatoshis());
         double expectedProbability = MULTI_PATH_PAYMENT.probability();
@@ -69,9 +69,9 @@ class PickhardtPaymentsControllerIT {
                 .andExpect(jsonPath("$.routes[0].probability",
                         is(ROUTE.getProbability())))
                 .andExpect(jsonPath("$.routes[0].feesMilliSat",
-                        is(String.valueOf(ROUTE.fees().milliSatoshis()))))
+                        is(String.valueOf(ROUTE.getFees().milliSatoshis()))))
                 .andExpect(jsonPath("$.routes[0].feesWithFirstHopMilliSat",
-                        is(String.valueOf(ROUTE.feesWithFirstHop().milliSatoshis()))))
+                        is(String.valueOf(ROUTE.getFeesWithFirstHop().milliSatoshis()))))
                 .andExpect(jsonPath("$.routes[0].feeRate",
                         is((int) ROUTE.getFeeRate())))
                 .andExpect(jsonPath("$.routes[0].feeRateWithFirstHop",

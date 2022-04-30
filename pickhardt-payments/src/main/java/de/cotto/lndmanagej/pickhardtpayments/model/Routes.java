@@ -15,10 +15,10 @@ public final class Routes {
     public static List<Route> getFixedWithTotalAmount(Collection<Route> routes, Coins amount) {
         List<Route> routesCopy = new ArrayList<>(routes);
         Route highProbabilityRoute = routesCopy.stream().max(Comparator.comparing(Route::getProbability)).orElseThrow();
-        Coins routesAmount = routesCopy.stream().map(Route::amount).reduce(Coins.NONE, Coins::add);
+        Coins routesAmount = routesCopy.stream().map(Route::getAmount).reduce(Coins.NONE, Coins::add);
         Coins remainder = amount.subtract(routesAmount);
         routesCopy.remove(highProbabilityRoute);
-        Route fixedRoute = highProbabilityRoute.getForAmount(highProbabilityRoute.amount().add(remainder));
+        Route fixedRoute = highProbabilityRoute.getForAmount(highProbabilityRoute.getAmount().add(remainder));
         routesCopy.add(fixedRoute);
         return routesCopy;
     }

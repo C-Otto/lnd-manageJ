@@ -69,6 +69,6 @@ public class MultiPathPaymentSplitter {
         List<EdgeWithLiquidityInformation> edgesWithLiquidityInformation = basicRoute.edges().stream()
                 .map(edgeComputation::getEdgeWithLiquidityInformation)
                 .toList();
-        return new Route(basicRoute, edgesWithLiquidityInformation);
+        return new Route(edgesWithLiquidityInformation, basicRoute.amount());
     }
 }

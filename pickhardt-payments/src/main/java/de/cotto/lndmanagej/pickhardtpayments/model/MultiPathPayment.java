@@ -16,9 +16,9 @@ public record MultiPathPayment(
 
     public MultiPathPayment(List<Route> routes) {
         this(
-                routes.stream().map(Route::amount).reduce(Coins.NONE, Coins::add),
-                routes.stream().map(Route::fees).reduce(Coins.NONE, Coins::add),
-                routes.stream().map(Route::feesWithFirstHop).reduce(Coins.NONE, Coins::add),
+                routes.stream().map(Route::getAmount).reduce(Coins.NONE, Coins::add),
+                routes.stream().map(Route::getFees).reduce(Coins.NONE, Coins::add),
+                routes.stream().map(Route::getFeesWithFirstHop).reduce(Coins.NONE, Coins::add),
                 routes.stream().mapToDouble(Route::getProbability).reduce(1.0, (a, b) -> a * b),
                 routes
         );

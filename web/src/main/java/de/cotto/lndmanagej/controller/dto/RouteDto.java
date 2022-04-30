@@ -17,11 +17,11 @@ public record RouteDto(
 ) {
     public static RouteDto fromModel(Route route) {
         return new RouteDto(
-                String.valueOf(route.amount().satoshis()),
-                route.edges().stream().map(Edge::channelId).toList(),
+                String.valueOf(route.getAmount().satoshis()),
+                route.getEdges().stream().map(Edge::channelId).toList(),
                 route.getProbability(),
-                String.valueOf(route.fees().milliSatoshis()),
-                String.valueOf(route.feesWithFirstHop().milliSatoshis()),
+                String.valueOf(route.getFees().milliSatoshis()),
+                String.valueOf(route.getFeesWithFirstHop().milliSatoshis()),
                 route.getFeeRate(),
                 route.getFeeRateWithFirstHop()
         );
