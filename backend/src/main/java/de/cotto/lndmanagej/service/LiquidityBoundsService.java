@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.service;
 import com.codahale.metrics.annotation.Timed;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
+import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.LiquidityBounds;
 import de.cotto.lndmanagej.model.Pubkey;
@@ -11,13 +12,20 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 import java.util.Optional;
 
+import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.USE_MISSION_CONTROL;
+
 @Component
 public class LiquidityBoundsService {
     private final MissionControlService missionControlService;
     private final LoadingCache<TwoPubkeys, LiquidityBounds> entries;
+    private final ConfigurationService configurationService;
 
-    public LiquidityBoundsService(MissionControlService missionControlService) {
+    public LiquidityBoundsService(
+            MissionControlService missionControlService,
+            ConfigurationService configurationService
+    ) {
         this.missionControlService = missionControlService;
+        this.configurationService = configurationService;
         entries = new CacheBuilder()
                 .withSoftValues(true)
                 .build(ignored -> new LiquidityBounds());
@@ -25,7 +33,7 @@ public class LiquidityBoundsService {
 
     @Timed
     public Optional<Coins> getAssumedLiquidityUpperBound(Pubkey source, Pubkey target) {
-        Coins fromMissionControl = missionControlService.getMinimumOfRecentFailures(source, target).orElse(null);
+        Coins fromMissionControl = getFromMissionControl(source, target).orElse(null);
         Coins fromPayments = getInfo(source, target).getUpperBound().orElse(null);
         if (fromMissionControl == null && fromPayments == null) {
             return Optional.empty();
@@ -59,6 +67,14 @@ public class LiquidityBoundsService {
 
     private LiquidityBounds getInfo(Pubkey source, Pubkey target) {
         return entries.get(new TwoPubkeys(source, target));
+    }
+
+    private Optional<Coins> getFromMissionControl(Pubkey source, Pubkey target) {
+        boolean useMissionControl = configurationService.getBooleanValue(USE_MISSION_CONTROL).orElse(true);
+        if (useMissionControl) {
+            return missionControlService.getMinimumOfRecentFailures(source, target);
+        }
+        return Optional.empty();
     }
 
     @SuppressWarnings("UnusedVariable")

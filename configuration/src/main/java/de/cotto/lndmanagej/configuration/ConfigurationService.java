@@ -8,6 +8,7 @@ import de.cotto.lndmanagej.model.TransactionHash;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -22,6 +23,11 @@ public class ConfigurationService {
     private static final String RESOLUTIONS_SECTION = "resolutions";
     private static final String ALIASES_SECTION = "aliases";
     private static final String LND_SECTION = "lnd";
+
+    private static final String YES_STRING = "yes";
+    private static final String NO_STRING = "no";
+    private static final String TRUE_STRING = "true";
+    private static final String FALSE_STRING = "false";
 
     private final IniFileReader iniFileReader;
 
@@ -78,6 +84,16 @@ public class ConfigurationService {
 
     private Optional<String> getStringValue(String section, String key) {
         return iniFileReader.getValues(section).getOrDefault(key, Set.of()).stream().findFirst();
+    }
+
+    public Optional<Boolean> getBooleanValue(ConfigurationSetting configurationSetting) {
+        return getStringValue(configurationSetting.getSection(), configurationSetting.getName())
+                .map(value -> value.toLowerCase(Locale.US))
+                .map(String::trim)
+                .map(value -> YES_STRING.equals(value) ? TRUE_STRING : value)
+                .map(value -> NO_STRING.equals(value) ? FALSE_STRING : value)
+                .filter(s -> TRUE_STRING.equals(s) || FALSE_STRING.equals(s))
+                .map(TRUE_STRING::equals);
     }
 
     public Optional<Integer> getIntegerValue(ConfigurationSetting configurationSetting) {

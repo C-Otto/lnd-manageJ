@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.service;
 
+import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.Coins;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,9 +10,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
+import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.USE_MISSION_CONTROL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -21,6 +24,9 @@ class LiquidityBoundsServiceTest {
 
     @Mock
     private MissionControlService missionControlService;
+
+    @Mock
+    private ConfigurationService configurationService;
 
     @Test
     void getAssumedLiquidityUpperBound_unknown() {
@@ -33,6 +39,13 @@ class LiquidityBoundsServiceTest {
                 .thenReturn(Optional.of(Coins.ofSatoshis(123)));
         assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(PUBKEY, PUBKEY_2))
                 .contains(Coins.ofSatoshis(122));
+    }
+
+    @Test
+    void getAssumedLiquidityUpperBound_mission_control_disabled() {
+        when(configurationService.getBooleanValue(USE_MISSION_CONTROL)).thenReturn(Optional.of(false));
+        assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(PUBKEY, PUBKEY_2)).isEmpty();
+        verifyNoInteractions(missionControlService);
     }
 
     @Test

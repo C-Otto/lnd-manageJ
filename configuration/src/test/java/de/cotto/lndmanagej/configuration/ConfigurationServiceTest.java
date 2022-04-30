@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Map;
 import java.util.Set;
 
+import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.USE_MISSION_CONTROL;
 import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.ONLINE_CHANGES_THRESHOLD;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
@@ -166,7 +167,7 @@ class ConfigurationServiceTest {
     @Test
     void getIntegerValue() {
         int expectedValue = 42;
-        WarningsConfigurationSettings setting = ONLINE_CHANGES_THRESHOLD;
+        ConfigurationSetting setting = ONLINE_CHANGES_THRESHOLD;
         String name = setting.getName();
         when(iniFileReader.getValues(WARNINGS_SECTION)).thenReturn(Map.of(name, Set.of(String.valueOf(expectedValue))));
         assertThat(configurationService.getIntegerValue(setting)).contains(expectedValue);
@@ -174,9 +175,102 @@ class ConfigurationServiceTest {
 
     @Test
     void getIntegerValue_not_integer() {
-        WarningsConfigurationSettings setting = ONLINE_CHANGES_THRESHOLD;
+        ConfigurationSetting setting = ONLINE_CHANGES_THRESHOLD;
         String name = setting.getName();
         when(iniFileReader.getValues(WARNINGS_SECTION)).thenReturn(Map.of(name, Set.of("x")));
         assertThat(configurationService.getIntegerValue(setting)).isEmpty();
+    }
+
+    @Nested
+    class GetBooleanValue {
+        @Test
+        void yes() {
+            assertBooleanValue("yes", true);
+        }
+
+        @Test
+        void capital_yes() {
+            assertBooleanValue("Yes", true);
+        }
+
+        @Test
+        void all_caps_yes() {
+            assertBooleanValue("YES", true);
+        }
+
+        @Test
+        void just_true() {
+            assertBooleanValue("true", true);
+        }
+
+        @Test
+        void capital_true() {
+            assertBooleanValue("True", true);
+        }
+
+        @Test
+        void all_caps_true() {
+            assertBooleanValue("TRUE", true);
+        }
+
+        @Test
+        void no() {
+            assertBooleanValue("no", false);
+        }
+
+        @Test
+        void capital_no() {
+            assertBooleanValue("No", false);
+        }
+
+        @Test
+        void all_caps_no() {
+            assertBooleanValue("NO", false);
+        }
+
+        @Test
+        void just_false() {
+            assertBooleanValue("false", false);
+        }
+
+        @Test
+        void false_with_whitespace_suffix() {
+            assertBooleanValue("false \t", false);
+        }
+
+        @Test
+        void false_with_whitespace_prefix() {
+            assertBooleanValue("   \t  false ", false);
+        }
+
+        @Test
+        void capital_false() {
+            assertBooleanValue("False", false);
+        }
+
+        @Test
+        void all_caps_false() {
+            assertBooleanValue("true", true);
+        }
+
+        @Test
+        void other_string() {
+            ConfigurationSetting setting = USE_MISSION_CONTROL;
+            String name = setting.getName();
+            when(iniFileReader.getValues(setting.getSection())).thenReturn(Map.of(name, Set.of("maybe")));
+            assertThat(configurationService.getBooleanValue(setting)).isEmpty();
+        }
+
+        @Test
+        void not_set() {
+            assertThat(configurationService.getBooleanValue(USE_MISSION_CONTROL)).isEmpty();
+        }
+
+        private void assertBooleanValue(String stringValue, boolean expectedValue) {
+            ConfigurationSetting setting = USE_MISSION_CONTROL;
+            String name = setting.getName();
+            when(iniFileReader.getValues(setting.getSection())).thenReturn(Map.of(name, Set.of(stringValue)));
+            assertThat(configurationService.getBooleanValue(setting)).contains(expectedValue);
+        }
     }
 }
