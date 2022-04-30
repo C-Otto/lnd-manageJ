@@ -9,9 +9,11 @@ import de.cotto.lndmanagej.model.LiquidityBounds;
 import de.cotto.lndmanagej.model.Pubkey;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 
+import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.LIQUIDITY_INFORMATION_MAX_AGE;
 import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.USE_MISSION_CONTROL;
 
 @Component
@@ -28,7 +30,7 @@ public class LiquidityBoundsService {
         this.configurationService = configurationService;
         entries = new CacheBuilder()
                 .withSoftValues(true)
-                .build(ignored -> new LiquidityBounds());
+                .build(ignored -> getLiquidityBounds());
     }
 
     @Timed
@@ -75,6 +77,19 @@ public class LiquidityBoundsService {
             return missionControlService.getMinimumOfRecentFailures(source, target);
         }
         return Optional.empty();
+    }
+
+    private LiquidityBounds getLiquidityBounds() {
+        Duration maxAge = getLiquidityInformationMaxAge().orElse(null);
+        if (maxAge == null) {
+            return new LiquidityBounds();
+        } else {
+            return new LiquidityBounds(maxAge);
+        }
+    }
+
+    private Optional<Duration> getLiquidityInformationMaxAge() {
+        return configurationService.getIntegerValue(LIQUIDITY_INFORMATION_MAX_AGE).map(Duration::ofSeconds);
     }
 
     @SuppressWarnings("UnusedVariable")

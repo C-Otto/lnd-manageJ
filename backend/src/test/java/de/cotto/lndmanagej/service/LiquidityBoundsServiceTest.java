@@ -10,10 +10,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
+import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.LIQUIDITY_INFORMATION_MAX_AGE;
 import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.USE_MISSION_CONTROL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -52,6 +54,12 @@ class LiquidityBoundsServiceTest {
     void getAssumedLiquidityLowerBound_defaults_to_none() {
         assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(PUBKEY, PUBKEY_2))
                 .isEqualTo(Coins.NONE);
+    }
+
+    @Test
+    void liquidity_information_uses_configured_max_age() {
+        liquidityBoundsService.markAsUnavailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(1));
+        verify(configurationService).getIntegerValue(LIQUIDITY_INFORMATION_MAX_AGE);
     }
 
     @Test
