@@ -4,5 +4,5 @@ plugins {
 check.dependsOn cpdCheck
 
 cpd {
-    toolVersion = '6.44.0'
+    toolVersion = '6.45.0'
 }
