@@ -9,6 +9,8 @@ import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.model.PaymentAttemptHop;
 import de.cotto.lndmanagej.model.PaymentListener;
 import de.cotto.lndmanagej.model.Pubkey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +26,7 @@ public class LiquidityInformationUpdater implements PaymentListener {
     private final GrpcGetInfo grpcGetInfo;
     private final GrpcChannelPolicy grpcChannelPolicy;
     private final LiquidityBoundsService liquidityBoundsService;
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     public LiquidityInformationUpdater(
             GrpcGetInfo grpcGetInfo,
@@ -54,6 +57,8 @@ public class LiquidityInformationUpdater implements PaymentListener {
             markAvailableAndUnavailable(paymentAttemptHops, failureSourceIndex, PaymentAttemptHop::amount);
         } else if (UNKNOWN_NEXT_PEER.equals(failureCode) || CHANNEL_DISABLED.equals(failureCode)) {
             markAvailableAndUnavailable(paymentAttemptHops, failureSourceIndex, hop -> Coins.ofSatoshis(1));
+        } else {
+            logger.warn("Unknown failure code {}", failureCode);
         }
     }
 
