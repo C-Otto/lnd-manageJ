@@ -29,7 +29,7 @@ public class PaymentListenerUpdater {
                 .map(this::toPaymentAttemptHop)
                 .toList();
         if (preimage.isEmpty()) {
-            FailureCode failureCode = new FailureCode(failure.getCodeValue());
+            FailureCode failureCode = FailureCode.getFor(failure.getCodeValue());
             int failureSourceIndex = failure.getFailureSourceIndex();
             paymentListeners.forEach(
                     paymentListener -> paymentListener.failure(paymentAttemptHops, failureCode, failureSourceIndex)

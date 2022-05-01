@@ -18,6 +18,8 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static de.cotto.lndmanagej.model.FailureCode.CHANNEL_DISABLED;
+import static de.cotto.lndmanagej.model.FailureCode.INCORRECT_OR_UNKNOWN_PAYMENT_DETAILS;
+import static de.cotto.lndmanagej.model.FailureCode.MPP_TIMEOUT;
 import static de.cotto.lndmanagej.model.FailureCode.TEMPORARY_CHANNEL_FAILURE;
 import static de.cotto.lndmanagej.model.FailureCode.UNKNOWN_NEXT_PEER;
 
@@ -57,6 +59,8 @@ public class LiquidityInformationUpdater implements PaymentListener {
             markAvailableAndUnavailable(paymentAttemptHops, failureSourceIndex, PaymentAttemptHop::amount);
         } else if (UNKNOWN_NEXT_PEER.equals(failureCode) || CHANNEL_DISABLED.equals(failureCode)) {
             markAvailableAndUnavailable(paymentAttemptHops, failureSourceIndex, hop -> Coins.ofSatoshis(1));
+        } else if (MPP_TIMEOUT.equals(failureCode) || INCORRECT_OR_UNKNOWN_PAYMENT_DETAILS.equals(failureCode)) {
+            markAllAvailable(paymentAttemptHops, failureSourceIndex);
         } else {
             logger.warn("Unknown failure code {}", failureCode);
         }
@@ -80,6 +84,21 @@ public class LiquidityInformationUpdater implements PaymentListener {
                 liquidityBoundsService.markAsUnavailable(startNode, endNode, unavailableAmountForHop.apply(hop));
                 return;
             }
+            startNode = endNode;
+        }
+    }
+
+    private void markAllAvailable(List<PaymentAttemptHop> paymentAttemptHops, int failureSourceIndex) {
+        if (failureSourceIndex != paymentAttemptHops.size()) {
+            return;
+        }
+        Pubkey startNode = grpcGetInfo.getPubkey();
+        for (PaymentAttemptHop hop : paymentAttemptHops) {
+            Pubkey endNode = getOtherNode(hop, startNode).orElse(null);
+            if (endNode == null) {
+                return;
+            }
+            liquidityBoundsService.markAsAvailable(startNode, endNode, hop.amount());
             startNode = endNode;
         }
     }
