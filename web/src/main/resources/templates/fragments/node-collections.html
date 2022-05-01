@@ -1,0 +1,27 @@
+<!doctype html>
+
+<html xmlns:th="https://www.thymeleaf.org">
+
+<div th:fragment="node-table" class="table-responsive table-sm">
+    <table class="node-table table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Online</th>
+            <th scope="col">Alias</th>
+            <th scope="col">Pubkey</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="node : ${nodes}">
+            <td>
+                <span th:if="${node.online}" data-feather="check-circle" style="color: darkGreen;"></span>
+                <span th:unless="${node.online}" data-feather="slash" style="color: darkRed;"></span>
+            </td>
+            <td th:text="${node.alias}"></td>
+            <td><a th:text="${node.pubkey}" th:href="@{/node/{id}(id=${node.pubkey})}"></a></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+</html>

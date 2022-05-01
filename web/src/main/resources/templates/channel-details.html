@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body}, 'Channel: ' + ${id})}">
+
+<body>
+
+<div class="row">
+
+    <div th:replace="~{fragments/tiles :: channel-details(${channel})}"/>
+    <div th:replace="~{fragments/tiles :: balance(${channel.balanceInformation})}"/>
+    <div th:replace="~{fragments/tiles :: on-chain-costs(${channel.onChainCosts})}"/>
+
+    <div th:replace="~{fragments/tiles :: rebalance-report(${channel.rebalanceReport})}"/>
+    <div th:replace="~{fragments/tiles :: fee-report(${channel.feeReport})}"/>
+    <div th:replace="~{fragments/tiles :: channel-warning('Warning', null, ${channel.warnings})}"/>
+
+</div>
+
+</body>
+
+</html>

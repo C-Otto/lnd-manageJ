@@ -1,0 +1,19 @@
+.tile {
+  padding-bottom: 1rem;
+}
+
+.top-space {
+  padding-top: 1rem;
+}
+
+.channel-table tbody td {
+  padding: 0.3rem 0.5rem;
+}
+
+.node-table tbody td {
+  padding: 0.3rem 0.5rem;
+}
+
+.title-table .card-body {
+  padding: 0.2rem 0.5rem 0rem 0.5rem;
+}
