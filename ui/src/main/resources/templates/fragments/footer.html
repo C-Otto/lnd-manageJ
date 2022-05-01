@@ -7,9 +7,9 @@
         <a href="/" class="mb-3 me-2 mb-md-0 text-muted text-decoration-none lh-1">
             <div th:replace="~{fragments/icons :: arrow-up}"/>
         </a>
-        <span class="text-muted">Updated at&nbsp;</span>
-        <a th:text="'todo'"
-           th:href="'https://www.blockstream.info/block-height/' + 'todo'"></a>
+        <span class="text-muted">Updated at &nbsp;</span>
+        <a th:text="${status.blockHeight}"
+           th:href="'https://www.blockstream.info/block-height/' + ${status.blockHeight}"></a>
         <span class="text-muted">.</span>
     </div>
 

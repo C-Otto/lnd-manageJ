@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = ChannelDetailsController.class)
-class ChannelDetailsControllerIT {
+class ChannelDetailsControllerIT extends BaseControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
