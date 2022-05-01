@@ -6,7 +6,7 @@ import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
-import de.cotto.lndmanagej.ui.dto.StatusModel;
+import de.cotto.lndmanagej.ui.dto.WarningsModel;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -30,8 +30,8 @@ class UiDataServiceTest {
 
     private static class TestableUiDataService extends UiDataService {
         @Override
-        public StatusModel getStatus() {
-            return new StatusModel(true, 123, NONE);
+        public WarningsModel getStatus() {
+            return new WarningsModel(NONE);
         }
 
         @Override

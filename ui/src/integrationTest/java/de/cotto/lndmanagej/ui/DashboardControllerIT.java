@@ -4,7 +4,7 @@ import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.ui.controller.DashboardController;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
-import de.cotto.lndmanagej.ui.dto.StatusModel;
+import de.cotto.lndmanagej.ui.dto.WarningsModel;
 import de.cotto.lndmanagej.ui.page.PageService;
 import de.cotto.lndmanagej.ui.page.general.DashboardPage;
 import org.junit.jupiter.api.Test;
@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = DashboardController.class)
-class DashboardControllerIT {
+class DashboardControllerIT extends BaseControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -37,7 +37,7 @@ class DashboardControllerIT {
     @Test
     void empty_dashboard() throws Exception {
         when(pageService.dashboard()).thenReturn(
-                new DashboardPage(List.of(), List.of(), new StatusModel(true, 1, NONE))
+                new DashboardPage(List.of(), List.of(), new WarningsModel(NONE))
         );
         mockMvc.perform(get("/")).andExpect(status().isOk());
     }
@@ -47,7 +47,7 @@ class DashboardControllerIT {
         OpenChannelDto channel = OPEN_CHANNEL_DTO;
         NodeDto node = new NodeDto(channel.remotePubkey().toString(), channel.remoteAlias(), true);
         when(pageService.dashboard()).thenReturn(
-                new DashboardPage(List.of(channel), List.of(node), new StatusModel(true, 1, NONE))
+                new DashboardPage(List.of(channel), List.of(node), new WarningsModel(NONE))
         );
         mockMvc.perform(get("/")).andExpect(status().isOk());
     }

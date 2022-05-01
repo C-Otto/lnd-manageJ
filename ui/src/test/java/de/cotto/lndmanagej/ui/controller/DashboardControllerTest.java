@@ -7,7 +7,7 @@ import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
-import de.cotto.lndmanagej.ui.dto.StatusModel;
+import de.cotto.lndmanagej.ui.dto.WarningsModel;
 import de.cotto.lndmanagej.ui.page.PageService;
 import de.cotto.lndmanagej.ui.page.channel.ChannelsPage;
 import de.cotto.lndmanagej.ui.page.general.DashboardPage;
@@ -48,11 +48,11 @@ class DashboardControllerTest {
 
     @Test
     void dashboard() {
-        StatusModel statusModel = new StatusModel(true, 213, NodesAndChannelsWithWarningsDto.NONE);
-        when(pageService.dashboard()).thenReturn(new DashboardPage(List.of(), List.of(), statusModel));
+        WarningsModel warningsModel = new WarningsModel(NodesAndChannelsWithWarningsDto.NONE);
+        when(pageService.dashboard()).thenReturn(new DashboardPage(List.of(), List.of(), warningsModel));
         assertThat(dashboardController.dashboard(model)).isEqualTo("dashboard");
         verify(model).addAllAttributes(
-                Map.of(NODES_KEY, List.of(), CHANNELS_KEY, List.of(), "status", statusModel)
+                Map.of(NODES_KEY, List.of(), CHANNELS_KEY, List.of(), "warnings", warningsModel)
         );
     }
 

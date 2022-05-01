@@ -1,6 +1,6 @@
 <!doctype html>
 
-<html th:fragment="layout (template)" xmlns:th="https://www.thymeleaf.org">
+<html th:fragment="layout (template, title)" xmlns:th="https://www.thymeleaf.org">
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -41,6 +41,10 @@
         <div th:replace="~{fragments/navigation :: left-side-bar}"/>
 
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+
+            <div th:if="${title != ''}" class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h3" th:text="${title}"></h1>
+            </div>
 
             <th:block th:include="${template}"/>
 

@@ -17,7 +17,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = NodeDetailsController.class)
-class NodeDetailsControllerIT {
+class NodeDetailsControllerIT extends BaseControllerIT {
 
     @Autowired
     private MockMvc mockMvc;

@@ -14,4 +14,5 @@ public class SpringBootConfiguration {
     public Formatter formatter() {
         return new Formatter();
     }
+
 }

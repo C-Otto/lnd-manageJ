@@ -7,7 +7,7 @@ import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
-import de.cotto.lndmanagej.ui.dto.StatusModel;
+import de.cotto.lndmanagej.ui.dto.WarningsModel;
 
 import java.util.Collection;
 import java.util.List;
@@ -21,7 +21,7 @@ public abstract class UiDataService {
         // default constructor
     }
 
-    public abstract StatusModel getStatus();
+    public abstract WarningsModel getStatus();
 
     public abstract List<OpenChannelDto> getOpenChannels();
 
