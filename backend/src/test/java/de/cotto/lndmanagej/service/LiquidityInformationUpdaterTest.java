@@ -21,7 +21,9 @@ import java.util.Optional;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
+import static de.cotto.lndmanagej.model.FailureCode.CHANNEL_DISABLED;
 import static de.cotto.lndmanagej.model.FailureCode.TEMPORARY_CHANNEL_FAILURE;
+import static de.cotto.lndmanagej.model.FailureCode.UNKNOWN_NEXT_PEER;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
@@ -107,8 +109,9 @@ class LiquidityInformationUpdaterTest {
         }
     }
 
+    // CPD-OFF
     @Nested
-    class Failure {
+    class TemporaryChannelFailure {
         @Test
         void temporary_channel_failure_on_first_hop() {
             liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, TEMPORARY_CHANNEL_FAILURE, 0);
@@ -124,7 +127,6 @@ class LiquidityInformationUpdaterTest {
             verifyNoMoreInteractions(liquidityBoundsService);
         }
 
-        // CPD-OFF
         @Test
         void temporary_channel_failure_on_third_hop() {
             liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, TEMPORARY_CHANNEL_FAILURE, 2);
@@ -142,24 +144,124 @@ class LiquidityInformationUpdaterTest {
         }
 
         @Test
-        void temporary_channel_just_channel_information() {
+        void temporary_channel_failure_just_channel_information() {
             liquidityInformationUpdater.failure(hopsWithChannelIds, TEMPORARY_CHANNEL_FAILURE, 2);
             verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
             verify(liquidityBoundsService).markAsAvailable(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
             verify(liquidityBoundsService).markAsUnavailable(PUBKEY_3, PUBKEY_4, Coins.ofSatoshis(80));
         }
-        // CPD-ON
 
         @Test
         void temporary_channel_failure_without_channel_or_pubkey_information() {
             liquidityInformationUpdater.failure(hopsJustWithAmount, TEMPORARY_CHANNEL_FAILURE, 2);
             verifyNoInteractions(liquidityBoundsService);
         }
+    }
+
+    @Nested
+    class UnknownNextPeer {
+        private final Coins oneSatoshi = Coins.ofSatoshis(1);
 
         @Test
-        void unknown_failure_code() {
-            liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, new FailureCode(99), 2);
+        void unknown_next_peer_on_first_hop() {
+            liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, UNKNOWN_NEXT_PEER, 0);
+            verify(liquidityBoundsService).markAsUnavailable(PUBKEY, PUBKEY_2, oneSatoshi);
+            verifyNoMoreInteractions(liquidityBoundsService);
+        }
+
+        @Test
+        void unknown_next_peer_on_second_hop() {
+            liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, UNKNOWN_NEXT_PEER, 1);
+            verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
+            verify(liquidityBoundsService).markAsUnavailable(PUBKEY_2, PUBKEY_3, oneSatoshi);
+            verifyNoMoreInteractions(liquidityBoundsService);
+        }
+
+        @Test
+        void unknown_next_peer_on_third_hop() {
+            liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, UNKNOWN_NEXT_PEER, 2);
+            verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
+            verify(liquidityBoundsService).markAsAvailable(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
+            verify(liquidityBoundsService).markAsUnavailable(PUBKEY_3, PUBKEY_4, oneSatoshi);
+        }
+
+        @Test
+        void unknown_next_peer_on_hop_that_does_not_exist() {
+            liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, UNKNOWN_NEXT_PEER, 99);
+            verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
+            verify(liquidityBoundsService).markAsAvailable(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
+            verify(liquidityBoundsService).markAsAvailable(PUBKEY_3, PUBKEY_4, Coins.ofSatoshis(80));
+        }
+
+        @Test
+        void unknown_next_peer_just_channel_information() {
+            liquidityInformationUpdater.failure(hopsWithChannelIds, UNKNOWN_NEXT_PEER, 2);
+            verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
+            verify(liquidityBoundsService).markAsAvailable(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
+            verify(liquidityBoundsService).markAsUnavailable(PUBKEY_3, PUBKEY_4, oneSatoshi);
+        }
+
+        @Test
+        void unknown_next_peer_without_channel_or_pubkey_information() {
+            liquidityInformationUpdater.failure(hopsJustWithAmount, UNKNOWN_NEXT_PEER, 2);
             verifyNoInteractions(liquidityBoundsService);
         }
+    }
+
+    @Nested
+    class ChannelDisabled {
+        private final Coins oneSatoshi = Coins.ofSatoshis(1);
+
+        @Test
+        void channel_disabled_on_first_hop() {
+            liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, CHANNEL_DISABLED, 0);
+            verify(liquidityBoundsService).markAsUnavailable(PUBKEY, PUBKEY_2, oneSatoshi);
+            verifyNoMoreInteractions(liquidityBoundsService);
+        }
+
+        @Test
+        void channel_disabled_on_second_hop() {
+            liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, CHANNEL_DISABLED, 1);
+            verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
+            verify(liquidityBoundsService).markAsUnavailable(PUBKEY_2, PUBKEY_3, oneSatoshi);
+            verifyNoMoreInteractions(liquidityBoundsService);
+        }
+
+        @Test
+        void channel_disabled_on_third_hop() {
+            liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, CHANNEL_DISABLED, 2);
+            verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
+            verify(liquidityBoundsService).markAsAvailable(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
+            verify(liquidityBoundsService).markAsUnavailable(PUBKEY_3, PUBKEY_4, oneSatoshi);
+        }
+
+        @Test
+        void channel_disabled_on_hop_that_does_not_exist() {
+            liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, CHANNEL_DISABLED, 99);
+            verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
+            verify(liquidityBoundsService).markAsAvailable(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
+            verify(liquidityBoundsService).markAsAvailable(PUBKEY_3, PUBKEY_4, Coins.ofSatoshis(80));
+        }
+
+        @Test
+        void channel_disabled_just_channel_information() {
+            liquidityInformationUpdater.failure(hopsWithChannelIds, CHANNEL_DISABLED, 2);
+            verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
+            verify(liquidityBoundsService).markAsAvailable(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
+            verify(liquidityBoundsService).markAsUnavailable(PUBKEY_3, PUBKEY_4, oneSatoshi);
+        }
+
+        @Test
+        void channel_disabled_without_channel_or_pubkey_information() {
+            liquidityInformationUpdater.failure(hopsJustWithAmount, CHANNEL_DISABLED, 2);
+            verifyNoInteractions(liquidityBoundsService);
+        }
+    }
+    // CPD-ON
+
+    @Test
+    void unknown_failure_code() {
+        liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, new FailureCode(99), 2);
+        verifyNoInteractions(liquidityBoundsService);
     }
 }

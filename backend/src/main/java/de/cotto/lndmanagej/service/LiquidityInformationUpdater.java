@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.service;
 import de.cotto.lndmanagej.grpc.GrpcChannelPolicy;
 import de.cotto.lndmanagej.grpc.GrpcGetInfo;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FailureCode;
 import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.model.PaymentAttemptHop;
@@ -12,8 +13,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
+import static de.cotto.lndmanagej.model.FailureCode.CHANNEL_DISABLED;
 import static de.cotto.lndmanagej.model.FailureCode.TEMPORARY_CHANNEL_FAILURE;
+import static de.cotto.lndmanagej.model.FailureCode.UNKNOWN_NEXT_PEER;
 
 @Service
 public class LiquidityInformationUpdater implements PaymentListener {
@@ -46,9 +50,18 @@ public class LiquidityInformationUpdater implements PaymentListener {
 
     @Override
     public void failure(List<PaymentAttemptHop> paymentAttemptHops, FailureCode failureCode, int failureSourceIndex) {
-        if (!TEMPORARY_CHANNEL_FAILURE.equals(failureCode)) {
-            return;
+        if (TEMPORARY_CHANNEL_FAILURE.equals(failureCode)) {
+            markAvailableAndUnavailable(paymentAttemptHops, failureSourceIndex, PaymentAttemptHop::amount);
+        } else if (UNKNOWN_NEXT_PEER.equals(failureCode) || CHANNEL_DISABLED.equals(failureCode)) {
+            markAvailableAndUnavailable(paymentAttemptHops, failureSourceIndex, hop -> Coins.ofSatoshis(1));
         }
+    }
+
+    private void markAvailableAndUnavailable(
+            List<PaymentAttemptHop> paymentAttemptHops,
+            int failureSourceIndex,
+            Function<PaymentAttemptHop, Coins> unavailableAmountForHop
+    ) {
         Pubkey startNode = grpcGetInfo.getPubkey();
         for (int i = 0; i < paymentAttemptHops.size(); i++) {
             PaymentAttemptHop hop = paymentAttemptHops.get(i);
@@ -59,7 +72,7 @@ public class LiquidityInformationUpdater implements PaymentListener {
             if (i < failureSourceIndex) {
                 liquidityBoundsService.markAsAvailable(startNode, endNode, hop.amount());
             } else {
-                liquidityBoundsService.markAsUnavailable(startNode, endNode, hop.amount());
+                liquidityBoundsService.markAsUnavailable(startNode, endNode, unavailableAmountForHop.apply(hop));
                 return;
             }
             startNode = endNode;
