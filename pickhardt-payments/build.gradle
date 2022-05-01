@@ -20,5 +20,5 @@ task deleteCrashLogs(type: Delete) {
 tasks.findByName('pitest').finalizedBy(deleteCrashLogs)
 
 pitest {
-    testStrengthThreshold = 99
+    testStrengthThreshold = 98
 }

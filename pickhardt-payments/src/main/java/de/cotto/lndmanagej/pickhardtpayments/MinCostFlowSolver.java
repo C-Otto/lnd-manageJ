@@ -72,6 +72,9 @@ class MinCostFlowSolver {
             Flow flow = new Flow(edge, Coins.ofSatoshis(flowAmount * quantization));
             flows.add(flow);
         }
+        if (flows.isEmpty()) {
+            logger.warn("Solver returned result with no flows: {}", flows);
+        }
         return flows;
     }
 
