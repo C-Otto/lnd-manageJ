@@ -1,0 +1,335 @@
+<!doctype html>
+
+<html xmlns:th="https://www.thymeleaf.org">
+
+<!-- full width tiles -->
+<div th:fragment="channel-tile (node)" class="tile col-sm-12">
+    <div class="card border-secondary">
+        <div class="card-header">
+            <div class="fs-4 mb-0">
+                <div th:replace="~{fragments/icons :: list-ul}"/>
+                Channels
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="container" style="padding-left: 0; padding-right: 0;">
+                <div class="row align-items-start">
+                    <div class="col">
+                        <div th:replace="~{fragments/channel-collections :: channel-list-group ('Open', ${node.channels})}"/>
+                    </div>
+                    <div class="col">
+                        <div th:replace="~{fragments/channel-collections :: channel-list-group ('Closed', ${node.closedChannels})}"/>
+                    </div>
+                    <div class="col">
+                        <div th:replace="~{fragments/channel-collections :: channel-list-group ('Waiting Close', ${node.waitingCloseChannels})}"/>
+                    </div>
+                    <div class="col">
+                        <div th:replace="~{fragments/channel-collections :: channel-list-group ('Pending Force Closing', ${node.pendingForceClosingChannels})}"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div th:fragment="all-channels" class="tile title-table col-sm-12">
+    <div class="card border-secondary">
+        <div class="card-header">
+            <div class="fs-4 mb-0">
+                <div th:replace="~{fragments/icons :: list-ul}"/>
+                Channels
+            </div>
+        </div>
+        <div class="card-body">
+            <div th:replace="~{fragments/channel-collections :: channel-table}"/>
+        </div>
+    </div>
+</div>
+
+<div th:fragment="all-nodes" class="tile title-table col-sm-12">
+    <div class="card border-secondary">
+        <div class="card-header">
+            <div class="fs-4 mb-0">
+                <div th:replace="~{fragments/icons :: cpu}"/>
+                Nodes
+            </div>
+        </div>
+        <div class="card-body">
+            <div th:replace="~{fragments/node-collections :: node-table}"/>
+        </div>
+    </div>
+</div>
+
+
+<!-- width / 3 tiles -->
+
+<div th:fragment="on-chain-costs (onChainCosts)" class="tile col-sm-4">
+    <div class="card border-secondary">
+        <div class="card-header">
+            <div class="fs-4 mb-0">
+                <div th:replace="~{fragments/icons :: link}"/>
+                On-Chain Costs
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="container" style="padding-left: 0; padding-right: 0;">
+                <div class="row align-items-start">
+                    <div class="col">
+                        <ul class="list-group">
+                            <li class="list-group-item disabled" aria-disabled="true">Open</li>
+                            <li class="list-group-item" th:text="${onChainCosts.openCostsSat}"></li>
+                        </ul>
+                    </div>
+                    <div class="col">
+                        <ul class="list-group">
+                            <li class="list-group-item disabled" aria-disabled="true">Close</li>
+                            <li class="list-group-item" th:text="${onChainCosts.closeCostsSat}"></li>
+                        </ul>
+                    </div>
+                    <div class="col">
+                        <ul class="list-group">
+                            <li class="list-group-item disabled" aria-disabled="true">Sweep</li>
+                            <li class="list-group-item" th:text="${onChainCosts.sweepCostsSat}"></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:fragment="fee-report (feeReport)" class="tile col-sm-4">
+    <div class="card border-secondary">
+        <div class="card-header">
+            <div class="fs-4 mb-0">
+                <div th:replace="~{fragments/icons :: pig}"/>
+                Fee Report
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="container" style="padding-left: 0; padding-right: 0;">
+                <div class="row align-items-start">
+                    <div class="col">
+                        <ul class="list-group">
+                            <li class="list-group-item disabled" aria-disabled="true">Earned</li>
+                            <li class="list-group-item" th:text="${feeReport.earnedMilliSat}"></li>
+                        </ul>
+                    </div>
+                    <div class="col">
+                        <ul class="list-group">
+                            <li class="list-group-item disabled" aria-disabled="true">Sourced</li>
+                            <li class="list-group-item" th:text="${feeReport.sourcedMilliSat}"></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:fragment="online-report (onlineReport)" class="tile col-sm-4">
+    <div class="card border-secondary">
+        <div class="card-header">
+            <div class="fs-4 mb-0">
+                <div th:replace="~{fragments/icons :: online}"/>
+                Online Report
+            </div>
+        </div>
+        <div class="card-body">
+            <p th:text="${onlineReport.online ? 'Online' : 'Offline'} + ' since '+${onlineReport.since}"></p>
+            <p th:text="${onlineReport.onlinePercentage} + '% online since ' + ${onlineReport.daysForOnlinePercentage} + ' days.'"></p>
+            <p th:text="'Changes '+${onlineReport.changes}"></p>
+            <p th:text="'Days for changes '+${onlineReport.daysForChanges}"></p>
+        </div>
+    </div>
+</div>
+
+
+<div th:fragment="balance (balanceInformation)" class="tile col-sm-4">
+    <div class="card border-secondary">
+        <div class="card-header">
+            <div class="fs-4 mb-0">
+                <div th:replace="~{fragments/icons :: wallet}"/>
+                Balance
+            </div>
+        </div>
+        <div class="card-body">
+
+            <div class="container" style="padding-left: 0; padding-right: 0;">
+                <div class="row align-items-start">
+                    <div class="col">
+                        <ul class="list-group">
+                            <li class="list-group-item disabled" aria-disabled="true">Local</li>
+                            <li class="list-group-item" th:text="'Balance '+${balanceInformation.localBalanceSat}"></li>
+                            <li class="list-group-item" th:text="'Reserve '+${balanceInformation.localReserveSat}"></li>
+                            <li class="list-group-item"
+                                th:text="'Available '+${balanceInformation.localAvailableSat}"></li>
+                        </ul>
+                    </div>
+                    <div class="col">
+                        <ul class="list-group">
+                            <li class="list-group-item disabled" aria-disabled="true">Remote</li>
+                            <li class="list-group-item"
+                                th:text="'Balance '+${balanceInformation.remoteBalanceSat}"></li>
+                            <li class="list-group-item"
+                                th:text="'Reserve '+${balanceInformation.remoteReserveSat}"></li>
+                            <li class="list-group-item"
+                                th:text="'Available '+${balanceInformation.remoteAvailableSat}"></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div th:fragment="rebalance-report (rebalanceReport)" class="tile col-sm-4">
+    <div class="card border-secondary">
+        <div class="card-header">
+            <div class="fs-4 mb-0">
+                <div th:replace="~{fragments/icons :: pig}"/>
+                Rebalance Report
+            </div>
+        </div>
+        <div class="card-body">
+
+            <div class="container" style="padding-left: 0; padding-right: 0;">
+                <div class="row align-items-start">
+                    <div class="col">
+                        <ul class="list-group">
+                            <li class="list-group-item disabled" aria-disabled="true">Source</li>
+                            <li class="list-group-item" th:text="'Cost: '+${rebalanceReport.sourceCostsMilliSat}"></li>
+                            <li class="list-group-item"
+                                th:text="'Amount: '+${rebalanceReport.sourceAmountMilliSat}"></li>
+                            <li class="list-group-item"
+                                th:text="'Support: '+${rebalanceReport.supportAsSourceAmountMilliSat}"></li>
+                        </ul>
+                    </div>
+                    <div class="col">
+                        <ul class="list-group">
+                            <li class="list-group-item disabled" aria-disabled="true">Target</li>
+                            <li class="list-group-item" th:text="'Cost: '+${rebalanceReport.targetCostsMilliSat}"></li>
+                            <li class="list-group-item"
+                                th:text="'Amount: '+${rebalanceReport.targetAmountMilliSat}"></li>
+                            <li class="list-group-item"
+                                th:text="'Support: '+${rebalanceReport.supportAsTargetAmountMilliSat}"></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div th:fragment="node-warning (title, pubkey, warnings)" class="tile col-sm-4">
+    <div class="card border-secondary">
+        <div class="card-header">
+            <div class="fs-4 mb-0">
+                <div th:replace="~{fragments/icons :: warning}"/>
+                <span></span>
+                <span th:if="${pubkey}"><a th:text="${title}" th:href="@{/node/{id}(id=${pubkey})}"></a></span>
+                <span th:unless="${pubkey}" th:text="${title}"></span>
+            </div>
+        </div>
+        <div class="card-body">
+            <ol class="list-group list-group-flush">
+                <li th:each="warning : ${warnings}" class="list-group-item">
+                    <span th:text="${warning}"></span>
+                </li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<div th:fragment="channel-warning (title, channelId, warnings)" class="tile col-sm-4">
+    <div class="card border-secondary">
+        <div class="card-header">
+            <div class="fs-4 mb-0">
+                <div th:replace="~{fragments/icons :: warning}"/>
+                <span></span>
+                <span th:if="${channelId}"><a th:text="${title}" th:href="@{/channel/{id}(id=${channelId})}"></a></span>
+                <span th:unless="${channelId}" th:text="${title}"></span>
+            </div>
+        </div>
+        <div class="card-body">
+            <ol class="list-group list-group-flush">
+                <li th:each="warning : ${warnings}" class="list-group-item">
+                    <span th:text="${warning}"></span>
+                </li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<div th:fragment="channel-details (channel)" class="tile col-sm-4">
+    <div class="card border-secondary">
+        <div class="card-header">
+            <div class="fs-4 mb-0">
+                <div th:replace="~{fragments/icons :: circle-info}"/>
+                Details
+            </div>
+        </div>
+        <div class="card-body">
+            <p th:switch="${channel.openInitiator.name}">
+                <span th:case="LOCAL">
+                    Channel with
+                    <a th:text="${channel.remoteAlias}" th:href="@{/node/{id}(id=${channel.remotePubkey})}"></a>
+                    opened by me.
+                </span>
+                <span th:case="REMOTE">
+                    Channel opened by
+                    <a th:text="${channel.remoteAlias}" th:href="@{/node/{id}(id=${channel.remotePubkey})}"></a>
+                </span>
+                <span th:case="*">
+                    Channel with
+                    <a th:text="${channel.remoteAlias}" th:href="@{/node/{id}(id=${channel.remotePubkey})}"></a>
+                </span>
+            </p>
+
+            <div class="container" style="padding-left: 0; padding-right: 0;">
+                <div class="row align-items-start">
+                    <div class="col">
+                        <ul class="list-group">
+                            <li class="list-group-item disabled" aria-disabled="true">Local</li>
+                            <li class="list-group-item"
+                                th:text="'Base Fee: '+${channel.policies.local.baseFeeMilliSat}"></li>
+                            <li class="list-group-item"
+                                th:text="'Fee Rate: '+${channel.policies.local.feeRatePpm}"></li>
+                            <li class="list-group-item" th:text="'Enabled: '+${channel.policies.local.enabled}"></li>
+                        </ul>
+                    </div>
+                    <div class="col">
+                        <ul class="list-group">
+                            <li class="list-group-item disabled" aria-disabled="true">Remote</li>
+                            <li class="list-group-item"
+                                th:text="'Base Fee: '+${channel.policies.remote.baseFeeMilliSat}"></li>
+                            <li class="list-group-item"
+                                th:text="'Fee Rate: '+${channel.policies.remote.feeRatePpm}"></li>
+                            <li class="list-group-item" th:text="'Enabled: '+${channel.policies.remote.enabled}"></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div th:fragment="status (status)" class="tile col-sm-4">
+    <div class="card border-secondary">
+        <div class="card-header">
+            <div class="fs-4 mb-0">
+                <div th:replace="~{fragments/icons :: circle-info}"/>
+                Status
+            </div>
+        </div>
+        <div class="card-body">
+            <p style="margin-bottom: 0;" th:text="'Synced: ' + ${status.synced} + ' &nbsp;&nbsp;&nbsp;Block Height: '+${status.blockHeight}"></p>
+        </div>
+    </div>
+</div>
+
+</html>

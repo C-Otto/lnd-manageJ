@@ -1,0 +1,46 @@
+<!doctype html>
+
+<html xmlns:th="https://www.thymeleaf.org">
+
+<div th:fragment="channel-table" class="table-responsive table-sm" xmlns:th="https://www.thymeleaf.org">
+    <table class="channel-table table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Inbound</th>
+            <th scope="col" style="text-align: center;">Ratio</th>
+            <th scope="col">Outbound</th>
+            <th scope="col">Base Fee (local)</th>
+            <th scope="col">Fee Rate (local)</th>
+            <th scope="col">Base Fee (remote)</th>
+            <th scope="col">Fee Rate (remote)</th>
+            <th scope="col">Alias</th>
+            <th scope="col">Channel Id</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="channel : ${channels}">
+            <td th:text="${channel.formatInbound}" style="color: darkRed; text-align: right; padding-left:0;"></td>
+            <td th:text="${channel.ratio}"></td>
+            <td th:text="${channel.formatOutbound}" style="color: darkGreen; text-align: right;"></td>
+            <td th:text="${channel.policies.local.baseFeeMilliSat}" style="text-align: right;"></td>
+            <td th:text="${channel.policies.local.feeRatePpm}" style="text-align: right;"></td>
+            <td th:text="${channel.policies.remote.baseFeeMilliSat}" style="text-align: right;"></td>
+            <td th:text="${channel.policies.remote.feeRatePpm}" style="text-align: right;"></td>
+            <td th:text="${channel.remoteAlias}"></td>
+            <td><a th:text="${channel.channelId}" th:href="@{/channel/{id}(id=${channel.channelId.shortChannelId})}"></a></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+
+<ul th:fragment="channel-list-group (title, channels)" class="list-group">
+    <li class="list-group-item disabled" aria-disabled="true" th:text="${title}"></li>
+
+    <li th:each="chan : ${channels}" class="list-group-item">
+        <a th:text="${chan}" th:href="@{/channel/{id}(id=${chan.shortChannelId})}"></a>
+    </li>
+
+</ul>
+
+</html>
