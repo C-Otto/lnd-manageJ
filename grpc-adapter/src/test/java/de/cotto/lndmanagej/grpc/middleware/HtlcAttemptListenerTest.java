@@ -5,6 +5,7 @@ import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.model.Pubkey;
 import lnrpc.Failure;
+import lnrpc.HTLCAttempt;
 import lnrpc.Hop;
 import lnrpc.Route;
 import org.junit.jupiter.api.Test;
@@ -12,8 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import routerrpc.RouterOuterClass;
-import routerrpc.RouterOuterClass.SendToRouteResponse;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
@@ -21,74 +20,57 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
-class SendToRouteListenerTest {
+class HtlcAttemptListenerTest {
+    // CPD-OFF
     private static final int REQUEST_ID = 1;
     private static final HexString NO_PREIMAGE = new HexString("");
     private static final ByteString NO_PREIMAGE_BYTESTRING = ByteString.copyFrom(NO_PREIMAGE.getByteArray());
     private static final HexString PREIMAGE = new HexString("FF00AB");
     private static final ByteString PREIMAGE_BYTESTRING = ByteString.copyFrom(PREIMAGE.getByteArray());
     private static final Failure NO_FAILURE = Failure.getDefaultInstance();
+    // CPD-ON
 
     @Mock
     private PaymentListenerUpdater paymentListenerUpdater;
 
     @InjectMocks
-    private SendToRouteListener sendToRouteListener;
-
-    @Test
-    void getRequestType() {
-        assertThat(sendToRouteListener.getRequestType()).isEqualTo("routerrpc.SendToRouteRequest");
-    }
+    private HtlcAttemptListener htlcAttemptListener;
 
     @Test
     void getResponseType() {
-        assertThat(sendToRouteListener.getResponseType()).isEqualTo("routerrpc.SendToRouteResponse");
-    }
-
-    @Test
-    void responseWithoutRequest() {
-        sendToRouteListener.acceptResponse(SendToRouteResponse.newBuilder().build(), REQUEST_ID);
-        verifyNoInteractions(paymentListenerUpdater);
+        assertThat(htlcAttemptListener.getResponseType()).isEqualTo("lnrpc.HTLCAttempt");
     }
 
     @Test
     void passes_success_to_payment_listener_updater() {
         Route route = getRoute();
-        acceptRequestWithRoute(route);
-        SendToRouteResponse response = SendToRouteResponse.newBuilder()
+        HTLCAttempt response = HTLCAttempt.newBuilder()
                 .setPreimage(PREIMAGE_BYTESTRING)
+                .setRoute(route)
                 .build();
-        sendToRouteListener.acceptResponse(response, REQUEST_ID);
+        htlcAttemptListener.acceptResponse(response, REQUEST_ID);
         verify(paymentListenerUpdater).update(PREIMAGE_BYTESTRING, route, NO_FAILURE);
         verifyNoMoreInteractions(paymentListenerUpdater);
     }
 
     @Test
-    void notifiesListenerForFailure() {
+    void notifies_listener_for_failure() {
         Route route = getRoute();
         Failure failure = Failure.newBuilder()
                 .setCode(Failure.FailureCode.TEMPORARY_CHANNEL_FAILURE)
                 .setFailureSourceIndex(3)
                 .build();
-        acceptRequestWithRoute(route);
 
-        SendToRouteResponse response = SendToRouteResponse.newBuilder()
+        HTLCAttempt response = HTLCAttempt.newBuilder()
                 .setFailure(failure)
-                .build();
-        sendToRouteListener.acceptResponse(response, REQUEST_ID);
-        verify(paymentListenerUpdater).update(NO_PREIMAGE_BYTESTRING, route, failure);
-        verifyNoMoreInteractions(paymentListenerUpdater);
-    }
-
-    private void acceptRequestWithRoute(Route route) {
-        RouterOuterClass.SendToRouteRequest request = RouterOuterClass.SendToRouteRequest.newBuilder()
                 .setRoute(route)
                 .build();
-        sendToRouteListener.acceptRequest(request, REQUEST_ID);
+        htlcAttemptListener.acceptResponse(response, REQUEST_ID);
+        verify(paymentListenerUpdater).update(NO_PREIMAGE_BYTESTRING, route, failure);
+        verifyNoMoreInteractions(paymentListenerUpdater);
     }
 
     private Route getRoute() {

@@ -8,25 +8,11 @@ import javax.annotation.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class RequestResponseListenerTest {
-    private static final String REQUEST_TYPE = "request-type";
+class AbstractResponseListenerTest {
     private static final String RESPONSE_TYPE = "response-type";
     private static final String CRASH_KEYWORD = "crash";
-    private final TestableRequestResponseListener messageListener = new TestableRequestResponseListener();
+    private final TestableAbstractResponseListener messageListener = new TestableAbstractResponseListener();
 
-    @Test
-    void getRequestType() {
-        assertThat(messageListener.getRequestType()).isEqualTo(REQUEST_TYPE);
-    }
-
-    @Test
-    void parses_request() {
-        messageListener.acceptRequest(ByteString.copyFromUtf8("bar"), 123);
-        assertThat(messageListener.request).isEqualTo("bar");
-        assertThat(messageListener.requestId).isEqualTo(123);
-    }
-
-    // CPD-OFF
     @Test
     void getResponseType() {
         assertThat(messageListener.getResponseType()).isEqualTo(RESPONSE_TYPE);
@@ -45,22 +31,14 @@ class RequestResponseListenerTest {
         assertThat(messageListener.response).isNull();
         assertThat(messageListener.requestId).isZero();
     }
-    // CPD-ON
 
-    private static class TestableRequestResponseListener extends RequestResponseListener<String, String> {
-        @Nullable
-        private String request;
+    private static class TestableAbstractResponseListener extends AbstractResponseListener<String> {
         @Nullable
         private String response;
         private long requestId;
 
-        public TestableRequestResponseListener() {
-            super(
-                    REQUEST_TYPE,
-                    TestableRequestResponseListener::parser,
-                    RESPONSE_TYPE,
-                    TestableRequestResponseListener::parser
-            );
+        public TestableAbstractResponseListener() {
+            super(RESPONSE_TYPE, TestableAbstractResponseListener::parser);
         }
 
         private static String parser(ByteString bytes) throws InvalidProtocolBufferException {
@@ -68,12 +46,6 @@ class RequestResponseListenerTest {
                 throw new InvalidProtocolBufferException(CRASH_KEYWORD);
             }
             return bytes.toStringUtf8();
-        }
-
-        @Override
-        public void acceptRequest(String request, long requestId) {
-            this.request = request;
-            this.requestId = requestId;
         }
 
         @Override
