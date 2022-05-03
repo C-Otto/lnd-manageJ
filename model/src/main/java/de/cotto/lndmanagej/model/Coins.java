@@ -6,13 +6,16 @@ import java.util.Locale;
 
 public record Coins(long milliSatoshis) implements Comparable<Coins> {
     private static final int SCALE = 3;
-    public static final Coins NONE = Coins.ofSatoshis(0);
+    public static final Coins NONE = new Coins(0);
 
     public static Coins ofSatoshis(long satoshis) {
-        return new Coins(satoshis * 1_000);
+        return ofMilliSatoshis(satoshis * 1_000);
     }
 
     public static Coins ofMilliSatoshis(long milliSatoshis) {
+        if (milliSatoshis == 0) {
+            return NONE;
+        }
         return new Coins(milliSatoshis);
     }
 
@@ -24,10 +27,19 @@ public record Coins(long milliSatoshis) implements Comparable<Coins> {
     }
 
     public Coins add(Coins summand) {
+        if (summand.milliSatoshis == 0) {
+            return this;
+        }
+        if (this.milliSatoshis == 0) {
+            return summand;
+        }
         return Coins.ofMilliSatoshis(milliSatoshis + summand.milliSatoshis);
     }
 
     public Coins subtract(Coins subtrahend) {
+        if (subtrahend.milliSatoshis == 0) {
+            return this;
+        }
         return Coins.ofMilliSatoshis(milliSatoshis - subtrahend.milliSatoshis);
     }
 

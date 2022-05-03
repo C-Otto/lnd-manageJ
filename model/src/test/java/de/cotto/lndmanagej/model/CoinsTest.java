@@ -8,6 +8,7 @@ import java.util.Locale;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+@SuppressWarnings("PMD.GodClass")
 class CoinsTest {
 
     private static final Coins ONE_COIN = Coins.ofSatoshis(100_000_000);
@@ -20,6 +21,44 @@ class CoinsTest {
     @Test
     void add_milli_satoshis() {
         assertThat(Coins.ofMilliSatoshis(400).add(Coins.ofMilliSatoshis(600))).isEqualTo(Coins.ofSatoshis(1));
+    }
+
+    @Test
+    void zero_sum_is_none_object() {
+        assertThat(Coins.ofMilliSatoshis(400).add(Coins.ofMilliSatoshis(-400))).isSameAs(Coins.NONE);
+    }
+
+    @Test
+    void difference_resulting_in_zero_is_none_object() {
+        assertThat(Coins.ofMilliSatoshis(400).subtract(Coins.ofMilliSatoshis(400))).isSameAs(Coins.NONE);
+    }
+
+    @Test
+    void zero_milli_satoshis_is_non_object() {
+        assertThat(Coins.ofMilliSatoshis(0)).isSameAs(Coins.NONE);
+    }
+
+    @Test
+    void zero_satoshis_is_non_object() {
+        assertThat(Coins.ofSatoshis(0)).isSameAs(Coins.NONE);
+    }
+
+    @Test
+    void add_zero_gives_same_instance() {
+        Coins original = Coins.ofSatoshis(1);
+        assertThat(original.add(Coins.NONE)).isSameAs(original);
+    }
+
+    @Test
+    void adding_to_zero_gives_same_instance() {
+        Coins original = Coins.ofSatoshis(1);
+        assertThat(Coins.NONE.add(original)).isSameAs(original);
+    }
+
+    @Test
+    void subtract_zero_gives_same_instance() {
+        Coins original = Coins.ofSatoshis(1);
+        assertThat(original.subtract(Coins.NONE)).isSameAs(original);
     }
 
     @Test
