@@ -93,6 +93,7 @@ class LiquidityInformationUpdaterTest {
             verify(liquidityBoundsService).markAsMoved(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
             verify(liquidityBoundsService).markAsMoved(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
             verify(liquidityBoundsService).markAsMoved(PUBKEY_3, PUBKEY_4, Coins.ofSatoshis(80));
+            verifyRemovesInFlightForAllHops();
         }
 
         @Test
@@ -101,6 +102,7 @@ class LiquidityInformationUpdaterTest {
             verify(liquidityBoundsService).markAsMoved(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
             verify(liquidityBoundsService).markAsMoved(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
             verify(liquidityBoundsService).markAsMoved(PUBKEY_3, PUBKEY_4, Coins.ofSatoshis(80));
+            verifyRemovesInFlightForAllHops();
         }
         // CPD-ON
 
@@ -118,6 +120,7 @@ class LiquidityInformationUpdaterTest {
         void from_sending_node() {
             liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, TEMPORARY_CHANNEL_FAILURE, 0);
             verify(liquidityBoundsService).markAsUnavailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
+            verifyRemovesInFlightForAllHops();
             verifyNoMoreInteractions(liquidityBoundsService);
         }
 
@@ -126,6 +129,8 @@ class LiquidityInformationUpdaterTest {
             liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, TEMPORARY_CHANNEL_FAILURE, 1);
             verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
             verify(liquidityBoundsService).markAsUnavailable(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
+
+            verifyRemovesInFlightForAllHops();
             verifyNoMoreInteractions(liquidityBoundsService);
         }
 
@@ -135,6 +140,7 @@ class LiquidityInformationUpdaterTest {
             verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
             verify(liquidityBoundsService).markAsAvailable(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
             verify(liquidityBoundsService).markAsUnavailable(PUBKEY_3, PUBKEY_4, Coins.ofSatoshis(80));
+            verifyRemovesInFlightForAllHops();
         }
 
         @Test
@@ -143,6 +149,7 @@ class LiquidityInformationUpdaterTest {
             verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
             verify(liquidityBoundsService).markAsAvailable(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
             verify(liquidityBoundsService).markAsAvailable(PUBKEY_3, PUBKEY_4, Coins.ofSatoshis(80));
+            verifyRemovesInFlightForAllHops();
         }
 
         @Test
@@ -151,6 +158,7 @@ class LiquidityInformationUpdaterTest {
             verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
             verify(liquidityBoundsService).markAsAvailable(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
             verify(liquidityBoundsService).markAsUnavailable(PUBKEY_3, PUBKEY_4, Coins.ofSatoshis(80));
+            verifyRemovesInFlightForAllHops();
         }
 
         @Test
@@ -168,6 +176,7 @@ class LiquidityInformationUpdaterTest {
         void from_sending_node() {
             liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, UNKNOWN_NEXT_PEER, 0);
             verify(liquidityBoundsService).markAsUnavailable(PUBKEY, PUBKEY_2, oneSatoshi);
+            verifyRemovesInFlightForAllHops();
             verifyNoMoreInteractions(liquidityBoundsService);
         }
 
@@ -176,6 +185,7 @@ class LiquidityInformationUpdaterTest {
             liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, UNKNOWN_NEXT_PEER, 1);
             verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
             verify(liquidityBoundsService).markAsUnavailable(PUBKEY_2, PUBKEY_3, oneSatoshi);
+            verifyRemovesInFlightForAllHops();
             verifyNoMoreInteractions(liquidityBoundsService);
         }
 
@@ -185,6 +195,7 @@ class LiquidityInformationUpdaterTest {
             verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
             verify(liquidityBoundsService).markAsAvailable(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
             verify(liquidityBoundsService).markAsUnavailable(PUBKEY_3, PUBKEY_4, oneSatoshi);
+            verifyRemovesInFlightForAllHops();
         }
 
         @Test
@@ -193,6 +204,7 @@ class LiquidityInformationUpdaterTest {
             verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
             verify(liquidityBoundsService).markAsAvailable(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
             verify(liquidityBoundsService).markAsAvailable(PUBKEY_3, PUBKEY_4, Coins.ofSatoshis(80));
+            verifyRemovesInFlightForAllHops();
         }
 
         @Test
@@ -201,6 +213,7 @@ class LiquidityInformationUpdaterTest {
             verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
             verify(liquidityBoundsService).markAsAvailable(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
             verify(liquidityBoundsService).markAsUnavailable(PUBKEY_3, PUBKEY_4, oneSatoshi);
+            verifyRemovesInFlightForAllHops();
         }
 
         @Test
@@ -218,6 +231,7 @@ class LiquidityInformationUpdaterTest {
         void from_sending_node() {
             liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, CHANNEL_DISABLED, 0);
             verify(liquidityBoundsService).markAsUnavailable(PUBKEY, PUBKEY_2, oneSatoshi);
+            verifyRemovesInFlightForAllHops();
             verifyNoMoreInteractions(liquidityBoundsService);
         }
 
@@ -226,6 +240,7 @@ class LiquidityInformationUpdaterTest {
             liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, CHANNEL_DISABLED, 1);
             verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
             verify(liquidityBoundsService).markAsUnavailable(PUBKEY_2, PUBKEY_3, oneSatoshi);
+            verifyRemovesInFlightForAllHops();
             verifyNoMoreInteractions(liquidityBoundsService);
         }
 
@@ -235,6 +250,7 @@ class LiquidityInformationUpdaterTest {
             verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
             verify(liquidityBoundsService).markAsAvailable(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
             verify(liquidityBoundsService).markAsUnavailable(PUBKEY_3, PUBKEY_4, oneSatoshi);
+            verifyRemovesInFlightForAllHops();
         }
 
         @Test
@@ -243,6 +259,7 @@ class LiquidityInformationUpdaterTest {
             verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
             verify(liquidityBoundsService).markAsAvailable(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
             verify(liquidityBoundsService).markAsAvailable(PUBKEY_3, PUBKEY_4, Coins.ofSatoshis(80));
+            verifyRemovesInFlightForAllHops();
         }
 
         @Test
@@ -251,6 +268,7 @@ class LiquidityInformationUpdaterTest {
             verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
             verify(liquidityBoundsService).markAsAvailable(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
             verify(liquidityBoundsService).markAsUnavailable(PUBKEY_3, PUBKEY_4, oneSatoshi);
+            verifyRemovesInFlightForAllHops();
         }
 
         @Test
@@ -265,19 +283,22 @@ class LiquidityInformationUpdaterTest {
         @Test
         void from_sending_node() {
             liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, MPP_TIMEOUT, 0);
-            verifyNoInteractions(liquidityBoundsService);
+            verifyRemovesInFlightForAllHops();
+            verifyNoMoreInteractions(liquidityBoundsService);
         }
 
         @Test
         void after_first_hop() {
             liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, MPP_TIMEOUT, 1);
-            verifyNoInteractions(liquidityBoundsService);
+            verifyRemovesInFlightForAllHops();
+            verifyNoMoreInteractions(liquidityBoundsService);
         }
 
         @Test
         void after_second_hop() {
             liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, MPP_TIMEOUT, 2);
-            verifyNoInteractions(liquidityBoundsService);
+            verifyRemovesInFlightForAllHops();
+            verifyNoMoreInteractions(liquidityBoundsService);
         }
 
         @Test
@@ -286,12 +307,14 @@ class LiquidityInformationUpdaterTest {
             verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
             verify(liquidityBoundsService).markAsAvailable(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
             verify(liquidityBoundsService).markAsAvailable(PUBKEY_3, PUBKEY_4, Coins.ofSatoshis(80));
+            verifyRemovesInFlightForAllHops();
         }
 
         @Test
         void after_hop_that_does_not_exist() {
             liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, MPP_TIMEOUT, 99);
-            verifyNoInteractions(liquidityBoundsService);
+            verifyRemovesInFlightForAllHops();
+            verifyNoMoreInteractions(liquidityBoundsService);
         }
 
         @Test
@@ -300,6 +323,7 @@ class LiquidityInformationUpdaterTest {
             verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
             verify(liquidityBoundsService).markAsAvailable(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
             verify(liquidityBoundsService).markAsAvailable(PUBKEY_3, PUBKEY_4, Coins.ofSatoshis(80));
+            verifyRemovesInFlightForAllHops();
         }
 
         @Test
@@ -314,19 +338,22 @@ class LiquidityInformationUpdaterTest {
         @Test
         void from_sending_node() {
             liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, INCORRECT_OR_UNKNOWN_PAYMENT_DETAILS, 0);
-            verifyNoInteractions(liquidityBoundsService);
+            verifyRemovesInFlightForAllHops();
+            verifyNoMoreInteractions(liquidityBoundsService);
         }
 
         @Test
         void after_first_hop() {
             liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, INCORRECT_OR_UNKNOWN_PAYMENT_DETAILS, 1);
-            verifyNoInteractions(liquidityBoundsService);
+            verifyRemovesInFlightForAllHops();
+            verifyNoMoreInteractions(liquidityBoundsService);
         }
 
         @Test
         void after_second_hop() {
             liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, INCORRECT_OR_UNKNOWN_PAYMENT_DETAILS, 2);
-            verifyNoInteractions(liquidityBoundsService);
+            verifyRemovesInFlightForAllHops();
+            verifyNoMoreInteractions(liquidityBoundsService);
         }
 
         @Test
@@ -335,12 +362,14 @@ class LiquidityInformationUpdaterTest {
             verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
             verify(liquidityBoundsService).markAsAvailable(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
             verify(liquidityBoundsService).markAsAvailable(PUBKEY_3, PUBKEY_4, Coins.ofSatoshis(80));
+            verifyRemovesInFlightForAllHops();
         }
 
         @Test
         void after_hop_that_does_not_exist() {
             liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, INCORRECT_OR_UNKNOWN_PAYMENT_DETAILS, 99);
-            verifyNoInteractions(liquidityBoundsService);
+            verifyRemovesInFlightForAllHops();
+            verifyNoMoreInteractions(liquidityBoundsService);
         }
 
         @Test
@@ -349,6 +378,7 @@ class LiquidityInformationUpdaterTest {
             verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
             verify(liquidityBoundsService).markAsAvailable(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
             verify(liquidityBoundsService).markAsAvailable(PUBKEY_3, PUBKEY_4, Coins.ofSatoshis(80));
+            verifyRemovesInFlightForAllHops();
         }
 
         @Test
@@ -362,6 +392,13 @@ class LiquidityInformationUpdaterTest {
     @Test
     void unknown_failure_code() {
         liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, FailureCode.UNKNOWN_FAILURE, 2);
-        verifyNoInteractions(liquidityBoundsService);
+        verifyRemovesInFlightForAllHops();
+        verifyNoMoreInteractions(liquidityBoundsService);
+    }
+
+    private void verifyRemovesInFlightForAllHops() {
+        verify(liquidityBoundsService).markAsInFlight(PUBKEY, PUBKEY_2, Coins.ofSatoshis(-100));
+        verify(liquidityBoundsService).markAsInFlight(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(-90));
+        verify(liquidityBoundsService).markAsInFlight(PUBKEY_3, PUBKEY_4, Coins.ofSatoshis(-80));
     }
 }

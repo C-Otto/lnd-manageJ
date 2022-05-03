@@ -42,6 +42,7 @@ public class LiquidityInformationUpdater implements PaymentListener {
 
     @Override
     public void success(HexString preimage, List<PaymentAttemptHop> paymentAttemptHops) {
+        removeInFlight(paymentAttemptHops);
         Pubkey startNode = grpcGetInfo.getPubkey();
         for (PaymentAttemptHop hop : paymentAttemptHops) {
             Pubkey endNode = getOtherNode(hop, startNode).orElse(null);
@@ -55,6 +56,7 @@ public class LiquidityInformationUpdater implements PaymentListener {
 
     @Override
     public void failure(List<PaymentAttemptHop> paymentAttemptHops, FailureCode failureCode, int failureSourceIndex) {
+        removeInFlight(paymentAttemptHops);
         switch (failureCode) {
             case TEMPORARY_CHANNEL_FAILURE ->
                     markAvailableAndUnavailable(paymentAttemptHops, failureSourceIndex, PaymentAttemptHop::amount);
@@ -63,6 +65,18 @@ public class LiquidityInformationUpdater implements PaymentListener {
             case MPP_TIMEOUT, INCORRECT_OR_UNKNOWN_PAYMENT_DETAILS ->
                     markAllAvailable(paymentAttemptHops, failureSourceIndex);
             default -> logger.warn("Unknown failure code {}", failureCode);
+        }
+    }
+
+    private void removeInFlight(List<PaymentAttemptHop> paymentAttemptHops) {
+        Pubkey startNode = grpcGetInfo.getPubkey();
+        for (PaymentAttemptHop hop : paymentAttemptHops) {
+            Pubkey endNode = getOtherNode(hop, startNode).orElse(null);
+            if (endNode == null) {
+                return;
+            }
+            liquidityBoundsService.markAsInFlight(startNode, endNode, hop.amount().negate());
+            startNode = endNode;
         }
     }
 
