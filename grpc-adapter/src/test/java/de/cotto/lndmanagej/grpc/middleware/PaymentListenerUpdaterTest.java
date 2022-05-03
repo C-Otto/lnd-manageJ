@@ -46,8 +46,15 @@ class PaymentListenerUpdaterTest {
     }
 
     @Test
-    void notifiesListenerForSuccess() {
-        paymentListenerUpdater.update(PREIMAGE_BYTESTRING, getRoute(), NO_FAILURE);
+    void notifies_listener_for_new_payment_attempt() {
+        paymentListenerUpdater.forNewPaymentAttempt(getRoute());
+        verify(paymentListener).forNewPaymentAttempt(getPaymentHops());
+        verifyNoMoreInteractions(paymentListener);
+    }
+
+    @Test
+    void notifies_listener_for_success() {
+        paymentListenerUpdater.forResponse(PREIMAGE_BYTESTRING, getRoute(), NO_FAILURE);
 
         verify(paymentListener).success(PREIMAGE, getPaymentHops());
         verifyNoMoreInteractions(paymentListener);
@@ -56,7 +63,7 @@ class PaymentListenerUpdaterTest {
     @Test
     void hop_without_pubkey() {
         Route route = Route.newBuilder().addHops(hop(CHANNEL_ID_2, 456_000)).build();
-        paymentListenerUpdater.update(PREIMAGE_BYTESTRING, route, NO_FAILURE);
+        paymentListenerUpdater.forResponse(PREIMAGE_BYTESTRING, route, NO_FAILURE);
         List<PaymentAttemptHop> paymentAttemptHops = List.of(
                 new PaymentAttemptHop(Optional.of(CHANNEL_ID_2), Coins.ofSatoshis(456), Optional.empty())
         );
@@ -67,7 +74,7 @@ class PaymentListenerUpdaterTest {
     @Test
     void hop_without_channel_id_and_pubkey() {
         Route route = Route.newBuilder().addHops(hop(100)).build();
-        paymentListenerUpdater.update(PREIMAGE_BYTESTRING, route, NO_FAILURE);
+        paymentListenerUpdater.forResponse(PREIMAGE_BYTESTRING, route, NO_FAILURE);
         List<PaymentAttemptHop> paymentAttemptHops = List.of(
                 new PaymentAttemptHop(Optional.empty(), Coins.ofMilliSatoshis(100), Optional.empty())
         );
@@ -78,7 +85,7 @@ class PaymentListenerUpdaterTest {
     @Test
     void hop_without_channel_id() {
         Route route = Route.newBuilder().addHops(hop(123_000, PUBKEY)).build();
-        paymentListenerUpdater.update(PREIMAGE_BYTESTRING, route, NO_FAILURE);
+        paymentListenerUpdater.forResponse(PREIMAGE_BYTESTRING, route, NO_FAILURE);
         List<PaymentAttemptHop> paymentAttemptHops = List.of(
                 new PaymentAttemptHop(Optional.empty(), Coins.ofSatoshis(123), Optional.of(PUBKEY))
         );
@@ -92,7 +99,7 @@ class PaymentListenerUpdaterTest {
                 .setCode(Failure.FailureCode.TEMPORARY_CHANNEL_FAILURE)
                 .setFailureSourceIndex(3)
                 .build();
-        paymentListenerUpdater.update(NO_PREIMAGE_BYTESTRING, getRoute(), failure);
+        paymentListenerUpdater.forResponse(NO_PREIMAGE_BYTESTRING, getRoute(), failure);
 
         List<PaymentAttemptHop> paymentAttemptHops = getPaymentHops();
         verify(paymentListener).failure(paymentAttemptHops, FailureCode.TEMPORARY_CHANNEL_FAILURE, 3);

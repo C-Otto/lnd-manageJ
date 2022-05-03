@@ -52,7 +52,7 @@ class HtlcAttemptListenerTest {
                 .setRoute(route)
                 .build();
         htlcAttemptListener.acceptResponse(response, REQUEST_ID);
-        verify(paymentListenerUpdater).update(PREIMAGE_BYTESTRING, route, NO_FAILURE);
+        verify(paymentListenerUpdater).forResponse(PREIMAGE_BYTESTRING, route, NO_FAILURE);
         verifyNoMoreInteractions(paymentListenerUpdater);
     }
 
@@ -69,7 +69,7 @@ class HtlcAttemptListenerTest {
                 .setRoute(route)
                 .build();
         htlcAttemptListener.acceptResponse(response, REQUEST_ID);
-        verify(paymentListenerUpdater).update(NO_PREIMAGE_BYTESTRING, route, failure);
+        verify(paymentListenerUpdater).forResponse(NO_PREIMAGE_BYTESTRING, route, failure);
         verifyNoMoreInteractions(paymentListenerUpdater);
     }
 

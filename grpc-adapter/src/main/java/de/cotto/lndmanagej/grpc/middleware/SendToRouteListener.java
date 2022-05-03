@@ -25,6 +25,7 @@ public class SendToRouteListener extends RequestResponseListener<SendToRouteRequ
 
     @Override
     public void acceptRequest(SendToRouteRequest request, long requestId) {
+        paymentListenerUpdater.forNewPaymentAttempt(request.getRoute());
         requests.put(requestId, request);
     }
 
@@ -34,6 +35,6 @@ public class SendToRouteListener extends RequestResponseListener<SendToRouteRequ
         if (request == null) {
             return;
         }
-        paymentListenerUpdater.update(response.getPreimage(), request.getRoute(), response.getFailure());
+        paymentListenerUpdater.forResponse(response.getPreimage(), request.getRoute(), response.getFailure());
     }
 }

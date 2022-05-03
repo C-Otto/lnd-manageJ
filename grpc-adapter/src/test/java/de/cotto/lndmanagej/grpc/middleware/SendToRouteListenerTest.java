@@ -22,7 +22,6 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class SendToRouteListenerTest {
@@ -50,6 +49,13 @@ class SendToRouteListenerTest {
     }
 
     @Test
+    void notifies_for_request_before_response_arrives() {
+        Route route = getRoute();
+        acceptRequestWithRoute(route);
+        verify(paymentListenerUpdater).forNewPaymentAttempt(route);
+    }
+
+    @Test
     void responseWithoutRequest() {
         sendToRouteListener.acceptResponse(SendToRouteResponse.newBuilder().build(), REQUEST_ID);
         verifyNoInteractions(paymentListenerUpdater);
@@ -63,8 +69,7 @@ class SendToRouteListenerTest {
                 .setPreimage(PREIMAGE_BYTESTRING)
                 .build();
         sendToRouteListener.acceptResponse(response, REQUEST_ID);
-        verify(paymentListenerUpdater).update(PREIMAGE_BYTESTRING, route, NO_FAILURE);
-        verifyNoMoreInteractions(paymentListenerUpdater);
+        verify(paymentListenerUpdater).forResponse(PREIMAGE_BYTESTRING, route, NO_FAILURE);
     }
 
     @Test
@@ -80,8 +85,7 @@ class SendToRouteListenerTest {
                 .setFailure(failure)
                 .build();
         sendToRouteListener.acceptResponse(response, REQUEST_ID);
-        verify(paymentListenerUpdater).update(NO_PREIMAGE_BYTESTRING, route, failure);
-        verifyNoMoreInteractions(paymentListenerUpdater);
+        verify(paymentListenerUpdater).forResponse(NO_PREIMAGE_BYTESTRING, route, failure);
     }
 
     private void acceptRequestWithRoute(Route route) {

@@ -82,6 +82,14 @@ class LiquidityInformationUpdaterTest {
         assertThat(liquidityInformationUpdater).isInstanceOf(PaymentListener.class);
     }
 
+    @Test
+    void forNewPayment_adds_in_flight() {
+        liquidityInformationUpdater.forNewPaymentAttempt(hopsWithChannelIds);
+        verify(liquidityBoundsService).markAsInFlight(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
+        verify(liquidityBoundsService).markAsInFlight(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
+        verify(liquidityBoundsService).markAsInFlight(PUBKEY_3, PUBKEY_4, Coins.ofSatoshis(80));
+    }
+
     @Nested
     class Success {
         private static final HexString PREIMAGE = new HexString("00");

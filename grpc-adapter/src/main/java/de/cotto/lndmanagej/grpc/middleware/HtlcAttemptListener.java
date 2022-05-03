@@ -15,7 +15,7 @@ public class HtlcAttemptListener extends AbstractResponseListener<HTLCAttempt> {
 
     @Override
     public void acceptResponse(HTLCAttempt response, long requestId) {
-        paymentListenerUpdater.update(response.getPreimage(), response.getRoute(), response.getFailure());
+        paymentListenerUpdater.forResponse(response.getPreimage(), response.getRoute(), response.getFailure());
     }
 
 }

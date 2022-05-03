@@ -24,10 +24,13 @@ public class PaymentListenerUpdater {
         this.paymentListeners = paymentListeners;
     }
 
-    public void update(ByteString preimage, Route route, Failure failure) {
-        List<PaymentAttemptHop> paymentAttemptHops = route.getHopsList().stream()
-                .map(this::toPaymentAttemptHop)
-                .toList();
+    public void forNewPaymentAttempt(Route route) {
+        List<PaymentAttemptHop> hops = toPaymentAttemptHops(route);
+        paymentListeners.forEach(paymentListener -> paymentListener.forNewPaymentAttempt(hops));
+    }
+
+    public void forResponse(ByteString preimage, Route route, Failure failure) {
+        List<PaymentAttemptHop> paymentAttemptHops = toPaymentAttemptHops(route);
         if (preimage.isEmpty()) {
             FailureCode failureCode = FailureCode.getFor(failure.getCodeValue());
             int failureSourceIndex = failure.getFailureSourceIndex();
@@ -39,6 +42,10 @@ public class PaymentListenerUpdater {
                     listener -> listener.success(new HexString(preimage.toByteArray()), paymentAttemptHops)
             );
         }
+    }
+
+    private List<PaymentAttemptHop> toPaymentAttemptHops(Route route) {
+        return route.getHopsList().stream().map(this::toPaymentAttemptHop).toList();
     }
 
     private PaymentAttemptHop toPaymentAttemptHop(Hop hop) {
@@ -61,5 +68,4 @@ public class PaymentListenerUpdater {
                 optionalPubkey
         );
     }
-
 }

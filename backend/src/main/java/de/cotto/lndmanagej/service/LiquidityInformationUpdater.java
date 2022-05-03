@@ -17,12 +17,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static de.cotto.lndmanagej.model.FailureCode.CHANNEL_DISABLED;
-import static de.cotto.lndmanagej.model.FailureCode.INCORRECT_OR_UNKNOWN_PAYMENT_DETAILS;
-import static de.cotto.lndmanagej.model.FailureCode.MPP_TIMEOUT;
-import static de.cotto.lndmanagej.model.FailureCode.TEMPORARY_CHANNEL_FAILURE;
-import static de.cotto.lndmanagej.model.FailureCode.UNKNOWN_NEXT_PEER;
-
 @Service
 public class LiquidityInformationUpdater implements PaymentListener {
     private final GrpcGetInfo grpcGetInfo;
@@ -38,6 +32,11 @@ public class LiquidityInformationUpdater implements PaymentListener {
         this.grpcGetInfo = grpcGetInfo;
         this.grpcChannelPolicy = grpcChannelPolicy;
         this.liquidityBoundsService = liquidityBoundsService;
+    }
+
+    @Override
+    public void forNewPaymentAttempt(List<PaymentAttemptHop> paymentAttemptHops) {
+        addInFlight(paymentAttemptHops);
     }
 
     @Override
@@ -68,14 +67,27 @@ public class LiquidityInformationUpdater implements PaymentListener {
         }
     }
 
+    private void addInFlight(List<PaymentAttemptHop> paymentAttemptHops) {
+        updateInFlight(paymentAttemptHops, false);
+    }
+
     private void removeInFlight(List<PaymentAttemptHop> paymentAttemptHops) {
+        updateInFlight(paymentAttemptHops, true);
+    }
+
+    private void updateInFlight(List<PaymentAttemptHop> paymentAttemptHops, boolean negate) {
         Pubkey startNode = grpcGetInfo.getPubkey();
         for (PaymentAttemptHop hop : paymentAttemptHops) {
             Pubkey endNode = getOtherNode(hop, startNode).orElse(null);
             if (endNode == null) {
                 return;
             }
-            liquidityBoundsService.markAsInFlight(startNode, endNode, hop.amount().negate());
+            Coins amount = hop.amount();
+            if (negate) {
+                liquidityBoundsService.markAsInFlight(startNode, endNode, amount.negate());
+            } else {
+                liquidityBoundsService.markAsInFlight(startNode, endNode, amount);
+            }
             startNode = endNode;
         }
     }
