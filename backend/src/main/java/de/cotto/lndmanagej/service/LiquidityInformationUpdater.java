@@ -55,14 +55,14 @@ public class LiquidityInformationUpdater implements PaymentListener {
 
     @Override
     public void failure(List<PaymentAttemptHop> paymentAttemptHops, FailureCode failureCode, int failureSourceIndex) {
-        if (TEMPORARY_CHANNEL_FAILURE.equals(failureCode)) {
-            markAvailableAndUnavailable(paymentAttemptHops, failureSourceIndex, PaymentAttemptHop::amount);
-        } else if (UNKNOWN_NEXT_PEER.equals(failureCode) || CHANNEL_DISABLED.equals(failureCode)) {
-            markAvailableAndUnavailable(paymentAttemptHops, failureSourceIndex, hop -> Coins.ofSatoshis(1));
-        } else if (MPP_TIMEOUT.equals(failureCode) || INCORRECT_OR_UNKNOWN_PAYMENT_DETAILS.equals(failureCode)) {
-            markAllAvailable(paymentAttemptHops, failureSourceIndex);
-        } else {
-            logger.warn("Unknown failure code {}", failureCode);
+        switch (failureCode) {
+            case TEMPORARY_CHANNEL_FAILURE ->
+                    markAvailableAndUnavailable(paymentAttemptHops, failureSourceIndex, PaymentAttemptHop::amount);
+            case UNKNOWN_NEXT_PEER, CHANNEL_DISABLED ->
+                    markAvailableAndUnavailable(paymentAttemptHops, failureSourceIndex, hop -> Coins.ofSatoshis(1));
+            case MPP_TIMEOUT, INCORRECT_OR_UNKNOWN_PAYMENT_DETAILS ->
+                    markAllAvailable(paymentAttemptHops, failureSourceIndex);
+            default -> logger.warn("Unknown failure code {}", failureCode);
         }
     }
 
