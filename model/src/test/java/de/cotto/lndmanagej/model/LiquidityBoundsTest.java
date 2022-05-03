@@ -221,6 +221,81 @@ class LiquidityBoundsTest {
         assertThat(liquidityBounds.getUpperBound()).contains(oneSatLessThan(amount));
     }
 
+    @Test
+    void upper_bound_is_reduced_by_amount_in_flight() {
+        liquidityBounds.unavailable(Coins.ofSatoshis(100));
+        liquidityBounds.addAsInFlight(Coins.ofSatoshis(40));
+
+        assertThat(liquidityBounds.getUpperBound()).contains(oneSatLessThan(Coins.ofSatoshis(60)));
+    }
+
+    @Test
+    void lower_bound_is_reduced_by_amount_in_flight() {
+        liquidityBounds.available(Coins.ofSatoshis(100));
+        liquidityBounds.addAsInFlight(Coins.ofSatoshis(40));
+
+        assertThat(liquidityBounds.getLowerBound()).isEqualTo(Coins.ofSatoshis(60));
+    }
+
+    @Test
+    void available_lower_bound_in_flight() {
+        liquidityBounds.available(Coins.ofSatoshis(100));
+        liquidityBounds.addAsInFlight(Coins.ofSatoshis(100));
+
+        assertThat(liquidityBounds.getLowerBound()).isEqualTo(Coins.NONE);
+    }
+
+    @Test
+    void more_than_available_lower_bound_in_flight() {
+        liquidityBounds.available(Coins.ofSatoshis(100));
+        liquidityBounds.addAsInFlight(Coins.ofSatoshis(101));
+
+        assertThat(liquidityBounds.getLowerBound()).isEqualTo(Coins.NONE);
+    }
+
+    @Test
+    void available_upper_bound_in_flight() {
+        liquidityBounds.unavailable(Coins.ofSatoshis(101));
+        liquidityBounds.addAsInFlight(Coins.ofSatoshis(100));
+
+        assertThat(liquidityBounds.getUpperBound()).contains(Coins.NONE);
+    }
+
+    @Test
+    void more_than_available_upper_bound_in_flight() {
+        liquidityBounds.unavailable(Coins.ofSatoshis(101));
+        liquidityBounds.addAsInFlight(Coins.ofSatoshis(101));
+
+        assertThat(liquidityBounds.getUpperBound()).contains(Coins.NONE);
+    }
+
+    @Test
+    void in_flight_can_be_stacked() {
+        liquidityBounds.available(Coins.ofSatoshis(100));
+        liquidityBounds.addAsInFlight(Coins.ofSatoshis(40));
+        liquidityBounds.addAsInFlight(Coins.ofSatoshis(20));
+
+        assertThat(liquidityBounds.getLowerBound()).isEqualTo(Coins.ofSatoshis(40));
+    }
+
+    @Test
+    void in_flight_can_be_reversed() {
+        liquidityBounds.available(Coins.ofSatoshis(100));
+        liquidityBounds.addAsInFlight(Coins.ofSatoshis(40));
+        liquidityBounds.addAsInFlight(Coins.ofSatoshis(-40));
+
+        assertThat(liquidityBounds.getLowerBound()).isEqualTo(Coins.ofSatoshis(100));
+    }
+
+    @Test
+    void in_flight_at_least_zero() {
+        liquidityBounds.available(Coins.ofSatoshis(100));
+        liquidityBounds.addAsInFlight(Coins.ofSatoshis(40));
+        liquidityBounds.addAsInFlight(Coins.ofSatoshis(-50));
+
+        assertThat(liquidityBounds.getLowerBound()).isEqualTo(Coins.ofSatoshis(100));
+    }
+
     private Instant oneHourAgo() {
         return Instant.now().minus(1, ChronoUnit.HOURS);
     }

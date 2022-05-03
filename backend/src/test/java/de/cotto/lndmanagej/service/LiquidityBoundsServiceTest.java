@@ -141,4 +141,52 @@ class LiquidityBoundsServiceTest {
         assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(PUBKEY, PUBKEY_2))
                 .isEqualTo(Coins.ofSatoshis(99));
     }
+
+    @Test
+    void markAsInFlight_reduces_upper_bound() {
+        liquidityBoundsService.markAsUnavailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(901));
+        liquidityBoundsService.markAsInFlight(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
+        assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(PUBKEY, PUBKEY_2))
+                .contains(Coins.ofSatoshis(800));
+    }
+
+    @Test
+    void markAsInFlight_reduces_lower_bound() {
+        liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(300));
+        liquidityBoundsService.markAsInFlight(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
+        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(PUBKEY, PUBKEY_2))
+                .isEqualTo(Coins.ofSatoshis(200));
+    }
+
+    @Test
+    void markAsInFlight_can_be_reversed() {
+        liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(300));
+        liquidityBoundsService.markAsInFlight(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
+        liquidityBoundsService.markAsInFlight(PUBKEY, PUBKEY_2, Coins.ofSatoshis(-100));
+        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(PUBKEY, PUBKEY_2))
+                .isEqualTo(Coins.ofSatoshis(300));
+    }
+
+    @Test
+    void markAsInFlight_can_be_stacked() {
+        liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(300));
+        liquidityBoundsService.markAsInFlight(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
+        liquidityBoundsService.markAsInFlight(PUBKEY, PUBKEY_2, Coins.ofSatoshis(40));
+        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(PUBKEY, PUBKEY_2))
+                .isEqualTo(Coins.ofSatoshis(160));
+    }
+
+    @Test
+    void markAsInFlight_for_unknown_lower_bound() {
+        liquidityBoundsService.markAsInFlight(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
+        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(PUBKEY, PUBKEY_2))
+                .isEqualTo(Coins.NONE);
+    }
+
+    @Test
+    void markAsInFlight_for_unknown_upper_bound() {
+        liquidityBoundsService.markAsInFlight(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
+        assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(PUBKEY, PUBKEY_2))
+                .isEmpty();
+    }
 }

@@ -67,6 +67,10 @@ public class LiquidityBoundsService {
         getInfo(source, target).unavailable(amount);
     }
 
+    public void markAsInFlight(Pubkey source, Pubkey target, Coins amount) {
+        getInfo(source, target).addAsInFlight(amount);
+    }
+
     private LiquidityBounds getInfo(Pubkey source, Pubkey target) {
         return entries.get(new TwoPubkeys(source, target));
     }

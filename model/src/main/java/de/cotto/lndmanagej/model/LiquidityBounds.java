@@ -17,6 +17,7 @@ public class LiquidityBounds {
     private Coins lowerBound;
     @CheckForNull
     private Coins upperBound;
+    private Coins inFlight;
 
     public LiquidityBounds() {
         this(DEFAULT_MAX_AGE);
@@ -24,6 +25,7 @@ public class LiquidityBounds {
 
     public LiquidityBounds(Duration maxAge) {
         lowerBound = Coins.NONE;
+        inFlight = Coins.NONE;
         lowerBoundLastUpdate = Instant.now();
         upperBoundLastUpdate = Instant.now();
         this.maxAge = maxAge;
@@ -55,14 +57,18 @@ public class LiquidityBounds {
         lowerBound = lowerBound.minimum(upperBound);
     }
 
+    public void addAsInFlight(Coins amount) {
+        inFlight = Coins.NONE.maximum(inFlight.add(amount));
+    }
+
     public Coins getLowerBound() {
         resetOldLowerBound();
-        return lowerBound;
+        return Coins.NONE.maximum(lowerBound.subtract(inFlight));
     }
 
     public Optional<Coins> getUpperBound() {
         resetOldUpperBound();
-        return Optional.ofNullable(upperBound);
+        return Optional.ofNullable(upperBound).map(upperBound -> Coins.NONE.maximum(upperBound.subtract(inFlight)));
     }
 
     @SuppressWarnings("PMD.NullAssignment")
