@@ -72,6 +72,16 @@ class FlowComputationTest {
     }
 
     @Test
+    void solve_amount_below_quantization() {
+        when(configurationService.getIntegerValue(QUANTIZATION)).thenReturn(Optional.of(10));
+        Coins amount = Coins.ofSatoshis(9);
+        EdgeWithLiquidityInformation edge = EdgeWithLiquidityInformation.forUpperBound(EDGE, EDGE.capacity());
+        when(edgeComputation.getEdges()).thenReturn(new EdgesWithLiquidityInformation(edge));
+        assertThat(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, amount))
+                .isEqualTo(new Flows(new Flow(EDGE, amount)));
+    }
+
+    @Test
     void solve_avoids_sending_from_depleted_local_channel() {
         Edge edge1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, LARGE, POLICY_1);
         Edge edge2 = new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, SMALL, POLICY_2);

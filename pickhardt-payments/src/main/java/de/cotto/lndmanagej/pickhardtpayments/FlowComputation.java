@@ -38,8 +38,7 @@ public class FlowComputation {
     }
 
     public Flows getOptimalFlows(Pubkey source, Pubkey target, Coins amount, int feeRateWeight) {
-        int quantization = configurationService.getIntegerValue(QUANTIZATION)
-                .orElse(DEFAULT_QUANTIZATION);
+        int quantization = getQuantization(amount);
         int piecewiseLinearApproximations = configurationService.getIntegerValue(PIECEWISE_LINEAR_APPROXIMATIONS)
                 .orElse(DEFAULT_PIECEWISE_LINEAR_APPROXIMATIONS);
         MinCostFlowSolver minCostFlowSolver = new MinCostFlowSolver(
@@ -52,6 +51,15 @@ public class FlowComputation {
                 grpcGetInfo.getPubkey()
         );
         return minCostFlowSolver.solve();
+    }
+
+    private int getQuantization(Coins amount) {
+        int quantization = configurationService.getIntegerValue(QUANTIZATION)
+                .orElse(DEFAULT_QUANTIZATION);
+        if (amount.satoshis() < quantization) {
+            return (int) amount.satoshis();
+        }
+        return quantization;
     }
 
 }
