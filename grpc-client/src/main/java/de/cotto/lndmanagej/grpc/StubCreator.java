@@ -17,6 +17,7 @@ public class StubCreator {
     private final LightningGrpc.LightningBlockingStub stub;
     private final LightningGrpc.LightningStub nonBlockingStub;
     private final RouterGrpc.RouterBlockingStub routerStub;
+    private final RouterGrpc.RouterStub nonBlockingRouterStub;
     private final ManagedChannel channel;
     private final File macaroonFile;
     private final File certFile;
@@ -32,6 +33,7 @@ public class StubCreator {
         stub = createLightningStub();
         nonBlockingStub = createNonBlockingLightningStub();
         routerStub = createRouterStub();
+        nonBlockingRouterStub = createNonBlockingRouterStub();
     }
 
     public LightningGrpc.LightningBlockingStub getLightningStub() {
@@ -44,6 +46,10 @@ public class StubCreator {
 
     public RouterGrpc.RouterBlockingStub getRouterStub() {
         return routerStub;
+    }
+
+    public RouterGrpc.RouterStub getNonBlockingRouterStub() {
+        return nonBlockingRouterStub;
     }
 
     public void shutdown() {
@@ -72,6 +78,13 @@ public class StubCreator {
     private RouterGrpc.RouterBlockingStub createRouterStub() throws IOException {
         return RouterGrpc
                 .newBlockingStub(channel)
+                .withMaxInboundMessageSize(FIFTY_MEGA_BYTE)
+                .withCallCredentials(new MacaroonCallCredential(macaroonFile));
+    }
+
+    private RouterGrpc.RouterStub createNonBlockingRouterStub() throws IOException {
+        return RouterGrpc
+                .newStub(channel)
                 .withMaxInboundMessageSize(FIFTY_MEGA_BYTE)
                 .withCallCredentials(new MacaroonCallCredential(macaroonFile));
     }

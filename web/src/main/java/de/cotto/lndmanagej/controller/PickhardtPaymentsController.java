@@ -4,6 +4,7 @@ import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.controller.dto.MultiPathPaymentDto;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSender;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSplitter;
 import de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPayment;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,9 +18,27 @@ import static de.cotto.lndmanagej.pickhardtpayments.PickhardtPaymentsConfigurati
 @RequestMapping("/beta/pickhardt-payments/")
 public class PickhardtPaymentsController {
     private final MultiPathPaymentSplitter multiPathPaymentSplitter;
+    private final MultiPathPaymentSender multiPathPaymentSender;
 
-    public PickhardtPaymentsController(MultiPathPaymentSplitter multiPathPaymentSplitter) {
+    public PickhardtPaymentsController(
+            MultiPathPaymentSplitter multiPathPaymentSplitter,
+            MultiPathPaymentSender multiPathPaymentSender
+    ) {
         this.multiPathPaymentSplitter = multiPathPaymentSplitter;
+        this.multiPathPaymentSender = multiPathPaymentSender;
+    }
+
+    @Timed
+    @GetMapping("/pay-payment-request/{paymentRequest}")
+    public MultiPathPaymentDto payPaymentRequest(@PathVariable String paymentRequest) {
+        return payPaymentRequest(paymentRequest, DEFAULT_FEE_RATE_WEIGHT);
+    }
+
+    @Timed
+    @GetMapping("/pay-payment-request/{paymentRequest}/fee-rate-weight/{feeRateWeight}")
+    public MultiPathPaymentDto payPaymentRequest(@PathVariable String paymentRequest, @PathVariable int feeRateWeight) {
+        MultiPathPayment multiPathPayment = multiPathPaymentSender.payPaymentRequest(paymentRequest, feeRateWeight);
+        return MultiPathPaymentDto.fromModel(multiPathPayment);
     }
 
     @Timed

@@ -2,6 +2,8 @@ package de.cotto.lndmanagej.grpc;
 
 import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.configuration.ConfigurationService;
+import io.grpc.stub.StreamObserver;
+import lnrpc.HTLCAttempt;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import routerrpc.RouterGrpc;
@@ -19,6 +21,7 @@ import java.util.Optional;
 @Component
 public class GrpcRouterService extends GrpcBase {
     private final RouterGrpc.RouterBlockingStub routerStub;
+    private final RouterGrpc.RouterStub nonBlockingRouterStub;
 
     public GrpcRouterService(
             ConfigurationService configurationService,
@@ -26,6 +29,7 @@ public class GrpcRouterService extends GrpcBase {
     ) throws IOException {
         super(configurationService, homeDirectory);
         routerStub = stubCreator.getRouterStub();
+        nonBlockingRouterStub = stubCreator.getNonBlockingRouterStub();
     }
 
     @PreDestroy
@@ -43,5 +47,10 @@ public class GrpcRouterService extends GrpcBase {
     public Optional<QueryMissionControlResponse> queryMissionControl() {
         QueryMissionControlRequest request = QueryMissionControlRequest.getDefaultInstance();
         return get(() -> routerStub.queryMissionControl(request));
+    }
+
+    @Timed
+    public void sendToRoute(RouterOuterClass.SendToRouteRequest request, StreamObserver<HTLCAttempt> streamObserver) {
+        nonBlockingRouterStub.sendToRouteV2(request, streamObserver);
     }
 }

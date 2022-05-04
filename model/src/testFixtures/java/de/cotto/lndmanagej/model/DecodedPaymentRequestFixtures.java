@@ -6,7 +6,7 @@ import java.time.ZoneOffset;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 
 public class DecodedPaymentRequestFixtures {
-    static final DecodedPaymentRequest DECODED_PAYMENT_REQUEST = new DecodedPaymentRequest(
+    public static final DecodedPaymentRequest DECODED_PAYMENT_REQUEST = new DecodedPaymentRequest(
             "some payment request",
             144,
             "description",

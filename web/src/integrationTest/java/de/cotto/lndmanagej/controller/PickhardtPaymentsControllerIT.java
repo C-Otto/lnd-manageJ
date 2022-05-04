@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.controller;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSender;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSplitter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = PickhardtPaymentsController.class)
 class PickhardtPaymentsControllerIT {
     private static final String PREFIX = "/beta/pickhardt-payments";
+    private static final String PAYMENT_REQUEST = "xxx";
     @Autowired
     private MockMvc mockMvc;
 
@@ -39,8 +41,28 @@ class PickhardtPaymentsControllerIT {
     private MultiPathPaymentSplitter multiPathPaymentSplitter;
 
     @MockBean
+    private MultiPathPaymentSender multiPathPaymentSender;
+
+    @MockBean
     @SuppressWarnings("unused")
     private ChannelIdResolver channelIdResolver;
+
+    @Test
+    void payPaymentRequest() throws Exception {
+        when(multiPathPaymentSender.payPaymentRequest(PAYMENT_REQUEST, DEFAULT_FEE_RATE_WEIGHT))
+                .thenReturn(MULTI_PATH_PAYMENT);
+        String url = "%s/pay-payment-request/%s".formatted(PREFIX, PAYMENT_REQUEST);
+        mockMvc.perform(get(url)).andExpect(status().isOk());
+    }
+
+    @Test
+    void payPaymentRequest_with_fee_rate_weight() throws Exception {
+        int feeRateWeight = 987;
+        when(multiPathPaymentSender.payPaymentRequest(PAYMENT_REQUEST, feeRateWeight))
+                .thenReturn(MULTI_PATH_PAYMENT);
+        String url = "%s/pay-payment-request/%s/fee-rate-weight/%d".formatted(PREFIX, PAYMENT_REQUEST, feeRateWeight);
+        mockMvc.perform(get(url)).andExpect(status().isOk());
+    }
 
     @Test
     void sendTo() throws Exception {

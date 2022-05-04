@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.controller.dto.MultiPathPaymentDto;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSender;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSplitter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,11 +20,31 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class PickhardtPaymentsControllerTest {
 
+    private static final String PAYMENT_REQUEST = "xxx";
     @InjectMocks
     private PickhardtPaymentsController controller;
 
     @Mock
     private MultiPathPaymentSplitter multiPathPaymentSplitter;
+
+    @Mock
+    private MultiPathPaymentSender multiPathPaymentSender;
+
+    @Test
+    void payPaymentRequest() {
+        when(multiPathPaymentSender.payPaymentRequest(PAYMENT_REQUEST, DEFAULT_FEE_RATE_WEIGHT))
+                .thenReturn(MULTI_PATH_PAYMENT);
+        assertThat(controller.payPaymentRequest(PAYMENT_REQUEST))
+                .isEqualTo(MultiPathPaymentDto.fromModel(MULTI_PATH_PAYMENT));
+    }
+
+    @Test
+    void payPaymentRequest_with_fee_rate_weight() {
+        when(multiPathPaymentSender.payPaymentRequest(PAYMENT_REQUEST, 456))
+                .thenReturn(MULTI_PATH_PAYMENT);
+        assertThat(controller.payPaymentRequest(PAYMENT_REQUEST, 456))
+                .isEqualTo(MultiPathPaymentDto.fromModel(MULTI_PATH_PAYMENT));
+    }
 
     @Test
     void sendTo() {
