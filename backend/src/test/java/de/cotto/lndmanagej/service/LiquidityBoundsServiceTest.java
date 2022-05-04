@@ -143,11 +143,12 @@ class LiquidityBoundsServiceTest {
     }
 
     @Test
-    void markAsInFlight_reduces_upper_bound() {
+    void markAsInFlight_does_not_reduce_upper_bound() {
+        // the 100 sats in flight might not reach the channel, so we should not lower the upper bound
         liquidityBoundsService.markAsUnavailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(901));
         liquidityBoundsService.markAsInFlight(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
         assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(PUBKEY, PUBKEY_2))
-                .contains(Coins.ofSatoshis(800));
+                .contains(Coins.ofSatoshis(900));
     }
 
     @Test

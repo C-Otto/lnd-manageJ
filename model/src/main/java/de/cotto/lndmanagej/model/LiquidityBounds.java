@@ -42,7 +42,7 @@ public class LiquidityBounds {
         synchronized (this) {
             resetOldLowerBound();
             lowerBoundLastUpdate = Instant.now();
-            lowerBound = lowerBound.maximum(amount);
+            lowerBound = lowerBound.maximum(amount.add(inFlight));
             if (upperBound != null && lowerBound.compareTo(upperBound) >= 0) {
                 upperBound = null;
             }
@@ -53,7 +53,7 @@ public class LiquidityBounds {
         synchronized (this) {
             resetOldUpperBound();
             upperBoundLastUpdate = Instant.now();
-            Coins newUpperBound = amount.subtract(Coins.ofSatoshis(1));
+            Coins newUpperBound = amount.subtract(Coins.ofSatoshis(1)).add(inFlight);
             if (upperBound == null) {
                 upperBound = newUpperBound;
             } else {
@@ -79,7 +79,7 @@ public class LiquidityBounds {
     public Optional<Coins> getUpperBound() {
         synchronized (this) {
             resetOldUpperBound();
-            return Optional.ofNullable(upperBound).map(upperBound -> Coins.NONE.maximum(upperBound.subtract(inFlight)));
+            return Optional.ofNullable(upperBound);
         }
     }
 

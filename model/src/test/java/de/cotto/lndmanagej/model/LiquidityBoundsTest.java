@@ -222,11 +222,12 @@ class LiquidityBoundsTest {
     }
 
     @Test
-    void upper_bound_is_reduced_by_amount_in_flight() {
+    void upper_bound_is_not_reduced_by_amount_in_flight() {
+        // the 40 sats in flight might not reach this channel, so we should not lower the upper bound
         liquidityBounds.unavailable(Coins.ofSatoshis(100));
         liquidityBounds.addAsInFlight(Coins.ofSatoshis(40));
 
-        assertThat(liquidityBounds.getUpperBound()).contains(oneSatLessThan(Coins.ofSatoshis(60)));
+        assertThat(liquidityBounds.getUpperBound()).contains(oneSatLessThan(Coins.ofSatoshis(100)));
     }
 
     @Test
@@ -255,18 +256,20 @@ class LiquidityBoundsTest {
 
     @Test
     void available_upper_bound_in_flight() {
+        // the 100 sats in flight might not reach this channel, so we should not lower the upper bound
         liquidityBounds.unavailable(Coins.ofSatoshis(101));
         liquidityBounds.addAsInFlight(Coins.ofSatoshis(100));
 
-        assertThat(liquidityBounds.getUpperBound()).contains(Coins.NONE);
+        assertThat(liquidityBounds.getUpperBound()).contains(Coins.ofSatoshis(100));
     }
 
     @Test
     void more_than_available_upper_bound_in_flight() {
+        // the 101 sats in flight might not reach this channel, so we should not lower the upper bound
         liquidityBounds.unavailable(Coins.ofSatoshis(101));
         liquidityBounds.addAsInFlight(Coins.ofSatoshis(101));
 
-        assertThat(liquidityBounds.getUpperBound()).contains(Coins.NONE);
+        assertThat(liquidityBounds.getUpperBound()).contains(Coins.ofSatoshis(100));
     }
 
     @Test
@@ -294,6 +297,24 @@ class LiquidityBoundsTest {
         liquidityBounds.addAsInFlight(Coins.ofSatoshis(-50));
 
         assertThat(liquidityBounds.getLowerBound()).isEqualTo(Coins.ofSatoshis(100));
+    }
+
+    @Test
+    void update_with_available_amount_ignores_amount_in_flight() {
+        // these sats may never reach the destination, so we don't know if we have 100+10 or just 10 sat
+        liquidityBounds.addAsInFlight(Coins.ofSatoshis(100));
+        liquidityBounds.available(Coins.ofSatoshis(10));
+
+        assertThat(liquidityBounds.getLowerBound()).isEqualTo(Coins.ofSatoshis(10));
+    }
+
+    @Test
+    void update_with_unavailable_amount_accounts_for_amount_in_flight() {
+        // the 100 sats in flight might actually exist on the channel, so we try to send 100+10
+        liquidityBounds.addAsInFlight(Coins.ofSatoshis(100));
+        liquidityBounds.unavailable(Coins.ofSatoshis(10));
+
+        assertThat(liquidityBounds.getUpperBound()).contains(Coins.ofSatoshis(109));
     }
 
     private Instant oneHourAgo() {
