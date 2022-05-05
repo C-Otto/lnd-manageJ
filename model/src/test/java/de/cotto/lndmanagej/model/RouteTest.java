@@ -101,6 +101,26 @@ class RouteTest {
     }
 
     @Test
+    void getProbability_below_lower_bound() {
+        Coins capacity = Coins.ofSatoshis(400);
+        Coins amount = Coins.ofSatoshis(100);
+        Edge edge = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, capacity, POLICY_1);
+        EdgeWithLiquidityInformation edgeWithLiquidityInformation =
+                EdgeWithLiquidityInformation.forLowerBound(edge, Coins.ofSatoshis(200));
+        Route route = new Route(List.of(edgeWithLiquidityInformation), amount);
+        assertThat(route.getProbability()).isEqualTo(1.0);
+    }
+
+    @Test
+    void getProbability_at_upper_bound() {
+        Coins amount = Coins.ofSatoshis(100);
+        EdgeWithLiquidityInformation edgeWithLiquidityInformation =
+                EdgeWithLiquidityInformation.forUpperBound(EDGE, amount);
+        Route route = new Route(List.of(edgeWithLiquidityInformation), amount);
+        assertThat(route.getProbability()).isGreaterThan(0);
+    }
+
+    @Test
     void getProbability_above_known_liquidity() {
         Route route = routeForAmountAndCapacityAndKnownLiquidity(250, 300, 200);
         assertThat(route.getProbability()).isEqualTo(0.0);
@@ -449,10 +469,9 @@ class RouteTest {
         Coins capacity = Coins.ofSatoshis(capacitySat);
         Coins amount = Coins.ofSatoshis(amountSat);
         Edge edge = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, capacity, POLICY_1);
-        BasicRoute basicRoute = new BasicRoute(List.of(edge), amount);
         EdgeWithLiquidityInformation edgeWithLiquidityInformation =
                 EdgeWithLiquidityInformation.forKnownLiquidity(edge, Coins.ofSatoshis(knownLiquiditySat));
-        return new Route(List.of(edgeWithLiquidityInformation), basicRoute.amount());
+        return new Route(List.of(edgeWithLiquidityInformation), amount);
     }
 
     private Route createRoute(Coins amount, int... feeRates) {

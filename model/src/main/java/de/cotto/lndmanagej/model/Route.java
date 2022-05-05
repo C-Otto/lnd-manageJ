@@ -51,16 +51,15 @@ public class Route {
     }
 
     private Double getProbability(EdgeWithLiquidityInformation edge) {
-        boolean knownLiquidity = edge.isKnownLiquidity();
-        if (knownLiquidity) {
-            if (amount.compareTo(edge.availableLiquidityLowerBound()) <= 0) {
-                return 1.0;
-            }
-            return 0.0;
+        long amountSat = amount.milliSatoshis() / 1_000;
+        long lowerBoundSat = edge.availableLiquidityLowerBound().milliSatoshis() / 1_000;
+        if (amountSat <= lowerBoundSat) {
+            return 1.0;
         }
         long upperBoundSat = edge.availableLiquidityUpperBound().milliSatoshis() / 1_000;
-        long lowerBoundSat = edge.availableLiquidityLowerBound().milliSatoshis() / 1_000;
-        long amountSat = amount.milliSatoshis() / 1_000;
+        if (amountSat > upperBoundSat) {
+            return 0.0;
+        }
         return (1.0 * (upperBoundSat + 1 - amountSat)) / (upperBoundSat + 1 - lowerBoundSat);
     }
 
@@ -144,5 +143,14 @@ public class Route {
         Coins baseFeeForHop = edge.policy().baseFee();
         Coins relativeFees = Coins.ofMilliSatoshis(feeRate * amountWithFees.milliSatoshis() / 1_000_000);
         return baseFeeForHop.add(relativeFees);
+    }
+
+    @Override
+    public String toString() {
+        return "Route{" +
+                "edgesWithLiquidityInformation=" + edgesWithLiquidityInformation +
+                ", amount=" + amount +
+                ", feesForHops=" + feesForHops +
+                '}';
     }
 }
