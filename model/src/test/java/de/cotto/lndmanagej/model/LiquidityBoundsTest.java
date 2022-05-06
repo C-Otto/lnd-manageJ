@@ -300,10 +300,17 @@ class LiquidityBoundsTest {
     }
 
     @Test
-    void update_with_available_amount_ignores_amount_in_flight() {
-        // these sats may never reach the destination, so we don't know if we have 100+10 or just 10 sat
+    void update_with_available_amount_but_below_in_flight() {
         liquidityBounds.addAsInFlight(Coins.ofSatoshis(100));
         liquidityBounds.available(Coins.ofSatoshis(10));
+
+        assertThat(liquidityBounds.getLowerBound()).isEqualTo(Coins.NONE);
+    }
+
+    @Test
+    void update_with_available_amount_more_than_in_flight() {
+        liquidityBounds.addAsInFlight(Coins.ofSatoshis(100));
+        liquidityBounds.available(Coins.ofSatoshis(110));
 
         assertThat(liquidityBounds.getLowerBound()).isEqualTo(Coins.ofSatoshis(10));
     }

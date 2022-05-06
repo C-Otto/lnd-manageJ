@@ -42,7 +42,7 @@ public class LiquidityBounds {
         synchronized (this) {
             resetOldLowerBound();
             lowerBoundLastUpdate = Instant.now();
-            lowerBound = lowerBound.maximum(amount.add(inFlight));
+            lowerBound = lowerBound.maximum(amount);
             if (upperBound != null && lowerBound.compareTo(upperBound) >= 0) {
                 upperBound = null;
             }
