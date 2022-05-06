@@ -59,7 +59,7 @@ public class LiquidityBounds {
             } else {
                 upperBound = upperBound.minimum(newUpperBound);
             }
-            lowerBound = lowerBound.minimum(upperBound);
+            lowerBound = lowerBound.minimum(upperBound.subtract(inFlight));
         }
     }
 

@@ -273,6 +273,22 @@ class LiquidityBoundsTest {
     }
 
     @Test
+    void unavailable_far_below_lower_bound_with_amount_in_flight() {
+        liquidityBounds.available(Coins.ofSatoshis(300));
+        liquidityBounds.addAsInFlight(Coins.ofSatoshis(100));
+        liquidityBounds.unavailable(Coins.ofSatoshis(10));
+        liquidityBounds.addAsInFlight(Coins.ofSatoshis(-100));
+        assertThat(liquidityBounds.getLowerBound()).isEqualTo(oneSatLessThan(Coins.ofSatoshis(10)));
+    }
+
+    @Test
+    void unavailable_far_below_lower_bound_with_no_amount_in_flight() {
+        liquidityBounds.available(Coins.ofSatoshis(300));
+        liquidityBounds.unavailable(Coins.ofSatoshis(10));
+        assertThat(liquidityBounds.getLowerBound()).isEqualTo(oneSatLessThan(Coins.ofSatoshis(10)));
+    }
+
+    @Test
     void in_flight_can_be_stacked() {
         liquidityBounds.available(Coins.ofSatoshis(100));
         liquidityBounds.addAsInFlight(Coins.ofSatoshis(40));
