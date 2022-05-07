@@ -1,350 +1,313 @@
 package de.cotto.lndmanagej.model;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
+import static de.cotto.lndmanagej.model.LiquidityBounds.NO_INFORMATION;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
+@ExtendWith(MockitoExtension.class)
 class LiquidityBoundsTest {
-    private LiquidityBounds liquidityBounds = new LiquidityBounds();
+
+    private static final String CLASS_CAN_BE_STATIC = "ClassCanBeStatic";
 
     @Test
-    void getLowerBound_initially_zero() {
-        assertThat(liquidityBounds.getLowerBound()).isEqualTo(Coins.NONE);
+    void negative_lower_bound() {
+        assertThatIllegalArgumentException().isThrownBy(() ->
+                new LiquidityBounds(Coins.ofSatoshis(-1), null, Coins.NONE)
+        ).withMessage("invalid lower bound: -1.000");
     }
 
     @Test
-    void getLowerBound_after_available_update() {
-        Coins amount = Coins.ofSatoshis(100);
-        liquidityBounds.available(amount);
-        assertThat(liquidityBounds.getLowerBound()).isEqualTo(amount);
+    void negative_upper_bound() {
+        assertThatIllegalArgumentException().isThrownBy(() ->
+                new LiquidityBounds(Coins.NONE, Coins.ofSatoshis(-1), Coins.NONE)
+        ).withMessage("invalid upper bound: -1.000");
     }
 
     @Test
-    void getLowerBound_two_available_updates() {
-        Coins amount1 = Coins.ofSatoshis(100);
-        Coins amount2 = Coins.ofSatoshis(200);
-        liquidityBounds.available(amount1);
-        liquidityBounds.available(amount2);
-        assertThat(liquidityBounds.getLowerBound()).isEqualTo(amount2);
+    void negative_in_flight() {
+        assertThatIllegalArgumentException().isThrownBy(() ->
+                new LiquidityBounds(Coins.NONE, null, Coins.ofSatoshis(-1))
+        ).withMessage("invalid in flight amount: -1.000");
     }
 
     @Test
-    void getLowerBound_two_available_updates_reversed() {
-        Coins amount1 = Coins.ofSatoshis(200);
-        Coins amount2 = Coins.ofSatoshis(100);
-        liquidityBounds.available(amount1);
-        liquidityBounds.available(amount2);
-        assertThat(liquidityBounds.getLowerBound()).isEqualTo(amount1);
+    void lower_bound_above_upper_bound() {
+        assertThatIllegalArgumentException().isThrownBy(() ->
+                new LiquidityBounds(Coins.ofSatoshis(100), Coins.ofSatoshis(99), Coins.NONE)
+        ).withMessage("lower bound must not be above upper bound: 100.000 <! 99.000");
     }
 
-    @Test
-    void getUpperBound_initially_unknown() {
-        assertThat(liquidityBounds.getUpperBound()).isEmpty();
+    @Nested
+    @SuppressWarnings(CLASS_CAN_BE_STATIC)
+    class NoInformation {
+        @Test
+        void lower_bound() {
+            assertThat(NO_INFORMATION.getLowerBound()).isEqualTo(Coins.NONE);
+        }
+
+        @Test
+        void upper_bound() {
+            assertThat(NO_INFORMATION.getUpperBound()).isEmpty();
+        }
     }
 
-    @Test
-    void getUpperBound_after_unavailable_update() {
-        Coins amount = Coins.ofSatoshis(200);
-        liquidityBounds.unavailable(amount);
-        assertThat(liquidityBounds.getUpperBound()).contains(oneSatLessThan(amount));
+    @Nested
+    @SuppressWarnings(CLASS_CAN_BE_STATIC)
+    class WithAvailable {
+        @Test
+        void increases_lower_bound() {
+            Coins amount = Coins.ofSatoshis(100);
+            assertLowerBound(NO_INFORMATION.withAvailableCoins(amount), amount);
+        }
+
+        @Test
+        void no_update_due_to_zero_amount_returns_empty_optional() {
+            assertThat(NO_INFORMATION.withAvailableCoins(Coins.NONE)).isEmpty();
+        }
+
+        @Test
+        void does_not_increase_lower_bound_if_not_above_old_lower_bound() {
+            Coins amount = Coins.ofSatoshis(100);
+            LiquidityBounds liquidityBounds = withLowerBound(amount);
+            assertThat(liquidityBounds.withAvailableCoins(amount)).isEmpty();
+        }
+
+        @Test
+        void increases_lower_bound_if_above_old_lower_bound() {
+            Coins amountLow = Coins.ofSatoshis(100);
+            Coins amountHigh = Coins.ofSatoshis(120);
+            LiquidityBounds initial = withLowerBound(amountLow);
+            assertLowerBound(initial.withAvailableCoins(amountHigh), amountHigh);
+        }
+
+        @Test
+        void invalidates_upper_bound_if_amount_above_upper_bound_is_available() {
+            Coins upperBound = Coins.ofSatoshis(100);
+            Coins upperBoundPlusOneSat = upperBound.add(Coins.ofSatoshis(1));
+            LiquidityBounds initial = withUpperBound(upperBound);
+            LiquidityBounds updated = initial.withAvailableCoins(upperBoundPlusOneSat).orElseThrow();
+            assertThat(updated.getUpperBound()).isEmpty();
+        }
+
+        @Test
+        void keeps_upper_bound_identical_to_lower_bound() {
+            Coins upperBound = Coins.ofSatoshis(100);
+            LiquidityBounds initial = withUpperBound(upperBound);
+            assertUpperBound(initial.withAvailableCoins(upperBound), upperBound);
+        }
+
+        @Test
+        void keeps_upper_bound_above_lower_bound() {
+            Coins upperBound = Coins.ofSatoshis(100);
+            LiquidityBounds initial = withUpperBound(upperBound);
+            assertUpperBound(initial.withAvailableCoins(Coins.ofSatoshis(10)), upperBound);
+        }
+
+        @Test
+        void available_amount_below_in_flight() {
+            LiquidityBounds initial = withInFlight(Coins.ofSatoshis(100));
+            assertLowerBound(initial.withAvailableCoins(Coins.ofSatoshis(10)), Coins.NONE);
+        }
+
+        @Test
+        void available_amount_above_in_flight() {
+            LiquidityBounds initial = withInFlight(Coins.ofSatoshis(100));
+            assertLowerBound(initial.withAvailableCoins(Coins.ofSatoshis(103)), Coins.ofSatoshis(3));
+        }
     }
 
-    @Test
-    void getUpperBound_after_two_unavailable_updates() {
-        Coins amount1 = Coins.ofSatoshis(200);
-        Coins amount2 = Coins.ofSatoshis(100);
-        liquidityBounds.unavailable(amount1);
-        liquidityBounds.unavailable(amount2);
-        assertThat(liquidityBounds.getUpperBound()).contains(oneSatLessThan(amount2));
+    @Nested
+    @SuppressWarnings(CLASS_CAN_BE_STATIC)
+    class WithUnavailable {
+        @Test
+        void sets_upper_bound() {
+            Coins amount = Coins.ofSatoshis(100);
+            assertUpperBound(NO_INFORMATION.withUnavailableCoins(amount), oneSatLessThan(amount));
+        }
+
+        @Test
+        void updates_upper_bound_with_amount_below_old_upper_bound() {
+            Coins lowerBound = Coins.ofSatoshis(120);
+            LiquidityBounds initial = withUpperBound(lowerBound);
+            Coins amount = Coins.ofSatoshis(100);
+            assertUpperBound(initial.withUnavailableCoins(amount), oneSatLessThan(amount));
+        }
+
+        @Test
+        void ignores_update_with_amount_above_upper_bound() {
+            Coins lowerBound = Coins.ofSatoshis(100);
+            LiquidityBounds initial = withUpperBound(lowerBound);
+            assertThat(initial.withUnavailableCoins(Coins.ofSatoshis(120))).isEmpty();
+        }
+
+        @Test
+        void keeps_lower_bound_if_below_upper_bound() {
+            Coins lowerBound = Coins.ofSatoshis(300);
+            LiquidityBounds initial = withLowerBound(lowerBound);
+            assertLowerBound(initial.withUnavailableCoins(Coins.ofSatoshis(400)), lowerBound);
+        }
+
+        @Test
+        void keeps_lower_bound_if_same_as_upper_bound() {
+            Coins lowerBound = Coins.ofSatoshis(300);
+            LiquidityBounds initial = withLowerBound(lowerBound);
+            assertLowerBound(initial.withUnavailableCoins(lowerBound.add(Coins.ofSatoshis(1))), lowerBound);
+        }
+
+        @Test
+        void updates_lower_bound_if_below_upper_bound() {
+            Coins lowerBound = Coins.ofSatoshis(300);
+            LiquidityBounds initial = withLowerBound(lowerBound);
+            assertLowerBound(initial.withUnavailableCoins(lowerBound), oneSatLessThan(lowerBound));
+        }
+
+        @Test
+        void accounts_for_amount_in_flight() {
+            // the 100 sats in flight might be blocked on the channel, so we might try to send 100+10
+            LiquidityBounds initial = withInFlight(Coins.ofSatoshis(100));
+            Coins unavailableAmount = Coins.ofSatoshis(10);
+            assertUpperBound(initial.withUnavailableCoins(unavailableAmount), Coins.ofSatoshis(109));
+        }
+
+        @Test
+        void unavailable_far_below_lower_bound_with_amount_in_flight() {
+            LiquidityBounds initial =
+                    new LiquidityBounds(Coins.ofSatoshis(300), null, Coins.ofSatoshis(100));
+            Coins unavailableAmount = Coins.ofSatoshis(10);
+            LiquidityBounds updated = initial.withUnavailableCoins(unavailableAmount).orElseThrow();
+            assertLowerBound(updated.withAdditionalInFlight(Coins.ofSatoshis(-100)), oneSatLessThan(unavailableAmount));
+        }
     }
 
-    @Test
-    void getUpperBound_after_unavailable_updates_reversed() {
-        Coins amount1 = Coins.ofSatoshis(100);
-        Coins amount2 = Coins.ofSatoshis(200);
-        liquidityBounds.unavailable(amount1);
-        liquidityBounds.unavailable(amount2);
-        assertThat(liquidityBounds.getUpperBound()).contains(oneSatLessThan(amount1));
+    @Nested
+    @SuppressWarnings(CLASS_CAN_BE_STATIC)
+    class WithMovedCoins {
+        @Test
+        void updates_lower_bound() {
+            Coins lowerBound = Coins.ofSatoshis(100);
+            LiquidityBounds initial = withLowerBound(lowerBound);
+            assertLowerBound(initial.withMovedCoins(Coins.ofSatoshis(60)), Coins.ofSatoshis(40));
+        }
+
+        @Test
+        void resets_lower_bound_if_moved_more_than_lower_bound() {
+            Coins lowerBound = Coins.ofSatoshis(100);
+            LiquidityBounds initial = withLowerBound(lowerBound);
+            assertLowerBound(initial.withMovedCoins(Coins.ofSatoshis(110)), Coins.NONE);
+        }
     }
 
-    @Test
-    void available_update_invalidates_lower_upper_bound() {
-        Coins amount1 = Coins.ofSatoshis(100);
-        Coins amount2 = oneSatLessThan(amount1);
-        liquidityBounds.unavailable(amount1);
-        liquidityBounds.available(amount2);
-        assertThat(liquidityBounds.getUpperBound()).isEmpty();
+    @Nested
+    @SuppressWarnings(CLASS_CAN_BE_STATIC)
+    class WithAdditionalInFlight {
+        @Test
+        void upper_bound_is_not_reduced_by_amount_in_flight() {
+            // the 40 sats in flight might not reach this channel, so we should not lower the upper bound
+            Coins upperBound = Coins.ofSatoshis(100);
+            LiquidityBounds initial = withUpperBound(upperBound);
+            assertUpperBound(initial.withAdditionalInFlight(Coins.ofSatoshis(40)), upperBound);
+        }
+
+        @Test
+        void upper_bound_is_not_reduced_by_amount_in_flight_if_upper_bound_equals_in_flight_amount() {
+            // the 100 sats in flight might not reach this channel, so we should not lower the upper bound
+            Coins upperBound = Coins.ofSatoshis(100);
+            LiquidityBounds initial = withUpperBound(upperBound);
+            assertUpperBound(initial.withAdditionalInFlight(upperBound), upperBound);
+        }
+
+        @Test
+        void upper_bound_is_not_reduced_by_amount_in_flight_if_upper_bound_is_less_than_in_flight_amount() {
+            // the 100 sats in flight might not reach this channel, so we should not lower the upper bound
+            Coins upperBound = Coins.ofSatoshis(100);
+            LiquidityBounds initial = withUpperBound(upperBound);
+            assertUpperBound(initial.withAdditionalInFlight(Coins.ofSatoshis(101)), upperBound);
+        }
+
+        @Test
+        void lower_bound_is_reduced_by_amount_in_flight() {
+            Coins lowerBound = Coins.ofSatoshis(100);
+            LiquidityBounds initial = withLowerBound(lowerBound);
+            assertLowerBound(initial.withAdditionalInFlight(Coins.ofSatoshis(40)), Coins.ofSatoshis(60));
+        }
+
+        @Test
+        void lower_bound_is_reduced_by_amount_in_flight_if_lower_bound_equals_in_flight_amount() {
+            Coins lowerBound = Coins.ofSatoshis(100);
+            LiquidityBounds initial = withLowerBound(lowerBound);
+            assertLowerBound(initial.withAdditionalInFlight(lowerBound), Coins.NONE);
+        }
+
+        @Test
+        void lower_bound_is_zero_if_lower_bound_is_below_in_flight() {
+            Coins lowerBound = Coins.ofSatoshis(100);
+            LiquidityBounds initial = withLowerBound(lowerBound);
+            assertLowerBound(initial.withAdditionalInFlight(Coins.ofSatoshis(101)), Coins.NONE);
+        }
+
+        @Test
+        void in_flight_can_be_stacked() {
+            LiquidityBounds initial =
+                    new LiquidityBounds(Coins.ofSatoshis(100), null, Coins.ofSatoshis(60));
+            assertLowerBound(initial.withAdditionalInFlight(Coins.ofSatoshis(10)), Coins.ofSatoshis(30));
+        }
+
+        @Test
+        void in_flight_can_be_reversed() {
+            Coins lowerBound = Coins.ofSatoshis(100);
+            LiquidityBounds initial = new LiquidityBounds(lowerBound, null, Coins.ofSatoshis(60));
+            assertLowerBound(initial.withAdditionalInFlight(Coins.ofSatoshis(-60)), lowerBound);
+        }
+
+        @Test
+        void remove_in_flight_without_bound_information() {
+            LiquidityBounds initial = new LiquidityBounds(Coins.NONE, null, Coins.ofSatoshis(60));
+            LiquidityBounds updated = initial.withAdditionalInFlight(Coins.ofSatoshis(-60)).orElseThrow();
+            assertThat(updated).isSameAs(NO_INFORMATION);
+        }
+
+        @Test
+        void in_flight_is_at_least_zero() {
+            Coins lowerBound = Coins.ofSatoshis(100);
+            LiquidityBounds initial = new LiquidityBounds(lowerBound, null, Coins.ofSatoshis(60));
+            assertLowerBound(initial.withAdditionalInFlight(Coins.ofSatoshis(-61)), lowerBound);
+        }
     }
 
-    @Test
-    void available_update_keeps_higher_upper_bound() {
-        Coins amount1 = Coins.ofSatoshis(300);
-        Coins amount2 = Coins.ofSatoshis(298);
-        liquidityBounds.unavailable(amount1);
-        liquidityBounds.available(amount2);
-        assertThat(liquidityBounds.getUpperBound()).contains(oneSatLessThan(amount1));
+    private void assertLowerBound(
+            @SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<LiquidityBounds> liquidityBounds,
+            Coins expectedLowerBound
+    ) {
+        assertThat(liquidityBounds.orElseThrow().getLowerBound()).isEqualTo(expectedLowerBound);
     }
 
-    @Test
-    void unavailable_update_updates_lower_bound() {
-        Coins amount1 = Coins.ofSatoshis(300);
-        Coins amount2 = Coins.ofSatoshis(301);
-        liquidityBounds.available(amount1);
-        liquidityBounds.unavailable(amount2);
-        assertThat(liquidityBounds.getLowerBound()).isEqualTo(oneSatLessThan(amount2));
-    }
-
-    @Test
-    void unavailable_what_is_assumed_to_be_available() {
-        Coins amount1 = Coins.ofSatoshis(300);
-        Coins amount2 = Coins.ofSatoshis(300);
-        liquidityBounds.available(amount1);
-        liquidityBounds.unavailable(amount2);
-        assertThat(liquidityBounds.getLowerBound()).isEqualTo(oneSatLessThan(amount2));
-    }
-
-    @Test
-    void unavailable_more_than_available() {
-        Coins amount1 = Coins.ofSatoshis(300);
-        Coins amount2 = Coins.ofSatoshis(500);
-        liquidityBounds.available(amount1);
-        liquidityBounds.unavailable(amount2);
-        assertThat(liquidityBounds.getLowerBound()).isEqualTo(amount1);
-    }
-
-    @Test
-    void move_updates_lower_bound() {
-        Coins amount1 = Coins.ofSatoshis(100);
-        Coins amount2 = Coins.ofSatoshis(60);
-        liquidityBounds.available(amount1);
-        liquidityBounds.move(amount2);
-        assertThat(liquidityBounds.getLowerBound()).isEqualTo(Coins.ofSatoshis(40));
-    }
-
-    @Test
-    void move_more_than_lower_bound() {
-        Coins amount1 = Coins.ofSatoshis(100);
-        Coins amount2 = Coins.ofSatoshis(200);
-        liquidityBounds.available(amount1);
-        liquidityBounds.move(amount2);
-        assertThat(liquidityBounds.getLowerBound()).isEqualTo(Coins.NONE);
-    }
-
-    @Test
-    void available_forgets_lower_bound_after_one_hour() {
-        Coins higherButOld = Coins.ofSatoshis(200);
-        Coins lowerMoreRecent = Coins.ofSatoshis(100);
-        liquidityBounds.available(higherButOld);
-        liquidityBounds.setLowerBoundLastUpdate(oneHourAgo());
-
-        liquidityBounds.available(lowerMoreRecent);
-        assertThat(liquidityBounds.getLowerBound()).isEqualTo(lowerMoreRecent);
-    }
-
-    @Test
-    void available_forgets_lower_bound_after_customized_time() {
-        Duration maxAge = Duration.ofMinutes(30);
-        liquidityBounds = new LiquidityBounds(maxAge);
-
-        Coins higherButOld = Coins.ofSatoshis(200);
-        Coins lowerMoreRecent = Coins.ofSatoshis(100);
-        liquidityBounds.available(higherButOld);
-        liquidityBounds.setLowerBoundLastUpdate(Instant.now().minus(maxAge));
-
-        liquidityBounds.available(lowerMoreRecent);
-        assertThat(liquidityBounds.getLowerBound()).isEqualTo(lowerMoreRecent);
-    }
-
-    @Test
-    void available_updates_last_update_of_lower_bound() {
-        liquidityBounds.setLowerBoundLastUpdate(oneHourAgo());
-
-        Coins lowerBound = Coins.ofSatoshis(50);
-        liquidityBounds.available(lowerBound);
-        assertThat(liquidityBounds.getLowerBound()).isEqualTo(lowerBound);
-    }
-
-    @Test
-    void unavailable_forgets_upper_bound_after_one_hour() {
-        liquidityBounds.unavailable(Coins.ofSatoshis(100));
-        liquidityBounds.setUpperBoundLastUpdate(oneHourAgo());
-
-        Coins moreRecentAmount = Coins.ofSatoshis(200);
-        liquidityBounds.unavailable(moreRecentAmount);
-        assertThat(liquidityBounds.getUpperBound()).contains(oneSatLessThan(moreRecentAmount));
-    }
-
-    @Test
-    void unavailable_updates_last_update_of_upper_bound() {
-        liquidityBounds.setUpperBoundLastUpdate(oneHourAgo());
-
-        Coins moreRecentValue = Coins.ofSatoshis(100);
-        liquidityBounds.unavailable(moreRecentValue);
-        assertThat(liquidityBounds.getUpperBound()).contains(oneSatLessThan(moreRecentValue));
-    }
-
-    @Test
-    void getLowerBound_does_not_return_old_value() {
-        liquidityBounds.available(Coins.ofSatoshis(100));
-        liquidityBounds.setLowerBoundLastUpdate(oneHourAgo());
-
-        assertThat(liquidityBounds.getLowerBound()).isEqualTo(Coins.NONE);
-    }
-
-    @Test
-    void getLowerBound_value_is_kept_for_old_upper_bound() {
-        Coins amount = Coins.ofSatoshis(100);
-        liquidityBounds.available(amount);
-        liquidityBounds.setUpperBoundLastUpdate(oneHourAgo());
-
-        assertThat(liquidityBounds.getLowerBound()).isEqualTo(amount);
-    }
-
-    @Test
-    void getUpperBound_does_not_return_old_value() {
-        liquidityBounds.unavailable(Coins.ofSatoshis(100));
-        liquidityBounds.setUpperBoundLastUpdate(oneHourAgo());
-
-        assertThat(liquidityBounds.getUpperBound()).isEmpty();
-    }
-
-    @Test
-    void getUpperBound_value_is_kept_for_old_lower_bound() {
-        Coins amount = Coins.ofSatoshis(100);
-        liquidityBounds.unavailable(amount);
-        liquidityBounds.setLowerBoundLastUpdate(oneHourAgo());
-
-        assertThat(liquidityBounds.getUpperBound()).contains(oneSatLessThan(amount));
-    }
-
-    @Test
-    void upper_bound_is_not_reduced_by_amount_in_flight() {
-        // the 40 sats in flight might not reach this channel, so we should not lower the upper bound
-        liquidityBounds.unavailable(Coins.ofSatoshis(100));
-        liquidityBounds.addAsInFlight(Coins.ofSatoshis(40));
-
-        assertThat(liquidityBounds.getUpperBound()).contains(oneSatLessThan(Coins.ofSatoshis(100)));
-    }
-
-    @Test
-    void lower_bound_is_reduced_by_amount_in_flight() {
-        liquidityBounds.available(Coins.ofSatoshis(100));
-        liquidityBounds.addAsInFlight(Coins.ofSatoshis(40));
-
-        assertThat(liquidityBounds.getLowerBound()).isEqualTo(Coins.ofSatoshis(60));
-    }
-
-    @Test
-    void available_lower_bound_in_flight() {
-        liquidityBounds.available(Coins.ofSatoshis(100));
-        liquidityBounds.addAsInFlight(Coins.ofSatoshis(100));
-
-        assertThat(liquidityBounds.getLowerBound()).isEqualTo(Coins.NONE);
-    }
-
-    @Test
-    void more_than_available_lower_bound_in_flight() {
-        liquidityBounds.available(Coins.ofSatoshis(100));
-        liquidityBounds.addAsInFlight(Coins.ofSatoshis(101));
-
-        assertThat(liquidityBounds.getLowerBound()).isEqualTo(Coins.NONE);
-    }
-
-    @Test
-    void available_upper_bound_in_flight() {
-        // the 100 sats in flight might not reach this channel, so we should not lower the upper bound
-        liquidityBounds.unavailable(Coins.ofSatoshis(101));
-        liquidityBounds.addAsInFlight(Coins.ofSatoshis(100));
-
-        assertThat(liquidityBounds.getUpperBound()).contains(Coins.ofSatoshis(100));
-    }
-
-    @Test
-    void more_than_available_upper_bound_in_flight() {
-        // the 101 sats in flight might not reach this channel, so we should not lower the upper bound
-        liquidityBounds.unavailable(Coins.ofSatoshis(101));
-        liquidityBounds.addAsInFlight(Coins.ofSatoshis(101));
-
-        assertThat(liquidityBounds.getUpperBound()).contains(Coins.ofSatoshis(100));
-    }
-
-    @Test
-    void unavailable_far_below_lower_bound_with_amount_in_flight() {
-        liquidityBounds.available(Coins.ofSatoshis(300));
-        liquidityBounds.addAsInFlight(Coins.ofSatoshis(100));
-        liquidityBounds.unavailable(Coins.ofSatoshis(10));
-        liquidityBounds.addAsInFlight(Coins.ofSatoshis(-100));
-        assertThat(liquidityBounds.getLowerBound()).isEqualTo(oneSatLessThan(Coins.ofSatoshis(10)));
-    }
-
-    @Test
-    void unavailable_far_below_lower_bound_with_no_amount_in_flight() {
-        liquidityBounds.available(Coins.ofSatoshis(300));
-        liquidityBounds.unavailable(Coins.ofSatoshis(10));
-        assertThat(liquidityBounds.getLowerBound()).isEqualTo(oneSatLessThan(Coins.ofSatoshis(10)));
-    }
-
-    @Test
-    void in_flight_can_be_stacked() {
-        liquidityBounds.available(Coins.ofSatoshis(100));
-        liquidityBounds.addAsInFlight(Coins.ofSatoshis(40));
-        liquidityBounds.addAsInFlight(Coins.ofSatoshis(20));
-
-        assertThat(liquidityBounds.getLowerBound()).isEqualTo(Coins.ofSatoshis(40));
-    }
-
-    @Test
-    void in_flight_can_be_reversed() {
-        liquidityBounds.available(Coins.ofSatoshis(100));
-        liquidityBounds.addAsInFlight(Coins.ofSatoshis(40));
-        liquidityBounds.addAsInFlight(Coins.ofSatoshis(-40));
-
-        assertThat(liquidityBounds.getLowerBound()).isEqualTo(Coins.ofSatoshis(100));
-    }
-
-    @Test
-    void in_flight_at_least_zero() {
-        liquidityBounds.available(Coins.ofSatoshis(100));
-        liquidityBounds.addAsInFlight(Coins.ofSatoshis(40));
-        liquidityBounds.addAsInFlight(Coins.ofSatoshis(-50));
-
-        assertThat(liquidityBounds.getLowerBound()).isEqualTo(Coins.ofSatoshis(100));
-    }
-
-    @Test
-    void update_with_available_amount_but_below_in_flight() {
-        liquidityBounds.addAsInFlight(Coins.ofSatoshis(100));
-        liquidityBounds.available(Coins.ofSatoshis(10));
-
-        assertThat(liquidityBounds.getLowerBound()).isEqualTo(Coins.NONE);
-    }
-
-    @Test
-    void update_with_available_amount_more_than_in_flight() {
-        liquidityBounds.addAsInFlight(Coins.ofSatoshis(100));
-        liquidityBounds.available(Coins.ofSatoshis(110));
-
-        assertThat(liquidityBounds.getLowerBound()).isEqualTo(Coins.ofSatoshis(10));
-    }
-
-    @Test
-    void update_with_unavailable_amount_accounts_for_amount_in_flight() {
-        // the 100 sats in flight might actually exist on the channel, so we try to send 100+10
-        liquidityBounds.addAsInFlight(Coins.ofSatoshis(100));
-        liquidityBounds.unavailable(Coins.ofSatoshis(10));
-
-        assertThat(liquidityBounds.getUpperBound()).contains(Coins.ofSatoshis(109));
-    }
-
-    private Instant oneHourAgo() {
-        return Instant.now().minus(1, ChronoUnit.HOURS);
+    private void assertUpperBound(
+            @SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<LiquidityBounds> liquidityBounds,
+            Coins expectedUpperBound
+    ) {
+        assertThat(liquidityBounds.orElseThrow().getUpperBound()).contains(expectedUpperBound);
     }
 
     private Coins oneSatLessThan(Coins amount) {
         return amount.subtract(Coins.ofSatoshis(1));
+    }
+
+    private LiquidityBounds withLowerBound(Coins lowerBound) {
+        return new LiquidityBounds(lowerBound, null, Coins.NONE);
+    }
+
+    private LiquidityBounds withUpperBound(Coins upperBound) {
+        return new LiquidityBounds(Coins.NONE, upperBound, Coins.NONE);
+    }
+
+    private LiquidityBounds withInFlight(Coins inFlight) {
+        return new LiquidityBounds(Coins.NONE, null, inFlight);
     }
 }

@@ -6,21 +6,38 @@ import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.LiquidityBounds;
+import de.cotto.lndmanagej.model.LiquidityBoundsWithTimestamp;
 import de.cotto.lndmanagej.model.Pubkey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAmount;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.LIQUIDITY_INFORMATION_MAX_AGE;
 import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.USE_MISSION_CONTROL;
+import static de.cotto.lndmanagej.model.LiquidityBounds.NO_INFORMATION;
 
 @Component
 public class LiquidityBoundsService {
+    private static final int ONE_HOUR_IN_MILLISECONDS = 60 * 60 * 1_000;
+    private static final Duration DEFAULT_MAX_AGE = Duration.of(1, ChronoUnit.HOURS);
     private final MissionControlService missionControlService;
-    private final LoadingCache<TwoPubkeys, LiquidityBounds> entries;
+    private final Map<TwoPubkeys, LiquidityBoundsWithTimestamp> entries;
     private final ConfigurationService configurationService;
+    private final LoadingCache<Object, Duration> maxAgeCache = new CacheBuilder()
+            .withRefresh(Duration.ofSeconds(5))
+            .withExpiry(Duration.ofSeconds(10))
+            .build(this::getMaxAgeWithoutCache);
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     public LiquidityBoundsService(
             MissionControlService missionControlService,
@@ -28,15 +45,13 @@ public class LiquidityBoundsService {
     ) {
         this.missionControlService = missionControlService;
         this.configurationService = configurationService;
-        entries = new CacheBuilder()
-                .withSoftValues(true)
-                .build(ignored -> getLiquidityBounds());
+        entries = new LinkedHashMap<>();
     }
 
     @Timed
     public Optional<Coins> getAssumedLiquidityUpperBound(Pubkey source, Pubkey target) {
         Coins fromMissionControl = getFromMissionControl(source, target).orElse(null);
-        Coins fromPayments = getInfo(source, target).getUpperBound().orElse(null);
+        Coins fromPayments = getInfo(new TwoPubkeys(source, target)).getUpperBound().orElse(null);
         if (fromMissionControl == null && fromPayments == null) {
             return Optional.empty();
         }
@@ -52,27 +67,65 @@ public class LiquidityBoundsService {
 
     @Timed
     public Coins getAssumedLiquidityLowerBound(Pubkey source, Pubkey target) {
-        return getInfo(source, target).getLowerBound();
+        return getInfo(new TwoPubkeys(source, target)).getLowerBound();
     }
 
     public void markAsMoved(Pubkey source, Pubkey target, Coins amount) {
-        getInfo(source, target).move(amount);
+        update(source, target, amount, LiquidityBounds::withMovedCoins);
+
     }
 
     public void markAsAvailable(Pubkey source, Pubkey target, Coins amount) {
-        getInfo(source, target).available(amount);
+        update(source, target, amount, LiquidityBounds::withAvailableCoins);
     }
 
     public void markAsUnavailable(Pubkey source, Pubkey target, Coins amount) {
-        getInfo(source, target).unavailable(amount);
+        update(source, target, amount, LiquidityBounds::withUnavailableCoins);
     }
 
     public void markAsInFlight(Pubkey source, Pubkey target, Coins amount) {
-        getInfo(source, target).addAsInFlight(amount);
+        update(source, target, amount, LiquidityBounds::withAdditionalInFlight);
     }
 
-    private LiquidityBounds getInfo(Pubkey source, Pubkey target) {
-        return entries.get(new TwoPubkeys(source, target));
+    @Scheduled(fixedDelay = ONE_HOUR_IN_MILLISECONDS)
+    public void cleanup() {
+        logger.info("Number of entries before cleanup: {}", entries.size());
+        TemporalAmount maxAge = getMaxAge();
+        entries.values().removeIf(liquidityBoundsWithTimestamp -> liquidityBoundsWithTimestamp.isTooOld(maxAge));
+        logger.info("Number of entries after cleanup: {}", entries.size());
+    }
+
+    private void update(
+            Pubkey source,
+            Pubkey target,
+            Coins amount,
+            BiFunction<LiquidityBounds, Coins, Optional<LiquidityBounds>> function
+    ) {
+        TwoPubkeys twoPubkeys = new TwoPubkeys(source, target);
+        synchronized (this.entries) {
+            Optional<LiquidityBounds> updated = function.apply(getInfo(twoPubkeys), amount);
+            updated.ifPresent(liquidityBounds -> setInfo(twoPubkeys, liquidityBounds));
+        }
+    }
+
+    private LiquidityBounds getInfo(TwoPubkeys twoPubkeys) {
+        LiquidityBoundsWithTimestamp liquidityBoundsWithTimestamp = entries.get(twoPubkeys);
+        if (liquidityBoundsWithTimestamp == null) {
+            return NO_INFORMATION;
+        }
+        if (liquidityBoundsWithTimestamp.isTooOld(getMaxAge())) {
+            entries.remove(twoPubkeys);
+            return NO_INFORMATION;
+        }
+        return liquidityBoundsWithTimestamp.liquidityBounds();
+    }
+
+    private void setInfo(TwoPubkeys twoPubkeys, LiquidityBounds liquidityBounds) {
+        if (NO_INFORMATION.equals(liquidityBounds)) {
+            entries.remove(twoPubkeys);
+        } else {
+            entries.put(twoPubkeys, new LiquidityBoundsWithTimestamp(liquidityBounds));
+        }
     }
 
     private Optional<Coins> getFromMissionControl(Pubkey source, Pubkey target) {
@@ -83,20 +136,17 @@ public class LiquidityBoundsService {
         return Optional.empty();
     }
 
-    private LiquidityBounds getLiquidityBounds() {
-        Duration maxAge = getLiquidityInformationMaxAge().orElse(null);
-        if (maxAge == null) {
-            return new LiquidityBounds();
-        } else {
-            return new LiquidityBounds(maxAge);
-        }
-    }
-
-    private Optional<Duration> getLiquidityInformationMaxAge() {
-        return configurationService.getIntegerValue(LIQUIDITY_INFORMATION_MAX_AGE).map(Duration::ofSeconds);
-    }
-
     @SuppressWarnings("UnusedVariable")
     private record TwoPubkeys(Pubkey source, Pubkey target) {
+    }
+
+    private Duration getMaxAge() {
+        return maxAgeCache.get("");
+    }
+
+    private Duration getMaxAgeWithoutCache() {
+        return configurationService.getIntegerValue(LIQUIDITY_INFORMATION_MAX_AGE)
+                .map(Duration::ofSeconds)
+                .orElse(DEFAULT_MAX_AGE);
     }
 }

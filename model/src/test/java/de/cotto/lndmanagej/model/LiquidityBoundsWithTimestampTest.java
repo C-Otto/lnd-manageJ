@@ -1,0 +1,49 @@
+package de.cotto.lndmanagej.model;
+
+import org.junit.jupiter.api.Test;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+
+import static de.cotto.lndmanagej.model.LiquidityBounds.NO_INFORMATION;
+import static org.assertj.core.api.Assertions.assertThat;
+
+class LiquidityBoundsWithTimestampTest {
+
+    private static final LiquidityBounds LIQUIDITY_BOUNDS =
+            new LiquidityBounds(Coins.ofSatoshis(1), Coins.ofSatoshis(2), Coins.ofSatoshis(3));
+    private static final Duration MAX_AGE = Duration.ofHours(1);
+
+    @Test
+    void isTooOld_for_max_age_old_entry() {
+        LiquidityBoundsWithTimestamp entry = new LiquidityBoundsWithTimestamp(
+                LIQUIDITY_BOUNDS,
+                Instant.now().minus(1, ChronoUnit.HOURS)
+        );
+        assertThat(entry.isTooOld(MAX_AGE)).isTrue();
+    }
+
+    @Test
+    void isTooOld_for_not_yet_max_age_old_entry() {
+        LiquidityBoundsWithTimestamp entry = new LiquidityBoundsWithTimestamp(
+                LIQUIDITY_BOUNDS,
+                Instant.now().minus(59, ChronoUnit.MINUTES)
+        );
+        assertThat(entry.isTooOld(MAX_AGE)).isFalse();
+    }
+
+    @Test
+    void liquidityBounds() {
+        LiquidityBounds liquidityBounds = LIQUIDITY_BOUNDS;
+        LiquidityBoundsWithTimestamp entry = new LiquidityBoundsWithTimestamp(liquidityBounds, Instant.now());
+        assertThat(entry.liquidityBounds()).isEqualTo(liquidityBounds);
+    }
+
+    @Test
+    void timestamp() {
+        Instant timestamp = Instant.now().minus(59, ChronoUnit.MINUTES);
+        LiquidityBoundsWithTimestamp entry = new LiquidityBoundsWithTimestamp(NO_INFORMATION, timestamp);
+        assertThat(entry.timestamp()).isEqualTo(timestamp);
+    }
+}

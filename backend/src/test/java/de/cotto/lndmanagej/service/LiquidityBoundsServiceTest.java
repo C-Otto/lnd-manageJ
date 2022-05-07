@@ -57,12 +57,6 @@ class LiquidityBoundsServiceTest {
     }
 
     @Test
-    void liquidity_information_uses_configured_max_age() {
-        liquidityBoundsService.markAsUnavailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(1));
-        verify(configurationService).getIntegerValue(LIQUIDITY_INFORMATION_MAX_AGE);
-    }
-
-    @Test
     void markAsAvailable() {
         liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100_000));
         assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(PUBKEY, PUBKEY_2))
@@ -169,6 +163,14 @@ class LiquidityBoundsServiceTest {
     }
 
     @Test
+    void updating_in_flight_and_back() {
+        liquidityBoundsService.markAsInFlight(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
+        liquidityBoundsService.markAsInFlight(PUBKEY, PUBKEY_2, Coins.ofSatoshis(-100));
+        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(PUBKEY, PUBKEY_2))
+                .isEqualTo(Coins.NONE);
+    }
+
+    @Test
     void markAsInFlight_can_be_stacked() {
         liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(300));
         liquidityBoundsService.markAsInFlight(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
@@ -189,5 +191,19 @@ class LiquidityBoundsServiceTest {
         liquidityBoundsService.markAsInFlight(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
         assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(PUBKEY, PUBKEY_2))
                 .isEmpty();
+    }
+
+    @Test
+    void does_not_return_stale_data() {
+        liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
+        when(configurationService.getIntegerValue(LIQUIDITY_INFORMATION_MAX_AGE)).thenReturn(Optional.of(0));
+        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(PUBKEY, PUBKEY_2)).isEqualTo(Coins.NONE);
+    }
+
+    @Test
+    void cleanup_requests_max_age() {
+        liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(10));
+        liquidityBoundsService.cleanup();
+        verify(configurationService).getIntegerValue(LIQUIDITY_INFORMATION_MAX_AGE);
     }
 }

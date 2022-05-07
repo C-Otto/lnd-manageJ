@@ -1,112 +1,96 @@
 package de.cotto.lndmanagej.model;
 
-import com.google.common.annotations.VisibleForTesting;
-
 import javax.annotation.CheckForNull;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.Optional;
 
 public class LiquidityBounds {
-    private static final Duration DEFAULT_MAX_AGE = Duration.of(1, ChronoUnit.HOURS);
-    private final Duration maxAge;
-    private Instant lowerBoundLastUpdate;
-    private Instant upperBoundLastUpdate;
-
-    private Coins lowerBound;
+    private final Coins lowerBound;
     @CheckForNull
-    private Coins upperBound;
-    private Coins inFlight;
+    private final Coins upperBound;
+    private final Coins inFlight;
 
+    public static final LiquidityBounds NO_INFORMATION = new LiquidityBounds();
+
+    @SuppressWarnings("PMD.NullAssignment")
     public LiquidityBounds() {
-        this(DEFAULT_MAX_AGE);
+        this.lowerBound = Coins.NONE;
+        this.upperBound = null;
+        this.inFlight = Coins.NONE;
     }
 
-    public LiquidityBounds(Duration maxAge) {
-        lowerBound = Coins.NONE;
-        inFlight = Coins.NONE;
-        lowerBoundLastUpdate = Instant.now();
-        upperBoundLastUpdate = Instant.now();
-        this.maxAge = maxAge;
-    }
-
-    public void move(Coins amount) {
-        synchronized (this) {
-            lowerBound = lowerBound.subtract(amount).maximum(Coins.NONE);
+    public LiquidityBounds(Coins lowerBound, @Nullable Coins upperBound, Coins inFlight) {
+        throwIfNegative(lowerBound, "invalid lower bound: ");
+        throwIfNegative(upperBound, "invalid upper bound: ");
+        throwIfNegative(inFlight, "invalid in flight amount: ");
+        if (upperBound != null && lowerBound.compareTo(upperBound) > 0) {
+            throw new IllegalArgumentException(
+                    "lower bound must not be above upper bound: " + lowerBound + " <! " + upperBound
+            );
         }
+        this.lowerBound = lowerBound;
+        this.upperBound = upperBound;
+        this.inFlight = inFlight;
+    }
+
+    public Optional<LiquidityBounds> withMovedCoins(Coins amount) {
+        Coins newLowerBound = lowerBound.subtract(amount).maximum(Coins.NONE);
+        return create(newLowerBound, upperBound, inFlight);
     }
 
     @SuppressWarnings("PMD.NullAssignment")
-    public void available(Coins amount) {
-        synchronized (this) {
-            resetOldLowerBound();
-            lowerBoundLastUpdate = Instant.now();
-            lowerBound = lowerBound.maximum(amount);
-            if (upperBound != null && lowerBound.compareTo(upperBound) >= 0) {
-                upperBound = null;
-            }
+    public Optional<LiquidityBounds> withAvailableCoins(Coins amount) {
+        Coins newLowerBound = lowerBound.maximum(amount);
+        Coins newUpperBound;
+        if (upperBound != null && newLowerBound.compareTo(upperBound) > 0) {
+            newUpperBound = null;
+        } else {
+            newUpperBound = upperBound;
         }
+        return create(newLowerBound, newUpperBound, inFlight);
     }
 
-    public void unavailable(Coins amount) {
-        synchronized (this) {
-            resetOldUpperBound();
-            upperBoundLastUpdate = Instant.now();
-            Coins newUpperBound = amount.subtract(Coins.ofSatoshis(1)).add(inFlight);
-            if (upperBound == null) {
-                upperBound = newUpperBound;
-            } else {
-                upperBound = upperBound.minimum(newUpperBound);
-            }
-            lowerBound = lowerBound.minimum(upperBound.subtract(inFlight));
-        }
+    public Optional<LiquidityBounds> withUnavailableCoins(Coins amount) {
+        Coins oneSatBelowUnavailableAmount = amount.subtract(Coins.ofSatoshis(1));
+        Coins newUpperBound = oneSatBelowUnavailableAmount.add(inFlight).minimum(upperBound).maximum(Coins.NONE);
+        Coins newLowerBound = lowerBound.minimum(newUpperBound.subtract(inFlight)).maximum(Coins.NONE);
+        return create(newLowerBound, newUpperBound, inFlight);
     }
 
-    public void addAsInFlight(Coins amount) {
-        synchronized (this) {
-            inFlight = Coins.NONE.maximum(inFlight.add(amount));
-        }
+    public Optional<LiquidityBounds> withAdditionalInFlight(Coins amount) {
+        Coins newInFlight = inFlight.add(amount).maximum(Coins.NONE);
+        return create(lowerBound, upperBound, newInFlight);
     }
 
     public Coins getLowerBound() {
-        synchronized (this) {
-            resetOldLowerBound();
-            return Coins.NONE.maximum(lowerBound.subtract(inFlight));
-        }
+        return Coins.NONE.maximum(lowerBound.subtract(inFlight));
     }
 
     public Optional<Coins> getUpperBound() {
-        synchronized (this) {
-            resetOldUpperBound();
-            return Optional.ofNullable(upperBound);
-        }
+        return Optional.ofNullable(upperBound);
     }
 
-    @SuppressWarnings("PMD.NullAssignment")
-    private void resetOldUpperBound() {
-        if (upperBoundLastUpdate.isBefore(Instant.now().minus(maxAge))) {
-            upperBound = null;
+    private Optional<LiquidityBounds> create(
+            Coins newLowerBound,
+            @Nullable Coins newUpperBound,
+            Coins newInFlight
+    ) {
+        if (newLowerBound.equals(lowerBound)
+                && Objects.equals(newUpperBound, upperBound)
+                && newInFlight.equals(inFlight)
+        ) {
+            return Optional.empty();
         }
+        if (Coins.NONE.equals(newLowerBound) && newUpperBound == null && Coins.NONE.equals(newInFlight)) {
+            return Optional.of(NO_INFORMATION);
+        }
+        return Optional.of(new LiquidityBounds(newLowerBound, newUpperBound, newInFlight));
     }
 
-    private void resetOldLowerBound() {
-        if (lowerBoundLastUpdate.isBefore(Instant.now().minus(maxAge))) {
-            lowerBound = Coins.NONE;
-        }
-    }
-
-    @VisibleForTesting
-    void setLowerBoundLastUpdate(Instant lowerBoundLastUpdate) {
-        synchronized (this) {
-            this.lowerBoundLastUpdate = lowerBoundLastUpdate;
-        }
-    }
-
-    @VisibleForTesting
-    void setUpperBoundLastUpdate(Instant upperBoundLastUpdate) {
-        synchronized (this) {
-            this.upperBoundLastUpdate = upperBoundLastUpdate;
+    private void throwIfNegative(@Nullable Coins coins, String prefix) {
+        if (coins != null && coins.isNegative()) {
+            throw new IllegalArgumentException(prefix + coins);
         }
     }
 }
