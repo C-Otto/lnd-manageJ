@@ -12,6 +12,10 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class MissionControlEntryTest {
+
+    private static final MissionControlEntry ENTRY =
+            new MissionControlEntry(PUBKEY, PUBKEY_2, Coins.ofSatoshis(123), Instant.ofEpochSecond(100), false);
+
     @Test
     void success() {
         assertThat(SUCCESS.success()).isTrue();
@@ -22,6 +26,21 @@ class MissionControlEntryTest {
     void failure() {
         assertThat(SUCCESS.failure()).isFalse();
         assertThat(FAILURE.failure()).isTrue();
+    }
+
+    @Test
+    void isAfter_same_value() {
+        assertThat(ENTRY.isAfter(Instant.ofEpochSecond(100))).isFalse();
+    }
+
+    @Test
+    void isAfter_strictly_after() {
+        assertThat(ENTRY.isAfter(Instant.ofEpochSecond(99))).isTrue();
+    }
+
+    @Test
+    void isAfter_strictly_before() {
+        assertThat(ENTRY.isAfter(Instant.ofEpochSecond(101))).isFalse();
     }
 
     @Test
