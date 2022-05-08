@@ -84,7 +84,7 @@ class RouteTest {
     void getProbability_within_known_liquidity() {
         long availableLiquiditySat = 100;
         Coins capacity = Coins.ofSatoshis(200);
-        Coins amount = Coins.ofSatoshis(90);
+        Coins amount = Coins.ofSatoshis(99);
         Edge edge = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, capacity, POLICY_1);
         BasicRoute basicRoute = new BasicRoute(List.of(edge), amount);
         EdgeWithLiquidityInformation edgeWithLiquidityInformation =
