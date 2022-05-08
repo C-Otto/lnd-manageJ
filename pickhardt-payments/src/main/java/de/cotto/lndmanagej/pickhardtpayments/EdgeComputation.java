@@ -84,7 +84,12 @@ public class EdgeComputation {
             Coins upperBound = getAvailableLiquidityUpperBound(edge, lowerBound);
             return EdgeWithLiquidityInformation.forLowerAndUpperBound(edge, lowerBound, upperBound);
         }
-        return EdgeWithLiquidityInformation.forKnownLiquidity(edge, knownLiquidity);
+        Coins usableLiquidityFromKnownLiquidity = getUsableLiquidityFromKnownLiquidity(knownLiquidity);
+        return EdgeWithLiquidityInformation.forKnownLiquidity(edge, usableLiquidityFromKnownLiquidity);
+    }
+
+    private Coins getUsableLiquidityFromKnownLiquidity(Coins knownLiquidity) {
+        return Coins.ofMilliSatoshis((long) (knownLiquidity.milliSatoshis() * 0.99));
     }
 
     private boolean shouldIgnore(DirectedChannelEdge channelEdge) {
