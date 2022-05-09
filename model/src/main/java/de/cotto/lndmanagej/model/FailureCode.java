@@ -7,6 +7,7 @@ import java.util.Arrays;
 
 public enum FailureCode {
     INCORRECT_OR_UNKNOWN_PAYMENT_DETAILS(1),
+    FEE_INSUFFICIENT(12),
     CHANNEL_DISABLED(14),
     TEMPORARY_CHANNEL_FAILURE(15),
     UNKNOWN_NEXT_PEER(18),

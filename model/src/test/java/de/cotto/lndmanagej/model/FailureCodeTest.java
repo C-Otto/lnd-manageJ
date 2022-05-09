@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.model;
 import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.model.FailureCode.CHANNEL_DISABLED;
+import static de.cotto.lndmanagej.model.FailureCode.FEE_INSUFFICIENT;
 import static de.cotto.lndmanagej.model.FailureCode.INCORRECT_OR_UNKNOWN_PAYMENT_DETAILS;
 import static de.cotto.lndmanagej.model.FailureCode.MPP_TIMEOUT;
 import static de.cotto.lndmanagej.model.FailureCode.TEMPORARY_CHANNEL_FAILURE;
@@ -24,6 +25,11 @@ class FailureCodeTest {
     @Test
     void channelDisabled() {
         assertThat(FailureCode.getFor(14)).isEqualTo(CHANNEL_DISABLED);
+    }
+
+    @Test
+    void feeInsufficient() {
+        assertThat(FailureCode.getFor(12)).isEqualTo(FEE_INSUFFICIENT);
     }
 
     @Test

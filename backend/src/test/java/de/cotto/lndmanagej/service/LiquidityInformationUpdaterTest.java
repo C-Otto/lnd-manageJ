@@ -22,6 +22,7 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.FailureCode.CHANNEL_DISABLED;
+import static de.cotto.lndmanagej.model.FailureCode.FEE_INSUFFICIENT;
 import static de.cotto.lndmanagej.model.FailureCode.INCORRECT_OR_UNKNOWN_PAYMENT_DETAILS;
 import static de.cotto.lndmanagej.model.FailureCode.MPP_TIMEOUT;
 import static de.cotto.lndmanagej.model.FailureCode.TEMPORARY_CHANNEL_FAILURE;
@@ -396,6 +397,12 @@ class LiquidityInformationUpdaterTest {
         }
     }
     // CPD-ON
+
+    @Test
+    void feeInsufficient_is_ignored() {
+        liquidityInformationUpdater.failure(hopsJustWithAmount, FEE_INSUFFICIENT, 0);
+        verifyNoInteractions(liquidityBoundsService);
+    }
 
     @Test
     void unknown_failure_code() {
