@@ -2,9 +2,13 @@ package de.cotto.lndmanagej.grpc;
 
 import io.grpc.stub.StreamObserver;
 
-class NoopObserver<T> implements StreamObserver<T> {
-    public NoopObserver() {
-        // default constructor
+import java.util.function.Consumer;
+
+class ErrorReporter<T> implements StreamObserver<T> {
+    private final Consumer<Throwable> consumer;
+
+    public ErrorReporter(Consumer<Throwable> consumer) {
+        this.consumer = consumer;
     }
 
     @Override
@@ -14,7 +18,7 @@ class NoopObserver<T> implements StreamObserver<T> {
 
     @Override
     public void onError(Throwable throwable) {
-        // nothing
+        consumer.accept(throwable);
     }
 
     @Override

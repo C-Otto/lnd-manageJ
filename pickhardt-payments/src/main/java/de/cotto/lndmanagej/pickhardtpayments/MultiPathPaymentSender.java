@@ -16,15 +16,18 @@ public class MultiPathPaymentSender {
     private final GrpcPayments grpcPayments;
     private final GrpcSendToRoute grpcSendToRoute;
     private final MultiPathPaymentSplitter multiPathPaymentSplitter;
+    private final MultiPathPaymentObserver multiPathPaymentObserver;
 
     public MultiPathPaymentSender(
             GrpcPayments grpcPayments,
             GrpcSendToRoute grpcSendToRoute,
-            MultiPathPaymentSplitter multiPathPaymentSplitter
+            MultiPathPaymentSplitter multiPathPaymentSplitter,
+            MultiPathPaymentObserver multiPathPaymentObserver
     ) {
         this.grpcPayments = grpcPayments;
         this.grpcSendToRoute = grpcSendToRoute;
         this.multiPathPaymentSplitter = multiPathPaymentSplitter;
+        this.multiPathPaymentObserver = multiPathPaymentObserver;
     }
 
     public MultiPathPayment payPaymentRequest(String paymentRequest, int feeRateWeight) {
@@ -38,7 +41,7 @@ public class MultiPathPaymentSender {
                 multiPathPaymentSplitter.getMultiPathPaymentTo(destination, amount, feeRateWeight);
         List<Route> routes = multiPathPayment.routes();
         for (Route route : routes) {
-            grpcSendToRoute.sendToRoute(route, decodedPaymentRequest);
+            grpcSendToRoute.sendToRoute(route, decodedPaymentRequest, multiPathPaymentObserver.forRoute(route));
         }
         return multiPathPayment;
     }

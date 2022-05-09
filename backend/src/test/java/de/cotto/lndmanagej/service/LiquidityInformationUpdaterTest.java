@@ -404,6 +404,13 @@ class LiquidityInformationUpdaterTest {
         verifyNoMoreInteractions(liquidityBoundsService);
     }
 
+    @Test
+    void removeInFlight() {
+        liquidityInformationUpdater.removeInFlight(hopsWithChannelIdsAndPubkeys);
+        verifyRemovesInFlightForAllHops();
+        verifyNoMoreInteractions(liquidityBoundsService);
+    }
+
     private void verifyRemovesInFlightForAllHops() {
         verify(liquidityBoundsService).markAsInFlight(PUBKEY, PUBKEY_2, Coins.ofSatoshis(-100));
         verify(liquidityBoundsService).markAsInFlight(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(-90));

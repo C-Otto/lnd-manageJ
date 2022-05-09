@@ -2,11 +2,16 @@ package de.cotto.lndmanagej.grpc;
 
 import com.google.protobuf.ByteString;
 import de.cotto.lndmanagej.model.HexString;
+import io.grpc.stub.StreamObserver;
+import lnrpc.HTLCAttempt;
 import lnrpc.Hop;
 import lnrpc.MPPRecord;
 import lnrpc.Route;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -40,17 +45,27 @@ class GrpcSendToRouteTest {
     @Mock
     private GrpcRouterService grpcRouterService;
 
+    @Mock
+    private SendToRouteObserver observer;
+
+    @Captor
+    private ArgumentCaptor<StreamObserver<HTLCAttempt>> captor;
+
+    @BeforeEach
+    void setUp() {
+        when(grpcGetInfo.getBlockHeight()).thenReturn(Optional.of(BLOCK_HEIGHT));
+    }
+
     @Test
     void block_height_not_available() {
         when(grpcGetInfo.getBlockHeight()).thenReturn(Optional.empty());
-        grpcSendToRoute.sendToRoute(ROUTE, DECODED_PAYMENT_REQUEST);
+        grpcSendToRoute.sendToRoute(ROUTE, DECODED_PAYMENT_REQUEST, observer);
         verifyNoInteractions(grpcRouterService);
     }
 
     @Test
     void sends_to_converted_route() {
-        when(grpcGetInfo.getBlockHeight()).thenReturn(Optional.of(BLOCK_HEIGHT));
-        grpcSendToRoute.sendToRoute(ROUTE, DECODED_PAYMENT_REQUEST);
+        grpcSendToRoute.sendToRoute(ROUTE, DECODED_PAYMENT_REQUEST, observer);
         RouterOuterClass.SendToRouteRequest expectedRequest = RouterOuterClass.SendToRouteRequest.newBuilder()
                 .setRoute(Route.newBuilder()
                         .setTotalTimeLock(ROUTE.getTotalTimeLock(BLOCK_HEIGHT, DECODED_PAYMENT_REQUEST.cltvExpiry()))
@@ -84,6 +99,15 @@ class GrpcSendToRouteTest {
                 .setPaymentHash(toByteString(DECODED_PAYMENT_REQUEST.paymentHash()))
                 .build();
         verify(grpcRouterService).sendToRoute(eq(expectedRequest), any());
+    }
+
+    @Test
+    void error_reporter_reports_to_given_observer() {
+        grpcSendToRoute.sendToRoute(ROUTE, DECODED_PAYMENT_REQUEST, observer);
+        verify(grpcRouterService).sendToRoute(any(), captor.capture());
+        NullPointerException throwable = new NullPointerException();
+        captor.getValue().onError(throwable);
+        verify(observer).accept(throwable);
     }
 
     private ByteString toByteString(HexString hexString) {

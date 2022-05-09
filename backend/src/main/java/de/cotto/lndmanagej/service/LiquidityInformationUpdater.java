@@ -67,12 +67,12 @@ public class LiquidityInformationUpdater implements PaymentListener {
         }
     }
 
-    private void addInFlight(List<PaymentAttemptHop> paymentAttemptHops) {
-        updateInFlight(paymentAttemptHops, false);
+    public void removeInFlight(List<PaymentAttemptHop> paymentAttemptHops) {
+        updateInFlight(paymentAttemptHops, true);
     }
 
-    private void removeInFlight(List<PaymentAttemptHop> paymentAttemptHops) {
-        updateInFlight(paymentAttemptHops, true);
+    private void addInFlight(List<PaymentAttemptHop> paymentAttemptHops) {
+        updateInFlight(paymentAttemptHops, false);
     }
 
     private void updateInFlight(List<PaymentAttemptHop> paymentAttemptHops, boolean negate) {

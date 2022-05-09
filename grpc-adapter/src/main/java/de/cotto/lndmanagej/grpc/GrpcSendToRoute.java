@@ -27,7 +27,7 @@ public class GrpcSendToRoute {
         this.grpcGetInfo = grpcGetInfo;
     }
 
-    public void sendToRoute(Route route, DecodedPaymentRequest decodedPaymentRequest) {
+    public void sendToRoute(Route route, DecodedPaymentRequest decodedPaymentRequest, SendToRouteObserver observer) {
         Integer blockHeight = grpcGetInfo.getBlockHeight().orElse(null);
         if (blockHeight == null) {
             logger.error("Unable to get current block height");
@@ -37,7 +37,7 @@ public class GrpcSendToRoute {
                 decodedPaymentRequest.paymentHash(),
                 buildLndRoute(route, blockHeight, decodedPaymentRequest)
         );
-        grpcRouterService.sendToRoute(request, new NoopObserver<>());
+        grpcRouterService.sendToRoute(request, new ErrorReporter<>(observer));
     }
 
     private lnrpc.Route buildLndRoute(Route route, int blockHeight, DecodedPaymentRequest decodedPaymentRequest) {
