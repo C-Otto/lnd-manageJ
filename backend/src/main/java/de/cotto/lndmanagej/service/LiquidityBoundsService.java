@@ -89,10 +89,10 @@ public class LiquidityBoundsService {
 
     @Scheduled(fixedDelay = ONE_HOUR_IN_MILLISECONDS)
     public void cleanup() {
-        logger.info("Number of entries before cleanup: {}", entries.size());
+        logger.debug("Number of entries before cleanup: {}", entries.size());
         TemporalAmount maxAge = getMaxAge();
         entries.values().removeIf(liquidityBoundsWithTimestamp -> liquidityBoundsWithTimestamp.isTooOld(maxAge));
-        logger.info("Number of entries after cleanup: {}", entries.size());
+        logger.debug("Number of entries after cleanup: {}", entries.size());
     }
 
     private void update(
