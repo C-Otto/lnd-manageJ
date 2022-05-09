@@ -89,7 +89,8 @@ public class EdgeComputation {
     }
 
     private Coins getUsableLiquidityFromKnownLiquidity(Coins knownLiquidity) {
-        return Coins.ofMilliSatoshis((long) (knownLiquidity.milliSatoshis() * 0.99));
+        Coins withFeeReserve = Coins.ofMilliSatoshis((long) (knownLiquidity.milliSatoshis() * 0.99));
+        return withFeeReserve.subtract(Coins.ofSatoshis(1_000)).maximum(Coins.NONE);
     }
 
     private boolean shouldIgnore(DirectedChannelEdge channelEdge) {

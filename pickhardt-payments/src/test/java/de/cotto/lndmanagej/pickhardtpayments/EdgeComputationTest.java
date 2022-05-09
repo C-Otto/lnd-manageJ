@@ -94,7 +94,7 @@ class EdgeComputationTest {
         mockEdge();
         when(grpcGetInfo.getPubkey()).thenReturn(EDGE.startNode());
         when(channelService.getLocalChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
-        Coins knownLiquidity = Coins.ofSatoshis(456);
+        Coins knownLiquidity = Coins.ofSatoshis(4_567);
         Coins availableKnownLiquidity = getAvailableKnownLiquidity(knownLiquidity);
         when(balanceService.getAvailableLocalBalance(EDGE.channelId())).thenReturn(knownLiquidity);
 
@@ -127,7 +127,7 @@ class EdgeComputationTest {
         mockEdge();
         when(grpcGetInfo.getPubkey()).thenReturn(EDGE.endNode());
         when(channelService.getLocalChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
-        Coins knownLiquidity = Coins.ofSatoshis(456);
+        Coins knownLiquidity = Coins.ofSatoshis(4_567);
         Coins availableKnownLiquidity = getAvailableKnownLiquidity(knownLiquidity);
         when(balanceService.getAvailableRemoteBalance(EDGE.channelId())).thenReturn(knownLiquidity);
 
@@ -187,7 +187,7 @@ class EdgeComputationTest {
     @Test
     void getEdgeWithLiquidityInformation_first_node_is_own_node() {
         when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY);
-        Coins knownLiquidity = Coins.ofSatoshis(456);
+        Coins knownLiquidity = Coins.ofSatoshis(4_567);
         Coins availableKnownLiquidity = getAvailableKnownLiquidity(knownLiquidity);
         when(channelService.getLocalChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         when(balanceService.getAvailableLocalBalance(EDGE.channelId())).thenReturn(knownLiquidity);
@@ -198,7 +198,7 @@ class EdgeComputationTest {
     @Test
     void getEdgeWithLiquidityInformation_second_node_is_own_node() {
         when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY_2);
-        Coins knownLiquidity = Coins.ofSatoshis(456);
+        Coins knownLiquidity = Coins.ofSatoshis(4_567);
         Coins availableKnownLiquidity = getAvailableKnownLiquidity(knownLiquidity);
         when(channelService.getLocalChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         when(balanceService.getAvailableRemoteBalance(EDGE.channelId())).thenReturn(knownLiquidity);
@@ -273,6 +273,9 @@ class EdgeComputationTest {
     private Coins getAvailableKnownLiquidity(Coins coins) {
         // 1% deducted to leave some room for fees
         long milliSat = coins.milliSatoshis();
-        return Coins.ofMilliSatoshis((long) (milliSat * 0.99));
+        Coins withFeeReserve = Coins.ofMilliSatoshis((long) (milliSat * 0.99));
+        // reserve 1k sat for on-chain fees (something like having an additional HTLC, commit fee, ...)
+        Coins withOnChainReserve = withFeeReserve.subtract(Coins.ofSatoshis(1_000));
+        return withOnChainReserve.maximum(Coins.NONE);
     }
 }
