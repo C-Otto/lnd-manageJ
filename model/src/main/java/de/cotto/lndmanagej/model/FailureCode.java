@@ -1,5 +1,8 @@
 package de.cotto.lndmanagej.model;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Arrays;
 
 public enum FailureCode {
@@ -10,6 +13,7 @@ public enum FailureCode {
     MPP_TIMEOUT(23),
     UNKNOWN_FAILURE(-1);
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(FailureCode.class);
     private final int code;
 
     FailureCode(int code) {
@@ -17,6 +21,9 @@ public enum FailureCode {
     }
 
     public static FailureCode getFor(int code) {
-        return Arrays.stream(values()).filter(value -> value.code == code).findFirst().orElse(UNKNOWN_FAILURE);
+        return Arrays.stream(values()).filter(value -> value.code == code).findFirst().orElseGet(() -> {
+            LOGGER.warn("Unknown failure code {}", code);
+            return UNKNOWN_FAILURE;
+        });
     }
 }
