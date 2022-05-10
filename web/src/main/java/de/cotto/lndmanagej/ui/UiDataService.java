@@ -12,7 +12,8 @@ import de.cotto.lndmanagej.ui.dto.StatusModel;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toSet;
 
 public abstract class UiDataService {
 
@@ -33,13 +34,13 @@ public abstract class UiDataService {
     public List<NodeDto> createNodeList(Collection<OpenChannelDto> openChannels) {
         Set<Pubkey> pubkeys = openChannels.stream()
                 .map(OpenChannelDto::remotePubkey)
-                .collect(Collectors.toSet());
+                .collect(toSet());
         return pubkeys.stream()
                 .map(this::getNode)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public List<NodeDto> createNodeList() {
-        return createNodeList(this.getOpenChannels());
+        return createNodeList(getOpenChannels());
     }
 }
