@@ -30,7 +30,7 @@ public class SearchController {
     }
 
     @GetMapping("/search")
-    public String search(@RequestParam(name = "q") String query, Model model) {
+    public String search(@RequestParam("q") String query, Model model) {
         List<OpenChannelDto> openChannels = dataService.getOpenChannels();
 
         Optional<OpenChannelDto> openChannel = openChannels.stream()
