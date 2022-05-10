@@ -17,7 +17,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = NodeDetailsController.class)
-class NodeDetailsControllerTest {
+class NodeDetailsControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
