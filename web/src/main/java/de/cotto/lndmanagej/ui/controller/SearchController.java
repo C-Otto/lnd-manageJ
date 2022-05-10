@@ -45,12 +45,9 @@ public class SearchController {
             return detailsPage(channelId, model);
         }
 
-        Optional<OpenChannelDto> openChannel = openChannels.stream()
-                .filter(c -> c.remotePubkey().toString().equals(query))
-                .findFirst();
-
-        if (openChannel.isPresent()) {
-            return page.nodeDetails(Pubkey.create(query)).create(model);
+        Pubkey pubkey = getForPubkey(query, openChannels).orElse(null);
+        if (pubkey != null) {
+            return page.nodeDetails(pubkey).create(model);
         }
 
         List<OpenChannelDto> matchingChannels = openChannels.stream()
@@ -78,6 +75,18 @@ public class SearchController {
                 .map(OpenChannelDto::channelId)
                 .filter(channelId::equals)
                 .findFirst();
+    }
+
+    private Optional<Pubkey> getForPubkey(String query, List<OpenChannelDto> openChannels) {
+        try {
+            Pubkey pubkey = Pubkey.create(query);
+            return openChannels.stream()
+                    .map(OpenChannelDto::remotePubkey)
+                    .filter(pubkey::equals)
+                    .findFirst();
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
     }
 
     private String detailsPage(ChannelId channelId, Model model) {
