@@ -37,7 +37,8 @@ public class UiDataServiceImpl extends UiDataService {
     public UiDataServiceImpl(
             ChannelController channelController,
             StatusController statusController,
-            WarningsController warningsController, NodeController nodeController,
+            WarningsController warningsController,
+            NodeController nodeController,
             NodeService nodeService,
             ChannelService channelService
     ) {
@@ -62,7 +63,9 @@ public class UiDataServiceImpl extends UiDataService {
     @Override
     public List<OpenChannelDto> getOpenChannels() {
         ChannelsDto openChannels = statusController.getOpenChannels();
-        return openChannels.channels().stream().map(this::toOpenChannelDto).toList();
+        return openChannels.channels().stream()
+                .map(this::toOpenChannelDto)
+                .toList();
     }
 
     private OpenChannelDto toOpenChannelDto(ChannelId channelId) {
