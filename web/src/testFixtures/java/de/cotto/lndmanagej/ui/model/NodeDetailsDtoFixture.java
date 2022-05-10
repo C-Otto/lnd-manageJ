@@ -18,12 +18,18 @@ import de.cotto.lndmanagej.model.warnings.ChannelWarningsFixtures;
 import java.util.List;
 
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
+import static de.cotto.lndmanagej.model.FeeReportFixtures.FEE_REPORT;
+import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
+import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
+import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
+import static de.cotto.lndmanagej.model.warnings.ChannelWarningsFixtures.CHANNEL_WARNINGS;
 
 public class NodeDetailsDtoFixture {
 
     public static final NodeDetailsDto NODE_DETAILS_DTO = new NodeDetailsDto(
-            PubkeyFixtures.PUBKEY,
+            PUBKEY,
             "Albert",
             List.of(ChannelIdFixtures.CHANNEL_ID),
             List.of(ChannelIdFixtures.CHANNEL_ID),
@@ -31,9 +37,9 @@ public class NodeDetailsDtoFixture {
             List.of(ChannelIdFixtures.CHANNEL_ID),
             OnChainCostsDto.createFromModel(ON_CHAIN_COSTS),
             BalanceInformationDto.createFromModel(BALANCE_INFORMATION),
-            OnlineReportDto.createFromModel(OnlineReportFixtures.ONLINE_REPORT),
-            FeeReportDto.createFromModel(FeeReportFixtures.FEE_REPORT),
-            FlowReportDto.createFromModel(FlowReportFixtures.FLOW_REPORT),
-            RebalanceReportDto.createFromModel(RebalanceReportFixtures.REBALANCE_REPORT),
-            ChannelWarningsFixtures.CHANNEL_WARNINGS.descriptions());
+            OnlineReportDto.createFromModel(ONLINE_REPORT),
+            FeeReportDto.createFromModel(FEE_REPORT),
+            FlowReportDto.createFromModel(FLOW_REPORT),
+            RebalanceReportDto.createFromModel(REBALANCE_REPORT),
+            CHANNEL_WARNINGS.descriptions());
 }
