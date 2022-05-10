@@ -2,9 +2,9 @@ package de.cotto.lndmanagej.ui;
 
 import de.cotto.lndmanagej.controller.ChannelIdConverter;
 import de.cotto.lndmanagej.ui.controller.SearchController;
+import de.cotto.lndmanagej.ui.dto.ChanDetailsDto;
+import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
-import de.cotto.lndmanagej.ui.model.NodeDtoFixture;
-import de.cotto.lndmanagej.ui.model.OpenChannelDtoFixture;
 import de.cotto.lndmanagej.ui.page.PageService;
 import de.cotto.lndmanagej.ui.page.channel.ChannelDetailsPage;
 import de.cotto.lndmanagej.ui.page.general.ErrorPage;
@@ -68,7 +68,7 @@ class SearchControllerTest {
 
     private void searchForChannelId(String query) throws Exception {
         given(this.dataService.getOpenChannels()).willReturn(
-                List.of(OpenChannelDtoFixture.createFrom(CHAN_DETAILS_DTO))
+                List.of(create(CHAN_DETAILS_DTO))
         );
         given(this.pageService.channelDetails(any())).willReturn(new ChannelDetailsPage(CHAN_DETAILS_DTO));
         mockMvc.perform(MockMvcRequestBuilders.get("/search?q=" + query))
@@ -108,7 +108,20 @@ class SearchControllerTest {
     }
 
     private NodesPage nodesPage(OpenChannelDto channel1, OpenChannelDto channel2) {
-        return new NodesPage(List.of(NodeDtoFixture.createFrom(channel1), NodeDtoFixture.createFrom(channel2)));
+        return new NodesPage(List.of(create(channel1), create(channel2)));
+    }
+
+    public static OpenChannelDto create(ChanDetailsDto channelDetails) {
+        return new OpenChannelDto(
+                channelDetails.channelId(),
+                channelDetails.remoteAlias(),
+                channelDetails.remotePubkey(),
+                channelDetails.policies(),
+                channelDetails.balanceInformation());
+    }
+
+    public static NodeDto create(OpenChannelDto channel) {
+        return new NodeDto(channel.remotePubkey().toString(), channel.remoteAlias(), true);
     }
 
 }
