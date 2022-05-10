@@ -11,7 +11,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -32,21 +31,21 @@ public class SearchController {
     public String search(@RequestParam(name = "q") String query, Model model) {
         List<OpenChannelDto> openChannels = dataService.getOpenChannels();
 
-        Optional<OpenChannelDto> channel = openChannels.stream()
-                .filter(c -> String.valueOf(c.channelId().getShortChannelId()).equals(query) || c.channelId().toString().equals(query))
+        Optional<OpenChannelDto> openChannel = openChannels.stream()
+                .filter(channel -> String.valueOf(channel.channelId().getShortChannelId()).equals(query)
+                        || channel.channelId().toString().equals(query))
                 .findFirst();
 
-        if (channel.isPresent()) {
+        if (openChannel.isPresent()) {
 
-            ChannelId channelId = query.contains("x") ? ChannelId.fromCompactForm(query) : ChannelId.fromShortChannelId(Long.parseLong(query));
-            return detailsPage(channelId, model);
+            return detailsPage(extractChannelId(query), model);
         }
 
-        channel = openChannels.stream()
+        openChannel = openChannels.stream()
                 .filter(c -> c.remotePubkey().toString().equals(query))
                 .findFirst();
 
-        if (channel.isPresent()) {
+        if (openChannel.isPresent()) {
             return page.nodeDetails(Pubkey.create(query)).create(model);
         }
 
@@ -72,6 +71,11 @@ public class SearchController {
         } catch (NotFoundException e) {
             return page.error("Channel not found.").create(model);
         }
+    }
+
+    private ChannelId extractChannelId(String query) {
+        return query.contains("x")
+                ? ChannelId.fromCompactForm(query) : ChannelId.fromShortChannelId(Long.parseLong(query));
     }
 
 }

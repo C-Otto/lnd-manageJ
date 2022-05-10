@@ -2,13 +2,16 @@ package de.cotto.lndmanagej.ui;
 
 import de.cotto.lndmanagej.controller.NotFoundException;
 import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
-import de.cotto.lndmanagej.model.*;
+import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.ui.dto.ChanDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import de.cotto.lndmanagej.ui.dto.StatusModel;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class UiDataService {

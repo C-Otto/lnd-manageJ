@@ -1,7 +1,24 @@
 package de.cotto.lndmanagej;
 
-import de.cotto.lndmanagej.controller.dto.*;
-import de.cotto.lndmanagej.model.*;
+import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
+import de.cotto.lndmanagej.controller.dto.ChannelWithWarningsDto;
+import de.cotto.lndmanagej.controller.dto.FeeReportDto;
+import de.cotto.lndmanagej.controller.dto.FlowReportDto;
+import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
+import de.cotto.lndmanagej.controller.dto.NodeWithWarningsDto;
+import de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto;
+import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
+import de.cotto.lndmanagej.controller.dto.OnlineReportDto;
+import de.cotto.lndmanagej.controller.dto.RebalanceReportDto;
+import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.ChannelIdFixtures;
+import de.cotto.lndmanagej.model.FeeReportFixtures;
+import de.cotto.lndmanagej.model.FlowReportFixtures;
+import de.cotto.lndmanagej.model.OnlineReport;
+import de.cotto.lndmanagej.model.OnlineReportFixtures;
+import de.cotto.lndmanagej.model.OpenInitiator;
+import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.model.RebalanceReportFixtures;
 import de.cotto.lndmanagej.model.warnings.ChannelWarningsFixtures;
 import de.cotto.lndmanagej.model.warnings.NodeWarningsFixtures;
 import de.cotto.lndmanagej.model.warnings.Warning;
@@ -23,19 +40,26 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
-import static de.cotto.lndmanagej.ui.model.OpenChannelDtoFixture.*;
+import static de.cotto.lndmanagej.ui.model.OpenChannelDtoFixture.ACINQ;
+import static de.cotto.lndmanagej.ui.model.OpenChannelDtoFixture.ACINQ2;
+import static de.cotto.lndmanagej.ui.model.OpenChannelDtoFixture.BCASH;
+import static de.cotto.lndmanagej.ui.model.OpenChannelDtoFixture.COTTO;
+import static de.cotto.lndmanagej.ui.model.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
+import static de.cotto.lndmanagej.ui.model.OpenChannelDtoFixture.WOS;
+import static de.cotto.lndmanagej.ui.model.OpenChannelDtoFixture.WOS2;
 
 @Configuration
-@EnableAutoConfiguration(exclude = {
-        DataSourceAutoConfiguration.class,
-        DataSourceTransactionManagerAutoConfiguration.class,
-        HibernateJpaAutoConfiguration.class
-})
+@EnableAutoConfiguration(
+        exclude = {
+            DataSourceAutoConfiguration.class,
+            DataSourceTransactionManagerAutoConfiguration.class,
+            HibernateJpaAutoConfiguration.class
+        }
+)
 @ComponentScan("de.cotto.lndmanagej.ui")
 public class DemoApplication {
 
@@ -55,8 +79,8 @@ public class DemoApplication {
         private NodesAndChannelsWithWarningsDto createNodeWarnings() {
             return new NodesAndChannelsWithWarningsDto(
                     List.of(new NodeWithWarningsDto(NodeWarningsFixtures.NODE_WARNINGS.warnings().stream()
-                            .map(Warning::description)
-                            .collect(Collectors.toSet()), WOS.remoteAlias(), WOS.remotePubkey()),
+                                    .map(Warning::description)
+                                    .collect(Collectors.toSet()), WOS.remoteAlias(), WOS.remotePubkey()),
                             new NodeWithWarningsDto(NodeWarningsFixtures.NODE_WARNINGS.warnings().stream()
                                     .map(Warning::description)
                                     .collect(Collectors.toSet()), ACINQ.remoteAlias(), ACINQ.remotePubkey())
@@ -75,11 +99,14 @@ public class DemoApplication {
 
         @Override
         public ChanDetailsDto getChannelDetails(ChannelId channelId) {
-            OpenChannelDto localOpenChannel = getOpenChannels().stream().filter(c -> c.channelId().equals(channelId)).findFirst().orElseThrow();
-            return createNodeDetails(localOpenChannel);
+            OpenChannelDto localOpenChannel = getOpenChannels().stream()
+                    .filter(c -> c.channelId().equals(channelId))
+                    .findFirst()
+                    .orElseThrow();
+            return createChannelDetails(localOpenChannel);
         }
 
-        private ChanDetailsDto createNodeDetails(OpenChannelDto channel) {
+        private ChanDetailsDto createChannelDetails(OpenChannelDto channel) {
             return new ChanDetailsDto(
                     channel.channelId(),
                     channel.remotePubkey(),
@@ -97,8 +124,8 @@ public class DemoApplication {
         @Override
         public NodeDto getNode(Pubkey pubkey) {
             return getOpenChannels().stream()
-                    .filter(c -> c.remotePubkey().equals(pubkey))
-                    .map(c -> new NodeDto(pubkey.toString(), c.remoteAlias(), c.channelId().getShortChannelId() % 2 != 0))
+                    .filter(channel -> channel.remotePubkey().equals(pubkey))
+                    .map(channel -> new NodeDto(pubkey.toString(), channel.remoteAlias(), isOnline(channel)))
                     .findFirst().orElseThrow();
         }
 
@@ -108,7 +135,8 @@ public class DemoApplication {
         }
 
         private static NodeDetailsDto createNodeDetails(NodeDto node) {
-            OnlineReport onlineReport = node.online() ? OnlineReportFixtures.ONLINE_REPORT : OnlineReportFixtures.ONLINE_REPORT_OFFLINE;
+            OnlineReport onlineReport = node.online()
+                    ? OnlineReportFixtures.ONLINE_REPORT : OnlineReportFixtures.ONLINE_REPORT_OFFLINE;
             return new NodeDetailsDto(
                     Pubkey.create(node.pubkey()),
                     node.alias(),
@@ -125,5 +153,9 @@ public class DemoApplication {
                     ChannelWarningsFixtures.CHANNEL_WARNINGS.descriptions());
         }
 
+    }
+
+    private static boolean isOnline(OpenChannelDto c) {
+        return c.channelId().getShortChannelId() % 2 != 0;
     }
 }

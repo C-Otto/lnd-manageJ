@@ -32,7 +32,7 @@ class NodeDetailsControllerTest {
     @Test
     void testNodeDetailsPage() throws Exception {
         given(this.pageService.nodeDetails(any())).willReturn(new NodeDetailsPage(NODE_DETAILS_DTO));
-        mockMvc.perform(MockMvcRequestBuilders.get("/node/027abc123abc123abc123abc123123abc123abc123abc123abc123abc123abc121"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/node/" + NODE_DETAILS_DTO.node().toString()))
                 .andExpect(status().isOk());
     }
 }

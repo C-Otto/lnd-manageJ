@@ -6,7 +6,7 @@ import de.cotto.lndmanagej.ui.page.general.ThymeleafPage;
 public class NodeDetailsPage extends ThymeleafPage {
     public NodeDetailsPage(NodeDetailsDto nodeDetails) {
         add("pubkey", nodeDetails.node());
-        add( "node", nodeDetails);
+        add("node", nodeDetails);
     }
 
     @Override

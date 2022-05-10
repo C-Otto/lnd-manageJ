@@ -3,7 +3,7 @@ package de.cotto.lndmanagej.ui.dto;
 import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.ui.model.OpenChannelDtoFixture.ACINQ;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class OpenChannelDtoTest {
 

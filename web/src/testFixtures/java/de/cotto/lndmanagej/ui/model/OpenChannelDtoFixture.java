@@ -2,7 +2,12 @@ package de.cotto.lndmanagej.ui.model;
 
 import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
-import de.cotto.lndmanagej.model.*;
+import de.cotto.lndmanagej.model.BalanceInformation;
+import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.ChannelIdFixtures;
+import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.model.PubkeyFixtures;
 import de.cotto.lndmanagej.ui.dto.ChanDetailsDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 
