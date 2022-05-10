@@ -19,8 +19,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.ui.model.ChannelDetailsDtoFixture.CHANNEL_DETAILS_DTO;
 import static de.cotto.lndmanagej.ui.model.NodeDetailsDtoFixture.NODE_DETAILS_DTO;
 import static de.cotto.lndmanagej.ui.model.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
@@ -66,6 +68,12 @@ class SearchControllerIT {
     @Test
     void searchForChannelId_viaCompactChannelId_found() throws Exception {
         searchForChannelId(CHANNEL_ID);
+    }
+
+    @Test
+    void searchForChannelId_viaChannelPoint_found() throws Exception {
+        when(channelIdResolver.resolveFromChannelPoint(CHANNEL_POINT)).thenReturn(Optional.of(CHANNEL_ID));
+        searchForChannelId(CHANNEL_POINT.toString());
     }
 
     private void searchForChannelId(Object query) throws Exception {
