@@ -144,8 +144,8 @@ channel(s).
 
 ## Is there a graphical user interface (GUI)?
 
-No. If you're interested in creating one, please get in touch or just create a pull request!
-If you have ideas for API improvements, please raise issues in GitHub.
+Yes! You can start a demo with `./ui-demo.sh` and browse to http://localhost:8081 (press CTRL+C to stop the demo).
+Once lnd-manageJ is running, you can access the full (non-demo) UI at the same address: http://localhost:8081 
 
 ## How can I run lnd-manageJ?
 
