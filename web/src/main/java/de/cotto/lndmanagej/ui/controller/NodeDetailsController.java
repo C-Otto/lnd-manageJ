@@ -12,20 +12,20 @@ import java.util.NoSuchElementException;
 @Controller
 public class NodeDetailsController {
 
-    private final PageService page;
+    private final PageService pageService;
 
     public NodeDetailsController(PageService pageService) {
-        this.page = pageService;
+        this.pageService = pageService;
     }
 
     @GetMapping("/node/{pubkey}")
     public String nodeDetails(@PathVariable Pubkey pubkey, Model model) {
         try {
-            return page.nodeDetails(pubkey).create(model);
+            return pageService.nodeDetails(pubkey).create(model);
         } catch (NoSuchElementException e) {
-            return page.error("Node not found.").create(model);
+            return pageService.error("Node not found.").create(model);
         } catch (IllegalArgumentException e) {
-            return page.error("Invalid public key.").create(model);
+            return pageService.error("Invalid public key.").create(model);
         }
     }
 
