@@ -46,7 +46,7 @@ class DashboardControllerIT {
     void dashboard() throws Exception {
         OpenChannelDto channel = OPEN_CHANNEL_DTO;
         NodeDto node = new NodeDto(channel.remotePubkey().toString(), channel.remoteAlias(), true);
-        when(this.pageService.dashboard()).thenReturn(
+        when(pageService.dashboard()).thenReturn(
                 new DashboardPage(List.of(channel), List.of(node), new StatusModel(true, 1, NONE))
         );
         mockMvc.perform(get("/")).andExpect(status().isOk());

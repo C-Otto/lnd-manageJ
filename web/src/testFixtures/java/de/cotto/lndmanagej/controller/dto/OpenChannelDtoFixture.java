@@ -1,7 +1,5 @@
 package de.cotto.lndmanagej.controller.dto;
 
-import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
-import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
