@@ -12,7 +12,7 @@ import de.cotto.lndmanagej.model.Pubkey;
 
 import java.util.Set;
 
-public record ChanDetailsDto(
+public record ChannelDetailsDto(
         ChannelId channelId,
         Pubkey remotePubkey,
         String remoteAlias,

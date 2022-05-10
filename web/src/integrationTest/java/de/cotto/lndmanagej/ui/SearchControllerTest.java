@@ -2,7 +2,7 @@ package de.cotto.lndmanagej.ui;
 
 import de.cotto.lndmanagej.controller.ChannelIdConverter;
 import de.cotto.lndmanagej.ui.controller.SearchController;
-import de.cotto.lndmanagej.ui.dto.ChanDetailsDto;
+import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import de.cotto.lndmanagej.ui.page.PageService;
@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.List;
 
-import static de.cotto.lndmanagej.ui.model.ChanDetailsDtoFixture.CHAN_DETAILS_DTO;
+import static de.cotto.lndmanagej.ui.model.ChannelDetailsDtoFixture.CHANNEL_DETAILS_DTO;
 import static de.cotto.lndmanagej.ui.model.NodeDetailsDtoFixture.NODE_DETAILS_DTO;
 import static de.cotto.lndmanagej.ui.model.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
 import static de.cotto.lndmanagej.ui.model.OpenChannelDtoFixture.WOS;
@@ -68,12 +68,12 @@ class SearchControllerTest {
 
     private void searchForChannelId(String query) throws Exception {
         given(this.dataService.getOpenChannels()).willReturn(
-                List.of(create(CHAN_DETAILS_DTO))
+                List.of(create(CHANNEL_DETAILS_DTO))
         );
-        given(this.pageService.channelDetails(any())).willReturn(new ChannelDetailsPage(CHAN_DETAILS_DTO));
+        given(this.pageService.channelDetails(any())).willReturn(new ChannelDetailsPage(CHANNEL_DETAILS_DTO));
         mockMvc.perform(MockMvcRequestBuilders.get("/search?q=" + query))
                 .andExpect(status().isOk())
-                .andExpect(model().attribute("id", is(CHAN_DETAILS_DTO.channelId())))
+                .andExpect(model().attribute("id", is(CHANNEL_DETAILS_DTO.channelId())))
                 .andExpect(view().name("channel-details"));
     }
 
@@ -111,7 +111,7 @@ class SearchControllerTest {
         return new NodesPage(List.of(create(channel1), create(channel2)));
     }
 
-    public static OpenChannelDto create(ChanDetailsDto channelDetails) {
+    public static OpenChannelDto create(ChannelDetailsDto channelDetails) {
         return new OpenChannelDto(
                 channelDetails.channelId(),
                 channelDetails.remoteAlias(),

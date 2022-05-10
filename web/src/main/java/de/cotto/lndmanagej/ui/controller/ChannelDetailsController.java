@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
-public class ChanDetailsController {
+public class ChannelDetailsController {
 
     private final PageService page;
 
-    public ChanDetailsController(PageService pageService) {
+    public ChannelDetailsController(PageService pageService) {
         this.page = pageService;
     }
 

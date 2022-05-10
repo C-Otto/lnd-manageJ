@@ -4,7 +4,7 @@ import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.ui.UiDataService;
-import de.cotto.lndmanagej.ui.dto.ChanDetailsDto;
+import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import de.cotto.lndmanagej.ui.dto.StatusModel;
@@ -39,7 +39,7 @@ public class DemoDataService extends UiDataService {
     }
 
     @Override
-    public ChanDetailsDto getChannelDetails(ChannelId channelId) {
+    public ChannelDetailsDto getChannelDetails(ChannelId channelId) {
         OpenChannelDto localOpenChannel = getOpenChannels().stream()
                 .filter(c -> c.channelId().equals(channelId))
                 .findFirst()

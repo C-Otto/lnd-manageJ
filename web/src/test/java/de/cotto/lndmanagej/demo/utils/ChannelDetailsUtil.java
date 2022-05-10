@@ -8,7 +8,7 @@ import de.cotto.lndmanagej.model.FeeReportFixtures;
 import de.cotto.lndmanagej.model.FlowReportFixtures;
 import de.cotto.lndmanagej.model.OpenInitiator;
 import de.cotto.lndmanagej.model.RebalanceReportFixtures;
-import de.cotto.lndmanagej.ui.dto.ChanDetailsDto;
+import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 
 import java.util.Set;
@@ -21,8 +21,8 @@ public final class ChannelDetailsUtil {
         // util class
     }
 
-    public static ChanDetailsDto createChannelDetails(OpenChannelDto channel) {
-        return new ChanDetailsDto(
+    public static ChannelDetailsDto createChannelDetails(OpenChannelDto channel) {
+        return new ChannelDetailsDto(
                 channel.channelId(),
                 channel.remotePubkey(),
                 channel.remoteAlias(),

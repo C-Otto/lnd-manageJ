@@ -6,7 +6,6 @@ import de.cotto.lndmanagej.controller.NotFoundException;
 import de.cotto.lndmanagej.controller.StatusController;
 import de.cotto.lndmanagej.controller.WarningsController;
 import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
-import de.cotto.lndmanagej.controller.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.controller.dto.ChannelsDto;
 import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
@@ -17,7 +16,7 @@ import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.ui.UiDataService;
-import de.cotto.lndmanagej.ui.dto.ChanDetailsDto;
+import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import de.cotto.lndmanagej.ui.dto.StatusModel;
@@ -76,9 +75,9 @@ public class UiDataServiceImpl extends UiDataService {
     }
 
     @Override
-    public ChanDetailsDto getChannelDetails(ChannelId channelId) throws NotFoundException {
-        ChannelDetailsDto details = channelController.getDetails(channelId);
-        return new ChanDetailsDto(
+    public ChannelDetailsDto getChannelDetails(ChannelId channelId) throws NotFoundException {
+        de.cotto.lndmanagej.controller.dto.ChannelDetailsDto details = channelController.getDetails(channelId);
+        return new ChannelDetailsDto(
                 channelId,
                 details.remotePubkey(),
                 details.remoteAlias(),
