@@ -1,4 +1,4 @@
-package de.cotto.lndmanagej.demo.utils;
+package de.cotto.lndmanagej.ui.demo.utils;
 
 import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.FeeReportDto;
@@ -8,12 +8,8 @@ import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.controller.dto.OnlineReportDto;
 import de.cotto.lndmanagej.controller.dto.RebalanceReportDto;
 import de.cotto.lndmanagej.model.ChannelId;
-import de.cotto.lndmanagej.model.FeeReportFixtures;
-import de.cotto.lndmanagej.model.FlowReportFixtures;
 import de.cotto.lndmanagej.model.OnlineReport;
-import de.cotto.lndmanagej.model.OnlineReportFixtures;
 import de.cotto.lndmanagej.model.Pubkey;
-import de.cotto.lndmanagej.model.RebalanceReportFixtures;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 
 import java.util.List;

@@ -1,0 +1,14 @@
+plugins {
+    id 'lnd-manageJ.java-library-conventions'
+}
+
+dependencies {
+    implementation project(':web')
+    implementation project(':model')
+    implementation testFixtures(project(':model'))
+    implementation testFixtures(project(':web'))
+}
+
+pitest {
+    testStrengthThreshold = 0
+}

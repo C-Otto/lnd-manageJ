@@ -1,11 +1,8 @@
-package de.cotto.lndmanagej.demo.utils;
+package de.cotto.lndmanagej.ui.demo.utils;
 
 import de.cotto.lndmanagej.controller.dto.ChannelWithWarningsDto;
 import de.cotto.lndmanagej.controller.dto.NodeWithWarningsDto;
 import de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto;
-import de.cotto.lndmanagej.model.PubkeyFixtures;
-import de.cotto.lndmanagej.model.warnings.ChannelWarningsFixtures;
-import de.cotto.lndmanagej.model.warnings.NodeWarningsFixtures;
 import de.cotto.lndmanagej.model.warnings.Warning;
 import de.cotto.lndmanagej.ui.dto.StatusModel;
 
