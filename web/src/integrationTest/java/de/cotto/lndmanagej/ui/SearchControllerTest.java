@@ -58,23 +58,20 @@ class SearchControllerTest {
 
     @Test
     void searchForChannelId_viaShortChannelId_found() throws Exception {
-        given(this.dataService.getOpenChannels()).willReturn(
-                List.of(OpenChannelDtoFixture.createFrom(CHAN_DETAILS_DTO))
-        );
-        given(this.pageService.channelDetails(any())).willReturn(new ChannelDetailsPage(CHAN_DETAILS_DTO));
-        mockMvc.perform(MockMvcRequestBuilders.get("/search?q=783231610496155649"))
-                .andExpect(status().isOk())
-                .andExpect(model().attribute("id", is(CHAN_DETAILS_DTO.channelId())))
-                .andExpect(view().name("channel-details"));
+        searchForChannelId("783231610496155649");
     }
 
     @Test
     void searchForChannelId_viaCompactChannelId_found() throws Exception {
+        searchForChannelId("712345x123x1");
+    }
+
+    private void searchForChannelId(String query) throws Exception {
         given(this.dataService.getOpenChannels()).willReturn(
                 List.of(OpenChannelDtoFixture.createFrom(CHAN_DETAILS_DTO))
         );
         given(this.pageService.channelDetails(any())).willReturn(new ChannelDetailsPage(CHAN_DETAILS_DTO));
-        mockMvc.perform(MockMvcRequestBuilders.get("/search?q=712345x123x1"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/search?q=" + query))
                 .andExpect(status().isOk())
                 .andExpect(model().attribute("id", is(CHAN_DETAILS_DTO.channelId())))
                 .andExpect(view().name("channel-details"));
@@ -82,19 +79,19 @@ class SearchControllerTest {
 
     @Test
     void searchForPubkey_found() throws Exception {
-        given(this.dataService.getOpenChannels()).willReturn(List.of(OPEN_CHANNEL_DTO));
-        given(this.pageService.nodeDetails(any())).willReturn(new NodeDetailsPage(NODE_DETAILS_DTO));
-        mockMvc.perform(MockMvcRequestBuilders.get("/search?q=" + NODE_DETAILS_DTO.node().toString()))
-                .andExpect(status().isOk())
-                .andExpect(model().attribute("pubkey", is(OPEN_CHANNEL_DTO.remotePubkey())))
-                .andExpect(view().name("node-details"));
+        searchAndExpectSingleNode(NODE_DETAILS_DTO.node().toString());
     }
+
 
     @Test
     void searchForAlias_found() throws Exception {
+        searchAndExpectSingleNode("albert");
+    }
+
+    private void searchAndExpectSingleNode(String query) throws Exception {
         given(this.dataService.getOpenChannels()).willReturn(List.of(OPEN_CHANNEL_DTO));
         given(this.pageService.nodeDetails(any())).willReturn(new NodeDetailsPage(NODE_DETAILS_DTO));
-        mockMvc.perform(MockMvcRequestBuilders.get("/search?q=albert"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/search?q=" + query))
                 .andExpect(status().isOk())
                 .andExpect(model().attribute("pubkey", is(OPEN_CHANNEL_DTO.remotePubkey())))
                 .andExpect(view().name("node-details"));
