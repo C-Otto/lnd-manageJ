@@ -10,11 +10,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.ui.Model;
 
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import static de.cotto.lndmanagej.controller.dto.NodeDetailsDtoFixture.NODE_DETAILS_DTO;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,6 +34,7 @@ class NodeDetailsControllerTest {
     void nodeDetails() {
         when(pageService.nodeDetails(PUBKEY)).thenReturn(new NodeDetailsPage(NODE_DETAILS_DTO));
         assertThat(nodeDetailsController.nodeDetails(PUBKEY, model)).isEqualTo("node-details");
+        verify(model).addAllAttributes(Map.of("node", NODE_DETAILS_DTO, "pubkey", PUBKEY));
     }
 
     @Test
