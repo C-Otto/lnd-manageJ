@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.ui.controller;
 
+import de.cotto.lndmanagej.controller.ChannelIdConverter;
 import de.cotto.lndmanagej.controller.NotFoundException;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
@@ -23,10 +24,16 @@ public class SearchController {
 
     private final UiDataService dataService;
     private final PageService page;
+    private final ChannelIdConverter channelIdConverter;
 
-    public SearchController(UiDataService dataService, PageService pageService) {
+    public SearchController(
+            UiDataService dataService,
+            PageService pageService,
+            ChannelIdConverter channelIdConverter
+    ) {
         this.dataService = dataService;
         this.page = pageService;
+        this.channelIdConverter = channelIdConverter;
     }
 
     @GetMapping("/search")
@@ -39,8 +46,7 @@ public class SearchController {
                 .findFirst();
 
         if (openChannel.isPresent()) {
-
-            return detailsPage(extractChannelId(query), model);
+            return detailsPage(channelIdConverter.convert(query), model);
         }
 
         openChannel = openChannels.stream()
@@ -58,7 +64,6 @@ public class SearchController {
 
         if (matchingChannels.isEmpty()) {
             return page.error("No search result.").create(model);
-
         }
 
         if (matchingChannels.size() == SINGLE_NODE) {
@@ -75,10 +80,4 @@ public class SearchController {
             return page.error("Channel not found.").create(model);
         }
     }
-
-    private ChannelId extractChannelId(String query) {
-        return query.contains("x")
-                ? ChannelId.fromCompactForm(query) : ChannelId.fromShortChannelId(Long.parseLong(query));
-    }
-
 }
