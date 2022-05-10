@@ -42,6 +42,7 @@ public class UiDataServiceImpl extends UiDataService {
             NodeService nodeService,
             ChannelService channelService
     ) {
+        super();
         this.channelController = channelController;
         this.statusController = statusController;
         this.warningsController = warningsController;

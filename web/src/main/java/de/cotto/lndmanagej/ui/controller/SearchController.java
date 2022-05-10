@@ -19,6 +19,8 @@ import java.util.stream.Collectors;
 @Controller
 public class SearchController {
 
+    private static final int SINGLE_NODE = 1;
+
     private final UiDataService dataService;
     private final PageService page;
 
@@ -49,20 +51,21 @@ public class SearchController {
             return page.nodeDetails(Pubkey.create(query)).create(model);
         }
 
-        List<OpenChannelDto> matchingChannel = openChannels.stream()
+        List<OpenChannelDto> matchingChannels = openChannels.stream()
                 .filter(chan -> chan.remoteAlias().toLowerCase(Locale.ROOT)
                         .contains(query.toLowerCase(Locale.ROOT)))
                 .collect(Collectors.toList());
 
-        if (matchingChannel.size() > 1) {
-            return page.nodes(matchingChannel).create(model);
+        if (matchingChannels.isEmpty()) {
+            return page.error("No search result.").create(model);
+
         }
 
-        if (matchingChannel.size() == 1) {
-            return page.nodeDetails(matchingChannel.get(0).remotePubkey()).create(model);
+        if (matchingChannels.size() == SINGLE_NODE) {
+            return page.nodeDetails(matchingChannels.get(0).remotePubkey()).create(model);
         }
 
-        return page.error("No search result.").create(model);
+        return page.nodes(matchingChannels).create(model);
     }
 
     private String detailsPage(ChannelId channelId, Model model) {

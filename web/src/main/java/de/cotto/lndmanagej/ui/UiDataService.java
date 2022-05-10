@@ -16,6 +16,10 @@ import java.util.stream.Collectors;
 
 public abstract class UiDataService {
 
+    public UiDataService() {
+        // default constructor
+    }
+
     public abstract StatusModel getStatus();
 
     public abstract List<OpenChannelDto> getOpenChannels();

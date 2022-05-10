@@ -18,10 +18,9 @@ public class ChanDetailsController {
     }
 
     @GetMapping("/channel/{id}")
-    public String channelDetails(@PathVariable(name = "id") long id, Model model) {
+    public String channelDetails(@PathVariable(name = "id") long channelId, Model model) {
         try {
-            ChannelId channelId = ChannelId.fromShortChannelId(id);
-            return page.channelDetails(channelId).create(model);
+            return page.channelDetails(ChannelId.fromShortChannelId(channelId)).create(model);
         } catch (NotFoundException e) {
             return page.error("Channel not found.").create(model);
         }

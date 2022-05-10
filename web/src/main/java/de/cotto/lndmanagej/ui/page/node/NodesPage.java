@@ -8,6 +8,7 @@ import java.util.List;
 public class NodesPage extends ThymeleafPage {
 
     public NodesPage(List<NodeDto> nodes) {
+        super();
         add("nodes", nodes);
     }
 

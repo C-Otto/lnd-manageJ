@@ -10,6 +10,7 @@ import java.util.List;
 public class DashboardPage extends ThymeleafPage {
 
     public DashboardPage(List<OpenChannelDto> channels, List<NodeDto> nodes, StatusModel statusModel) {
+        super();
         List<OpenChannelDto> sortedChannels = channels.stream()
                 .sorted(Comparator.comparing(OpenChannelDto::getOutboundPercentage))
                 .toList();

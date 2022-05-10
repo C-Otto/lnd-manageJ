@@ -9,6 +9,7 @@ import java.util.List;
 public class ChannelsPage extends ThymeleafPage {
 
     public ChannelsPage(List<OpenChannelDto> channels) {
+        super();
         List<OpenChannelDto> sortedChannels = channels.stream()
                 .sorted(Comparator.comparing(OpenChannelDto::getOutboundPercentage))
                 .toList();

@@ -7,7 +7,11 @@ import java.util.Map;
 
 public abstract class ThymeleafPage {
 
-    Map<String, Object> modelAttributes = new HashMap<>();
+    private final Map<String, Object> modelAttributes = new HashMap<>();
+
+    public ThymeleafPage() {
+        // default constructor
+    }
 
     public abstract String getView();
 
