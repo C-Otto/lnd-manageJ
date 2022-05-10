@@ -1,15 +1,9 @@
 package de.cotto.lndmanagej.ui.controller;
 
-import de.cotto.lndmanagej.controller.NotFoundException;
-import de.cotto.lndmanagej.model.ChannelId;
-import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.ui.page.PageService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-
-import java.util.NoSuchElementException;
 
 @Controller
 public class DashboardController {

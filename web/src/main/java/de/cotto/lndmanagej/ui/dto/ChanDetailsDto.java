@@ -1,6 +1,11 @@
 package de.cotto.lndmanagej.ui.dto;
 
-import de.cotto.lndmanagej.controller.dto.*;
+import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
+import de.cotto.lndmanagej.controller.dto.FeeReportDto;
+import de.cotto.lndmanagej.controller.dto.FlowReportDto;
+import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
+import de.cotto.lndmanagej.controller.dto.PoliciesDto;
+import de.cotto.lndmanagej.controller.dto.RebalanceReportDto;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.OpenInitiator;
 import de.cotto.lndmanagej.model.Pubkey;
