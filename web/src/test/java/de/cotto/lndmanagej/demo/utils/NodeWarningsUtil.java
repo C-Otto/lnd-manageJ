@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
+import static de.cotto.lndmanagej.model.warnings.ChannelWarningsFixtures.CHANNEL_WARNINGS;
+import static de.cotto.lndmanagej.model.warnings.NodeWarningsFixtures.NODE_WARNINGS;
 
 public final class NodeWarningsUtil {
 
@@ -26,14 +29,14 @@ public final class NodeWarningsUtil {
 
     public static NodesAndChannelsWithWarningsDto createNodeWarnings() {
         return new NodesAndChannelsWithWarningsDto(
-                List.of(new NodeWithWarningsDto(NodeWarningsFixtures.NODE_WARNINGS.warnings().stream()
+                List.of(new NodeWithWarningsDto(NODE_WARNINGS.warnings().stream()
                                 .map(Warning::description)
-                                .collect(Collectors.toSet()), "WalletOfSatoshi", PubkeyFixtures.PUBKEY),
-                        new NodeWithWarningsDto(NodeWarningsFixtures.NODE_WARNINGS.warnings().stream()
+                                .collect(Collectors.toSet()), "WalletOfSatoshi", PUBKEY),
+                        new NodeWithWarningsDto(NODE_WARNINGS.warnings().stream()
                                 .map(Warning::description)
-                                .collect(Collectors.toSet()), "Albert", PubkeyFixtures.PUBKEY)
+                                .collect(Collectors.toSet()), "Albert", PUBKEY)
                 ),
-                List.of(new ChannelWithWarningsDto(ChannelWarningsFixtures.CHANNEL_WARNINGS.warnings().stream()
+                List.of(new ChannelWithWarningsDto(CHANNEL_WARNINGS.warnings().stream()
                         .map(Warning::description)
                         .collect(Collectors.toSet()), CHANNEL_ID_3)
                 )

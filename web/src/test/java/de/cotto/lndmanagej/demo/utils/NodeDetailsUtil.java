@@ -20,7 +20,12 @@ import java.util.List;
 import java.util.Set;
 
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
+import static de.cotto.lndmanagej.model.FeeReportFixtures.FEE_REPORT;
+import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
+import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT;
+import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT_OFFLINE;
+import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 
 public final class NodeDetailsUtil {
 
@@ -29,8 +34,7 @@ public final class NodeDetailsUtil {
     }
 
     public static NodeDetailsDto createNodeDetails(NodeDto node) {
-        OnlineReport onlineReport = node.online()
-                ? OnlineReportFixtures.ONLINE_REPORT : OnlineReportFixtures.ONLINE_REPORT_OFFLINE;
+        OnlineReport onlineReport = node.online() ? ONLINE_REPORT : ONLINE_REPORT_OFFLINE;
         return new NodeDetailsDto(
                 Pubkey.create(node.pubkey()),
                 node.alias(),
@@ -41,9 +45,9 @@ public final class NodeDetailsUtil {
                 OnChainCostsDto.createFromModel(ON_CHAIN_COSTS),
                 BalanceInformationDto.createFromModel(BALANCE_INFORMATION),
                 OnlineReportDto.createFromModel(onlineReport),
-                FeeReportDto.createFromModel(FeeReportFixtures.FEE_REPORT),
-                FlowReportDto.createFromModel(FlowReportFixtures.FLOW_REPORT),
-                RebalanceReportDto.createFromModel(RebalanceReportFixtures.REBALANCE_REPORT),
+                FeeReportDto.createFromModel(FEE_REPORT),
+                FlowReportDto.createFromModel(FLOW_REPORT),
+                RebalanceReportDto.createFromModel(REBALANCE_REPORT),
                 Set.of("Something is wrong with this node."));
     }
 }

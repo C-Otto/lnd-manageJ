@@ -13,7 +13,10 @@ import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 
 import java.util.Set;
 
+import static de.cotto.lndmanagej.model.FeeReportFixtures.FEE_REPORT;
+import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
+import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 
 public final class ChannelDetailsUtil {
 
@@ -30,9 +33,9 @@ public final class ChannelDetailsUtil {
                 channel.balanceInformation(),
                 OnChainCostsDto.createFromModel(ON_CHAIN_COSTS),
                 channel.policies(),
-                FeeReportDto.createFromModel(FeeReportFixtures.FEE_REPORT),
-                FlowReportDto.createFromModel(FlowReportFixtures.FLOW_REPORT),
-                RebalanceReportDto.createFromModel(RebalanceReportFixtures.REBALANCE_REPORT),
+                FeeReportDto.createFromModel(FEE_REPORT),
+                FlowReportDto.createFromModel(FLOW_REPORT),
+                RebalanceReportDto.createFromModel(REBALANCE_REPORT),
                 Set.of("Something is wrong with this channel."));
     }
 
