@@ -7,6 +7,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
 @Component
 public class ChannelIdConverter implements Converter<String, ChannelId> {
@@ -22,6 +23,20 @@ public class ChannelIdConverter implements Converter<String, ChannelId> {
             return fromShortChannelId(source);
         } catch (NumberFormatException numberFormatException) {
             return fromCompactFormOrChannelPoint(source);
+        }
+    }
+
+    @SuppressWarnings("PMD.EmptyCatchBlock")
+    public Optional<ChannelId> tryToConvert(String source) {
+        try {
+            return Optional.of(fromShortChannelId(source));
+        } catch (IllegalArgumentException e) {
+            // ignore
+        }
+        try {
+            return Optional.of(fromCompactFormOrChannelPoint(source));
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
         }
     }
 
