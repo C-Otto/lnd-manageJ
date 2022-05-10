@@ -32,8 +32,8 @@ public class PageService {
         return new ChannelsPage(dataService.getOpenChannels());
     }
 
-    public ChannelDetailsPage channelDetails(ChannelId id) throws NotFoundException {
-        return new ChannelDetailsPage(dataService.getChannelDetails(id));
+    public ChannelDetailsPage channelDetails(ChannelId channelId) throws NotFoundException {
+        return new ChannelDetailsPage(dataService.getChannelDetails(channelId));
     }
 
     public NodesPage nodes() {
