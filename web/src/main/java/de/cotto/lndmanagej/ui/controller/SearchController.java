@@ -40,16 +40,12 @@ public class SearchController {
     public String search(@RequestParam("q") String query, Model model) {
         List<OpenChannelDto> openChannels = dataService.getOpenChannels();
 
-        Optional<OpenChannelDto> openChannel = openChannels.stream()
-                .filter(channel -> String.valueOf(channel.channelId().getShortChannelId()).equals(query)
-                        || channel.channelId().toString().equals(query))
-                .findFirst();
-
-        if (openChannel.isPresent()) {
-            return detailsPage(channelIdConverter.convert(query), model);
+        ChannelId channelId = getForChannelId(query, openChannels).orElse(null);
+        if (channelId != null) {
+            return detailsPage(channelId, model);
         }
 
-        openChannel = openChannels.stream()
+        Optional<OpenChannelDto> openChannel = openChannels.stream()
                 .filter(c -> c.remotePubkey().toString().equals(query))
                 .findFirst();
 
@@ -71,6 +67,17 @@ public class SearchController {
         }
 
         return page.nodes(matchingChannels).create(model);
+    }
+
+    private Optional<ChannelId> getForChannelId(String query, List<OpenChannelDto> openChannels) {
+        ChannelId channelId = channelIdConverter.tryToConvert(query).orElse(null);
+        if (channelId == null) {
+            return Optional.empty();
+        }
+        return openChannels.stream()
+                .map(OpenChannelDto::channelId)
+                .filter(channelId::equals)
+                .findFirst();
     }
 
     private String detailsPage(ChannelId channelId, Model model) {
