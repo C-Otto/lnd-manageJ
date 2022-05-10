@@ -1,4 +1,4 @@
-package de.cotto.lndmanagej.demo;
+package de.cotto.lndmanagej.ui.demo;
 
 import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.model.ChannelId;
@@ -11,16 +11,16 @@ import de.cotto.lndmanagej.ui.dto.StatusModel;
 
 import java.util.List;
 
-import static de.cotto.lndmanagej.demo.utils.ChannelDetailsUtil.createChannelDetails;
-import static de.cotto.lndmanagej.demo.utils.NodeDetailsUtil.createNodeDetails;
-import static de.cotto.lndmanagej.demo.utils.NodeWarningsUtil.getStatusModel;
-import static de.cotto.lndmanagej.ui.model.OpenChannelDtoFixture.ACINQ;
-import static de.cotto.lndmanagej.ui.model.OpenChannelDtoFixture.ACINQ2;
-import static de.cotto.lndmanagej.ui.model.OpenChannelDtoFixture.BCASH;
-import static de.cotto.lndmanagej.ui.model.OpenChannelDtoFixture.COTTO;
-import static de.cotto.lndmanagej.ui.model.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
-import static de.cotto.lndmanagej.ui.model.OpenChannelDtoFixture.WOS;
-import static de.cotto.lndmanagej.ui.model.OpenChannelDtoFixture.WOS2;
+import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.ACINQ;
+import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.ACINQ2;
+import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.BCASH;
+import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.C_OTTO;
+import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
+import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.WOS;
+import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.WOS2;
+import static de.cotto.lndmanagej.ui.demo.utils.ChannelDetailsUtil.createChannelDetails;
+import static de.cotto.lndmanagej.ui.demo.utils.NodeDetailsUtil.createNodeDetails;
+import static de.cotto.lndmanagej.ui.demo.utils.NodeWarningsUtil.getStatusModel;
 
 public class DemoDataService extends UiDataService {
 
@@ -35,13 +35,13 @@ public class DemoDataService extends UiDataService {
 
     @Override
     public List<OpenChannelDto> getOpenChannels() {
-        return List.of(OPEN_CHANNEL_DTO, ACINQ, ACINQ2, WOS, WOS2, BCASH, COTTO);
+        return List.of(OPEN_CHANNEL_DTO, ACINQ, ACINQ2, WOS, WOS2, BCASH, C_OTTO);
     }
 
     @Override
     public ChannelDetailsDto getChannelDetails(ChannelId channelId) {
         OpenChannelDto localOpenChannel = getOpenChannels().stream()
-                .filter(c -> c.channelId().equals(channelId))
+                .filter(c -> channelId.equals(c.channelId()))
                 .findFirst()
                 .orElseThrow();
         return createChannelDetails(localOpenChannel);

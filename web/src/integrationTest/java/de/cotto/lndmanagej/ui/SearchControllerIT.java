@@ -21,12 +21,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static de.cotto.lndmanagej.controller.dto.ChannelDetailsDtoFixture.CHANNEL_DETAILS_DTO;
+import static de.cotto.lndmanagej.controller.dto.NodeDetailsDtoFixture.NODE_DETAILS_DTO;
+import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
+import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.WOS;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
-import static de.cotto.lndmanagej.ui.model.ChannelDetailsDtoFixture.CHANNEL_DETAILS_DTO;
-import static de.cotto.lndmanagej.ui.model.NodeDetailsDtoFixture.NODE_DETAILS_DTO;
-import static de.cotto.lndmanagej.ui.model.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
-import static de.cotto.lndmanagej.ui.model.OpenChannelDtoFixture.WOS;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.when;

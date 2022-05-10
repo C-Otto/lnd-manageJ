@@ -1,13 +1,10 @@
-package de.cotto.lndmanagej.demo.utils;
+package de.cotto.lndmanagej.ui.demo.utils;
 
 import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.FlowReportDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.controller.dto.RebalanceReportDto;
-import de.cotto.lndmanagej.model.FeeReportFixtures;
-import de.cotto.lndmanagej.model.FlowReportFixtures;
 import de.cotto.lndmanagej.model.OpenInitiator;
-import de.cotto.lndmanagej.model.RebalanceReportFixtures;
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 
