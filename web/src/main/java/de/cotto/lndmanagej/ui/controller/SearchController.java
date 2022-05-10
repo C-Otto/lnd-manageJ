@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Controller
 public class SearchController {
@@ -50,10 +49,10 @@ public class SearchController {
             return page.nodeDetails(pubkey).create(model);
         }
 
+        String lowercaseQuery = query.toLowerCase(Locale.US);
         List<OpenChannelDto> matchingChannels = openChannels.stream()
-                .filter(chan -> chan.remoteAlias().toLowerCase(Locale.ROOT)
-                        .contains(query.toLowerCase(Locale.ROOT)))
-                .collect(Collectors.toList());
+                .filter(channel -> containsInPeerAlias(channel, lowercaseQuery))
+                .toList();
 
         if (matchingChannels.isEmpty()) {
             return page.error("No search result.").create(model);
@@ -87,6 +86,10 @@ public class SearchController {
         } catch (IllegalArgumentException e) {
             return Optional.empty();
         }
+    }
+
+    private boolean containsInPeerAlias(OpenChannelDto channel, String lowercaseQuery) {
+        return channel.remoteAlias().toLowerCase(Locale.US).contains(lowercaseQuery);
     }
 
     private String detailsPage(ChannelId channelId, Model model) {
