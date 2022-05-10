@@ -11,7 +11,7 @@ import de.cotto.lndmanagej.model.FlowReportFixtures;
 import de.cotto.lndmanagej.model.OpenInitiator;
 import de.cotto.lndmanagej.model.RebalanceReportFixtures;
 import de.cotto.lndmanagej.model.warnings.ChannelWarningsFixtures;
-import de.cotto.lndmanagej.ui.dto.ChanDetailsDto;
+import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
 
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
@@ -19,9 +19,9 @@ import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES_FOR_LOCAL_CHANNEL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 
-public class ChanDetailsDtoFixture {
+public class ChannelDetailsDtoFixture {
 
-    public static final ChanDetailsDto CHAN_DETAILS_DTO = new ChanDetailsDto(
+    public static final ChannelDetailsDto CHANNEL_DETAILS_DTO = new ChannelDetailsDto(
             CHANNEL_ID,
             PUBKEY,
             "Albert",

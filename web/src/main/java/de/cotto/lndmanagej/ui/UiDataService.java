@@ -4,7 +4,7 @@ import de.cotto.lndmanagej.controller.NotFoundException;
 import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
-import de.cotto.lndmanagej.ui.dto.ChanDetailsDto;
+import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import de.cotto.lndmanagej.ui.dto.StatusModel;
@@ -24,7 +24,7 @@ public abstract class UiDataService {
 
     public abstract List<OpenChannelDto> getOpenChannels();
 
-    public abstract ChanDetailsDto getChannelDetails(ChannelId channelId) throws NotFoundException;
+    public abstract ChannelDetailsDto getChannelDetails(ChannelId channelId) throws NotFoundException;
 
     public abstract NodeDto getNode(Pubkey pubkey);
 
