@@ -14,6 +14,7 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.ui.model.ChannelDetailsDtoFixture.CHANNEL_DETAILS_DTO;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -31,8 +32,8 @@ class ChannelDetailsControllerTest {
     private ChannelIdResolver channelIdResolver;
 
     @Test
-    void testNodeDetailsPage() throws Exception {
-        given(pageService.channelDetails(any())).willReturn(new ChannelDetailsPage(CHANNEL_DETAILS_DTO));
+    void node_details_page() throws Exception {
+        when(pageService.channelDetails(any())).thenReturn(new ChannelDetailsPage(CHANNEL_DETAILS_DTO));
         mockMvc.perform(get("/channel/" + CHANNEL_ID))
                 .andExpect(status().isOk());
     }
