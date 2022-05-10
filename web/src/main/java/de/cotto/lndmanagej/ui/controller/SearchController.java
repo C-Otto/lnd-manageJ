@@ -22,7 +22,7 @@ public class SearchController {
     private static final int SINGLE_NODE = 1;
 
     private final UiDataService dataService;
-    private final PageService page;
+    private final PageService pageService;
     private final ChannelIdConverter channelIdConverter;
 
     public SearchController(
@@ -31,7 +31,7 @@ public class SearchController {
             ChannelIdConverter channelIdConverter
     ) {
         this.dataService = dataService;
-        this.page = pageService;
+        this.pageService = pageService;
         this.channelIdConverter = channelIdConverter;
     }
 
@@ -46,7 +46,7 @@ public class SearchController {
 
         Pubkey pubkey = getForPubkey(query, openChannels).orElse(null);
         if (pubkey != null) {
-            return page.nodeDetails(pubkey).create(model);
+            return pageService.nodeDetails(pubkey).create(model);
         }
 
         String lowercaseQuery = query.toLowerCase(Locale.US);
@@ -55,14 +55,14 @@ public class SearchController {
                 .toList();
 
         if (matchingChannels.isEmpty()) {
-            return page.error("No search result.").create(model);
+            return pageService.error("No search result.").create(model);
         }
 
         if (matchingChannels.size() == SINGLE_NODE) {
-            return page.nodeDetails(matchingChannels.get(0).remotePubkey()).create(model);
+            return pageService.nodeDetails(matchingChannels.get(0).remotePubkey()).create(model);
         }
 
-        return page.nodes(matchingChannels).create(model);
+        return pageService.nodes(matchingChannels).create(model);
     }
 
     private Optional<ChannelId> getForChannelId(String query, List<OpenChannelDto> openChannels) {
@@ -94,9 +94,9 @@ public class SearchController {
 
     private String detailsPage(ChannelId channelId, Model model) {
         try {
-            return page.channelDetails(channelId).create(model);
+            return pageService.channelDetails(channelId).create(model);
         } catch (NotFoundException e) {
-            return page.error("Channel not found.").create(model);
+            return pageService.error("Channel not found.").create(model);
         }
     }
 }
