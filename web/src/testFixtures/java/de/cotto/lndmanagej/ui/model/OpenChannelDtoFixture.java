@@ -8,7 +8,6 @@ import de.cotto.lndmanagej.model.ChannelIdFixtures;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.PubkeyFixtures;
-import de.cotto.lndmanagej.ui.dto.ChanDetailsDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
@@ -96,13 +95,4 @@ public class OpenChannelDtoFixture {
                     Coins.ofSatoshis(MILLION * 10),
                     Coins.ofSatoshis(500)
             )));
-
-    public static OpenChannelDto createFrom(ChanDetailsDto channelDetails) {
-        return new OpenChannelDto(
-                channelDetails.channelId(),
-                channelDetails.remoteAlias(),
-                channelDetails.remotePubkey(),
-                channelDetails.policies(),
-                channelDetails.balanceInformation());
-    }
 }
