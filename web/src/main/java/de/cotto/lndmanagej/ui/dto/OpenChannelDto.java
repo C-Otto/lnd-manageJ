@@ -16,10 +16,10 @@ public record OpenChannelDto(
 ) {
 
     public String getRatio() {
-        int local = (int) getOutboundPercentage();
-        int remote = 100 - local;
-        int leftDots = (int) (remote / 5d);
-        int rightDots = (int) (local / 5d);
+        double percentLocal = getOutboundPercentage();
+        double percentRemote = 100 - percentLocal;
+        int leftDots = (int) (percentRemote / 5);
+        int rightDots = (int) (percentLocal / 5);
         return dots(leftDots) + " | " + dots(rightDots);
     }
 
@@ -34,7 +34,7 @@ public record OpenChannelDto(
     public double getOutboundPercentage() {
         long outbound = getOutbound();
         long routableCapacity = outbound + getInbound();
-        return (outbound / (double) routableCapacity) * 100;
+        return (1.0 * outbound / routableCapacity) * 100;
     }
 
     public long getOutbound() {
