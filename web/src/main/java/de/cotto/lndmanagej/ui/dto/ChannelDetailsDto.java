@@ -25,6 +25,4 @@ public record ChannelDetailsDto(
         RebalanceReportDto rebalanceReport,
         Set<String> warnings
 ) {
-
-
 }
