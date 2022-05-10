@@ -19,10 +19,9 @@ public class NodeDetailsController {
     }
 
     @GetMapping("/node/{pubkey}")
-    public String nodeDetails(@PathVariable(name = "pubkey") String pubkey, Model model) {
+    public String nodeDetails(@PathVariable Pubkey pubkey, Model model) {
         try {
-            Pubkey publicKey = Pubkey.create(pubkey);
-            return page.nodeDetails(publicKey).create(model);
+            return page.nodeDetails(pubkey).create(model);
         } catch (NoSuchElementException e) {
             return page.error("Node not found.").create(model);
         } catch (IllegalArgumentException e) {
