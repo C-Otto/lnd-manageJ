@@ -82,7 +82,6 @@ class SearchControllerTest {
         searchAndExpectSingleNode(NODE_DETAILS_DTO.node().toString());
     }
 
-
     @Test
     void searchForAlias_found() throws Exception {
         searchAndExpectSingleNode("albert");
