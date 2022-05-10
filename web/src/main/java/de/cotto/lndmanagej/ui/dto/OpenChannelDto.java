@@ -12,7 +12,8 @@ public record OpenChannelDto(
         String remoteAlias,
         Pubkey remotePubkey,
         PoliciesDto policies,
-        BalanceInformationDto balanceInformation) {
+        BalanceInformationDto balanceInformation
+) {
 
     public String getRatio() {
         int local = (int) getOutboundPercentage();
