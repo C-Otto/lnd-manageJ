@@ -78,13 +78,13 @@ public class DemoDataService extends UiDataService {
             19_000_100,
             900_900);
 
-    public static final NodeWithWarningsDto ACINQ_WARNING = createNodeWarnings(
+    public static final NodeWithWarningsDto ACINQ_WARNING = createNodeWithWarnings(
             ACINQ.remoteAlias(),
             ACINQ.remotePubkey(),
             "No flow in the past 21 days.",
             "Node has been online 86% in the past 14 days");
 
-    public static final NodeWithWarningsDto POCKET_WARNING = createNodeWarnings(
+    public static final NodeWithWarningsDto POCKET_WARNING = createNodeWithWarnings(
             POCKET.remoteAlias(),
             POCKET.remotePubkey(),
             "No flow in the past 35 days.");
@@ -96,8 +96,10 @@ public class DemoDataService extends UiDataService {
     @Override
     public StatusModel getStatus() {
         return new StatusModel(true, 735_642, new NodesAndChannelsWithWarningsDto(
-                List.of(ACINQ_WARNING, POCKET_WARNING),
-                List.of(createChannelWarnings(KRAKEN.channelId(), "Warning channel"))));
+                List.of(ACINQ_WARNING, POCKET_WARNING), List.of(
+                createChannelWarning(B_CASH_IS_TRASH.channelId(), "Channel has accumulated 500000 updates."),
+                createChannelWarning(TRY_BITCOIN.channelId(), "Channel has accumulated 600000 updates."),
+                createChannelWarning(WOS.channelId(), "Channel has accumulated 700000 updates."))));
     }
 
     @Override
@@ -131,11 +133,11 @@ public class DemoDataService extends UiDataService {
         return channel.channelId().getShortChannelId() % 4 != 0;
     }
 
-    public static NodeWithWarningsDto createNodeWarnings(String alias, Pubkey pubkey, String... warnings) {
+    public static NodeWithWarningsDto createNodeWithWarnings(String alias, Pubkey pubkey, String... warnings) {
         return new NodeWithWarningsDto(Set.of(warnings), alias, pubkey);
     }
 
-    public static ChannelWithWarningsDto createChannelWarnings(ChannelId channelId, String... warnings) {
+    public static ChannelWithWarningsDto createChannelWarning(ChannelId channelId, String... warnings) {
         return new ChannelWithWarningsDto(Set.of(warnings), channelId);
     }
 
