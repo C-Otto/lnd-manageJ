@@ -1,16 +1,27 @@
 package de.cotto.lndmanagej.ui.demo.utils;
 
 import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
+import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
+import de.cotto.lndmanagej.controller.dto.OnlineReportDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
-import de.cotto.lndmanagej.model.PoliciesForLocalChannel;
-import de.cotto.lndmanagej.model.Policy;
+import de.cotto.lndmanagej.model.OnlineReport;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
+import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 
-import java.util.Random;
+import java.util.List;
+
+import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT;
+import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT_OFFLINE;
+import static de.cotto.lndmanagej.ui.demo.utils.DeriveDataUtil.deriveChannelWarnings;
+import static de.cotto.lndmanagej.ui.demo.utils.DeriveDataUtil.deriveFeeReport;
+import static de.cotto.lndmanagej.ui.demo.utils.DeriveDataUtil.deriveOnChainCosts;
+import static de.cotto.lndmanagej.ui.demo.utils.DeriveDataUtil.deriveOpenInitiator;
+import static de.cotto.lndmanagej.ui.demo.utils.DeriveDataUtil.derivePolicies;
 
 public final class ChannelDataUtil {
 
@@ -39,17 +50,37 @@ public final class ChannelDataUtil {
                 )));
     }
 
-    private static PoliciesForLocalChannel derivePolicies(ChannelId channelId) {
-        Random generator = new Random(channelId.getShortChannelId());
-        return new PoliciesForLocalChannel(derivePolicy(generator), derivePolicy(generator));
+    public static ChannelDetailsDto createChannelDetails(OpenChannelDto channel) {
+        return new ChannelDetailsDto(
+                channel.channelId(),
+                channel.remotePubkey(),
+                channel.remoteAlias(),
+                deriveOpenInitiator(channel.channelId()),
+                channel.balanceInformation(),
+                deriveOnChainCosts(channel.channelId()),
+                channel.policies(),
+                deriveFeeReport(channel.channelId()),
+                DeriveDataUtil.deriveFlowReport(channel.channelId()),
+                DeriveDataUtil.deriveRebalanceReport(channel.channelId()),
+                DeriveDataUtil.deriveWarnings(channel.channelId()));
     }
 
-    private static Policy derivePolicy(Random generator) {
-        long feeRate = generator.nextLong(100) * 10;
-        Coins baseFee = Coins.ofMilliSatoshis(generator.nextLong(2) * 1000);
-        boolean enabled = generator.nextInt(10) == 0;
-        int timeLockDelta = (generator.nextInt(5) + 1) * 10;
-        return new Policy(feeRate, baseFee, enabled, timeLockDelta);
+    public static NodeDetailsDto createNodeDetails(NodeDto node, List<OpenChannelDto> channels) {
+        OpenChannelDto firstChannel = channels.stream().findFirst().orElseThrow();
+        OnlineReport onlineReport = node.online() ? ONLINE_REPORT : ONLINE_REPORT_OFFLINE;
+        return new NodeDetailsDto(
+                Pubkey.create(node.pubkey()),
+                node.alias(),
+                channels.stream().map(OpenChannelDto::channelId).toList(),
+                List.of(ChannelId.fromCompactForm("712345x124x1")),
+                List.of(ChannelId.fromCompactForm("712345x124x2")),
+                List.of(ChannelId.fromCompactForm("712345x124x3")),
+                deriveOnChainCosts(firstChannel.channelId()),
+                firstChannel.balanceInformation(),
+                OnlineReportDto.createFromModel(onlineReport),
+                deriveFeeReport(firstChannel.channelId()),
+                DeriveDataUtil.deriveFlowReport(firstChannel.channelId()),
+                DeriveDataUtil.deriveRebalanceReport(firstChannel.channelId()),
+                deriveChannelWarnings(firstChannel.channelId()));
     }
-
 }

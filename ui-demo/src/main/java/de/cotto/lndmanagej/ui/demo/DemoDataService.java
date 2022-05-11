@@ -15,10 +15,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import static de.cotto.lndmanagej.ui.demo.utils.ChannelDataUtil.createChannelDetails;
+import static de.cotto.lndmanagej.ui.demo.utils.ChannelDataUtil.createNodeDetails;
 import static de.cotto.lndmanagej.ui.demo.utils.ChannelDataUtil.createOpenChannel;
-import static de.cotto.lndmanagej.ui.demo.utils.ChannelDetailsUtil.createChannelDetails;
-import static de.cotto.lndmanagej.ui.demo.utils.NodeDetailsUtil.createNodeDetails;
 
 @Component
 public class DemoDataService extends UiDataService {
@@ -107,6 +108,12 @@ public class DemoDataService extends UiDataService {
         return List.of(C_OTTO, ACINQ, TRY_BITCOIN, KRAKEN, WOS, B_CASH_IS_TRASH, POCKET, ACINQ2, B_CASH_IS_TRASH2);
     }
 
+    private List<OpenChannelDto> getOpenChannels(Pubkey pubkey) {
+        return getOpenChannels().stream()
+                .filter(channel -> channel.remotePubkey().equals(pubkey))
+                .collect(Collectors.toList());
+    }
+
     @Override
     public ChannelDetailsDto getChannelDetails(ChannelId channelId) {
         OpenChannelDto localOpenChannel = getOpenChannels().stream()
@@ -126,7 +133,7 @@ public class DemoDataService extends UiDataService {
 
     @Override
     public NodeDetailsDto getNodeDetails(Pubkey pubkey) {
-        return createNodeDetails(getNode(pubkey));
+        return createNodeDetails(getNode(pubkey), getOpenChannels(pubkey));
     }
 
     private static boolean isOnline(OpenChannelDto channel) {
