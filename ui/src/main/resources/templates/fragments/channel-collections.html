@@ -19,9 +19,9 @@
         </thead>
         <tbody>
         <tr th:each="channel : ${channels}">
-            <td th:text="${channel.formatInbound}" style="color: darkRed; text-align: right; padding-left:0;"></td>
+            <td th:text="${T(de.cotto.lndmanagej.ui.formatting.NumberFormatter).format(channel.inbound)}" style="color: darkRed; text-align: right; padding-left:0;"></td>
             <td th:text="${channel.ratio}"></td>
-            <td th:text="${channel.formatOutbound}" style="color: darkGreen; text-align: right;"></td>
+            <td th:text="${T(de.cotto.lndmanagej.ui.formatting.NumberFormatter).format(channel.outbound)}" style="color: darkGreen; text-align: right;"></td>
             <td th:text="${channel.policies.local.baseFeeMilliSat}" style="text-align: right;"></td>
             <td th:text="${channel.policies.local.feeRatePpm}" style="text-align: right;"></td>
             <td th:text="${channel.policies.remote.baseFeeMilliSat}" style="text-align: right;"></td>
