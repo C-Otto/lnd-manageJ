@@ -5,15 +5,12 @@ import de.cotto.lndmanagej.ui.controller.DashboardController;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import de.cotto.lndmanagej.ui.dto.StatusModel;
-import de.cotto.lndmanagej.ui.formatting.Formatter;
 import de.cotto.lndmanagej.ui.page.PageService;
 import de.cotto.lndmanagej.ui.page.general.DashboardPage;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -53,13 +50,5 @@ class DashboardControllerIT {
                 new DashboardPage(List.of(channel), List.of(node), new StatusModel(true, 1, NONE))
         );
         mockMvc.perform(get("/")).andExpect(status().isOk());
-    }
-
-    @TestConfiguration
-    static class AdditionalConfiguration {
-        @Bean
-        public Formatter formatter() {
-            return new Formatter();
-        }
     }
 }
