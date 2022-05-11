@@ -1,10 +1,16 @@
-package de.cotto.lndmanagej.ui.demo;
+package de.cotto.lndmanagej.ui.demo.data;
 
+import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.ChannelWithWarningsDto;
 import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.controller.dto.NodeWithWarningsDto;
 import de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto;
+import de.cotto.lndmanagej.controller.dto.OnlineReportDto;
+import de.cotto.lndmanagej.controller.dto.PoliciesDto;
+import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.OnlineReport;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.ui.UiDataService;
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
@@ -17,9 +23,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static de.cotto.lndmanagej.ui.demo.utils.ChannelDataUtil.createChannelDetails;
-import static de.cotto.lndmanagej.ui.demo.utils.ChannelDataUtil.createNodeDetails;
-import static de.cotto.lndmanagej.ui.demo.utils.ChannelDataUtil.createOpenChannel;
+import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT;
+import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT_OFFLINE;
+import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveChannelWarnings;
+import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveFeeReport;
+import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveOnChainCosts;
+import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveOpenInitiator;
+import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.derivePolicies;
 
 @Component
 public class DemoDataService extends UiDataService {
@@ -146,6 +156,61 @@ public class DemoDataService extends UiDataService {
 
     public static ChannelWithWarningsDto createChannelWarning(ChannelId channelId, String... warnings) {
         return new ChannelWithWarningsDto(Set.of(warnings), channelId);
+    }
+
+    public static OpenChannelDto createOpenChannel(
+            String compactChannelId,
+            String alias,
+            String pubkey,
+            long local,
+            long remote
+    ) {
+        ChannelId channelId = ChannelId.fromCompactForm(compactChannelId);
+        return new OpenChannelDto(
+                channelId,
+                alias,
+                Pubkey.create(pubkey),
+                PoliciesDto.createFromModel(derivePolicies(channelId)),
+                BalanceInformationDto.createFromModel(new BalanceInformation(
+                        Coins.ofSatoshis(local),
+                        Coins.ofSatoshis(200),
+                        Coins.ofSatoshis(remote),
+                        Coins.ofSatoshis(500)
+                )));
+    }
+
+    public static ChannelDetailsDto createChannelDetails(OpenChannelDto channel) {
+        return new ChannelDetailsDto(
+                channel.channelId(),
+                channel.remotePubkey(),
+                channel.remoteAlias(),
+                deriveOpenInitiator(channel.channelId()),
+                channel.balanceInformation(),
+                deriveOnChainCosts(channel.channelId()),
+                channel.policies(),
+                deriveFeeReport(channel.channelId()),
+                DeriveDataUtil.deriveFlowReport(channel.channelId()),
+                DeriveDataUtil.deriveRebalanceReport(channel.channelId()),
+                DeriveDataUtil.deriveWarnings(channel.channelId()));
+    }
+
+    public static NodeDetailsDto createNodeDetails(NodeDto node, List<OpenChannelDto> channels) {
+        OpenChannelDto firstChannel = channels.stream().findFirst().orElseThrow();
+        OnlineReport onlineReport = node.online() ? ONLINE_REPORT : ONLINE_REPORT_OFFLINE;
+        return new NodeDetailsDto(
+                Pubkey.create(node.pubkey()),
+                node.alias(),
+                channels.stream().map(OpenChannelDto::channelId).toList(),
+                List.of(ChannelId.fromCompactForm("712345x124x1")),
+                List.of(ChannelId.fromCompactForm("712345x124x2")),
+                List.of(ChannelId.fromCompactForm("712345x124x3")),
+                deriveOnChainCosts(firstChannel.channelId()),
+                firstChannel.balanceInformation(),
+                OnlineReportDto.createFromModel(onlineReport),
+                deriveFeeReport(firstChannel.channelId()),
+                DeriveDataUtil.deriveFlowReport(firstChannel.channelId()),
+                DeriveDataUtil.deriveRebalanceReport(firstChannel.channelId()),
+                deriveChannelWarnings(firstChannel.channelId()));
     }
 
 }

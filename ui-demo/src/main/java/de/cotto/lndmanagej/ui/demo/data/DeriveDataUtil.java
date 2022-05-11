@@ -1,4 +1,4 @@
-package de.cotto.lndmanagej.ui.demo.utils;
+package de.cotto.lndmanagej.ui.demo.data;
 
 import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.FlowReportDto;
