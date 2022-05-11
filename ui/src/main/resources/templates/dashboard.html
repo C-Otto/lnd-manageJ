@@ -11,9 +11,9 @@
         <div th:replace="~{fragments/tiles :: node-warning(${node.alias}, ${node.pubkey}, ${node.warnings})}"/>
     </th:block>
 
-    <!--th:block th:each="channel : ${status.warnings.channelsWithWarnings}" class="list-group-item">
+    <th:block th:each="channel : ${status.warnings.channelsWithWarnings}" class="list-group-item">
         <div th:replace="~{fragments/tiles :: channel-warning(${channel.channelId}, ${channel.channelId.shortChannelId}, ${channel.warnings})}"/>
-    </th:block-->
+    </th:block>
 
     <div th:replace="~{fragments/tiles :: all-channels}"/>
 
