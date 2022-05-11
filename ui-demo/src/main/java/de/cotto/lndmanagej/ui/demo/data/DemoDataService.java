@@ -92,7 +92,6 @@ public class DemoDataService extends UiDataService {
     public static final NodeWithWarningsDto ACINQ_WARNING = createNodeWithWarnings(
             ACINQ.remoteAlias(),
             ACINQ.remotePubkey(),
-            "No flow in the past 21 days.",
             "Node has been online 86% in the past 14 days");
 
     public static final NodeWithWarningsDto POCKET_WARNING = createNodeWithWarnings(
