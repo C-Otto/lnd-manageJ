@@ -131,7 +131,6 @@ public class DemoDataService extends UiDataService {
         return channel.channelId().getShortChannelId() % 4 != 0;
     }
 
-
     public static NodeWithWarningsDto createNodeWarnings(String alias, Pubkey pubkey, String... warnings) {
         return new NodeWithWarningsDto(Set.of(warnings), alias, pubkey);
     }
