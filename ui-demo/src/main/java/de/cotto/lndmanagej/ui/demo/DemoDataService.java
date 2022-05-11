@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
 import static de.cotto.lndmanagej.ui.demo.utils.ChannelDataUtil.ACINQ;
 import static de.cotto.lndmanagej.ui.demo.utils.ChannelDataUtil.ACINQ2;
 import static de.cotto.lndmanagej.ui.demo.utils.ChannelDataUtil.BCASH;
@@ -38,7 +37,7 @@ public class DemoDataService extends UiDataService {
 
     @Override
     public List<OpenChannelDto> getOpenChannels() {
-        return List.of(OPEN_CHANNEL_DTO, ACINQ, ACINQ2, WOS, WOS2, BCASH, C_OTTO);
+        return List.of(ACINQ, ACINQ2, WOS, WOS2, BCASH, C_OTTO);
     }
 
     @Override
