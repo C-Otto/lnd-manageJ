@@ -20,7 +20,7 @@ import static de.cotto.lndmanagej.ui.demo.utils.NodeWarningsUtil.getStatusModel;
 @Component
 public class DemoDataService extends UiDataService {
 
-    private static List<OpenChannelDto> OPEN_CHANNELS = List.of(
+    private static final List<OpenChannelDto> OPEN_CHANNELS = List.of(
             createOpenChannel(
                     "799999x456x1",
                     "c-otto.de",

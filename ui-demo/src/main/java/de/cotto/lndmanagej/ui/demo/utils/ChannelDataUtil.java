@@ -12,7 +12,11 @@ import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 
 import java.util.Random;
 
-public class ChannelDataUtil {
+public final class ChannelDataUtil {
+
+    private ChannelDataUtil() {
+        // util class
+    }
 
     public static OpenChannelDto createOpenChannel(
             String compactChannelId,
