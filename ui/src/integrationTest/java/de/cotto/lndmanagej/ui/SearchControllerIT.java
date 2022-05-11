@@ -27,7 +27,7 @@ import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.OPEN_CHAN
 import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.WOS;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;

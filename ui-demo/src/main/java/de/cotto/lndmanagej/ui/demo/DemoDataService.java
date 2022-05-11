@@ -8,6 +8,7 @@ import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import de.cotto.lndmanagej.ui.dto.StatusModel;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -22,6 +23,7 @@ import static de.cotto.lndmanagej.ui.demo.utils.ChannelDetailsUtil.createChannel
 import static de.cotto.lndmanagej.ui.demo.utils.NodeDetailsUtil.createNodeDetails;
 import static de.cotto.lndmanagej.ui.demo.utils.NodeWarningsUtil.getStatusModel;
 
+@Component
 public class DemoDataService extends UiDataService {
 
     public DemoDataService() {

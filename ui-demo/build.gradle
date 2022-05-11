@@ -3,10 +3,11 @@ plugins {
 }
 
 dependencies {
-    implementation project(':web')
+    implementation project(':ui')
     implementation project(':model')
+    implementation project(':web')
     implementation testFixtures(project(':model'))
-    implementation testFixtures(project(':web'))
+    implementation testFixtures(project(':ui'))
 }
 
 pitest {

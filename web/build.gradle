@@ -4,7 +4,6 @@ plugins {
 
 dependencies {
     implementation('org.springframework.boot:spring-boot-starter-web')
-    implementation('org.springframework.boot:spring-boot-starter-thymeleaf')
     implementation project(':backend')
     implementation project(':pickhardt-payments')
     implementation project(':model')
@@ -14,7 +13,5 @@ dependencies {
     integrationTestImplementation('org.springframework.boot:spring-boot-starter-web')
     integrationTestImplementation project(':backend')
     integrationTestImplementation testFixtures(project(':model'))
-    integrationTestImplementation testFixtures(project(':web'))
     integrationTestImplementation testFixtures(project(':pickhardt-payments'))
-    testFixturesImplementation testFixtures(project(':model'))
 }

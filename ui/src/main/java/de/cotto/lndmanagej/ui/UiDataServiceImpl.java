@@ -1,4 +1,4 @@
-package de.cotto.lndmanagej;
+package de.cotto.lndmanagej.ui;
 
 import de.cotto.lndmanagej.controller.ChannelController;
 import de.cotto.lndmanagej.controller.NodeController;
@@ -15,7 +15,6 @@ import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
-import de.cotto.lndmanagej.ui.UiDataService;
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;

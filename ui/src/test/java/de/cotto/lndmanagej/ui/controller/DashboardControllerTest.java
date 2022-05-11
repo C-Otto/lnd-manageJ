@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.ui.controller;
 
 import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
+import de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Coins;
@@ -21,7 +22,6 @@ import org.springframework.ui.Model;
 import java.util.List;
 import java.util.Map;
 
-import static de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto.NONE;
 import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.REMOTE_BALANCE;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
@@ -48,7 +48,7 @@ class DashboardControllerTest {
 
     @Test
     void dashboard() {
-        StatusModel statusModel = new StatusModel(true, 213, NONE);
+        StatusModel statusModel = new StatusModel(true, 213, NodesAndChannelsWithWarningsDto.NONE);
         when(pageService.dashboard()).thenReturn(new DashboardPage(List.of(), List.of(), statusModel));
         assertThat(dashboardController.dashboard(model)).isEqualTo("dashboard");
         verify(model).addAllAttributes(
