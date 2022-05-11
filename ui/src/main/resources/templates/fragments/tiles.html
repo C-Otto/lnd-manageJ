@@ -138,9 +138,8 @@
         </div>
         <div class="card-body">
             <p th:text="${onlineReport.online ? 'Online' : 'Offline'} + ' since '+${onlineReport.since}"></p>
-            <p th:text="${onlineReport.onlinePercentage} + '% online since ' + ${@formatter.formatNumber(onlineReport.daysForOnlinePercentage)} + ' days.'"></p>
-            <p th:text="'Changes '+${@formatter.formatNumber(onlineReport.changes)}"></p>
-            <p th:text="'Days for changes '+${@formatter.formatNumber(onlineReport.daysForChanges)}"></p>
+            <p th:text="${onlineReport.onlinePercentage} + '% online in last ' + ${@formatter.formatNumber(onlineReport.daysForOnlinePercentage)} + ' days.'"></p>
+            <p th:text="'Online status changed '+${@formatter.formatNumber(onlineReport.changes)} + ' times in last ' +${@formatter.formatNumber(onlineReport.daysForChanges)} + ' days.'"></p>
         </div>
     </div>
 </div>
