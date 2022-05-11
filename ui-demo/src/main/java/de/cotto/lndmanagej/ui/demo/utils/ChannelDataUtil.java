@@ -14,7 +14,13 @@ import java.util.Random;
 
 public class ChannelDataUtil {
 
-    public static OpenChannelDto createOpenChannel(String compactChannelId, String alias, String pubkey, long local, long remote) {
+    public static OpenChannelDto createOpenChannel(
+            String compactChannelId,
+            String alias,
+            String pubkey,
+            long local,
+            long remote
+    ) {
         ChannelId channelId = ChannelId.fromCompactForm(compactChannelId);
         return new OpenChannelDto(
                 channelId,

@@ -41,7 +41,7 @@ public class DemoDataService extends UiDataService {
                     14_300_000),
             createOpenChannel(
                     "799999x456x4",
-                    "Kraken \uD83D\uDC19⚡",
+                    "Kraken 🐙⚡",
                     "02f1a8c87607f415c8f22c00593002775941dea48869ce23096af27b0cfdcc0b69",
                     5_050_000,
                     8_000_000),
