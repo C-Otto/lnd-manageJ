@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     runtimeOnly project(':web')
+    runtimeOnly project(':ui')
     runtimeOnly project(':forwarding-history')
     runtimeOnly project(':invoices')
     runtimeOnly project(':payments')
