@@ -56,16 +56,6 @@ class OpenChannelDtoTest {
         assertThat(dtoWithBalance(balanceInformation).getRatio()).isEqualTo(" | · · · · · · · · · · · · · · · · · · ·");
     }
 
-    @Test
-    void formatInbound() {
-        assertThat(OPEN_CHANNEL_DTO.formatInbound()).isEqualTo("123");
-    }
-
-    @Test
-    void formatOutbound() {
-        assertThat(OPEN_CHANNEL_DTO.formatOutbound()).isEqualTo("1,000");
-    }
-
     private OpenChannelDto dtoWithBalance(BalanceInformation balanceInformation) {
         return new OpenChannelDto(
                 CHANNEL_ID,

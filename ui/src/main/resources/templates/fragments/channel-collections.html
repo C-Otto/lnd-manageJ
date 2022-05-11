@@ -6,26 +6,26 @@
     <table class="channel-table table table-hover">
         <thead>
         <tr>
-            <th scope="col">Inbound</th>
+            <th scope="col" style="text-align: right;">Inbound</th>
             <th scope="col" style="text-align: center;">Ratio</th>
-            <th scope="col">Outbound</th>
-            <th scope="col">Base Fee (local)</th>
-            <th scope="col">Fee Rate (local)</th>
-            <th scope="col">Base Fee (remote)</th>
-            <th scope="col">Fee Rate (remote)</th>
+            <th scope="col" style="text-align: right;">Outbound</th>
+            <th scope="col" style="text-align: right;">Base Fee (local)</th>
+            <th scope="col" style="text-align: right;">Fee Rate (local)</th>
+            <th scope="col" style="text-align: right;">Base Fee (remote)</th>
+            <th scope="col" style="text-align: right;">Fee Rate (remote)</th>
             <th scope="col">Alias</th>
             <th scope="col">Channel ID</th>
         </tr>
         </thead>
         <tbody>
         <tr th:each="channel : ${channels}">
-            <td th:text="${channel.formatInbound}" style="color: darkRed; text-align: right; padding-left:0;"></td>
+            <td th:text="${@formatter.formatNumber(channel.inbound)}" style="color: darkRed; text-align: right; padding-left:0;"></td>
             <td th:text="${channel.ratio}"></td>
-            <td th:text="${channel.formatOutbound}" style="color: darkGreen; text-align: right;"></td>
-            <td th:text="${channel.policies.local.baseFeeMilliSat}" style="text-align: right;"></td>
-            <td th:text="${channel.policies.local.feeRatePpm}" style="text-align: right;"></td>
-            <td th:text="${channel.policies.remote.baseFeeMilliSat}" style="text-align: right;"></td>
-            <td th:text="${channel.policies.remote.feeRatePpm}" style="text-align: right;"></td>
+            <td th:text="${@formatter.formatNumber(channel.outbound)}" style="color: darkGreen; text-align: right;"></td>
+            <td th:text="${@formatter.formatNumber(channel.policies.local.baseFeeMilliSat)}" style="text-align: right;"></td>
+            <td th:text="${@formatter.formatNumber(channel.policies.local.feeRatePpm)}" style="text-align: right;"></td>
+            <td th:text="${@formatter.formatNumber(channel.policies.remote.baseFeeMilliSat)}" style="text-align: right;"></td>
+            <td th:text="${@formatter.formatNumber(channel.policies.remote.feeRatePpm)}" style="text-align: right;"></td>
             <td th:text="${channel.remoteAlias}"></td>
             <td><a th:text="${channel.channelId}" th:href="@{/channel/{id}(id=${channel.channelId.shortChannelId})}"></a></td>
         </tr>

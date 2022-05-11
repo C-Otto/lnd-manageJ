@@ -78,19 +78,19 @@
                     <div class="col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Open</li>
-                            <li class="list-group-item" th:text="${onChainCosts.openCostsSat}"></li>
+                            <li class="list-group-item" th:text="${@formatter.formatNumber(onChainCosts.openCostsSat)}"></li>
                         </ul>
                     </div>
                     <div class="col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Close</li>
-                            <li class="list-group-item" th:text="${onChainCosts.closeCostsSat}"></li>
+                            <li class="list-group-item" th:text="${@formatter.formatNumber(onChainCosts.closeCostsSat)}"></li>
                         </ul>
                     </div>
                     <div class="col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Sweep</li>
-                            <li class="list-group-item" th:text="${onChainCosts.sweepCostsSat}"></li>
+                            <li class="list-group-item" th:text="${@formatter.formatNumber(onChainCosts.sweepCostsSat)}"></li>
                         </ul>
                     </div>
                 </div>
@@ -112,14 +112,14 @@
                 <div class="row align-items-start">
                     <div class="col">
                         <ul class="list-group">
-                            <li class="list-group-item disabled" aria-disabled="true">Earned</li>
-                            <li class="list-group-item" th:text="${feeReport.earnedMilliSat}"></li>
+                            <li class="list-group-item disabled" aria-disabled="true">Earned (mSAT)</li>
+                            <li class="list-group-item" th:text="${@formatter.formatNumber(feeReport.earnedMilliSat)}"></li>
                         </ul>
                     </div>
                     <div class="col">
                         <ul class="list-group">
-                            <li class="list-group-item disabled" aria-disabled="true">Sourced</li>
-                            <li class="list-group-item" th:text="${feeReport.sourcedMilliSat}"></li>
+                            <li class="list-group-item disabled" aria-disabled="true">Sourced (mSAT)</li>
+                            <li class="list-group-item" th:text="${@formatter.formatNumber(feeReport.sourcedMilliSat)}"></li>
                         </ul>
                     </div>
                 </div>
@@ -138,9 +138,8 @@
         </div>
         <div class="card-body">
             <p th:text="${onlineReport.online ? 'Online' : 'Offline'} + ' since '+${onlineReport.since}"></p>
-            <p th:text="${onlineReport.onlinePercentage} + '% online since ' + ${onlineReport.daysForOnlinePercentage} + ' days.'"></p>
-            <p th:text="'Changes '+${onlineReport.changes}"></p>
-            <p th:text="'Days for changes '+${onlineReport.daysForChanges}"></p>
+            <p th:text="${onlineReport.onlinePercentage} + '% online in last ' + ${@formatter.formatNumber(onlineReport.daysForOnlinePercentage)} + ' days.'"></p>
+            <p th:text="'Online status changed '+${@formatter.formatNumber(onlineReport.changes)} + ' times in last ' +${@formatter.formatNumber(onlineReport.daysForChanges)} + ' days.'"></p>
         </div>
     </div>
 </div>
@@ -161,21 +160,21 @@
                     <div class="col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Local</li>
-                            <li class="list-group-item" th:text="'Balance '+${balanceInformation.localBalanceSat}"></li>
-                            <li class="list-group-item" th:text="'Reserve '+${balanceInformation.localReserveSat}"></li>
+                            <li class="list-group-item" th:text="'Balance '+${@formatter.formatNumber(balanceInformation.localBalanceSat)}"></li>
+                            <li class="list-group-item" th:text="'Reserve '+${@formatter.formatNumber(balanceInformation.localReserveSat)}"></li>
                             <li class="list-group-item"
-                                th:text="'Available '+${balanceInformation.localAvailableSat}"></li>
+                                th:text="'Available '+${@formatter.formatNumber(balanceInformation.localAvailableSat)}"></li>
                         </ul>
                     </div>
                     <div class="col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Remote</li>
                             <li class="list-group-item"
-                                th:text="'Balance '+${balanceInformation.remoteBalanceSat}"></li>
+                                th:text="'Balance '+${@formatter.formatNumber(balanceInformation.remoteBalanceSat)}"></li>
                             <li class="list-group-item"
-                                th:text="'Reserve '+${balanceInformation.remoteReserveSat}"></li>
+                                th:text="'Reserve '+${@formatter.formatNumber(balanceInformation.remoteReserveSat)}"></li>
                             <li class="list-group-item"
-                                th:text="'Available '+${balanceInformation.remoteAvailableSat}"></li>
+                                th:text="'Available '+${@formatter.formatNumber(balanceInformation.remoteAvailableSat)}"></li>
                         </ul>
                     </div>
                 </div>
@@ -199,22 +198,22 @@
                 <div class="row align-items-start">
                     <div class="col">
                         <ul class="list-group">
-                            <li class="list-group-item disabled" aria-disabled="true">Source</li>
-                            <li class="list-group-item" th:text="'Cost: '+${rebalanceReport.sourceCostsMilliSat}"></li>
+                            <li class="list-group-item disabled" aria-disabled="true">Source (mSAT)</li>
+                            <li class="list-group-item" th:text="'Cost: '+${@formatter.formatNumber(rebalanceReport.sourceCostsMilliSat)}"></li>
                             <li class="list-group-item"
-                                th:text="'Amount: '+${rebalanceReport.sourceAmountMilliSat}"></li>
+                                th:text="'Amount: '+${@formatter.formatNumber(rebalanceReport.sourceAmountMilliSat)}"></li>
                             <li class="list-group-item"
-                                th:text="'Support: '+${rebalanceReport.supportAsSourceAmountMilliSat}"></li>
+                                th:text="'Support: '+${@formatter.formatNumber(rebalanceReport.supportAsSourceAmountMilliSat)}"></li>
                         </ul>
                     </div>
                     <div class="col">
                         <ul class="list-group">
-                            <li class="list-group-item disabled" aria-disabled="true">Target</li>
-                            <li class="list-group-item" th:text="'Cost: '+${rebalanceReport.targetCostsMilliSat}"></li>
+                            <li class="list-group-item disabled" aria-disabled="true">Target (mSAT)</li>
+                            <li class="list-group-item" th:text="'Cost: '+${@formatter.formatNumber(rebalanceReport.targetCostsMilliSat)}"></li>
                             <li class="list-group-item"
-                                th:text="'Amount: '+${rebalanceReport.targetAmountMilliSat}"></li>
+                                th:text="'Amount: '+${@formatter.formatNumber(rebalanceReport.targetAmountMilliSat)}"></li>
                             <li class="list-group-item"
-                                th:text="'Support: '+${rebalanceReport.supportAsTargetAmountMilliSat}"></li>
+                                th:text="'Support: '+${@formatter.formatNumber(rebalanceReport.supportAsTargetAmountMilliSat)}"></li>
                         </ul>
                     </div>
                 </div>
@@ -295,9 +294,9 @@
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Local</li>
                             <li class="list-group-item"
-                                th:text="'Base Fee: '+${channel.policies.local.baseFeeMilliSat}"></li>
+                                th:text="'Base Fee (mSAT): '+${@formatter.formatNumber(channel.policies.local.baseFeeMilliSat)}"></li>
                             <li class="list-group-item"
-                                th:text="'Fee Rate: '+${channel.policies.local.feeRatePpm}"></li>
+                                th:text="'Fee Rate: '+${@formatter.formatNumber(channel.policies.local.feeRatePpm)}"></li>
                             <li class="list-group-item" th:text="'Enabled: '+${channel.policies.local.enabled}"></li>
                         </ul>
                     </div>
@@ -305,9 +304,9 @@
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Remote</li>
                             <li class="list-group-item"
-                                th:text="'Base Fee: '+${channel.policies.remote.baseFeeMilliSat}"></li>
+                                th:text="'Base Fee (mSAT): '+${@formatter.formatNumber(channel.policies.remote.baseFeeMilliSat)}"></li>
                             <li class="list-group-item"
-                                th:text="'Fee Rate: '+${channel.policies.remote.feeRatePpm}"></li>
+                                th:text="'Fee Rate: '+${@formatter.formatNumber(channel.policies.remote.feeRatePpm)}"></li>
                             <li class="list-group-item" th:text="'Enabled: '+${channel.policies.remote.enabled}"></li>
                         </ul>
                     </div>
@@ -327,7 +326,7 @@
             </div>
         </div>
         <div class="card-body">
-            <p style="margin-bottom: 0;" th:text="'Synced: ' + ${status.synced} + ' &nbsp;&nbsp;&nbsp;Block Height: '+${status.blockHeight}"></p>
+            <p style="margin-bottom: 0;" th:text="'Synced: ' + ${status.synced} + ' &nbsp;&nbsp;&nbsp;Block Height: '+${@formatter.formatNumber(status.blockHeight)}"></p>
         </div>
     </div>
 </div>

@@ -5,8 +5,6 @@ import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
 
-import java.text.NumberFormat;
-
 public record OpenChannelDto(
         ChannelId channelId,
         String remoteAlias,
@@ -43,13 +41,5 @@ public record OpenChannelDto(
 
     public long getInbound() {
         return Long.parseLong(balanceInformation.remoteBalanceSat());
-    }
-
-    public String formatOutbound() {
-        return NumberFormat.getInstance().format(getOutbound());
-    }
-
-    public String formatInbound() {
-        return NumberFormat.getInstance().format(getInbound());
     }
 }
