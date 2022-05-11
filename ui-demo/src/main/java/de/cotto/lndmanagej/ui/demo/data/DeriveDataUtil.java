@@ -13,92 +13,105 @@ import de.cotto.lndmanagej.model.PoliciesForLocalChannel;
 import de.cotto.lndmanagej.model.Policy;
 import de.cotto.lndmanagej.model.RebalanceReport;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.random.RandomGenerator;
 
 import static de.cotto.lndmanagej.model.OpenInitiator.LOCAL;
 import static de.cotto.lndmanagej.model.OpenInitiator.REMOTE;
 
 public final class DeriveDataUtil {
 
+    private static final Map<ChannelId, Random> RANDOM_GENERATOR = new HashMap<>();
+
     private DeriveDataUtil() {
         // util class
     }
 
+    private static RandomGenerator getOrCreateRandomGenerator(ChannelId channelId) {
+        Random random = RANDOM_GENERATOR.get(channelId);
+        if (random == null) {
+            random = new Random(channelId.getShortChannelId());
+            RANDOM_GENERATOR.put(channelId, random);
+        }
+        return random;
+    }
+
     static RebalanceReportDto deriveRebalanceReport(ChannelId channelId) {
-        Random generator = new Random(channelId.getShortChannelId());
+        RandomGenerator rand = getOrCreateRandomGenerator(channelId);
         return RebalanceReportDto.createFromModel(new RebalanceReport(
-                Coins.ofSatoshis(generator.nextInt(5000)),
-                Coins.ofSatoshis(generator.nextInt(1000)),
-                Coins.ofSatoshis(generator.nextInt(5000)),
-                Coins.ofSatoshis(generator.nextInt(2000)),
-                Coins.ofSatoshis(generator.nextInt(3000)),
-                Coins.ofSatoshis(generator.nextInt(500))
+                Coins.ofSatoshis(rand.nextInt(5000)),
+                Coins.ofSatoshis(rand.nextInt(1000)),
+                Coins.ofSatoshis(rand.nextInt(5000)),
+                Coins.ofSatoshis(rand.nextInt(2000)),
+                Coins.ofSatoshis(rand.nextInt(3000)),
+                Coins.ofSatoshis(rand.nextInt(500))
         ));
     }
 
     static Set<String> deriveWarnings(ChannelId channelId) {
-        Random generator = new Random(channelId.getShortChannelId());
-        boolean showWarning = generator.nextInt(10) != 0;
-        int updates = (generator.nextInt(10) + 5) * 100_000;
+        RandomGenerator rand = getOrCreateRandomGenerator(channelId);
+        boolean showWarning = rand.nextInt(10) != 0;
+        int updates = (rand.nextInt(10) + 5) * 100_000;
         return showWarning ? Set.of("Channel has accumulated " + updates + " updates.") : Set.of();
     }
 
     static FlowReportDto deriveFlowReport(ChannelId channelId) {
-        Random generator = new Random(channelId.getShortChannelId());
+        RandomGenerator rand = getOrCreateRandomGenerator(channelId);
         FlowReport flowReport = new FlowReport(
-                Coins.ofSatoshis(generator.nextLong(100_000)),
-                Coins.ofSatoshis(generator.nextLong(100_000)),
-                Coins.ofSatoshis(generator.nextLong(100)),
-                Coins.ofSatoshis(generator.nextLong(100)),
-                Coins.ofSatoshis(generator.nextLong(10)),
-                Coins.ofSatoshis(generator.nextLong(100)),
-                Coins.ofSatoshis(generator.nextLong(200)),
-                Coins.ofSatoshis(generator.nextLong(10)),
-                Coins.ofSatoshis(generator.nextLong(1000))
+                Coins.ofSatoshis(rand.nextLong(100_000)),
+                Coins.ofSatoshis(rand.nextLong(100_000)),
+                Coins.ofSatoshis(rand.nextLong(100)),
+                Coins.ofSatoshis(rand.nextLong(100)),
+                Coins.ofSatoshis(rand.nextLong(10)),
+                Coins.ofSatoshis(rand.nextLong(100)),
+                Coins.ofSatoshis(rand.nextLong(200)),
+                Coins.ofSatoshis(rand.nextLong(10)),
+                Coins.ofSatoshis(rand.nextLong(1000))
         );
         return FlowReportDto.createFromModel(flowReport);
     }
 
     static FeeReportDto deriveFeeReport(ChannelId channelId) {
-        Random generator = new Random(channelId.getShortChannelId());
-        long earned = generator.nextLong(1_000_000);
-        long sourced = generator.nextLong(100_000);
+        RandomGenerator rand = getOrCreateRandomGenerator(channelId);
+        long earned = rand.nextLong(1_000_000);
+        long sourced = rand.nextLong(100_000);
         return FeeReportDto.createFromModel(
                 new FeeReport(Coins.ofMilliSatoshis(earned), Coins.ofMilliSatoshis(sourced)));
     }
 
     static OnChainCostsDto deriveOnChainCosts(ChannelId channelId) {
-        Random generator = new Random(channelId.getShortChannelId());
+        RandomGenerator rand = getOrCreateRandomGenerator(channelId);
         return new OnChainCostsDto(
-                String.valueOf(generator.nextLong(2000)),
-                String.valueOf(generator.nextLong(2000)),
-                String.valueOf(generator.nextLong(3000))
+                String.valueOf(rand.nextLong(2000)),
+                String.valueOf(rand.nextLong(2000)),
+                String.valueOf(rand.nextLong(3000))
         );
     }
 
     static OpenInitiator deriveOpenInitiator(ChannelId channelId) {
-        Random generator = new Random(channelId.getShortChannelId());
-        return generator.nextBoolean() ? LOCAL : REMOTE;
+        return getOrCreateRandomGenerator(channelId).nextBoolean() ? LOCAL : REMOTE;
     }
 
     static PoliciesForLocalChannel derivePolicies(ChannelId channelId) {
-        Random generator = new Random(channelId.getShortChannelId());
-        return new PoliciesForLocalChannel(derivePolicy(generator), derivePolicy(generator));
+        return new PoliciesForLocalChannel(derivePolicy(channelId), derivePolicy(channelId));
     }
 
-    static Policy derivePolicy(Random generator) {
-        long feeRate = generator.nextLong(100) * 10;
-        Coins baseFee = Coins.ofMilliSatoshis(generator.nextLong(2) * 1000);
-        boolean enabled = generator.nextInt(10) == 0;
-        int timeLockDelta = (generator.nextInt(5) + 1) * 10;
+    static Policy derivePolicy(ChannelId channelId) {
+        RandomGenerator rand = getOrCreateRandomGenerator(channelId);
+        long feeRate = rand.nextLong(100) * 10;
+        Coins baseFee = Coins.ofMilliSatoshis(rand.nextLong(2) * 1000);
+        boolean enabled = rand.nextInt(10) == 0;
+        int timeLockDelta = (rand.nextInt(5) + 1) * 10;
         return new Policy(feeRate, baseFee, enabled, timeLockDelta);
     }
 
     static Set<String> deriveChannelWarnings(ChannelId channelId) {
-        Random generator = new Random(channelId.getShortChannelId());
-        boolean showWarning = generator.nextInt(20) != 0;
-        int days = generator.nextInt(30) + 30;
+        RandomGenerator rand = getOrCreateRandomGenerator(channelId);
+        boolean showWarning = rand.nextInt(20) != 0;
+        int days = rand.nextInt(30) + 30;
         return showWarning ? Set.of("No flow in the past " + days + " days.") : Set.of();
     }
 }
