@@ -1,0 +1,37 @@
+<!doctype html>
+
+<html xmlns:th="https://www.thymeleaf.org">
+
+<nav th:fragment="left-side-bar" id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+    <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${page == 'dashboard' ? 'active' : ''}" href="/">
+                    <span data-feather="home"></span>
+                    Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${page == 'channels' ? 'active' : ''}" href="/channels">
+                    <span data-feather="list"></span>
+                    Channels
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${page == 'nodes' ? 'active' : ''}" href="/nodes">
+                    <span data-feather="cpu"></span>
+                    Nodes
+                </a>
+            </li>
+            <!--                    <li class="nav-item">-->
+            <!--                        <a class="nav-link" th:classappend="${page == 'pay' ? 'active' : ''}" href="/pay">-->
+            <!--                            <span data-feather="credit-card"></span>-->
+            <!--                            Pickhardt Payments-->
+            <!--                        </a>-->
+            <!--                    </li>-->
+        </ul>
+
+    </div>
+</nav>
+
+</html>
