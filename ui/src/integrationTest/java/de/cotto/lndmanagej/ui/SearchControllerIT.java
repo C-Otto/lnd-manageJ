@@ -24,7 +24,7 @@ import java.util.Optional;
 import static de.cotto.lndmanagej.controller.dto.ChannelDetailsDtoFixture.CHANNEL_DETAILS_DTO;
 import static de.cotto.lndmanagej.controller.dto.NodeDetailsDtoFixture.NODE_DETAILS_DTO;
 import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
-import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.WOS;
+import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static org.hamcrest.core.Is.is;
@@ -107,10 +107,10 @@ class SearchControllerIT {
     }
 
     @Test
-    void searchForAlias_TwoNodesFound() throws Exception {
-        when(dataService.getOpenChannels()).thenReturn(List.of(OPEN_CHANNEL_DTO, WOS));
-        when(pageService.nodes(any())).thenReturn(nodesPage(OPEN_CHANNEL_DTO, WOS));
-        mockMvc.perform(MockMvcRequestBuilders.get("/search?q=al"))
+    void searchForAlias_multipleResults() throws Exception {
+        when(dataService.getOpenChannels()).thenReturn(List.of(OPEN_CHANNEL_DTO, OPEN_CHANNEL_DTO2));
+        when(pageService.nodes(any())).thenReturn(nodesPage(OPEN_CHANNEL_DTO, OPEN_CHANNEL_DTO2));
+        mockMvc.perform(MockMvcRequestBuilders.get("/search?q=alb"))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("nodes"))
                 .andExpect(view().name("nodes"));

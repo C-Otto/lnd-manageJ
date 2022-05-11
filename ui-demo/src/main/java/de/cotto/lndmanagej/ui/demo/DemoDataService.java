@@ -12,19 +12,20 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.ACINQ;
-import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.ACINQ2;
-import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.BCASH;
-import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.C_OTTO;
 import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
-import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.WOS;
-import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.WOS2;
+import static de.cotto.lndmanagej.ui.demo.utils.ChannelDataUtil.ACINQ;
+import static de.cotto.lndmanagej.ui.demo.utils.ChannelDataUtil.ACINQ2;
+import static de.cotto.lndmanagej.ui.demo.utils.ChannelDataUtil.BCASH;
+import static de.cotto.lndmanagej.ui.demo.utils.ChannelDataUtil.C_OTTO;
+import static de.cotto.lndmanagej.ui.demo.utils.ChannelDataUtil.WOS;
+import static de.cotto.lndmanagej.ui.demo.utils.ChannelDataUtil.WOS2;
 import static de.cotto.lndmanagej.ui.demo.utils.ChannelDetailsUtil.createChannelDetails;
 import static de.cotto.lndmanagej.ui.demo.utils.NodeDetailsUtil.createNodeDetails;
 import static de.cotto.lndmanagej.ui.demo.utils.NodeWarningsUtil.getStatusModel;
 
 @Component
 public class DemoDataService extends UiDataService {
+
 
     public DemoDataService() {
         super();
