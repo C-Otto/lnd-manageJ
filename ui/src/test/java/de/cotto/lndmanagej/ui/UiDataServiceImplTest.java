@@ -1,4 +1,4 @@
-package de.cotto.lndmanagej;
+package de.cotto.lndmanagej.ui;
 
 import de.cotto.lndmanagej.controller.ChannelController;
 import de.cotto.lndmanagej.controller.NodeController;
