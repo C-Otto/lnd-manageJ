@@ -24,10 +24,7 @@ public class MultiPathPaymentObserver {
     }
 
     public SendToRouteObserver forRoute(Route route) {
-        return throwable -> {
-            logger.warn("Send to route failed for route {}: ", route, throwable);
-            liquidityInformationUpdater.removeInFlight(topPaymentAttemptHops(route));
-        };
+        return new SendToRouteObserverImpl(route);
     }
 
     private List<PaymentAttemptHop> topPaymentAttemptHops(Route route) {
@@ -44,5 +41,24 @@ public class MultiPathPaymentObserver {
             result.add(hop);
         }
         return result;
+    }
+
+    private class SendToRouteObserverImpl implements SendToRouteObserver {
+        private final Route route;
+
+        public SendToRouteObserverImpl(Route route) {
+            this.route = route;
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            logger.warn("Send to route failed for route {}: ", route, throwable);
+            liquidityInformationUpdater.removeInFlight(topPaymentAttemptHops(route));
+        }
+
+        @Override
+        public void onValue(Object value) {
+            logger.info("Got value {}: ", value);
+        }
     }
 }

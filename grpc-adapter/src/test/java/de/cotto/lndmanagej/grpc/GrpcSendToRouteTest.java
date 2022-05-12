@@ -102,12 +102,25 @@ class GrpcSendToRouteTest {
     }
 
     @Test
-    void error_reporter_reports_to_given_observer() {
+    void reporter_reports_error_to_given_observer() {
         grpcSendToRoute.sendToRoute(ROUTE, DECODED_PAYMENT_REQUEST, observer);
         verify(grpcRouterService).sendToRoute(any(), captor.capture());
         NullPointerException throwable = new NullPointerException();
         captor.getValue().onError(throwable);
-        verify(observer).accept(throwable);
+        verify(observer).onError(throwable);
+    }
+
+    @Test
+    void reporter_reports_value_to_given_observer() {
+        grpcSendToRoute.sendToRoute(ROUTE, DECODED_PAYMENT_REQUEST, observer);
+        verify(grpcRouterService).sendToRoute(any(), captor.capture());
+        HTLCAttempt value = htlcAttempt();
+        captor.getValue().onNext(value);
+        verify(observer).onValue(value);
+    }
+
+    private HTLCAttempt htlcAttempt() {
+        return HTLCAttempt.newBuilder().build();
     }
 
     private ByteString toByteString(HexString hexString) {

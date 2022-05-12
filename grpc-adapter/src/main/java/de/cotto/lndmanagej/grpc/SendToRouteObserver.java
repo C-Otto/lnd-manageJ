@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.grpc;
 
-import java.util.function.Consumer;
+public interface SendToRouteObserver {
+    void onError(Throwable throwable);
 
-public interface SendToRouteObserver extends Consumer<Throwable> {
+    void onValue(Object value);
 }

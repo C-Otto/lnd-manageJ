@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.RouteFixtures.ROUTE;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,8 +30,14 @@ class MultiPathPaymentObserverTest {
     @Test
     void cancels_in_flight_on_error() {
         SendToRouteObserver sendToRouteObserver = multiPathPaymentObserver.forRoute(ROUTE);
-        sendToRouteObserver.accept(new NullPointerException());
+        sendToRouteObserver.onError(new NullPointerException());
         verify(liquidityInformationUpdater).removeInFlight(hops());
+    }
+
+    @Test
+    void accepts_value() {
+        SendToRouteObserver sendToRouteObserver = multiPathPaymentObserver.forRoute(ROUTE);
+        assertThatCode(() -> sendToRouteObserver.onValue("")).doesNotThrowAnyException();
     }
 
     private List<PaymentAttemptHop> hops() {
