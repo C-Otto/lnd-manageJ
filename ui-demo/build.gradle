@@ -13,3 +13,23 @@ dependencies {
 pitest {
     testStrengthThreshold = 0
 }
+jacocoTestCoverageVerification {
+    violationRules {
+        rules.forEach {rule ->
+            rule.limits.forEach {limit ->
+                if (limit.counter == 'INSTRUCTION') {
+                    limit.minimum = 0
+                }
+                if (limit.counter == 'CLASS') {
+                    limit.minimum = 0
+                }
+                if (limit.counter == 'BRANCH') {
+                    limit.minimum = 0
+                }
+                if (limit.counter == 'METHOD') {
+                    limit.minimum = 0
+                }
+            }
+        }
+    }
+}
