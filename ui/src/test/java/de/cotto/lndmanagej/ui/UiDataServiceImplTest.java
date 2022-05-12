@@ -18,7 +18,6 @@ import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
-import de.cotto.lndmanagej.ui.dto.WarningsModel;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -73,12 +72,10 @@ class UiDataServiceImplTest {
     private NodeService nodeService;
 
     @Test
-    void getStatus() {
+    void getWarnings() {
         NodesAndChannelsWithWarningsDto warnings = new NodesAndChannelsWithWarningsDto(List.of(), List.of());
         when(warningsController.getWarnings()).thenReturn(warnings);
-        WarningsModel expected = new WarningsModel(warnings);
-
-        assertThat(uiDataService.getStatus()).isEqualTo(expected);
+        assertThat(uiDataService.getWarnings()).isEqualTo(warnings);
     }
 
     @Test

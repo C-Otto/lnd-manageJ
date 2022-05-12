@@ -4,7 +4,6 @@ import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.ui.controller.DashboardController;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
-import de.cotto.lndmanagej.ui.dto.WarningsModel;
 import de.cotto.lndmanagej.ui.page.PageService;
 import de.cotto.lndmanagej.ui.page.general.DashboardPage;
 import org.junit.jupiter.api.Test;
@@ -36,9 +35,7 @@ class DashboardControllerIT extends BaseControllerIT {
 
     @Test
     void empty_dashboard() throws Exception {
-        when(pageService.dashboard()).thenReturn(
-                new DashboardPage(List.of(), List.of(), new WarningsModel(NONE))
-        );
+        when(pageService.dashboard()).thenReturn(new DashboardPage(List.of(), List.of(), NONE));
         mockMvc.perform(get("/")).andExpect(status().isOk());
     }
 
@@ -47,7 +44,7 @@ class DashboardControllerIT extends BaseControllerIT {
         OpenChannelDto channel = OPEN_CHANNEL_DTO;
         NodeDto node = new NodeDto(channel.remotePubkey().toString(), channel.remoteAlias(), true);
         when(pageService.dashboard()).thenReturn(
-                new DashboardPage(List.of(channel), List.of(node), new WarningsModel(NONE))
+                new DashboardPage(List.of(channel), List.of(node), NONE)
         );
         mockMvc.perform(get("/")).andExpect(status().isOk());
     }

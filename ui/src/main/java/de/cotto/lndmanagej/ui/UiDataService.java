@@ -2,12 +2,12 @@ package de.cotto.lndmanagej.ui;
 
 import de.cotto.lndmanagej.controller.NotFoundException;
 import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
+import de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
-import de.cotto.lndmanagej.ui.dto.WarningsModel;
 
 import java.util.Collection;
 import java.util.List;
@@ -21,7 +21,7 @@ public abstract class UiDataService {
         // default constructor
     }
 
-    public abstract WarningsModel getStatus();
+    public abstract NodesAndChannelsWithWarningsDto getWarnings();
 
     public abstract List<OpenChannelDto> getOpenChannels();
 

@@ -17,7 +17,6 @@ import de.cotto.lndmanagej.ui.UiDataService;
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
-import de.cotto.lndmanagej.ui.dto.WarningsModel;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -105,12 +104,11 @@ public class DemoDataService extends UiDataService {
     }
 
     @Override
-    public WarningsModel getStatus() {
-        return new WarningsModel(new NodesAndChannelsWithWarningsDto(
-                List.of(ACINQ_WARNING, POCKET_WARNING), List.of(
+    public NodesAndChannelsWithWarningsDto getWarnings() {
+        return new NodesAndChannelsWithWarningsDto(List.of(ACINQ_WARNING, POCKET_WARNING), List.of(
                 createChannelWarning(B_CASH_IS_TRASH.channelId(), "Channel has accumulated 500000 updates."),
                 createChannelWarning(TRY_BITCOIN.channelId(), "Channel has accumulated 600000 updates."),
-                createChannelWarning(WOS.channelId(), "Channel has accumulated 700000 updates."))));
+                createChannelWarning(WOS.channelId(), "Channel has accumulated 700000 updates.")));
     }
 
     @Override

@@ -25,7 +25,11 @@ public class PageService {
     }
 
     public DashboardPage dashboard() {
-        return new DashboardPage(dataService.getOpenChannels(), dataService.createNodeList(), dataService.getStatus());
+        return new DashboardPage(
+                dataService.getOpenChannels(),
+                dataService.createNodeList(),
+                dataService.getWarnings()
+        );
     }
 
     public ChannelsPage channels() {
