@@ -4,8 +4,10 @@ import de.cotto.lndmanagej.model.OpenInitiator;
 import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.ui.demo.data.DemoDataService.POCKET;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DeriveDataUtilTest {
 
@@ -34,15 +36,23 @@ class DeriveDataUtilTest {
     }
 
     @Test
-    void deriveWarnings_sameChannelId_sameResult() {
-        assertFalse(DeriveDataUtil.deriveWarnings(CHANNEL_ID).isEmpty());
+    void deriveWarnings_noWarnings() {
         assertFalse(DeriveDataUtil.deriveWarnings(CHANNEL_ID).isEmpty());
     }
 
     @Test
-    void deriveChannelWarnings_sameChannelId_sameResult() {
+    void deriveWarnings_hasWarnings() {
+        assertTrue(DeriveDataUtil.deriveWarnings(POCKET.channelId()).isEmpty());
+    }
+
+    @Test
+    void deriveChannelWarnings_noWarnings() {
         assertFalse(DeriveDataUtil.deriveChannelWarnings(CHANNEL_ID).isEmpty());
-        assertFalse(DeriveDataUtil.deriveChannelWarnings(CHANNEL_ID).isEmpty());
+    }
+
+    @Test
+    void deriveChannelWarnings_hasWarnings() {
+        assertTrue(DeriveDataUtil.deriveChannelWarnings(POCKET.channelId()).isEmpty());
     }
 
     @Test
