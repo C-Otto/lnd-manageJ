@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.pickhardtpayments;
 import de.cotto.lndmanagej.grpc.GrpcPayments;
 import de.cotto.lndmanagej.grpc.GrpcSendToRoute;
 import de.cotto.lndmanagej.grpc.SendToRouteObserver;
+import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.model.Route;
 import de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPayment;
 import org.junit.jupiter.api.Test;
@@ -84,10 +85,11 @@ class MultiPathPaymentSenderTest {
     void registers_observers_for_routes() {
         when(grpcPayments.decodePaymentRequest(any())).thenReturn(Optional.of(DECODED_PAYMENT_REQUEST));
         when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), any(), anyInt())).thenReturn(MULTI_PATH_PAYMENT);
+        HexString paymentHash = DECODED_PAYMENT_REQUEST.paymentHash();
         Map<Route, SendToRouteObserver> expected = new LinkedHashMap<>();
         for (Route route : MULTI_PATH_PAYMENT.routes()) {
             SendToRouteObserver expectedObserver = mock(SendToRouteObserver.class);
-            when(multiPathPaymentObserver.forRoute(route)).thenReturn(expectedObserver);
+            when(multiPathPaymentObserver.getFor(route, paymentHash)).thenReturn(expectedObserver);
             expected.put(route, expectedObserver);
         }
         multiPathPaymentSender.payPaymentRequest(PAYMENT_REQUEST, FEE_RATE_WEIGHT);

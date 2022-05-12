@@ -37,7 +37,7 @@ public class GrpcSendToRoute {
                 decodedPaymentRequest.paymentHash(),
                 buildLndRoute(route, blockHeight, decodedPaymentRequest)
         );
-        grpcRouterService.sendToRoute(request, new ReportingStreamObserver<>(observer));
+        grpcRouterService.sendToRoute(request, new ReportingStreamObserver(observer));
     }
 
     private lnrpc.Route buildLndRoute(Route route, int blockHeight, DecodedPaymentRequest decodedPaymentRequest) {

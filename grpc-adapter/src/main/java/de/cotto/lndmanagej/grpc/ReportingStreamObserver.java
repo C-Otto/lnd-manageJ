@@ -1,8 +1,10 @@
 package de.cotto.lndmanagej.grpc;
 
+import de.cotto.lndmanagej.model.HexString;
 import io.grpc.stub.StreamObserver;
+import lnrpc.HTLCAttempt;
 
-class ReportingStreamObserver<T> implements StreamObserver<T> {
+class ReportingStreamObserver implements StreamObserver<HTLCAttempt> {
     private final SendToRouteObserver sendToRouteObserver;
 
     public ReportingStreamObserver(SendToRouteObserver sendToRouteObserver) {
@@ -10,8 +12,9 @@ class ReportingStreamObserver<T> implements StreamObserver<T> {
     }
 
     @Override
-    public void onNext(T value) {
-        sendToRouteObserver.onValue(value);
+    public void onNext(HTLCAttempt htlcAttempt) {
+        HexString preimage = new HexString(htlcAttempt.getPreimage().toByteArray());
+        sendToRouteObserver.onValue(preimage);
     }
 
     @Override

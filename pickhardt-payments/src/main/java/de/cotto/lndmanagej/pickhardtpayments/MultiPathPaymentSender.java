@@ -2,8 +2,10 @@ package de.cotto.lndmanagej.pickhardtpayments;
 
 import de.cotto.lndmanagej.grpc.GrpcPayments;
 import de.cotto.lndmanagej.grpc.GrpcSendToRoute;
+import de.cotto.lndmanagej.grpc.SendToRouteObserver;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.DecodedPaymentRequest;
+import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.Route;
 import de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPayment;
@@ -40,8 +42,10 @@ public class MultiPathPaymentSender {
         MultiPathPayment multiPathPayment =
                 multiPathPaymentSplitter.getMultiPathPaymentTo(destination, amount, feeRateWeight);
         List<Route> routes = multiPathPayment.routes();
+        HexString paymentHash = decodedPaymentRequest.paymentHash();
         for (Route route : routes) {
-            grpcSendToRoute.sendToRoute(route, decodedPaymentRequest, multiPathPaymentObserver.forRoute(route));
+            SendToRouteObserver sendToRouteObserver = multiPathPaymentObserver.getFor(route, paymentHash);
+            grpcSendToRoute.sendToRoute(route, decodedPaymentRequest, sendToRouteObserver);
         }
         return multiPathPayment;
     }

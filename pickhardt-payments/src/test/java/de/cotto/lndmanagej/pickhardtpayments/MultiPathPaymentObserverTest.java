@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.pickhardtpayments;
 import de.cotto.lndmanagej.grpc.SendToRouteObserver;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Edge;
+import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.model.PaymentAttemptHop;
 import de.cotto.lndmanagej.service.LiquidityInformationUpdater;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static de.cotto.lndmanagej.model.DecodedPaymentRequestFixtures.DECODED_PAYMENT_REQUEST;
 import static de.cotto.lndmanagej.model.RouteFixtures.ROUTE;
+import static de.cotto.lndmanagej.model.RouteFixtures.ROUTE_2;
+import static de.cotto.lndmanagej.model.RouteFixtures.ROUTE_3;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.Mockito.verify;
 
@@ -29,15 +34,65 @@ class MultiPathPaymentObserverTest {
 
     @Test
     void cancels_in_flight_on_error() {
-        SendToRouteObserver sendToRouteObserver = multiPathPaymentObserver.forRoute(ROUTE);
+        HexString paymentHash = DECODED_PAYMENT_REQUEST.paymentHash();
+        SendToRouteObserver sendToRouteObserver =
+                multiPathPaymentObserver.getFor(ROUTE, paymentHash);
+        sendToRouteObserver.onError(new NullPointerException());
+        assertThat(multiPathPaymentObserver.getInFlight(paymentHash)).isEqualTo(Coins.NONE);
+    }
+
+    @Test
+    void cancels_in_flight_using_liquidity_information_updater_on_error() {
+        SendToRouteObserver sendToRouteObserver =
+                multiPathPaymentObserver.getFor(ROUTE, DECODED_PAYMENT_REQUEST.paymentHash());
         sendToRouteObserver.onError(new NullPointerException());
         verify(liquidityInformationUpdater).removeInFlight(hops());
     }
 
     @Test
     void accepts_value() {
-        SendToRouteObserver sendToRouteObserver = multiPathPaymentObserver.forRoute(ROUTE);
-        assertThatCode(() -> sendToRouteObserver.onValue("")).doesNotThrowAnyException();
+        SendToRouteObserver sendToRouteObserver =
+                multiPathPaymentObserver.getFor(ROUTE, DECODED_PAYMENT_REQUEST.paymentHash());
+        assertThatCode(() -> sendToRouteObserver.onValue(HexString.EMPTY)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void inFlight_initially_zero() {
+        assertThat(multiPathPaymentObserver.getInFlight(DECODED_PAYMENT_REQUEST.paymentHash()))
+                .isEqualTo(Coins.NONE);
+    }
+
+    @Test
+    void inFlight_initialized_with_route_amount() {
+        HexString paymentHash = DECODED_PAYMENT_REQUEST.paymentHash();
+        multiPathPaymentObserver.getFor(ROUTE, paymentHash);
+        assertThat(multiPathPaymentObserver.getInFlight(paymentHash)).isEqualTo(ROUTE.getAmount());
+    }
+
+    @Test
+    void inFlight_reset_on_success() {
+        HexString paymentHash = DECODED_PAYMENT_REQUEST.paymentHash();
+        SendToRouteObserver observer = multiPathPaymentObserver.getFor(ROUTE, paymentHash);
+        observer.onValue(new HexString("AABBCC"));
+        assertThat(multiPathPaymentObserver.getInFlight(paymentHash)).isEqualTo(Coins.NONE);
+    }
+
+    @Test
+    void inFlight_reset_on_failure() {
+        HexString paymentHash = DECODED_PAYMENT_REQUEST.paymentHash();
+        SendToRouteObserver observer = multiPathPaymentObserver.getFor(ROUTE, paymentHash);
+        observer.onValue(HexString.EMPTY);
+        assertThat(multiPathPaymentObserver.getInFlight(paymentHash)).isEqualTo(Coins.NONE);
+    }
+
+    @Test
+    void inFlight_updated_with_several_routes() {
+        HexString paymentHash = DECODED_PAYMENT_REQUEST.paymentHash();
+        multiPathPaymentObserver.getFor(ROUTE, paymentHash);
+        multiPathPaymentObserver.getFor(ROUTE_2, HexString.EMPTY);
+        multiPathPaymentObserver.getFor(ROUTE_3, paymentHash);
+        Coins expectedAmount = ROUTE.getAmount().add(ROUTE_3.getAmount());
+        assertThat(multiPathPaymentObserver.getInFlight(paymentHash)).isEqualTo(expectedAmount);
     }
 
     private List<PaymentAttemptHop> hops() {

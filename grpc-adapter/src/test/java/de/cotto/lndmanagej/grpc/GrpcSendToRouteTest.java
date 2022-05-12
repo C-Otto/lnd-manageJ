@@ -114,13 +114,15 @@ class GrpcSendToRouteTest {
     void reporter_reports_value_to_given_observer() {
         grpcSendToRoute.sendToRoute(ROUTE, DECODED_PAYMENT_REQUEST, observer);
         verify(grpcRouterService).sendToRoute(any(), captor.capture());
-        HTLCAttempt value = htlcAttempt();
+        HexString preimage = new HexString("0011FF");
+        HTLCAttempt value = htlcAttempt(preimage);
         captor.getValue().onNext(value);
-        verify(observer).onValue(value);
+        verify(observer).onValue(preimage);
     }
 
-    private HTLCAttempt htlcAttempt() {
-        return HTLCAttempt.newBuilder().build();
+    private HTLCAttempt htlcAttempt(HexString hexString) {
+        ByteString bytestring = ByteString.copyFrom(hexString.getByteArray());
+        return HTLCAttempt.newBuilder().setPreimage(bytestring).build();
     }
 
     private ByteString toByteString(HexString hexString) {

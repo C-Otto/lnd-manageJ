@@ -1,5 +1,8 @@
 package de.cotto.lndmanagej.grpc;
 
+import com.google.protobuf.ByteString;
+import de.cotto.lndmanagej.model.HexString;
+import lnrpc.HTLCAttempt;
 import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nullable;
@@ -9,14 +12,8 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 
 class ReportingStreamObserverTest {
 
-    private final MySendToRouteObserver sendToRouteObserver = new MySendToRouteObserver();
-    private final ReportingStreamObserver<String> reportingStreamObserver =
-            new ReportingStreamObserver<>(sendToRouteObserver);
-
-    @Test
-    void onNext() {
-        assertThatCode(() -> reportingStreamObserver.onNext("foo")).doesNotThrowAnyException();
-    }
+    private final TestableSendToRouteObserver sendToRouteObserver = new TestableSendToRouteObserver();
+    private final ReportingStreamObserver reportingStreamObserver = new ReportingStreamObserver(sendToRouteObserver);
 
     @Test
     void onCompleted() {
@@ -31,18 +28,21 @@ class ReportingStreamObserverTest {
     }
 
     @Test
-    void onValue() {
-        String value = "";
-        assertThatCode(() -> reportingStreamObserver.onNext(value)).doesNotThrowAnyException();
-        assertThat(sendToRouteObserver.seenValue).isSameAs(value);
+    void onNext_forwards_preimage() {
+        HexString preimage = new HexString("AA00");
+        HTLCAttempt htlcAttempt = HTLCAttempt.newBuilder()
+                .setPreimage(ByteString.copyFrom(preimage.getByteArray()))
+                .build();
+        assertThatCode(() -> reportingStreamObserver.onNext(htlcAttempt)).doesNotThrowAnyException();
+        assertThat(sendToRouteObserver.seenPreimage).isEqualTo(preimage);
     }
 
-    private static class MySendToRouteObserver implements SendToRouteObserver {
+    private static class TestableSendToRouteObserver implements SendToRouteObserver {
         @Nullable
         private Throwable seenThrowable;
 
         @Nullable
-        private Object seenValue;
+        private HexString seenPreimage;
 
         @Override
         public void onError(Throwable throwable) {
@@ -50,8 +50,8 @@ class ReportingStreamObserverTest {
         }
 
         @Override
-        public void onValue(Object value) {
-            seenValue = value;
+        public void onValue(HexString preimage) {
+            seenPreimage = preimage;
         }
     }
 }
