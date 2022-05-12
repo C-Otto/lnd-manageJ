@@ -46,9 +46,8 @@ public final class DeriveDataUtil {
 
     static Set<String> deriveWarnings(ChannelId channelId) {
         RandomGenerator rand = createRandomGenerator(channelId);
-        boolean showWarning = rand.nextInt(10) != 0;
         int updates = (rand.nextInt(10) + 5) * 100_000;
-        return showWarning ? Set.of("Channel has accumulated " + updates + " updates.") : Set.of();
+        return rand.nextBoolean() ? Set.of("Channel has accumulated " + updates + " updates.") : Set.of();
     }
 
     static FlowReportDto deriveFlowReport(ChannelId channelId) {
@@ -103,8 +102,7 @@ public final class DeriveDataUtil {
 
     static Set<String> deriveChannelWarnings(ChannelId channelId) {
         RandomGenerator rand = createRandomGenerator(channelId);
-        boolean showWarning = rand.nextInt(20) != 0;
         int days = rand.nextInt(30) + 30;
-        return showWarning ? Set.of("No flow in the past " + days + " days.") : Set.of();
+        return rand.nextBoolean() ? Set.of("No flow in the past " + days + " days.") : Set.of();
     }
 }

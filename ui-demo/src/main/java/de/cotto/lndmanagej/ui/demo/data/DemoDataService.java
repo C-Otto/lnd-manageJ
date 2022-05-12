@@ -137,7 +137,7 @@ public class DemoDataService extends UiDataService {
     public NodeDto getNode(Pubkey pubkey) {
         return getOpenChannels().stream()
                 .filter(channel -> channel.remotePubkey().equals(pubkey))
-                .map(channel -> new NodeDto(pubkey.toString(), channel.remoteAlias(), isOnline(channel)))
+                .map(channel -> new NodeDto(pubkey.toString(), channel.remoteAlias(), isOnline(channel.channelId())))
                 .findFirst().orElseThrow();
     }
 
@@ -146,8 +146,8 @@ public class DemoDataService extends UiDataService {
         return createNodeDetails(getNode(pubkey), getOpenChannels(pubkey));
     }
 
-    private static boolean isOnline(OpenChannelDto channel) {
-        return channel.channelId().getShortChannelId() % 4 != 0;
+    static boolean isOnline(ChannelId channelId) {
+        return channelId.getShortChannelId() % 4 != 0;
     }
 
     private static NodeWithWarningsDto createNodeWithWarnings(String alias, Pubkey pubkey, String... warnings) {
