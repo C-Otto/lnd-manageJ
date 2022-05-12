@@ -13,8 +13,6 @@ import de.cotto.lndmanagej.model.PoliciesForLocalChannel;
 import de.cotto.lndmanagej.model.Policy;
 import de.cotto.lndmanagej.model.RebalanceReport;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.random.RandomGenerator;
@@ -24,24 +22,18 @@ import static de.cotto.lndmanagej.model.OpenInitiator.REMOTE;
 
 public final class DeriveDataUtil {
 
-    private static final Map<ChannelId, Random> RANDOM_GENERATOR = new HashMap<>();
     private static final Coins MAX_HTLC = Coins.ofSatoshis(1_000_000);
 
     private DeriveDataUtil() {
         // util class
     }
 
-    private static RandomGenerator getOrCreateRandomGenerator(ChannelId channelId) {
-        Random random = RANDOM_GENERATOR.get(channelId);
-        if (random == null) {
-            random = new Random(channelId.getShortChannelId());
-            RANDOM_GENERATOR.put(channelId, random);
-        }
-        return random;
+    private static RandomGenerator createRandomGenerator(ChannelId channelId) {
+        return new Random(channelId.getShortChannelId());
     }
 
     static RebalanceReportDto deriveRebalanceReport(ChannelId channelId) {
-        RandomGenerator rand = getOrCreateRandomGenerator(channelId);
+        RandomGenerator rand = createRandomGenerator(channelId);
         return RebalanceReportDto.createFromModel(new RebalanceReport(
                 Coins.ofSatoshis(rand.nextInt(5000)),
                 Coins.ofSatoshis(rand.nextInt(1000)),
@@ -53,14 +45,14 @@ public final class DeriveDataUtil {
     }
 
     static Set<String> deriveWarnings(ChannelId channelId) {
-        RandomGenerator rand = getOrCreateRandomGenerator(channelId);
+        RandomGenerator rand = createRandomGenerator(channelId);
         boolean showWarning = rand.nextInt(10) != 0;
         int updates = (rand.nextInt(10) + 5) * 100_000;
         return showWarning ? Set.of("Channel has accumulated " + updates + " updates.") : Set.of();
     }
 
     static FlowReportDto deriveFlowReport(ChannelId channelId) {
-        RandomGenerator rand = getOrCreateRandomGenerator(channelId);
+        RandomGenerator rand = createRandomGenerator(channelId);
         FlowReport flowReport = new FlowReport(
                 Coins.ofSatoshis(rand.nextLong(100_000)),
                 Coins.ofSatoshis(rand.nextLong(100_000)),
@@ -76,7 +68,7 @@ public final class DeriveDataUtil {
     }
 
     static FeeReportDto deriveFeeReport(ChannelId channelId) {
-        RandomGenerator rand = getOrCreateRandomGenerator(channelId);
+        RandomGenerator rand = createRandomGenerator(channelId);
         long earned = rand.nextLong(1_000_000);
         long sourced = rand.nextLong(100_000);
         return FeeReportDto.createFromModel(
@@ -84,7 +76,7 @@ public final class DeriveDataUtil {
     }
 
     static OnChainCostsDto deriveOnChainCosts(ChannelId channelId) {
-        RandomGenerator rand = getOrCreateRandomGenerator(channelId);
+        RandomGenerator rand = createRandomGenerator(channelId);
         return new OnChainCostsDto(
                 String.valueOf(rand.nextLong(2000)),
                 String.valueOf(rand.nextLong(2000)),
@@ -93,7 +85,7 @@ public final class DeriveDataUtil {
     }
 
     static OpenInitiator deriveOpenInitiator(ChannelId channelId) {
-        return getOrCreateRandomGenerator(channelId).nextBoolean() ? LOCAL : REMOTE;
+        return createRandomGenerator(channelId).nextBoolean() ? LOCAL : REMOTE;
     }
 
     static PoliciesForLocalChannel derivePolicies(ChannelId channelId) {
@@ -101,7 +93,7 @@ public final class DeriveDataUtil {
     }
 
     static Policy derivePolicy(ChannelId channelId) {
-        RandomGenerator rand = getOrCreateRandomGenerator(channelId);
+        RandomGenerator rand = createRandomGenerator(channelId);
         long feeRate = rand.nextLong(100) * 10;
         Coins baseFee = Coins.ofMilliSatoshis(rand.nextLong(2) * 1000);
         boolean enabled = rand.nextInt(10) == 0;
@@ -110,7 +102,7 @@ public final class DeriveDataUtil {
     }
 
     static Set<String> deriveChannelWarnings(ChannelId channelId) {
-        RandomGenerator rand = getOrCreateRandomGenerator(channelId);
+        RandomGenerator rand = createRandomGenerator(channelId);
         boolean showWarning = rand.nextInt(20) != 0;
         int days = rand.nextInt(30) + 30;
         return showWarning ? Set.of("No flow in the past " + days + " days.") : Set.of();

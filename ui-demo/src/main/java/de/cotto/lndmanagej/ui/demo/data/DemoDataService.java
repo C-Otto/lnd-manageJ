@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.ui.demo.data;
 
+import de.cotto.lndmanagej.controller.NotFoundException;
 import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.ChannelWithWarningsDto;
 import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
@@ -124,11 +125,11 @@ public class DemoDataService extends UiDataService {
     }
 
     @Override
-    public ChannelDetailsDto getChannelDetails(ChannelId channelId) {
+    public ChannelDetailsDto getChannelDetails(ChannelId channelId) throws NotFoundException {
         OpenChannelDto localOpenChannel = getOpenChannels().stream()
                 .filter(c -> channelId.equals(c.channelId()))
                 .findFirst()
-                .orElseThrow();
+                .orElseThrow(NotFoundException::new);
         return createChannelDetails(localOpenChannel);
     }
 
@@ -149,15 +150,15 @@ public class DemoDataService extends UiDataService {
         return channel.channelId().getShortChannelId() % 4 != 0;
     }
 
-    public static NodeWithWarningsDto createNodeWithWarnings(String alias, Pubkey pubkey, String... warnings) {
+    private static NodeWithWarningsDto createNodeWithWarnings(String alias, Pubkey pubkey, String... warnings) {
         return new NodeWithWarningsDto(Set.of(warnings), alias, pubkey);
     }
 
-    public static ChannelWithWarningsDto createChannelWarning(ChannelId channelId, String... warnings) {
+    private static ChannelWithWarningsDto createChannelWarning(ChannelId channelId, String... warnings) {
         return new ChannelWithWarningsDto(Set.of(warnings), channelId);
     }
 
-    public static OpenChannelDto createOpenChannel(
+    private static OpenChannelDto createOpenChannel(
             String compactChannelId,
             String alias,
             String pubkey,
@@ -178,7 +179,7 @@ public class DemoDataService extends UiDataService {
                 )));
     }
 
-    public static ChannelDetailsDto createChannelDetails(OpenChannelDto channel) {
+    private static ChannelDetailsDto createChannelDetails(OpenChannelDto channel) {
         return new ChannelDetailsDto(
                 channel.channelId(),
                 channel.remotePubkey(),
@@ -193,7 +194,7 @@ public class DemoDataService extends UiDataService {
                 DeriveDataUtil.deriveWarnings(channel.channelId()));
     }
 
-    public static NodeDetailsDto createNodeDetails(NodeDto node, List<OpenChannelDto> channels) {
+    private static NodeDetailsDto createNodeDetails(NodeDto node, List<OpenChannelDto> channels) {
         OpenChannelDto firstChannel = channels.stream().findFirst().orElseThrow();
         OnlineReport onlineReport = node.online() ? ONLINE_REPORT : ONLINE_REPORT_OFFLINE;
         return new NodeDetailsDto(
