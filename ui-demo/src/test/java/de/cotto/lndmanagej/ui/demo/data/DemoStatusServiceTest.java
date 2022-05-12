@@ -15,7 +15,7 @@ class DemoStatusServiceTest {
     DemoStatusService statusService;
 
     @Test
-    void getStatus_isSynced() {
+    void getWarnings_isSynced() {
         assertNotNull(statusService.getStatus());
         assertTrue(statusService.getStatus().synced());
     }

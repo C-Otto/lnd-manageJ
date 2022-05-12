@@ -6,7 +6,6 @@ import de.cotto.lndmanagej.ui.UiDataService;
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
-import de.cotto.lndmanagej.ui.dto.WarningsModel;
 import de.cotto.lndmanagej.ui.page.channel.ChannelDetailsPage;
 import de.cotto.lndmanagej.ui.page.channel.ChannelsPage;
 import de.cotto.lndmanagej.ui.page.general.DashboardPage;
@@ -42,13 +41,13 @@ class PageServiceTest {
     void dashboard() {
         List<OpenChannelDto> channels = List.of(OPEN_CHANNEL_DTO);
         List<NodeDto> nodes = List.of(new NodeDto(PUBKEY.toString(), NODE.alias(), true));
-        WarningsModel warningsModel = new WarningsModel(new NodesAndChannelsWithWarningsDto(List.of(), List.of()));
+        NodesAndChannelsWithWarningsDto warnings = new NodesAndChannelsWithWarningsDto(List.of(), List.of());
         when(dataService.getOpenChannels()).thenReturn(channels);
         when(dataService.createNodeList()).thenReturn(nodes);
-        when(dataService.getStatus()).thenReturn(warningsModel);
+        when(dataService.getWarnings()).thenReturn(warnings);
 
         assertThat(pageService.dashboard()).usingRecursiveComparison().isEqualTo(
-                new DashboardPage(channels, nodes, warningsModel)
+                new DashboardPage(channels, nodes, warnings)
         );
     }
 

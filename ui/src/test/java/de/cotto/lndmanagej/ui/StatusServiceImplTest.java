@@ -21,7 +21,7 @@ class StatusServiceImplTest {
     private OwnNodeService ownNodeService;
 
     @Test
-    void getStatus_synced() {
+    void getWarnings_synced() {
         int blockHeight = 111_111;
         when(ownNodeService.getBlockHeight()).thenReturn(blockHeight);
         when(ownNodeService.isSyncedToChain()).thenReturn(true);

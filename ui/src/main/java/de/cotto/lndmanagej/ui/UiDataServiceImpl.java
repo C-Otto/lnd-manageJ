@@ -8,6 +8,7 @@ import de.cotto.lndmanagej.controller.WarningsController;
 import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.ChannelsDto;
 import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
+import de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.LocalChannel;
@@ -18,7 +19,6 @@ import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
-import de.cotto.lndmanagej.ui.dto.WarningsModel;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -51,8 +51,8 @@ public class UiDataServiceImpl extends UiDataService {
     }
 
     @Override
-    public WarningsModel getStatus() {
-        return new WarningsModel(warningsController.getWarnings());
+    public NodesAndChannelsWithWarningsDto getWarnings() {
+        return warningsController.getWarnings();
     }
 
     @Override

@@ -45,21 +45,18 @@ class DemoDataServiceTest {
     }
 
     @Test
-    void getStatus_exists() {
-        assertNotNull(demoDataService.getStatus());
-        assertNotNull(demoDataService.getStatus().warnings());
+    void getWarnings_exists() {
+        assertNotNull(demoDataService.getWarnings());
     }
 
     @Test
-    void getStatus_hasNodeWithWarnings() {
-        assertNotNull(demoDataService.getStatus().warnings().nodesWithWarnings());
-        assertFalse(demoDataService.getStatus().warnings().nodesWithWarnings().isEmpty());
+    void getWarnings_hasNodeWithWarnings() {
+        assertNotNull(demoDataService.getWarnings().nodesWithWarnings());
     }
 
     @Test
-    void getStatus_hasChannelWarnings() {
-        assertNotNull(demoDataService.getStatus().warnings().channelsWithWarnings());
-        assertFalse(demoDataService.getStatus().warnings().channelsWithWarnings().isEmpty());
+    void getWarnings_hasChannelWarnings() {
+        assertNotNull(demoDataService.getWarnings().channelsWithWarnings());
     }
 
     @Test
