@@ -12,4 +12,6 @@ public class BasicRouteFixtures {
             new BasicRoute(List.of(EDGE, EDGE_2_3, EDGE_3_4), Coins.ofSatoshis(100));
     public static final BasicRoute BASIC_ROUTE_2 =
             new BasicRoute(List.of(EDGE_1_3, EDGE_2_3), Coins.ofSatoshis(200));
+    public static final BasicRoute BASIC_ROUTE_3 =
+            new BasicRoute(List.of(EDGE_2_3, EDGE_3_4), Coins.ofSatoshis(50));
 }
