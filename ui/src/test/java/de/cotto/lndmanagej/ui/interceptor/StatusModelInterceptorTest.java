@@ -14,6 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 import static de.cotto.lndmanagej.controller.dto.StatusModelFixture.STATUS_MODEL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,8 +41,16 @@ class StatusModelInterceptorTest {
         when(statusService.getStatus()).thenReturn(STATUS_MODEL);
         ModelAndView modelAndView = new ModelAndView();
         statusModelInterceptor.postHandle(request, response, handler, modelAndView);
+        verify(statusService).getStatus();
         assertTrue(modelAndView.getModel().containsKey("status"));
         assertEquals(modelAndView.getModel().get("status"), STATUS_MODEL);
+    }
+
+    @Test
+    void postHandle_noModel_addStatusModel() {
+        ModelAndView modelAndView = null;
+        statusModelInterceptor.postHandle(request, response, handler, modelAndView);
+        verifyNoInteractions(statusService);
     }
 
 }
