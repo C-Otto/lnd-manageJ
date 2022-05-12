@@ -40,7 +40,11 @@ class ObjectMapperConfigurationIT {
     @Test
     void output_is_pretty_printed() throws Exception {
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL));
+        String expectedString = """
+                {
+                  "channels" : [ "712345x123x1" ]
+                }""";
         mockMvc.perform(get(PREFIX + "/open-channels/"))
-                .andExpect(content().string("{\n  \"channels\" : [ \"712345x123x1\" ]\n}"));
+                .andExpect(content().string(expectedString));
     }
 }
