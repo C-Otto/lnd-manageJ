@@ -7,7 +7,7 @@ dependencies {
     implementation project(':model')
     implementation project(':web')
     implementation testFixtures(project(':model'))
-    implementation testFixtures(project(':ui'))
+    integrationTestImplementation testFixtures(project(':ui'))
 }
 
 pitest {
