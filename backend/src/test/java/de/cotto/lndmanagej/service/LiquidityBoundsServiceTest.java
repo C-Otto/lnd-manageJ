@@ -37,6 +37,7 @@ class LiquidityBoundsServiceTest {
 
     @Test
     void getAssumedLiquidityUpperBound_from_mission_control() {
+        when(configurationService.getBooleanValue(USE_MISSION_CONTROL)).thenReturn(Optional.of(true));
         when(missionControlService.getMinimumOfRecentFailures(PUBKEY, PUBKEY_2))
                 .thenReturn(Optional.of(Coins.ofSatoshis(123)));
         assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(PUBKEY, PUBKEY_2))
@@ -45,7 +46,6 @@ class LiquidityBoundsServiceTest {
 
     @Test
     void getAssumedLiquidityUpperBound_mission_control_disabled() {
-        when(configurationService.getBooleanValue(USE_MISSION_CONTROL)).thenReturn(Optional.of(false));
         assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(PUBKEY, PUBKEY_2)).isEmpty();
         verifyNoInteractions(missionControlService);
     }
@@ -106,6 +106,7 @@ class LiquidityBoundsServiceTest {
 
     @Test
     void markAsUnavailable_with_existing_mission_control_data() {
+        when(configurationService.getBooleanValue(USE_MISSION_CONTROL)).thenReturn(Optional.of(true));
         when(missionControlService.getMinimumOfRecentFailures(PUBKEY, PUBKEY_2))
                 .thenReturn(Optional.of(Coins.ofSatoshis(123)));
         liquidityBoundsService.markAsUnavailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));

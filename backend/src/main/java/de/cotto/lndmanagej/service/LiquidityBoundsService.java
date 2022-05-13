@@ -129,7 +129,7 @@ public class LiquidityBoundsService {
     }
 
     private Optional<Coins> getFromMissionControl(Pubkey source, Pubkey target) {
-        boolean useMissionControl = configurationService.getBooleanValue(USE_MISSION_CONTROL).orElse(true);
+        boolean useMissionControl = configurationService.getBooleanValue(USE_MISSION_CONTROL).orElse(false);
         if (useMissionControl) {
             return missionControlService.getMinimumOfRecentFailures(source, target);
         }
