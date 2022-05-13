@@ -5,6 +5,7 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.Edge;
 import de.cotto.lndmanagej.model.LiquidityBounds;
 import de.cotto.lndmanagej.model.LiquidityBoundsWithTimestamp;
 import de.cotto.lndmanagej.model.Pubkey;
@@ -49,16 +50,19 @@ public class LiquidityBoundsService {
     }
 
     @Timed
-    public Optional<Coins> getAssumedLiquidityUpperBound(Pubkey source, Pubkey target) {
+    public Optional<Coins> getAssumedLiquidityUpperBound(Edge edge) {
+        Pubkey source = edge.startNode();
+        Pubkey target = edge.endNode();
         Coins fromMissionControl = getFromMissionControl(source, target).orElse(null);
         Coins fromPayments = getInfo(new TwoPubkeys(source, target)).getUpperBound().orElse(null);
         if (fromMissionControl == null && fromPayments == null) {
             return Optional.empty();
         }
+        Coins maxHtlc = edge.policy().maxHtlc();
         if (fromMissionControl == null) {
-            return Optional.of(Objects.requireNonNull(fromPayments));
+            return Optional.of(Objects.requireNonNull(fromPayments).minimum(maxHtlc));
         }
-        Coins oneSatBelowFailure = fromMissionControl.subtract(Coins.ofSatoshis(1));
+        Coins oneSatBelowFailure = fromMissionControl.subtract(Coins.ofSatoshis(1)).minimum(maxHtlc);
         if (fromPayments == null) {
             return Optional.of(oneSatBelowFailure);
         }
@@ -66,8 +70,9 @@ public class LiquidityBoundsService {
     }
 
     @Timed
-    public Coins getAssumedLiquidityLowerBound(Pubkey source, Pubkey target) {
-        return getInfo(new TwoPubkeys(source, target)).getLowerBound();
+    public Coins getAssumedLiquidityLowerBound(Edge edge) {
+        LiquidityBounds info = getInfo(new TwoPubkeys(edge.startNode(), edge.endNode()));
+        return info.getLowerBound().minimum(edge.policy().maxHtlc());
     }
 
     public void markAsMoved(Pubkey source, Pubkey target, Coins amount) {

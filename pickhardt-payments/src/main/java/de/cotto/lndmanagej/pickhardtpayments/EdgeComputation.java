@@ -80,7 +80,7 @@ public class EdgeComputation {
     private EdgeWithLiquidityInformation getEdgeWithLiquidityInformation(Edge edge, Pubkey ownPubkey) {
         Coins knownLiquidity = getKnownLiquidity(edge, ownPubkey).orElse(null);
         if (knownLiquidity == null) {
-            Coins lowerBound = liquidityBoundsService.getAssumedLiquidityLowerBound(edge.startNode(), edge.endNode());
+            Coins lowerBound = liquidityBoundsService.getAssumedLiquidityLowerBound(edge);
             Coins upperBound = getAvailableLiquidityUpperBound(edge, lowerBound);
             return EdgeWithLiquidityInformation.forLowerAndUpperBound(edge, lowerBound, upperBound);
         }
@@ -131,9 +131,7 @@ public class EdgeComputation {
     }
 
     private Coins getAvailableLiquidityUpperBound(Edge edge, Coins lowerBound) {
-        Pubkey source = edge.startNode();
-        Pubkey target = edge.endNode();
-        Coins upperBound = liquidityBoundsService.getAssumedLiquidityUpperBound(source, target).orElse(null);
+        Coins upperBound = liquidityBoundsService.getAssumedLiquidityUpperBound(edge).orElse(null);
         return edge.capacity().minimum(upperBound).maximum(lowerBound);
     }
 }

@@ -12,6 +12,7 @@ import java.util.Optional;
 
 import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.LIQUIDITY_INFORMATION_MAX_AGE;
 import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.USE_MISSION_CONTROL;
+import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,7 +33,7 @@ class LiquidityBoundsServiceTest {
 
     @Test
     void getAssumedLiquidityUpperBound_unknown() {
-        assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(PUBKEY, PUBKEY_2)).isEmpty();
+        assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(EDGE)).isEmpty();
     }
 
     @Test
@@ -40,68 +41,91 @@ class LiquidityBoundsServiceTest {
         when(configurationService.getBooleanValue(USE_MISSION_CONTROL)).thenReturn(Optional.of(true));
         when(missionControlService.getMinimumOfRecentFailures(PUBKEY, PUBKEY_2))
                 .thenReturn(Optional.of(Coins.ofSatoshis(123)));
-        assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(PUBKEY, PUBKEY_2))
+        assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(EDGE))
                 .contains(Coins.ofSatoshis(122));
     }
 
     @Test
     void getAssumedLiquidityUpperBound_mission_control_disabled() {
-        assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(PUBKEY, PUBKEY_2)).isEmpty();
+        assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(EDGE)).isEmpty();
         verifyNoInteractions(missionControlService);
     }
 
     @Test
     void getAssumedLiquidityLowerBound_defaults_to_none() {
-        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(PUBKEY, PUBKEY_2))
+        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(EDGE))
                 .isEqualTo(Coins.NONE);
     }
 
     @Test
     void markAsAvailable() {
-        liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100_000));
-        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(PUBKEY, PUBKEY_2))
-                .isEqualTo(Coins.ofSatoshis(100_000));
+        liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(9_000));
+        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(EDGE))
+                .isEqualTo(Coins.ofSatoshis(9_000));
     }
 
     @Test
     void markAsAvailable_uses_maximum() {
-        liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(120_000));
-        liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(130_000));
-        liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(110_000));
-        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(PUBKEY, PUBKEY_2))
-                .isEqualTo(Coins.ofSatoshis(130_000));
+        liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(120));
+        liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(130));
+        liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(110));
+        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(EDGE))
+                .isEqualTo(Coins.ofSatoshis(130));
     }
 
     @Test
     void markAsMoved_removes_available_coins() {
-        liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(110_000));
-        liquidityBoundsService.markAsMoved(PUBKEY, PUBKEY_2, Coins.ofSatoshis(50_000));
-        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(PUBKEY, PUBKEY_2))
-                .isEqualTo(Coins.ofSatoshis(60_000));
+        liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(1_100));
+        liquidityBoundsService.markAsMoved(PUBKEY, PUBKEY_2, Coins.ofSatoshis(500));
+        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(EDGE))
+                .isEqualTo(Coins.ofSatoshis(600));
     }
 
     @Test
     void markAsMoved_below_assumed_available() {
         liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(1));
         liquidityBoundsService.markAsMoved(PUBKEY, PUBKEY_2, Coins.ofSatoshis(50_000));
-        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(PUBKEY, PUBKEY_2))
+        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(EDGE))
                 .isEqualTo(Coins.NONE);
     }
 
     @Test
     void markAsUnavailable() {
+        liquidityBoundsService.markAsUnavailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(5_000));
+        assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(EDGE))
+                .contains(Coins.ofSatoshis(4_999));
+    }
+
+    @Test
+    void getAssumedLiquidityUpperBound_with_htlc_below_upper_bound_from_mission_control() {
+        when(configurationService.getBooleanValue(USE_MISSION_CONTROL)).thenReturn(Optional.of(true));
+        when(missionControlService.getMinimumOfRecentFailures(PUBKEY, PUBKEY_2))
+                .thenReturn(Optional.of(Coins.ofSatoshis(40_000)));
+        assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(EDGE))
+                .contains(Coins.ofSatoshis(10_000));
+    }
+
+    @Test
+    void getAssumedLiquidityUpperBound_with_htlc_below_upper_bound_from_payments_observation() {
         liquidityBoundsService.markAsUnavailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(50_000));
-        assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(PUBKEY, PUBKEY_2))
-                .contains(Coins.ofSatoshis(49_999));
+        assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(EDGE))
+                .contains(Coins.ofSatoshis(10_000));
+    }
+
+    @Test
+    void getAssumedLiquidityLowerBound_with_htlc_below_upper_bound() {
+        liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(50_000));
+        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(EDGE))
+                .isEqualTo(Coins.ofSatoshis(10_000));
     }
 
     @Test
     void markAsUnavailable_uses_minimum() {
-        liquidityBoundsService.markAsUnavailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(50_000));
-        liquidityBoundsService.markAsUnavailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(40_000));
-        liquidityBoundsService.markAsUnavailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(60_000));
-        assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(PUBKEY, PUBKEY_2))
-                .contains(Coins.ofSatoshis(39_999));
+        liquidityBoundsService.markAsUnavailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(5_000));
+        liquidityBoundsService.markAsUnavailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(4_000));
+        liquidityBoundsService.markAsUnavailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(6_000));
+        assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(EDGE))
+                .contains(Coins.ofSatoshis(3_999));
     }
 
     @Test
@@ -110,7 +134,7 @@ class LiquidityBoundsServiceTest {
         when(missionControlService.getMinimumOfRecentFailures(PUBKEY, PUBKEY_2))
                 .thenReturn(Optional.of(Coins.ofSatoshis(123)));
         liquidityBoundsService.markAsUnavailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
-        assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(PUBKEY, PUBKEY_2))
+        assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(EDGE))
                 .contains(Coins.ofSatoshis(99));
     }
 
@@ -118,14 +142,14 @@ class LiquidityBoundsServiceTest {
     void markAsAvailable_more_than_upper_bound() {
         liquidityBoundsService.markAsUnavailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
         liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(120));
-        assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(PUBKEY, PUBKEY_2)).isEmpty();
+        assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(EDGE)).isEmpty();
     }
 
     @Test
     void markAsAvailable_below_upper_bound() {
         liquidityBoundsService.markAsUnavailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
         liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(90));
-        assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(PUBKEY, PUBKEY_2))
+        assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(EDGE))
                 .contains(Coins.ofSatoshis(99));
     }
 
@@ -133,7 +157,7 @@ class LiquidityBoundsServiceTest {
     void markAsUnavailable_below_lower_bound() {
         liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(120));
         liquidityBoundsService.markAsUnavailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
-        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(PUBKEY, PUBKEY_2))
+        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(EDGE))
                 .isEqualTo(Coins.ofSatoshis(99));
     }
 
@@ -142,7 +166,7 @@ class LiquidityBoundsServiceTest {
         // the 100 sats in flight might not reach the channel, so we should not lower the upper bound
         liquidityBoundsService.markAsUnavailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(901));
         liquidityBoundsService.markAsInFlight(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
-        assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(PUBKEY, PUBKEY_2))
+        assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(EDGE))
                 .contains(Coins.ofSatoshis(900));
     }
 
@@ -150,7 +174,7 @@ class LiquidityBoundsServiceTest {
     void markAsInFlight_reduces_lower_bound() {
         liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(300));
         liquidityBoundsService.markAsInFlight(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
-        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(PUBKEY, PUBKEY_2))
+        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(EDGE))
                 .isEqualTo(Coins.ofSatoshis(200));
     }
 
@@ -159,7 +183,7 @@ class LiquidityBoundsServiceTest {
         liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(300));
         liquidityBoundsService.markAsInFlight(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
         liquidityBoundsService.markAsInFlight(PUBKEY, PUBKEY_2, Coins.ofSatoshis(-100));
-        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(PUBKEY, PUBKEY_2))
+        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(EDGE))
                 .isEqualTo(Coins.ofSatoshis(300));
     }
 
@@ -167,7 +191,7 @@ class LiquidityBoundsServiceTest {
     void updating_in_flight_and_back() {
         liquidityBoundsService.markAsInFlight(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
         liquidityBoundsService.markAsInFlight(PUBKEY, PUBKEY_2, Coins.ofSatoshis(-100));
-        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(PUBKEY, PUBKEY_2))
+        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(EDGE))
                 .isEqualTo(Coins.NONE);
     }
 
@@ -176,21 +200,21 @@ class LiquidityBoundsServiceTest {
         liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(300));
         liquidityBoundsService.markAsInFlight(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
         liquidityBoundsService.markAsInFlight(PUBKEY, PUBKEY_2, Coins.ofSatoshis(40));
-        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(PUBKEY, PUBKEY_2))
+        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(EDGE))
                 .isEqualTo(Coins.ofSatoshis(160));
     }
 
     @Test
     void markAsInFlight_for_unknown_lower_bound() {
         liquidityBoundsService.markAsInFlight(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
-        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(PUBKEY, PUBKEY_2))
+        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(EDGE))
                 .isEqualTo(Coins.NONE);
     }
 
     @Test
     void markAsInFlight_for_unknown_upper_bound() {
         liquidityBoundsService.markAsInFlight(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
-        assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(PUBKEY, PUBKEY_2))
+        assertThat(liquidityBoundsService.getAssumedLiquidityUpperBound(EDGE))
                 .isEmpty();
     }
 
@@ -198,7 +222,7 @@ class LiquidityBoundsServiceTest {
     void does_not_return_stale_data() {
         liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
         when(configurationService.getIntegerValue(LIQUIDITY_INFORMATION_MAX_AGE)).thenReturn(Optional.of(0));
-        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(PUBKEY, PUBKEY_2)).isEqualTo(Coins.NONE);
+        assertThat(liquidityBoundsService.getAssumedLiquidityLowerBound(EDGE)).isEqualTo(Coins.NONE);
     }
 
     @Test

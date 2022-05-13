@@ -66,7 +66,7 @@ class EdgeComputationTest {
     void setUp() {
         lenient().when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY_4);
         lenient().when(nodeService.getNode(any())).thenReturn(NODE_PEER);
-        lenient().when(liquidityBoundsService.getAssumedLiquidityLowerBound(any(), any())).thenReturn(Coins.NONE);
+        lenient().when(liquidityBoundsService.getAssumedLiquidityLowerBound(any())).thenReturn(Coins.NONE);
     }
 
     @Test
@@ -256,13 +256,11 @@ class EdgeComputationTest {
     }
 
     private void mockLowerBound(Coins lowerBound) {
-        when(liquidityBoundsService.getAssumedLiquidityLowerBound(EDGE.startNode(), EDGE.endNode()))
-                .thenReturn(lowerBound);
+        when(liquidityBoundsService.getAssumedLiquidityLowerBound(EDGE)).thenReturn(lowerBound);
     }
 
     private void mockUpperBound(Coins upperBound) {
-        when(liquidityBoundsService.getAssumedLiquidityUpperBound(EDGE.startNode(), EDGE.endNode()))
-                .thenReturn(Optional.of(upperBound));
+        when(liquidityBoundsService.getAssumedLiquidityUpperBound(EDGE)).thenReturn(Optional.of(upperBound));
     }
 
     private void mockEdge() {
