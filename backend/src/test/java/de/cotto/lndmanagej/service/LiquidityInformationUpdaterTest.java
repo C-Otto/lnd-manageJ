@@ -399,9 +399,12 @@ class LiquidityInformationUpdaterTest {
     // CPD-ON
 
     @Test
-    void feeInsufficient_is_ignored() {
-        liquidityInformationUpdater.failure(hopsJustWithAmount, FEE_INSUFFICIENT, 0);
-        verifyNoInteractions(liquidityBoundsService);
+    void feeInsufficient_is_treated_as_channel_failure() {
+        liquidityInformationUpdater.failure(hopsWithChannelIds, FEE_INSUFFICIENT, 2);
+        verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
+        verify(liquidityBoundsService).markAsAvailable(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
+        verify(liquidityBoundsService).markAsUnavailable(PUBKEY_3, PUBKEY_4, Coins.ofSatoshis(1));
+        verifyRemovesInFlightForAllHops();
     }
 
     @Test
