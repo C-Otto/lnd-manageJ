@@ -4,7 +4,7 @@ import de.cotto.lndmanagej.model.Policy;
 
 public record PolicyDto(
         long feeRatePpm,
-        long baseFeeMilliSat,
+        String baseFeeMilliSat,
         boolean enabled,
         int timeLockDelta,
         String maxHtlcMilliSat
@@ -12,7 +12,7 @@ public record PolicyDto(
     public static PolicyDto createFromModel(Policy policy) {
         return new PolicyDto(
                 policy.feeRate(),
-                policy.baseFee().milliSatoshis(),
+                String.valueOf(policy.baseFee().milliSatoshis()),
                 policy.enabled(),
                 policy.timeLockDelta(),
                 String.valueOf(policy.maxHtlc().milliSatoshis())
