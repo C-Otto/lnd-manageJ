@@ -45,4 +45,12 @@ public enum FailureCode {
             return UNKNOWN_FAILURE;
         });
     }
+
+    public boolean isErrorFromFinalNode() {
+        return this == MPP_TIMEOUT
+                || this == INCORRECT_OR_UNKNOWN_PAYMENT_DETAILS
+                || this == FINAL_INCORRECT_CLTV_EXPIRY
+                || this == FINAL_INCORRECT_HTLC_AMOUNT
+                || this == FINAL_EXPIRY_TOO_SOON;
+    }
 }

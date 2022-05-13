@@ -9,20 +9,19 @@ import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.model.PaymentAttemptHop;
 import de.cotto.lndmanagej.model.PaymentListener;
 import de.cotto.lndmanagej.model.Pubkey;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static de.cotto.lndmanagej.model.FailureCode.TEMPORARY_CHANNEL_FAILURE;
+
 @Service
 public class LiquidityInformationUpdater implements PaymentListener {
     private final GrpcGetInfo grpcGetInfo;
     private final GrpcChannelPolicy grpcChannelPolicy;
     private final LiquidityBoundsService liquidityBoundsService;
-    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     public LiquidityInformationUpdater(
             GrpcGetInfo grpcGetInfo,
@@ -56,14 +55,12 @@ public class LiquidityInformationUpdater implements PaymentListener {
     @Override
     public void failure(List<PaymentAttemptHop> paymentAttemptHops, FailureCode failureCode, int failureSourceIndex) {
         removeInFlight(paymentAttemptHops);
-        switch (failureCode) {
-            case TEMPORARY_CHANNEL_FAILURE ->
-                    markAvailableAndUnavailable(paymentAttemptHops, failureSourceIndex, PaymentAttemptHop::amount);
-            case UNKNOWN_NEXT_PEER, CHANNEL_DISABLED, FEE_INSUFFICIENT ->
-                    markAvailableAndUnavailable(paymentAttemptHops, failureSourceIndex, hop -> Coins.ofSatoshis(2));
-            case MPP_TIMEOUT, INCORRECT_OR_UNKNOWN_PAYMENT_DETAILS ->
-                    markAllAvailable(paymentAttemptHops, failureSourceIndex);
-            default -> logger.warn("Unknown failure code {}", failureCode);
+        if (TEMPORARY_CHANNEL_FAILURE.equals(failureCode)) {
+            markAvailableAndUnavailable(paymentAttemptHops, failureSourceIndex, PaymentAttemptHop::amount);
+        } else if (failureCode.isErrorFromFinalNode()) {
+            markAllAvailable(paymentAttemptHops, failureSourceIndex);
+        } else {
+            markAvailableAndUnavailable(paymentAttemptHops, failureSourceIndex, hop -> Coins.ofSatoshis(2));
         }
     }
 

@@ -11,6 +11,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -22,8 +24,11 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.FailureCode.CHANNEL_DISABLED;
-import static de.cotto.lndmanagej.model.FailureCode.FEE_INSUFFICIENT;
+import static de.cotto.lndmanagej.model.FailureCode.FINAL_EXPIRY_TOO_SOON;
+import static de.cotto.lndmanagej.model.FailureCode.FINAL_INCORRECT_CLTV_EXPIRY;
+import static de.cotto.lndmanagej.model.FailureCode.FINAL_INCORRECT_HTLC_AMOUNT;
 import static de.cotto.lndmanagej.model.FailureCode.INCORRECT_OR_UNKNOWN_PAYMENT_DETAILS;
+import static de.cotto.lndmanagej.model.FailureCode.INCORRECT_PAYMENT_AMOUNT;
 import static de.cotto.lndmanagej.model.FailureCode.MPP_TIMEOUT;
 import static de.cotto.lndmanagej.model.FailureCode.TEMPORARY_CHANNEL_FAILURE;
 import static de.cotto.lndmanagej.model.FailureCode.UNKNOWN_NEXT_PEER;
@@ -318,11 +323,7 @@ class LiquidityInformationUpdaterTest {
 
         @Test
         void after_last_hop_from_receiver() {
-            liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, MPP_TIMEOUT, 3);
-            verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
-            verify(liquidityBoundsService).markAsAvailable(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
-            verify(liquidityBoundsService).markAsAvailable(PUBKEY_3, PUBKEY_4, Coins.ofSatoshis(80));
-            verifyRemovesInFlightForAllHops();
+            assertAllAvailableForFailureFromFinalNode(MPP_TIMEOUT);
         }
 
         @Test
@@ -373,11 +374,7 @@ class LiquidityInformationUpdaterTest {
 
         @Test
         void after_last_hop_from_receiver() {
-            liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, INCORRECT_OR_UNKNOWN_PAYMENT_DETAILS, 3);
-            verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
-            verify(liquidityBoundsService).markAsAvailable(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
-            verify(liquidityBoundsService).markAsAvailable(PUBKEY_3, PUBKEY_4, Coins.ofSatoshis(80));
-            verifyRemovesInFlightForAllHops();
+            assertAllAvailableForFailureFromFinalNode(INCORRECT_OR_UNKNOWN_PAYMENT_DETAILS);
         }
 
         @Test
@@ -404,22 +401,61 @@ class LiquidityInformationUpdaterTest {
     }
     // CPD-ON
 
-    @Test
-    void feeInsufficient_is_treated_as_channel_failure() {
-        liquidityInformationUpdater.failure(hopsWithChannelIds, FEE_INSUFFICIENT, 2);
+    @ParameterizedTest
+    @EnumSource(value = FailureCode.class, names = {
+        "INVALID_REALM",
+        "EXPIRY_TOO_SOON",
+        "INVALID_ONION_VERSION",
+        "INVALID_ONION_HMAC",
+        "INVALID_ONION_KEY",
+        "AMOUNT_BELOW_MINIMUM",
+        "FEE_INSUFFICIENT",
+        "INCORRECT_CLTV_EXPIRY",
+        "CHANNEL_DISABLED",
+        "REQUIRED_NODE_FEATURE_MISSING",
+        "REQUIRED_CHANNEL_FEATURE_MISSING",
+        "UNKNOWN_NEXT_PEER",
+        "TEMPORARY_NODE_FAILURE",
+        "PERMANENT_NODE_FAILURE",
+        "PERMANENT_CHANNEL_FAILURE",
+        "EXPIRY_TOO_FAR",
+        "INVALID_ONION_PAYLOAD",
+        "UNKNOWN_FAILURE"
+    })
+    void channel_should_be_treated_as_unavailable(FailureCode failureCode) {
+        liquidityInformationUpdater.failure(hopsWithChannelIds, failureCode, 2);
         verifyRemovesInFlightForAllHops();
         verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
         verify(liquidityBoundsService).markAsAvailable(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
 
-        // see ChannelDisabled
+        // see ChannelDisabled test class
         verify(liquidityBoundsService).markAsUnavailable(PUBKEY_3, PUBKEY_4, Coins.ofSatoshis(2));
+    }
+
+    @Test
+    void incorrect_payment_amount_on_final_node_marks_everything_as_available() {
+        assertAllAvailableForFailureFromFinalNode(INCORRECT_PAYMENT_AMOUNT);
+    }
+
+    @Test
+    void final_incorrect_cltv_expiry_on_final_node_marks_everything_as_available() {
+        assertAllAvailableForFailureFromFinalNode(FINAL_INCORRECT_CLTV_EXPIRY);
+    }
+
+    @Test
+    void final_incorrect_htlc_amount_on_final_node_marks_everything_as_available() {
+        assertAllAvailableForFailureFromFinalNode(FINAL_INCORRECT_HTLC_AMOUNT);
+    }
+
+    @Test
+    void final_expiry_too_soon_on_final_node_marks_everything_as_available() {
+        assertAllAvailableForFailureFromFinalNode(FINAL_EXPIRY_TOO_SOON);
     }
 
     @Test
     void unknown_failure_code() {
         liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, FailureCode.UNKNOWN_FAILURE, 2);
         verifyRemovesInFlightForAllHops();
-        verifyNoMoreInteractions(liquidityBoundsService);
     }
 
     @Test
@@ -427,6 +463,14 @@ class LiquidityInformationUpdaterTest {
         liquidityInformationUpdater.removeInFlight(hopsWithChannelIdsAndPubkeys);
         verifyRemovesInFlightForAllHops();
         verifyNoMoreInteractions(liquidityBoundsService);
+    }
+
+    private void assertAllAvailableForFailureFromFinalNode(FailureCode failureCode) {
+        liquidityInformationUpdater.failure(hopsWithChannelIdsAndPubkeys, failureCode, 3);
+        verify(liquidityBoundsService).markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(100));
+        verify(liquidityBoundsService).markAsAvailable(PUBKEY_2, PUBKEY_3, Coins.ofSatoshis(90));
+        verify(liquidityBoundsService).markAsAvailable(PUBKEY_3, PUBKEY_4, Coins.ofSatoshis(80));
+        verifyRemovesInFlightForAllHops();
     }
 
     private void verifyRemovesInFlightForAllHops() {
