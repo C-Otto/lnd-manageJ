@@ -3,11 +3,9 @@ package de.cotto.lndmanagej.grpc;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.model.ChannelId;
-import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Policy;
 import de.cotto.lndmanagej.model.Pubkey;
 import lnrpc.ChannelEdge;
-import lnrpc.RoutingPolicy;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -18,10 +16,12 @@ public class GrpcChannelPolicy {
     private final GrpcService grpcService;
     private final GrpcGetInfo grpcGetInfo;
     private final LoadingCache<ChannelId, Optional<ChannelEdge>> channelEdgeCache;
+    private final GrpcPolicy grpcPolicy;
 
-    public GrpcChannelPolicy(GrpcService grpcService, GrpcGetInfo grpcGetInfo) {
+    public GrpcChannelPolicy(GrpcService grpcService, GrpcGetInfo grpcGetInfo, GrpcPolicy grpcPolicy) {
         this.grpcService = grpcService;
         this.grpcGetInfo = grpcGetInfo;
+        this.grpcPolicy = grpcPolicy;
         channelEdgeCache = new CacheBuilder()
                 .withExpiry(Duration.ofMinutes(5))
                 .withRefresh(Duration.ofSeconds(150))
@@ -57,9 +57,9 @@ public class GrpcChannelPolicy {
         return getChannelEdge(channelId).map(
                 channelEdge -> {
                     if (sourcePubkey.equals(channelEdge.getNode1Pub())) {
-                        return toPolicy(channelEdge.getNode1Policy());
+                        return grpcPolicy.toPolicy(channelEdge.getNode1Policy());
                     } else if (sourcePubkey.equals(channelEdge.getNode2Pub())) {
-                        return toPolicy(channelEdge.getNode2Policy());
+                        return grpcPolicy.toPolicy(channelEdge.getNode2Policy());
                     } else {
                         return null;
                     }
@@ -72,22 +72,13 @@ public class GrpcChannelPolicy {
         return getChannelEdge(channelId).map(
                 channelEdge -> {
                     if (targetPubkey.equals(channelEdge.getNode2Pub())) {
-                        return toPolicy(channelEdge.getNode1Policy());
+                        return grpcPolicy.toPolicy(channelEdge.getNode1Policy());
                     } else if (targetPubkey.equals(channelEdge.getNode1Pub())) {
-                        return toPolicy(channelEdge.getNode2Policy());
+                        return grpcPolicy.toPolicy(channelEdge.getNode2Policy());
                     } else {
                         return null;
                     }
                 }
-        );
-    }
-
-    private Policy toPolicy(RoutingPolicy routingPolicy) {
-        return new Policy(
-                routingPolicy.getFeeRateMilliMsat(),
-                Coins.ofMilliSatoshis(routingPolicy.getFeeBaseMsat()),
-                !routingPolicy.getDisabled(),
-                routingPolicy.getTimeLockDelta()
         );
     }
 

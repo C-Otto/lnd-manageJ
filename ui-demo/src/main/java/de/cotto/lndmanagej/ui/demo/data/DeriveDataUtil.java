@@ -25,6 +25,7 @@ import static de.cotto.lndmanagej.model.OpenInitiator.REMOTE;
 public final class DeriveDataUtil {
 
     private static final Map<ChannelId, Random> RANDOM_GENERATOR = new HashMap<>();
+    private static final Coins MAX_HTLC = Coins.ofSatoshis(1_000_000);
 
     private DeriveDataUtil() {
         // util class
@@ -105,7 +106,7 @@ public final class DeriveDataUtil {
         Coins baseFee = Coins.ofMilliSatoshis(rand.nextLong(2) * 1000);
         boolean enabled = rand.nextInt(10) == 0;
         int timeLockDelta = (rand.nextInt(5) + 1) * 10;
-        return new Policy(feeRate, baseFee, enabled, timeLockDelta);
+        return new Policy(feeRate, baseFee, enabled, timeLockDelta, MAX_HTLC);
     }
 
     static Set<String> deriveChannelWarnings(ChannelId channelId) {

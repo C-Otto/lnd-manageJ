@@ -9,7 +9,6 @@ import de.cotto.lndmanagej.model.Policy;
 import de.cotto.lndmanagej.model.Pubkey;
 import lnrpc.ChannelEdge;
 import lnrpc.ChannelGraph;
-import lnrpc.RoutingPolicy;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -19,12 +18,14 @@ import java.util.Set;
 
 @Component
 public class GrpcGraph {
-    private static final Policy DEFAULT_DISABLED_POLICY = new Policy(0, Coins.NONE, false, 0);
+    private static final Policy DEFAULT_DISABLED_POLICY = new Policy(0, Coins.NONE, false, 0, Coins.NONE);
     private final GrpcService grpcService;
     private final LoadingCache<Object, Optional<Set<DirectedChannelEdge>>> channelEdgeCache;
+    private final GrpcPolicy grpcPolicy;
 
-    public GrpcGraph(GrpcService grpcService) {
+    public GrpcGraph(GrpcService grpcService, GrpcPolicy grpcPolicy) {
         this.grpcService = grpcService;
+        this.grpcPolicy = grpcPolicy;
         channelEdgeCache = new CacheBuilder()
                 .withExpiry(Duration.ofMinutes(2))
                 .withRefresh(Duration.ofMinutes(1))
@@ -69,24 +70,15 @@ public class GrpcGraph {
 
     private Policy getNode1Policy(ChannelEdge channelEdge) {
         if (channelEdge.hasNode1Policy()) {
-            return toPolicy(channelEdge.getNode1Policy());
+            return grpcPolicy.toPolicy(channelEdge.getNode1Policy());
         }
         return DEFAULT_DISABLED_POLICY;
     }
 
     private Policy getNode2Policy(ChannelEdge channelEdge) {
         if (channelEdge.hasNode2Policy()) {
-            return toPolicy(channelEdge.getNode2Policy());
+            return grpcPolicy.toPolicy(channelEdge.getNode2Policy());
         }
         return DEFAULT_DISABLED_POLICY;
-    }
-
-    private Policy toPolicy(RoutingPolicy routingPolicy) {
-        return new Policy(
-                routingPolicy.getFeeRateMilliMsat(),
-                Coins.ofMilliSatoshis(routingPolicy.getFeeBaseMsat()),
-                !routingPolicy.getDisabled(),
-                routingPolicy.getTimeLockDelta()
-        );
     }
 }

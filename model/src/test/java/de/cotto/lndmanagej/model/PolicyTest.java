@@ -31,7 +31,12 @@ class PolicyTest {
     }
 
     @Test
+    void maxHtlc() {
+        assertThat(POLICY_1.maxHtlc()).isEqualTo(Coins.ofSatoshis(10_000));
+    }
+
+    @Test
     void unknown() {
-        assertThat(Policy.UNKNOWN).isEqualTo(new Policy(0, Coins.NONE, false, 0));
+        assertThat(Policy.UNKNOWN).isEqualTo(new Policy(0, Coins.NONE, false, 0, Coins.NONE));
     }
 }

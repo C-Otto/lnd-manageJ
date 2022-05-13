@@ -6,6 +6,7 @@ import de.cotto.lndmanagej.model.Policy;
 import lnrpc.ChannelEdge;
 import lnrpc.ChannelGraph;
 import lnrpc.RoutingPolicy;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,15 +25,26 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_4;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class GrpcGraphTest {
+    private static final Coins MAX_HTLC = Coins.ofMilliSatoshis(5_432);
+    @InjectMocks
+    private GrpcGraph grpcGraph;
+
     @Mock
     private GrpcService grpcService;
 
-    @InjectMocks
-    private GrpcGraph grpcGraph;
+    @Mock
+    private GrpcPolicy grpcPolicy;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(grpcPolicy.toPolicy(any())).thenCallRealMethod();
+    }
 
     @Test
     void empty() {
@@ -62,14 +74,14 @@ class GrpcGraphTest {
                 CAPACITY,
                 PUBKEY,
                 PUBKEY_2,
-                new Policy(0, Coins.NONE, false, 40)
+                new Policy(0, Coins.NONE, false, 40, MAX_HTLC)
         );
         DirectedChannelEdge expectedEdge2 = new DirectedChannelEdge(
                 CHANNEL_ID,
                 CAPACITY,
                 PUBKEY_2,
                 PUBKEY,
-                new Policy(1, Coins.NONE, true, 144)
+                new Policy(1, Coins.NONE, true, 144, MAX_HTLC)
         );
         ChannelEdge edge2 = ChannelEdge.newBuilder()
                 .setChannelId(CHANNEL_ID_2.getShortChannelId())
@@ -84,14 +96,14 @@ class GrpcGraphTest {
                 CAPACITY_2,
                 PUBKEY_3,
                 PUBKEY_4,
-                new Policy(456, Coins.NONE, true, 123)
+                new Policy(456, Coins.NONE, true, 123, MAX_HTLC)
         );
         DirectedChannelEdge expectedEdge4 = new DirectedChannelEdge(
                 CHANNEL_ID_2,
                 CAPACITY_2,
                 PUBKEY_4,
                 PUBKEY_3,
-                new Policy(123, Coins.ofMilliSatoshis(1), true, 456)
+                new Policy(123, Coins.ofMilliSatoshis(1), true, 456, MAX_HTLC)
         );
         ChannelGraph channelGraph = ChannelGraph.newBuilder()
                 .addEdges(edge1)
@@ -116,14 +128,14 @@ class GrpcGraphTest {
                 CAPACITY,
                 PUBKEY,
                 PUBKEY_2,
-                new Policy(0, Coins.NONE, false, 0)
+                new Policy(0, Coins.NONE, false, 0, Coins.NONE)
         );
         DirectedChannelEdge expectedPolicyForNode2 = new DirectedChannelEdge(
                 CHANNEL_ID,
                 CAPACITY,
                 PUBKEY_2,
                 PUBKEY,
-                new Policy(0, Coins.NONE, false, 0)
+                new Policy(0, Coins.NONE, false, 0, Coins.NONE)
         );
         ChannelGraph channelGraph = ChannelGraph.newBuilder().addEdges(edgeWithMissingPolicy).build();
         when(grpcService.describeGraph()).thenReturn(Optional.of(channelGraph));
@@ -137,6 +149,7 @@ class GrpcGraphTest {
                 .setFeeBaseMsat(baseFee)
                 .setDisabled(disabled)
                 .setTimeLockDelta(timeLockDelta)
+                .setMaxHtlcMsat(5_432)
                 .build();
     }
 }
