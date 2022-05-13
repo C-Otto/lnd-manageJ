@@ -29,7 +29,7 @@ import static de.cotto.lndmanagej.model.LiquidityBounds.NO_INFORMATION;
 @Component
 public class LiquidityBoundsService {
     private static final int ONE_HOUR_IN_MILLISECONDS = 60 * 60 * 1_000;
-    private static final Duration DEFAULT_MAX_AGE = Duration.of(1, ChronoUnit.HOURS);
+    private static final Duration DEFAULT_MAX_AGE = Duration.of(10, ChronoUnit.MINUTES);
     private final MissionControlService missionControlService;
     private final Map<TwoPubkeys, LiquidityBoundsWithTimestamp> entries;
     private final ConfigurationService configurationService;
