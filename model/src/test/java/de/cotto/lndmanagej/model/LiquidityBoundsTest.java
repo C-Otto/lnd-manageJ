@@ -169,14 +169,6 @@ class LiquidityBoundsTest {
         }
 
         @Test
-        void accounts_for_amount_in_flight() {
-            // the 100 sats in flight might be blocked on the channel, so we might try to send 100+10
-            LiquidityBounds initial = withInFlight(Coins.ofSatoshis(100));
-            Coins unavailableAmount = Coins.ofSatoshis(10);
-            assertUpperBound(initial.withUnavailableCoins(unavailableAmount), Coins.ofSatoshis(109));
-        }
-
-        @Test
         void unavailable_far_below_lower_bound_with_amount_in_flight() {
             LiquidityBounds initial =
                     new LiquidityBounds(Coins.ofSatoshis(300), null, Coins.ofSatoshis(100));
@@ -208,27 +200,61 @@ class LiquidityBoundsTest {
     @SuppressWarnings(CLASS_CAN_BE_STATIC)
     class WithAdditionalInFlight {
         @Test
-        void upper_bound_is_not_reduced_by_amount_in_flight() {
-            // the 40 sats in flight might not reach this channel, so we should not lower the upper bound
+        void upper_bound_is_reduced_by_amount_in_flight() {
+            /*
+             * It is possible that the sats never reach this channel (because the payment fails on the way), but it
+             * is also possible that the in-flight amount actually blocks otherwise available liquidity.
+             *
+             * If we do not subtract the in-flight amount form the upper bound, temporary channel failures would not
+             * lower the upper bound accordingly. As such, the algorithm might try this edge again and again.
+             *
+             * Instead, if we subtract the in-flight amount, other edges can be attempted. As soon as the in-flight
+             * amount is removed, this edge might be tried again.
+             */
+
             Coins upperBound = Coins.ofSatoshis(100);
             LiquidityBounds initial = withUpperBound(upperBound);
-            assertUpperBound(initial.withAdditionalInFlight(Coins.ofSatoshis(40)), upperBound);
+            assertUpperBound(initial.withAdditionalInFlight(Coins.ofSatoshis(40)), Coins.ofSatoshis(60));
         }
 
         @Test
-        void upper_bound_is_not_reduced_by_amount_in_flight_if_upper_bound_equals_in_flight_amount() {
-            // the 100 sats in flight might not reach this channel, so we should not lower the upper bound
-            Coins upperBound = Coins.ofSatoshis(100);
-            LiquidityBounds initial = withUpperBound(upperBound);
-            assertUpperBound(initial.withAdditionalInFlight(upperBound), upperBound);
+        void two_in_flight_attempts_and_one_fails() {
+            /*
+             * Let's assume we start one attempt with 21sat and another with 100sat, so that 121sat are in flight.
+             * If the 21sat payment fails, we first remove the 21sat from the in-flight amount. If the remaining 100sat
+             * actually are pending, the true upper bound should be set to 120sat. Because the 100sat need to be
+             * considered, the returned upper bound needs to be 20sat, though.
+             *
+             * However, if the 100sat payment never reaches this channel, a failure of 21sat should result in an upper
+             * bound of 20sat.
+             *
+             * In both cases a value of 20sat needs to be returned as the upper bound while the 100sat are in-flight.
+             * Once the 100sat are removed from the in-flight amount (without causing a failure in this channel),
+             * we can return an upper bound of 120.
+             */
+            LiquidityBounds initial = withInFlight(Coins.ofSatoshis(100));
+            Coins unavailableAmount = Coins.ofSatoshis(21);
+
+            LiquidityBounds afterFailure = initial.withUnavailableCoins(unavailableAmount).orElseThrow();
+            assertThat(afterFailure.getUpperBound()).contains(Coins.ofSatoshis(20));
+
+            LiquidityBounds withoutInFlight = afterFailure.withAdditionalInFlight(Coins.ofSatoshis(-100)).orElseThrow();
+            assertThat(withoutInFlight.getUpperBound()).contains(Coins.ofSatoshis(120));
         }
 
         @Test
-        void upper_bound_is_not_reduced_by_amount_in_flight_if_upper_bound_is_less_than_in_flight_amount() {
+        void upper_bound_is_reduced_by_amount_in_flight_if_upper_bound_equals_in_flight_amount() {
+            Coins upperBound = Coins.ofSatoshis(100);
+            LiquidityBounds initial = withUpperBound(upperBound);
+            assertUpperBound(initial.withAdditionalInFlight(upperBound), Coins.NONE);
+        }
+
+        @Test
+        void upper_bound_is_reduced_by_amount_in_flight_if_upper_bound_is_less_than_in_flight_amount() {
             // the 100 sats in flight might not reach this channel, so we should not lower the upper bound
             Coins upperBound = Coins.ofSatoshis(100);
             LiquidityBounds initial = withUpperBound(upperBound);
-            assertUpperBound(initial.withAdditionalInFlight(Coins.ofSatoshis(101)), upperBound);
+            assertUpperBound(initial.withAdditionalInFlight(Coins.ofSatoshis(101)), Coins.NONE);
         }
 
         @Test

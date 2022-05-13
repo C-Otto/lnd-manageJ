@@ -68,7 +68,10 @@ public class LiquidityBounds {
     }
 
     public Optional<Coins> getUpperBound() {
-        return Optional.ofNullable(upperBound);
+        if (upperBound == null) {
+            return Optional.empty();
+        }
+        return Optional.of(upperBound.subtract(inFlight).maximum(Coins.NONE));
     }
 
     private Optional<LiquidityBounds> create(

@@ -125,6 +125,7 @@
     <rule ref="category/java/documentation.xml/CommentSize">
         <properties>
             <property name="maxLineLength" value="120" />
+            <property name="violationSuppressXPath" value="//ClassOrInterfaceDeclaration[ends-with(@SimpleName, 'Test') or ends-with(@SimpleName, 'IT')]" />
         </properties>
     </rule>
 
