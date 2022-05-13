@@ -60,7 +60,7 @@ public class LiquidityInformationUpdater implements PaymentListener {
             case TEMPORARY_CHANNEL_FAILURE ->
                     markAvailableAndUnavailable(paymentAttemptHops, failureSourceIndex, PaymentAttemptHop::amount);
             case UNKNOWN_NEXT_PEER, CHANNEL_DISABLED, FEE_INSUFFICIENT ->
-                    markAvailableAndUnavailable(paymentAttemptHops, failureSourceIndex, hop -> Coins.ofSatoshis(1));
+                    markAvailableAndUnavailable(paymentAttemptHops, failureSourceIndex, hop -> Coins.ofSatoshis(2));
             case MPP_TIMEOUT, INCORRECT_OR_UNKNOWN_PAYMENT_DETAILS ->
                     markAllAvailable(paymentAttemptHops, failureSourceIndex);
             default -> logger.warn("Unknown failure code {}", failureCode);

@@ -77,7 +77,6 @@ public class LiquidityBoundsService {
 
     public void markAsMoved(Pubkey source, Pubkey target, Coins amount) {
         update(source, target, amount, LiquidityBounds::withMovedCoins);
-
     }
 
     public void markAsAvailable(Pubkey source, Pubkey target, Coins amount) {
