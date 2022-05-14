@@ -15,3 +15,7 @@ dependencies {
     integrationTestImplementation testFixtures(project(':model'))
     integrationTestImplementation testFixtures(project(':pickhardt-payments'))
 }
+
+pitest {
+    testStrengthThreshold = 99
+}

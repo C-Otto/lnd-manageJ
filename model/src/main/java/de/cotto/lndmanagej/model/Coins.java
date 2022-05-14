@@ -91,4 +91,9 @@ public record Coins(long milliSatoshis) implements Comparable<Coins> {
         double coins = BigDecimal.valueOf(milliSatoshis, SCALE).doubleValue();
         return String.format(Locale.ENGLISH, "%,.3f", coins);
     }
+
+    public String toStringSat() {
+        long coins = BigDecimal.valueOf(milliSatoshis(), SCALE).longValue();
+        return String.format(Locale.ENGLISH, "%,d", coins);
+    }
 }

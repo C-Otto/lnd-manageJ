@@ -3,8 +3,10 @@ package de.cotto.lndmanagej.controller;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSender;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSplitter;
+import de.cotto.lndmanagej.pickhardtpayments.model.PaymentStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -29,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SuppressWarnings("CPD-START")
-@Import(ObjectMapperConfiguration.class)
+@Import({ObjectMapperConfiguration.class, PaymentStatusStream.class})
 @WebMvcTest(controllers = PickhardtPaymentsController.class)
 class PickhardtPaymentsControllerIT {
     private static final String PREFIX = "/beta/pickhardt-payments";
@@ -47,19 +49,21 @@ class PickhardtPaymentsControllerIT {
     @SuppressWarnings("unused")
     private ChannelIdResolver channelIdResolver;
 
+    private final PaymentStatus paymentStatus = new PaymentStatus(HexString.EMPTY);
+
     @Test
     void payPaymentRequest() throws Exception {
         when(multiPathPaymentSender.payPaymentRequest(PAYMENT_REQUEST, DEFAULT_FEE_RATE_WEIGHT))
-                .thenReturn(MULTI_PATH_PAYMENT);
+                .thenReturn(paymentStatus);
         String url = "%s/pay-payment-request/%s".formatted(PREFIX, PAYMENT_REQUEST);
-        mockMvc.perform(get(url)).andExpect(status().isOk());
+        mockMvc.perform(get(url))
+                .andExpect(status().isOk());
     }
 
     @Test
     void payPaymentRequest_with_fee_rate_weight() throws Exception {
         int feeRateWeight = 987;
-        when(multiPathPaymentSender.payPaymentRequest(PAYMENT_REQUEST, feeRateWeight))
-                .thenReturn(MULTI_PATH_PAYMENT);
+        when(multiPathPaymentSender.payPaymentRequest(PAYMENT_REQUEST, feeRateWeight)).thenReturn(paymentStatus);
         String url = "%s/pay-payment-request/%s/fee-rate-weight/%d".formatted(PREFIX, PAYMENT_REQUEST, feeRateWeight);
         mockMvc.perform(get(url)).andExpect(status().isOk());
     }

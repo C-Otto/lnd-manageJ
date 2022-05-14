@@ -56,10 +56,7 @@ public class FlowComputation {
     private int getQuantization(Coins amount) {
         int quantization = configurationService.getIntegerValue(QUANTIZATION)
                 .orElse(DEFAULT_QUANTIZATION);
-        if (amount.satoshis() < quantization) {
-            return (int) amount.satoshis();
-        }
-        return quantization;
+        return (int) Math.min(amount.satoshis(), quantization);
     }
 
 }
