@@ -40,6 +40,9 @@ public enum FailureCode {
     }
 
     public static FailureCode getFor(int code) {
+        if (code == 0) {
+            return UNKNOWN_FAILURE;
+        }
         return Arrays.stream(values()).filter(value -> value.code == code).findFirst().orElseGet(() -> {
             LOGGER.warn("Unknown failure code {}", code);
             return UNKNOWN_FAILURE;

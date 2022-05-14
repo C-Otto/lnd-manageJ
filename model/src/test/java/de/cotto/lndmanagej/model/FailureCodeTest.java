@@ -31,6 +31,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class FailureCodeTest {
     @Test
+    void getFor_default_value_0() {
+        assertThat(FailureCode.getFor(0)).isEqualTo(UNKNOWN_FAILURE);
+        assertThat(UNKNOWN_FAILURE.isErrorFromFinalNode()).isFalse();
+    }
+
+    @Test
     void getFor_unknown() {
         assertThat(FailureCode.getFor(99)).isEqualTo(UNKNOWN_FAILURE);
         assertThat(UNKNOWN_FAILURE.isErrorFromFinalNode()).isFalse();
