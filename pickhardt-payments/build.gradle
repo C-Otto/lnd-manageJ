@@ -11,6 +11,9 @@ dependencies {
     implementation 'com.google.ortools:ortools-java:9.3.10497'
     implementation 'org.eclipse.collections:eclipse-collections:11.0.0'
     testImplementation testFixtures(project(':model'))
+    integrationTestImplementation project(':backend')
+    integrationTestImplementation project(':grpc-adapter')
+    integrationTestImplementation testFixtures(project(':model'))
     testFixturesImplementation testFixtures(project(':model'))
 }
 

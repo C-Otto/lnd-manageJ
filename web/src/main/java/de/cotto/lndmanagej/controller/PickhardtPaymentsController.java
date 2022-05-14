@@ -7,38 +7,51 @@ import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSender;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSplitter;
 import de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPayment;
+import de.cotto.lndmanagej.pickhardtpayments.model.PaymentStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import static de.cotto.lndmanagej.pickhardtpayments.PickhardtPaymentsConfiguration.DEFAULT_FEE_RATE_WEIGHT;
+import static org.springframework.http.MediaType.APPLICATION_NDJSON;
 
 @RestController
 @RequestMapping("/beta/pickhardt-payments/")
 public class PickhardtPaymentsController {
     private final MultiPathPaymentSplitter multiPathPaymentSplitter;
     private final MultiPathPaymentSender multiPathPaymentSender;
+    private final PaymentStatusStream paymentStatusStream;
 
     public PickhardtPaymentsController(
             MultiPathPaymentSplitter multiPathPaymentSplitter,
-            MultiPathPaymentSender multiPathPaymentSender
+            MultiPathPaymentSender multiPathPaymentSender,
+            PaymentStatusStream paymentStatusStream
     ) {
         this.multiPathPaymentSplitter = multiPathPaymentSplitter;
         this.multiPathPaymentSender = multiPathPaymentSender;
+        this.paymentStatusStream = paymentStatusStream;
     }
 
     @Timed
     @GetMapping("/pay-payment-request/{paymentRequest}")
-    public MultiPathPaymentDto payPaymentRequest(@PathVariable String paymentRequest) {
+    public ResponseEntity<StreamingResponseBody> payPaymentRequest(@PathVariable String paymentRequest) {
         return payPaymentRequest(paymentRequest, DEFAULT_FEE_RATE_WEIGHT);
     }
 
     @Timed
     @GetMapping("/pay-payment-request/{paymentRequest}/fee-rate-weight/{feeRateWeight}")
-    public MultiPathPaymentDto payPaymentRequest(@PathVariable String paymentRequest, @PathVariable int feeRateWeight) {
-        MultiPathPayment multiPathPayment = multiPathPaymentSender.payPaymentRequest(paymentRequest, feeRateWeight);
-        return MultiPathPaymentDto.fromModel(multiPathPayment);
+    public ResponseEntity<StreamingResponseBody> payPaymentRequest(
+            @PathVariable String paymentRequest,
+            @PathVariable int feeRateWeight
+    ) {
+        PaymentStatus paymentStatus = multiPathPaymentSender.payPaymentRequest(paymentRequest, feeRateWeight);
+        StreamingResponseBody streamingResponseBody = paymentStatusStream.getFor(paymentStatus);
+        return ResponseEntity.ok()
+                .contentType(APPLICATION_NDJSON)
+                .body(streamingResponseBody);
     }
 
     @Timed

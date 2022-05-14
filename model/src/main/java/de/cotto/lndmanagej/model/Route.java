@@ -144,13 +144,4 @@ public class Route {
         Coins relativeFees = Coins.ofMilliSatoshis(feeRate * amountWithFees.milliSatoshis() / 1_000_000);
         return baseFeeForHop.add(relativeFees);
     }
-
-    @Override
-    public String toString() {
-        return "Route{" +
-                "edgesWithLiquidityInformation=" + edgesWithLiquidityInformation +
-                ", amount=" + amount +
-                ", feesForHops=" + feesForHops +
-                '}';
-    }
 }

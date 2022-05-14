@@ -1,52 +1,27 @@
 package de.cotto.lndmanagej.pickhardtpayments;
 
 import de.cotto.lndmanagej.grpc.GrpcPayments;
-import de.cotto.lndmanagej.grpc.GrpcSendToRoute;
-import de.cotto.lndmanagej.grpc.SendToRouteObserver;
-import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.DecodedPaymentRequest;
-import de.cotto.lndmanagej.model.HexString;
-import de.cotto.lndmanagej.model.Pubkey;
-import de.cotto.lndmanagej.model.Route;
-import de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPayment;
+import de.cotto.lndmanagej.pickhardtpayments.model.PaymentStatus;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class MultiPathPaymentSender {
     private final GrpcPayments grpcPayments;
-    private final GrpcSendToRoute grpcSendToRoute;
-    private final MultiPathPaymentSplitter multiPathPaymentSplitter;
-    private final MultiPathPaymentObserver multiPathPaymentObserver;
+    private final PaymentLoop paymentLoop;
 
-    public MultiPathPaymentSender(
-            GrpcPayments grpcPayments,
-            GrpcSendToRoute grpcSendToRoute,
-            MultiPathPaymentSplitter multiPathPaymentSplitter,
-            MultiPathPaymentObserver multiPathPaymentObserver
-    ) {
+    public MultiPathPaymentSender(GrpcPayments grpcPayments, PaymentLoop paymentLoop) {
         this.grpcPayments = grpcPayments;
-        this.grpcSendToRoute = grpcSendToRoute;
-        this.multiPathPaymentSplitter = multiPathPaymentSplitter;
-        this.multiPathPaymentObserver = multiPathPaymentObserver;
+        this.paymentLoop = paymentLoop;
     }
 
-    public MultiPathPayment payPaymentRequest(String paymentRequest, int feeRateWeight) {
+    public PaymentStatus payPaymentRequest(String paymentRequest, int feeRateWeight) {
         DecodedPaymentRequest decodedPaymentRequest = grpcPayments.decodePaymentRequest(paymentRequest).orElse(null);
         if (decodedPaymentRequest == null) {
-            return MultiPathPayment.FAILURE;
+            return PaymentStatus.UNABLE_TO_DECODE_PAYMENT_REQUEST;
         }
-        Pubkey destination = decodedPaymentRequest.destination();
-        Coins amount = decodedPaymentRequest.amount();
-        MultiPathPayment multiPathPayment =
-                multiPathPaymentSplitter.getMultiPathPaymentTo(destination, amount, feeRateWeight);
-        List<Route> routes = multiPathPayment.routes();
-        HexString paymentHash = decodedPaymentRequest.paymentHash();
-        for (Route route : routes) {
-            SendToRouteObserver sendToRouteObserver = multiPathPaymentObserver.getFor(route, paymentHash);
-            grpcSendToRoute.sendToRoute(route, decodedPaymentRequest, sendToRouteObserver);
-        }
-        return multiPathPayment;
+        PaymentStatus paymentStatus = new PaymentStatus(decodedPaymentRequest.paymentHash());
+        paymentLoop.start(decodedPaymentRequest, feeRateWeight, paymentStatus);
+        return paymentStatus;
     }
 }

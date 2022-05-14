@@ -174,6 +174,16 @@ class CoinsTest {
     }
 
     @Test
+    void toStringSat() {
+        assertThat(Coins.ofSatoshis(12_345).toStringSat()).isEqualTo("12,345");
+    }
+
+    @Test
+    void toStringSat_with_milli_sat() {
+        assertThat(Coins.ofMilliSatoshis(12_345_999).toStringSat()).isEqualTo("12,345");
+    }
+
+    @Test
     void justMilliCoins() {
         assertThat(Coins.ofSatoshis(12_300_000)).hasToString("12,300,000.000");
     }
