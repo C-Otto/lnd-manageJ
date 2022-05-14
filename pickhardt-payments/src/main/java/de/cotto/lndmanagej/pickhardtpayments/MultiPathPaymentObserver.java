@@ -7,6 +7,7 @@ import de.cotto.lndmanagej.model.FailureCode;
 import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.model.PaymentAttemptHop;
 import de.cotto.lndmanagej.model.Route;
+import de.cotto.lndmanagej.pickhardtpayments.model.PaymentInformation;
 import de.cotto.lndmanagej.service.LiquidityInformationUpdater;
 import org.springframework.stereotype.Component;
 
@@ -15,11 +16,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 @Component
 public class MultiPathPaymentObserver {
     private final LiquidityInformationUpdater liquidityInformationUpdater;
-    private final Map<HexString, Coins> inFlight = new ConcurrentHashMap<>();
+    private final Map<HexString, PaymentInformation> map = new ConcurrentHashMap<>();
 
     public MultiPathPaymentObserver(LiquidityInformationUpdater liquidityInformationUpdater) {
         this.liquidityInformationUpdater = liquidityInformationUpdater;
@@ -30,11 +32,33 @@ public class MultiPathPaymentObserver {
     }
 
     public Coins getInFlight(HexString paymentHash) {
-        return inFlight.getOrDefault(paymentHash, Coins.NONE);
+        return get(paymentHash).inFlight();
+    }
+
+    public boolean isSettled(HexString paymentHash) {
+        return get(paymentHash).settled();
+    }
+
+    public boolean isFailed(HexString paymentHash) {
+        return get(paymentHash).failed();
     }
 
     private void addInFlight(HexString paymentHash, Coins amount) {
-        inFlight.compute(paymentHash, (key, value) -> value == null ? amount : amount.add(value));
+        update(paymentHash, value -> value.withAdditionalInFlight(amount));
+    }
+
+    private PaymentInformation get(HexString paymentHash) {
+        return map.getOrDefault(paymentHash, PaymentInformation.DEFAULT);
+    }
+
+    private void update(HexString paymentHash, Function<PaymentInformation, PaymentInformation> updater) {
+        map.compute(paymentHash, (key, value) -> {
+            PaymentInformation newValue = updater.apply(value == null ? PaymentInformation.DEFAULT : value);
+            if (PaymentInformation.DEFAULT.equals(newValue)) {
+                return null;
+            }
+            return newValue;
+        });
     }
 
     private List<PaymentAttemptHop> topPaymentAttemptHops(Route route) {
@@ -71,6 +95,13 @@ public class MultiPathPaymentObserver {
 
         @Override
         public void onValue(HexString preimage, FailureCode failureCode) {
+            if (preimage.equals(HexString.EMPTY)) {
+                if (failureCode.isErrorFromFinalNode()) {
+                    update(paymentHash, PaymentInformation::withIsFailed);
+                }
+            } else {
+                update(paymentHash, PaymentInformation::withIsSettled);
+            }
             addInFlight(paymentHash, route.getAmount().negate());
         }
     }

@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class MultiPathPaymentObserverTest {
+    private static final HexString PAYMENT_HASH = DECODED_PAYMENT_REQUEST.paymentHash();
     @InjectMocks
     private MultiPathPaymentObserver multiPathPaymentObserver;
 
@@ -35,25 +36,21 @@ class MultiPathPaymentObserverTest {
 
     @Test
     void cancels_in_flight_on_error() {
-        HexString paymentHash = DECODED_PAYMENT_REQUEST.paymentHash();
-        SendToRouteObserver sendToRouteObserver =
-                multiPathPaymentObserver.getFor(ROUTE, paymentHash);
+        SendToRouteObserver sendToRouteObserver = multiPathPaymentObserver.getFor(ROUTE, PAYMENT_HASH);
         sendToRouteObserver.onError(new NullPointerException());
-        assertThat(multiPathPaymentObserver.getInFlight(paymentHash)).isEqualTo(Coins.NONE);
+        assertThat(multiPathPaymentObserver.getInFlight(PAYMENT_HASH)).isEqualTo(Coins.NONE);
     }
 
     @Test
     void cancels_in_flight_using_liquidity_information_updater_on_error() {
-        SendToRouteObserver sendToRouteObserver =
-                multiPathPaymentObserver.getFor(ROUTE, DECODED_PAYMENT_REQUEST.paymentHash());
+        SendToRouteObserver sendToRouteObserver = multiPathPaymentObserver.getFor(ROUTE, PAYMENT_HASH);
         sendToRouteObserver.onError(new NullPointerException());
         verify(liquidityInformationUpdater).removeInFlight(hops());
     }
 
     @Test
     void accepts_value() {
-        SendToRouteObserver sendToRouteObserver =
-                multiPathPaymentObserver.getFor(ROUTE, DECODED_PAYMENT_REQUEST.paymentHash());
+        SendToRouteObserver sendToRouteObserver = multiPathPaymentObserver.getFor(ROUTE, PAYMENT_HASH);
         assertThatCode(
                 () -> sendToRouteObserver.onValue(HexString.EMPTY, FailureCode.UNKNOWN_FAILURE)
         ).doesNotThrowAnyException();
@@ -61,41 +58,96 @@ class MultiPathPaymentObserverTest {
 
     @Test
     void inFlight_initially_zero() {
-        assertThat(multiPathPaymentObserver.getInFlight(DECODED_PAYMENT_REQUEST.paymentHash()))
-                .isEqualTo(Coins.NONE);
+        assertThat(multiPathPaymentObserver.getInFlight(PAYMENT_HASH)).isEqualTo(Coins.NONE);
     }
 
     @Test
     void inFlight_initialized_with_route_amount() {
-        HexString paymentHash = DECODED_PAYMENT_REQUEST.paymentHash();
-        multiPathPaymentObserver.getFor(ROUTE, paymentHash);
-        assertThat(multiPathPaymentObserver.getInFlight(paymentHash)).isEqualTo(ROUTE.getAmount());
+        multiPathPaymentObserver.getFor(ROUTE, PAYMENT_HASH);
+        assertThat(multiPathPaymentObserver.getInFlight(PAYMENT_HASH)).isEqualTo(ROUTE.getAmount());
     }
 
     @Test
     void inFlight_reset_on_success() {
-        HexString paymentHash = DECODED_PAYMENT_REQUEST.paymentHash();
-        SendToRouteObserver observer = multiPathPaymentObserver.getFor(ROUTE, paymentHash);
+        SendToRouteObserver observer = multiPathPaymentObserver.getFor(ROUTE, PAYMENT_HASH);
         observer.onValue(new HexString("AABBCC"), FailureCode.UNKNOWN_FAILURE);
-        assertThat(multiPathPaymentObserver.getInFlight(paymentHash)).isEqualTo(Coins.NONE);
+        assertThat(multiPathPaymentObserver.getInFlight(PAYMENT_HASH)).isEqualTo(Coins.NONE);
+    }
+
+    @Test
+    void isSettled_success() {
+        SendToRouteObserver observer = multiPathPaymentObserver.getFor(ROUTE, PAYMENT_HASH);
+        observer.onValue(new HexString("AABBCC"), FailureCode.UNKNOWN_FAILURE);
+        assertThat(multiPathPaymentObserver.isSettled(PAYMENT_HASH)).isTrue();
+    }
+
+    @Test
+    void isSettled_failure() {
+        SendToRouteObserver observer = multiPathPaymentObserver.getFor(ROUTE, PAYMENT_HASH);
+        observer.onValue(HexString.EMPTY, FailureCode.FEE_INSUFFICIENT);
+        assertThat(multiPathPaymentObserver.isSettled(PAYMENT_HASH)).isFalse();
+    }
+
+    @Test
+    void isSettled_error() {
+        SendToRouteObserver observer = multiPathPaymentObserver.getFor(ROUTE, PAYMENT_HASH);
+        observer.onError(new NullPointerException());
+        assertThat(multiPathPaymentObserver.isSettled(PAYMENT_HASH)).isFalse();
+    }
+
+    @Test
+    void isFailed_success() {
+        SendToRouteObserver observer = multiPathPaymentObserver.getFor(ROUTE, PAYMENT_HASH);
+        observer.onValue(new HexString("AABBCC"), FailureCode.UNKNOWN_FAILURE);
+        assertThat(multiPathPaymentObserver.isFailed(PAYMENT_HASH)).isFalse();
+    }
+
+    @Test
+    void isFailed_failure_from_final_node() {
+        SendToRouteObserver observer = multiPathPaymentObserver.getFor(ROUTE, PAYMENT_HASH);
+        observer.onValue(HexString.EMPTY, FailureCode.FINAL_INCORRECT_CLTV_EXPIRY);
+        assertThat(multiPathPaymentObserver.isFailed(PAYMENT_HASH)).isTrue();
+    }
+
+    @Test
+    void isFailed_failure_from_other_node() {
+        SendToRouteObserver observer = multiPathPaymentObserver.getFor(ROUTE, PAYMENT_HASH);
+        observer.onValue(HexString.EMPTY, FailureCode.PERMANENT_CHANNEL_FAILURE);
+        assertThat(multiPathPaymentObserver.isFailed(PAYMENT_HASH)).isFalse();
+    }
+
+    @Test
+    void isFailed_error() {
+        SendToRouteObserver observer = multiPathPaymentObserver.getFor(ROUTE, PAYMENT_HASH);
+        observer.onError(new NullPointerException());
+        assertThat(multiPathPaymentObserver.isFailed(PAYMENT_HASH)).isFalse();
+    }
+
+    @Test
+    void isSettled_initial() {
+        multiPathPaymentObserver.getFor(ROUTE, PAYMENT_HASH);
+        assertThat(multiPathPaymentObserver.isSettled(PAYMENT_HASH)).isFalse();
+    }
+
+    @Test
+    void isSettled_unknown() {
+        assertThat(multiPathPaymentObserver.isSettled(PAYMENT_HASH)).isFalse();
     }
 
     @Test
     void inFlight_reset_on_failure() {
-        HexString paymentHash = DECODED_PAYMENT_REQUEST.paymentHash();
-        SendToRouteObserver observer = multiPathPaymentObserver.getFor(ROUTE, paymentHash);
-        observer.onValue(HexString.EMPTY, FailureCode.PERMANENT_CHANNEL_FAILURE);
-        assertThat(multiPathPaymentObserver.getInFlight(paymentHash)).isEqualTo(Coins.NONE);
+        SendToRouteObserver observer = multiPathPaymentObserver.getFor(ROUTE, PAYMENT_HASH);
+        observer.onValue(HexString.EMPTY, FailureCode.FEE_INSUFFICIENT);
+        assertThat(multiPathPaymentObserver.getInFlight(PAYMENT_HASH)).isEqualTo(Coins.NONE);
     }
 
     @Test
     void inFlight_updated_with_several_routes() {
-        HexString paymentHash = DECODED_PAYMENT_REQUEST.paymentHash();
-        multiPathPaymentObserver.getFor(ROUTE, paymentHash);
+        multiPathPaymentObserver.getFor(ROUTE, PAYMENT_HASH);
         multiPathPaymentObserver.getFor(ROUTE_2, HexString.EMPTY);
-        multiPathPaymentObserver.getFor(ROUTE_3, paymentHash);
+        multiPathPaymentObserver.getFor(ROUTE_3, PAYMENT_HASH);
         Coins expectedAmount = ROUTE.getAmount().add(ROUTE_3.getAmount());
-        assertThat(multiPathPaymentObserver.getInFlight(paymentHash)).isEqualTo(expectedAmount);
+        assertThat(multiPathPaymentObserver.getInFlight(PAYMENT_HASH)).isEqualTo(expectedAmount);
     }
 
     private List<PaymentAttemptHop> hops() {
