@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.grpc;
 
 import com.google.protobuf.ByteString;
+import de.cotto.lndmanagej.model.FailureCode;
 import de.cotto.lndmanagej.model.HexString;
 import io.grpc.stub.StreamObserver;
 import lnrpc.HTLCAttempt;
@@ -117,7 +118,7 @@ class GrpcSendToRouteTest {
         HexString preimage = new HexString("0011FF");
         HTLCAttempt value = htlcAttempt(preimage);
         captor.getValue().onNext(value);
-        verify(observer).onValue(preimage);
+        verify(observer).onValue(preimage, FailureCode.UNKNOWN_FAILURE);
     }
 
     private HTLCAttempt htlcAttempt(HexString hexString) {

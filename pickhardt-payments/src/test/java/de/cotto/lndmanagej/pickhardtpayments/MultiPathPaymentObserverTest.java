@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.pickhardtpayments;
 import de.cotto.lndmanagej.grpc.SendToRouteObserver;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Edge;
+import de.cotto.lndmanagej.model.FailureCode;
 import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.model.PaymentAttemptHop;
 import de.cotto.lndmanagej.service.LiquidityInformationUpdater;
@@ -53,7 +54,9 @@ class MultiPathPaymentObserverTest {
     void accepts_value() {
         SendToRouteObserver sendToRouteObserver =
                 multiPathPaymentObserver.getFor(ROUTE, DECODED_PAYMENT_REQUEST.paymentHash());
-        assertThatCode(() -> sendToRouteObserver.onValue(HexString.EMPTY)).doesNotThrowAnyException();
+        assertThatCode(
+                () -> sendToRouteObserver.onValue(HexString.EMPTY, FailureCode.UNKNOWN_FAILURE)
+        ).doesNotThrowAnyException();
     }
 
     @Test
@@ -73,7 +76,7 @@ class MultiPathPaymentObserverTest {
     void inFlight_reset_on_success() {
         HexString paymentHash = DECODED_PAYMENT_REQUEST.paymentHash();
         SendToRouteObserver observer = multiPathPaymentObserver.getFor(ROUTE, paymentHash);
-        observer.onValue(new HexString("AABBCC"));
+        observer.onValue(new HexString("AABBCC"), FailureCode.UNKNOWN_FAILURE);
         assertThat(multiPathPaymentObserver.getInFlight(paymentHash)).isEqualTo(Coins.NONE);
     }
 
@@ -81,7 +84,7 @@ class MultiPathPaymentObserverTest {
     void inFlight_reset_on_failure() {
         HexString paymentHash = DECODED_PAYMENT_REQUEST.paymentHash();
         SendToRouteObserver observer = multiPathPaymentObserver.getFor(ROUTE, paymentHash);
-        observer.onValue(HexString.EMPTY);
+        observer.onValue(HexString.EMPTY, FailureCode.PERMANENT_CHANNEL_FAILURE);
         assertThat(multiPathPaymentObserver.getInFlight(paymentHash)).isEqualTo(Coins.NONE);
     }
 

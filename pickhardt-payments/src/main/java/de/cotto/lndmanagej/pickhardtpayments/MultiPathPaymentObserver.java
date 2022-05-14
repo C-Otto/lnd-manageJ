@@ -3,12 +3,11 @@ package de.cotto.lndmanagej.pickhardtpayments;
 import de.cotto.lndmanagej.grpc.SendToRouteObserver;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Edge;
+import de.cotto.lndmanagej.model.FailureCode;
 import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.model.PaymentAttemptHop;
 import de.cotto.lndmanagej.model.Route;
 import de.cotto.lndmanagej.service.LiquidityInformationUpdater;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -20,7 +19,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class MultiPathPaymentObserver {
     private final LiquidityInformationUpdater liquidityInformationUpdater;
-    private final Logger logger = LoggerFactory.getLogger(getClass());
     private final Map<HexString, Coins> inFlight = new ConcurrentHashMap<>();
 
     public MultiPathPaymentObserver(LiquidityInformationUpdater liquidityInformationUpdater) {
@@ -67,14 +65,14 @@ public class MultiPathPaymentObserver {
 
         @Override
         public void onError(Throwable throwable) {
-            logger.warn("Send to route failed for route {}: ", route, throwable);
             liquidityInformationUpdater.removeInFlight(topPaymentAttemptHops(route));
             addInFlight(paymentHash, route.getAmount().negate());
         }
 
         @Override
-        public void onValue(HexString preimage) {
+        public void onValue(HexString preimage, FailureCode failureCode) {
             addInFlight(paymentHash, route.getAmount().negate());
         }
     }
+
 }
