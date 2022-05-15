@@ -56,7 +56,7 @@ configuration file:
 You can compute an MPP based on #PickhardtPayments using any of the following endpoints:
 
 * `/beta/pickhardt-payments/from/{source}/to/{target}/amount/{amount}/fee-rate-weight/{feeRateWeight}`
-  * compute an MPP from the given node `source` to the given node `target`
+  * compute an MPP from the given node `source` to the given node `target`, the amount is given in satoshis
 * `/beta/pickhardt-payments/from/{source}/to/{target}/amount/{amount}`
   * as above, with default fee rate weight 0
 * `/beta/pickhardt-payments/to/{pubkey}/amount/{amount}/fee-rate-weight/{feeRateWeight}`
@@ -69,7 +69,7 @@ You can compute an MPP based on #PickhardtPayments using any of the following en
 Warning: Don't do this on mainnet, yet! This is very much work in progress.
 
 * `/beta/pickhardt-payments/pay-payment-request/{paymentRequest}/fee-rate-weight/{feeRateWeight}`
-  * Pay the given payment request (also known as invoice) using the configured fee rate weight.
+  * Pay the given payment request (also known as invoice) using the configured fee rate weight
 * `/beta/pickhardt-payments/pay-payment-request/{paymentRequest}`
   * as above, with default fee rate weight 0
 
