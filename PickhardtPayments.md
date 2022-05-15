@@ -6,7 +6,8 @@ See https://arxiv.org/abs/2107.05322.
 Please reach out to me on Twitter (https://twitter.com/c_otto83) to discuss more about this!
 
 The implementation is based on the piecewise linearization approach:
-https://lists.linuxfoundation.org/pipermail/lightning-dev/2022-March/003510.html.
+https://lists.linuxfoundation.org/pipermail/lightning-dev/2022-March/003510.html. 
+There is also a lightweight python package being developement which can be used for simulations or to do production tests at: https://github.com/renepickhardt/pickhardtpayments 
 
 # Requirements
 1. Currently (as of v0.14.3-beta, May 2022) lnd does not allow sending a replacement shard once a shard of an active MPP
