@@ -29,7 +29,7 @@ Any value > 0 takes fees into account. Pick higher fee rate weights to compute c
  Note that the probability is still taken into account, even with high fee rate weights. As such, a massive channel
  may be picked, even though it charges a high fee rate.
 
-A value of 1 seems to be a good compromise (using the default quantization value)
+A value of 1 seems to be a good compromise (using the default quantization value).
 
 # Configuration options
 You can configure the following values in the `[pickhardt-payments]` section of your `~/.config/lnd-manageJ.conf`
