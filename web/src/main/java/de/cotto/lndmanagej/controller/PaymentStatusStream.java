@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -21,7 +22,7 @@ public class PaymentStatusStream {
         return response -> {
             int seenMessages = 0;
             do {
-                List<InstantWithString> messages = paymentStatus.getMessages();
+                List<InstantWithString> messages = new ArrayList<>(paymentStatus.getMessages());
                 int oldMessages = seenMessages;
                 seenMessages = messages.size();
                 for (int i = oldMessages; i < messages.size(); i++) {
