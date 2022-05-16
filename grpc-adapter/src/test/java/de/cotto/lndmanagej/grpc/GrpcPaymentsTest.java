@@ -1,11 +1,20 @@
 package de.cotto.lndmanagej.grpc;
 
+import com.google.protobuf.ByteString;
+import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.DecodedPaymentRequest;
+import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.model.Payment;
 import de.cotto.lndmanagej.model.PaymentHop;
 import de.cotto.lndmanagej.model.PaymentRoute;
+import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.model.RouteHint;
 import lnrpc.HTLCAttempt;
 import lnrpc.Hop;
+import lnrpc.HopHint;
 import lnrpc.ListPaymentsResponse;
+import lnrpc.PayReq;
 import lnrpc.Payment.PaymentStatus;
 import lnrpc.Route;
 import org.junit.jupiter.api.Test;
@@ -15,13 +24,21 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.annotation.Nullable;
+import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
+import static de.cotto.lndmanagej.model.DecodedPaymentRequestFixtures.DECODED_PAYMENT_REQUEST;
 import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT;
 import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT_2;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_4;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -34,6 +51,7 @@ import static org.mockito.Mockito.when;
 class GrpcPaymentsTest {
     private static final long ADD_INDEX_OFFSET = 123;
     private static final int LIMIT = 1_000;
+    private static final String PAYMENT_REQUEST = "abc";
 
     @InjectMocks
     private GrpcPayments grpcPayments;
@@ -119,6 +137,75 @@ class GrpcPaymentsTest {
     @Test
     void getLimit() {
         assertThat(grpcPayments.getLimit()).isEqualTo(LIMIT);
+    }
+
+    @Test
+    void decodePaymentRequest_empty() {
+        assertThat(grpcPayments.decodePaymentRequest(PAYMENT_REQUEST)).isEmpty();
+    }
+
+    @Test
+    void decodePaymentRequest() {
+        String paymentHashHex = "aabbcc";
+        HexString paymentAddress = new HexString("dd00");
+        int cltvExpiry = 111;
+        String description = "description";
+        PayReq payReq = PayReq.newBuilder()
+                .setDestination(PUBKEY_4.toString())
+                .setNumMsat(1234)
+                .setDescription(description)
+                .setPaymentHash(paymentHashHex)
+                .setPaymentAddr(ByteString.copyFrom(paymentAddress.getByteArray()))
+                .setCltvExpiry(cltvExpiry)
+                .setTimestamp(100)
+                .setExpiry(99)
+                .addRouteHints(routeHint(CHANNEL_ID, 9, Coins.NONE, PUBKEY, 123))
+                .addRouteHints(routeHint(CHANNEL_ID_2, 40, Coins.ofMilliSatoshis(1), PUBKEY_3, 1234))
+                .build();
+        when(grpcService.decodePaymentRequest(PAYMENT_REQUEST)).thenReturn(Optional.of(payReq));
+        Coins amount = Coins.ofMilliSatoshis(1234);
+        HexString paymentHash = new HexString(paymentHashHex);
+        Instant creation = Instant.ofEpochSecond(100);
+        Instant expiry = Instant.ofEpochSecond(199);
+        Set<RouteHint> routeHints = DECODED_PAYMENT_REQUEST.routeHints();
+        assertThat(grpcPayments.decodePaymentRequest(PAYMENT_REQUEST)).contains(new DecodedPaymentRequest(
+                PAYMENT_REQUEST,
+                cltvExpiry,
+                description,
+                PUBKEY_4,
+                amount,
+                paymentHash,
+                paymentAddress,
+                creation,
+                expiry,
+                routeHints
+        ));
+    }
+
+    private lnrpc.RouteHint routeHint(
+            ChannelId channelId,
+            int cltvExpiryDelta,
+            Coins baseFee,
+            Pubkey pubkey,
+            int feeRate
+    ) {
+        return lnrpc.RouteHint.newBuilder().addHopHints(hopHint(
+                channelId,
+                cltvExpiryDelta,
+                baseFee,
+                pubkey,
+                feeRate
+        )).build();
+    }
+
+    private HopHint hopHint(ChannelId channelId, int cltvExpiryDelta, Coins baseFee, Pubkey node, int feeRate) {
+        return HopHint.newBuilder()
+                .setCltvExpiryDelta(cltvExpiryDelta)
+                .setFeeBaseMsat((int) baseFee.milliSatoshis())
+                .setNodeId(node.toString())
+                .setFeeProportionalMillionths(feeRate)
+                .setChanId(channelId.getShortChannelId())
+                .build();
     }
 
     private lnrpc.Payment payment(

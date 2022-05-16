@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.service.LiquidityBoundsService.TwoPubkeys;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -221,5 +222,12 @@ class LiquidityBoundsServiceTest {
         liquidityBoundsService.markAsAvailable(PUBKEY, PUBKEY_2, Coins.ofSatoshis(10));
         liquidityBoundsService.cleanup();
         verify(configurationService).getIntegerValue(LIQUIDITY_INFORMATION_MAX_AGE);
+    }
+
+    @Test
+    void twoPubkeys() {
+        TwoPubkeys twoPubkeys = new TwoPubkeys(PUBKEY, PUBKEY_2);
+        assertThat(twoPubkeys.source()).isEqualTo(PUBKEY);
+        assertThat(twoPubkeys.target()).isEqualTo(PUBKEY_2);
     }
 }

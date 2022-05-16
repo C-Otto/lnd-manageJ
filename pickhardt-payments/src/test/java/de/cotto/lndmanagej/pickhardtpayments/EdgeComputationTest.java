@@ -4,13 +4,16 @@ import de.cotto.lndmanagej.grpc.GrpcGetInfo;
 import de.cotto.lndmanagej.grpc.GrpcGraph;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.DirectedChannelEdge;
+import de.cotto.lndmanagej.model.Edge;
 import de.cotto.lndmanagej.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.model.Node;
+import de.cotto.lndmanagej.model.Policy;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.LiquidityBoundsService;
 import de.cotto.lndmanagej.service.NodeService;
+import de.cotto.lndmanagej.service.RouteHintService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,6 +65,9 @@ class EdgeComputationTest {
     @Mock
     private LiquidityBoundsService liquidityBoundsService;
 
+    @Mock
+    private RouteHintService routeHintService;
+
     @BeforeEach
     void setUp() {
         lenient().when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY_4);
@@ -100,6 +106,25 @@ class EdgeComputationTest {
 
         assertThat(edgeComputation.getEdges().edges())
                 .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, availableKnownLiquidity));
+    }
+
+    @Test
+    void adds_edges_from_route_hint_service() {
+        when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of()));
+        Coins fiftyCoins = Coins.ofSatoshis(5_000_000_000L);
+        Policy policy = new Policy(200, Coins.NONE, true, 40, fiftyCoins);
+        Edge edge = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, fiftyCoins, policy);
+        when(routeHintService.getEdgesFromPaymentHints()).thenReturn(Set.of(
+                new DirectedChannelEdge(
+                        edge.channelId(),
+                        edge.capacity(),
+                        edge.startNode(),
+                        edge.endNode(),
+                        edge.policy()
+                )
+        ));
+        assertThat(edgeComputation.getEdges().edges())
+                .contains(EdgeWithLiquidityInformation.forKnownLiquidity(edge, fiftyCoins));
     }
 
     @Test

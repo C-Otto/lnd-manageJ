@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.model;
 
 import java.time.Instant;
+import java.util.Set;
 
 public record DecodedPaymentRequest(
         String paymentRequest,
@@ -11,6 +12,7 @@ public record DecodedPaymentRequest(
         HexString paymentHash,
         HexString paymentAddress,
         Instant creation,
-        Instant expiry
+        Instant expiry,
+        Set<RouteHint> routeHints
 ) {
 }

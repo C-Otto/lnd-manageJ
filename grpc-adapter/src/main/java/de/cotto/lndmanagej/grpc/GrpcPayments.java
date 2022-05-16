@@ -8,6 +8,7 @@ import de.cotto.lndmanagej.model.Payment;
 import de.cotto.lndmanagej.model.PaymentHop;
 import de.cotto.lndmanagej.model.PaymentRoute;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.model.RouteHint;
 import lnrpc.HTLCAttempt;
 import lnrpc.Hop;
 import lnrpc.ListPaymentsResponse;
@@ -18,6 +19,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static lnrpc.Payment.PaymentStatus.SUCCEEDED;
 
@@ -48,18 +51,35 @@ public class GrpcPayments {
                 .map(payReq -> {
                     Instant creationTimestamp = Instant.ofEpochSecond(payReq.getTimestamp());
                     Instant expiryTimestamp = creationTimestamp.plusSeconds(payReq.getExpiry());
+                    Pubkey destination = Pubkey.create(payReq.getDestination());
                     return new DecodedPaymentRequest(
                             paymentRequest,
                             (int) payReq.getCltvExpiry(),
                             payReq.getDescription(),
-                            Pubkey.create(payReq.getDestination()),
+                            destination,
                             Coins.ofMilliSatoshis(payReq.getNumMsat()),
                             new HexString(payReq.getPaymentHash()),
                             new HexString(payReq.getPaymentAddr().toByteArray()),
                             creationTimestamp,
-                            expiryTimestamp
+                            expiryTimestamp,
+                            getRouteHints(destination, payReq.getRouteHintsList())
                     );
                 });
+    }
+
+    private Set<RouteHint> getRouteHints(Pubkey destination, List<lnrpc.RouteHint> routeHintsList) {
+        return routeHintsList.stream()
+                .filter(routeHint -> routeHint.getHopHintsCount() == 1)
+                .map(routeHint -> routeHint.getHopHints(0))
+                .map(hopHint -> new RouteHint(
+                                Pubkey.create(hopHint.getNodeId()),
+                                destination,
+                                ChannelId.fromShortChannelId(hopHint.getChanId()),
+                                Coins.ofMilliSatoshis(hopHint.getFeeBaseMsat()),
+                                hopHint.getFeeProportionalMillionths(),
+                                hopHint.getCltvExpiryDelta()
+                        )
+                ).collect(Collectors.toSet());
     }
 
     private Payment toPayment(lnrpc.Payment lndPayment) {

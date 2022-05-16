@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.service;
 
 import com.codahale.metrics.annotation.Timed;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.google.common.annotations.VisibleForTesting;
 import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.Coins;
@@ -140,8 +141,8 @@ public class LiquidityBoundsService {
         return Optional.empty();
     }
 
-    @SuppressWarnings("UnusedVariable")
-    private record TwoPubkeys(Pubkey source, Pubkey target) {
+    @VisibleForTesting
+    record TwoPubkeys(Pubkey source, Pubkey target) {
     }
 
     private Duration getMaxAge() {

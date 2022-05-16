@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.pickhardtpayments;
 import de.cotto.lndmanagej.grpc.GrpcPayments;
 import de.cotto.lndmanagej.pickhardtpayments.model.PaymentStatus;
 import de.cotto.lndmanagej.pickhardtpayments.model.PaymentStatus.InstantWithString;
+import de.cotto.lndmanagej.service.RouteHintService;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +29,9 @@ class MultiPathPaymentSenderTest {
     @Mock
     private PaymentLoop paymentLoop;
 
+    @Mock
+    private RouteHintService routeHintService;
+
     @Test
     void unable_to_decode_payment_request() {
         PaymentStatus paymentStatus = multiPathPaymentSender.payPaymentRequest("foo", 123);
@@ -37,6 +41,15 @@ class MultiPathPaymentSenderTest {
                 .contains("Unable to decode payment request");
         softly.assertAll();
         verifyNoInteractions(paymentLoop);
+    }
+
+    @Test
+    void fees_decoded_payment_request_to_route_hint_service() {
+        when(grpcPayments.decodePaymentRequest(DECODED_PAYMENT_REQUEST.paymentRequest()))
+                .thenReturn(Optional.of(DECODED_PAYMENT_REQUEST));
+
+        multiPathPaymentSender.payPaymentRequest(DECODED_PAYMENT_REQUEST.paymentRequest(), 0);
+        verify(routeHintService).addDecodedPaymentRequest(DECODED_PAYMENT_REQUEST);
     }
 
     @Test

@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.pickhardtpayments;
 
+import com.google.common.collect.Sets;
 import de.cotto.lndmanagej.grpc.GrpcGetInfo;
 import de.cotto.lndmanagej.grpc.GrpcGraph;
 import de.cotto.lndmanagej.model.ChannelId;
@@ -15,6 +16,7 @@ import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.LiquidityBoundsService;
 import de.cotto.lndmanagej.service.NodeService;
+import de.cotto.lndmanagej.service.RouteHintService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -34,6 +36,7 @@ public class EdgeComputation {
     private final NodeService nodeService;
     private final BalanceService balanceService;
     private final LiquidityBoundsService liquidityBoundsService;
+    private final RouteHintService routeHintService;
 
     public EdgeComputation(
             GrpcGraph grpcGraph,
@@ -41,7 +44,8 @@ public class EdgeComputation {
             ChannelService channelService,
             NodeService nodeService,
             BalanceService balanceService,
-            LiquidityBoundsService liquidityBoundsService
+            LiquidityBoundsService liquidityBoundsService,
+            RouteHintService routeHintService
     ) {
         this.grpcGraph = grpcGraph;
         this.grpcGetInfo = grpcGetInfo;
@@ -49,6 +53,7 @@ public class EdgeComputation {
         this.nodeService = nodeService;
         this.balanceService = balanceService;
         this.liquidityBoundsService = liquidityBoundsService;
+        this.routeHintService = routeHintService;
     }
 
     public EdgesWithLiquidityInformation getEdges() {
@@ -59,7 +64,8 @@ public class EdgeComputation {
         }
         Set<EdgeWithLiquidityInformation> edgesWithLiquidityInformation = new LinkedHashSet<>();
         Pubkey ownPubkey = grpcGetInfo.getPubkey();
-        for (DirectedChannelEdge channelEdge : channelEdges) {
+        Set<DirectedChannelEdge> edgesFromPaymentHints = routeHintService.getEdgesFromPaymentHints();
+        for (DirectedChannelEdge channelEdge : Sets.union(channelEdges, edgesFromPaymentHints)) {
             if (shouldIgnore(channelEdge)) {
                 continue;
             }
@@ -67,7 +73,13 @@ public class EdgeComputation {
             Pubkey pubkey1 = channelEdge.source();
             Pubkey pubkey2 = channelEdge.target();
             Edge edge = new Edge(channelId, pubkey1, pubkey2, channelEdge.capacity(), channelEdge.policy());
-            edgesWithLiquidityInformation.add(getEdgeWithLiquidityInformation(edge, ownPubkey));
+            if (edgesFromPaymentHints.contains(channelEdge)) {
+                edgesWithLiquidityInformation.add(
+                        EdgeWithLiquidityInformation.forLowerAndUpperBound(edge, edge.capacity(), edge.capacity())
+                );
+            } else {
+                edgesWithLiquidityInformation.add(getEdgeWithLiquidityInformation(edge, ownPubkey));
+            }
         }
         return new EdgesWithLiquidityInformation(edgesWithLiquidityInformation);
     }
