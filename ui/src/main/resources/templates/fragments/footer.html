@@ -8,7 +8,7 @@
             <div th:replace="~{fragments/icons :: arrow-up}"/>
         </a>
         <span class="text-muted">Updated at &nbsp;</span>
-        <a th:text="${status.blockHeight}"
+        <a th:text="${@formatter.formatNumber(status.blockHeight)}"
            th:href="'https://www.blockstream.info/block-height/' + ${status.blockHeight}"></a>
         <span class="text-muted">.</span>
     </div>
