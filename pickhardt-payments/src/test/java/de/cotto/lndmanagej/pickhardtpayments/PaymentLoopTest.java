@@ -13,10 +13,8 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.LinkedHashMap;
@@ -194,67 +192,11 @@ class PaymentLoopTest {
     }
 
     @Test
-    void does_not_send_out_outdated_routes_if_residual_amount_changed_after_route_computation() {
-        Coins totalAmount = DECODED_PAYMENT_REQUEST.amount();
-        Coins outdatedResidualAmount = Coins.ofSatoshis(1);
-        Coins actualResidualAmount = Coins.ofSatoshis(2);
-
-        when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), eq(totalAmount), anyInt()))
-                .thenReturn(MULTI_PATH_PAYMENT);
-        when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), eq(outdatedResidualAmount), anyInt()))
-                .thenReturn(MULTI_PATH_PAYMENT);
-        when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), eq(actualResidualAmount), anyInt()))
-                .thenReturn(MULTI_PATH_PAYMENT_2);
-
-        when(multiPathPaymentObserver.getInFlight(PAYMENT_HASH))
-                .thenReturn(Coins.NONE)
-                .thenReturn(Coins.NONE)
-                .thenReturn(totalAmount.subtract(outdatedResidualAmount))
-                .thenReturn(totalAmount.subtract(actualResidualAmount))
-                .thenReturn(totalAmount.subtract(actualResidualAmount));
-
-        when(multiPathPaymentObserver.isSettled(PAYMENT_HASH))
-                .thenReturn(false)
-                .thenReturn(false)
-                .thenReturn(false)
-                .thenReturn(false)
-                .thenReturn(false)
-                .thenReturn(false)
-                .thenReturn(true);
-
-        paymentLoop.start(DECODED_PAYMENT_REQUEST, FEE_RATE_WEIGHT, paymentStatus);
-
-        SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(paymentStatus.isSuccess()).isTrue();
-        softly.assertThat(paymentStatus.getNumberOfAttemptedRoutes()).isEqualTo(3);
-        softly.assertThat(paymentStatus.getMessages().stream().map(InstantWithString::string)).containsExactly(
-                "Initializing payment " + PAYMENT_HASH,
-                "#1: Sending 123 (0.0% = 0 in flight)",
-                "Sending to route #1: " + MPP_1_ROUTE_1,
-                "Sending to route #2: " + MPP_1_ROUTE_2,
-                "#2: Sending 1 (99.1% = 122 in flight)",
-                "Residual amount changed from 1 to 2 during route computation, restarting.",
-                "#3: Sending 2 (98.3% = 121 in flight)",
-                "Sending to route #3: 50: " + MPP_2_ROUTE_1,
-                "Settled"
-        );
-        softly.assertAll();
-
-        InOrder inOrder = Mockito.inOrder(multiPathPaymentSplitter);
-        inOrder.verify(multiPathPaymentSplitter).getMultiPathPaymentTo(any(), eq(totalAmount), anyInt());
-        inOrder.verify(multiPathPaymentSplitter).getMultiPathPaymentTo(any(), eq(outdatedResidualAmount), anyInt());
-        inOrder.verify(multiPathPaymentSplitter).getMultiPathPaymentTo(any(), eq(actualResidualAmount), anyInt());
-
-        verify(grpcSendToRoute, times(3)).sendToRoute(any(), any(), any());
-    }
-
-    @Test
     void aborts_on_failure_from_destination_node() {
         when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), eq(DECODED_PAYMENT_REQUEST.amount()), anyInt()))
                 .thenReturn(MULTI_PATH_PAYMENT);
 
         when(multiPathPaymentObserver.getFailureCode(PAYMENT_HASH))
-                .thenReturn(Optional.empty())
                 .thenReturn(Optional.empty())
                 .thenReturn(Optional.of(FailureCode.MPP_TIMEOUT));
 
@@ -276,12 +218,9 @@ class PaymentLoopTest {
         when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), any(), anyInt())).thenReturn(MULTI_PATH_PAYMENT);
         when(multiPathPaymentObserver.isSettled(PAYMENT_HASH))
                 .thenReturn(false)
-                .thenReturn(false)
                 .thenReturn(true);
         when(multiPathPaymentObserver.getInFlight(PAYMENT_HASH))
                 .thenReturn(Coins.NONE)
-                .thenReturn(Coins.NONE)
-                .thenReturn(DECODED_PAYMENT_REQUEST.amount())
                 .thenReturn(DECODED_PAYMENT_REQUEST.amount());
     }
 
@@ -291,13 +230,9 @@ class PaymentLoopTest {
         when(multiPathPaymentObserver.isSettled(PAYMENT_HASH))
                 .thenReturn(false)
                 .thenReturn(false)
-                .thenReturn(false)
-                .thenReturn(false)
                 .thenReturn(true);
         when(multiPathPaymentObserver.getInFlight(PAYMENT_HASH))
                 .thenReturn(Coins.NONE)
-                .thenReturn(Coins.NONE)
-                .thenReturn(pendingAfterFirstAttempt)
                 .thenReturn(pendingAfterFirstAttempt);
     }
     // CPD-ON

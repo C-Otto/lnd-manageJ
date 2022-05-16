@@ -77,16 +77,6 @@ public class PaymentLoop {
                     );
                     return;
                 }
-                Coins currentResidualAmount = getCurrentResidualAmount();
-                if (!residualAmount.equals(currentResidualAmount)) {
-                    paymentStatus.info(
-                            "Residual amount changed from %s to %s during route computation, restarting.".formatted(
-                                    residualAmount.toStringSat(),
-                                    currentResidualAmount.toStringSat()
-                            )
-                    );
-                    continue;
-                }
                 List<Route> routes = multiPathPayment.routes();
                 for (Route route : routes) {
                     SendToRouteObserver sendToRouteObserver = multiPathPaymentObserver.getFor(route, paymentHash);
@@ -103,11 +93,6 @@ public class PaymentLoop {
             paymentStatus.info("#%d: Sending %s (%s%% = %s in flight)".formatted(
                     loopCounter, residualAmount.toStringSat(), percentageInFlight, inFlight.toStringSat())
             );
-        }
-
-        private Coins getCurrentResidualAmount() {
-            updateInformation();
-            return totalAmountToSend.subtract(inFlight);
         }
 
         private boolean shouldContinue() {
