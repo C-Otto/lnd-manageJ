@@ -26,7 +26,7 @@ class WebMvcConfigTest {
     @Test
     void addInterceptors() {
         config.addInterceptors(interceptorRegistry);
-        verify(interceptorRegistry).addInterceptor(eq(statusModelInterceptor));
+        verify(interceptorRegistry).addInterceptor(statusModelInterceptor);
     }
 
 }

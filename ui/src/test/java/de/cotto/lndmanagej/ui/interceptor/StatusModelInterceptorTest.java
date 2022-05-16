@@ -12,8 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import static de.cotto.lndmanagej.controller.dto.StatusModelFixture.STATUS_MODEL;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -42,8 +41,8 @@ class StatusModelInterceptorTest {
         ModelAndView modelAndView = new ModelAndView();
         statusModelInterceptor.postHandle(request, response, handler, modelAndView);
         verify(statusService).getStatus();
-        assertTrue(modelAndView.getModel().containsKey("status"));
-        assertEquals(modelAndView.getModel().get("status"), STATUS_MODEL);
+        assertThat(modelAndView.getModel().containsKey("status")).isTrue();
+        assertThat(modelAndView.getModel().get("status")).isEqualTo(STATUS_MODEL);
     }
 
     @Test
