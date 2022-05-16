@@ -160,21 +160,17 @@
                     <div class="col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Local</li>
+                            <li class="list-group-item" th:text="'Available '+${@formatter.formatNumber(balanceInformation.localAvailableSat)}"></li>
                             <li class="list-group-item" th:text="'Balance '+${@formatter.formatNumber(balanceInformation.localBalanceSat)}"></li>
                             <li class="list-group-item" th:text="'Reserve '+${@formatter.formatNumber(balanceInformation.localReserveSat)}"></li>
-                            <li class="list-group-item"
-                                th:text="'Available '+${@formatter.formatNumber(balanceInformation.localAvailableSat)}"></li>
                         </ul>
                     </div>
                     <div class="col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Remote</li>
-                            <li class="list-group-item"
-                                th:text="'Balance '+${@formatter.formatNumber(balanceInformation.remoteBalanceSat)}"></li>
-                            <li class="list-group-item"
-                                th:text="'Reserve '+${@formatter.formatNumber(balanceInformation.remoteReserveSat)}"></li>
-                            <li class="list-group-item"
-                                th:text="'Available '+${@formatter.formatNumber(balanceInformation.remoteAvailableSat)}"></li>
+                            <li class="list-group-item" th:text="'Available '+${@formatter.formatNumber(balanceInformation.remoteAvailableSat)}"></li>
+                            <li class="list-group-item" th:text="'Balance '+${@formatter.formatNumber(balanceInformation.remoteBalanceSat)}"></li>
+                            <li class="list-group-item" th:text="'Reserve '+${@formatter.formatNumber(balanceInformation.remoteReserveSat)}"></li>
                         </ul>
                     </div>
                 </div>
