@@ -10,6 +10,7 @@ import lnrpc.Hop;
 import lnrpc.MPPRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import routerrpc.RouterOuterClass.SendToRouteRequest;
 
@@ -27,6 +28,7 @@ public class GrpcSendToRoute {
         this.grpcGetInfo = grpcGetInfo;
     }
 
+    @Async
     public void sendToRoute(Route route, DecodedPaymentRequest decodedPaymentRequest, SendToRouteObserver observer) {
         Integer blockHeight = grpcGetInfo.getBlockHeight().orElse(null);
         if (blockHeight == null) {
