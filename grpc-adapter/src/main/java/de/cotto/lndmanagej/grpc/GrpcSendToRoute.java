@@ -87,6 +87,7 @@ public class GrpcSendToRoute {
         return SendToRouteRequest.newBuilder()
                 .setRoute(lndRoute)
                 .setPaymentHash(ByteString.copyFrom(paymentHash.getByteArray()))
+                .setSkipTempErr(true)
                 .build();
     }
 
