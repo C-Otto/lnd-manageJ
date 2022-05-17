@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.controller.dto.MultiPathPaymentDto;
+import de.cotto.lndmanagej.grpc.GrpcGraph;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSender;
@@ -23,6 +24,7 @@ import static de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPaymentFixtur
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,6 +43,9 @@ class PickhardtPaymentsControllerTest {
 
     @Mock
     private PaymentStatusStream paymentStatusStream;
+
+    @Mock
+    private GrpcGraph grpcGraph;
 
     private final PaymentStatus paymentStatus = new PaymentStatus(HexString.EMPTY);
 
@@ -105,5 +110,11 @@ class PickhardtPaymentsControllerTest {
         )).thenReturn(MULTI_PATH_PAYMENT);
         assertThat(controller.send(PUBKEY, PUBKEY_2, 123, feeRateWeight))
                 .isEqualTo(MultiPathPaymentDto.fromModel(MULTI_PATH_PAYMENT));
+    }
+
+    @Test
+    void resetCache() {
+        controller.resetGraph();
+        verify(grpcGraph).resetCache();
     }
 }

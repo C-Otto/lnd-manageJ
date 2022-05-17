@@ -25,6 +25,7 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_4;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
@@ -141,6 +142,11 @@ class GrpcGraphTest {
         when(grpcService.describeGraph()).thenReturn(Optional.of(channelGraph));
         assertThat(grpcGraph.getChannelEdges().orElseThrow())
                 .containsExactlyInAnyOrder(expectedPolicyForNode1, expectedPolicyForNode2);
+    }
+
+    @Test
+    void resetCache() {
+        assertThatCode(() -> grpcGraph.resetCache()).doesNotThrowAnyException();
     }
 
     private RoutingPolicy policy(int feeRate, int baseFee, boolean disabled, int timeLockDelta) {

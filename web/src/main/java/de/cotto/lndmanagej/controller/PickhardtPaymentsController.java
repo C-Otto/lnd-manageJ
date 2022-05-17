@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.controller;
 
 import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.controller.dto.MultiPathPaymentDto;
+import de.cotto.lndmanagej.grpc.GrpcGraph;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSender;
@@ -24,15 +25,18 @@ public class PickhardtPaymentsController {
     private final MultiPathPaymentSplitter multiPathPaymentSplitter;
     private final MultiPathPaymentSender multiPathPaymentSender;
     private final PaymentStatusStream paymentStatusStream;
+    private final GrpcGraph grpcGraph;
 
     public PickhardtPaymentsController(
             MultiPathPaymentSplitter multiPathPaymentSplitter,
             MultiPathPaymentSender multiPathPaymentSender,
-            PaymentStatusStream paymentStatusStream
+            PaymentStatusStream paymentStatusStream,
+            GrpcGraph grpcGraph
     ) {
         this.multiPathPaymentSplitter = multiPathPaymentSplitter;
         this.multiPathPaymentSender = multiPathPaymentSender;
         this.paymentStatusStream = paymentStatusStream;
+        this.grpcGraph = grpcGraph;
     }
 
     @Timed
@@ -98,5 +102,11 @@ public class PickhardtPaymentsController {
             @PathVariable long amount
     ) {
         return send(source, target, amount, DEFAULT_FEE_RATE_WEIGHT);
+    }
+
+    @Timed
+    @GetMapping("/reset-graph-cache")
+    public void resetGraph() {
+        grpcGraph.resetCache();
     }
 }
