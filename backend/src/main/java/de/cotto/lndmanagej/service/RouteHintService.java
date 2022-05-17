@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.service;
 
+import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.DecodedPaymentRequest;
 import de.cotto.lndmanagej.model.DirectedChannelEdge;
@@ -14,13 +15,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Component
 public class RouteHintService {
     private static final Coins FIFTY_COINS = Coins.ofSatoshis(5_000_000_000L);
 
     private static final Duration MAX_AGE = Duration.ofHours(1);
-    private final Map<DirectedChannelEdge, Instant> edges;
+    private final Map<ChannelId, EdgeWithInstant> edges;
 
     public RouteHintService() {
         edges = new LinkedHashMap<>();
@@ -29,17 +31,17 @@ public class RouteHintService {
     public void addDecodedPaymentRequest(DecodedPaymentRequest decodedPaymentRequest) {
         decodedPaymentRequest.routeHints().stream()
                 .map(this::toDirectedChannelEdge)
-                .forEach(edge -> edges.put(edge, Instant.now()));
+                .forEach(edge -> edges.put(edge.channelId(), new EdgeWithInstant(edge)));
     }
 
     public Set<DirectedChannelEdge> getEdgesFromPaymentHints() {
-        return edges.keySet();
+        return edges.values().stream().map(EdgeWithInstant::edge).collect(Collectors.toSet());
     }
 
     @Scheduled(fixedDelay = 1, timeUnit = TimeUnit.HOURS)
     public void clean() {
         Instant cutoff = Instant.now().minus(MAX_AGE);
-        edges.values().removeIf(instant -> instant.isBefore(cutoff));
+        edges.values().removeIf(edgeWithInstant -> edgeWithInstant.instant().isBefore(cutoff));
     }
 
     private DirectedChannelEdge toDirectedChannelEdge(RouteHint routeHint) {
@@ -54,5 +56,12 @@ public class RouteHintService {
 
     private Policy toPolicy(RouteHint routeHint) {
         return new Policy(routeHint.feeRate(), routeHint.baseFee(), true, routeHint.cltvExpiryDelta(), FIFTY_COINS);
+    }
+
+    @SuppressWarnings("UnusedVariable")
+    private record EdgeWithInstant(DirectedChannelEdge edge, Instant instant) {
+        private EdgeWithInstant(DirectedChannelEdge edge) {
+            this(edge, Instant.now());
+        }
     }
 }

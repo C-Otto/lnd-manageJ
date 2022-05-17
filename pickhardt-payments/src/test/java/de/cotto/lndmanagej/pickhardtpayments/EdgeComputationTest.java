@@ -109,7 +109,7 @@ class EdgeComputationTest {
     }
 
     @Test
-    void adds_edges_from_route_hint_service() {
+    void adds_edge_from_route_hint_service() {
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of()));
         Coins fiftyCoins = Coins.ofSatoshis(5_000_000_000L);
         Policy policy = new Policy(200, Coins.NONE, true, 40, fiftyCoins);

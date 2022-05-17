@@ -1,12 +1,16 @@
 package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.DecodedPaymentRequest;
 import de.cotto.lndmanagej.model.DirectedChannelEdge;
 import de.cotto.lndmanagej.model.Policy;
+import de.cotto.lndmanagej.model.RouteHint;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Set;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
@@ -37,6 +41,27 @@ class RouteHintServiceTest {
         DirectedChannelEdge edge1 = new DirectedChannelEdge(CHANNEL_ID, FIFTY_COINS, PUBKEY, PUBKEY_4, policy1);
         DirectedChannelEdge edge2 = new DirectedChannelEdge(CHANNEL_ID_2, FIFTY_COINS, PUBKEY_3, PUBKEY_4, policy2);
         assertThat(routeHintService.getEdgesFromPaymentHints()).contains(edge1, edge2);
+    }
+
+    @Test
+    void ignores_duplicate_channel_id() {
+        routeHintService.addDecodedPaymentRequest(new DecodedPaymentRequest(
+                DECODED_PAYMENT_REQUEST.paymentRequest(),
+                DECODED_PAYMENT_REQUEST.cltvExpiry(),
+                DECODED_PAYMENT_REQUEST.description(),
+                DECODED_PAYMENT_REQUEST.destination(),
+                DECODED_PAYMENT_REQUEST.amount(),
+                DECODED_PAYMENT_REQUEST.paymentHash(),
+                DECODED_PAYMENT_REQUEST.paymentAddress(),
+                DECODED_PAYMENT_REQUEST.creation(),
+                DECODED_PAYMENT_REQUEST.expiry(),
+                Set.of(new RouteHint(
+                        PUBKEY, PUBKEY_4, CHANNEL_ID, Coins.NONE, 123, 9
+                ), new RouteHint(
+                        PUBKEY_3, PUBKEY_4, CHANNEL_ID, Coins.ofMilliSatoshis(1), 1234, 40
+                ))
+        ));
+        assertThat(routeHintService.getEdgesFromPaymentHints()).hasSize(1);
     }
 
     @Test
