@@ -14,21 +14,32 @@ import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.Objects;
 
 import static com.google.ortools.graph.MinCostFlowBase.Status.OPTIMAL;
 
+@SuppressWarnings({"PMD.AvoidCatchingNPE", "PMD.AvoidCatchingGenericException"})
 class MinCostFlowSolver {
     private final Logger logger = LoggerFactory.getLogger(getClass());
-    private final MinCostFlow minCostFlow = new MinCostFlow();
+    @Nullable
+    private final MinCostFlow minCostFlow;
     private final IntegerMapping<Pubkey> integerMapping = new IntegerMapping<>();
     private final IntObjectHashMap<Edge> edgeMapping;
+    private static final boolean UNABLE_TO_LOAD_LIBRARY;
 
     private final long quantization;
 
     static {
-        Loader.loadNativeLibraries();
+        boolean loaded;
+        try {
+            Loader.loadNativeLibraries();
+            loaded = true;
+        } catch (NullPointerException nullPointerException) {
+            loaded = false;
+        }
+        UNABLE_TO_LOAD_LIBRARY = !loaded;
     }
 
     public MinCostFlowSolver(
@@ -43,6 +54,12 @@ class MinCostFlowSolver {
         this.quantization = quantization;
         int initialMapCapacity = edgesWithLiquidityInformation.edges().size() * (piecewiseLinearApproximations - 1);
         edgeMapping = new IntObjectHashMap<>(initialMapCapacity);
+        if (UNABLE_TO_LOAD_LIBRARY) {
+            logger.error("Unable to initialize OR library, see https://github.com/C-Otto/lnd-manageJ/issues/13");
+            minCostFlow = null;
+            return;
+        }
+        minCostFlow = new MinCostFlow();
         ArcInitializer arcInitializer = new ArcInitializer(
                 minCostFlow,
                 integerMapping,
@@ -57,6 +74,9 @@ class MinCostFlowSolver {
     }
 
     public Flows solve() {
+        if (minCostFlow == null) {
+            return new Flows();
+        }
         MinCostFlowBase.Status status = minCostFlow.solve();
         if (status != OPTIMAL) {
             logger.warn("Solving the min cost flow problem failed. Solver status: {}", status);
@@ -89,12 +109,12 @@ class MinCostFlowSolver {
         for (Map.Entry<Pubkey, Coins> entry : sources.entrySet()) {
             Pubkey node = entry.getKey();
             long supply = entry.getValue().satoshis() / quantization;
-            minCostFlow.setNodeSupply(integerMapping.getMappedInteger(node), supply);
+            Objects.requireNonNull(minCostFlow).setNodeSupply(integerMapping.getMappedInteger(node), supply);
         }
         for (Map.Entry<Pubkey, Coins> entry : sinks.entrySet()) {
             Pubkey node = entry.getKey();
             long supply = -entry.getValue().satoshis() / quantization;
-            minCostFlow.setNodeSupply(integerMapping.getMappedInteger(node), supply);
+            Objects.requireNonNull(minCostFlow).setNodeSupply(integerMapping.getMappedInteger(node), supply);
         }
     }
 }

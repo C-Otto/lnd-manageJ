@@ -25,3 +25,15 @@ tasks.findByName('pitest').finalizedBy(deleteCrashLogs)
 pitest {
     testStrengthThreshold = 98
 }
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rules.forEach {rule ->
+            rule.limits.forEach {limit ->
+                if (limit.counter == 'BRANCH') {
+                    limit.minimum = 0.97
+                }
+            }
+        }
+    }
+}
