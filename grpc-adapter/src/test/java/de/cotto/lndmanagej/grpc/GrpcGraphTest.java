@@ -28,6 +28,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -146,7 +148,11 @@ class GrpcGraphTest {
 
     @Test
     void resetCache() {
-        assertThatCode(() -> grpcGraph.resetCache()).doesNotThrowAnyException();
+        when(grpcService.describeGraph()).thenReturn(Optional.of(ChannelGraph.getDefaultInstance()));
+        grpcGraph.getChannelEdges();
+        grpcGraph.resetCache();
+        grpcGraph.getChannelEdges();
+        verify(grpcService, times(2)).describeGraph();
     }
 
     private RoutingPolicy policy(int feeRate, int baseFee, boolean disabled, int timeLockDelta) {
