@@ -9,6 +9,7 @@
             <th scope="col" style="text-align: right;">Inbound</th>
             <th scope="col" style="text-align: center;">Ratio</th>
             <th scope="col" style="text-align: right;">Outbound</th>
+            <th scope="col" style="text-align: right;">Capacity</th>
             <th scope="col" style="text-align: right;">Base Fee (local)</th>
             <th scope="col" style="text-align: right;">Fee Rate (local)</th>
             <th scope="col" style="text-align: right;">Base Fee (remote)</th>
@@ -22,6 +23,7 @@
             <td th:text="${@formatter.formatNumber(channel.inbound)}" style="color: darkRed; text-align: right; padding-left:0;"></td>
             <td th:text="${channel.ratio}"></td>
             <td th:text="${@formatter.formatNumber(channel.outbound)}" style="color: darkGreen; text-align: right;"></td>
+            <td th:text="${@formatter.formatNumber(channel.capacitySat)}" style="text-align: right;"></td>
             <td th:text="${@formatter.formatNumber(channel.policies.local.baseFeeMilliSat)}" style="text-align: right;"></td>
             <td th:text="${@formatter.formatNumber(channel.policies.local.feeRatePpm)}" style="text-align: right;"></td>
             <td th:text="${@formatter.formatNumber(channel.policies.remote.baseFeeMilliSat)}" style="text-align: right;"></td>

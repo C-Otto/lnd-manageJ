@@ -18,6 +18,7 @@ public record ChannelDetailsDto(
         String remoteAlias,
         OpenInitiator openInitiator,
         BalanceInformationDto balanceInformation,
+        long capacitySat,
         OnChainCostsDto onChainCosts,
         PoliciesDto policies,
         FeeReportDto feeReport,

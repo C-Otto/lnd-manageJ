@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.controller.dto;
 
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
 
+import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.CAPACITY_SAT;
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.FeeReportFixtures.FEE_REPORT;
@@ -21,6 +22,7 @@ public class ChannelDetailsDtoFixture {
             "Albert",
             LOCAL,
             BalanceInformationDto.createFromModel(BALANCE_INFORMATION),
+            CAPACITY_SAT,
             OnChainCostsDto.createFromModel(ON_CHAIN_COSTS),
             PoliciesDto.createFromModel(POLICIES_FOR_LOCAL_CHANNEL),
             FeeReportDto.createFromModel(FEE_REPORT),

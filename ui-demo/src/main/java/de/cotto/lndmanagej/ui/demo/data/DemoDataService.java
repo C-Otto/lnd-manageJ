@@ -39,13 +39,13 @@ public class DemoDataService extends UiDataService {
             "c-otto.de",
             "027ce055380348d7812d2ae7745701c9f93e70c1adeb2657f053f91df4f2843c71",
             1_500,
-            20_000_000);
+            19_998_500);
     public static final OpenChannelDto ACINQ = createOpenChannel(
             "799999x456x2",
             "ACINQ",
             "03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f",
-            600_100,
-            2_500_000);
+            500_100,
+            2_499_900);
     public static final OpenChannelDto TRY_BITCOIN = createOpenChannel(
             "799999x456x3",
             "try-bitcoin.com",
@@ -57,19 +57,19 @@ public class DemoDataService extends UiDataService {
             "Kraken 🐙⚡",
             "02f1a8c87607f415c8f22c00593002775941dea48869ce23096af27b0cfdcc0b69",
             5_050_000,
-            8_000_000);
+            8_450_000);
     public static final OpenChannelDto POCKET = createOpenChannel(
             "799999x456x5",
             "PocketBitcoin.com",
             "02765a281bd188e80a89e6ea5092dcb8ebaaa5c5da341e64327e3fadbadcbc686c",
             10_500_900,
-            12_000_000);
+            11_499_100);
     public static final OpenChannelDto B_CASH_IS_TRASH = createOpenChannel(
             "799999x456x6",
             "BCash_Is_Trash",
             "0298f6074a454a1f5345cb2a7c6f9fce206cd0bf675d177cdbf0ca7508dd28852f",
             11_100_600,
-            9_800_400);
+            8_899_400);
     public static final OpenChannelDto WOS = createOpenChannel(
             "799999x456x7",
             "WalletOfSatoshi.com",
@@ -80,13 +80,13 @@ public class DemoDataService extends UiDataService {
             "799999x456x8",
             "ACINQ",
             "03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f",
-            12_400_100,
-            1_500_900);
+            11_899_100,
+            1_600_900);
     public static final OpenChannelDto B_CASH_IS_TRASH2 = createOpenChannel(
             "799999x456x9",
             "BCash_Is_Trash",
             "0298f6074a454a1f5345cb2a7c6f9fce206cd0bf675d177cdbf0ca7508dd28852f",
-            19_000_100,
+            18_099_100,
             900_900);
 
     public static final NodeWithWarningsDto ACINQ_WARNING = createNodeWithWarnings(
@@ -164,17 +164,18 @@ public class DemoDataService extends UiDataService {
             long remote
     ) {
         ChannelId channelId = ChannelId.fromCompactForm(compactChannelId);
-        return new OpenChannelDto(
-                channelId,
-                alias,
-                Pubkey.create(pubkey),
-                PoliciesDto.createFromModel(derivePolicies(channelId)),
-                BalanceInformationDto.createFromModel(new BalanceInformation(
-                        Coins.ofSatoshis(local),
-                        Coins.ofSatoshis(200),
-                        Coins.ofSatoshis(remote),
-                        Coins.ofSatoshis(500)
-                )));
+        Pubkey remotePubkey = Pubkey.create(pubkey);
+        PoliciesDto policies = PoliciesDto.createFromModel(derivePolicies(channelId));
+        long localReserve = 200;
+        long remoteReserve = 500;
+        long capacity = local + remote;
+        BalanceInformationDto balance = BalanceInformationDto.createFromModel(new BalanceInformation(
+                Coins.ofSatoshis(local),
+                Coins.ofSatoshis(localReserve),
+                Coins.ofSatoshis(remote),
+                Coins.ofSatoshis(remoteReserve)
+        ));
+        return new OpenChannelDto(channelId, alias, remotePubkey, policies, balance, capacity);
     }
 
     private static ChannelDetailsDto createChannelDetails(OpenChannelDto channel) {
@@ -184,6 +185,7 @@ public class DemoDataService extends UiDataService {
                 channel.remoteAlias(),
                 deriveOpenInitiator(channel.channelId()),
                 channel.balanceInformation(),
+                channel.capacitySat(),
                 deriveOnChainCosts(channel.channelId()),
                 channel.policies(),
                 deriveFeeReport(channel.channelId()),
