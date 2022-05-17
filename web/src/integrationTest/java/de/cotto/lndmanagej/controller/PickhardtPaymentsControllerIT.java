@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
+import de.cotto.lndmanagej.grpc.GrpcGraph;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.HexString;
@@ -44,6 +45,10 @@ class PickhardtPaymentsControllerIT {
 
     @MockBean
     private MultiPathPaymentSender multiPathPaymentSender;
+
+    @MockBean
+    @SuppressWarnings("unused")
+    private GrpcGraph grpcGraph;
 
     @MockBean
     @SuppressWarnings("unused")

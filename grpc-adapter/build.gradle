@@ -11,6 +11,10 @@ dependencies {
     testImplementation testFixtures(project(':model'))
 }
 
+pitest {
+    testStrengthThreshold = 99
+}
+
 jacocoTestCoverageVerification {
     violationRules {
         rules.forEach {rule ->

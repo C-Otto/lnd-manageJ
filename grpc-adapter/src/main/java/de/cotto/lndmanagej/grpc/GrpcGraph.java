@@ -37,6 +37,10 @@ public class GrpcGraph {
         return channelEdgeCache.get("");
     }
 
+    public void resetCache() {
+        channelEdgeCache.invalidateAll();
+    }
+
     private Optional<Set<DirectedChannelEdge>> getChannelEdgesWithoutCache() {
         ChannelGraph channelGraph = grpcService.describeGraph().orElse(null);
         if (channelGraph == null) {
