@@ -1,12 +1,12 @@
 package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.controller.dto.MultiPathPaymentDto;
-import de.cotto.lndmanagej.grpc.GrpcGraph;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSender;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSplitter;
 import de.cotto.lndmanagej.pickhardtpayments.model.PaymentStatus;
+import de.cotto.lndmanagej.service.GraphService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,7 +45,7 @@ class PickhardtPaymentsControllerTest {
     private PaymentStatusStream paymentStatusStream;
 
     @Mock
-    private GrpcGraph grpcGraph;
+    private GraphService graphService;
 
     private final PaymentStatus paymentStatus = new PaymentStatus(HexString.EMPTY);
 
@@ -115,6 +115,6 @@ class PickhardtPaymentsControllerTest {
     @Test
     void resetCache() {
         controller.resetGraph();
-        verify(grpcGraph).resetCache();
+        verify(graphService).resetCache();
     }
 }

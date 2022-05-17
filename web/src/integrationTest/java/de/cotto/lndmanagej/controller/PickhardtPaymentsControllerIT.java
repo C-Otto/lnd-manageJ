@@ -1,13 +1,13 @@
 package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
-import de.cotto.lndmanagej.grpc.GrpcGraph;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSender;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSplitter;
 import de.cotto.lndmanagej.pickhardtpayments.model.PaymentStatus;
+import de.cotto.lndmanagej.service.GraphService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -48,7 +48,7 @@ class PickhardtPaymentsControllerIT {
 
     @MockBean
     @SuppressWarnings("unused")
-    private GrpcGraph grpcGraph;
+    private GraphService graphService;
 
     @MockBean
     @SuppressWarnings("unused")

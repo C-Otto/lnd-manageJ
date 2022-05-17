@@ -2,13 +2,13 @@ package de.cotto.lndmanagej.controller;
 
 import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.controller.dto.MultiPathPaymentDto;
-import de.cotto.lndmanagej.grpc.GrpcGraph;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSender;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSplitter;
 import de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPayment;
 import de.cotto.lndmanagej.pickhardtpayments.model.PaymentStatus;
+import de.cotto.lndmanagej.service.GraphService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,18 +25,18 @@ public class PickhardtPaymentsController {
     private final MultiPathPaymentSplitter multiPathPaymentSplitter;
     private final MultiPathPaymentSender multiPathPaymentSender;
     private final PaymentStatusStream paymentStatusStream;
-    private final GrpcGraph grpcGraph;
+    private final GraphService graphService;
 
     public PickhardtPaymentsController(
             MultiPathPaymentSplitter multiPathPaymentSplitter,
             MultiPathPaymentSender multiPathPaymentSender,
             PaymentStatusStream paymentStatusStream,
-            GrpcGraph grpcGraph
+            GraphService graphService
     ) {
         this.multiPathPaymentSplitter = multiPathPaymentSplitter;
         this.multiPathPaymentSender = multiPathPaymentSender;
         this.paymentStatusStream = paymentStatusStream;
-        this.grpcGraph = grpcGraph;
+        this.graphService = graphService;
     }
 
     @Timed
@@ -107,6 +107,6 @@ public class PickhardtPaymentsController {
     @Timed
     @GetMapping("/reset-graph-cache")
     public void resetGraph() {
-        grpcGraph.resetCache();
+        graphService.resetCache();
     }
 }

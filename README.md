@@ -55,6 +55,7 @@ Status: `/api/status/` followed by...
  * `all-channels`: the channel IDs of all channels (open, closed, waiting close, ...)
    * "pending open channels" are not included, as these do not have an ID, yet!
  * `all-channels/pubkeys`: the pubkeys of all peers with at least one channel as defined above
+ * `known-channels`: the number of known channels in the whole network
 
 Channel specific: `/api/channel/{ID}/` (where `{ID}` is the channel ID) followed by...
  * (nothing): basic channel information (open height, remote pubkey, capacity, status, ...)

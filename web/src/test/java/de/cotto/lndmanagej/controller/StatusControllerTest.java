@@ -5,6 +5,7 @@ import de.cotto.lndmanagej.controller.dto.PubkeysDto;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.ChannelService;
+import de.cotto.lndmanagej.service.GraphService;
 import de.cotto.lndmanagej.service.OwnNodeService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +36,9 @@ class StatusControllerTest {
 
     @Mock
     private ChannelService channelService;
+
+    @Mock
+    private GraphService graphService;
 
     @Test
     void isSyncedToChain() {
@@ -97,5 +101,11 @@ class StatusControllerTest {
     void getBlockHeight() {
         when(ownNodeService.getBlockHeight()).thenReturn(123_456);
         assertThat(statusController.getBlockHeight()).isEqualTo(123_456);
+    }
+
+    @Test
+    void getKnownChannels() {
+        when(graphService.getNumberOfChannels()).thenReturn(123);
+        assertThat(statusController.getKnownChannels()).isEqualTo(123);
     }
 }
