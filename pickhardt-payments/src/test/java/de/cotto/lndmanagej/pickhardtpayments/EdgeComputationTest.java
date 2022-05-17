@@ -88,11 +88,11 @@ class EdgeComputationTest {
     }
 
     @Test
-    void does_not_add_edge_for_channel_with_base_fee() {
+    void adds_edge_for_channel_with_base_fee() {
         DirectedChannelEdge edge =
                 new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY, PUBKEY_2, POLICY_WITH_BASE_FEE);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));
-        assertThat(edgeComputation.getEdges().edges()).isEmpty();
+        assertThat(edgeComputation.getEdges().edges()).isNotEmpty();
     }
 
     @Test

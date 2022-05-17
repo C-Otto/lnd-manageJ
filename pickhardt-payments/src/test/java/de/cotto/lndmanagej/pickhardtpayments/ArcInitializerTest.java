@@ -5,6 +5,7 @@ import com.google.ortools.graph.MinCostFlow;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Edge;
 import de.cotto.lndmanagej.model.EdgeWithLiquidityInformation;
+import de.cotto.lndmanagej.model.Policy;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgesWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.IntegerMapping;
@@ -13,6 +14,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE;
 import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE_1_3;
 import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE_2_3;
@@ -206,17 +209,56 @@ class ArcInitializerTest {
         @Test
         void adds_fee_rate_as_cost() {
             int feeRateWeight = 1;
-            ArcInitializer arcInitializer = new ArcInitializer(
+            ArcInitializer arcInitializer = getArcInitializer(QUANTIZATION, feeRateWeight);
+            arcInitializer.addArcs(new EdgesWithLiquidityInformation(edgeWithLiquidityInformation));
+            assertThat(minCostFlow.getUnitCost(0)).isEqualTo(200);
+        }
+
+        @Test
+        void includes_base_fee_in_assumed_fee_rate() {
+            Coins baseFee = Coins.ofMilliSatoshis(100);
+
+            int feeRateWeight = 1;
+            int quantization = 10_000;
+            ArcInitializer arcInitializer = getArcInitializer(quantization, feeRateWeight);
+            addEdgeWithBaseFee(baseFee, quantization, arcInitializer);
+
+            long expectedFeeRate = (long) Math.ceil(200 + 10);
+            assertThat(minCostFlow.getUnitCost(0)).isEqualTo(expectedFeeRate);
+        }
+
+        @Test
+        void includes_base_fee_in_assumed_fee_rate_rounds_up() {
+            Coins baseFee = Coins.ofMilliSatoshis(111);
+
+            int feeRateWeight = 1;
+            int quantization = 10_000;
+            ArcInitializer arcInitializer = getArcInitializer(quantization, feeRateWeight);
+            addEdgeWithBaseFee(baseFee, quantization, arcInitializer);
+
+            long expectedFeeRate = (long) Math.ceil(200 + 12);
+            assertThat(minCostFlow.getUnitCost(0)).isEqualTo(expectedFeeRate);
+        }
+
+        private void addEdgeWithBaseFee(Coins baseFee, int quantization, ArcInitializer arcInitializer) {
+            Policy policy = new Policy(200, baseFee, true, 40, Coins.ofSatoshis(10_000));
+            EdgeWithLiquidityInformation edge = EdgeWithLiquidityInformation.forKnownLiquidity(
+                    new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy),
+                    Coins.ofSatoshis(30L * quantization)
+            );
+            arcInitializer.addArcs(new EdgesWithLiquidityInformation(edge));
+        }
+
+        private ArcInitializer getArcInitializer(int quantization, int feeRateWeight) {
+            return new ArcInitializer(
                     minCostFlow,
                     integerMapping,
                     edgeMapping,
-                    QUANTIZATION,
+                    quantization,
                     PIECEWISE_LINEAR_APPROXIMATIONS,
                     feeRateWeight,
                     PUBKEY_2
             );
-            arcInitializer.addArcs(new EdgesWithLiquidityInformation(edgeWithLiquidityInformation));
-            assertThat(minCostFlow.getUnitCost(0)).isEqualTo(200);
         }
     }
 

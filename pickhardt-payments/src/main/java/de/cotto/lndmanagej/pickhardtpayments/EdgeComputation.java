@@ -9,7 +9,6 @@ import de.cotto.lndmanagej.model.DirectedChannelEdge;
 import de.cotto.lndmanagej.model.Edge;
 import de.cotto.lndmanagej.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.model.LocalChannel;
-import de.cotto.lndmanagej.model.Policy;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgesWithLiquidityInformation;
 import de.cotto.lndmanagej.service.BalanceService;
@@ -106,8 +105,7 @@ public class EdgeComputation {
     }
 
     private boolean shouldIgnore(DirectedChannelEdge channelEdge) {
-        Policy policy = channelEdge.policy();
-        return policy.disabled() || policy.baseFee().isPositive();
+        return channelEdge.policy().disabled();
     }
 
     private Optional<Coins> getKnownLiquidity(Edge edge, Pubkey ownPubKey) {

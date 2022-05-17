@@ -91,7 +91,8 @@ class ArcInitializer {
         if (ownPubkey.equals(edge.startNode())) {
             return 0;
         }
-        return edge.policy().feeRate();
+        long fromBaseFee = (long) Math.ceil(1.0 * 1_000 / quantization * edge.policy().baseFee().milliSatoshis());
+        return edge.policy().feeRate() + fromBaseFee;
     }
 
     private long quantize(Coins coins) {
