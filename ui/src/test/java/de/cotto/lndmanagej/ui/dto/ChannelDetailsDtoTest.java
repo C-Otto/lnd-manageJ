@@ -50,6 +50,11 @@ class ChannelDetailsDtoTest {
     }
 
     @Test
+    void capacitySat() {
+        assertThat(CHANNEL_DETAILS_DTO.capacitySat()).isEqualTo(21_000_000);
+    }
+
+    @Test
     void onChainCosts() {
         assertThat(CHANNEL_DETAILS_DTO.onChainCosts()).isEqualTo(OnChainCostsDto.createFromModel(ON_CHAIN_COSTS));
     }

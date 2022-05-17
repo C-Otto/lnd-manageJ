@@ -126,7 +126,9 @@ class SearchControllerIT extends BaseControllerIT {
                 channelDetails.remoteAlias(),
                 channelDetails.remotePubkey(),
                 channelDetails.policies(),
-                channelDetails.balanceInformation());
+                channelDetails.balanceInformation(),
+                channelDetails.capacitySat()
+        );
     }
 
     public NodeDto nodeDto(OpenChannelDto channel) {

@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static de.cotto.lndmanagej.controller.dto.NodeDetailsDtoFixture.NODE_DETAILS_DTO;
+import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.CAPACITY_SAT;
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.ChannelDetailsFixtures.CHANNEL_DETAILS;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
@@ -90,7 +91,7 @@ class UiDataServiceImplTest {
         when(statusController.getOpenChannels()).thenReturn(new ChannelsDto(List.of(CHANNEL_ID)));
 
         assertThat(uiDataService.getOpenChannels()).containsExactly(
-                new OpenChannelDto(CHANNEL_ID, alias, PUBKEY_2, policies, balance)
+                new OpenChannelDto(CHANNEL_ID, alias, PUBKEY_2, policies, balance, CAPACITY_SAT)
         );
     }
 
@@ -104,6 +105,7 @@ class UiDataServiceImplTest {
                         ALIAS,
                         LOCAL,
                         BalanceInformationDto.createFromModel(BALANCE_INFORMATION),
+                        CAPACITY_SAT,
                         OnChainCostsDto.createFromModel(ON_CHAIN_COSTS),
                         PoliciesDto.createFromModel(POLICIES_FOR_LOCAL_CHANNEL),
                         FeeReportDto.createFromModel(FEE_REPORT),

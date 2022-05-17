@@ -21,6 +21,7 @@ import org.springframework.ui.Model;
 import java.util.List;
 import java.util.Map;
 
+import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.CAPACITY_SAT;
 import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.REMOTE_BALANCE;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
@@ -88,7 +89,8 @@ class DashboardControllerTest {
                 "Albert",
                 PUBKEY,
                 PoliciesDto.createFromModel(POLICIES_FOR_LOCAL_CHANNEL),
-                BalanceInformationDto.createFromModel(balanceInformation)
+                BalanceInformationDto.createFromModel(balanceInformation),
+                CAPACITY_SAT
         );
     }
 }
