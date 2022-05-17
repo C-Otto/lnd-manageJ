@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.controller;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.service.ChannelService;
+import de.cotto.lndmanagej.service.GraphService;
 import de.cotto.lndmanagej.service.OwnNodeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,10 @@ class ObjectMapperConfigurationIT {
     @MockBean
     @SuppressWarnings("unused")
     private OwnNodeService ownNodeService;
+
+    @MockBean
+    @SuppressWarnings("unused")
+    private GraphService graphService;
 
     @Test
     void output_is_pretty_printed() throws Exception {

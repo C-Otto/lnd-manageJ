@@ -9,6 +9,7 @@ import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.ChannelService;
+import de.cotto.lndmanagej.service.GraphService;
 import de.cotto.lndmanagej.service.OwnNodeService;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,10 +24,12 @@ import java.util.List;
 public class StatusController {
     private final OwnNodeService ownNodeService;
     private final ChannelService channelService;
+    private final GraphService graphService;
 
-    public StatusController(OwnNodeService ownNodeService, ChannelService channelService) {
+    public StatusController(OwnNodeService ownNodeService, ChannelService channelService, GraphService graphService) {
         this.ownNodeService = ownNodeService;
         this.channelService = channelService;
+        this.graphService = graphService;
     }
 
     @Timed
@@ -85,4 +88,9 @@ public class StatusController {
         return new PubkeysDto(pubkeys);
     }
 
+    @Timed
+    @GetMapping("/known-channels")
+    public int getKnownChannels() {
+        return graphService.getNumberOfChannels();
+    }
 }

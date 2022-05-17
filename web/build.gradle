@@ -6,7 +6,6 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-web')
     implementation project(':backend')
     implementation project(':pickhardt-payments')
-    implementation project(':grpc-adapter')
     implementation project(':model')
     testImplementation testFixtures(project(':model'))
     testImplementation testFixtures(project(':pickhardt-payments'))

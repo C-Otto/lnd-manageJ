@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.service.ChannelService;
+import de.cotto.lndmanagej.service.GraphService;
 import de.cotto.lndmanagej.service.OwnNodeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,9 @@ class StatusControllerIT {
 
     @MockBean
     private OwnNodeService ownNodeService;
+
+    @MockBean
+    private GraphService graphService;
 
     @Test
     void isSyncedToChain() throws Exception {
@@ -95,5 +99,12 @@ class StatusControllerIT {
         );
         mockMvc.perform(get(PREFIX + "/all-channels/pubkeys"))
                 .andExpect(jsonPath("$.pubkeys", is(sortedPubkeys)));
+    }
+
+    @Test
+    void getKnownChannels() throws Exception {
+        when(graphService.getNumberOfChannels()).thenReturn(123);
+        mockMvc.perform(get(PREFIX + "/known-channels"))
+                .andExpect(jsonPath("$", is(123)));
     }
 }
