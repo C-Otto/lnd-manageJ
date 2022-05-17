@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.grpc;
 
+import de.cotto.lndmanagej.model.Network;
 import de.cotto.lndmanagej.model.Pubkey;
 import lnrpc.Chain;
 import lnrpc.GetInfoResponse;
@@ -14,6 +15,8 @@ import java.util.Optional;
 @Component
 public class GrpcGetInfo {
     private static final String TESTNET = "testnet";
+    private static final String MAINNET = "mainnet";
+    private static final String REGTEST = "regtest";
     private static final String BITCOIN = "bitcoin";
     private final GrpcService grpcService;
 
@@ -82,7 +85,7 @@ public class GrpcGetInfo {
     }
 
     @SuppressWarnings("PMD.LinguisticNaming")
-    public Optional<Boolean> isTestnet() {
+    public Optional<Network> getNetwork() {
         GetInfoResponse info = grpcService.getInfo().orElse(null);
         if (info == null) {
             return Optional.empty();
@@ -97,6 +100,21 @@ public class GrpcGetInfo {
         boolean isTestnet = bitcoinChains.stream()
                 .map(Chain::getNetwork)
                 .allMatch(TESTNET::equals);
-        return Optional.of(isTestnet);
+        if (isTestnet) {
+            return Optional.of(Network.TESTNET);
+        }
+        boolean isMainnet = bitcoinChains.stream()
+                .map(Chain::getNetwork)
+                .allMatch(MAINNET::equals);
+        if (isMainnet) {
+            return Optional.of(Network.MAINNET);
+        }
+        boolean isRegtest = bitcoinChains.stream()
+                .map(Chain::getNetwork)
+                .allMatch(REGTEST::equals);
+        if (isRegtest) {
+            return Optional.of(Network.REGTEST);
+        }
+        return Optional.empty();
     }
 }

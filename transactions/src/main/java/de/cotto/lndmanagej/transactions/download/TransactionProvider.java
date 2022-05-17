@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.transactions.download;
 
 import de.cotto.lndmanagej.grpc.GrpcGetInfo;
+import de.cotto.lndmanagej.model.Network;
 import de.cotto.lndmanagej.model.TransactionHash;
 import de.cotto.lndmanagej.transactions.model.Transaction;
 import feign.FeignException;
@@ -43,14 +44,17 @@ public class TransactionProvider {
             TransactionDetailsClient client
     ) {
         try {
-            Boolean isTestnet = grpcGetInfo.isTestnet().orElse(null);
-            if (isTestnet == null) {
+            Network network = grpcGetInfo.getNetwork().orElse(null);
+            if (network == null) {
                 return Optional.empty();
             }
-            if (isTestnet) {
+            if (network == Network.TESTNET) {
                 return client.getTransactionTestnet(transactionHash.getHash());
+            } else if (network == Network.MAINNET) {
+                return client.getTransaction(transactionHash.getHash());
+            } else {
+                return Optional.empty();
             }
-            return client.getTransaction(transactionHash.getHash());
         } catch (FeignException feignException) {
             logger.warn("Feign exception: ", feignException);
             return Optional.empty();

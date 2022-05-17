@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.transactions.download;
 
 import de.cotto.lndmanagej.grpc.GrpcGetInfo;
+import de.cotto.lndmanagej.model.Network;
 import feign.FeignException;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +39,7 @@ class TransactionProviderTest {
     @BeforeEach
     void setUp() {
         transactionProvider = new TransactionProvider(grpcGetInfo, List.of(blockcypherClient, bitapsClient));
-        lenient().when(grpcGetInfo.isTestnet()).thenReturn(Optional.of(false));
+        lenient().when(grpcGetInfo.getNetwork()).thenReturn(Optional.of(Network.MAINNET));
     }
 
     @Test
@@ -75,7 +76,7 @@ class TransactionProviderTest {
 
     @Test
     void testnet() {
-        when(grpcGetInfo.isTestnet()).thenReturn(Optional.of(true));
+        when(grpcGetInfo.getNetwork()).thenReturn(Optional.of(Network.TESTNET));
         lenient().when(blockcypherClient.getTransactionTestnet(TRANSACTION_HASH.getHash()))
                 .thenReturn(Optional.of(BLOCKCYPHER_TRANSACTION));
         lenient().when(bitapsClient.getTransactionTestnet(TRANSACTION_HASH.getHash()))
@@ -84,8 +85,16 @@ class TransactionProviderTest {
     }
 
     @Test
+    void regtest() {
+        when(grpcGetInfo.getNetwork()).thenReturn(Optional.of(Network.REGTEST));
+        assertThat(transactionProvider.get(TRANSACTION_HASH)).isEmpty();
+        verifyNoInteractions(bitapsClient);
+        verifyNoInteractions(blockcypherClient);
+    }
+
+    @Test
     void network_not_known() {
-        when(grpcGetInfo.isTestnet()).thenReturn(Optional.empty());
+        when(grpcGetInfo.getNetwork()).thenReturn(Optional.empty());
         assertThat(transactionProvider.get(TRANSACTION_HASH)).isEmpty();
         verifyNoInteractions(blockcypherClient);
         verifyNoInteractions(bitapsClient);
