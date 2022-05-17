@@ -63,13 +63,8 @@ class ChannelIdConverterTest {
         }
 
         @Test
-        void just_numbers_small_number() {
-            assertThat(channelIdConverter.tryToConvert("123")).isEmpty();
-        }
-
-        @Test
-        void just_numbers_too_early() {
-            assertThat(channelIdConverter.tryToConvert("430103660018532351")).isEmpty();
+        void just_numbers_zero() {
+            assertThat(channelIdConverter.tryToConvert("0")).isEmpty();
         }
 
         @Test
@@ -78,8 +73,8 @@ class ChannelIdConverterTest {
         }
 
         @Test
-        void compact_form_too_early() {
-            assertThat(channelIdConverter.tryToConvert("300000x123x1")).isEmpty();
+        void compact_form_zero() {
+            assertThat(channelIdConverter.tryToConvert("0x0x0")).isEmpty();
         }
 
         @Test
@@ -88,8 +83,8 @@ class ChannelIdConverterTest {
         }
 
         @Test
-        void compact_lnd_form_too_early() {
-            assertThat(channelIdConverter.tryToConvert("300000:123:1")).isEmpty();
+        void compact_lnd_form_zero() {
+            assertThat(channelIdConverter.tryToConvert("0:0:0")).isEmpty();
         }
 
         @Test

@@ -5,7 +5,6 @@ import java.util.Objects;
 
 public final class ChannelId implements Comparable<ChannelId> {
     private static final int EXPECTED_NUMBER_OF_SEGMENTS = 3;
-    private static final long NOT_BEFORE = 430_103_660_018_532_352L; // January 1st 2016
 
     private final long shortChannelId;
 
@@ -14,7 +13,7 @@ public final class ChannelId implements Comparable<ChannelId> {
     }
 
     public static ChannelId fromShortChannelId(long shortChannelId) {
-        if (shortChannelId < NOT_BEFORE) {
+        if (shortChannelId <= 0) {
             throw new IllegalArgumentException("Illegal channel ID " + shortChannelId);
         }
         return new ChannelId(shortChannelId);

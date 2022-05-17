@@ -25,9 +25,9 @@ class ChannelIdTest {
         }
 
         @Test
-        void before_2016() {
+        void zero_id() {
             assertThatIllegalArgumentException().isThrownBy(
-                    () -> ChannelId.fromCompactForm("391176:999:999")
+                    () -> ChannelId.fromCompactForm("0:0:0")
             ).withMessageStartingWith(ILLEGAL_CHANNEL_ID);
         }
 
@@ -81,9 +81,9 @@ class ChannelIdTest {
         }
 
         @Test
-        void before_2016() {
+        void zero_id() {
             assertThatIllegalArgumentException().isThrownBy(
-                    () -> ChannelId.fromShortChannelId(430_103_660_018_532_351L)
+                    () -> ChannelId.fromShortChannelId(0)
             ).withMessageStartingWith(ILLEGAL_CHANNEL_ID);
         }
 
