@@ -80,6 +80,7 @@ public class UiDataServiceImpl extends UiDataService {
                 channelId,
                 details.remotePubkey(),
                 details.remoteAlias(),
+                details.status(),
                 details.openInitiator(),
                 details.balance(),
                 Long.parseLong(details.capacitySat()),
@@ -88,7 +89,8 @@ public class UiDataServiceImpl extends UiDataService {
                 details.feeReport(),
                 details.flowReport(),
                 details.rebalanceReport(),
-                details.warnings());
+                details.warnings()
+        );
     }
 
     @Override
