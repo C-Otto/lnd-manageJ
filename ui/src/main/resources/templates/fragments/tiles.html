@@ -14,16 +14,16 @@
         <div class="card-body">
             <div class="container" style="padding-left: 0; padding-right: 0;">
                 <div class="row align-items-start">
-                    <div class="col">
+                    <div class="tile-column-left col">
                         <div th:replace="~{fragments/channel-collections :: channel-list-group ('Open', ${node.channels})}"/>
                     </div>
-                    <div class="col">
+                    <div class="tile-column col">
                         <div th:replace="~{fragments/channel-collections :: channel-list-group ('Closed', ${node.closedChannels})}"/>
                     </div>
-                    <div class="col">
+                    <div class="tile-column col">
                         <div th:replace="~{fragments/channel-collections :: channel-list-group ('Waiting Close', ${node.waitingCloseChannels})}"/>
                     </div>
-                    <div class="col">
+                    <div class="tile-column-right col">
                         <div th:replace="~{fragments/channel-collections :: channel-list-group ('Pending Force Closing', ${node.pendingForceClosingChannels})}"/>
                     </div>
                 </div>
@@ -75,19 +75,19 @@
         <div class="card-body">
             <div class="container" style="padding-left: 0; padding-right: 0;">
                 <div class="row align-items-start">
-                    <div class="col">
+                    <div class="tile-column-left col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Open</li>
                             <li class="list-group-item" th:text="${@formatter.formatNumber(onChainCosts.openCostsSat)}"></li>
                         </ul>
                     </div>
-                    <div class="col">
+                    <div class="tile-column col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Close</li>
                             <li class="list-group-item" th:text="${@formatter.formatNumber(onChainCosts.closeCostsSat)}"></li>
                         </ul>
                     </div>
-                    <div class="col">
+                    <div class="tile-column-right col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Sweep</li>
                             <li class="list-group-item" th:text="${@formatter.formatNumber(onChainCosts.sweepCostsSat)}"></li>
@@ -110,13 +110,13 @@
         <div class="card-body">
             <div class="container" style="padding-left: 0; padding-right: 0;">
                 <div class="row align-items-start">
-                    <div class="col">
+                    <div class="tile-column-left col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Earned (mSAT)</li>
                             <li class="list-group-item" th:text="${@formatter.formatNumber(feeReport.earnedMilliSat)}"></li>
                         </ul>
                     </div>
-                    <div class="col">
+                    <div class="tile-column-right col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Sourced (mSAT)</li>
                             <li class="list-group-item" th:text="${@formatter.formatNumber(feeReport.sourcedMilliSat)}"></li>
@@ -157,7 +157,7 @@
 
             <div class="container" style="padding-left: 0; padding-right: 0;">
                 <div class="row align-items-start">
-                    <div class="col">
+                    <div class="tile-column-left col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Local</li>
                             <li class="list-group-item" th:text="'Available '+${@formatter.formatNumber(balanceInformation.localAvailableSat)}"></li>
@@ -165,7 +165,7 @@
                             <li class="list-group-item" th:text="'Reserve '+${@formatter.formatNumber(balanceInformation.localReserveSat)}"></li>
                         </ul>
                     </div>
-                    <div class="col">
+                    <div class="tile-column-right col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Remote</li>
                             <li class="list-group-item" th:text="'Available '+${@formatter.formatNumber(balanceInformation.remoteAvailableSat)}"></li>
@@ -192,7 +192,7 @@
 
             <div class="container" style="padding-left: 0; padding-right: 0;">
                 <div class="row align-items-start">
-                    <div class="col">
+                    <div class="tile-column-left col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Source (mSAT)</li>
                             <li class="list-group-item" th:text="'Cost: '+${@formatter.formatNumber(rebalanceReport.sourceCostsMilliSat)}"></li>
@@ -202,7 +202,7 @@
                                 th:text="'Support: '+${@formatter.formatNumber(rebalanceReport.supportAsSourceAmountMilliSat)}"></li>
                         </ul>
                     </div>
-                    <div class="col">
+                    <div class="tile-column-right col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Target (mSAT)</li>
                             <li class="list-group-item" th:text="'Cost: '+${@formatter.formatNumber(rebalanceReport.targetCostsMilliSat)}"></li>
@@ -303,7 +303,7 @@
 
             <div class="container" style="padding-left: 0; padding-right: 0;">
                 <div class="row align-items-start">
-                    <div class="col">
+                    <div class="tile-column-left col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Local</li>
                             <li class="list-group-item"
@@ -313,7 +313,7 @@
                             <li class="list-group-item" th:text="'Enabled: '+${policies.local.enabled}"></li>
                         </ul>
                     </div>
-                    <div class="col">
+                    <div class="tile-column-right col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Remote</li>
                             <li class="list-group-item"
