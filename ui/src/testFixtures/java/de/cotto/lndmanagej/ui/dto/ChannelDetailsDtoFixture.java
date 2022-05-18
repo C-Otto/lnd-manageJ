@@ -7,6 +7,7 @@ import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.controller.dto.RebalanceReportDto;
 
+import static de.cotto.lndmanagej.controller.dto.ChannelStatusDtoFixture.CHANNEL_STATUS_PUBLIC_OPEN;
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.FeeReportFixtures.FEE_REPORT;
@@ -25,6 +26,7 @@ public class ChannelDetailsDtoFixture {
             CHANNEL_ID,
             PUBKEY,
             "Albert",
+            CHANNEL_STATUS_PUBLIC_OPEN,
             LOCAL,
             BalanceInformationDto.createFromModel(BALANCE_INFORMATION),
             CAPACITY_SAT,
@@ -33,5 +35,6 @@ public class ChannelDetailsDtoFixture {
             FeeReportDto.createFromModel(FEE_REPORT),
             FlowReportDto.createFromModel(FLOW_REPORT),
             RebalanceReportDto.createFromModel(REBALANCE_REPORT),
-            CHANNEL_WARNINGS.descriptions());
+            CHANNEL_WARNINGS.descriptions()
+    );
 }

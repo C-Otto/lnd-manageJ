@@ -25,12 +25,17 @@ import java.util.stream.Collectors;
 
 import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT;
 import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT_OFFLINE;
+import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveChannelStatus;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveChannelWarnings;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveFeeReport;
+import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveFlowReport;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveOnChainCosts;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveOpenInitiator;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.derivePolicies;
+import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveRebalanceReport;
+import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveWarnings;
 
+@SuppressWarnings("PMD.ExcessiveImports")
 @Component
 public class DemoDataService extends UiDataService {
 
@@ -183,15 +188,17 @@ public class DemoDataService extends UiDataService {
                 channel.channelId(),
                 channel.remotePubkey(),
                 channel.remoteAlias(),
+                deriveChannelStatus(channel.channelId()),
                 deriveOpenInitiator(channel.channelId()),
                 channel.balanceInformation(),
                 channel.capacitySat(),
                 deriveOnChainCosts(channel.channelId()),
                 channel.policies(),
                 deriveFeeReport(channel.channelId()),
-                DeriveDataUtil.deriveFlowReport(channel.channelId()),
-                DeriveDataUtil.deriveRebalanceReport(channel.channelId()),
-                DeriveDataUtil.deriveWarnings(channel.channelId()));
+                deriveFlowReport(channel.channelId()),
+                deriveRebalanceReport(channel.channelId()),
+                deriveWarnings(channel.channelId())
+        );
     }
 
     private static NodeDetailsDto createNodeDetails(NodeDto node, List<OpenChannelDto> channels) {
@@ -208,8 +215,8 @@ public class DemoDataService extends UiDataService {
                 firstChannel.balanceInformation(),
                 OnlineReportDto.createFromModel(onlineReport),
                 deriveFeeReport(firstChannel.channelId()),
-                DeriveDataUtil.deriveFlowReport(firstChannel.channelId()),
-                DeriveDataUtil.deriveRebalanceReport(firstChannel.channelId()),
+                deriveFlowReport(firstChannel.channelId()),
+                deriveRebalanceReport(firstChannel.channelId()),
                 deriveChannelWarnings(firstChannel.channelId()));
     }
 

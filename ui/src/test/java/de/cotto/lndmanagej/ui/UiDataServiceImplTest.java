@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static de.cotto.lndmanagej.controller.dto.ChannelStatusDtoFixture.CHANNEL_STATUS_PRIVATE_OPEN;
 import static de.cotto.lndmanagej.controller.dto.NodeDetailsDtoFixture.NODE_DETAILS_DTO;
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.ChannelDetailsFixtures.CHANNEL_DETAILS;
@@ -103,6 +104,7 @@ class UiDataServiceImplTest {
                         CHANNEL_ID,
                         PUBKEY_2,
                         ALIAS,
+                        CHANNEL_STATUS_PRIVATE_OPEN,
                         LOCAL,
                         BalanceInformationDto.createFromModel(BALANCE_INFORMATION),
                         CAPACITY_SAT,

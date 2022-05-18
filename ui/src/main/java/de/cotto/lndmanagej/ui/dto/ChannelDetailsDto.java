@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.ui.dto;
 
 import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
+import de.cotto.lndmanagej.controller.dto.ChannelStatusDto;
 import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.FlowReportDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
@@ -16,6 +17,7 @@ public record ChannelDetailsDto(
         ChannelId channelId,
         Pubkey remotePubkey,
         String remoteAlias,
+        ChannelStatusDto channelStatus,
         OpenInitiator openInitiator,
         BalanceInformationDto balanceInformation,
         long capacitySat,
