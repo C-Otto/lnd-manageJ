@@ -283,6 +283,7 @@
                     <a th:text="${channel.remoteAlias}" th:href="@{/node/{id}(id=${channel.remotePubkey})}"></a>
                 </span>
             </p>
+            <p th:text="'Capacity: ' + ${@formatter.formatNumber(channel.capacitySat)}"></p>
         </div>
     </div>
 </div>
