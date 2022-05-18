@@ -184,7 +184,7 @@
     <div class="card border-secondary">
         <div class="card-header">
             <div class="fs-4 mb-0">
-                <div th:replace="~{fragments/icons :: pig}"/>
+                <div th:replace="~{fragments/icons :: shuffle}"/>
                 Rebalance Report
             </div>
         </div>
@@ -283,6 +283,19 @@
                     <a th:text="${channel.remoteAlias}" th:href="@{/node/{id}(id=${channel.remotePubkey})}"></a>
                 </span>
             </p>
+        </div>
+    </div>
+</div>
+
+<div th:fragment="fee-policy (policies)" class="tile col-sm-4">
+    <div class="card border-secondary">
+        <div class="card-header">
+            <div class="fs-4 mb-0">
+                <div th:replace="~{fragments/icons :: speedometer}"/>
+                Fee Policy
+            </div>
+        </div>
+        <div class="card-body">
 
             <div class="container" style="padding-left: 0; padding-right: 0;">
                 <div class="row align-items-start">
@@ -290,20 +303,20 @@
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Local</li>
                             <li class="list-group-item"
-                                th:text="'Base Fee (mSAT): '+${@formatter.formatNumber(channel.policies.local.baseFeeMilliSat)}"></li>
+                                th:text="'Base Fee (mSAT): '+${@formatter.formatNumber(policies.local.baseFeeMilliSat)}"></li>
                             <li class="list-group-item"
-                                th:text="'Fee Rate: '+${@formatter.formatNumber(channel.policies.local.feeRatePpm)}"></li>
-                            <li class="list-group-item" th:text="'Enabled: '+${channel.policies.local.enabled}"></li>
+                                th:text="'Fee Rate: '+${@formatter.formatNumber(policies.local.feeRatePpm)}"></li>
+                            <li class="list-group-item" th:text="'Enabled: '+${policies.local.enabled}"></li>
                         </ul>
                     </div>
                     <div class="col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Remote</li>
                             <li class="list-group-item"
-                                th:text="'Base Fee (mSAT): '+${@formatter.formatNumber(channel.policies.remote.baseFeeMilliSat)}"></li>
+                                th:text="'Base Fee (mSAT): '+${@formatter.formatNumber(policies.remote.baseFeeMilliSat)}"></li>
                             <li class="list-group-item"
-                                th:text="'Fee Rate: '+${@formatter.formatNumber(channel.policies.remote.feeRatePpm)}"></li>
-                            <li class="list-group-item" th:text="'Enabled: '+${channel.policies.remote.enabled}"></li>
+                                th:text="'Fee Rate: '+${@formatter.formatNumber(policies.remote.feeRatePpm)}"></li>
+                            <li class="list-group-item" th:text="'Enabled: '+${policies.remote.enabled}"></li>
                         </ul>
                     </div>
                 </div>
