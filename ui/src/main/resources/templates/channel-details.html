@@ -7,6 +7,7 @@
 <div class="row">
 
     <div th:replace="~{fragments/tiles :: channel-details(${channel})}"/>
+    <div th:replace="~{fragments/tiles :: fee-policy(${channel.policies})}"/>
     <div th:replace="~{fragments/tiles :: balance(${channel.balanceInformation})}"/>
     <div th:replace="~{fragments/tiles :: on-chain-costs(${channel.onChainCosts})}"/>
 
