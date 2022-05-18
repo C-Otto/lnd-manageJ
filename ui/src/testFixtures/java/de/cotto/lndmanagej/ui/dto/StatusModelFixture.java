@@ -1,6 +1,4 @@
-package de.cotto.lndmanagej.controller.dto;
-
-import de.cotto.lndmanagej.ui.dto.StatusModel;
+package de.cotto.lndmanagej.ui.dto;
 
 public class StatusModelFixture {
 
