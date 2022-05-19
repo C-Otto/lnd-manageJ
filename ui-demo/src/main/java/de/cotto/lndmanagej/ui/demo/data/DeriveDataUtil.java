@@ -16,7 +16,6 @@ import de.cotto.lndmanagej.model.Policy;
 import de.cotto.lndmanagej.model.RebalanceReport;
 
 import java.util.Random;
-import java.util.Set;
 import java.util.random.RandomGenerator;
 
 import static de.cotto.lndmanagej.model.OpenCloseStatus.OPEN;
@@ -46,12 +45,6 @@ public final class DeriveDataUtil {
                 Coins.ofSatoshis(rand.nextInt(3000)),
                 Coins.ofSatoshis(rand.nextInt(500))
         ));
-    }
-
-    static Set<String> deriveWarnings(ChannelId channelId) {
-        RandomGenerator rand = createRandomGenerator(channelId);
-        int updates = (rand.nextInt(10) + 5) * 100_000;
-        return rand.nextBoolean() ? Set.of("Channel has accumulated " + updates + " updates.") : Set.of();
     }
 
     static FlowReportDto deriveFlowReport(ChannelId channelId) {
@@ -102,12 +95,6 @@ public final class DeriveDataUtil {
         boolean enabled = rand.nextInt(10) == 0;
         int timeLockDelta = (rand.nextInt(5) + 1) * 10;
         return new Policy(feeRate, baseFee, enabled, timeLockDelta, MAX_HTLC);
-    }
-
-    static Set<String> deriveChannelWarnings(ChannelId channelId) {
-        RandomGenerator rand = createRandomGenerator(channelId);
-        int days = rand.nextInt(30) + 30;
-        return rand.nextBoolean() ? Set.of("No flow in the past " + days + " days.") : Set.of();
     }
 
     public static ChannelStatusDto deriveChannelStatus(ChannelId channelId) {

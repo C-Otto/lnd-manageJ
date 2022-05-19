@@ -19,6 +19,7 @@ import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,14 +27,12 @@ import java.util.stream.Collectors;
 import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT;
 import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT_OFFLINE;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveChannelStatus;
-import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveChannelWarnings;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveFeeReport;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveFlowReport;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveOnChainCosts;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveOpenInitiator;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.derivePolicies;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveRebalanceReport;
-import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveWarnings;
 
 @SuppressWarnings("PMD.ExcessiveImports")
 @Component
@@ -133,7 +132,15 @@ public class DemoDataService extends UiDataService {
                 .filter(c -> channelId.equals(c.channelId()))
                 .findFirst()
                 .orElseThrow(NotFoundException::new);
-        return createChannelDetails(localOpenChannel);
+        return createChannelDetails(localOpenChannel, getChannelWarnings(channelId));
+    }
+
+    private Set<String> getChannelWarnings(ChannelId channelId) {
+        return getWarnings().channelsWithWarnings().stream()
+                .filter(c -> c.channelId().equals(channelId))
+                .map(ChannelWithWarningsDto::warnings)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
     }
 
     @Override
@@ -146,7 +153,16 @@ public class DemoDataService extends UiDataService {
 
     @Override
     public NodeDetailsDto getNodeDetails(Pubkey pubkey) {
-        return createNodeDetails(getNode(pubkey), getOpenChannels(pubkey));
+        List<OpenChannelDto> openChannels = getOpenChannels(pubkey);
+        return createNodeDetails(getNode(pubkey), openChannels, getNodeWarnings(pubkey));
+    }
+
+    private Set<String> getNodeWarnings(Pubkey pubkey) {
+        return getWarnings().nodesWithWarnings().stream()
+                .filter(p -> p.pubkey().equals(pubkey))
+                .map(NodeWithWarningsDto::warnings)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
     }
 
     static boolean isOnline(ChannelId channelId) {
@@ -183,7 +199,7 @@ public class DemoDataService extends UiDataService {
         return new OpenChannelDto(channelId, alias, remotePubkey, policies, balance, capacity);
     }
 
-    private static ChannelDetailsDto createChannelDetails(OpenChannelDto channel) {
+    private static ChannelDetailsDto createChannelDetails(OpenChannelDto channel, Set<String> warnings) {
         return new ChannelDetailsDto(
                 channel.channelId(),
                 channel.remotePubkey(),
@@ -197,11 +213,11 @@ public class DemoDataService extends UiDataService {
                 deriveFeeReport(channel.channelId()),
                 deriveFlowReport(channel.channelId()),
                 deriveRebalanceReport(channel.channelId()),
-                deriveWarnings(channel.channelId())
+                warnings
         );
     }
 
-    private static NodeDetailsDto createNodeDetails(NodeDto node, List<OpenChannelDto> channels) {
+    private static NodeDetailsDto createNodeDetails(NodeDto node, List<OpenChannelDto> channels, Set<String> warnings) {
         OpenChannelDto firstChannel = channels.stream().findFirst().orElseThrow();
         OnlineReport onlineReport = node.online() ? ONLINE_REPORT : ONLINE_REPORT_OFFLINE;
         return new NodeDetailsDto(
@@ -217,7 +233,7 @@ public class DemoDataService extends UiDataService {
                 deriveFeeReport(firstChannel.channelId()),
                 deriveFlowReport(firstChannel.channelId()),
                 deriveRebalanceReport(firstChannel.channelId()),
-                deriveChannelWarnings(firstChannel.channelId()));
+                warnings);
     }
 
 }
