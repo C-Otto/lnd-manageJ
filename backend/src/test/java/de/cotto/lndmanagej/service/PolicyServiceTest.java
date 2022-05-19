@@ -1,7 +1,10 @@
 package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.grpc.GrpcChannelPolicy;
+import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.PoliciesForLocalChannel;
+import de.cotto.lndmanagej.model.Policy;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,9 +13,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+import java.util.Set;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_1;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
@@ -27,6 +33,9 @@ class PolicyServiceTest {
 
     @Mock
     private GrpcChannelPolicy grpcChannelPolicy;
+
+    @Mock
+    private ChannelService channelService;
 
     @Nested
     class ForLocalChannel {
@@ -70,6 +79,64 @@ class PolicyServiceTest {
         void getPolicyTo() {
             when(grpcChannelPolicy.getPolicyTo(CHANNEL_ID, PUBKEY)).thenReturn(Optional.of(POLICY_1));
             assertThat(policyService.getPolicyTo(CHANNEL_ID, PUBKEY)).contains(POLICY_1);
+        }
+    }
+
+    @Nested
+    class GetMinimumFeeRateFrom {
+        @Test
+        void no_channel() {
+            assertThat(policyService.getMinimumFeeRateFrom(PUBKEY)).isEmpty();
+        }
+
+        @Test
+        void one_channel() {
+            when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL));
+            mockPolicy(CHANNEL_ID, 123);
+            assertThat(policyService.getMinimumFeeRateFrom(PUBKEY)).contains(123L);
+        }
+
+        @Test
+        void two_channels() {
+            when(channelService.getOpenChannelsWith(PUBKEY))
+                    .thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2));
+            mockPolicy(CHANNEL_ID, 2);
+            mockPolicy(CHANNEL_ID_2, 1);
+            assertThat(policyService.getMinimumFeeRateFrom(PUBKEY)).contains(1L);
+        }
+
+        private void mockPolicy(ChannelId channelId, int feeRate) {
+            when(grpcChannelPolicy.getPolicyFrom(channelId, PUBKEY))
+                    .thenReturn(Optional.of(new Policy(feeRate, Coins.NONE, false, 0, Coins.NONE)));
+        }
+    }
+
+    @Nested
+    class GetMinimumFeeRateTo {
+        @Test
+        void no_channel() {
+            assertThat(policyService.getMinimumFeeRateTo(PUBKEY)).isEmpty();
+        }
+
+        @Test
+        void one_channel() {
+            when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL));
+            mockPolicy(CHANNEL_ID, 123);
+            assertThat(policyService.getMinimumFeeRateTo(PUBKEY)).contains(123L);
+        }
+
+        @Test
+        void two_channels() {
+            when(channelService.getOpenChannelsWith(PUBKEY))
+                    .thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2));
+            mockPolicy(CHANNEL_ID, 200);
+            mockPolicy(CHANNEL_ID_2, 123);
+            assertThat(policyService.getMinimumFeeRateTo(PUBKEY)).contains(123L);
+        }
+
+        private void mockPolicy(ChannelId channelId, int feeRate) {
+            when(grpcChannelPolicy.getPolicyTo(channelId, PUBKEY))
+                    .thenReturn(Optional.of(new Policy(feeRate, Coins.NONE, false, 0, Coins.NONE)));
         }
     }
 }
