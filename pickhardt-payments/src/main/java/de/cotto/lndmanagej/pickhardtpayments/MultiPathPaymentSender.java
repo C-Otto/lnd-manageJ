@@ -27,6 +27,10 @@ public class MultiPathPaymentSender {
         if (decodedPaymentRequest == null) {
             return PaymentStatus.createFailure("Unable to decode payment request");
         }
+        return payPaymentRequest(decodedPaymentRequest, feeRateWeight);
+    }
+
+    public PaymentStatus payPaymentRequest(DecodedPaymentRequest decodedPaymentRequest, int feeRateWeight) {
         routeHintService.addDecodedPaymentRequest(decodedPaymentRequest);
 
         PaymentStatus paymentStatus = new PaymentStatus(decodedPaymentRequest.paymentHash());
