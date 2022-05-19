@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.pickhardtpayments;
 
 import de.cotto.lndmanagej.grpc.GrpcPayments;
+import de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions;
 import de.cotto.lndmanagej.pickhardtpayments.model.PaymentStatus;
 import de.cotto.lndmanagej.pickhardtpayments.model.PaymentStatus.InstantWithString;
 import de.cotto.lndmanagej.service.RouteHintService;
@@ -34,7 +35,7 @@ class MultiPathPaymentSenderTest {
 
     @Test
     void unable_to_decode_payment_request() {
-        PaymentStatus paymentStatus = multiPathPaymentSender.payPaymentRequest("foo", 123);
+        PaymentStatus paymentStatus = multiPathPaymentSender.payPaymentRequest("foo", feeRateWeight(123));
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(paymentStatus.isFailure()).isTrue();
         softly.assertThat(paymentStatus.getMessages().stream().map(InstantWithString::string))
@@ -48,7 +49,7 @@ class MultiPathPaymentSenderTest {
         when(grpcPayments.decodePaymentRequest(DECODED_PAYMENT_REQUEST.paymentRequest()))
                 .thenReturn(Optional.of(DECODED_PAYMENT_REQUEST));
 
-        multiPathPaymentSender.payPaymentRequest(DECODED_PAYMENT_REQUEST.paymentRequest(), 0);
+        multiPathPaymentSender.payPaymentRequest(DECODED_PAYMENT_REQUEST.paymentRequest(), feeRateWeight(0));
         verify(routeHintService).addDecodedPaymentRequest(DECODED_PAYMENT_REQUEST);
     }
 
@@ -58,8 +59,10 @@ class MultiPathPaymentSenderTest {
                 .thenReturn(Optional.of(DECODED_PAYMENT_REQUEST));
 
         int feeRateWeight = 123;
-        PaymentStatus paymentStatus =
-                multiPathPaymentSender.payPaymentRequest(DECODED_PAYMENT_REQUEST.paymentRequest(), feeRateWeight);
+        PaymentStatus paymentStatus = multiPathPaymentSender.payPaymentRequest(
+                DECODED_PAYMENT_REQUEST.paymentRequest(),
+                feeRateWeight(feeRateWeight)
+        );
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(paymentStatus.isSuccess()).isFalse();
         softly.assertThat(paymentStatus.isFailure()).isFalse();
@@ -74,8 +77,14 @@ class MultiPathPaymentSenderTest {
                 .thenReturn(Optional.of(DECODED_PAYMENT_REQUEST));
 
         int feeRateWeight = 123;
-        PaymentStatus paymentStatus =
-                multiPathPaymentSender.payPaymentRequest(DECODED_PAYMENT_REQUEST.paymentRequest(), feeRateWeight);
+        PaymentStatus paymentStatus = multiPathPaymentSender.payPaymentRequest(
+                DECODED_PAYMENT_REQUEST.paymentRequest(),
+                feeRateWeight(feeRateWeight)
+        );
         verify(paymentLoop).start(DECODED_PAYMENT_REQUEST, feeRateWeight, paymentStatus);
+    }
+
+    private PaymentOptions feeRateWeight(int feeRateWeight) {
+        return PaymentOptions.feeRateWeight(feeRateWeight);
     }
 }

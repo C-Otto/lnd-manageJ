@@ -16,8 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static de.cotto.lndmanagej.pickhardtpayments.PickhardtPaymentsConfiguration.DEFAULT_FEE_RATE_WEIGHT;
-
 @Component
 public class MultiPathPaymentSplitter {
     private final GrpcGetInfo grpcGetInfo;
@@ -34,18 +32,9 @@ public class MultiPathPaymentSplitter {
         this.edgeComputation = edgeComputation;
     }
 
-    public MultiPathPayment getMultiPathPaymentTo(Pubkey target, Coins amount) {
-        Pubkey source = grpcGetInfo.getPubkey();
-        return getMultiPathPayment(source, target, amount);
-    }
-
     public MultiPathPayment getMultiPathPaymentTo(Pubkey target, Coins amount, int feeRateWeight) {
         Pubkey source = grpcGetInfo.getPubkey();
         return getMultiPathPayment(source, target, amount, feeRateWeight);
-    }
-
-    public MultiPathPayment getMultiPathPayment(Pubkey source, Pubkey target, Coins amount) {
-        return getMultiPathPayment(source, target, amount, DEFAULT_FEE_RATE_WEIGHT);
     }
 
     public MultiPathPayment getMultiPathPayment(Pubkey source, Pubkey target, Coins amount, int feeRateWeight) {

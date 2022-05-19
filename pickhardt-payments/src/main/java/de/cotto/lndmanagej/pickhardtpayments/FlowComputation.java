@@ -11,7 +11,6 @@ import java.util.Map;
 
 import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.PIECEWISE_LINEAR_APPROXIMATIONS;
 import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.QUANTIZATION;
-import static de.cotto.lndmanagej.pickhardtpayments.PickhardtPaymentsConfiguration.DEFAULT_FEE_RATE_WEIGHT;
 
 @Component
 public class FlowComputation {
@@ -31,10 +30,6 @@ public class FlowComputation {
         this.edgeComputation = edgeComputation;
         this.grpcGetInfo = grpcGetInfo;
         this.configurationService = configurationService;
-    }
-
-    public Flows getOptimalFlows(Pubkey source, Pubkey target, Coins amount) {
-        return getOptimalFlows(source, target, amount, DEFAULT_FEE_RATE_WEIGHT);
     }
 
     public Flows getOptimalFlows(Pubkey source, Pubkey target, Coins amount, int feeRateWeight) {

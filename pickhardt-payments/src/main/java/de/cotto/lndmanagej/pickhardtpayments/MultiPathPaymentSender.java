@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.pickhardtpayments;
 
 import de.cotto.lndmanagej.grpc.GrpcPayments;
 import de.cotto.lndmanagej.model.DecodedPaymentRequest;
+import de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions;
 import de.cotto.lndmanagej.pickhardtpayments.model.PaymentStatus;
 import de.cotto.lndmanagej.service.RouteHintService;
 import org.springframework.stereotype.Component;
@@ -22,19 +23,22 @@ public class MultiPathPaymentSender {
         this.routeHintService = routeHintService;
     }
 
-    public PaymentStatus payPaymentRequest(String paymentRequest, int feeRateWeight) {
+    public PaymentStatus payPaymentRequest(String paymentRequest, PaymentOptions paymentOptions) {
         DecodedPaymentRequest decodedPaymentRequest = grpcPayments.decodePaymentRequest(paymentRequest).orElse(null);
         if (decodedPaymentRequest == null) {
             return PaymentStatus.createFailure("Unable to decode payment request");
         }
-        return payPaymentRequest(decodedPaymentRequest, feeRateWeight);
+        return payPaymentRequest(decodedPaymentRequest, paymentOptions);
     }
 
-    public PaymentStatus payPaymentRequest(DecodedPaymentRequest decodedPaymentRequest, int feeRateWeight) {
+    public PaymentStatus payPaymentRequest(
+            DecodedPaymentRequest decodedPaymentRequest,
+            PaymentOptions paymentOptions
+    ) {
         routeHintService.addDecodedPaymentRequest(decodedPaymentRequest);
 
         PaymentStatus paymentStatus = new PaymentStatus(decodedPaymentRequest.paymentHash());
-        paymentLoop.start(decodedPaymentRequest, feeRateWeight, paymentStatus);
+        paymentLoop.start(decodedPaymentRequest, paymentOptions.feeRateWeight(), paymentStatus);
         return paymentStatus;
     }
 }
