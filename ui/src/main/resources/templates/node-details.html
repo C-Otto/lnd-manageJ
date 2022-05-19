@@ -9,12 +9,12 @@
     <div th:replace="~{fragments/tiles :: channel-tile(${node})}"/>
 
     <div th:replace="~{fragments/tiles :: balance(${node.balance})}"/>
-    <div th:replace="~{fragments/tiles :: on-chain-costs(${node.onChainCosts})}"/>
-    <div th:replace="~{fragments/tiles :: node-warning('Warning', null, ${node.warnings})}"/>
-
-    <div th:replace="~{fragments/tiles :: online-report(${node.onlineReport})}"/>
     <div th:replace="~{fragments/tiles :: rebalance-report(${node.rebalanceReport})}"/>
+    <div th:replace="~{fragments/tiles :: on-chain-costs(${node.onChainCosts})}"/>
+
     <div th:replace="~{fragments/tiles :: fee-report(${node.feeReport})}"/>
+    <div th:replace="~{fragments/tiles :: online-report(${node.onlineReport})}"/>
+    <div th:replace="~{fragments/tiles :: node-warning('Warning', null, ${node.warnings})}"/>
 
 </div>
 

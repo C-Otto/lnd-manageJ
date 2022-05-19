@@ -219,7 +219,7 @@
     </div>
 </div>
 
-<div th:fragment="node-warning (title, pubkey, warnings)" class="tile col-sm-4">
+<div th:fragment="node-warning (title, pubkey, warnings)" class="tile col-sm-4" th:if="${!warnings.isEmpty}">
     <div class="card border-secondary">
         <div class="card-header">
             <div class="fs-4 mb-0">
@@ -239,7 +239,7 @@
     </div>
 </div>
 
-<div th:fragment="channel-warning (title, channelId, warnings)" class="tile col-sm-4">
+<div th:fragment="channel-warning (title, channelId, warnings)" class="tile col-sm-4" th:if="${!warnings.isEmpty}">
     <div class="card border-secondary">
         <div class="card-header">
             <div class="fs-4 mb-0">
