@@ -6,6 +6,7 @@ import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSender;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSplitter;
+import de.cotto.lndmanagej.pickhardtpayments.TopUpService;
 import de.cotto.lndmanagej.pickhardtpayments.model.PaymentStatus;
 import de.cotto.lndmanagej.service.GraphService;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,7 @@ import static de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPaymentFixtur
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -45,6 +47,9 @@ class PickhardtPaymentsControllerIT {
 
     @MockBean
     private MultiPathPaymentSender multiPathPaymentSender;
+
+    @MockBean
+    private TopUpService topUpService;
 
     @MockBean
     @SuppressWarnings("unused")
@@ -151,5 +156,12 @@ class PickhardtPaymentsControllerIT {
         String url = "%s/from/%s/to/%s/amount/%d/fee-rate-weight/%d"
                 .formatted(PREFIX, PUBKEY, PUBKEY_2, amount.satoshis(), feeRateWeight);
         mockMvc.perform(get(url)).andExpect(status().isOk());
+    }
+
+    @Test
+    void topUp() throws Exception {
+        String url = "%s/top-up/%s/amount/%s".formatted(PREFIX, PUBKEY, "123");
+        mockMvc.perform(get(url)).andExpect(status().isOk());
+        verify(topUpService).topUp(PUBKEY, Coins.ofSatoshis(123));
     }
 }

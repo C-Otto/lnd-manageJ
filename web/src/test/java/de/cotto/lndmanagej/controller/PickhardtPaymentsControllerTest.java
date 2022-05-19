@@ -5,6 +5,7 @@ import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSender;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSplitter;
+import de.cotto.lndmanagej.pickhardtpayments.TopUpService;
 import de.cotto.lndmanagej.pickhardtpayments.model.PaymentStatus;
 import de.cotto.lndmanagej.service.GraphService;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,6 +47,9 @@ class PickhardtPaymentsControllerTest {
 
     @Mock
     private GraphService graphService;
+
+    @Mock
+    private TopUpService topUpService;
 
     private final PaymentStatus paymentStatus = new PaymentStatus(HexString.EMPTY);
 
@@ -110,6 +114,12 @@ class PickhardtPaymentsControllerTest {
         )).thenReturn(MULTI_PATH_PAYMENT);
         assertThat(controller.send(PUBKEY, PUBKEY_2, 123, feeRateWeight))
                 .isEqualTo(MultiPathPaymentDto.fromModel(MULTI_PATH_PAYMENT));
+    }
+
+    @Test
+    void topUp() {
+        controller.topUp(PUBKEY, 123);
+        verify(topUpService).topUp(PUBKEY, Coins.ofSatoshis(123));
     }
 
     @Test

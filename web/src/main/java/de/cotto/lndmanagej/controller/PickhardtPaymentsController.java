@@ -6,6 +6,7 @@ import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSender;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSplitter;
+import de.cotto.lndmanagej.pickhardtpayments.TopUpService;
 import de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPayment;
 import de.cotto.lndmanagej.pickhardtpayments.model.PaymentStatus;
 import de.cotto.lndmanagej.service.GraphService;
@@ -25,17 +26,20 @@ public class PickhardtPaymentsController {
     private final MultiPathPaymentSplitter multiPathPaymentSplitter;
     private final MultiPathPaymentSender multiPathPaymentSender;
     private final PaymentStatusStream paymentStatusStream;
+    private final TopUpService topUpService;
     private final GraphService graphService;
 
     public PickhardtPaymentsController(
             MultiPathPaymentSplitter multiPathPaymentSplitter,
             MultiPathPaymentSender multiPathPaymentSender,
             PaymentStatusStream paymentStatusStream,
+            TopUpService topUpService,
             GraphService graphService
     ) {
         this.multiPathPaymentSplitter = multiPathPaymentSplitter;
         this.multiPathPaymentSender = multiPathPaymentSender;
         this.paymentStatusStream = paymentStatusStream;
+        this.topUpService = topUpService;
         this.graphService = graphService;
     }
 
@@ -102,6 +106,12 @@ public class PickhardtPaymentsController {
             @PathVariable long amount
     ) {
         return send(source, target, amount, DEFAULT_FEE_RATE_WEIGHT);
+    }
+
+    @Timed
+    @GetMapping("/top-up/{pubkey}/amount/{amount}")
+    public void topUp(@PathVariable Pubkey pubkey, @PathVariable long amount) {
+        topUpService.topUp(pubkey, Coins.ofSatoshis(amount));
     }
 
     @Timed
