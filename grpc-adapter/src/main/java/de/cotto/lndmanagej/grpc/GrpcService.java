@@ -9,6 +9,7 @@ import de.cotto.lndmanagej.model.Pubkey;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
+import lnrpc.AddInvoiceResponse;
 import lnrpc.ChanInfoRequest;
 import lnrpc.Channel;
 import lnrpc.ChannelCloseSummary;
@@ -236,5 +237,9 @@ public class GrpcService extends GrpcBase {
 
     private Optional<PendingChannelsResponse> getPendingChannels() {
         return pendingChannelsCache.get("");
+    }
+
+    public Optional<AddInvoiceResponse> addInvoice(Invoice invoice) {
+        return get(() -> lightningStub.addInvoice(invoice));
     }
 }

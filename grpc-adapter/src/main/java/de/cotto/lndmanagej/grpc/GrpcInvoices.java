@@ -3,7 +3,9 @@ package de.cotto.lndmanagej.grpc;
 import com.google.protobuf.ByteString;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.DecodedPaymentRequest;
 import de.cotto.lndmanagej.model.SettledInvoice;
+import lnrpc.AddInvoiceResponse;
 import lnrpc.Invoice;
 import lnrpc.InvoiceHTLC;
 import lnrpc.ListInvoiceResponse;
@@ -29,9 +31,11 @@ public class GrpcInvoices {
     private static final long KEYSEND_DATA_V2 = 34_349_334L;
 
     private final GrpcService grpcService;
+    private final GrpcPayments grpcPayments;
 
-    public GrpcInvoices(GrpcService grpcService) {
+    public GrpcInvoices(GrpcService grpcService, GrpcPayments grpcPayments) {
         this.grpcService = grpcService;
+        this.grpcPayments = grpcPayments;
     }
 
     public int getLimit() {
@@ -97,5 +101,16 @@ public class GrpcInvoices {
 
     private Stream<Invoice> toStream(Iterator<Invoice> iterator) {
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false);
+    }
+
+    public Optional<DecodedPaymentRequest> createPaymentRequest(Coins amount, String description) {
+        Invoice invoiceRequest = Invoice.newBuilder()
+                .setMemo(description)
+                .setValueMsat(amount.milliSatoshis())
+                .build();
+        return grpcService.addInvoice(invoiceRequest)
+                .map(AddInvoiceResponse::getPaymentRequest)
+                .map(grpcPayments::decodePaymentRequest)
+                .map(Optional::orElseThrow);
     }
 }
