@@ -25,7 +25,7 @@ public class MultiPathPaymentSender {
     public PaymentStatus payPaymentRequest(String paymentRequest, int feeRateWeight) {
         DecodedPaymentRequest decodedPaymentRequest = grpcPayments.decodePaymentRequest(paymentRequest).orElse(null);
         if (decodedPaymentRequest == null) {
-            return PaymentStatus.UNABLE_TO_DECODE_PAYMENT_REQUEST;
+            return PaymentStatus.createFailure("Unable to decode payment request");
         }
         routeHintService.addDecodedPaymentRequest(decodedPaymentRequest);
 
