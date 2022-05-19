@@ -1,0 +1,47 @@
+<!doctype html>
+
+<html xmlns:th="https://www.thymeleaf.org">
+
+<div th:fragment="title(text)"
+     class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h3" th:text="${text}"></h1>
+</div>
+
+<li th:fragment="ext-link-item(text, link)" class="ms-3">
+    <a class="link-button" target="_blank" th:href="${link}">
+        <span th:text="${text}"></span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor"
+             class="bi bi-box-arrow-up-right" viewBox="0 0 16 16" style="padding-bottom: 3px;">
+            <path fill-rule="evenodd"
+                  d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
+            <path fill-rule="evenodd"
+                  d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
+        </svg>
+    </a>
+</li>
+
+<div th:fragment="channel-link-title(channelId)"
+     class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <div class="col-md-4 d-flex align-items-center">
+        <h1 class="h3" th:text="'Channel: ' + ${channelId}"></h1>
+    </div>
+
+    <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
+        <div th:replace="~{fragments/page-title :: ext-link-item('1ML', 'https://1ml.com/channel/'+${channelId.shortChannelId})}"/>
+        <div th:replace="~{fragments/page-title :: ext-link-item('Amboss', 'https://www.amboss.space/edge/'+${channelId.shortChannelId})}"/>
+    </ul>
+</div>
+
+<div th:fragment="node-link-title(alias, pubkey)"
+     class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <div class="col-md-4 d-flex align-items-center">
+        <h1 class="h3" th:text="${alias}"></h1>
+    </div>
+
+    <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
+        <div th:replace="~{fragments/page-title :: ext-link-item('1ML', 'https://1ml.com/node/'+${pubkey})}"/>
+        <div th:replace="~{fragments/page-title :: ext-link-item('Amboss', 'https://www.amboss.space/node/'+${pubkey})}"/>
+    </ul>
+</div>
+
+</html>

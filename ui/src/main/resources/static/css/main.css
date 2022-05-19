@@ -32,3 +32,13 @@
 .tile-column-right {
   padding-left: 0.375rem;
 }
+
+.link-button {
+  color: black;
+  background: rgba(0,0,0,.03);
+  border-radius: 4px;
+  border: 1px solid;
+  text-decoration: none;
+  text-align: center;
+  padding: 5px 10px 5px 15px;
+}

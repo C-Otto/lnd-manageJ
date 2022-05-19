@@ -1,13 +1,19 @@
 <!DOCTYPE html>
 
-<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body}, ${error})}">
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body})}">
 
 <body>
 
+<div th:replace="~{fragments/page-title :: title(${error})}"/>
+
 <p>If you use the search, your query may be:</p>
 <ol class="list-group list-group-flush">
-    <li class="list-group-item">1. Channel ID (e.g. 774909407114231809, 704776x2087x1, 704776:2087:1, b343cb900bc9d606c02dc01954c78a52be4f4653e8a4ed69ce06ff7087802756:1)</li>
-    <li class="list-group-item">2. Node Public Key (e.g. 03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f)</li>
+    <li class="list-group-item">1. Channel ID (e.g. 774909407114231809, 704776x2087x1, 704776:2087:1,
+        b343cb900bc9d606c02dc01954c78a52be4f4653e8a4ed69ce06ff7087802756:1)
+    </li>
+    <li class="list-group-item">2. Node Public Key (e.g.
+        03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f)
+    </li>
     <li class="list-group-item">3. Node Alias (e.g. ACINQ)</li>
 </ol>
 
