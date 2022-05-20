@@ -50,6 +50,16 @@ class ChannelDetailsDtoTest {
     }
 
     @Test
+    void inboundPercentage() {
+        assertThat(CHANNEL_DETAILS_DTO.getInboundPercentage()).isEqualTo(10.952_804_986_642_917);
+    }
+
+    @Test
+    void outboundPercentage() {
+        assertThat(CHANNEL_DETAILS_DTO.getOutboundPercentage()).isEqualTo(100 - 10.952_804_986_642_917);
+    }
+
+    @Test
     void capacitySat() {
         assertThat(CHANNEL_DETAILS_DTO.capacitySat()).isEqualTo(21_000_000);
     }

@@ -28,4 +28,16 @@ public record ChannelDetailsDto(
         RebalanceReportDto rebalanceReport,
         Set<String> warnings
 ) {
+
+    public double getInboundPercentage() {
+        return 100 - getOutboundPercentage();
+    }
+
+    public double getOutboundPercentage() {
+        long outbound = Long.parseLong(balanceInformation.localBalanceSat());
+        long inbound = Long.parseLong(balanceInformation.remoteBalanceSat());
+        long routableCapacity = outbound + inbound;
+        return (1.0 * outbound / routableCapacity) * 100;
+    }
+
 }
