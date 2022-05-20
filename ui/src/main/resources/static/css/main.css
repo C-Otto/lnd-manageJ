@@ -1,3 +1,11 @@
+.outbound-green {
+  background-color: #006400bd;
+}
+
+.inbound-red {
+  background-color: #8b0000f2;
+}
+
 .top-space {
   padding-top: 1rem;
 }
