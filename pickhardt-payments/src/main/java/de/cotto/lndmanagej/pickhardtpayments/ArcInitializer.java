@@ -63,10 +63,11 @@ class ArcInitializer {
         Coins upperBound = edgeWithLiquidityInformation.availableLiquidityUpperBound();
         long quantizedUpperBound = quantize(upperBound);
         long uncertainButPossibleLiquidity = quantizedUpperBound - quantizedLowerBound;
-        long capacityPiece = uncertainButPossibleLiquidity / remainingPieces;
-        if (capacityPiece == 0) {
+        if (uncertainButPossibleLiquidity == 0) {
             return;
         }
+        remainingPieces = (int) Math.min(remainingPieces, uncertainButPossibleLiquidity);
+        long capacityPiece = uncertainButPossibleLiquidity / remainingPieces;
         long unitCost = 10 * quantize(maximumCapacity) / uncertainButPossibleLiquidity;
         long feeRateSummand = feeRateWeight * getFeeRate(edge);
         for (int i = 1; i <= remainingPieces; i++) {
