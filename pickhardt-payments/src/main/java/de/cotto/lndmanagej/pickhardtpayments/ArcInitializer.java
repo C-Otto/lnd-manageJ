@@ -8,6 +8,8 @@ import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgesWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.IntegerMapping;
 import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class ArcInitializer {
     // 50 BTC
@@ -20,6 +22,7 @@ class ArcInitializer {
     private final int piecewiseLinearApproximations;
     private final int feeRateWeight;
     private final Pubkey ownPubkey;
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     public ArcInitializer(
             MinCostFlow minCostFlow,
@@ -67,11 +70,13 @@ class ArcInitializer {
         long unitCost = 10 * quantize(maximumCapacity) / uncertainButPossibleLiquidity;
         long feeRateSummand = feeRateWeight * getFeeRate(edge);
         for (int i = 1; i <= remainingPieces; i++) {
+            long cost = i * unitCost + feeRateSummand;
+            logger.debug("{} - {}: {} (cost {})", edge.startNode(), edge.endNode(), capacityPiece, cost);
             int arcIndex = minCostFlow.addArcWithCapacityAndUnitCost(
                     startNode,
                     endNode,
                     capacityPiece,
-                    i * unitCost + feeRateSummand
+                    cost
             );
             edgeMapping.put(arcIndex, edge);
         }
@@ -83,6 +88,7 @@ class ArcInitializer {
         }
         long feeRateCost = feeRateWeight * getFeeRate(edge);
         int arcIndex = minCostFlow.addArcWithCapacityAndUnitCost(startNode, endNode, quantizedLowerBound, feeRateCost);
+        logger.debug("{} - {}: {} (cost {})", edge.startNode(), edge.endNode(), quantizedLowerBound, feeRateCost);
         edgeMapping.put(arcIndex, edge);
         return piecewiseLinearApproximations - 1;
     }
