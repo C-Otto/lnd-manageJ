@@ -10,10 +10,13 @@ public class ChannelsPage extends ThymeleafPage {
 
     public ChannelsPage(List<OpenChannelDto> channels) {
         super();
-        List<OpenChannelDto> sortedChannels = channels.stream()
+        add("channels", sort(channels));
+    }
+
+    private List<OpenChannelDto> sort(List<OpenChannelDto> channels) {
+        return channels.stream()
                 .sorted(Comparator.comparing(OpenChannelDto::getOutboundPercentage))
                 .toList();
-        add("channels", sortedChannels);
     }
 
     @Override
