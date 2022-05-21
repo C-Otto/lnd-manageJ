@@ -9,6 +9,7 @@ import de.cotto.lndmanagej.model.Policy;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgesWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.IntegerMapping;
+import org.assertj.core.api.SoftAssertions;
 import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -74,21 +75,53 @@ class ArcInitializerTest {
                 edge(EDGE, Coins.ofSatoshis(quantization));
         arcInitializer.addArcs(new EdgesWithLiquidityInformation(edgeWithLiquidityInformation));
         assertThat(minCostFlow.getNumArcs()).isOne();
+        assertThat(minCostFlow.getCapacity(0)).isEqualTo(1);
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
-    void edge_with_known_liquidity_is_added_as_arc_without_cost() {
-        Coins capacity = Coins.ofSatoshis(100);
-        Coins knownLiquidity = Coins.ofSatoshis(25);
+    void edge_with_capacity_more_than_quantization_amount() {
+        int quantization = 5_000;
+        ArcInitializer arcInitializer = new ArcInitializer(
+                minCostFlow,
+                integerMapping,
+                edgeMapping,
+                quantization,
+                2,
+                FEE_RATE_WEIGHT,
+                PUBKEY
+        );
         EdgeWithLiquidityInformation edgeWithLiquidityInformation =
-                EdgeWithLiquidityInformation.forKnownLiquidity(EDGE.withCapacity(capacity), knownLiquidity);
-
+                edge(EDGE, Coins.ofSatoshis(10_000));
         arcInitializer.addArcs(new EdgesWithLiquidityInformation(edgeWithLiquidityInformation));
+        assertThat(minCostFlow.getNumArcs()).isEqualTo(2);
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(minCostFlow.getCapacity(0)).isEqualTo(1);
+        softly.assertThat(minCostFlow.getCapacity(1)).isEqualTo(1);
+        softly.assertAll();
+    }
 
-        assertThat(minCostFlow.getNumArcs()).isEqualTo(1);
-        assertThat(minCostFlow.getUnitCost(0)).isEqualTo(0);
-        assertThat(minCostFlow.getCapacity(0)).isEqualTo(25);
+    @Test
+    void edge_with_low_capacity() {
+        int quantization = 10_000;
+        ArcInitializer arcInitializer = new ArcInitializer(
+                minCostFlow,
+                integerMapping,
+                edgeMapping,
+                quantization,
+                5,
+                FEE_RATE_WEIGHT,
+                PUBKEY
+        );
+        EdgeWithLiquidityInformation edgeWithLiquidityInformation =
+                edge(EDGE, Coins.ofSatoshis(40_000));
+        arcInitializer.addArcs(new EdgesWithLiquidityInformation(edgeWithLiquidityInformation));
+        assertThat(minCostFlow.getNumArcs()).isEqualTo(4);
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(minCostFlow.getCapacity(0)).isEqualTo(1);
+        softly.assertThat(minCostFlow.getCapacity(1)).isEqualTo(1);
+        softly.assertThat(minCostFlow.getCapacity(2)).isEqualTo(1);
+        softly.assertThat(minCostFlow.getCapacity(3)).isEqualTo(1);
+        softly.assertAll();
     }
 
     @Nested
@@ -109,8 +142,11 @@ class ArcInitializerTest {
         @Test
         void added_as_arc_without_cost() {
             arcInitializer.addArcs(new EdgesWithLiquidityInformation(edgeWithLiquidityInformation));
-            assertThat(minCostFlow.getUnitCost(0)).isEqualTo(0);
-            assertThat(minCostFlow.getCapacity(0)).isEqualTo(25);
+            assertThat(minCostFlow.getNumArcs()).isEqualTo(1);
+            SoftAssertions softly = new SoftAssertions();
+            softly.assertThat(minCostFlow.getUnitCost(0)).isEqualTo(0);
+            softly.assertThat(minCostFlow.getCapacity(0)).isEqualTo(25);
+            softly.assertAll();
         }
 
         @Test
@@ -191,7 +227,7 @@ class ArcInitializerTest {
         }
 
         @Test
-        void does_not_add_arcs_without_capacity() {
+        void adds_arcs_for_unknown_capacity_even_if_amount_is_small() {
             ArcInitializer arcInitializer = new ArcInitializer(
                     minCostFlow,
                     integerMapping,
@@ -202,8 +238,8 @@ class ArcInitializerTest {
                     PUBKEY
             );
             arcInitializer.addArcs(new EdgesWithLiquidityInformation(edgeWithLiquidityInformation));
-            // one arc for the known liquidity (25 / 20 = 1), 100 / 20 - 1 = 4 remaining: 4 < 5, no additional arc added
-            assertThat(minCostFlow.getNumArcs()).isEqualTo(1);
+            // one arc for the known liquidity (25 / 20 = 1), 100 / 20 - 1 = 4 remaining: 4
+            assertThat(minCostFlow.getNumArcs()).isEqualTo(5);
         }
 
         @Test
@@ -283,7 +319,7 @@ class ArcInitializerTest {
     }
 
     @Test
-    void ignores_edge_with_capacity_smaller_than_quantization_amount() {
+    void adds_arcs_for_edge_with_capacity_smaller_than_quantization_amount() {
         int quantization = 10_000;
         ArcInitializer arcInitializer = new ArcInitializer(
                 minCostFlow,
@@ -342,7 +378,6 @@ class ArcInitializerTest {
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
     void edges_with_piecewise_linear_approximation() {
         int piecewiseLinearApproximations = 5;
         ArcInitializer arcInitializer = new ArcInitializer(
@@ -359,16 +394,18 @@ class ArcInitializerTest {
                 edge(EDGE_2_3, Coins.ofSatoshis(30_000))
         ));
         assertThat(minCostFlow.getNumArcs()).isEqualTo(10);
-        assertThat(minCostFlow.getUnitCost(0)).isEqualTo(5_000_000L);
-        assertThat(minCostFlow.getCapacity(0)).isEqualTo(2_000);
-        assertThat(minCostFlow.getUnitCost(1)).isEqualTo(10_000_000L);
-        assertThat(minCostFlow.getCapacity(1)).isEqualTo(2_000);
-        assertThat(minCostFlow.getUnitCost(2)).isEqualTo(15_000_000L);
-        assertThat(minCostFlow.getCapacity(2)).isEqualTo(2_000);
-        assertThat(minCostFlow.getUnitCost(3)).isEqualTo(20_000_000L);
-        assertThat(minCostFlow.getCapacity(3)).isEqualTo(2_000);
-        assertThat(minCostFlow.getUnitCost(4)).isEqualTo(25_000_000L);
-        assertThat(minCostFlow.getCapacity(4)).isEqualTo(2_000);
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(minCostFlow.getUnitCost(0)).isEqualTo(5_000_000L);
+        softly.assertThat(minCostFlow.getCapacity(0)).isEqualTo(2_000);
+        softly.assertThat(minCostFlow.getUnitCost(1)).isEqualTo(10_000_000L);
+        softly.assertThat(minCostFlow.getCapacity(1)).isEqualTo(2_000);
+        softly.assertThat(minCostFlow.getUnitCost(2)).isEqualTo(15_000_000L);
+        softly.assertThat(minCostFlow.getCapacity(2)).isEqualTo(2_000);
+        softly.assertThat(minCostFlow.getUnitCost(3)).isEqualTo(20_000_000L);
+        softly.assertThat(minCostFlow.getCapacity(3)).isEqualTo(2_000);
+        softly.assertThat(minCostFlow.getUnitCost(4)).isEqualTo(25_000_000L);
+        softly.assertThat(minCostFlow.getCapacity(4)).isEqualTo(2_000);
+        softly.assertAll();
     }
 
     @Test
