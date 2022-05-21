@@ -5,6 +5,7 @@ import de.cotto.lndmanagej.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.model.FailureCode;
 import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.model.Route;
+import nl.jqno.equalsverifier.EqualsVerifier;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -197,5 +198,10 @@ class PaymentStatusTest {
             assertThat(instantWithString.instant())
                     .isBetween(Instant.now().minusSeconds(1), Instant.now());
         }
+    }
+
+    @Test
+    void testEquals() {
+        EqualsVerifier.simple().forClass(PaymentStatus.class).verify();
     }
 }

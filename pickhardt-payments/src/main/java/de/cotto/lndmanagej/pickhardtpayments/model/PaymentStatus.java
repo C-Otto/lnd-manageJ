@@ -10,6 +10,7 @@ import de.cotto.lndmanagej.model.Route;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class PaymentStatus {
     private boolean success;
@@ -17,15 +18,16 @@ public class PaymentStatus {
     private int numberOfAttemptedRoutes;
     private final List<InstantWithString> messages = new ArrayList<>();
 
-    public static final PaymentStatus UNABLE_TO_DECODE_PAYMENT_REQUEST;
-
-    static {
-        UNABLE_TO_DECODE_PAYMENT_REQUEST = new PaymentStatus(HexString.EMPTY);
-        UNABLE_TO_DECODE_PAYMENT_REQUEST.failed("Unable to decode payment request");
+    public PaymentStatus(HexString paymentHash) {
+        if (!paymentHash.equals(HexString.EMPTY)) {
+            info("Initializing payment " + paymentHash);
+        }
     }
 
-    public PaymentStatus(HexString paymentHash) {
-        info("Initializing payment " + paymentHash);
+    public static PaymentStatus createFailure(String reason) {
+        PaymentStatus paymentStatus = new PaymentStatus(HexString.EMPTY);
+        paymentStatus.failed(reason);
+        return paymentStatus;
     }
 
     public void settled() {
@@ -111,5 +113,25 @@ public class PaymentStatus {
         InstantWithString(String string) {
             this(Instant.now(), string);
         }
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
+        PaymentStatus that = (PaymentStatus) other;
+        return success == that.success
+                && failure == that.failure
+                && numberOfAttemptedRoutes == that.numberOfAttemptedRoutes
+                && Objects.equals(messages, that.messages);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(success, failure, numberOfAttemptedRoutes, messages);
     }
 }

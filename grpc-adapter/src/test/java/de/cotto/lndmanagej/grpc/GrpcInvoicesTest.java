@@ -1,7 +1,9 @@
 package de.cotto.lndmanagej.grpc;
 
 import com.google.protobuf.ByteString;
+import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.SettledInvoice;
+import lnrpc.AddInvoiceResponse;
 import lnrpc.Invoice;
 import lnrpc.InvoiceHTLC;
 import lnrpc.ListInvoiceResponse;
@@ -20,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static de.cotto.lndmanagej.model.DecodedPaymentRequestFixtures.DECODED_PAYMENT_REQUEST;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.KEYSEND_MESSAGE;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE_2;
@@ -46,6 +49,9 @@ class GrpcInvoicesTest {
 
     @Mock
     private GrpcService grpcService;
+
+    @Mock
+    private GrpcPayments grpcPayments;
 
     @Nested
     class BulkGet {
@@ -207,6 +213,23 @@ class GrpcInvoicesTest {
     @Test
     void getLimit() {
         assertThat(grpcInvoices.getLimit()).isEqualTo(LIMIT);
+    }
+
+    @Test
+    void createPaymentRequest() {
+        Coins amount = Coins.ofSatoshis(123);
+        String memo = "memo";
+
+        String paymentRequest = "paymentRequest";
+        when(grpcPayments.decodePaymentRequest(paymentRequest))
+                .thenReturn(Optional.of(DECODED_PAYMENT_REQUEST));
+        when(grpcService.addInvoice(Invoice.newBuilder()
+                        .setValueMsat(amount.milliSatoshis())
+                        .setMemo(memo)
+                .build()))
+                .thenReturn(Optional.of(AddInvoiceResponse.newBuilder().setPaymentRequest(paymentRequest).build()));
+
+        assertThat(grpcInvoices.createPaymentRequest(amount, memo)).contains(DECODED_PAYMENT_REQUEST);
     }
 
     private Invoice keysendInvoice() {

@@ -80,6 +80,7 @@ public class EdgeComputation {
                 edgesWithLiquidityInformation.add(getEdgeWithLiquidityInformation(edge, ownPubkey));
             }
         }
+        logger.debug("Edges with liquidity information: {}", edgesWithLiquidityInformation);
         return new EdgesWithLiquidityInformation(edgesWithLiquidityInformation);
     }
 

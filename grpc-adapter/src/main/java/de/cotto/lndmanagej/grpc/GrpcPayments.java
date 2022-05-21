@@ -12,6 +12,8 @@ import de.cotto.lndmanagej.model.RouteHint;
 import lnrpc.HTLCAttempt;
 import lnrpc.Hop;
 import lnrpc.ListPaymentsResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -29,6 +31,7 @@ public class GrpcPayments {
     private static final int LIMIT = 1_000;
 
     private final GrpcService grpcService;
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     public GrpcPayments(GrpcService grpcService) {
         this.grpcService = grpcService;
@@ -87,28 +90,34 @@ public class GrpcPayments {
             throw new IllegalStateException("");
         }
         Instant timestamp = Instant.ofEpochMilli(lndPayment.getCreationTimeNs() / 1_000);
+        String paymentHash = lndPayment.getPaymentHash();
         return new Payment(
                 lndPayment.getPaymentIndex(),
-                lndPayment.getPaymentHash(),
+                paymentHash,
                 LocalDateTime.ofInstant(timestamp, ZoneOffset.UTC),
                 Coins.ofMilliSatoshis(lndPayment.getValueMsat()),
                 Coins.ofMilliSatoshis(lndPayment.getFeeMsat()),
-                lndPayment.getHtlcsList().stream().map(this::toPaymentRoute).toList()
+                lndPayment.getHtlcsList().stream().map(htlcAttempt -> toPaymentRoute(htlcAttempt, paymentHash)).toList()
         );
     }
 
-    private PaymentRoute toPaymentRoute(HTLCAttempt htlcAttempt) {
+    private PaymentRoute toPaymentRoute(HTLCAttempt htlcAttempt, String paymentHash) {
         List<PaymentHop> hops = htlcAttempt.getRoute().getHopsList().stream()
                 .filter(hop -> hop.getChanId() != 0)
-                .map(this::toHop)
+                .map(hop -> toHop(hop, paymentHash))
                 .toList();
         return new PaymentRoute(hops);
     }
 
-    private PaymentHop toHop(Hop hop) {
-        return new PaymentHop(
-                ChannelId.fromShortChannelId(hop.getChanId()),
-                Coins.ofMilliSatoshis(hop.getAmtToForwardMsat())
-        );
+    private PaymentHop toHop(Hop hop, String paymentHash) {
+        try {
+            return new PaymentHop(
+                    ChannelId.fromShortChannelId(hop.getChanId()),
+                    Coins.ofMilliSatoshis(hop.getAmtToForwardMsat())
+            );
+        } catch (IllegalArgumentException exception) {
+            logger.error("Unable to parse hop {} in payment with payment hash {}", hop, paymentHash);
+            throw exception;
+        }
     }
 }
