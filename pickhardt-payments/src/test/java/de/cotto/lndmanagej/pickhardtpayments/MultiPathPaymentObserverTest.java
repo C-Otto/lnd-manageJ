@@ -8,15 +8,21 @@ import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.model.PaymentAttemptHop;
 import de.cotto.lndmanagej.service.LiquidityInformationUpdater;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static de.cotto.lndmanagej.model.DecodedPaymentRequestFixtures.DECODED_PAYMENT_REQUEST;
 import static de.cotto.lndmanagej.model.FailureCode.FINAL_INCORRECT_CLTV_EXPIRY;
@@ -26,12 +32,14 @@ import static de.cotto.lndmanagej.model.RouteFixtures.ROUTE_3;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assumptions.assumeThat;
+import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class MultiPathPaymentObserverTest {
     private static final HexString PAYMENT_HASH = DECODED_PAYMENT_REQUEST.paymentHash();
     private static final Duration DURATION = Duration.ofMillis(100);
+    private final Executor executor = Executors.newCachedThreadPool();
 
     @InjectMocks
     private MultiPathPaymentObserver multiPathPaymentObserver;
@@ -44,6 +52,32 @@ class MultiPathPaymentObserverTest {
         SendToRouteObserver sendToRouteObserver = multiPathPaymentObserver.getFor(ROUTE, PAYMENT_HASH);
         sendToRouteObserver.onError(new NullPointerException());
         assertThat(multiPathPaymentObserver.getInFlight(PAYMENT_HASH)).isEqualTo(Coins.NONE);
+    }
+
+    @Test
+    void notifies_about_in_flight_change() {
+        SendToRouteObserver sendToRouteObserver = multiPathPaymentObserver.getFor(ROUTE, PAYMENT_HASH);
+        AtomicBoolean released = new AtomicBoolean(false);
+        executor.execute(
+                () -> {
+                    Duration timeout = Duration.ofSeconds(2);
+                    multiPathPaymentObserver.waitForInFlightChange(timeout, PAYMENT_HASH, ROUTE.getAmount());
+                    released.set(true);
+                }
+        );
+        sendToRouteObserver.onError(new NullPointerException());
+        await().atMost(1, TimeUnit.SECONDS).until(released::get);
+    }
+
+    @Test
+    @Timeout(1)
+    void waitForInFlightChange_returns_without_change_in_timeout() {
+        multiPathPaymentObserver.getFor(ROUTE, PAYMENT_HASH);
+        multiPathPaymentObserver.waitForInFlightChange(
+                Duration.of(100, ChronoUnit.MILLIS),
+                PAYMENT_HASH,
+                ROUTE.getAmount()
+        );
     }
 
     @Test
