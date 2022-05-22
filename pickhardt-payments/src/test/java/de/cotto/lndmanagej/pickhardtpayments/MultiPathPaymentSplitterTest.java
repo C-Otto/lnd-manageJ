@@ -334,14 +334,14 @@ class MultiPathPaymentSplitterTest {
 
         @Test
         void extension_fails_no_channel_with_peer() {
-            when(channelService.getAllChannelsWith(PUBKEY_2)).thenReturn(Set.of());
+            when(channelService.getOpenChannelsWith(PUBKEY_2)).thenReturn(Set.of());
             MultiPathPayment multiPathPayment = attemptTopUpPayment();
             assertThat(multiPathPayment.isFailure()).isTrue();
         }
 
         @Test
         void extension_fails_unable_to_get_policy_from_peer() {
-            when(channelService.getAllChannelsWith(PUBKEY_2)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL));
+            when(channelService.getOpenChannelsWith(PUBKEY_2)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL));
             when(policyService.getPolicyFrom(CHANNEL_ID, PUBKEY_2)).thenReturn(Optional.empty());
             MultiPathPayment multiPathPayment = attemptTopUpPayment();
             assertThat(multiPathPayment.isFailure()).isTrue();
@@ -419,7 +419,7 @@ class MultiPathPaymentSplitterTest {
     private Edge mockExtensionEdge(Pubkey destination, int feeRate) {
         Policy policyExtension =
                 new Policy(feeRate, Coins.NONE, true, 40, Coins.ofSatoshis(10_000));
-        when(channelService.getAllChannelsWith(PUBKEY_2)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL));
+        when(channelService.getOpenChannelsWith(PUBKEY_2)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL));
         when(policyService.getPolicyFrom(CHANNEL_ID, PUBKEY_2)).thenReturn(Optional.of(policyExtension));
         Edge extensionEdge =
                 new Edge(CHANNEL_ID, PUBKEY_2, destination, LOCAL_OPEN_CHANNEL.getCapacity(), policyExtension);
