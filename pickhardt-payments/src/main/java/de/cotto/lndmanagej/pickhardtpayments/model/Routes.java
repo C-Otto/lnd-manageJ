@@ -26,30 +26,27 @@ public final class Routes {
         routesCopy.remove(highProbabilityRoute);
         Route fixedRoute = highProbabilityRoute.getForAmount(highProbabilityRoute.getAmount().add(remainder));
         routesCopy.add(fixedRoute);
-        if (isAboveAvailableLiquidity(routesCopy)) {
+        if (notEnoughLiquidityOnFirstHop(routesCopy)) {
             return List.of();
         }
         return routesCopy;
     }
 
-    private static boolean isAboveAvailableLiquidity(List<Route> routes) {
+    private static boolean notEnoughLiquidityOnFirstHop(List<Route> routes) {
         for (Route route : routes) {
             List<EdgeWithLiquidityInformation> edgesWithLiquidityInformation = route.getEdgesWithLiquidityInformation();
-            for (int index = 0; index < edgesWithLiquidityInformation.size(); index++) {
-                EdgeWithLiquidityInformation edge = edgesWithLiquidityInformation.get(index);
-                Coins requiredAmount = route.getForwardAmountForHop(index);
-                Coins availableAmountUpperBound = edge.availableLiquidityUpperBound();
-                if (availableAmountUpperBound.compareTo(requiredAmount) < 0) {
-                    LOGGER.warn(
-                            "Above liquidity: {} < {} at index {} in {} (in {})",
-                            availableAmountUpperBound,
-                            requiredAmount,
-                            index,
-                            route,
-                            routes
-                    );
-                    return true;
-                }
+            EdgeWithLiquidityInformation firstEdge = edgesWithLiquidityInformation.get(0);
+            Coins amountForFirstHop = route.getForwardAmountForHop(0);
+            Coins availableAmountUpperBound = firstEdge.availableLiquidityUpperBound();
+            if (availableAmountUpperBound.compareTo(amountForFirstHop) < 0) {
+                LOGGER.warn(
+                        "Above liquidity: {} < {} at first hop in {} (in {})",
+                        availableAmountUpperBound,
+                        amountForFirstHop,
+                        route,
+                        routes
+                );
+                return true;
             }
         }
         return false;
