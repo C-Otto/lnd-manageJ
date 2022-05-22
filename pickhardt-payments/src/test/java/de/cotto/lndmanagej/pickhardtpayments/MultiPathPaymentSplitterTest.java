@@ -164,6 +164,24 @@ class MultiPathPaymentSplitterTest {
         }
 
         @Test
+        void fee_rate_at_limit_excluding_fees_from_first_hop() {
+            int feeRate = 200;
+            Coins amount = Coins.ofSatoshis(3_000_000);
+            Policy policy = policyFor(feeRate);
+            PaymentOptions paymentOptions = PaymentOptions.forFeeRateLimit(feeRate);
+            Flow firstEdgeFlow = new Flow(firstEdge, amount);
+            Edge edge = new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_4, CAPACITY, policy);
+            Flow flow = new Flow(edge, amount);
+            addEdgeWithoutInformation(edge);
+            when(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_4, amount, paymentOptions))
+                    .thenReturn(new Flows(firstEdgeFlow, flow));
+
+            MultiPathPayment multiPathPayment =
+                    multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_4, amount, paymentOptions);
+            assertThat(multiPathPayment.isFailure()).isFalse();
+        }
+
+        @Test
         void one_flow_has_fee_rate_above_limit_but_average_fee_rate_is_below_limit_including_fees_from_first_hop() {
             mockExtensionEdge(PUBKEY_4);
             int feeRate = 200;

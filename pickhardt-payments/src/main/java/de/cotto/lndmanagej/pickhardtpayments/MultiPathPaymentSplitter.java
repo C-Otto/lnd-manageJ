@@ -73,8 +73,7 @@ public class MultiPathPaymentSplitter {
         List<Route> routes = getWithLiquidityInformation(extendedBasicRoutes);
         List<Route> fixedRoutes = Routes.getFixedWithTotalAmount(routes, amount);
 
-        boolean isTooExpensive = isTooExpensive(paymentOptions, fixedRoutes);
-        if (isTooExpensive) {
+        if (isTooExpensive(paymentOptions, fixedRoutes)) {
             return MultiPathPayment.FAILURE;
         }
         return new MultiPathPayment(fixedRoutes);
