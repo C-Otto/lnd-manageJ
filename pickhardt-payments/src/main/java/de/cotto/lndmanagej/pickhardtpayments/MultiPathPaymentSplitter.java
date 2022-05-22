@@ -90,14 +90,17 @@ public class MultiPathPaymentSplitter {
         }
         Set<LocalChannel> channels = channelService.getAllChannelsWith(peer);
         if (channels.isEmpty()) {
-            logger.error("Unable to extend routes for channel with " + peer);
+            logger.error("Unable to extend routes for channel with " + peer + " (no channel found)");
             return List.of();
         }
         LocalChannel localChannel = channels.stream().iterator().next();
         ChannelId channelId = localChannel.getId();
         Policy policy = policyService.getPolicyFrom(channelId, peer).orElse(null);
         if (policy == null) {
-            logger.error("Unable to extend routes for channel with " + peer);
+            logger.error(
+                    "Unable to extend routes for channel with %s (no policy found for channel %s)"
+                            .formatted(peer, channelId)
+            );
             return List.of();
         }
         Coins capacity = localChannel.getCapacity();
