@@ -13,13 +13,17 @@ import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.PolicyService;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.Optional;
 
+import static de.cotto.lndmanagej.configuration.TopUpConfigurationSettings.EXPIRY;
 import static de.cotto.lndmanagej.configuration.TopUpConfigurationSettings.THRESHOLD;
 
 @Component
 public class TopUpService {
     private static final Coins DEFAULT_THRESHOLD = Coins.ofSatoshis(10_000);
+    private static final Integer DEFAULT_EXPIRY = 10 * 60;
+
     private final BalanceService balanceService;
     private final GrpcInvoices grpcInvoices;
     private final NodeService nodeService;
@@ -97,7 +101,11 @@ public class TopUpService {
 
     private Optional<DecodedPaymentRequest> getPaymentRequest(Pubkey pubkey, Coins topUpAmount) {
         String description = getDescription(pubkey, topUpAmount);
-        return grpcInvoices.createPaymentRequest(topUpAmount, description);
+        return grpcInvoices.createPaymentRequest(topUpAmount, description, getExpiry());
+    }
+
+    private Duration getExpiry() {
+        return Duration.ofSeconds(configurationService.getIntegerValue(EXPIRY).orElse(DEFAULT_EXPIRY));
     }
 
     private String getDescription(Pubkey pubkey, Coins amount) {

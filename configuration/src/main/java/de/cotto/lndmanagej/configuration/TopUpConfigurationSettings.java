@@ -1,7 +1,8 @@
 package de.cotto.lndmanagej.configuration;
 
 public enum TopUpConfigurationSettings implements ConfigurationSetting {
-    THRESHOLD("threshold_sat");
+    THRESHOLD("threshold_sat"),
+    EXPIRY("expiry_seconds");
 
     private final String name;
 

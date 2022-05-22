@@ -11,7 +11,9 @@ import lnrpc.InvoiceHTLC;
 import lnrpc.ListInvoiceResponse;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.HexFormat;
 import java.util.Iterator;
 import java.util.List;
@@ -103,10 +105,11 @@ public class GrpcInvoices {
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false);
     }
 
-    public Optional<DecodedPaymentRequest> createPaymentRequest(Coins amount, String description) {
+    public Optional<DecodedPaymentRequest> createPaymentRequest(Coins amount, String description, Duration expiry) {
         Invoice invoiceRequest = Invoice.newBuilder()
                 .setMemo(description)
                 .setValueMsat(amount.milliSatoshis())
+                .setExpiry(expiry.get(ChronoUnit.SECONDS))
                 .build();
         return grpcService.addInvoice(invoiceRequest)
                 .map(AddInvoiceResponse::getPaymentRequest)
