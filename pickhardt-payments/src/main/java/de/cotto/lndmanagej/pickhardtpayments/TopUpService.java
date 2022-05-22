@@ -83,7 +83,7 @@ public class TopUpService {
             String alias = nodeService.getAlias(pubkey);
             return PaymentStatus.createFailure("Unable to create payment request (%s, %s)".formatted(pubkey, alias));
         }
-        PaymentOptions paymentOptions = PaymentOptions.forTopUp(ourFeeRate - peerFeeRate, pubkey);
+        PaymentOptions paymentOptions = PaymentOptions.forTopUp(ourFeeRate, pubkey);
         return multiPathPaymentSender.payPaymentRequest(paymentRequest, paymentOptions);
     }
 
