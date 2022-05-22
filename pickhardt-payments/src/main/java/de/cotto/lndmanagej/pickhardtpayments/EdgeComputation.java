@@ -118,7 +118,7 @@ public class EdgeComputation {
         if (feeRateLimit == NO_FEE_RATE_LIMIT) {
             return false;
         }
-        return channelEdge.policy().feeRate() > feeRateLimit;
+        return channelEdge.policy().feeRate() >= feeRateLimit;
     }
 
     private Optional<Coins> getKnownLiquidity(Edge edge, Pubkey ownPubKey) {

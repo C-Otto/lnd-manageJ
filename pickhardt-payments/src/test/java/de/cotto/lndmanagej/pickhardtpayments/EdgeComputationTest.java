@@ -27,6 +27,7 @@ import java.util.Set;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_PEER;
@@ -89,17 +90,21 @@ class EdgeComputationTest {
     }
 
     @Test
-    void does_not_add_edge_with_fee_rate_above_limit() {
+    void does_not_add_edge_with_fee_rate_at_or_above_limit() {
         int feeRateLimit = 199;
         Policy policyExpensive = new Policy(200, Coins.NONE, true, 40, Coins.ofSatoshis(0));
-        Policy policyOk = new Policy(199, Coins.NONE, true, 40, Coins.ofSatoshis(0));
+        // needs to be excluded to avoid sending top-up payments in a tiny loop: S-X-S
+        Policy policyAtLimit = new Policy(199, Coins.NONE, true, 40, Coins.ofSatoshis(0));
+        Policy policyOk = new Policy(198, Coins.NONE, true, 40, Coins.ofSatoshis(0));
         DirectedChannelEdge edgeExpensive =
                 new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY, PUBKEY_2, policyExpensive);
+        DirectedChannelEdge edgeAtLimit =
+                new DirectedChannelEdge(CHANNEL_ID_2, CAPACITY, PUBKEY, PUBKEY_2, policyAtLimit);
         DirectedChannelEdge edgeOk =
-                new DirectedChannelEdge(CHANNEL_ID_2, CAPACITY, PUBKEY, PUBKEY_2, policyOk);
-        when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edgeExpensive, edgeOk)));
+                new DirectedChannelEdge(CHANNEL_ID_3, CAPACITY, PUBKEY, PUBKEY_2, policyOk);
+        when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edgeExpensive, edgeAtLimit, edgeOk)));
         assertThat(edgeComputation.getEdges(feeRateLimit).edges().stream().map(EdgeWithLiquidityInformation::channelId))
-                .containsExactly(CHANNEL_ID_2);
+                .containsExactly(CHANNEL_ID_3);
     }
 
     @Test
