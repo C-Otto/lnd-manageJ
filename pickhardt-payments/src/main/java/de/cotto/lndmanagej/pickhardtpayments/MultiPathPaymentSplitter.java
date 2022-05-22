@@ -7,6 +7,7 @@ import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Edge;
 import de.cotto.lndmanagej.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.model.LocalChannel;
+import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.Policy;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.Route;
@@ -88,7 +89,7 @@ public class MultiPathPaymentSplitter {
         if (peer == null) {
             return basicRoutes;
         }
-        Set<LocalChannel> channels = channelService.getAllChannelsWith(peer);
+        Set<LocalOpenChannel> channels = channelService.getOpenChannelsWith(peer);
         if (channels.isEmpty()) {
             logger.error("Unable to extend routes for channel with " + peer + " (no channel found)");
             return List.of();
