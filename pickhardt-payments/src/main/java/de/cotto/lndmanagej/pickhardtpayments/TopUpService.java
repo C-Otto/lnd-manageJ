@@ -100,7 +100,7 @@ public class TopUpService {
     }
 
     private Optional<DecodedPaymentRequest> getPaymentRequest(Pubkey pubkey, Coins topUpAmount) {
-        String description = getDescription(pubkey, topUpAmount);
+        String description = getDescription(pubkey);
         return grpcInvoices.createPaymentRequest(topUpAmount, description, getExpiry());
     }
 
@@ -108,8 +108,8 @@ public class TopUpService {
         return Duration.ofSeconds(configurationService.getIntegerValue(EXPIRY).orElse(DEFAULT_EXPIRY));
     }
 
-    private String getDescription(Pubkey pubkey, Coins amount) {
+    private String getDescription(Pubkey pubkey) {
         String alias = nodeService.getAlias(pubkey);
-        return "Topping up channel with %s (%s), adding %s".formatted(pubkey, alias, amount);
+        return "Topping up channel with %s (%s)".formatted(pubkey, alias);
     }
 }

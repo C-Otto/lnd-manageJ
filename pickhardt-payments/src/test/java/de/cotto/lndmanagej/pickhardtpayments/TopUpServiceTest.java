@@ -39,7 +39,7 @@ import static org.mockito.Mockito.when;
 class TopUpServiceTest {
     private static final Coins AMOUNT = Coins.ofSatoshis(123_000);
     private static final Coins DEFAULT_THRESHOLD = Coins.ofSatoshis(10_000);
-    private static final String DESCRIPTION_PREFIX = "Topping up channel with " + PUBKEY + " (alias), adding ";
+    private static final String DESCRIPTION = "Topping up channel with " + PUBKEY + " (alias)";
     private static final long OUR_FEE_RATE = 1234;
     private static final long PEER_FEE_RATE = 1233;
     private static final Duration DEFAULT_EXPIRY = Duration.ofMinutes(10);
@@ -182,11 +182,7 @@ class TopUpServiceTest {
 
     private void assertTopUp(Coins expectedTopUpAmount, Duration expiry) {
         PaymentStatus paymentStatus = topUpService.topUp(PUBKEY, AMOUNT);
-        verify(grpcInvoices).createPaymentRequest(
-                expectedTopUpAmount,
-                DESCRIPTION_PREFIX + expectedTopUpAmount,
-                expiry
-        );
+        verify(grpcInvoices).createPaymentRequest(expectedTopUpAmount, DESCRIPTION, expiry);
         PaymentOptions paymentOptions = PaymentOptions.forTopUp(OUR_FEE_RATE, PUBKEY);
         verify(multiPathPaymentSender).payPaymentRequest(DECODED_PAYMENT_REQUEST, paymentOptions);
         assertThat(paymentStatus.isPending()).isTrue();
