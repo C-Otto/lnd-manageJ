@@ -98,8 +98,8 @@ public class MultiPathPaymentSplitter {
         Policy policy = policyService.getPolicyFrom(channelId, peer).orElse(null);
         if (policy == null) {
             logger.error(
-                    "Unable to extend routes for channel with %s (no policy found for channel %s)"
-                            .formatted(peer, channelId)
+                    "Unable to extend routes for channel with " + peer +
+                            " (no policy found for channel " + channelId + ")"
             );
             return List.of();
         }
