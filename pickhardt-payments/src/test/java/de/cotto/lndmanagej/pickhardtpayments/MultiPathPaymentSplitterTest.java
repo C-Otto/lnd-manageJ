@@ -119,7 +119,7 @@ class MultiPathPaymentSplitterTest {
 
         @Test
         void one_flow_has_fee_rate_above_limit_including_fees_from_first_hop() {
-            mockExtensionEdge(PUBKEY_4);
+            mockExtensionEdge(PUBKEY_4, 0);
             int feeRate = 200;
             Coins amount = Coins.ofSatoshis(1_000_000);
             Policy policy = policyFor(feeRate);
@@ -133,7 +133,7 @@ class MultiPathPaymentSplitterTest {
 
         @Test
         void one_flow_has_fee_rate_at_limit_including_fees_from_first_hop() {
-            mockExtensionEdge(PUBKEY_3);
+            mockExtensionEdge(PUBKEY_3, 0);
             int feeRate = 200;
             Coins amount = Coins.ofSatoshis(2_000_000);
             Policy policy = policyFor(feeRate);
@@ -143,6 +143,20 @@ class MultiPathPaymentSplitterTest {
             MultiPathPayment multiPathPayment =
                     multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_3, amount, paymentOptions);
             assertThat(multiPathPayment.isFailure()).isFalse();
+        }
+
+        @Test
+        void extension_edge_is_too_expensive() {
+            int feeRate = 200;
+            mockExtensionEdge(PUBKEY_3, feeRate);
+            Coins amount = Coins.ofSatoshis(2_000_000);
+            Policy policy = policyFor(0);
+            PaymentOptions paymentOptions = PaymentOptions.forTopUp(feeRate - 1, PUBKEY_2);
+            mockFlow(amount, policy, paymentOptions);
+
+            MultiPathPayment multiPathPayment =
+                    multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_3, amount, paymentOptions);
+            assertThat(multiPathPayment.isFailure()).isTrue();
         }
 
         @Test
@@ -183,7 +197,7 @@ class MultiPathPaymentSplitterTest {
 
         @Test
         void one_flow_has_fee_rate_above_limit_but_average_fee_rate_is_below_limit_including_fees_from_first_hop() {
-            mockExtensionEdge(PUBKEY_4);
+            mockExtensionEdge(PUBKEY_4, 0);
             int feeRate = 200;
             Coins halfOfAmount = Coins.ofSatoshis(500_000);
             Coins amount = halfOfAmount.add(halfOfAmount);
@@ -313,7 +327,7 @@ class MultiPathPaymentSplitterTest {
 
         @Test
         void adds_hop_if_peer_is_specified_in_payment_options() {
-            Edge extensionEdge = mockExtensionEdge(PUBKEY_3);
+            Edge extensionEdge = mockExtensionEdge(PUBKEY_3, 0);
             MultiPathPayment multiPathPayment = attemptTopUpPayment();
             assertThat(multiPathPayment.routes().iterator().next().getEdges()).contains(extensionEdge);
         }
@@ -402,11 +416,13 @@ class MultiPathPaymentSplitterTest {
         }
     }
 
-    private Edge mockExtensionEdge(Pubkey destination) {
-        Policy policy = new Policy(0, Coins.NONE, true, 40, Coins.ofSatoshis(10_000));
+    private Edge mockExtensionEdge(Pubkey destination, int feeRate) {
+        Policy policyExtension =
+                new Policy(feeRate, Coins.NONE, true, 40, Coins.ofSatoshis(10_000));
         when(channelService.getAllChannelsWith(PUBKEY_2)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL));
-        when(policyService.getPolicyFrom(CHANNEL_ID, PUBKEY_2)).thenReturn(Optional.of(policy));
-        Edge extensionEdge = new Edge(CHANNEL_ID, PUBKEY_2, destination, LOCAL_OPEN_CHANNEL.getCapacity(), policy);
+        when(policyService.getPolicyFrom(CHANNEL_ID, PUBKEY_2)).thenReturn(Optional.of(policyExtension));
+        Edge extensionEdge =
+                new Edge(CHANNEL_ID, PUBKEY_2, destination, LOCAL_OPEN_CHANNEL.getCapacity(), policyExtension);
         when(edgeComputation.getEdgeWithLiquidityInformation(extensionEdge))
                 .thenReturn(noInformationFor(extensionEdge));
         return extensionEdge;
