@@ -24,6 +24,7 @@ import java.util.Set;
 
 import static de.cotto.lndmanagej.configuration.TopUpConfigurationSettings.EXPIRY;
 import static de.cotto.lndmanagej.configuration.TopUpConfigurationSettings.THRESHOLD;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.DecodedPaymentRequestFixtures.DECODED_PAYMENT_REQUEST;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
@@ -39,7 +40,7 @@ import static org.mockito.Mockito.when;
 class TopUpServiceTest {
     private static final Coins AMOUNT = Coins.ofSatoshis(123_000);
     private static final Coins DEFAULT_THRESHOLD = Coins.ofSatoshis(10_000);
-    private static final String DESCRIPTION = "Topping up channel with " + PUBKEY + " (alias)";
+    private static final String DESCRIPTION = "Topping up channel " + CHANNEL_ID + " with " + PUBKEY + " (alias)";
     private static final long OUR_FEE_RATE = 1234;
     private static final long PEER_FEE_RATE = 1233;
     private static final Duration DEFAULT_EXPIRY = Duration.ofMinutes(10);
