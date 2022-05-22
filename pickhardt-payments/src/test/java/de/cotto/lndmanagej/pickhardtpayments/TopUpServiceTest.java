@@ -43,7 +43,7 @@ class TopUpServiceTest {
     private static final String DESCRIPTION = "Topping up channel " + CHANNEL_ID + " with " + PUBKEY + " (alias)";
     private static final long OUR_FEE_RATE = 1234;
     private static final long PEER_FEE_RATE = 1233;
-    private static final Duration DEFAULT_EXPIRY = Duration.ofMinutes(10);
+    private static final Duration DEFAULT_EXPIRY = Duration.ofMinutes(30);
 
     @InjectMocks
     private TopUpService topUpService;
