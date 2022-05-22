@@ -1,7 +1,6 @@
 package de.cotto.lndmanagej.pickhardtpayments;
 
 import de.cotto.lndmanagej.configuration.ConfigurationService;
-import de.cotto.lndmanagej.configuration.TopUpConfigurationSettings;
 import de.cotto.lndmanagej.grpc.GrpcInvoices;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.HexString;
@@ -19,9 +18,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
 
+import static de.cotto.lndmanagej.configuration.TopUpConfigurationSettings.EXPIRY;
+import static de.cotto.lndmanagej.configuration.TopUpConfigurationSettings.THRESHOLD;
 import static de.cotto.lndmanagej.model.DecodedPaymentRequestFixtures.DECODED_PAYMENT_REQUEST;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
@@ -40,6 +42,7 @@ class TopUpServiceTest {
     private static final String DESCRIPTION_PREFIX = "Topping up channel with " + PUBKEY + " (alias), adding ";
     private static final long OUR_FEE_RATE = 1234;
     private static final long PEER_FEE_RATE = 1233;
+    private static final Duration DEFAULT_EXPIRY = Duration.ofMinutes(10);
 
     @InjectMocks
     private TopUpService topUpService;
@@ -71,7 +74,7 @@ class TopUpServiceTest {
         lenient().when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL));
         lenient().when(policyService.getMinimumFeeRateFrom(PUBKEY)).thenReturn(Optional.of(PEER_FEE_RATE));
         lenient().when(policyService.getMinimumFeeRateTo(PUBKEY)).thenReturn(Optional.of(OUR_FEE_RATE));
-        lenient().when(grpcInvoices.createPaymentRequest(any(), any()))
+        lenient().when(grpcInvoices.createPaymentRequest(any(), any(), any()))
                 .thenReturn(Optional.of(DECODED_PAYMENT_REQUEST));
         lenient().when(multiPathPaymentSender.payPaymentRequest(eq(DECODED_PAYMENT_REQUEST), any()))
                 .thenReturn(new PaymentStatus(new HexString("AA00")));
@@ -87,14 +90,14 @@ class TopUpServiceTest {
     @Test
     void unable_to_create_payment_request() {
         when(balanceService.getAvailableLocalBalanceForPeer(PUBKEY)).thenReturn(Coins.NONE);
-        when(grpcInvoices.createPaymentRequest(any(), any())).thenReturn(Optional.empty());
+        when(grpcInvoices.createPaymentRequest(any(), any(), any())).thenReturn(Optional.empty());
         assertFailure("Unable to create payment request (" + PUBKEY + ", alias)");
     }
 
     @Test
     void empty_channel_with_peer() {
         when(balanceService.getAvailableLocalBalanceForPeer(PUBKEY)).thenReturn(Coins.NONE);
-        assertTopUp(AMOUNT);
+        assertTopUp(AMOUNT, DEFAULT_EXPIRY);
     }
 
     @Test
@@ -119,14 +122,14 @@ class TopUpServiceTest {
     @Test
     void missing_amount_is_threshold() {
         when(balanceService.getAvailableLocalBalanceForPeer(PUBKEY)).thenReturn(AMOUNT.subtract(DEFAULT_THRESHOLD));
-        assertTopUp(DEFAULT_THRESHOLD);
+        assertTopUp(DEFAULT_THRESHOLD, DEFAULT_EXPIRY);
     }
 
     @Test
     void missing_amount_is_above_threshold() {
         Coins balance = AMOUNT.subtract(DEFAULT_THRESHOLD).subtract(Coins.ofSatoshis(1));
         when(balanceService.getAvailableLocalBalanceForPeer(PUBKEY)).thenReturn(balance);
-        assertTopUp(DEFAULT_THRESHOLD.add(Coins.ofSatoshis(1)));
+        assertTopUp(DEFAULT_THRESHOLD.add(Coins.ofSatoshis(1)), DEFAULT_EXPIRY);
     }
 
     @Test
@@ -155,22 +158,35 @@ class TopUpServiceTest {
     @Test
     void we_charge_more_than_peer() {
         when(balanceService.getAvailableLocalBalanceForPeer(PUBKEY)).thenReturn(Coins.NONE);
-        assertTopUp(AMOUNT);
+        assertTopUp(AMOUNT, DEFAULT_EXPIRY);
+    }
+
+    @Test
+    void uses_configured_expiry() {
+        int expiry = 900;
+        when(configurationService.getIntegerValue(THRESHOLD)).thenReturn(Optional.empty());
+        when(configurationService.getIntegerValue(EXPIRY)).thenReturn(Optional.of(expiry));
+        when(balanceService.getAvailableLocalBalanceForPeer(PUBKEY)).thenReturn(Coins.NONE);
+        assertTopUp(AMOUNT, Duration.ofSeconds(expiry));
     }
 
     @Test
     void uses_configured_threshold() {
         Coins threshold = DEFAULT_THRESHOLD.add(Coins.ofSatoshis(1));
-        when(configurationService.getIntegerValue(TopUpConfigurationSettings.THRESHOLD))
+        when(configurationService.getIntegerValue(THRESHOLD))
                 .thenReturn(Optional.of((int) threshold.satoshis()));
         Coins balance = AMOUNT.subtract(DEFAULT_THRESHOLD);
         when(balanceService.getAvailableLocalBalanceForPeer(PUBKEY)).thenReturn(balance);
         assertFailure("Amount 10,000.000 below threshold 10,001.000 (balance 113,000.000)");
     }
 
-    private void assertTopUp(Coins expectedTopUpAmount) {
+    private void assertTopUp(Coins expectedTopUpAmount, Duration expiry) {
         PaymentStatus paymentStatus = topUpService.topUp(PUBKEY, AMOUNT);
-        verify(grpcInvoices).createPaymentRequest(expectedTopUpAmount, DESCRIPTION_PREFIX + expectedTopUpAmount);
+        verify(grpcInvoices).createPaymentRequest(
+                expectedTopUpAmount,
+                DESCRIPTION_PREFIX + expectedTopUpAmount,
+                expiry
+        );
         PaymentOptions paymentOptions = PaymentOptions.forTopUp(OUR_FEE_RATE, PUBKEY);
         verify(multiPathPaymentSender).payPaymentRequest(DECODED_PAYMENT_REQUEST, paymentOptions);
         assertThat(paymentStatus.isPending()).isTrue();

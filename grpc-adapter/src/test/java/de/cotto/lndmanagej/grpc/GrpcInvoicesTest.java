@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.annotation.Nullable;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HexFormat;
 import java.util.LinkedHashMap;
@@ -225,11 +226,13 @@ class GrpcInvoicesTest {
                 .thenReturn(Optional.of(DECODED_PAYMENT_REQUEST));
         when(grpcService.addInvoice(Invoice.newBuilder()
                         .setValueMsat(amount.milliSatoshis())
+                        .setExpiry(123)
                         .setMemo(memo)
                 .build()))
                 .thenReturn(Optional.of(AddInvoiceResponse.newBuilder().setPaymentRequest(paymentRequest).build()));
 
-        assertThat(grpcInvoices.createPaymentRequest(amount, memo)).contains(DECODED_PAYMENT_REQUEST);
+        assertThat(grpcInvoices.createPaymentRequest(amount, memo, Duration.ofSeconds(123)))
+                .contains(DECODED_PAYMENT_REQUEST);
     }
 
     private Invoice keysendInvoice() {
