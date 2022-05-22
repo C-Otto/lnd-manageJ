@@ -21,6 +21,6 @@ public record PaymentOptions(
     }
 
     public static PaymentOptions forTopUp(long feeRateLimit, Pubkey peer) {
-        return new PaymentOptions(10, Optional.of(feeRateLimit), false, Optional.of(peer));
+        return new PaymentOptions(5, Optional.of(feeRateLimit), false, Optional.of(peer));
     }
 }
