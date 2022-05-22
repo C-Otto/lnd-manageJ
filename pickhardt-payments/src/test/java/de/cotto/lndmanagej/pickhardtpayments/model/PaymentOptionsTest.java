@@ -24,7 +24,7 @@ class PaymentOptionsTest {
     @Test
     void forTopUp() {
         assertThat(PaymentOptions.forTopUp(123, PUBKEY))
-                .isEqualTo(new PaymentOptions(10, Optional.of(123L), false, Optional.of(PUBKEY)));
+                .isEqualTo(new PaymentOptions(5, Optional.of(123L), false, Optional.of(PUBKEY)));
     }
 
     @Test
