@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.pickhardtpayments.model;
 
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.model.Route;
 
 import java.util.ArrayList;
@@ -21,6 +22,24 @@ public final class Routes {
         routesCopy.remove(highProbabilityRoute);
         Route fixedRoute = highProbabilityRoute.getForAmount(highProbabilityRoute.getAmount().add(remainder));
         routesCopy.add(fixedRoute);
+        if (isAboveAvailableLiquidity(routesCopy)) {
+            return List.of();
+        }
         return routesCopy;
+    }
+
+    private static boolean isAboveAvailableLiquidity(List<Route> routes) {
+        for (Route route : routes) {
+            List<EdgeWithLiquidityInformation> edgesWithLiquidityInformation = route.getEdgesWithLiquidityInformation();
+            for (int index = 0; index < edgesWithLiquidityInformation.size(); index++) {
+                EdgeWithLiquidityInformation edge = edgesWithLiquidityInformation.get(index);
+                Coins requiredAmount = route.getForwardAmountForHop(index);
+                Coins availableAmountUpperBound = edge.availableLiquidityUpperBound();
+                if (availableAmountUpperBound.compareTo(requiredAmount) < 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
