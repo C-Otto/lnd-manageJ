@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.pickhardtpayments;
 
 import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.grpc.GrpcInvoices;
+import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.DecodedPaymentRequest;
 import de.cotto.lndmanagej.model.Pubkey;
@@ -100,7 +101,7 @@ public class TopUpService {
     }
 
     private Optional<DecodedPaymentRequest> getPaymentRequest(Pubkey pubkey, Coins topUpAmount) {
-        String description = getDescription(pubkey, topUpAmount);
+        String description = getDescription(pubkey);
         return grpcInvoices.createPaymentRequest(topUpAmount, description, getExpiry());
     }
 
@@ -108,8 +109,9 @@ public class TopUpService {
         return Duration.ofSeconds(configurationService.getIntegerValue(EXPIRY).orElse(DEFAULT_EXPIRY));
     }
 
-    private String getDescription(Pubkey pubkey, Coins amount) {
+    private String getDescription(Pubkey pubkey) {
         String alias = nodeService.getAlias(pubkey);
-        return "Topping up channel with %s (%s), adding %s".formatted(pubkey, alias, amount);
+        ChannelId channelId = channelService.getOpenChannelsWith(pubkey).iterator().next().getId();
+        return "Topping up channel %s with %s (%s)".formatted(channelId, pubkey, alias);
     }
 }
