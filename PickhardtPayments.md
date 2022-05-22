@@ -94,10 +94,10 @@ Warning: Work in progress.
       less than the fee rate towards node Z.
     * ...and a route found by the algorithm costs more (in ppm) than the fee rate difference between the channels to
       node Z and node A, the whole payment fails (it is not attempted).
-  * Invoices (payment requests) created for top-up payments expiry after 10 minutes. This value can be configured as
+  * Invoices (payment requests) created for top-up payments expiry after 30 minutes. This value can be configured as
     `expiry_seconds=`.
 
-The threshold, i.e. the minimum difference between the current local balance and the requested amount, defaults to 10,000sat.
-You can configure this value by setting `threshold_sat=` in the configuration file.
+The threshold, i.e. the minimum difference between the current local balance and the requested amount, defaults to
+10,000sat. You can configure this value by setting `threshold_sat=` in the configuration file.
 
 As before, the response shows a somewhat readable representation of the payment progress, including the final result.

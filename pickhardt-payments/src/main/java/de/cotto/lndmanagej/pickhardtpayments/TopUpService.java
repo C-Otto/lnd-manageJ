@@ -23,7 +23,7 @@ import static de.cotto.lndmanagej.configuration.TopUpConfigurationSettings.THRES
 @Component
 public class TopUpService {
     private static final Coins DEFAULT_THRESHOLD = Coins.ofSatoshis(10_000);
-    private static final Integer DEFAULT_EXPIRY = 10 * 60;
+    private static final Integer DEFAULT_EXPIRY = 30 * 60;
 
     private final BalanceService balanceService;
     private final GrpcInvoices grpcInvoices;
