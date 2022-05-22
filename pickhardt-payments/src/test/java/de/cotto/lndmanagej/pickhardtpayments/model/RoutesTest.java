@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.pickhardtpayments.model;
 import de.cotto.lndmanagej.model.BasicRoute;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Edge;
+import de.cotto.lndmanagej.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.model.Route;
 import org.junit.jupiter.api.Test;
 
@@ -52,5 +53,18 @@ class RoutesTest {
                 new Route(basicRoute2),
                 new Route(basicRoute3)
         );
+    }
+
+    @Test
+    void getFixedWithTotalAmount_does_not_add_if_amount_exceeds_available_balance() {
+        Edge edge = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1);
+
+        EdgeWithLiquidityInformation withLiquidityInformation =
+                EdgeWithLiquidityInformation.forKnownLiquidity(edge, Coins.ofSatoshis(199));
+        List<Route> routes = List.of(new Route(List.of(withLiquidityInformation), Coins.ofSatoshis(150)));
+
+        List<Route> fixedRoutes = Routes.getFixedWithTotalAmount(routes, Coins.ofSatoshis(200));
+
+        assertThat(fixedRoutes).isEmpty();
     }
 }
