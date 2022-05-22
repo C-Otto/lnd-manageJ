@@ -69,16 +69,16 @@ public class MultiPathPaymentSplitter {
         List<BasicRoute> basicRoutes = BasicRoutes.fromFlows(source, intermediateTarget, flows);
         List<BasicRoute> extendedBasicRoutes = extendBasicRoutes(basicRoutes, paymentOptions, target);
         if (extendedBasicRoutes.isEmpty()) {
-            return MultiPathPayment.FAILURE;
+            return MultiPathPayment.failure("Unable to extend channel back to own node");
         }
         List<Route> routes = getWithLiquidityInformation(extendedBasicRoutes);
         List<Route> fixedRoutes = Routes.getFixedWithTotalAmount(routes, amount);
         if (fixedRoutes.isEmpty()) {
-            return MultiPathPayment.FAILURE;
+            return MultiPathPayment.failure("Not enough liquidity for first hop (due to fees?)");
         }
 
         if (isTooExpensive(paymentOptions, fixedRoutes)) {
-            return MultiPathPayment.FAILURE;
+            return MultiPathPayment.failure("At least one route is too expensive (fee rate limit)");
         }
         return new MultiPathPayment(fixedRoutes);
     }

@@ -83,6 +83,18 @@ class PaymentLoopTest {
     }
 
     @Test
+    void failure_with_information() {
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), any(), any()))
+                .thenReturn(MultiPathPayment.failure("something"));
+        paymentLoop.start(DECODED_PAYMENT_REQUEST, PAYMENT_OPTIONS, paymentStatus);
+
+        assertThat(paymentStatus.isFailure()).isTrue();
+        assertThat(paymentStatus.getMessages().stream().map(InstantWithString::string))
+                .contains("Unable to find route (trying to send 123): something");
+        verifyNoInteractions(grpcSendToRoute);
+    }
+
+    @Test
     void requests_route_with_expected_parameters() {
         mockSuccessOnFirstAttempt();
         paymentLoop.start(DECODED_PAYMENT_REQUEST, PAYMENT_OPTIONS, paymentStatus);

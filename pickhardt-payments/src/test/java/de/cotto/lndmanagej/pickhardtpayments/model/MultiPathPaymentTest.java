@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.pickhardtpayments.model;
 
 import de.cotto.lndmanagej.model.Coins;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.model.RouteFixtures.ROUTE;
@@ -73,5 +74,19 @@ class MultiPathPaymentTest {
     @Test
     void feeRateWithFirstHop() {
         assertThat(MULTI_PATH_PAYMENT.getFeeRateWithFirstHop()).isEqualTo(466);
+    }
+
+    @Test
+    void failure_with_information() {
+        assertThat(MultiPathPayment.failure("something").isFailure()).isTrue();
+    }
+
+    @Test
+    void getInformation() {
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(MultiPathPayment.FAILURE.getInformation()).isEqualTo("");
+        softly.assertThat(MultiPathPayment.failure("hello").getInformation()).isEqualTo("hello");
+        softly.assertThat(MULTI_PATH_PAYMENT.getInformation()).isEqualTo("");
+        softly.assertAll();
     }
 }
