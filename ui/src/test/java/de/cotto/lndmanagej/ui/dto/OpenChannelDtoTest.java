@@ -6,11 +6,12 @@ import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Coins;
 import org.junit.jupiter.api.Test;
 
-import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES_FOR_LOCAL_CHANNEL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
+import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.CAPACITY_SAT;
+import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class OpenChannelDtoTest {
@@ -32,6 +33,11 @@ class OpenChannelDtoTest {
     @Test
     void policies() {
         assertThat(OPEN_CHANNEL_DTO.policies()).isEqualTo(PoliciesDto.createFromModel(POLICIES_FOR_LOCAL_CHANNEL));
+    }
+
+    @Test
+    void capacitySat() {
+        assertThat(OPEN_CHANNEL_DTO.capacitySat()).isEqualTo(21_000_000);
     }
 
     @Test
@@ -62,7 +68,8 @@ class OpenChannelDtoTest {
                 "Albert",
                 PUBKEY,
                 PoliciesDto.createFromModel(POLICIES_FOR_LOCAL_CHANNEL),
-                BalanceInformationDto.createFromModel(balanceInformation)
+                BalanceInformationDto.createFromModel(balanceInformation),
+                CAPACITY_SAT
         );
     }
 }

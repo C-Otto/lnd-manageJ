@@ -11,7 +11,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import static de.cotto.lndmanagej.controller.dto.StatusModelFixture.STATUS_MODEL;
+import static de.cotto.lndmanagej.ui.dto.StatusModelFixture.STATUS_MODEL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;

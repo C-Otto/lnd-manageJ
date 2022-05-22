@@ -20,12 +20,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static de.cotto.lndmanagej.controller.dto.ChannelDetailsDtoFixture.CHANNEL_DETAILS_DTO;
 import static de.cotto.lndmanagej.controller.dto.NodeDetailsDtoFixture.NODE_DETAILS_DTO;
-import static de.cotto.lndmanagej.controller.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
+import static de.cotto.lndmanagej.ui.dto.ChannelDetailsDtoFixture.CHANNEL_DETAILS_DTO;
+import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
+import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -41,14 +44,50 @@ class PageServiceTest {
     void dashboard() {
         List<OpenChannelDto> channels = List.of(OPEN_CHANNEL_DTO);
         List<NodeDto> nodes = List.of(new NodeDto(PUBKEY.toString(), NODE.alias(), true));
-        NodesAndChannelsWithWarningsDto warnings = new NodesAndChannelsWithWarningsDto(List.of(), List.of());
-        when(dataService.getOpenChannels()).thenReturn(channels);
-        when(dataService.createNodeList()).thenReturn(nodes);
-        when(dataService.getWarnings()).thenReturn(warnings);
+        mockChannelsAndNodesWithoutWarning(channels, nodes);
 
         assertThat(pageService.dashboard()).usingRecursiveComparison().isEqualTo(
-                new DashboardPage(channels, nodes, warnings)
+                new DashboardPage(channels, nodes, NodesAndChannelsWithWarningsDto.NONE)
         );
+    }
+
+    @Test
+    void dashboard_nodes_alphabeticalOrder() {
+        NodeDto bob = new NodeDto(PUBKEY.toString(), "Bob", true);
+        NodeDto alice = new NodeDto(PUBKEY_3.toString(), "Alice", true);
+        NodeDto charlie = new NodeDto(PUBKEY_2.toString(), "Charlie", true);
+        List<NodeDto> nodesUnsorted = List.of(bob, charlie, alice);
+        mockChannelsAndNodesWithoutWarning(List.of(), nodesUnsorted);
+
+        List<NodeDto> nodesSorted = List.of(alice, bob, charlie);
+        assertThat(pageService.dashboard().getNodes()).isEqualTo(nodesSorted);
+    }
+
+    @Test
+    void dashboard_nodes_grouped_offline_first() {
+        NodeDto offlineNode1 = new NodeDto(PUBKEY_3.toString(), "Offline-Node1", false);
+        NodeDto onlineNode = new NodeDto(PUBKEY.toString(), "Online-Node", true);
+        NodeDto offlineNode2 = new NodeDto(PUBKEY_2.toString(), "Offline-Node2", false);
+        List<NodeDto> nodesUnsorted = List.of(onlineNode, offlineNode2, offlineNode1);
+        mockChannelsAndNodesWithoutWarning(List.of(), nodesUnsorted);
+
+        List<NodeDto> nodesSorted = List.of(offlineNode1, offlineNode2, onlineNode);
+        assertThat(pageService.dashboard().getNodes()).isEqualTo(nodesSorted);
+    }
+
+    @Test
+    void dashboard_channels_sorted() {
+        List<OpenChannelDto> channels = List.of(OPEN_CHANNEL_DTO2, OPEN_CHANNEL_DTO);
+        mockChannelsAndNodesWithoutWarning(channels, List.of());
+
+        List<OpenChannelDto> channelsSorted = List.of(OPEN_CHANNEL_DTO, OPEN_CHANNEL_DTO2);
+        assertThat(pageService.dashboard().getChannels()).isEqualTo(channelsSorted);
+    }
+
+    private void mockChannelsAndNodesWithoutWarning(List<OpenChannelDto> channels, List<NodeDto> nodes) {
+        when(dataService.getOpenChannels()).thenReturn(channels);
+        when(dataService.createNodeList()).thenReturn(nodes);
+        when(dataService.getWarnings()).thenReturn(NodesAndChannelsWithWarningsDto.NONE);
     }
 
     @Test
@@ -77,6 +116,18 @@ class PageServiceTest {
         assertThat(pageService.nodes()).usingRecursiveComparison().isEqualTo(
                 new NodesPage(List.of(nodeDto))
         );
+    }
+
+    @Test
+    void nodes_sorted() {
+        NodeDto bob = new NodeDto(PUBKEY.toString(), "Bob", true);
+        NodeDto alice = new NodeDto(PUBKEY_3.toString(), "alice", true);
+        NodeDto charlie = new NodeDto(PUBKEY_2.toString(), "Charlie", false);
+        List<NodeDto> nodesUnsorted = List.of(bob, charlie, alice);
+        when(dataService.createNodeList()).thenReturn(nodesUnsorted);
+
+        List<NodeDto> nodesSorted = List.of(charlie, alice, bob);
+        assertThat(pageService.nodes().getNodes()).isEqualTo(nodesSorted);
     }
 
     @Test

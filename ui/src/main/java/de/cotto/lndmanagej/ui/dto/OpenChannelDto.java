@@ -10,7 +10,8 @@ public record OpenChannelDto(
         String remoteAlias,
         Pubkey remotePubkey,
         PoliciesDto policies,
-        BalanceInformationDto balanceInformation
+        BalanceInformationDto balanceInformation,
+        long capacitySat
 ) {
 
     public String getRatio() {

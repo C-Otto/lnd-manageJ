@@ -1,10 +1,12 @@
 package de.cotto.lndmanagej.ui.demo.data;
 
+import de.cotto.lndmanagej.controller.dto.ChannelStatusDto;
 import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.FlowReportDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.controller.dto.RebalanceReportDto;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.ChannelStatus;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.FlowReport;
@@ -14,12 +16,13 @@ import de.cotto.lndmanagej.model.Policy;
 import de.cotto.lndmanagej.model.RebalanceReport;
 
 import java.util.Random;
-import java.util.Set;
 import java.util.random.RandomGenerator;
 
+import static de.cotto.lndmanagej.model.OpenCloseStatus.OPEN;
 import static de.cotto.lndmanagej.model.OpenInitiator.LOCAL;
 import static de.cotto.lndmanagej.model.OpenInitiator.REMOTE;
 
+@SuppressWarnings("PMD.TooManyMethods")
 public final class DeriveDataUtil {
 
     private static final Coins MAX_HTLC = Coins.ofSatoshis(1_000_000);
@@ -42,12 +45,6 @@ public final class DeriveDataUtil {
                 Coins.ofSatoshis(rand.nextInt(3000)),
                 Coins.ofSatoshis(rand.nextInt(500))
         ));
-    }
-
-    static Set<String> deriveWarnings(ChannelId channelId) {
-        RandomGenerator rand = createRandomGenerator(channelId);
-        int updates = (rand.nextInt(10) + 5) * 100_000;
-        return rand.nextBoolean() ? Set.of("Channel has accumulated " + updates + " updates.") : Set.of();
     }
 
     static FlowReportDto deriveFlowReport(ChannelId channelId) {
@@ -100,9 +97,8 @@ public final class DeriveDataUtil {
         return new Policy(feeRate, baseFee, enabled, timeLockDelta, MAX_HTLC);
     }
 
-    static Set<String> deriveChannelWarnings(ChannelId channelId) {
-        RandomGenerator rand = createRandomGenerator(channelId);
-        int days = rand.nextInt(30) + 30;
-        return rand.nextBoolean() ? Set.of("No flow in the past " + days + " days.") : Set.of();
+    public static ChannelStatusDto deriveChannelStatus(ChannelId channelId) {
+        boolean privateChannel = createRandomGenerator(channelId).nextBoolean();
+        return ChannelStatusDto.createFromModel(new ChannelStatus(privateChannel, true, false, OPEN));
     }
 }

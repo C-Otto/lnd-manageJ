@@ -1,6 +1,7 @@
-package de.cotto.lndmanagej.controller.dto;
+package de.cotto.lndmanagej.ui.dto;
 
-import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
+import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
+import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION_2;
@@ -12,18 +13,22 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 
 public class OpenChannelDtoFixture {
 
+    public static final long CAPACITY_SAT = 21_000_000;
+
     public static final OpenChannelDto OPEN_CHANNEL_DTO = new OpenChannelDto(
             CHANNEL_ID,
             "Albert",
             PUBKEY,
             PoliciesDto.createFromModel(POLICIES_FOR_LOCAL_CHANNEL),
-            BalanceInformationDto.createFromModel(BALANCE_INFORMATION));
+            BalanceInformationDto.createFromModel(BALANCE_INFORMATION),
+            CAPACITY_SAT);
 
     public static final OpenChannelDto OPEN_CHANNEL_DTO2 = new OpenChannelDto(
             CHANNEL_ID_2,
             "Albert II",
             PUBKEY_2,
             PoliciesDto.createFromModel(POLICIES_FOR_LOCAL_CHANNEL),
-            BalanceInformationDto.createFromModel(BALANCE_INFORMATION_2));
+            BalanceInformationDto.createFromModel(BALANCE_INFORMATION_2),
+            CAPACITY_SAT);
 
 }

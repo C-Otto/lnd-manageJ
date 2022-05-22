@@ -7,13 +7,24 @@ import java.util.List;
 
 public class NodesPage extends ThymeleafPage {
 
+    private final List<NodeDto> nodes;
+
     public NodesPage(List<NodeDto> nodes) {
         super();
-        add("nodes", nodes);
+        this.nodes = sort(nodes);
+        add("nodes", this.nodes);
+    }
+
+    private List<NodeDto> sort(List<NodeDto> nodes) {
+        return nodes.stream().sorted(new NodeDto.OnlineStatusAndAliasComparator()).toList();
     }
 
     @Override
     public String getView() {
         return "nodes";
+    }
+
+    public List<NodeDto> getNodes() {
+        return nodes;
     }
 }

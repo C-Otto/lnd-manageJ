@@ -1,5 +1,9 @@
-.tile {
-  padding-bottom: 1rem;
+.outbound-green {
+  background-color: #006400bd;
+}
+
+.inbound-red {
+  background-color: #8b0000f2;
 }
 
 .top-space {
@@ -16,4 +20,33 @@
 
 .title-table .card-body {
   padding: 0.2rem 0.5rem 0rem 0.5rem;
+}
+
+.tile {
+  padding-left: 0.375rem;
+  padding-right: 0.375rem;
+  padding-bottom: 0.75rem;
+}
+
+.tile-column {
+  padding-left: 0.375rem;
+  padding-right: 0.375rem;
+}
+
+.tile-column-left {
+  padding-right: 0.375rem;
+}
+
+.tile-column-right {
+  padding-left: 0.375rem;
+}
+
+.link-button {
+  color: black;
+  background: rgba(0,0,0,.03);
+  border-radius: 4px;
+  border: 1px solid;
+  text-decoration: none;
+  text-align: center;
+  padding: 5px 10px 5px 15px;
 }
