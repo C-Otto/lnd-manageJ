@@ -27,6 +27,8 @@ import java.util.function.Function;
 
 @Component
 public class EdgeComputation {
+    private static final long NO_FEE_RATE_LIMIT = -1L;
+
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final GrpcGraph grpcGraph;
@@ -56,6 +58,10 @@ public class EdgeComputation {
     }
 
     public EdgesWithLiquidityInformation getEdges() {
+        return getEdges(NO_FEE_RATE_LIMIT);
+    }
+
+    public EdgesWithLiquidityInformation getEdges(long feeRateLimit) {
         Set<DirectedChannelEdge> channelEdges = grpcGraph.getChannelEdges().orElse(null);
         if (channelEdges == null) {
             logger.warn("Unable to get graph");
@@ -65,7 +71,7 @@ public class EdgeComputation {
         Pubkey ownPubkey = grpcGetInfo.getPubkey();
         Set<DirectedChannelEdge> edgesFromPaymentHints = routeHintService.getEdgesFromPaymentHints();
         for (DirectedChannelEdge channelEdge : Sets.union(channelEdges, edgesFromPaymentHints)) {
-            if (shouldIgnore(channelEdge)) {
+            if (shouldIgnore(channelEdge, feeRateLimit)) {
                 continue;
             }
             ChannelId channelId = channelEdge.channelId();
@@ -105,8 +111,14 @@ public class EdgeComputation {
         return withFeeReserve.subtract(Coins.ofSatoshis(1_000)).maximum(Coins.NONE);
     }
 
-    private boolean shouldIgnore(DirectedChannelEdge channelEdge) {
-        return channelEdge.policy().disabled();
+    private boolean shouldIgnore(DirectedChannelEdge channelEdge, long feeRateLimit) {
+        if (channelEdge.policy().disabled()) {
+            return true;
+        }
+        if (feeRateLimit == NO_FEE_RATE_LIMIT) {
+            return false;
+        }
+        return channelEdge.policy().feeRate() > feeRateLimit;
     }
 
     private Optional<Coins> getKnownLiquidity(Edge edge, Pubkey ownPubKey) {

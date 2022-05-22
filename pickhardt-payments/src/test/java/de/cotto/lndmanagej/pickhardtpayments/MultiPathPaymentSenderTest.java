@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.DecodedPaymentRequestFixtures.DECODED_PAYMENT_REQUEST;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -76,15 +77,17 @@ class MultiPathPaymentSenderTest {
         when(grpcPayments.decodePaymentRequest(DECODED_PAYMENT_REQUEST.paymentRequest()))
                 .thenReturn(Optional.of(DECODED_PAYMENT_REQUEST));
 
-        int feeRateWeight = 123;
+        PaymentOptions paymentOptions = feeRateWeight(123);
         PaymentStatus paymentStatus = multiPathPaymentSender.payPaymentRequest(
                 DECODED_PAYMENT_REQUEST.paymentRequest(),
-                feeRateWeight(feeRateWeight)
+                paymentOptions
         );
-        verify(paymentLoop).start(DECODED_PAYMENT_REQUEST, feeRateWeight, paymentStatus);
+        verify(paymentLoop).start(DECODED_PAYMENT_REQUEST, paymentOptions, paymentStatus);
+        assertThat(paymentStatus.getMessages().stream().map(InstantWithString::string))
+                .contains("Payment Options: " + paymentOptions);
     }
 
     private PaymentOptions feeRateWeight(int feeRateWeight) {
-        return PaymentOptions.feeRateWeight(feeRateWeight);
+        return PaymentOptions.forFeeRateWeight(feeRateWeight);
     }
 }

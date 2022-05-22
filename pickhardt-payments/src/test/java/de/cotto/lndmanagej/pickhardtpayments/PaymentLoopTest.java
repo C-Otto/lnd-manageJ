@@ -7,6 +7,7 @@ import de.cotto.lndmanagej.model.FailureCode;
 import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.model.Route;
 import de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPayment;
+import de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions;
 import de.cotto.lndmanagej.pickhardtpayments.model.PaymentStatus;
 import de.cotto.lndmanagej.pickhardtpayments.model.PaymentStatus.InstantWithString;
 import org.assertj.core.api.SoftAssertions;
@@ -27,7 +28,6 @@ import static de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPaymentFixtur
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -39,7 +39,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class PaymentLoopTest {
     private static final HexString PAYMENT_HASH = DECODED_PAYMENT_REQUEST.paymentHash();
-    private static final int FEE_RATE_WEIGHT = 123;
+    private static final PaymentOptions PAYMENT_OPTIONS = PaymentOptions.forFeeRateWeight(123);
     private static final String MPP_1_ROUTE_1 =
             "100: [712345x123x1 (cap 21,000,000), 799999x456x3 (cap 21,000,000), 799999x456x5 (cap 21,000,000)], " +
                     "400ppm, probability 0.9999857143544217";
@@ -72,9 +72,9 @@ class PaymentLoopTest {
 
     @Test
     void failure_from_splitter() {
-        when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), any(), anyInt()))
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), any(), any()))
                 .thenReturn(MultiPathPayment.FAILURE);
-        paymentLoop.start(DECODED_PAYMENT_REQUEST, FEE_RATE_WEIGHT, paymentStatus);
+        paymentLoop.start(DECODED_PAYMENT_REQUEST, PAYMENT_OPTIONS, paymentStatus);
 
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(paymentStatus.isFailure()).isTrue();
@@ -85,18 +85,18 @@ class PaymentLoopTest {
     @Test
     void requests_route_with_expected_parameters() {
         mockSuccessOnFirstAttempt();
-        paymentLoop.start(DECODED_PAYMENT_REQUEST, FEE_RATE_WEIGHT, paymentStatus);
+        paymentLoop.start(DECODED_PAYMENT_REQUEST, PAYMENT_OPTIONS, paymentStatus);
         verify(multiPathPaymentSplitter).getMultiPathPaymentTo(
                 DECODED_PAYMENT_REQUEST.destination(),
                 DECODED_PAYMENT_REQUEST.amount(),
-                FEE_RATE_WEIGHT
+                PAYMENT_OPTIONS
         );
     }
 
     @Test
     void sends_to_each_route() {
         mockSuccessOnFirstAttempt();
-        paymentLoop.start(DECODED_PAYMENT_REQUEST, FEE_RATE_WEIGHT, paymentStatus);
+        paymentLoop.start(DECODED_PAYMENT_REQUEST, PAYMENT_OPTIONS, paymentStatus);
         for (Route route : MULTI_PATH_PAYMENT.routes()) {
             verify(grpcSendToRoute).sendToRoute(eq(route), eq(DECODED_PAYMENT_REQUEST), any());
         }
@@ -115,11 +115,11 @@ class PaymentLoopTest {
 
     @Test
     void aborts_for_stuck_pending_amount() {
-        when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), any(), anyInt())).thenReturn(MULTI_PATH_PAYMENT);
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), any(), any())).thenReturn(MULTI_PATH_PAYMENT);
         when(multiPathPaymentObserver.getInFlight(PAYMENT_HASH))
                 .thenReturn(Coins.NONE)
                 .thenReturn(DECODED_PAYMENT_REQUEST.amount());
-        paymentLoop.start(DECODED_PAYMENT_REQUEST, FEE_RATE_WEIGHT, paymentStatus);
+        paymentLoop.start(DECODED_PAYMENT_REQUEST, PAYMENT_OPTIONS, paymentStatus);
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(paymentStatus.isSuccess()).isFalse();
         softly.assertThat(paymentStatus.isFailure()).isFalse();
@@ -137,7 +137,7 @@ class PaymentLoopTest {
             expected.put(route, expectedObserver);
         }
 
-        paymentLoop.start(DECODED_PAYMENT_REQUEST, FEE_RATE_WEIGHT, paymentStatus);
+        paymentLoop.start(DECODED_PAYMENT_REQUEST, PAYMENT_OPTIONS, paymentStatus);
         for (Route route : MULTI_PATH_PAYMENT.routes()) {
             verify(grpcSendToRoute).sendToRoute(route, DECODED_PAYMENT_REQUEST, requireNonNull(expected.get(route)));
         }
@@ -150,10 +150,10 @@ class PaymentLoopTest {
         mockPartialFailureInFirstAttempt(pendingAfterFirstAttempt);
 
         Coins amountForSecondAttempt = totalAmountToSend.subtract(pendingAfterFirstAttempt);
-        when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), eq(amountForSecondAttempt), anyInt()))
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), eq(amountForSecondAttempt), any()))
                 .thenReturn(MULTI_PATH_PAYMENT_2);
 
-        paymentLoop.start(DECODED_PAYMENT_REQUEST, FEE_RATE_WEIGHT, paymentStatus);
+        paymentLoop.start(DECODED_PAYMENT_REQUEST, PAYMENT_OPTIONS, paymentStatus);
         for (Route route : MULTI_PATH_PAYMENT_2.routes()) {
             verify(grpcSendToRoute).sendToRoute(eq(route), eq(DECODED_PAYMENT_REQUEST), any());
         }
@@ -176,7 +176,7 @@ class PaymentLoopTest {
     @Test
     void fails_after_waiting_for_shard_failure_or_settled_payment() {
         Coins totalAmountToSend = DECODED_PAYMENT_REQUEST.amount();
-        when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), eq(DECODED_PAYMENT_REQUEST.amount()), anyInt()))
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), eq(DECODED_PAYMENT_REQUEST.amount()), any()))
                 .thenReturn(MULTI_PATH_PAYMENT);
         when(multiPathPaymentObserver.getInFlight(PAYMENT_HASH))
                 .thenReturn(Coins.NONE)
@@ -184,7 +184,7 @@ class PaymentLoopTest {
                 .thenReturn(totalAmountToSend)
                 .thenReturn(totalAmountToSend);
 
-        paymentLoop.start(DECODED_PAYMENT_REQUEST, FEE_RATE_WEIGHT, paymentStatus);
+        paymentLoop.start(DECODED_PAYMENT_REQUEST, PAYMENT_OPTIONS, paymentStatus);
         verify(multiPathPaymentObserver).waitForInFlightChange(any(), eq(PAYMENT_HASH), eq(totalAmountToSend));
         assertThat(paymentStatus.getMessages().stream().map(InstantWithString::string))
                 .contains("Stopping payment loop, full amount is in-flight, but no failure/settle message received " +
@@ -193,29 +193,29 @@ class PaymentLoopTest {
 
     @Test
     void aborts_on_failure_from_destination_node() {
-        when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), eq(DECODED_PAYMENT_REQUEST.amount()), anyInt()))
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), eq(DECODED_PAYMENT_REQUEST.amount()), any()))
                 .thenReturn(MULTI_PATH_PAYMENT);
 
         when(multiPathPaymentObserver.getFailureCode(PAYMENT_HASH))
                 .thenReturn(Optional.empty())
                 .thenReturn(Optional.of(FailureCode.MPP_TIMEOUT));
 
-        paymentLoop.start(DECODED_PAYMENT_REQUEST, FEE_RATE_WEIGHT, paymentStatus);
-        verify(multiPathPaymentSplitter, times(1)).getMultiPathPaymentTo(any(), any(), anyInt());
+        paymentLoop.start(DECODED_PAYMENT_REQUEST, PAYMENT_OPTIONS, paymentStatus);
+        verify(multiPathPaymentSplitter, times(1)).getMultiPathPaymentTo(any(), any(), any());
         assertThat(paymentStatus.isFailure()).isTrue();
     }
 
     @Test
     void aborts_if_no_route_can_be_computed() {
-        when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), eq(DECODED_PAYMENT_REQUEST.amount()), anyInt()))
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), eq(DECODED_PAYMENT_REQUEST.amount()), any()))
                 .thenReturn(MultiPathPayment.FAILURE);
-        paymentLoop.start(DECODED_PAYMENT_REQUEST, FEE_RATE_WEIGHT, paymentStatus);
+        paymentLoop.start(DECODED_PAYMENT_REQUEST, PAYMENT_OPTIONS, paymentStatus);
         assertThat(paymentStatus.isFailure()).isTrue();
     }
 
     // CPD-OFF
     private void mockSuccessOnFirstAttempt() {
-        when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), any(), anyInt())).thenReturn(MULTI_PATH_PAYMENT);
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), any(), any())).thenReturn(MULTI_PATH_PAYMENT);
         when(multiPathPaymentObserver.isSettled(PAYMENT_HASH))
                 .thenReturn(false)
                 .thenReturn(true);
@@ -225,7 +225,7 @@ class PaymentLoopTest {
     }
 
     private void mockPartialFailureInFirstAttempt(Coins pendingAfterFirstAttempt) {
-        when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), eq(DECODED_PAYMENT_REQUEST.amount()), anyInt()))
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), eq(DECODED_PAYMENT_REQUEST.amount()), any()))
                 .thenReturn(MULTI_PATH_PAYMENT);
         when(multiPathPaymentObserver.isSettled(PAYMENT_HASH))
                 .thenReturn(false)

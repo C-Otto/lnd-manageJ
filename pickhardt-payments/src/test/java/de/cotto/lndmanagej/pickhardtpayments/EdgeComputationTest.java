@@ -26,6 +26,7 @@ import java.util.Set;
 
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_PEER;
@@ -85,6 +86,20 @@ class EdgeComputationTest {
         DirectedChannelEdge edge = new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY, PUBKEY_2, POLICY_DISABLED);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));
         assertThat(edgeComputation.getEdges().edges()).isEmpty();
+    }
+
+    @Test
+    void does_not_add_edge_with_fee_rate_above_limit() {
+        int feeRateLimit = 199;
+        Policy policyExpensive = new Policy(200, Coins.NONE, true, 40, Coins.ofSatoshis(0));
+        Policy policyOk = new Policy(199, Coins.NONE, true, 40, Coins.ofSatoshis(0));
+        DirectedChannelEdge edgeExpensive =
+                new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY, PUBKEY_2, policyExpensive);
+        DirectedChannelEdge edgeOk =
+                new DirectedChannelEdge(CHANNEL_ID_2, CAPACITY, PUBKEY, PUBKEY_2, policyOk);
+        when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edgeExpensive, edgeOk)));
+        assertThat(edgeComputation.getEdges(feeRateLimit).edges().stream().map(EdgeWithLiquidityInformation::channelId))
+                .containsExactly(CHANNEL_ID_2);
     }
 
     @Test

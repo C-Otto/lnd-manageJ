@@ -75,3 +75,27 @@ Warning: Don't do this on mainnet, yet! This is very much work in progress.
   * as above, with default fee rate weight 0
 
 The response shows a somewhat readable representation of the payment progress, including the final result.
+
+# Top Up
+
+Warning: Work in progress.
+
+* `/beta/pickhardt-payments/top-up/{pubkey}/amount/{amount}`
+  * Sends satoshis out via some channel and back to the own node through the specified peer so that the local balance
+    to that peer is increased.
+  * The given amount is the the local balance you'd like to have *after* the payment is done.
+  * If you have more than one channel to the peer, the target amount is the sum of the (available) local balances.
+  * If the local balance to that peer is more than the given amount, nothing is done.
+  * If the difference between the current local balance and the target amount is less than the configured threshold
+    (see below), nothing is done. 
+  * The payment is only attempted for routes that make sense from an economic perspective. If you try to top up the
+    channel(s) to node Z...
+    * ...and if one of the routes is supposed to leave via a channel to node A, the fee rate towards node A must be
+      less than the fee rate towards node Z.
+    * ...and a route found by the algorithm costs more (in ppm) than the fee rate difference between the channels to
+      node Z and node A, the whole payment fails (it is not attempted).
+
+The threshold, i.e. the minimum difference between the current local balance and the requested amount, defaults to 10,000sat.
+You can configure this value by setting `threshold_sat=` in the configuration file.
+
+As before, the response shows a somewhat readable representation of the payment progress, including the final result.

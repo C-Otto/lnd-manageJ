@@ -7,6 +7,7 @@ import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSender;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSplitter;
 import de.cotto.lndmanagej.pickhardtpayments.TopUpService;
+import de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions;
 import de.cotto.lndmanagej.pickhardtpayments.model.PaymentStatus;
 import de.cotto.lndmanagej.service.GraphService;
 import org.junit.jupiter.api.Test;
@@ -22,8 +23,8 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_5;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.RouteFixtures.ROUTE;
-import static de.cotto.lndmanagej.pickhardtpayments.PickhardtPaymentsConfiguration.DEFAULT_FEE_RATE_WEIGHT;
 import static de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPaymentFixtures.MULTI_PATH_PAYMENT;
+import static de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions.DEFAULT_PAYMENT_OPTIONS;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
@@ -39,6 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class PickhardtPaymentsControllerIT {
     private static final String PREFIX = "/beta/pickhardt-payments";
     private static final String PAYMENT_REQUEST = "xxx";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -63,7 +65,7 @@ class PickhardtPaymentsControllerIT {
 
     @Test
     void payPaymentRequest() throws Exception {
-        when(multiPathPaymentSender.payPaymentRequest(PAYMENT_REQUEST, DEFAULT_FEE_RATE_WEIGHT))
+        when(multiPathPaymentSender.payPaymentRequest(PAYMENT_REQUEST, DEFAULT_PAYMENT_OPTIONS))
                 .thenReturn(paymentStatus);
         String url = "%s/pay-payment-request/%s".formatted(PREFIX, PAYMENT_REQUEST);
         mockMvc.perform(get(url))
@@ -73,7 +75,8 @@ class PickhardtPaymentsControllerIT {
     @Test
     void payPaymentRequest_with_fee_rate_weight() throws Exception {
         int feeRateWeight = 987;
-        when(multiPathPaymentSender.payPaymentRequest(PAYMENT_REQUEST, feeRateWeight)).thenReturn(paymentStatus);
+        PaymentOptions paymentOptions = PaymentOptions.forFeeRateWeight(feeRateWeight);
+        when(multiPathPaymentSender.payPaymentRequest(PAYMENT_REQUEST, paymentOptions)).thenReturn(paymentStatus);
         String url = "%s/pay-payment-request/%s/fee-rate-weight/%d".formatted(PREFIX, PAYMENT_REQUEST, feeRateWeight);
         mockMvc.perform(get(url)).andExpect(status().isOk());
     }
@@ -86,7 +89,7 @@ class PickhardtPaymentsControllerIT {
         String feesAsString = String.valueOf(MULTI_PATH_PAYMENT.fees().milliSatoshis());
         String feesWithFirstHopAsString = String.valueOf(MULTI_PATH_PAYMENT.feesWithFirstHop().milliSatoshis());
         double expectedProbability = MULTI_PATH_PAYMENT.probability();
-        when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, amount, DEFAULT_FEE_RATE_WEIGHT))
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, amount, DEFAULT_PAYMENT_OPTIONS))
                 .thenReturn(MULTI_PATH_PAYMENT);
         mockMvc.perform(get("%s/to/%s/amount/%d".formatted(PREFIX, PUBKEY, amount.satoshis())))
                 .andExpect(jsonPath("$.probability", is(expectedProbability)))
@@ -118,7 +121,8 @@ class PickhardtPaymentsControllerIT {
     void sendTo_with_fee_rate_weight() throws Exception {
         int feeRateWeight = 999;
         Coins amount = MULTI_PATH_PAYMENT.amount();
-        when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, amount, feeRateWeight))
+        PaymentOptions paymentOptions = PaymentOptions.forFeeRateWeight(feeRateWeight);
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, amount, paymentOptions))
                 .thenReturn(MULTI_PATH_PAYMENT);
         String url = "%s/to/%s/amount/%d/fee-rate-weight/%d"
                 .formatted(PREFIX, PUBKEY, amount.satoshis(), feeRateWeight);
@@ -131,13 +135,13 @@ class PickhardtPaymentsControllerIT {
         String amountAsString = String.valueOf(amount.satoshis());
         String feesAsString = String.valueOf(MULTI_PATH_PAYMENT.fees().milliSatoshis());
         double expectedProbability = MULTI_PATH_PAYMENT.probability();
-        when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, amount))
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, amount, DEFAULT_PAYMENT_OPTIONS))
                 .thenReturn(MULTI_PATH_PAYMENT);
         when(multiPathPaymentSplitter.getMultiPathPayment(
                 PUBKEY,
                 PUBKEY_2,
                 Coins.ofSatoshis(1_234),
-                DEFAULT_FEE_RATE_WEIGHT
+                DEFAULT_PAYMENT_OPTIONS
         )).thenReturn(MULTI_PATH_PAYMENT);
         mockMvc.perform(get("%s/from/%s/to/%s/amount/%d".formatted(PREFIX, PUBKEY, PUBKEY_2, 1_234)))
                 .andExpect(jsonPath("$.probability", is(expectedProbability)))
@@ -151,7 +155,8 @@ class PickhardtPaymentsControllerIT {
     void send_with_fee_rate_weight() throws Exception {
         int feeRateWeight = 999;
         Coins amount = MULTI_PATH_PAYMENT.amount();
-        when(multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_2, amount, feeRateWeight))
+        PaymentOptions paymentOptions = PaymentOptions.forFeeRateWeight(feeRateWeight);
+        when(multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_2, amount, paymentOptions))
                 .thenReturn(MULTI_PATH_PAYMENT);
         String url = "%s/from/%s/to/%s/amount/%d/fee-rate-weight/%d"
                 .formatted(PREFIX, PUBKEY, PUBKEY_2, amount.satoshis(), feeRateWeight);

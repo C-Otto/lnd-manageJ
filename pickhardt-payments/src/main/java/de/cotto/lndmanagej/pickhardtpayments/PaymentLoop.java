@@ -8,6 +8,7 @@ import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.Route;
 import de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPayment;
+import de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions;
 import de.cotto.lndmanagej.pickhardtpayments.model.PaymentStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -37,22 +38,30 @@ public class PaymentLoop {
     }
 
     @Async
-    public void start(DecodedPaymentRequest decodedPaymentRequest, int feeRateWeight, PaymentStatus paymentStatus) {
-        new Instance(decodedPaymentRequest, feeRateWeight, paymentStatus).start();
+    public void start(
+            DecodedPaymentRequest decodedPaymentRequest,
+            PaymentOptions paymentOptions,
+            PaymentStatus paymentStatus
+    ) {
+        new Instance(decodedPaymentRequest, paymentOptions, paymentStatus).start();
     }
 
     private class Instance {
         private final DecodedPaymentRequest decodedPaymentRequest;
-        private final int feeRateWeight;
+        private final PaymentOptions paymentOptions;
         private final PaymentStatus paymentStatus;
         private final HexString paymentHash;
         private final Pubkey destination;
         private final Coins totalAmountToSend;
         private Coins inFlight = Coins.NONE;
 
-        public Instance(DecodedPaymentRequest decodedPaymentRequest, int feeRateWeight, PaymentStatus paymentStatus) {
+        public Instance(
+                DecodedPaymentRequest decodedPaymentRequest,
+                PaymentOptions paymentOptions,
+                PaymentStatus paymentStatus
+        ) {
             this.decodedPaymentRequest = decodedPaymentRequest;
-            this.feeRateWeight = feeRateWeight;
+            this.paymentOptions = paymentOptions;
             this.paymentStatus = paymentStatus;
             paymentHash = decodedPaymentRequest.paymentHash();
             destination = decodedPaymentRequest.destination();
@@ -70,7 +79,7 @@ public class PaymentLoop {
                 }
                 addLoopIterationInfo(loopIterationCounter, residualAmount);
                 MultiPathPayment multiPathPayment =
-                        multiPathPaymentSplitter.getMultiPathPaymentTo(destination, residualAmount, feeRateWeight);
+                        multiPathPaymentSplitter.getMultiPathPaymentTo(destination, residualAmount, paymentOptions);
                 if (multiPathPayment.isFailure()) {
                     paymentStatus.failed(
                             "Unable to find route (trying to send %s)".formatted(residualAmount.toStringSat())

@@ -8,6 +8,7 @@ import de.cotto.lndmanagej.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgesWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.Flow;
 import de.cotto.lndmanagej.pickhardtpayments.model.Flows;
+import de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,14 +31,15 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_4;
 import static de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions.DEFAULT_PAYMENT_OPTIONS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class FlowComputationTest {
     private static final Coins LARGE = Coins.ofSatoshis(10_000_000);
     private static final Coins SMALL = Coins.ofSatoshis(100);
-    private static final int DEFAULT_FEE_RATE_WEIGHT = DEFAULT_PAYMENT_OPTIONS.feeRateWeight();
 
     private FlowComputation flowComputation;
 
@@ -61,8 +63,15 @@ class FlowComputationTest {
     @Test
     void solve_no_edge() {
         when(edgeComputation.getEdges()).thenReturn(EdgesWithLiquidityInformation.EMPTY);
-        assertThat(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, Coins.ofSatoshis(1), DEFAULT_FEE_RATE_WEIGHT))
+        assertThat(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, Coins.ofSatoshis(1), DEFAULT_PAYMENT_OPTIONS))
                 .isEqualTo(new Flows());
+    }
+
+    @Test
+    void passes_fee_rate_limit_to_get_edges() {
+        when(edgeComputation.getEdges(anyLong())).thenReturn(EdgesWithLiquidityInformation.EMPTY);
+        flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, Coins.ofSatoshis(1), PaymentOptions.forFeeRateLimit(123));
+        verify(edgeComputation).getEdges(123);
     }
 
     @Test
@@ -71,7 +80,7 @@ class FlowComputationTest {
         EdgeWithLiquidityInformation edge = EdgeWithLiquidityInformation.forUpperBound(EDGE, EDGE.capacity());
         when(edgeComputation.getEdges()).thenReturn(new EdgesWithLiquidityInformation(edge));
         Flow expectedFlow = new Flow(EDGE, amount);
-        assertThat(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, amount, DEFAULT_FEE_RATE_WEIGHT))
+        assertThat(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, amount, DEFAULT_PAYMENT_OPTIONS))
                 .isEqualTo(new Flows(expectedFlow));
     }
 
@@ -81,7 +90,7 @@ class FlowComputationTest {
         Coins amount = Coins.ofSatoshis(9);
         EdgeWithLiquidityInformation edge = EdgeWithLiquidityInformation.forUpperBound(EDGE, EDGE.capacity());
         when(edgeComputation.getEdges()).thenReturn(new EdgesWithLiquidityInformation(edge));
-        assertThat(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, amount, DEFAULT_FEE_RATE_WEIGHT))
+        assertThat(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, amount, DEFAULT_PAYMENT_OPTIONS))
                 .isEqualTo(new Flows(new Flow(EDGE, amount)));
     }
 
@@ -95,7 +104,7 @@ class FlowComputationTest {
         ));
         Coins amount = Coins.ofSatoshis(100);
         Flow expectedFlow = new Flow(edge2, amount);
-        assertThat(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, amount, DEFAULT_FEE_RATE_WEIGHT))
+        assertThat(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, amount, DEFAULT_PAYMENT_OPTIONS))
                 .isEqualTo(new Flows(expectedFlow));
     }
 
@@ -111,7 +120,7 @@ class FlowComputationTest {
                 EdgeWithLiquidityInformation.forUpperBound(edge2, SMALL)
         ));
         Flow expectedFlow = new Flow(edge2, amount);
-        assertThat(flowComputation.getOptimalFlows(PUBKEY_2, PUBKEY_4, amount, DEFAULT_FEE_RATE_WEIGHT))
+        assertThat(flowComputation.getOptimalFlows(PUBKEY_2, PUBKEY_4, amount, DEFAULT_PAYMENT_OPTIONS))
                 .isEqualTo(new Flows(expectedFlow));
     }
 
@@ -128,7 +137,7 @@ class FlowComputationTest {
         ));
         Flow expectedFlow1 = new Flow(edge1a, amount);
         Flow expectedFlow2 = new Flow(edge1b, amount);
-        assertThat(flowComputation.getOptimalFlows(PUBKEY_3, PUBKEY, amount, DEFAULT_FEE_RATE_WEIGHT))
+        assertThat(flowComputation.getOptimalFlows(PUBKEY_3, PUBKEY, amount, DEFAULT_PAYMENT_OPTIONS))
                 .isEqualTo(new Flows(expectedFlow1, expectedFlow2));
     }
 
