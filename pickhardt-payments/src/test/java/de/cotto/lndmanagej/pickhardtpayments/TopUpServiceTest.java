@@ -1,7 +1,6 @@
 package de.cotto.lndmanagej.pickhardtpayments;
 
 import de.cotto.lndmanagej.configuration.ConfigurationService;
-import de.cotto.lndmanagej.configuration.TopUpConfigurationSettings;
 import de.cotto.lndmanagej.grpc.GrpcInvoices;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.HexString;
@@ -174,7 +173,7 @@ class TopUpServiceTest {
     @Test
     void uses_configured_threshold() {
         Coins threshold = DEFAULT_THRESHOLD.add(Coins.ofSatoshis(1));
-        when(configurationService.getIntegerValue(TopUpConfigurationSettings.THRESHOLD))
+        when(configurationService.getIntegerValue(THRESHOLD))
                 .thenReturn(Optional.of((int) threshold.satoshis()));
         Coins balance = AMOUNT.subtract(DEFAULT_THRESHOLD);
         when(balanceService.getAvailableLocalBalanceForPeer(PUBKEY)).thenReturn(balance);
