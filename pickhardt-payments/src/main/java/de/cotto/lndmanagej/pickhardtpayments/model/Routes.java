@@ -3,6 +3,8 @@ package de.cotto.lndmanagej.pickhardtpayments.model;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.model.Route;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,6 +12,8 @@ import java.util.Comparator;
 import java.util.List;
 
 public final class Routes {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Routes.class);
+
     private Routes() {
         // do not instantiate me
     }
@@ -36,6 +40,14 @@ public final class Routes {
                 Coins requiredAmount = route.getForwardAmountForHop(index);
                 Coins availableAmountUpperBound = edge.availableLiquidityUpperBound();
                 if (availableAmountUpperBound.compareTo(requiredAmount) < 0) {
+                    LOGGER.warn(
+                            "Above liquidity: {} < {} at index {} in {} (in {})",
+                            availableAmountUpperBound,
+                            requiredAmount,
+                            index,
+                            route,
+                            routes
+                    );
                     return true;
                 }
             }
