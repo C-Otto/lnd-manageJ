@@ -22,6 +22,7 @@ class ArcInitializer {
     private final int piecewiseLinearApproximations;
     private final int feeRateWeight;
     private final Pubkey ownPubkey;
+    private final boolean ignoreFeesForOwnChannels;
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     public ArcInitializer(
@@ -31,7 +32,8 @@ class ArcInitializer {
             long quantization,
             int piecewiseLinearApproximations,
             int feeRateWeight,
-            Pubkey ownPubkey
+            Pubkey ownPubkey,
+            boolean ignoreFeesForOwnChannels
     ) {
         this.minCostFlow = minCostFlow;
         this.pubkeyToIntegerMapping = integerMapping;
@@ -40,6 +42,7 @@ class ArcInitializer {
         this.piecewiseLinearApproximations = piecewiseLinearApproximations;
         this.feeRateWeight = feeRateWeight;
         this.ownPubkey = ownPubkey;
+        this.ignoreFeesForOwnChannels = ignoreFeesForOwnChannels;
     }
 
     public void addArcs(EdgesWithLiquidityInformation edgesWithLiquidityInformation) {
@@ -95,7 +98,7 @@ class ArcInitializer {
     }
 
     private long getFeeRate(Edge edge) {
-        if (ownPubkey.equals(edge.startNode())) {
+        if (ignoreFeesForOwnChannels && ownPubkey.equals(edge.startNode())) {
             return 0;
         }
         long fromBaseFee = (long) Math.ceil(1.0 * 1_000 / quantization * edge.policy().baseFee().milliSatoshis());

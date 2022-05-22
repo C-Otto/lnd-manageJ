@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.service;
 
 import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.grpc.GrpcChannelPolicy;
+import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.PoliciesForLocalChannel;
@@ -14,9 +15,11 @@ import java.util.Optional;
 @Component
 public class PolicyService {
     private final GrpcChannelPolicy grpcChannelPolicy;
+    private final ChannelService channelService;
 
-    public PolicyService(GrpcChannelPolicy grpcChannelPolicy) {
+    public PolicyService(GrpcChannelPolicy grpcChannelPolicy, ChannelService channelService) {
         this.grpcChannelPolicy = grpcChannelPolicy;
+        this.channelService = channelService;
     }
 
     @Timed
@@ -34,5 +37,23 @@ public class PolicyService {
 
     public Optional<Policy> getPolicyTo(ChannelId channelId, Pubkey pubkey) {
         return grpcChannelPolicy.getPolicyTo(channelId, pubkey);
+    }
+
+    public Optional<Long> getMinimumFeeRateFrom(Pubkey pubkey) {
+        return channelService.getOpenChannelsWith(pubkey).stream()
+                .map(Channel::getId)
+                .map(id -> getPolicyFrom(id, pubkey))
+                .flatMap(Optional::stream)
+                .map(Policy::feeRate)
+                .min(Long::compare);
+    }
+
+    public Optional<Long> getMinimumFeeRateTo(Pubkey pubkey) {
+        return channelService.getOpenChannelsWith(pubkey).stream()
+                .map(Channel::getId)
+                .map(id -> getPolicyTo(id, pubkey))
+                .flatMap(Optional::stream)
+                .map(Policy::feeRate)
+                .min(Long::compare);
     }
 }

@@ -4,14 +4,15 @@ import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.grpc.GrpcGetInfo;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.pickhardtpayments.model.EdgesWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.Flows;
+import de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
 import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.PIECEWISE_LINEAR_APPROXIMATIONS;
 import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.QUANTIZATION;
-import static de.cotto.lndmanagej.pickhardtpayments.PickhardtPaymentsConfiguration.DEFAULT_FEE_RATE_WEIGHT;
 
 @Component
 public class FlowComputation {
@@ -33,24 +34,32 @@ public class FlowComputation {
         this.configurationService = configurationService;
     }
 
-    public Flows getOptimalFlows(Pubkey source, Pubkey target, Coins amount) {
-        return getOptimalFlows(source, target, amount, DEFAULT_FEE_RATE_WEIGHT);
-    }
-
-    public Flows getOptimalFlows(Pubkey source, Pubkey target, Coins amount, int feeRateWeight) {
+    public Flows getOptimalFlows(Pubkey source, Pubkey target, Coins amount, PaymentOptions paymentOptions) {
         int quantization = getQuantization(amount);
         int piecewiseLinearApproximations = configurationService.getIntegerValue(PIECEWISE_LINEAR_APPROXIMATIONS)
                 .orElse(DEFAULT_PIECEWISE_LINEAR_APPROXIMATIONS);
+        EdgesWithLiquidityInformation edges = getEdges(paymentOptions);
         MinCostFlowSolver minCostFlowSolver = new MinCostFlowSolver(
-                edgeComputation.getEdges(),
+                edges,
                 Map.of(source, amount),
                 Map.of(target, amount),
                 quantization,
                 piecewiseLinearApproximations,
-                feeRateWeight,
-                grpcGetInfo.getPubkey()
+                paymentOptions.feeRateWeight(),
+                grpcGetInfo.getPubkey(),
+                paymentOptions.ignoreFeesForOwnChannels()
         );
         return minCostFlowSolver.solve();
+    }
+
+    private EdgesWithLiquidityInformation getEdges(PaymentOptions paymentOptions) {
+        EdgesWithLiquidityInformation edges;
+        if (paymentOptions.feeRateLimit().isPresent()) {
+            edges = edgeComputation.getEdges(paymentOptions.feeRateLimit().get());
+        } else {
+            edges = edgeComputation.getEdges();
+        }
+        return edges;
     }
 
     private int getQuantization(Coins amount) {

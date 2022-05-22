@@ -50,7 +50,9 @@ class MinCostFlowSolverTest {
                         QUANTIZATION,
                         PIECEWISE_LINEAR_APPROXIMATIONS,
                         FEE_RATE_WEIGHT,
-                        PUBKEY)
+                        PUBKEY,
+                        true
+                )
         ).doesNotThrowAnyException();
     }
 
@@ -68,7 +70,8 @@ class MinCostFlowSolverTest {
                         QUANTIZATION,
                         PIECEWISE_LINEAR_APPROXIMATIONS,
                         FEE_RATE_WEIGHT,
-                        PUBKEY
+                        PUBKEY,
+                        true
                 )
         ).doesNotThrowAnyException();
     }
@@ -88,7 +91,8 @@ class MinCostFlowSolverTest {
                         QUANTIZATION,
                         PIECEWISE_LINEAR_APPROXIMATIONS,
                         FEE_RATE_WEIGHT,
-                        PUBKEY
+                        PUBKEY,
+                        true
                 )
         );
     }
@@ -108,7 +112,8 @@ class MinCostFlowSolverTest {
                         QUANTIZATION,
                         PIECEWISE_LINEAR_APPROXIMATIONS,
                         FEE_RATE_WEIGHT,
-                        PUBKEY
+                        PUBKEY,
+                        true
                 )
         );
     }
@@ -127,7 +132,8 @@ class MinCostFlowSolverTest {
                         QUANTIZATION,
                         PIECEWISE_LINEAR_APPROXIMATIONS,
                         FEE_RATE_WEIGHT,
-                        PUBKEY
+                        PUBKEY,
+                        true
                 )
         );
     }
@@ -173,7 +179,8 @@ class MinCostFlowSolverTest {
                 quantization,
                 PIECEWISE_LINEAR_APPROXIMATIONS,
                 FEE_RATE_WEIGHT,
-                PUBKEY
+                PUBKEY,
+                true
         ).solve();
 
         assertThat(flows).isEqualTo(new Flows(new Flow(EDGE_2_3, amount)));
@@ -196,7 +203,8 @@ class MinCostFlowSolverTest {
                 quantization,
                 PIECEWISE_LINEAR_APPROXIMATIONS,
                 FEE_RATE_WEIGHT,
-                PUBKEY
+                PUBKEY,
+                true
         ).solve();
 
         assertThat(flows).isEqualTo(new Flows(new Flow(EDGE_3_4, Coins.ofSatoshis(120_000))));
@@ -218,7 +226,8 @@ class MinCostFlowSolverTest {
                 quantization,
                 PIECEWISE_LINEAR_APPROXIMATIONS,
                 FEE_RATE_WEIGHT,
-                PUBKEY
+                PUBKEY,
+                true
         ).solve();
 
         assertThat(flows).isEqualTo(new Flows());
@@ -240,7 +249,8 @@ class MinCostFlowSolverTest {
                 QUANTIZATION,
                 PIECEWISE_LINEAR_APPROXIMATIONS,
                 FEE_RATE_WEIGHT,
-                PUBKEY
+                PUBKEY,
+                true
         );
 
         assertThat(minCostFlowSolver.solve()).isEqualTo(new Flows(FLOW_1_2, FLOW_3_4));
@@ -261,7 +271,8 @@ class MinCostFlowSolverTest {
                 QUANTIZATION,
                 PIECEWISE_LINEAR_APPROXIMATIONS,
                 FEE_RATE_WEIGHT,
-                PUBKEY
+                PUBKEY,
+                true
         );
 
         assertThat(minCostFlowSolver.solve()).isEqualTo(new Flows(FLOW_1_2, FLOW_1_3));
@@ -307,7 +318,8 @@ class MinCostFlowSolverTest {
                 QUANTIZATION,
                 PIECEWISE_LINEAR_APPROXIMATIONS,
                 FEE_RATE_WEIGHT,
-                PUBKEY
+                PUBKEY,
+                true
         ).solve();
     }
 }

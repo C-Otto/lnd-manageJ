@@ -89,9 +89,10 @@ public class MultiPathPaymentObserver {
     }
 
     public void waitForInFlightChange(Duration timeout, HexString paymentHash, Coins referenceInFlight) {
+        CountDownLatch latch = getLatch(paymentHash);
         while (getInFlight(paymentHash).equals(referenceInFlight)) {
             try {
-                boolean changedWithinTimeout = getLatch(paymentHash).await(timeout.toMillis(), TimeUnit.MILLISECONDS);
+                boolean changedWithinTimeout = latch.await(timeout.toMillis(), TimeUnit.MILLISECONDS);
                 if (!changedWithinTimeout) {
                     return;
                 }
