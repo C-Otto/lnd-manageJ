@@ -10,6 +10,7 @@ import de.cotto.lndmanagej.model.Route;
 import de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPayment;
 import de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions;
 import de.cotto.lndmanagej.pickhardtpayments.model.PaymentStatus;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -81,9 +82,18 @@ public class PaymentLoop {
                 MultiPathPayment multiPathPayment =
                         multiPathPaymentSplitter.getMultiPathPaymentTo(destination, residualAmount, paymentOptions);
                 if (multiPathPayment.isFailure()) {
-                    paymentStatus.failed(
-                            "Unable to find route (trying to send %s)".formatted(residualAmount.toStringSat())
-                    );
+                    String information = multiPathPayment.getInformation();
+                    if (Strings.isNotEmpty(information)) {
+                        paymentStatus.failed(
+                                "Unable to find route (trying to send %s): %s"
+                                        .formatted(residualAmount.toStringSat(), information)
+                        );
+                    } else {
+                        paymentStatus.failed(
+                                "Unable to find route (trying to send %s)"
+                                        .formatted(residualAmount.toStringSat())
+                        );
+                    }
                     return;
                 }
                 List<Route> routes = multiPathPayment.routes();

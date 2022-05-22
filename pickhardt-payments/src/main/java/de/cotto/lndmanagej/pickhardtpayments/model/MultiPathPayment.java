@@ -10,10 +10,11 @@ public record MultiPathPayment(
         Coins fees,
         Coins feesWithFirstHop,
         double probability,
-        List<Route> routes
+        List<Route> routes,
+        String information
 ) {
     public static final MultiPathPayment FAILURE =
-            new MultiPathPayment(Coins.NONE, Coins.NONE, Coins.NONE, 0.0, List.of());
+            new MultiPathPayment(Coins.NONE, Coins.NONE, Coins.NONE, 0.0, List.of(), "");
 
     public MultiPathPayment(List<Route> routes) {
         this(
@@ -21,12 +22,17 @@ public record MultiPathPayment(
                 routes.stream().map(Route::getFees).reduce(Coins.NONE, Coins::add),
                 routes.stream().map(Route::getFeesWithFirstHop).reduce(Coins.NONE, Coins::add),
                 routes.stream().mapToDouble(Route::getProbability).reduce(1.0, (a, b) -> a * b),
-                routes
+                routes,
+                ""
         );
     }
 
+    public static MultiPathPayment failure(String information) {
+        return new MultiPathPayment(Coins.NONE, Coins.NONE, Coins.NONE, 0.0, List.of(), information);
+    }
+
     public boolean isFailure() {
-        return equals(FAILURE);
+        return routes.isEmpty() && amount.equals(Coins.NONE);
     }
 
     public long getFeeRate() {
@@ -35,6 +41,10 @@ public record MultiPathPayment(
 
     public long getFeeRateWithFirstHop() {
         return getFeeRateForFees(feesWithFirstHop);
+    }
+
+    public String getInformation() {
+        return information;
     }
 
     private long getFeeRateForFees(Coins feesToConsider) {
