@@ -124,6 +124,15 @@ public class Route {
         return Objects.hash(edgesWithLiquidityInformation, amount, feesForHops);
     }
 
+    @Override
+    public String toString() {
+        return "Route{" +
+                "edgesWithLiquidityInformation=" + edgesWithLiquidityInformation +
+                ", amount=" + amount +
+                ", feesForHops=" + feesForHops +
+                '}';
+    }
+
     private static List<Coins> computeFees(List<EdgeWithLiquidityInformation> edges, Coins amount) {
         Coins fees = Coins.NONE;
         Coins amountWithFees = amount;
