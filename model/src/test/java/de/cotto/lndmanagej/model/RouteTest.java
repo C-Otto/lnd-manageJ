@@ -466,6 +466,16 @@ class RouteTest {
         EqualsVerifier.forClass(Route.class).usingGetClass().verify();
     }
 
+    @Test
+    void testToString() {
+        assertThat(ROUTE).hasToString("Route{edgesWithLiquidityInformation=[" +
+                EdgeWithLiquidityInformation.forUpperBound(EDGE, EDGE.capacity()) + ", " +
+                EdgeWithLiquidityInformation.forUpperBound(EDGE_2_3, EDGE_2_3.capacity()) + ", " +
+                EdgeWithLiquidityInformation.forUpperBound(EDGE_3_4, EDGE_3_4.capacity()) +
+                "], amount=100.000, feesForHops=[0.020, 0.020, 0.000]}"
+        );
+    }
+
     private Route routeForAmountAndCapacityAndKnownLiquidity(int amountSat, int capacitySat, int knownLiquiditySat) {
         Coins capacity = Coins.ofSatoshis(capacitySat);
         Coins amount = Coins.ofSatoshis(amountSat);
