@@ -1,6 +1,6 @@
 package de.cotto.lndmanagej.ui.page.node;
 
-import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
+import de.cotto.lndmanagej.ui.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.ui.page.general.ThymeleafPage;
 
 public class NodeDetailsPage extends ThymeleafPage {

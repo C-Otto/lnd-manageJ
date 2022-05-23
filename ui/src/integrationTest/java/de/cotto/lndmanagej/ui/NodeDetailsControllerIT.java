@@ -10,7 +10,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static de.cotto.lndmanagej.controller.dto.NodeDetailsDtoFixture.NODE_DETAILS_DTO;
+import static de.cotto.lndmanagej.ui.dto.NodeDetailsDtoFixture.NODE_DETAILS_MODEL;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -31,8 +31,8 @@ class NodeDetailsControllerIT extends BaseControllerIT {
 
     @Test
     void testNodeDetailsPage() throws Exception {
-        when(pageService.nodeDetails(any())).thenReturn(new NodeDetailsPage(NODE_DETAILS_DTO));
-        mockMvc.perform(get("/node/" + NODE_DETAILS_DTO.node().toString()))
+        when(pageService.nodeDetails(any())).thenReturn(new NodeDetailsPage(NODE_DETAILS_MODEL));
+        mockMvc.perform(get("/node/" + NODE_DETAILS_MODEL.node().toString()))
                 .andExpect(status().isOk());
     }
 }

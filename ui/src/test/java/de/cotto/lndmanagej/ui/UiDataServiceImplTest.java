@@ -45,6 +45,7 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static de.cotto.lndmanagej.model.warnings.ChannelWarningFixtures.CHANNEL_NUM_UPDATES_WARNING;
+import static de.cotto.lndmanagej.ui.dto.NodeDetailsDtoFixture.NODE_DETAILS_MODEL;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.CAPACITY_SAT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -136,6 +137,6 @@ class UiDataServiceImplTest {
     @Test
     void getNodeDetails() {
         when(nodeController.getDetails(PUBKEY)).thenReturn(NODE_DETAILS_DTO);
-        assertThat(uiDataService.getNodeDetails(PUBKEY)).isEqualTo(NODE_DETAILS_DTO);
+        assertThat(uiDataService.getNodeDetails(PUBKEY)).isEqualTo(NODE_DETAILS_MODEL);
     }
 }
