@@ -78,19 +78,22 @@
                     <div class="tile-column-left col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Open</li>
-                            <li class="list-group-item" th:text="${@formatter.formatNumber(onChainCosts.openCostsSat)}"></li>
+                            <li class="list-group-item"
+                                th:text="${@formatter.formatNumber(onChainCosts.openCostsSat)}"></li>
                         </ul>
                     </div>
                     <div class="tile-column col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Close</li>
-                            <li class="list-group-item" th:text="${@formatter.formatNumber(onChainCosts.closeCostsSat)}"></li>
+                            <li class="list-group-item"
+                                th:text="${@formatter.formatNumber(onChainCosts.closeCostsSat)}"></li>
                         </ul>
                     </div>
                     <div class="tile-column-right col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Sweep</li>
-                            <li class="list-group-item" th:text="${@formatter.formatNumber(onChainCosts.sweepCostsSat)}"></li>
+                            <li class="list-group-item"
+                                th:text="${@formatter.formatNumber(onChainCosts.sweepCostsSat)}"></li>
                         </ul>
                     </div>
                 </div>
@@ -113,13 +116,15 @@
                     <div class="tile-column-left col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Earned (mSAT)</li>
-                            <li class="list-group-item" th:text="${@formatter.formatNumber(feeReport.earnedMilliSat)}"></li>
+                            <li class="list-group-item"
+                                th:text="${@formatter.formatNumber(feeReport.earnedMilliSat)}"></li>
                         </ul>
                     </div>
                     <div class="tile-column-right col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Sourced (mSAT)</li>
-                            <li class="list-group-item" th:text="${@formatter.formatNumber(feeReport.sourcedMilliSat)}"></li>
+                            <li class="list-group-item"
+                                th:text="${@formatter.formatNumber(feeReport.sourcedMilliSat)}"></li>
                         </ul>
                     </div>
                 </div>
@@ -180,9 +185,12 @@
                     <div class="tile-column-right col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Remote</li>
-                            <li class="list-group-item" th:text="'Available '+${@formatter.formatNumber(balanceInformation.remoteAvailableSat)}"></li>
-                            <li class="list-group-item" th:text="'Balance '+${@formatter.formatNumber(balanceInformation.remoteBalanceSat)}"></li>
-                            <li class="list-group-item" th:text="'Reserve '+${@formatter.formatNumber(balanceInformation.remoteReserveSat)}"></li>
+                            <li class="list-group-item"
+                                th:text="'Available '+${@formatter.formatNumber(balanceInformation.remoteAvailableSat)}"></li>
+                            <li class="list-group-item"
+                                th:text="'Balance '+${@formatter.formatNumber(balanceInformation.remoteBalanceSat)}"></li>
+                            <li class="list-group-item"
+                                th:text="'Reserve '+${@formatter.formatNumber(balanceInformation.remoteReserveSat)}"></li>
                         </ul>
                     </div>
                 </div>
@@ -207,7 +215,8 @@
                     <div class="tile-column-left col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Source (mSAT)</li>
-                            <li class="list-group-item" th:text="'Cost: '+${@formatter.formatNumber(rebalanceReport.sourceCostsMilliSat)}"></li>
+                            <li class="list-group-item"
+                                th:text="'Cost: '+${@formatter.formatNumber(rebalanceReport.sourceCostsMilliSat)}"></li>
                             <li class="list-group-item"
                                 th:text="'Amount: '+${@formatter.formatNumber(rebalanceReport.sourceAmountMilliSat)}"></li>
                             <li class="list-group-item"
@@ -217,7 +226,8 @@
                     <div class="tile-column-right col">
                         <ul class="list-group">
                             <li class="list-group-item disabled" aria-disabled="true">Target (mSAT)</li>
-                            <li class="list-group-item" th:text="'Cost: '+${@formatter.formatNumber(rebalanceReport.targetCostsMilliSat)}"></li>
+                            <li class="list-group-item"
+                                th:text="'Cost: '+${@formatter.formatNumber(rebalanceReport.targetCostsMilliSat)}"></li>
                             <li class="list-group-item"
                                 th:text="'Amount: '+${@formatter.formatNumber(rebalanceReport.targetAmountMilliSat)}"></li>
                             <li class="list-group-item"
@@ -280,9 +290,12 @@
             </div>
         </div>
         <div class="card-body">
-            <p th:text="'Status: ' + ${channel.channelStatus.openClosed} +
-            '&nbsp;&nbsp;&nbsp;Private: ' + ${channel.channelStatus.privateChannel} +
-            '&nbsp;&nbsp;&nbsp;Active: '  + ${channel.channelStatus.active}"></p>
+            <p>
+                <span th:text="'Status: ' + ${channel.channelStatus.openClosed}"></span>
+                <span th:text="'&nbsp;&nbsp;&nbsp;Private: ' + ${channel.channelStatus.privateChannel}"></span>
+                <span th:text="'&nbsp;&nbsp;&nbsp;Active: ' + ${channel.channelStatus.active}"
+                      th:if="${channel.channelStatus.openClosed} != 'CLOSED'"></span>
+            </p>
             <p th:switch="${channel.openInitiator.name}">
                 <span th:case="LOCAL">
                     Channel with
@@ -351,7 +364,8 @@
             </div>
         </div>
         <div class="card-body">
-            <p style="margin-bottom: 0;" th:text="'Synced: ' + ${status.synced} + '&nbsp;&nbsp;&nbsp;Block Height: '+${@formatter.formatNumber(status.blockHeight)}"></p>
+            <p style="margin-bottom: 0;"
+               th:text="'Synced: ' + ${status.synced} + '&nbsp;&nbsp;&nbsp;Block Height: '+${@formatter.formatNumber(status.blockHeight)}"></p>
         </div>
     </div>
 </div>
