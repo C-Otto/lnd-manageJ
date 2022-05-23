@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.ui.dto;
 
-import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.FlowReportDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
@@ -8,7 +7,6 @@ import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.controller.dto.RebalanceReportDto;
 
 import static de.cotto.lndmanagej.controller.dto.ChannelStatusDtoFixture.CHANNEL_STATUS_PUBLIC_OPEN;
-import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.FeeReportFixtures.FEE_REPORT;
 import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT;
@@ -18,6 +16,7 @@ import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES_FOR_LOCAL_CHANNE
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static de.cotto.lndmanagej.model.warnings.ChannelWarningsFixtures.CHANNEL_WARNINGS;
+import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixture.BALANCE_INFORMATION_MODEL;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.CAPACITY_SAT;
 
 public class ChannelDetailsDtoFixture {
@@ -28,7 +27,7 @@ public class ChannelDetailsDtoFixture {
             "Albert",
             CHANNEL_STATUS_PUBLIC_OPEN,
             LOCAL,
-            BalanceInformationDto.createFromModel(BALANCE_INFORMATION),
+            BALANCE_INFORMATION_MODEL,
             CAPACITY_SAT,
             OnChainCostsDto.createFromModel(ON_CHAIN_COSTS),
             PoliciesDto.createFromModel(POLICIES_FOR_LOCAL_CHANNEL),
