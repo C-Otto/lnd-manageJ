@@ -20,11 +20,11 @@ import org.springframework.ui.Model;
 import java.util.List;
 import java.util.Optional;
 
-import static de.cotto.lndmanagej.controller.dto.NodeDetailsDtoFixture.NODE_DETAILS_DTO;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_PEER;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.ui.dto.ChannelDetailsDtoFixture.CHANNEL_DETAILS_DTO;
+import static de.cotto.lndmanagej.ui.dto.NodeDetailsDtoFixture.NODE_DETAILS_MODEL;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -68,7 +68,7 @@ class SearchControllerTest {
     @Test
     void by_pubkey() {
         when(dataService.getOpenChannels()).thenReturn(List.of(OPEN_CHANNEL_DTO));
-        when(pageService.nodeDetails(PUBKEY)).thenReturn(new NodeDetailsPage(NODE_DETAILS_DTO));
+        when(pageService.nodeDetails(PUBKEY)).thenReturn(new NodeDetailsPage(NODE_DETAILS_MODEL));
         assertThat(searchController.search(PUBKEY.toString(), model)).isEqualTo("node-details");
     }
 
@@ -76,7 +76,7 @@ class SearchControllerTest {
     void by_alias_infix_one_result() {
         String query = "BERT";
         when(dataService.getOpenChannels()).thenReturn(List.of(OPEN_CHANNEL_DTO));
-        when(pageService.nodeDetails(PUBKEY)).thenReturn(new NodeDetailsPage(NODE_DETAILS_DTO));
+        when(pageService.nodeDetails(PUBKEY)).thenReturn(new NodeDetailsPage(NODE_DETAILS_MODEL));
         assertThat(searchController.search(query, model)).isEqualTo("node-details");
     }
 

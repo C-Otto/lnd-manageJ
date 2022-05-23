@@ -1,11 +1,11 @@
 package de.cotto.lndmanagej.ui;
 
 import de.cotto.lndmanagej.controller.NotFoundException;
-import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
+import de.cotto.lndmanagej.ui.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 
