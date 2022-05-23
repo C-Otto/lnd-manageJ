@@ -45,6 +45,7 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static de.cotto.lndmanagej.model.warnings.ChannelWarningFixtures.CHANNEL_NUM_UPDATES_WARNING;
+import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixture.BALANCE_INFORMATION_MODEL;
 import static de.cotto.lndmanagej.ui.dto.NodeDetailsDtoFixture.NODE_DETAILS_MODEL;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.CAPACITY_SAT;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -93,7 +94,7 @@ class UiDataServiceImplTest {
         when(statusController.getOpenChannels()).thenReturn(new ChannelsDto(List.of(CHANNEL_ID)));
 
         assertThat(uiDataService.getOpenChannels()).containsExactly(
-                new OpenChannelDto(CHANNEL_ID, alias, PUBKEY_2, policies, balance, CAPACITY_SAT)
+                new OpenChannelDto(CHANNEL_ID, alias, PUBKEY_2, policies, BALANCE_INFORMATION_MODEL, CAPACITY_SAT)
         );
     }
 
@@ -107,7 +108,7 @@ class UiDataServiceImplTest {
                         ALIAS,
                         CHANNEL_STATUS_PRIVATE_OPEN,
                         LOCAL,
-                        BalanceInformationDto.createFromModel(BALANCE_INFORMATION),
+                        BALANCE_INFORMATION_MODEL,
                         CAPACITY_SAT,
                         OnChainCostsDto.createFromModel(ON_CHAIN_COSTS),
                         PoliciesDto.createFromModel(POLICIES_FOR_LOCAL_CHANNEL),

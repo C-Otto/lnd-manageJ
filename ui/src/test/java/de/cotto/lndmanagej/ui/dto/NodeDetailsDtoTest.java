@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.ui.dto;
 
-import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.FlowReportDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
@@ -10,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
@@ -24,6 +22,7 @@ import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static de.cotto.lndmanagej.model.warnings.NodeWarningsFixtures.NODE_WARNINGS;
+import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixture.BALANCE_INFORMATION_MODEL_2;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class NodeDetailsDtoTest {
@@ -37,7 +36,7 @@ class NodeDetailsDtoTest {
                 List.of(CHANNEL_ID_3),
                 List.of(CHANNEL_ID_4),
                 OnChainCostsDto.createFromModel(ON_CHAIN_COSTS),
-                BalanceInformationDto.createFromModel(BALANCE_INFORMATION_2),
+                BALANCE_INFORMATION_MODEL_2,
                 OnlineReportDto.createFromModel(ONLINE_REPORT),
                 FeeReportDto.createFromModel(FEE_REPORT),
                 FlowReportDto.createFromModel(FLOW_REPORT),

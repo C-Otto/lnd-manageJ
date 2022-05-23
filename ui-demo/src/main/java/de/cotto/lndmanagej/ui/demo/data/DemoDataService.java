@@ -1,20 +1,18 @@
 package de.cotto.lndmanagej.ui.demo.data;
 
 import de.cotto.lndmanagej.controller.NotFoundException;
-import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.ChannelStatusDto;
 import de.cotto.lndmanagej.controller.dto.ChannelWithWarningsDto;
 import de.cotto.lndmanagej.controller.dto.NodeWithWarningsDto;
 import de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto;
 import de.cotto.lndmanagej.controller.dto.OnlineReportDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
-import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ChannelStatus;
-import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.OnlineReport;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.ui.UiDataService;
+import de.cotto.lndmanagej.ui.dto.BalanceInformationModel;
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
@@ -26,7 +24,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static de.cotto.lndmanagej.model.BalanceInformation.EMPTY;
 import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT;
 import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT_OFFLINE;
 import static de.cotto.lndmanagej.model.OpenCloseStatus.CLOSED;
@@ -38,6 +35,7 @@ import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveOnChainCosts
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveOpenInitiator;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.derivePolicies;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveRebalanceReport;
+import static de.cotto.lndmanagej.ui.dto.BalanceInformationModel.EMPTY;
 
 @SuppressWarnings("PMD.ExcessiveImports")
 @Component
@@ -197,16 +195,17 @@ public class DemoDataService extends UiDataService {
         ChannelId channelId = ChannelId.fromCompactForm(compactChannelId);
         Pubkey remotePubkey = Pubkey.create(pubkey);
         PoliciesDto policies = PoliciesDto.createFromModel(derivePolicies(channelId));
-        long localReserve = 200;
-        long remoteReserve = 500;
         long capacity = local + remote;
-        BalanceInformationDto balance = BalanceInformationDto.createFromModel(new BalanceInformation(
-                Coins.ofSatoshis(local),
-                Coins.ofSatoshis(localReserve),
-                Coins.ofSatoshis(remote),
-                Coins.ofSatoshis(remoteReserve)
-        ));
+        BalanceInformationModel balance = createBalanceInformation(local, remote);
         return new OpenChannelDto(channelId, alias, remotePubkey, policies, balance, capacity);
+    }
+
+    private static BalanceInformationModel createBalanceInformation(long local, long remote) {
+        long localReserve = 200;
+        long localAvailable = local - localReserve;
+        long remoteReserve = 500;
+        long remoteAvailable = remote - remoteReserve;
+        return new BalanceInformationModel(local, localReserve, localAvailable, remote, remoteReserve, remoteAvailable);
     }
 
     private static ChannelDetailsDto createChannelDetails(OpenChannelDto channel, Set<String> warnings) {
@@ -234,7 +233,7 @@ public class DemoDataService extends UiDataService {
                 POCKET.remoteAlias(),
                 ChannelStatusDto.createFromModel(new ChannelStatus(false, false, true, CLOSED)),
                 UNKNOWN,
-                BalanceInformationDto.createFromModel(EMPTY),
+                EMPTY,
                 10_000_000L,
                 deriveOnChainCosts(CLOSED_CHANNEL),
                 PoliciesDto.createFromModel(derivePolicies(CLOSED_CHANNEL)),

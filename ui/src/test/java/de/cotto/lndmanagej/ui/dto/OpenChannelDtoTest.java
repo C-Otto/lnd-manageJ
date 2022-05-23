@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.ui.dto;
 
-import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Coins;
@@ -43,7 +42,7 @@ class OpenChannelDtoTest {
     @Test
     void balanceInformation() {
         assertThat(OPEN_CHANNEL_DTO.balanceInformation())
-                .isEqualTo(BalanceInformationDto.createFromModel(BALANCE_INFORMATION));
+                .isEqualTo(BalanceInformationModel.createFromModel(BALANCE_INFORMATION));
     }
 
     @Test
@@ -68,7 +67,7 @@ class OpenChannelDtoTest {
                 "Albert",
                 PUBKEY,
                 PoliciesDto.createFromModel(POLICIES_FOR_LOCAL_CHANNEL),
-                BalanceInformationDto.createFromModel(balanceInformation),
+                BalanceInformationModel.createFromModel(balanceInformation),
                 CAPACITY_SAT
         );
     }

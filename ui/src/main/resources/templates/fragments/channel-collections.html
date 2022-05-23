@@ -20,9 +20,11 @@
         </thead>
         <tbody>
         <tr th:each="channel : ${channels}">
-            <td th:text="${@formatter.formatNumber(channel.inbound)}" style="color: darkRed; text-align: right; padding-left:0;"></td>
+            <td th:text="${@formatter.formatNumber(channel.balanceInformation.remoteBalanceSat)}"
+                style="color: darkRed; text-align: right; padding-left:0;"></td>
             <td th:text="${channel.ratio}"></td>
-            <td th:text="${@formatter.formatNumber(channel.outbound)}" style="color: darkGreen; text-align: right;"></td>
+            <td th:text="${@formatter.formatNumber(channel.balanceInformation.localBalanceSat)}"
+                style="color: darkGreen; text-align: right;"></td>
             <td th:text="${@formatter.formatNumber(channel.capacitySat)}" style="text-align: right;"></td>
             <td th:text="${@formatter.formatNumber(channel.policies.local.baseFeeMilliSat)}" style="text-align: right;"></td>
             <td th:text="${@formatter.formatNumber(channel.policies.local.feeRatePpm)}" style="text-align: right;"></td>

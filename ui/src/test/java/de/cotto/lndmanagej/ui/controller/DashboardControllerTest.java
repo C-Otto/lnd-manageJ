@@ -1,10 +1,9 @@
 package de.cotto.lndmanagej.ui.controller;
 
-import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
-import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.ui.dto.BalanceInformationModel;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import de.cotto.lndmanagej.ui.page.PageService;
@@ -65,9 +64,9 @@ class DashboardControllerTest {
 
     @Test
     void channels_sorted_by_outbound() {
-        OpenChannelDto channelA = withBalance(Coins.ofSatoshis(2));
-        OpenChannelDto channelB = withBalance(Coins.ofSatoshis(3));
-        OpenChannelDto channelC = withBalance(Coins.ofSatoshis(1));
+        OpenChannelDto channelA = withBalance("A", Coins.ofSatoshis(2));
+        OpenChannelDto channelB = withBalance("B", Coins.ofSatoshis(3));
+        OpenChannelDto channelC = withBalance("C", Coins.ofSatoshis(1));
         when(pageService.channels()).thenReturn(new ChannelsPage(List.of(channelA, channelB, channelC)));
         assertThat(dashboardController.channels(model)).isEqualTo(CHANNELS_KEY);
         verify(model).addAllAttributes(Map.of(CHANNELS_KEY, List.of(channelC, channelA, channelB)));
@@ -81,15 +80,13 @@ class DashboardControllerTest {
         verify(model).addAllAttributes(Map.of(NODES_KEY, List.of(nodeDto)));
     }
 
-    private OpenChannelDto withBalance(Coins localBalance) {
-        BalanceInformation balanceInformation =
-                new BalanceInformation(localBalance, Coins.NONE, REMOTE_BALANCE, Coins.NONE);
+    private OpenChannelDto withBalance(String alias, Coins localBalance) {
         return new OpenChannelDto(
                 CHANNEL_ID,
-                "Albert",
+                alias,
                 PUBKEY,
                 PoliciesDto.createFromModel(POLICIES_FOR_LOCAL_CHANNEL),
-                BalanceInformationDto.createFromModel(balanceInformation),
+                new BalanceInformationModel(localBalance.satoshis(), 0, 0, REMOTE_BALANCE.satoshis(), 0, 0),
                 CAPACITY_SAT
         );
     }

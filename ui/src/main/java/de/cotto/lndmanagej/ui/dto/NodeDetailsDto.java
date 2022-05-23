@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.ui.dto;
 
-import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.FlowReportDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
@@ -21,7 +20,7 @@ public record NodeDetailsDto(
         List<ChannelId> waitingCloseChannels,
         List<ChannelId> pendingForceClosingChannels,
         OnChainCostsDto onChainCosts,
-        BalanceInformationDto balance,
+        BalanceInformationModel balance,
         OnlineReportDto onlineReport,
         FeeReportDto feeReport,
         FlowReportDto flowReport,
@@ -37,7 +36,7 @@ public record NodeDetailsDto(
                 nodeDetails.waitingCloseChannels(),
                 nodeDetails.pendingForceClosingChannels(),
                 OnChainCostsDto.createFromModel(nodeDetails.onChainCosts()),
-                BalanceInformationDto.createFromModel(nodeDetails.balanceInformation()),
+                BalanceInformationModel.createFromModel(nodeDetails.balanceInformation()),
                 OnlineReportDto.createFromModel(nodeDetails.onlineReport()),
                 FeeReportDto.createFromModel(nodeDetails.feeReport()),
                 FlowReportDto.createFromModel(nodeDetails.flowReport()),

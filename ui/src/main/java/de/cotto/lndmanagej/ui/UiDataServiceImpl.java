@@ -15,6 +15,7 @@ import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
+import de.cotto.lndmanagej.ui.dto.BalanceInformationModel;
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
@@ -70,7 +71,18 @@ public class UiDataServiceImpl extends UiDataService {
         String alias = nodeController.getAlias(pubkey);
         PoliciesDto policies = channelController.getPolicies(channelId);
         BalanceInformationDto balance = channelController.getBalance(channelId);
-        return new OpenChannelDto(channelId, alias, pubkey, policies, balance, capacitySat);
+        return new OpenChannelDto(channelId, alias, pubkey, policies, map(balance), capacitySat);
+    }
+
+    private BalanceInformationModel map(BalanceInformationDto balance) {
+        return new BalanceInformationModel(
+                Long.parseLong(balance.localBalanceSat()),
+                Long.parseLong(balance.localReserveSat()),
+                Long.parseLong(balance.localAvailableSat()),
+                Long.parseLong(balance.remoteBalanceSat()),
+                Long.parseLong(balance.remoteReserveSat()),
+                Long.parseLong(balance.remoteAvailableSat())
+        );
     }
 
     @Override
@@ -82,7 +94,7 @@ public class UiDataServiceImpl extends UiDataService {
                 details.remoteAlias(),
                 details.status(),
                 details.openInitiator(),
-                details.balance(),
+                map(details.balance()),
                 Long.parseLong(details.capacitySat()),
                 details.onChainCosts(),
                 details.policies(),
@@ -110,7 +122,7 @@ public class UiDataServiceImpl extends UiDataService {
                 nodeDetails.waitingCloseChannels(),
                 nodeDetails.pendingForceClosingChannels(),
                 nodeDetails.onChainCosts(),
-                nodeDetails.balance(),
+                map(nodeDetails.balance()),
                 nodeDetails.onlineReport(),
                 nodeDetails.feeReport(),
                 nodeDetails.flowReport(),
