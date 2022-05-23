@@ -145,7 +145,8 @@
 </div>
 
 
-<div th:fragment="balance (balanceInformation, inboundPercent, outboundPercent)" class="tile col-sm-4">
+<div th:fragment="balance (balanceInformation, inboundPercent, outboundPercent, disabled)" class="tile col-sm-4"
+     th:if="!${disabled}">
     <div class="card border-secondary">
         <div class="card-header">
             <div class="fs-4 mb-0">
@@ -302,7 +303,7 @@
     </div>
 </div>
 
-<div th:fragment="fee-policy (policies)" class="tile col-sm-4">
+<div th:fragment="fee-policy (status, policies)" class="tile col-sm-4" th:if="${status.openClosed} != 'CLOSED'">
     <div class="card border-secondary">
         <div class="card-header">
             <div class="fs-4 mb-0">

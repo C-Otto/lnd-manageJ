@@ -9,8 +9,8 @@
 <div class="row">
 
     <div th:replace="~{fragments/tiles :: channel-details(${channel})}"/>
-    <div th:replace="~{fragments/tiles :: fee-policy(${channel.policies})}"/>
-    <div th:replace="~{fragments/tiles :: balance(${channel.balanceInformation}, ${channel.getInboundPercentage}, ${channel.getOutboundPercentage})}"/>
+    <div th:replace="~{fragments/tiles :: fee-policy(${channel.channelStatus}, ${channel.policies})}"/>
+    <div th:replace="~{fragments/tiles :: balance(${channel.balanceInformation}, ${channel.getInboundPercentage}, ${channel.getOutboundPercentage}, ${channel.routableCapacity == 0})}"/>
 
     <div th:replace="~{fragments/tiles :: on-chain-costs(${channel.onChainCosts})}"/>
     <div th:replace="~{fragments/tiles :: rebalance-report(${channel.rebalanceReport})}"/>

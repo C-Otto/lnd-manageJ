@@ -50,6 +50,11 @@ class ChannelDetailsDtoTest {
     }
 
     @Test
+    void routableCapacity() {
+        assertThat(CHANNEL_DETAILS_DTO.getRoutableCapacity()).isEqualTo(1123L);
+    }
+
+    @Test
     void inboundPercentage() {
         assertThat(CHANNEL_DETAILS_DTO.getInboundPercentage()).isEqualTo(10.952_804_986_642_917);
     }
