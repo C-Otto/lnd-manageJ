@@ -1,0 +1,47 @@
+<!doctype html>
+
+<html xmlns:th="https://www.thymeleaf.org">
+
+<div th:fragment="tile (balanceInformation)" class="tile col-sm-4"
+     th:if="${balanceInformation.routableCapacity > 0}">
+    <div class="card border-secondary">
+        <div class="card-header">
+            <div class="fs-4 mb-0">
+                <div th:replace="~{fragments/icons :: wallet}"/>
+                Balance
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="container" style="padding-left: 0; padding-right: 0;">
+                <div th:replace="~{fragments/balance-bar :: balance-tile(${balanceInformation})}"/>
+                <div class="row align-items-start">
+                    <div class="tile-column-left col">
+                        <ul class="list-group">
+                            <li class="list-group-item disabled" aria-disabled="true">Local</li>
+                            <li class="list-group-item"
+                                th:text="'Available '+${@formatter.formatNumber(balanceInformation.localAvailableSat)}"></li>
+                            <li class="list-group-item"
+                                th:text="'Balance '+${@formatter.formatNumber(balanceInformation.localBalanceSat)}"></li>
+                            <li class="list-group-item"
+                                th:text="'Reserve '+${@formatter.formatNumber(balanceInformation.localReserveSat)}"></li>
+                        </ul>
+                    </div>
+                    <div class="tile-column-right col">
+                        <ul class="list-group">
+                            <li class="list-group-item disabled" aria-disabled="true">Remote</li>
+                            <li class="list-group-item"
+                                th:text="'Available '+${@formatter.formatNumber(balanceInformation.remoteAvailableSat)}"></li>
+                            <li class="list-group-item"
+                                th:text="'Balance '+${@formatter.formatNumber(balanceInformation.remoteBalanceSat)}"></li>
+                            <li class="list-group-item"
+                                th:text="'Reserve '+${@formatter.formatNumber(balanceInformation.remoteReserveSat)}"></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+</html>

@@ -1,0 +1,19 @@
+<!doctype html>
+
+<html xmlns:th="https://www.thymeleaf.org">
+
+<div th:fragment="tile" class="tile title-table col-sm-12">
+    <div class="card border-secondary">
+        <div class="card-header">
+            <div class="fs-4 mb-0">
+                <div th:replace="~{fragments/icons :: list-ul}"/>
+                Channels
+            </div>
+        </div>
+        <div class="card-body">
+            <div th:replace="~{fragments/channel-collections :: channel-table}"/>
+        </div>
+    </div>
+</div>
+
+</html>
