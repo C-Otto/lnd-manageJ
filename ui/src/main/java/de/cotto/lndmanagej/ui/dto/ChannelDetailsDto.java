@@ -28,17 +28,4 @@ public record ChannelDetailsDto(
         Set<String> warnings
 ) {
 
-    public long getRoutableCapacity() {
-        return balanceInformation.remoteBalanceSat() + balanceInformation.localBalanceSat();
-    }
-
-    public double getInboundPercentage() {
-        return 100 - getOutboundPercentage();
-    }
-
-    public double getOutboundPercentage() {
-        long outbound = balanceInformation.localBalanceSat();
-        return (1.0 * outbound / getRoutableCapacity()) * 100;
-    }
-
 }
