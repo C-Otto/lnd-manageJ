@@ -160,18 +160,7 @@
         </div>
         <div class="card-body">
             <div class="container" style="padding-left: 0; padding-right: 0;">
-                <div class="progress" style="margin-bottom: 16px">
-                    <div th:text="${#numbers.formatDecimal(balanceInformation.getOutboundPercentage,1,0)} + '%'"
-                         class="progress-bar outbound-green" role="progressbar"
-                         th:style="'width: ' + ${balanceInformation.getOutboundPercentage} + '%'" aria-valuenow="30"
-                         aria-valuemin="0"
-                         aria-valuemax="100"></div>
-                    <div th:text="${#numbers.formatDecimal(balanceInformation.getInboundPercentage,1,0)} + '%'"
-                         class="progress-bar inbound-red"
-                         role="progressbar" th:style="'width: ' + ${balanceInformation.getInboundPercentage} + '%'"
-                         aria-valuenow="15"
-                         aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
+                <div th:replace="~{fragments/balance-bar :: balance-tile(${balanceInformation})}"/>
                 <div class="row align-items-start">
                     <div class="tile-column-left col">
                         <ul class="list-group">

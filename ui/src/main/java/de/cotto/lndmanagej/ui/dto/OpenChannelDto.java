@@ -13,24 +13,8 @@ public record OpenChannelDto(
         long capacitySat
 ) {
 
-    public String getRatio() {
-        double percentLocal = getOutboundPercentage();
-        double percentRemote = 100 - percentLocal;
-        int leftDots = (int) (percentRemote / 5);
-        int rightDots = (int) (percentLocal / 5);
-        return dots(leftDots) + " | " + dots(rightDots);
-    }
-
     public double getOutboundPercentage() {
         return balanceInformation().getOutboundPercentage();
-    }
-
-    private String dots(int numberOfDots) {
-        if (numberOfDots == 0) {
-            return "";
-        }
-        String dotsString = "· ".repeat(numberOfDots);
-        return dotsString.substring(0, dotsString.length() - 1); // remove excess space
     }
 
 }
