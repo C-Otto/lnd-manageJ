@@ -6,6 +6,7 @@ import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FailureCode;
 import de.cotto.lndmanagej.model.HexString;
+import de.cotto.lndmanagej.model.LiquidityChangeListener;
 import de.cotto.lndmanagej.model.PaymentAttemptHop;
 import de.cotto.lndmanagej.model.PaymentListener;
 import de.cotto.lndmanagej.model.Pubkey;
@@ -22,15 +23,18 @@ public class LiquidityInformationUpdater implements PaymentListener {
     private final GrpcGetInfo grpcGetInfo;
     private final GrpcChannelPolicy grpcChannelPolicy;
     private final LiquidityBoundsService liquidityBoundsService;
+    private final List<LiquidityChangeListener> liquidityChangeListeners;
 
     public LiquidityInformationUpdater(
             GrpcGetInfo grpcGetInfo,
             GrpcChannelPolicy grpcChannelPolicy,
-            LiquidityBoundsService liquidityBoundsService
+            LiquidityBoundsService liquidityBoundsService,
+            List<LiquidityChangeListener> liquidityChangeListeners
     ) {
         this.grpcGetInfo = grpcGetInfo;
         this.grpcChannelPolicy = grpcChannelPolicy;
         this.liquidityBoundsService = liquidityBoundsService;
+        this.liquidityChangeListeners = liquidityChangeListeners;
     }
 
     @Override
@@ -73,11 +77,15 @@ public class LiquidityInformationUpdater implements PaymentListener {
     }
 
     private void updateInFlight(List<PaymentAttemptHop> paymentAttemptHops, boolean negate) {
-        Pubkey startNode = grpcGetInfo.getPubkey();
+        Pubkey ownNode = grpcGetInfo.getPubkey();
+        Pubkey startNode = ownNode;
         for (PaymentAttemptHop hop : paymentAttemptHops) {
             Pubkey endNode = getOtherNode(hop, startNode).orElse(null);
             if (endNode == null) {
                 return;
+            }
+            if (ownNode.equals(startNode)) {
+                liquidityChangeListeners.forEach(l -> l.amountChanged(endNode));
             }
             Coins amount = hop.amount();
             if (negate) {
