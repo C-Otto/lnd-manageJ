@@ -195,9 +195,10 @@ public class DemoDataService extends UiDataService {
         ChannelId channelId = ChannelId.fromCompactForm(compactChannelId);
         Pubkey remotePubkey = Pubkey.create(pubkey);
         PoliciesDto policies = PoliciesDto.createFromModel(derivePolicies(channelId));
+        boolean isPrivateChannel = deriveChannelStatus(channelId).privateChannel();
         long capacity = local + remote;
         BalanceInformationModel balance = createBalanceInformation(local, remote);
-        return new OpenChannelDto(channelId, alias, remotePubkey, policies, balance, capacity);
+        return new OpenChannelDto(channelId, alias, remotePubkey, policies, balance, capacity, isPrivateChannel);
     }
 
     private static BalanceInformationModel createBalanceInformation(long local, long remote) {

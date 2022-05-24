@@ -10,7 +10,8 @@ public record OpenChannelDto(
         Pubkey remotePubkey,
         PoliciesDto policies,
         BalanceInformationModel balanceInformation,
-        long capacitySat
+        long capacitySat,
+        boolean privateChannel
 ) {
 
     public double getOutboundPercentage() {

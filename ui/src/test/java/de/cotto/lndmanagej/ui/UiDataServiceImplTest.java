@@ -94,7 +94,15 @@ class UiDataServiceImplTest {
         when(statusController.getOpenChannels()).thenReturn(new ChannelsDto(List.of(CHANNEL_ID)));
 
         assertThat(uiDataService.getOpenChannels()).containsExactly(
-                new OpenChannelDto(CHANNEL_ID, alias, PUBKEY_2, policies, BALANCE_INFORMATION_MODEL, CAPACITY_SAT)
+                new OpenChannelDto(
+                        CHANNEL_ID,
+                        alias,
+                        PUBKEY_2,
+                        policies,
+                        BALANCE_INFORMATION_MODEL,
+                        CAPACITY_SAT,
+                        false
+                )
         );
     }
 

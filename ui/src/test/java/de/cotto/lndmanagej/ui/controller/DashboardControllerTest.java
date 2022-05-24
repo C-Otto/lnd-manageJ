@@ -87,7 +87,7 @@ class DashboardControllerTest {
                 PUBKEY,
                 PoliciesDto.createFromModel(POLICIES_FOR_LOCAL_CHANNEL),
                 new BalanceInformationModel(localBalance.satoshis(), 0, 0, REMOTE_BALANCE.satoshis(), 0, 0),
-                CAPACITY_SAT
-        );
+                CAPACITY_SAT,
+                false);
     }
 }
