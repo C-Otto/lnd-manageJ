@@ -1,0 +1,25 @@
+<!doctype html>
+
+<html xmlns:th="https://www.thymeleaf.org">
+
+<div th:fragment="tile (title, pubkey, warnings)" class="tile col-sm-4" th:if="${!warnings.isEmpty}">
+    <div class="card border-secondary">
+        <div class="card-header">
+            <div class="fs-4 mb-0">
+                <div th:replace="~{fragments/icons :: warning}"/>
+                <span></span>
+                <span th:if="${pubkey}"><a th:text="${title}" th:href="@{/node/{id}(id=${pubkey})}"></a></span>
+                <span th:unless="${pubkey}" th:text="${title}"></span>
+            </div>
+        </div>
+        <div class="card-body">
+            <ol class="list-group list-group-flush">
+                <li th:each="warning : ${warnings}" class="list-group-item">
+                    <span th:text="${warning}"></span>
+                </li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+</html>

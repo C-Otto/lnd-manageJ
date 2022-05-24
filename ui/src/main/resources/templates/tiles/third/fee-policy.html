@@ -1,0 +1,44 @@
+<!doctype html>
+
+<html xmlns:th="https://www.thymeleaf.org">
+
+<div th:fragment="tile (status, policies)" class="tile col-sm-4" th:if="${status.openClosed} != 'CLOSED'">
+    <div class="card border-secondary">
+        <div class="card-header">
+            <div class="fs-4 mb-0">
+                <div th:replace="~{fragments/icons :: speedometer}"/>
+                Fee Policy
+            </div>
+        </div>
+        <div class="card-body">
+
+            <div class="container" style="padding-left: 0; padding-right: 0;">
+                <div class="row align-items-start">
+                    <div class="tile-column-left col">
+                        <ul class="list-group">
+                            <li class="list-group-item disabled" aria-disabled="true">Local</li>
+                            <li class="list-group-item"
+                                th:text="'Base Fee (mSAT): '+${@formatter.formatNumber(policies.local.baseFeeMilliSat)}"></li>
+                            <li class="list-group-item"
+                                th:text="'Fee Rate: '+${@formatter.formatNumber(policies.local.feeRatePpm)}"></li>
+                            <li class="list-group-item" th:text="'Enabled: '+${policies.local.enabled}"></li>
+                        </ul>
+                    </div>
+                    <div class="tile-column-right col">
+                        <ul class="list-group">
+                            <li class="list-group-item disabled" aria-disabled="true">Remote</li>
+                            <li class="list-group-item"
+                                th:text="'Base Fee (mSAT): '+${@formatter.formatNumber(policies.remote.baseFeeMilliSat)}"></li>
+                            <li class="list-group-item"
+                                th:text="'Fee Rate: '+${@formatter.formatNumber(policies.remote.feeRatePpm)}"></li>
+                            <li class="list-group-item" th:text="'Enabled: '+${policies.remote.enabled}"></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+</html>

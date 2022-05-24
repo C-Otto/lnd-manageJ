@@ -1,0 +1,35 @@
+<!doctype html>
+
+<html xmlns:th="https://www.thymeleaf.org">
+
+<!-- full width tiles -->
+<div th:fragment="tile(node)" class="tile col-sm-12">
+    <div class="card border-secondary">
+        <div class="card-header">
+            <div class="fs-4 mb-0">
+                <div th:replace="~{fragments/icons :: list-ul}"/>
+                Channels
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="container" style="padding-left: 0; padding-right: 0;">
+                <div class="row align-items-start">
+                    <div class="tile-column-left col">
+                        <div th:replace="~{fragments/channel-collections :: channel-list-group ('Open', ${node.channels})}"/>
+                    </div>
+                    <div class="tile-column col">
+                        <div th:replace="~{fragments/channel-collections :: channel-list-group ('Closed', ${node.closedChannels})}"/>
+                    </div>
+                    <div class="tile-column col">
+                        <div th:replace="~{fragments/channel-collections :: channel-list-group ('Waiting Close', ${node.waitingCloseChannels})}"/>
+                    </div>
+                    <div class="tile-column-right col">
+                        <div th:replace="~{fragments/channel-collections :: channel-list-group ('Pending Force Closing', ${node.pendingForceClosingChannels})}"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</html>

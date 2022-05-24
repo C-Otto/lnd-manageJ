@@ -8,15 +8,15 @@
 
 <div class="row">
 
-    <div th:replace="~{fragments/tiles :: channel-tile(${node})}"/>
+    <div th:replace="~{tiles/full/channel-tile :: tile(${node})}"/>
 
-    <div th:replace="~{fragments/tiles :: balance(${node.balance})}"/>
-    <div th:replace="~{fragments/tiles :: rebalance-report(${node.rebalanceReport})}"/>
-    <div th:replace="~{fragments/tiles :: on-chain-costs(${node.onChainCosts})}"/>
+    <div th:replace="~{tiles/third/balance :: tile(${node.balance})}"/>
+    <div th:replace="~{tiles/third/rebalance-report :: tile(${node.rebalanceReport})}"/>
+    <div th:replace="~{tiles/third/on-chain-costs :: tile(${node.onChainCosts})}"/>
 
-    <div th:replace="~{fragments/tiles :: fee-report(${node.feeReport})}"/>
-    <div th:replace="~{fragments/tiles :: online-report(${node.onlineReport})}"/>
-    <div th:replace="~{fragments/tiles :: node-warning('Warning', null, ${node.warnings})}"/>
+    <div th:replace="~{tiles/third/fee-report :: tile(${node.feeReport})}"/>
+    <div th:replace="~{tiles/third/online-report :: tile(${node.onlineReport})}"/>
+    <div th:replace="~{tiles/third/node-warning :: tile('Warning', null, ${node.warnings})}"/>
 
 </div>
 
