@@ -68,10 +68,11 @@ public class UiDataServiceImpl extends UiDataService {
         LocalChannel localChannel = channelService.getLocalChannel(channelId).orElseThrow();
         Pubkey pubkey = localChannel.getRemotePubkey();
         long capacitySat = localChannel.getCapacity().satoshis();
+        boolean privateChannel = localChannel.getStatus().privateChannel();
         String alias = nodeController.getAlias(pubkey);
         PoliciesDto policies = channelController.getPolicies(channelId);
         BalanceInformationDto balance = channelController.getBalance(channelId);
-        return new OpenChannelDto(channelId, alias, pubkey, policies, map(balance), capacitySat);
+        return new OpenChannelDto(channelId, alias, pubkey, policies, map(balance), capacitySat, privateChannel);
     }
 
     private BalanceInformationModel map(BalanceInformationDto balance) {

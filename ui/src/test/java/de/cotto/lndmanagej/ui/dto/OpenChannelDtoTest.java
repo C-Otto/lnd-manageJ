@@ -37,6 +37,11 @@ class OpenChannelDtoTest {
     }
 
     @Test
+    void privateChannel() {
+        assertThat(OPEN_CHANNEL_DTO.privateChannel()).isFalse();
+    }
+
+    @Test
     void balanceInformation() {
         assertThat(OPEN_CHANNEL_DTO.balanceInformation())
                 .isEqualTo(BalanceInformationModel.createFromModel(BALANCE_INFORMATION));

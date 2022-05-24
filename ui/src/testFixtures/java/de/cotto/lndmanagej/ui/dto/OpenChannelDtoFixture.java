@@ -20,7 +20,7 @@ public class OpenChannelDtoFixture {
             PUBKEY,
             PoliciesDto.createFromModel(POLICIES_FOR_LOCAL_CHANNEL),
             BALANCE_INFORMATION_MODEL,
-            CAPACITY_SAT);
+            CAPACITY_SAT, false);
 
     public static final OpenChannelDto OPEN_CHANNEL_DTO2 = new OpenChannelDto(
             CHANNEL_ID_2,
@@ -28,6 +28,6 @@ public class OpenChannelDtoFixture {
             PUBKEY_2,
             PoliciesDto.createFromModel(POLICIES_FOR_LOCAL_CHANNEL),
             BALANCE_INFORMATION_MODEL_2,
-            CAPACITY_SAT);
+            CAPACITY_SAT, false);
 
 }

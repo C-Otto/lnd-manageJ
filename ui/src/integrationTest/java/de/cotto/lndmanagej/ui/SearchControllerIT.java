@@ -127,8 +127,8 @@ class SearchControllerIT extends BaseControllerIT {
                 channelDetails.remotePubkey(),
                 channelDetails.policies(),
                 channelDetails.balanceInformation(),
-                channelDetails.capacitySat()
-        );
+                channelDetails.capacitySat(),
+                false);
     }
 
     public NodeDto nodeDto(OpenChannelDto channel) {

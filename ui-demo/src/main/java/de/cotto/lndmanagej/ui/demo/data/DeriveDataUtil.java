@@ -99,7 +99,7 @@ public final class DeriveDataUtil {
     }
 
     public static ChannelStatusDto deriveChannelStatus(ChannelId channelId) {
-        boolean privateChannel = createRandomGenerator(channelId).nextBoolean();
+        boolean privateChannel = createRandomGenerator(channelId).nextInt(10) <= 1;
         return ChannelStatusDto.createFromModel(new ChannelStatus(privateChannel, true, false, OPEN));
     }
 }
