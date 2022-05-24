@@ -73,9 +73,6 @@ public class MultiPathPaymentSplitter {
         }
         List<Route> routes = getWithLiquidityInformation(extendedBasicRoutes);
         List<Route> fixedRoutes = Routes.getFixedWithTotalAmount(routes, amount);
-        if (fixedRoutes.isEmpty()) {
-            return MultiPathPayment.failure("Not enough liquidity (due to fees?)");
-        }
 
         if (isTooExpensive(paymentOptions, fixedRoutes)) {
             return MultiPathPayment.failure("At least one route is too expensive (fee rate limit)");
