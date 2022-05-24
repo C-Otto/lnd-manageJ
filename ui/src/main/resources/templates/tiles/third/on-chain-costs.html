@@ -2,7 +2,7 @@
 
 <html xmlns:th="https://www.thymeleaf.org">
 
-<div th:fragment="tile (onChainCosts)" class="tile col-sm-4">
+<div th:fragment="tile (onChainCosts, display)" class="tile col-sm-4" th:if="${display}">
     <div class="card border-secondary">
         <div class="card-header">
             <div class="fs-4 mb-0">
