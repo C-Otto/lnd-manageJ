@@ -10,7 +10,7 @@
 
     <div th:replace="~{fragments/tiles :: channel-tile(${node})}"/>
 
-    <div th:replace="~{fragments/tiles :: balance(${node.balance}, 0, 0, false)}"/>
+    <div th:replace="~{fragments/tiles :: balance(${node.balance})}"/>
     <div th:replace="~{fragments/tiles :: rebalance-report(${node.rebalanceReport})}"/>
     <div th:replace="~{fragments/tiles :: on-chain-costs(${node.onChainCosts})}"/>
 
