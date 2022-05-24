@@ -32,7 +32,11 @@
                     <a th:text="${channel.remoteAlias}" th:href="@{/node/{id}(id=${channel.remotePubkey})}"></a>
                 </span>
             </p>
-            <p th:text="'Capacity: ' + ${@formatter.formatNumber(channel.capacitySat)}"></p>
+            <p th:if="${channel.channelStatus.openClosed} != 'CLOSED'">
+                <span th:text="'Open Costs: ' + ${@formatter.formatNumber(channel.onChainCosts.openCostsSat)} + ' sats'"
+                      th:if="${channel.openInitiator.name} != 'REMOTE'"></span>
+            </p>
+            <p th:text="'Capacity: ' + ${@formatter.formatNumber(channel.capacitySat)}+ ' sats'"></p>
         </div>
     </div>
 </div>

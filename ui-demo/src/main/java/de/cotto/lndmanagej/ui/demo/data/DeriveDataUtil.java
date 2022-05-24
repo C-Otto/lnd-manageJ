@@ -81,7 +81,8 @@ public final class DeriveDataUtil {
     }
 
     static OpenInitiator deriveOpenInitiator(ChannelId channelId) {
-        return createRandomGenerator(channelId).nextBoolean() ? LOCAL : REMOTE;
+        boolean local = createRandomGenerator(channelId).nextInt(10) <= 3;
+        return local ? LOCAL : REMOTE;
     }
 
     static PoliciesForLocalChannel derivePolicies(ChannelId channelId) {
