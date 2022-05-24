@@ -5,7 +5,6 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.ChannelId;
-import de.cotto.lndmanagej.model.LiquidityChangeListener;
 import de.cotto.lndmanagej.model.Pubkey;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -54,7 +53,7 @@ import java.util.Optional;
 
 @Component
 @SuppressWarnings("PMD.ExcessiveImports")
-public class GrpcService extends GrpcBase implements LiquidityChangeListener {
+public class GrpcService extends GrpcBase {
     private static final Duration CHANNELS_CACHE_REFRESH = Duration.ofMillis(100);
     private static final Duration CHANNELS_CACHE_EXPIRY = Duration.ofMillis(200);
 
@@ -244,8 +243,7 @@ public class GrpcService extends GrpcBase implements LiquidityChangeListener {
         return get(() -> lightningStub.addInvoice(invoice));
     }
 
-    @Override
-    public void amountChanged(Pubkey peer) {
+    public void invalidateChannelsCache() {
         channelsCache.invalidateAll();
     }
 }
