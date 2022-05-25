@@ -81,7 +81,8 @@ public final class DeriveDataUtil {
     }
 
     static OpenInitiator deriveOpenInitiator(ChannelId channelId) {
-        return createRandomGenerator(channelId).nextBoolean() ? LOCAL : REMOTE;
+        boolean local = createRandomGenerator(channelId).nextInt(10) <= 3;
+        return local ? LOCAL : REMOTE;
     }
 
     static PoliciesForLocalChannel derivePolicies(ChannelId channelId) {
@@ -98,7 +99,7 @@ public final class DeriveDataUtil {
     }
 
     public static ChannelStatusDto deriveChannelStatus(ChannelId channelId) {
-        boolean privateChannel = createRandomGenerator(channelId).nextBoolean();
+        boolean privateChannel = createRandomGenerator(channelId).nextInt(10) <= 1;
         return ChannelStatusDto.createFromModel(new ChannelStatus(privateChannel, true, false, OPEN));
     }
 }

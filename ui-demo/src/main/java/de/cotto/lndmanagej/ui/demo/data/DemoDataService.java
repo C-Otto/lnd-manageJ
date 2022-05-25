@@ -1,20 +1,20 @@
 package de.cotto.lndmanagej.ui.demo.data;
 
 import de.cotto.lndmanagej.controller.NotFoundException;
-import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
+import de.cotto.lndmanagej.controller.dto.ChannelStatusDto;
 import de.cotto.lndmanagej.controller.dto.ChannelWithWarningsDto;
-import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.controller.dto.NodeWithWarningsDto;
 import de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto;
 import de.cotto.lndmanagej.controller.dto.OnlineReportDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
-import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelId;
-import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.ChannelStatus;
 import de.cotto.lndmanagej.model.OnlineReport;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.ui.UiDataService;
+import de.cotto.lndmanagej.ui.dto.BalanceInformationModel;
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
+import de.cotto.lndmanagej.ui.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import org.springframework.stereotype.Component;
@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 
 import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT;
 import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT_OFFLINE;
+import static de.cotto.lndmanagej.model.OpenCloseStatus.CLOSED;
+import static de.cotto.lndmanagej.model.OpenInitiator.UNKNOWN;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveChannelStatus;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveFeeReport;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveFlowReport;
@@ -33,6 +35,7 @@ import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveOnChainCosts
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveOpenInitiator;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.derivePolicies;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveRebalanceReport;
+import static de.cotto.lndmanagej.ui.dto.BalanceInformationModel.EMPTY;
 
 @SuppressWarnings("PMD.ExcessiveImports")
 @Component
@@ -103,6 +106,8 @@ public class DemoDataService extends UiDataService {
             POCKET.remotePubkey(),
             "No flow in the past 35 days.");
 
+    public static final ChannelId CLOSED_CHANNEL = ChannelId.fromCompactForm("712345x124x1");
+
     public DemoDataService() {
         super();
     }
@@ -128,6 +133,9 @@ public class DemoDataService extends UiDataService {
 
     @Override
     public ChannelDetailsDto getChannelDetails(ChannelId channelId) throws NotFoundException {
+        if (CLOSED_CHANNEL.equals(channelId)) {
+            return createClosedChannelDetails(getChannelWarnings(channelId));
+        }
         OpenChannelDto localOpenChannel = getOpenChannels().stream()
                 .filter(c -> channelId.equals(c.channelId()))
                 .findFirst()
@@ -187,16 +195,18 @@ public class DemoDataService extends UiDataService {
         ChannelId channelId = ChannelId.fromCompactForm(compactChannelId);
         Pubkey remotePubkey = Pubkey.create(pubkey);
         PoliciesDto policies = PoliciesDto.createFromModel(derivePolicies(channelId));
-        long localReserve = 200;
-        long remoteReserve = 500;
+        boolean isPrivateChannel = deriveChannelStatus(channelId).privateChannel();
         long capacity = local + remote;
-        BalanceInformationDto balance = BalanceInformationDto.createFromModel(new BalanceInformation(
-                Coins.ofSatoshis(local),
-                Coins.ofSatoshis(localReserve),
-                Coins.ofSatoshis(remote),
-                Coins.ofSatoshis(remoteReserve)
-        ));
-        return new OpenChannelDto(channelId, alias, remotePubkey, policies, balance, capacity);
+        BalanceInformationModel balance = createBalanceInformation(local, remote);
+        return new OpenChannelDto(channelId, alias, remotePubkey, policies, balance, capacity, isPrivateChannel);
+    }
+
+    private static BalanceInformationModel createBalanceInformation(long local, long remote) {
+        long localReserve = 200;
+        long localAvailable = local - localReserve;
+        long remoteReserve = 500;
+        long remoteAvailable = remote - remoteReserve;
+        return new BalanceInformationModel(local, localReserve, localAvailable, remote, remoteReserve, remoteAvailable);
     }
 
     private static ChannelDetailsDto createChannelDetails(OpenChannelDto channel, Set<String> warnings) {
@@ -217,6 +227,24 @@ public class DemoDataService extends UiDataService {
         );
     }
 
+    private ChannelDetailsDto createClosedChannelDetails(Set<String> warnings) {
+        return new ChannelDetailsDto(
+                CLOSED_CHANNEL,
+                POCKET.remotePubkey(),
+                POCKET.remoteAlias(),
+                ChannelStatusDto.createFromModel(new ChannelStatus(false, false, true, CLOSED)),
+                UNKNOWN,
+                EMPTY,
+                10_000_000L,
+                deriveOnChainCosts(CLOSED_CHANNEL),
+                PoliciesDto.createFromModel(derivePolicies(CLOSED_CHANNEL)),
+                deriveFeeReport(CLOSED_CHANNEL),
+                deriveFlowReport(CLOSED_CHANNEL),
+                deriveRebalanceReport(CLOSED_CHANNEL),
+                warnings
+        );
+    }
+
     private static NodeDetailsDto createNodeDetails(NodeDto node, List<OpenChannelDto> channels, Set<String> warnings) {
         OpenChannelDto firstChannel = channels.stream().findFirst().orElseThrow();
         OnlineReport onlineReport = node.online() ? ONLINE_REPORT : ONLINE_REPORT_OFFLINE;
@@ -224,7 +252,7 @@ public class DemoDataService extends UiDataService {
                 Pubkey.create(node.pubkey()),
                 node.alias(),
                 channels.stream().map(OpenChannelDto::channelId).toList(),
-                List.of(ChannelId.fromCompactForm("712345x124x1")),
+                List.of(CLOSED_CHANNEL),
                 List.of(ChannelId.fromCompactForm("712345x124x2")),
                 List.of(ChannelId.fromCompactForm("712345x124x3")),
                 deriveOnChainCosts(firstChannel.channelId()),

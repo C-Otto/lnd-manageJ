@@ -1,0 +1,35 @@
+<!doctype html>
+
+<html xmlns:th="https://www.thymeleaf.org">
+
+<div th:fragment="channel-table-column (balanceInformation)" class="progress balance-bar" style="margin-top: 4px">
+    <div th:text="${balanceInformation.getInboundPercentageLabel}"
+         class="progress-bar balance-bar-red"
+         role="progressbar"
+         th:style="'width: ' + ${balanceInformation.getInboundPercentage} + '%; border-right: 0px solid;'"
+         aria-valuenow="15"
+         aria-valuemin="0" aria-valuemax="100"></div>
+    <div th:text="${balanceInformation.getOutboundPercentageLabel}"
+         class="progress-bar balance-bar-green" role="progressbar"
+         th:style="'width: ' + ${balanceInformation.getOutboundPercentage} + '%; border-left: 0px solid;'"
+         aria-valuenow="30"
+         aria-valuemin="0"
+         aria-valuemax="100"></div>
+</div>
+
+<div th:fragment="balance-tile (balanceInformation)" class="progress balance-bar" style="margin-bottom: 16px">
+    <div th:text="${balanceInformation.getOutboundPercentageLabel}"
+         class="progress-bar balance-bar-green" role="progressbar"
+         th:style="'width: ' + ${balanceInformation.getOutboundPercentage} + '%; border-right: 0px solid;'"
+         aria-valuenow="30"
+         aria-valuemin="0"
+         aria-valuemax="100"></div>
+    <div th:text="${balanceInformation.getInboundPercentageLabel}"
+         class="progress-bar balance-bar-red"
+         role="progressbar"
+         th:style="'width: ' + ${balanceInformation.getInboundPercentage} + '%; border-left: 0px solid;'"
+         aria-valuenow="15"
+         aria-valuemin="0" aria-valuemax="100"></div>
+</div>
+
+</html>

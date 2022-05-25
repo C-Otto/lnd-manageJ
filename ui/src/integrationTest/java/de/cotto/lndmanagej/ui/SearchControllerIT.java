@@ -21,10 +21,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static de.cotto.lndmanagej.controller.dto.NodeDetailsDtoFixture.NODE_DETAILS_DTO;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.ui.dto.ChannelDetailsDtoFixture.CHANNEL_DETAILS_DTO;
+import static de.cotto.lndmanagej.ui.dto.NodeDetailsDtoFixture.NODE_DETAILS_MODEL;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO2;
 import static org.hamcrest.core.Is.is;
@@ -89,7 +89,7 @@ class SearchControllerIT extends BaseControllerIT {
 
     @Test
     void searchForPubkey_found() throws Exception {
-        searchAndExpectSingleNode(NODE_DETAILS_DTO.node().toString());
+        searchAndExpectSingleNode(NODE_DETAILS_MODEL.node().toString());
     }
 
     @Test
@@ -99,7 +99,7 @@ class SearchControllerIT extends BaseControllerIT {
 
     private void searchAndExpectSingleNode(String query) throws Exception {
         when(dataService.getOpenChannels()).thenReturn(List.of(OPEN_CHANNEL_DTO));
-        when(pageService.nodeDetails(any())).thenReturn(new NodeDetailsPage(NODE_DETAILS_DTO));
+        when(pageService.nodeDetails(any())).thenReturn(new NodeDetailsPage(NODE_DETAILS_MODEL));
         mockMvc.perform(MockMvcRequestBuilders.get("/search?q=" + query))
                 .andExpect(status().isOk())
                 .andExpect(model().attribute("pubkey", is(OPEN_CHANNEL_DTO.remotePubkey())))
@@ -127,8 +127,8 @@ class SearchControllerIT extends BaseControllerIT {
                 channelDetails.remotePubkey(),
                 channelDetails.policies(),
                 channelDetails.balanceInformation(),
-                channelDetails.capacitySat()
-        );
+                channelDetails.capacitySat(),
+                false);
     }
 
     public NodeDto nodeDto(OpenChannelDto channel) {

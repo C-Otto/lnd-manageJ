@@ -8,15 +8,15 @@
 
 <div class="row">
 
-    <div th:replace="~{fragments/tiles :: channel-details(${channel})}"/>
-    <div th:replace="~{fragments/tiles :: fee-policy(${channel.policies})}"/>
-    <div th:replace="~{fragments/tiles :: balance(${channel.balanceInformation}, ${channel.getInboundPercentage}, ${channel.getOutboundPercentage})}"/>
+    <div th:replace="~{tiles/third/channel-details :: tile(${channel})}"/>
+    <div th:replace="~{tiles/third/fee-policy :: tile(${channel.channelStatus}, ${channel.policies})}"/>
+    <div th:replace="~{tiles/third/balance :: tile(${channel.balanceInformation})}"/>
 
-    <div th:replace="~{fragments/tiles :: on-chain-costs(${channel.onChainCosts})}"/>
-    <div th:replace="~{fragments/tiles :: rebalance-report(${channel.rebalanceReport})}"/>
-    <div th:replace="~{fragments/tiles :: fee-report(${channel.feeReport})}"/>
+    <div th:replace="~{tiles/third/on-chain-costs :: tile(${channel.onChainCosts}, ${channel.channelStatus.openClosed} == 'CLOSED')}"/>
+    <div th:replace="~{tiles/third/rebalance-report :: tile(${channel.rebalanceReport})}"/>
+    <div th:replace="~{tiles/third/fee-report :: tile(${channel.feeReport})}"/>
 
-    <div th:replace="~{fragments/tiles :: channel-warning('Warning', null, ${channel.warnings})}"/>
+    <div th:replace="~{tiles/third/channel-warning :: tile('Warning', null, ${channel.warnings})}"/>
 </div>
 
 </body>

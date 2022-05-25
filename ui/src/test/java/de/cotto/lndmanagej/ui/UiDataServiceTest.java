@@ -1,21 +1,21 @@
 package de.cotto.lndmanagej.ui;
 
-import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
+import de.cotto.lndmanagej.ui.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static de.cotto.lndmanagej.controller.dto.NodeDetailsDtoFixture.NODE_DETAILS_DTO;
 import static de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto.NONE;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.ui.dto.ChannelDetailsDtoFixture.CHANNEL_DETAILS_DTO;
+import static de.cotto.lndmanagej.ui.dto.NodeDetailsDtoFixture.NODE_DETAILS_MODEL;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -51,7 +51,7 @@ class UiDataServiceTest {
 
         @Override
         public NodeDetailsDto getNodeDetails(Pubkey pubkey) {
-            return NODE_DETAILS_DTO;
+            return NODE_DETAILS_MODEL;
         }
     }
 }

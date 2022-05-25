@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.ui.dto;
 
-import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.FlowReportDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
@@ -46,17 +45,7 @@ class ChannelDetailsDtoTest {
     @Test
     void balanceInformation() {
         assertThat(CHANNEL_DETAILS_DTO.balanceInformation())
-                .isEqualTo(BalanceInformationDto.createFromModel(BALANCE_INFORMATION));
-    }
-
-    @Test
-    void inboundPercentage() {
-        assertThat(CHANNEL_DETAILS_DTO.getInboundPercentage()).isEqualTo(10.952_804_986_642_917);
-    }
-
-    @Test
-    void outboundPercentage() {
-        assertThat(CHANNEL_DETAILS_DTO.getOutboundPercentage()).isEqualTo(100 - 10.952_804_986_642_917);
+                .isEqualTo(BalanceInformationModel.createFromModel(BALANCE_INFORMATION));
     }
 
     @Test

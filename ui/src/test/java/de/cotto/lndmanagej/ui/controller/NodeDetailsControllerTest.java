@@ -13,8 +13,8 @@ import org.springframework.ui.Model;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import static de.cotto.lndmanagej.controller.dto.NodeDetailsDtoFixture.NODE_DETAILS_DTO;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
+import static de.cotto.lndmanagej.ui.dto.NodeDetailsDtoFixture.NODE_DETAILS_MODEL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,9 +32,9 @@ class NodeDetailsControllerTest {
 
     @Test
     void nodeDetails() {
-        when(pageService.nodeDetails(PUBKEY)).thenReturn(new NodeDetailsPage(NODE_DETAILS_DTO));
+        when(pageService.nodeDetails(PUBKEY)).thenReturn(new NodeDetailsPage(NODE_DETAILS_MODEL));
         assertThat(nodeDetailsController.nodeDetails(PUBKEY, model)).isEqualTo("node-details");
-        verify(model).addAllAttributes(Map.of("node", NODE_DETAILS_DTO, "pubkey", PUBKEY));
+        verify(model).addAllAttributes(Map.of("node", NODE_DETAILS_MODEL, "pubkey", PUBKEY));
     }
 
     @Test

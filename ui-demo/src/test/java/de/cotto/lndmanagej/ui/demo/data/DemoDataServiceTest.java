@@ -1,7 +1,7 @@
 package de.cotto.lndmanagej.ui.demo.data;
 
 import de.cotto.lndmanagej.controller.NotFoundException;
-import de.cotto.lndmanagej.controller.dto.NodeDetailsDto;
+import de.cotto.lndmanagej.ui.dto.NodeDetailsDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

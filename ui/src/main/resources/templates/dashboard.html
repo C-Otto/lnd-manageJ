@@ -5,19 +5,19 @@
 <body>
 
 <div class="row top-space">
-    <div th:replace="~{fragments/tiles :: status(${status})}"/>
+    <div th:replace="~{tiles/third/status :: tile(${status})}"/>
 
     <th:block th:each="node : ${warnings.nodesWithWarnings}" class="list-group-item">
-        <div th:replace="~{fragments/tiles :: node-warning(${node.alias}, ${node.pubkey}, ${node.warnings})}"/>
+        <div th:replace="~{tiles/third/node-warning :: tile(${node.alias}, ${node.pubkey}, ${node.warnings})}"/>
     </th:block>
 
     <th:block th:each="channel : ${warnings.channelsWithWarnings}" class="list-group-item">
-        <div th:replace="~{fragments/tiles :: channel-warning(${channel.channelId}, ${channel.channelId.shortChannelId}, ${channel.warnings})}"/>
+        <div th:replace="~{tiles/third/channel-warning :: tile(${channel.channelId}, ${channel.channelId.shortChannelId}, ${channel.warnings})}"/>
     </th:block>
 
-    <div th:replace="~{fragments/tiles :: all-channels}"/>
+    <div th:replace="~{tiles/full/all-channels :: tile}"/>
 
-    <div th:replace="~{fragments/tiles :: all-nodes}"/>
+    <div th:replace="~{tiles/full/all-nodes :: tile}"/>
 
 </div>
 

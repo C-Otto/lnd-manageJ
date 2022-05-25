@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.ui.dto;
 
-import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.ChannelStatusDto;
 import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.FlowReportDto;
@@ -19,7 +18,7 @@ public record ChannelDetailsDto(
         String remoteAlias,
         ChannelStatusDto channelStatus,
         OpenInitiator openInitiator,
-        BalanceInformationDto balanceInformation,
+        BalanceInformationModel balanceInformation,
         long capacitySat,
         OnChainCostsDto onChainCosts,
         PoliciesDto policies,
@@ -28,16 +27,5 @@ public record ChannelDetailsDto(
         RebalanceReportDto rebalanceReport,
         Set<String> warnings
 ) {
-
-    public double getInboundPercentage() {
-        return 100 - getOutboundPercentage();
-    }
-
-    public double getOutboundPercentage() {
-        long outbound = Long.parseLong(balanceInformation.localBalanceSat());
-        long inbound = Long.parseLong(balanceInformation.remoteBalanceSat());
-        long routableCapacity = outbound + inbound;
-        return (1.0 * outbound / routableCapacity) * 100;
-    }
 
 }

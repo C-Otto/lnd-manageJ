@@ -1,9 +1,17 @@
-.outbound-green {
-  background-color: #006400bd;
+.balance-bar {
+  border-radius: .1rem;
 }
 
-.inbound-red {
-  background-color: #8b0000f2;
+.balance-bar-green {
+  background-color: #0064001f;
+  color: darkGreen;
+  border: 1px solid;
+}
+
+.balance-bar-red {
+  background-color: #8b000024;
+  color: darkred;
+  border: 1px solid;
 }
 
 .top-space {

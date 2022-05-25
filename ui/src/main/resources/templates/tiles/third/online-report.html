@@ -1,0 +1,21 @@
+<!doctype html>
+
+<html xmlns:th="https://www.thymeleaf.org">
+
+<div th:fragment="tile (onlineReport)" class="tile col-sm-4">
+    <div class="card border-secondary">
+        <div class="card-header">
+            <div class="fs-4 mb-0">
+                <div th:replace="~{fragments/icons :: online}"/>
+                Online Report
+            </div>
+        </div>
+        <div class="card-body">
+            <p th:text="${onlineReport.online ? 'Online' : 'Offline'} + ' since '+${onlineReport.since}"></p>
+            <p th:text="${onlineReport.onlinePercentage} + '% online in last ' + ${@formatter.formatNumber(onlineReport.daysForOnlinePercentage)} + ' days.'"></p>
+            <p th:text="'Online status changed '+${@formatter.formatNumber(onlineReport.changes)} + ' times in last ' +${@formatter.formatNumber(onlineReport.daysForChanges)} + ' days.'"></p>
+        </div>
+    </div>
+</div>
+
+</html>

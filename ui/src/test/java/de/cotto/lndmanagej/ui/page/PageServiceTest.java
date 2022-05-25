@@ -20,13 +20,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static de.cotto.lndmanagej.controller.dto.NodeDetailsDtoFixture.NODE_DETAILS_DTO;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static de.cotto.lndmanagej.ui.dto.ChannelDetailsDtoFixture.CHANNEL_DETAILS_DTO;
+import static de.cotto.lndmanagej.ui.dto.NodeDetailsDtoFixture.NODE_DETAILS_MODEL;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO2;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -143,9 +143,9 @@ class PageServiceTest {
 
     @Test
     void nodeDetails() {
-        when(dataService.getNodeDetails(PUBKEY)).thenReturn(NODE_DETAILS_DTO);
+        when(dataService.getNodeDetails(PUBKEY)).thenReturn(NODE_DETAILS_MODEL);
         assertThat(pageService.nodeDetails(PUBKEY)).usingRecursiveComparison().isEqualTo(
-                new NodeDetailsPage(NODE_DETAILS_DTO)
+                new NodeDetailsPage(NODE_DETAILS_MODEL)
         );
     }
 
