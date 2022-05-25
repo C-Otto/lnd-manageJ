@@ -242,4 +242,8 @@ public class GrpcService extends GrpcBase {
     public Optional<AddInvoiceResponse> addInvoice(Invoice invoice) {
         return get(() -> lightningStub.addInvoice(invoice));
     }
+
+    public void invalidateChannelsCache() {
+        channelsCache.invalidateAll();
+    }
 }

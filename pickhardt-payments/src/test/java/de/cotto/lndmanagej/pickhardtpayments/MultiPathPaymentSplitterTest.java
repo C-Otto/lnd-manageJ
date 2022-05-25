@@ -326,20 +326,6 @@ class MultiPathPaymentSplitterTest {
         }
 
         @Test
-        void unable_to_add_remainder() {
-            Coins largeAmount = Coins.ofSatoshis(100_000_000_000L);
-            when(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, largeAmount, DEFAULT_PAYMENT_OPTIONS))
-                    .thenReturn(new Flows(FLOW));
-            MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPayment(
-                    PUBKEY,
-                    PUBKEY_2,
-                    largeAmount,
-                    DEFAULT_PAYMENT_OPTIONS
-            );
-            assertThat(multiPathPayment.isFailure()).isTrue();
-        }
-
-        @Test
         void adds_hop_if_peer_is_specified_in_payment_options() {
             Edge extensionEdge = mockExtensionEdge(PUBKEY_3, 0);
             MultiPathPayment multiPathPayment = attemptTopUpPayment();

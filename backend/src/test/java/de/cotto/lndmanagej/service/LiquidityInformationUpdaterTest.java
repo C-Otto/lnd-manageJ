@@ -5,6 +5,7 @@ import de.cotto.lndmanagej.grpc.GrpcGetInfo;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FailureCode;
 import de.cotto.lndmanagej.model.HexString;
+import de.cotto.lndmanagej.model.LiquidityChangeListener;
 import de.cotto.lndmanagej.model.PaymentAttemptHop;
 import de.cotto.lndmanagej.model.PaymentListener;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -63,7 +63,6 @@ class LiquidityInformationUpdaterTest {
             new PaymentAttemptHop(Optional.empty(), Coins.ofSatoshis(80), Optional.empty())
     );
 
-    @InjectMocks
     private LiquidityInformationUpdater liquidityInformationUpdater;
 
     @Mock
@@ -75,8 +74,17 @@ class LiquidityInformationUpdaterTest {
     @Mock
     private LiquidityBoundsService liquidityBoundsService;
 
+    @Mock
+    private LiquidityChangeListener liquidityChangeListener;
+
     @BeforeEach
     void setUp() {
+        liquidityInformationUpdater = new LiquidityInformationUpdater(
+                grpcGetInfo,
+                grpcChannelPolicy,
+                liquidityBoundsService,
+                List.of(liquidityChangeListener)
+        );
         lenient().when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY);
         lenient().when(grpcChannelPolicy.getOtherPubkey(CHANNEL_ID, PUBKEY)).thenReturn(Optional.of(PUBKEY_2));
         lenient().when(grpcChannelPolicy.getOtherPubkey(CHANNEL_ID_2, PUBKEY_2)).thenReturn(Optional.of(PUBKEY_3));
@@ -463,6 +471,18 @@ class LiquidityInformationUpdaterTest {
         liquidityInformationUpdater.removeInFlight(hopsWithChannelIdsAndPubkeys);
         verifyRemovesInFlightForAllHops();
         verifyNoMoreInteractions(liquidityBoundsService);
+    }
+
+    @Test
+    void notifies_liquidity_change_listener_on_in_flight_change_addition() {
+        liquidityInformationUpdater.forNewPaymentAttempt(hopsWithChannelIdsAndPubkeys);
+        verify(liquidityChangeListener).amountChanged(PUBKEY_2);
+    }
+
+    @Test
+    void notifies_liquidity_change_listener_on_in_flight_change_removal() {
+        liquidityInformationUpdater.removeInFlight(hopsWithChannelIdsAndPubkeys);
+        verify(liquidityChangeListener).amountChanged(PUBKEY_2);
     }
 
     private void assertAllAvailableForFailureFromFinalNode(FailureCode failureCode) {
