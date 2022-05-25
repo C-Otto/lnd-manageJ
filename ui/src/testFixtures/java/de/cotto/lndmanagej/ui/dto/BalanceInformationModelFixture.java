@@ -7,8 +7,8 @@ public class BalanceInformationModelFixture {
     public static final BalanceInformationModel BALANCE_INFORMATION_MODEL_2 =
             new BalanceInformationModel(2_000, 200, 1_800, 223, 20, 203);
     public static final BalanceInformationModel LOW_LOCAL_MODEL =
-            new BalanceInformationModel(123, 20, 103, 2_000, 200, 1_800);
+            new BalanceInformationModel(110, 10, 100, 1_010, 10, 1_000);
     public static final BalanceInformationModel LOW_REMOTE_MODEL =
-            new BalanceInformationModel(2_000, 200, 1_800, 123, 20, 103);
+            new BalanceInformationModel(1_010, 10, 1_000, 110, 10, 100);
 
 }
