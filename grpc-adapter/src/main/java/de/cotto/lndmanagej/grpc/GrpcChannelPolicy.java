@@ -23,8 +23,8 @@ public class GrpcChannelPolicy {
         this.grpcGetInfo = grpcGetInfo;
         this.grpcPolicy = grpcPolicy;
         channelEdgeCache = new CacheBuilder()
-                .withExpiry(Duration.ofMinutes(5))
-                .withRefresh(Duration.ofSeconds(150))
+                .withExpiry(Duration.ofMinutes(1))
+                .withRefresh(Duration.ofSeconds(30))
                 .build(this::getChannelEdgeWithoutCache);
     }
 
