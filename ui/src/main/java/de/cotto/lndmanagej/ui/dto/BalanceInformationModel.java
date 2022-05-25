@@ -19,12 +19,12 @@ public record BalanceInformationModel(
 
     public static BalanceInformationModel createFromModel(BalanceInformation balanceInformation) {
         return new BalanceInformationModel(
-                balanceInformation.localBalance().satoshis(),
-                balanceInformation.localReserve().satoshis(),
-                balanceInformation.localAvailable().satoshis(),
-                balanceInformation.remoteBalance().satoshis(),
-                balanceInformation.remoteReserve().satoshis(),
-                balanceInformation.remoteAvailable().satoshis()
+                balanceInformation.localBalance().milliSatoshis() / 1_000,
+                balanceInformation.localReserve().milliSatoshis() / 1_000,
+                balanceInformation.localAvailable().milliSatoshis() / 1_000,
+                balanceInformation.remoteBalance().milliSatoshis() / 1_000,
+                balanceInformation.remoteReserve().milliSatoshis() / 1_000,
+                balanceInformation.remoteAvailable().milliSatoshis() / 1_000
         );
     }
 

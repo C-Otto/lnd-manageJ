@@ -1,5 +1,7 @@
 package de.cotto.lndmanagej.ui.dto;
 
+import de.cotto.lndmanagej.model.BalanceInformation;
+import de.cotto.lndmanagej.model.Coins;
 import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixture.BALANCE_INFORMATION_MODEL;
@@ -8,6 +10,21 @@ import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixture.LOW_REMO
 import static org.assertj.core.api.Assertions.assertThat;
 
 class BalanceInformationModelTest {
+
+    @Test
+    void accepts_msat_amount() {
+        Coins coinsWithMilliSat = Coins.ofMilliSatoshis(1_234);
+        BalanceInformation model = new BalanceInformation(
+                coinsWithMilliSat,
+                coinsWithMilliSat,
+                coinsWithMilliSat,
+                coinsWithMilliSat,
+                coinsWithMilliSat,
+                coinsWithMilliSat
+        );
+        BalanceInformationModel balanceInformation = BalanceInformationModel.createFromModel(model);
+        assertThat(balanceInformation.getRoutableCapacity()).isEqualTo(2);
+    }
 
     @Test
     void routableCapacity() {
