@@ -26,12 +26,14 @@ class BalanceInformationModelTest {
 
     @Test
     void inboundPercentageLabel() {
-        assertThat(BALANCE_INFORMATION_MODEL.getInboundPercentageLabel()).isEqualTo("11%");
+        BalanceInformationModel balance = new BalanceInformationModel(900, 0, 900, 100, 0, 100);
+        assertThat(balance.getInboundPercentageLabel()).isEqualTo("10%");
     }
 
     @Test
     void outboundPercentageLabel() {
-        assertThat(BALANCE_INFORMATION_MODEL.getOutboundPercentageLabel()).isEqualTo("89%");
+        BalanceInformationModel balance = new BalanceInformationModel(100, 0, 100, 900, 0, 900);
+        assertThat(balance.getOutboundPercentageLabel()).isEqualTo("10%");
     }
 
     @Test
