@@ -136,6 +136,22 @@ class EdgeComputationTest {
     }
 
     @Test
+    void adds_first_hop_edge_if_limit_for_first_hops_is_not_specified() {
+        Pubkey ownPubkey = EDGE.startNode();
+        int feeRateLimit = 200;
+
+        when(grpcGetInfo.getPubkey()).thenReturn(ownPubkey);
+        PaymentOptions paymentOptions = PaymentOptions.forFeeRateLimit(feeRateLimit);
+        Policy firstHopPolicyExpensive = policy(100);
+        DirectedChannelEdge firstHopExpensiveButOk =
+                new DirectedChannelEdge(CHANNEL_ID_2, CAPACITY, ownPubkey, PUBKEY_2, firstHopPolicyExpensive);
+        when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(firstHopExpensiveButOk)));
+        assertThat(
+                edgeComputation.getEdges(paymentOptions).edges().stream().map(EdgeWithLiquidityInformation::channelId)
+        ).containsExactlyInAnyOrder(CHANNEL_ID_2);
+    }
+
+    @Test
     void adds_edge_for_channel_with_base_fee() {
         DirectedChannelEdge edge =
                 new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY, PUBKEY_2, POLICY_WITH_BASE_FEE);

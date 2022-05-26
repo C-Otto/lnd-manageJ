@@ -18,7 +18,7 @@ class PaymentOptionsTest {
     @Test
     void forFeeRateLimit() {
         assertThat(PaymentOptions.forFeeRateLimit(123))
-                .isEqualTo(new PaymentOptions(0, Optional.of(123L), Optional.of(123L), true, Optional.empty()));
+                .isEqualTo(new PaymentOptions(0, Optional.of(123L), Optional.empty(), true, Optional.empty()));
     }
 
     @Test
