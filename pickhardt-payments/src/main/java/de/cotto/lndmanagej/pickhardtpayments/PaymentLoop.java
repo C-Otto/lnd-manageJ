@@ -97,6 +97,7 @@ public class PaymentLoop {
                         paymentStatus.failed("Giving up after " + failureCounter + " failed attempts to compute route");
                         return;
                     }
+                    paymentStatus.info("Trying again...");
                     failureCounter++;
                     sleepAfterFailure();
                 } else {
