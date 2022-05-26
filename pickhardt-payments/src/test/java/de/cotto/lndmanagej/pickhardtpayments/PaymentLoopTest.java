@@ -37,6 +37,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -169,6 +170,14 @@ class PaymentLoopTest {
                 DECODED_PAYMENT_REQUEST.amount(),
                 PAYMENT_OPTIONS
         );
+    }
+
+    @Test
+    void does_not_cancel_settled_invoice() {
+        when(grpcGetInfo.getPubkey()).thenReturn(DECODED_PAYMENT_REQUEST.destination());
+        mockSuccessOnFirstAttempt();
+        paymentLoop.start(DECODED_PAYMENT_REQUEST, PAYMENT_OPTIONS, paymentStatus);
+        verify(grpcInvoices, never()).cancelPaymentRequest(DECODED_PAYMENT_REQUEST);
     }
 
     @Test
