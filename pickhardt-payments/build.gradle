@@ -24,7 +24,7 @@ task deleteCrashLogs(type: Delete) {
 tasks.findByName('pitest').finalizedBy(deleteCrashLogs)
 
 pitest {
-    testStrengthThreshold = 98
+    testStrengthThreshold = 97
 }
 
 jacocoTestCoverageVerification {
