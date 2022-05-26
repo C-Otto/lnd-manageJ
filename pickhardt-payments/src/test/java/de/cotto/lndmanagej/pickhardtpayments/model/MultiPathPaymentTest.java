@@ -82,11 +82,11 @@ class MultiPathPaymentTest {
     }
 
     @Test
-    void getInformation() {
+    void information() {
         SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(MultiPathPayment.FAILURE.getInformation()).isEqualTo("");
-        softly.assertThat(MultiPathPayment.failure("hello").getInformation()).isEqualTo("hello");
-        softly.assertThat(MULTI_PATH_PAYMENT.getInformation()).isEqualTo("");
+        softly.assertThat(MultiPathPayment.FAILURE.information()).isEqualTo("");
+        softly.assertThat(MultiPathPayment.failure("hello").information()).isEqualTo("hello");
+        softly.assertThat(MULTI_PATH_PAYMENT.information()).isEqualTo("");
         softly.assertAll();
     }
 }

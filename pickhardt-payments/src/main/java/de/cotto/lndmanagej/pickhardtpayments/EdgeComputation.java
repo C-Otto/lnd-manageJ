@@ -9,8 +9,10 @@ import de.cotto.lndmanagej.model.DirectedChannelEdge;
 import de.cotto.lndmanagej.model.Edge;
 import de.cotto.lndmanagej.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.model.LocalChannel;
+import de.cotto.lndmanagej.model.Policy;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgesWithLiquidityInformation;
+import de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.LiquidityBoundsService;
@@ -27,8 +29,6 @@ import java.util.function.Function;
 
 @Component
 public class EdgeComputation {
-    private static final long NO_FEE_RATE_LIMIT = -1L;
-
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final GrpcGraph grpcGraph;
@@ -57,11 +57,7 @@ public class EdgeComputation {
         this.routeHintService = routeHintService;
     }
 
-    public EdgesWithLiquidityInformation getEdges() {
-        return getEdges(NO_FEE_RATE_LIMIT);
-    }
-
-    public EdgesWithLiquidityInformation getEdges(long feeRateLimit) {
+    public EdgesWithLiquidityInformation getEdges(PaymentOptions paymentOptions) {
         Set<DirectedChannelEdge> channelEdges = grpcGraph.getChannelEdges().orElse(null);
         if (channelEdges == null) {
             logger.warn("Unable to get graph");
@@ -71,7 +67,7 @@ public class EdgeComputation {
         Pubkey ownPubkey = grpcGetInfo.getPubkey();
         Set<DirectedChannelEdge> edgesFromPaymentHints = routeHintService.getEdgesFromPaymentHints();
         for (DirectedChannelEdge channelEdge : Sets.union(channelEdges, edgesFromPaymentHints)) {
-            if (shouldIgnore(channelEdge, feeRateLimit)) {
+            if (shouldIgnore(channelEdge, paymentOptions, ownPubkey)) {
                 continue;
             }
             ChannelId channelId = channelEdge.channelId();
@@ -111,14 +107,31 @@ public class EdgeComputation {
         return withFeeReserve.subtract(Coins.ofSatoshis(1_000)).maximum(Coins.NONE);
     }
 
-    private boolean shouldIgnore(DirectedChannelEdge channelEdge, long feeRateLimit) {
-        if (channelEdge.policy().disabled()) {
+    private boolean shouldIgnore(DirectedChannelEdge channelEdge, PaymentOptions paymentOptions, Pubkey pubkey) {
+        Policy policy = channelEdge.policy();
+        if (policy.disabled()) {
             return true;
         }
-        if (feeRateLimit == NO_FEE_RATE_LIMIT) {
+        Long feeRateLimit = paymentOptions.feeRateLimit().orElse(null);
+        if (feeRateLimit == null) {
             return false;
         }
-        return channelEdge.policy().feeRate() >= feeRateLimit;
+        long feeRate = policy.feeRate();
+        if (feeRate >= feeRateLimit) {
+            return true;
+        }
+        if (isIncomingEdge(channelEdge, pubkey)) {
+            return false;
+        }
+        Long feeRateLimitFirstHops = paymentOptions.feeRateLimitExceptIncomingHops().orElse(null);
+        if (feeRateLimitFirstHops == null) {
+            return false;
+        }
+        return feeRate >= feeRateLimitFirstHops;
+    }
+
+    private boolean isIncomingEdge(DirectedChannelEdge channelEdge, Pubkey ownPubkey) {
+        return ownPubkey.equals(channelEdge.target());
     }
 
     private Optional<Coins> getKnownLiquidity(Edge edge, Pubkey ownPubKey) {

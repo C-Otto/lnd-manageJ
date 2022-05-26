@@ -31,7 +31,6 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_4;
 import static de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions.DEFAULT_PAYMENT_OPTIONS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -62,23 +61,24 @@ class FlowComputationTest {
 
     @Test
     void solve_no_edge() {
-        when(edgeComputation.getEdges()).thenReturn(EdgesWithLiquidityInformation.EMPTY);
+        when(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS)).thenReturn(EdgesWithLiquidityInformation.EMPTY);
         assertThat(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, Coins.ofSatoshis(1), DEFAULT_PAYMENT_OPTIONS))
                 .isEqualTo(new Flows());
     }
 
     @Test
     void passes_fee_rate_limit_to_get_edges() {
-        when(edgeComputation.getEdges(anyLong())).thenReturn(EdgesWithLiquidityInformation.EMPTY);
-        flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, Coins.ofSatoshis(1), PaymentOptions.forFeeRateLimit(123));
-        verify(edgeComputation).getEdges(123);
+        PaymentOptions paymentOptions = PaymentOptions.forFeeRateLimit(123);
+        when(edgeComputation.getEdges(paymentOptions)).thenReturn(EdgesWithLiquidityInformation.EMPTY);
+        flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, Coins.ofSatoshis(1), paymentOptions);
+        verify(edgeComputation).getEdges(paymentOptions);
     }
 
     @Test
     void solve() {
         Coins amount = Coins.ofSatoshis(1);
         EdgeWithLiquidityInformation edge = EdgeWithLiquidityInformation.forUpperBound(EDGE, EDGE.capacity());
-        when(edgeComputation.getEdges()).thenReturn(new EdgesWithLiquidityInformation(edge));
+        when(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS)).thenReturn(new EdgesWithLiquidityInformation(edge));
         Flow expectedFlow = new Flow(EDGE, amount);
         assertThat(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, amount, DEFAULT_PAYMENT_OPTIONS))
                 .isEqualTo(new Flows(expectedFlow));
@@ -89,7 +89,7 @@ class FlowComputationTest {
         when(configurationService.getIntegerValue(QUANTIZATION)).thenReturn(Optional.of(10));
         Coins amount = Coins.ofSatoshis(9);
         EdgeWithLiquidityInformation edge = EdgeWithLiquidityInformation.forUpperBound(EDGE, EDGE.capacity());
-        when(edgeComputation.getEdges()).thenReturn(new EdgesWithLiquidityInformation(edge));
+        when(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS)).thenReturn(new EdgesWithLiquidityInformation(edge));
         assertThat(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, amount, DEFAULT_PAYMENT_OPTIONS))
                 .isEqualTo(new Flows(new Flow(EDGE, amount)));
     }
@@ -98,7 +98,7 @@ class FlowComputationTest {
     void solve_avoids_sending_from_depleted_local_channel() {
         Edge edge1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, LARGE, POLICY_1);
         Edge edge2 = new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, SMALL, POLICY_2);
-        when(edgeComputation.getEdges()).thenReturn(new EdgesWithLiquidityInformation(
+        when(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS)).thenReturn(new EdgesWithLiquidityInformation(
                 EdgeWithLiquidityInformation.forKnownLiquidity(edge1, Coins.NONE),
                 EdgeWithLiquidityInformation.forUpperBound(edge2, SMALL)
         ));
@@ -114,7 +114,7 @@ class FlowComputationTest {
         Edge edge1a = new Edge(CHANNEL_ID, PUBKEY_2, PUBKEY_3, LARGE, POLICY_1);
         Edge edge1b = new Edge(CHANNEL_ID_2, PUBKEY_3, PUBKEY_4, LARGE, POLICY_1);
         Edge edge2 = new Edge(CHANNEL_ID_3, PUBKEY_2, PUBKEY_4, SMALL, POLICY_2);
-        when(edgeComputation.getEdges()).thenReturn(new EdgesWithLiquidityInformation(
+        when(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS)).thenReturn(new EdgesWithLiquidityInformation(
                 EdgeWithLiquidityInformation.forUpperBound(edge1a, amount),
                 EdgeWithLiquidityInformation.forUpperBound(edge1b, LARGE),
                 EdgeWithLiquidityInformation.forUpperBound(edge2, SMALL)
@@ -130,7 +130,7 @@ class FlowComputationTest {
         Edge edge1a = new Edge(CHANNEL_ID, PUBKEY_3, PUBKEY_4, LARGE, POLICY_2);
         Edge edge1b = new Edge(CHANNEL_ID_2, PUBKEY_4, PUBKEY, LARGE, POLICY_2);
         Edge edge2 = new Edge(CHANNEL_ID_3, PUBKEY_3, PUBKEY, SMALL, POLICY_1);
-        when(edgeComputation.getEdges()).thenReturn(new EdgesWithLiquidityInformation(
+        when(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS)).thenReturn(new EdgesWithLiquidityInformation(
                 EdgeWithLiquidityInformation.forUpperBound(edge1a, Coins.ofSatoshis(5_000_000)),
                 EdgeWithLiquidityInformation.forUpperBound(edge1b, LARGE),
                 EdgeWithLiquidityInformation.forUpperBound(edge2, SMALL)

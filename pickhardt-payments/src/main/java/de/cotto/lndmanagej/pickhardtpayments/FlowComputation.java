@@ -38,7 +38,7 @@ public class FlowComputation {
         int quantization = getQuantization(amount);
         int piecewiseLinearApproximations = configurationService.getIntegerValue(PIECEWISE_LINEAR_APPROXIMATIONS)
                 .orElse(DEFAULT_PIECEWISE_LINEAR_APPROXIMATIONS);
-        EdgesWithLiquidityInformation edges = getEdges(paymentOptions);
+        EdgesWithLiquidityInformation edges = edgeComputation.getEdges(paymentOptions);
         MinCostFlowSolver minCostFlowSolver = new MinCostFlowSolver(
                 edges,
                 Map.of(source, amount),
@@ -50,16 +50,6 @@ public class FlowComputation {
                 paymentOptions.ignoreFeesForOwnChannels()
         );
         return minCostFlowSolver.solve();
-    }
-
-    private EdgesWithLiquidityInformation getEdges(PaymentOptions paymentOptions) {
-        EdgesWithLiquidityInformation edges;
-        if (paymentOptions.feeRateLimit().isPresent()) {
-            edges = edgeComputation.getEdges(paymentOptions.feeRateLimit().get());
-        } else {
-            edges = edgeComputation.getEdges();
-        }
-        return edges;
     }
 
     private int getQuantization(Coins amount) {

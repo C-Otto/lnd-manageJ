@@ -82,7 +82,7 @@ public class PaymentLoop {
                 MultiPathPayment multiPathPayment =
                         multiPathPaymentSplitter.getMultiPathPaymentTo(destination, residualAmount, paymentOptions);
                 if (multiPathPayment.isFailure()) {
-                    String information = multiPathPayment.getInformation();
+                    String information = multiPathPayment.information();
                     if (Strings.isNotEmpty(information)) {
                         paymentStatus.failed(
                                 "Unable to find route (trying to send %s): %s"

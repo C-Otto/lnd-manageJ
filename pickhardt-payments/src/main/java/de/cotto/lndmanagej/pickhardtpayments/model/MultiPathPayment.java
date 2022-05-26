@@ -32,7 +32,7 @@ public record MultiPathPayment(
     }
 
     public boolean isFailure() {
-        return routes.isEmpty() && amount.equals(Coins.NONE);
+        return routes.isEmpty();
     }
 
     public long getFeeRate() {
@@ -41,10 +41,6 @@ public record MultiPathPayment(
 
     public long getFeeRateWithFirstHop() {
         return getFeeRateForFees(feesWithFirstHop);
-    }
-
-    public String getInformation() {
-        return information;
     }
 
     private long getFeeRateForFees(Coins feesToConsider) {
