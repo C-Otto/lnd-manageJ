@@ -43,10 +43,6 @@ public record MultiPathPayment(
         return getFeeRateForFees(feesWithFirstHop);
     }
 
-    public String getInformation() {
-        return information;
-    }
-
     private long getFeeRateForFees(Coins feesToConsider) {
         if (amount.isPositive()) {
             return feesToConsider.milliSatoshis() * 1_000_000 / amount.milliSatoshis();
