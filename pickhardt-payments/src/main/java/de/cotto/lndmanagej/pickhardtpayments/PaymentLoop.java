@@ -104,13 +104,13 @@ public class PaymentLoop {
                 MultiPathPayment multiPathPayment =
                         multiPathPaymentSplitter.getMultiPathPaymentTo(destination, residualAmount, paymentOptions);
                 if (multiPathPayment.isFailure()) {
+                    failureCounter++;
                     logFailureInformation(residualAmount, multiPathPayment);
-                    if (failureCounter >= getMaxRetriesAfterFailure()) {
+                    if (failureCounter > getMaxRetriesAfterFailure()) {
                         paymentStatus.failed("Giving up after " + failureCounter + " failed attempts to compute route");
                         return;
                     }
                     paymentStatus.info("Trying again...");
-                    failureCounter++;
                     sleepAfterFailure();
                 } else {
                     failureCounter = 0;
