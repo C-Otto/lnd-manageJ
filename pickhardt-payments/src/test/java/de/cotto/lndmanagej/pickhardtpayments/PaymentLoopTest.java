@@ -42,13 +42,13 @@ class PaymentLoopTest {
     private static final PaymentOptions PAYMENT_OPTIONS = PaymentOptions.forFeeRateWeight(123);
     private static final String MPP_1_ROUTE_1 =
             "100: [712345x123x1 (cap 21,000,000), 799999x456x3 (cap 21,000,000), 799999x456x5 (cap 21,000,000)], " +
-                    "400ppm, probability 0.9999857143544217";
+                    "400ppm, 600ppm with first hop, probability 0.9999857143544217";
     private static final String MPP_1_ROUTE_2 =
             "200: [799999x456x2 (cap 21,000,000), 799999x456x3 (cap 21,000,000)], " +
-                    "200ppm, probability 0.9999809524725624";
+                    "200ppm, 400ppm with first hop, probability 0.9999809524725624";
     private static final String MPP_2_ROUTE_1 =
-            "[799999x456x3 (cap 21,000,000), 799999x456x5 (cap 21,000,000)], " +
-                    "200ppm, probability 0.9999952381011338";
+            "50: [799999x456x3 (cap 21,000,000), 799999x456x5 (cap 21,000,000)], " +
+                    "200ppm, 400ppm with first hop, probability 0.9999952381011338";
 
     @InjectMocks
     private PaymentLoop paymentLoop;
@@ -179,7 +179,7 @@ class PaymentLoopTest {
                 "Sending to route #1: " + MPP_1_ROUTE_1,
                 "Sending to route #2: " + MPP_1_ROUTE_2,
                 "#2: Sending 3 (97.2% = 120 in flight)",
-                "Sending to route #3: 50: " + MPP_2_ROUTE_1,
+                "Sending to route #3: " + MPP_2_ROUTE_1,
                 "Settled"
         );
         softly.assertAll();
