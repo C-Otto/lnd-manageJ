@@ -75,7 +75,7 @@ class PaymentStatusTest {
                             "[712345x123x1 (cap 21,000,000), " +
                             "799999x456x3 (cap 21,000,000), " +
                             "799999x456x5 (cap 21,000,000)], " +
-                            "400ppm, probability 0.9999857143544217"
+                            "400ppm, 600ppm with first hop, probability 0.9999857143544217"
             );
         }
 
@@ -83,7 +83,8 @@ class PaymentStatusTest {
         void adds_message_with_min() {
             sendSingleEdge(EdgeWithLiquidityInformation.forLowerBound(EDGE, Coins.ofSatoshis(10)));
             assertThat(paymentStatus.getMessages().stream().map(PaymentStatus.InstantWithString::string)).contains(
-                    ROUTE_PREFIX + "[712345x123x1 (min 10, cap 21,000,000)], 0ppm, probability 0.9999957142838776"
+                    ROUTE_PREFIX + "[712345x123x1 (min 10, cap 21,000,000)], " +
+                            "0ppm, 200ppm with first hop, probability 0.9999957142838776"
             );
         }
 
@@ -91,7 +92,8 @@ class PaymentStatusTest {
         void adds_message_with_max() {
             sendSingleEdge(EdgeWithLiquidityInformation.forUpperBound(EDGE, Coins.ofSatoshis(11)));
             assertThat(paymentStatus.getMessages().stream().map(PaymentStatus.InstantWithString::string)).contains(
-                    ROUTE_PREFIX + "[712345x123x1 (max 11, cap 21,000,000)], 0ppm, probability 0.0"
+                    ROUTE_PREFIX + "[712345x123x1 (max 11, cap 21,000,000)], " +
+                            "0ppm, 200ppm with first hop, probability 0.0"
             );
         }
 
@@ -99,7 +101,7 @@ class PaymentStatusTest {
         void adds_message_with_known() {
             sendSingleEdge(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, Coins.ofSatoshis(12)));
             assertThat(paymentStatus.getMessages().stream().map(PaymentStatus.InstantWithString::string)).contains(
-                    ROUTE_PREFIX + "[712345x123x1 (known 12)], 0ppm, probability 0.0"
+                    ROUTE_PREFIX + "[712345x123x1 (known 12)], 0ppm, 200ppm with first hop, probability 0.0"
             );
         }
 
@@ -111,7 +113,7 @@ class PaymentStatusTest {
                     .contains("Sending to route #2: 200: " +
                             "[799999x456x2 (cap 21,000,000), " +
                             "799999x456x3 (cap 21,000,000)], " +
-                            "200ppm, probability 0.9999809524725624");
+                            "200ppm, 400ppm with first hop, probability 0.9999809524725624");
         }
 
         private void sendSingleEdge(EdgeWithLiquidityInformation edge) {

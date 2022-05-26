@@ -85,7 +85,9 @@ public class PaymentStatus {
                 .map(this::getFormattedEdge)
                 .toList();
         return route.getAmount().toStringSat() + ": " + edgeInformation + ", "
-                + route.getFeeRate() + "ppm, probability " + route.getProbability();
+                + route.getFeeRate() + "ppm, "
+                + route.getFeeRateWithFirstHop() + "ppm with first hop, " +
+                "probability " + route.getProbability();
     }
 
     private String getFormattedEdge(EdgeWithLiquidityInformation edge) {
