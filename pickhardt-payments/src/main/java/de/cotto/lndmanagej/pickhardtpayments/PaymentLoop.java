@@ -1,6 +1,8 @@
 package de.cotto.lndmanagej.pickhardtpayments;
 
 import de.cotto.lndmanagej.configuration.ConfigurationService;
+import de.cotto.lndmanagej.grpc.GrpcGetInfo;
+import de.cotto.lndmanagej.grpc.GrpcInvoices;
 import de.cotto.lndmanagej.grpc.GrpcSendToRoute;
 import de.cotto.lndmanagej.grpc.SendToRouteObserver;
 import de.cotto.lndmanagej.model.Coins;
@@ -35,16 +37,22 @@ public class PaymentLoop {
     private final MultiPathPaymentSplitter multiPathPaymentSplitter;
     private final ConfigurationService configurationService;
     private final GrpcSendToRoute grpcSendToRoute;
+    private final GrpcInvoices grpcInvoices;
+    private final GrpcGetInfo grpcGetInfo;
 
     public PaymentLoop(
             MultiPathPaymentObserver multiPathPaymentObserver,
             MultiPathPaymentSplitter multiPathPaymentSplitter,
-            ConfigurationService configurationService, GrpcSendToRoute grpcSendToRoute
+            ConfigurationService configurationService, GrpcSendToRoute grpcSendToRoute,
+            GrpcInvoices grpcInvoices,
+            GrpcGetInfo grpcGetInfo
     ) {
         this.multiPathPaymentObserver = multiPathPaymentObserver;
         this.multiPathPaymentSplitter = multiPathPaymentSplitter;
         this.configurationService = configurationService;
         this.grpcSendToRoute = grpcSendToRoute;
+        this.grpcInvoices = grpcInvoices;
+        this.grpcGetInfo = grpcGetInfo;
     }
 
     @Async
@@ -54,6 +62,10 @@ public class PaymentLoop {
             PaymentStatus paymentStatus
     ) {
         new Instance(decodedPaymentRequest, paymentOptions, paymentStatus).start();
+        Pubkey ownPubkey = grpcGetInfo.getPubkey();
+        if (paymentStatus.isFailure() && decodedPaymentRequest.destination().equals(ownPubkey)) {
+            grpcInvoices.cancelPaymentRequest(decodedPaymentRequest);
+        }
     }
 
     private class Instance {
@@ -92,12 +104,13 @@ public class PaymentLoop {
                 MultiPathPayment multiPathPayment =
                         multiPathPaymentSplitter.getMultiPathPaymentTo(destination, residualAmount, paymentOptions);
                 if (multiPathPayment.isFailure()) {
-                    failureCounter++;
                     logFailureInformation(residualAmount, multiPathPayment);
-                    if (failureCounter > getMaxRetriesAfterFailure()) {
+                    if (failureCounter >= getMaxRetriesAfterFailure()) {
                         paymentStatus.failed("Giving up after " + failureCounter + " failed attempts to compute route");
                         return;
                     }
+                    paymentStatus.info("Trying again...");
+                    failureCounter++;
                     sleepAfterFailure();
                 } else {
                     failureCounter = 0;
