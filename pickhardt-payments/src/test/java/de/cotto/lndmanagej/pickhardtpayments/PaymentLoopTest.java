@@ -78,7 +78,9 @@ class PaymentLoopTest {
 
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(paymentStatus.isFailure()).isTrue();
-        softly.assertThat(paymentStatus.getMessages().stream().map(InstantWithString::string)).contains("");
+        softly.assertThat(paymentStatus.getMessages().stream().map(InstantWithString::string))
+                .contains("Unable to find route (trying to send 123)");
+        softly.assertAll();
         verifyNoInteractions(grpcSendToRoute);
     }
 
