@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.pickhardtpayments;
 
+import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.grpc.GrpcSendToRoute;
 import de.cotto.lndmanagej.grpc.SendToRouteObserver;
 import de.cotto.lndmanagej.model.Coins;
@@ -17,8 +18,14 @@ import org.springframework.stereotype.Component;
 import java.time.Duration;
 import java.util.List;
 
+import static de.cotto.lndmanagej.configuration.TopUpConfigurationSettings.MAX_RETRIES_AFTER_FAILURE;
+import static de.cotto.lndmanagej.configuration.TopUpConfigurationSettings.SLEEP_AFTER_FAILURE_MILLISECONDS;
+
 @Component
 public class PaymentLoop {
+    private static final int DEFAULT_MAX_RETRIES = 5;
+    private static final int DEFAULT_SLEEP_MILLISECONDS = 500;
+
     private static final Duration TIMEOUT = Duration.ofMinutes(5);
     private static final String TIMEOUT_MESSAGE =
             "Stopping payment loop, full amount is in-flight, but no failure/settle message received within timeout. " +
@@ -26,15 +33,17 @@ public class PaymentLoop {
 
     private final MultiPathPaymentObserver multiPathPaymentObserver;
     private final MultiPathPaymentSplitter multiPathPaymentSplitter;
+    private final ConfigurationService configurationService;
     private final GrpcSendToRoute grpcSendToRoute;
 
     public PaymentLoop(
             MultiPathPaymentObserver multiPathPaymentObserver,
             MultiPathPaymentSplitter multiPathPaymentSplitter,
-            GrpcSendToRoute grpcSendToRoute
+            ConfigurationService configurationService, GrpcSendToRoute grpcSendToRoute
     ) {
         this.multiPathPaymentObserver = multiPathPaymentObserver;
         this.multiPathPaymentSplitter = multiPathPaymentSplitter;
+        this.configurationService = configurationService;
         this.grpcSendToRoute = grpcSendToRoute;
     }
 
@@ -71,6 +80,7 @@ public class PaymentLoop {
 
         private void start() {
             int loopIterationCounter = 0;
+            int failureCounter = 0;
             while (shouldContinue()) {
                 loopIterationCounter++;
                 Coins residualAmount = totalAmountToSend.subtract(inFlight);
@@ -82,26 +92,45 @@ public class PaymentLoop {
                 MultiPathPayment multiPathPayment =
                         multiPathPaymentSplitter.getMultiPathPaymentTo(destination, residualAmount, paymentOptions);
                 if (multiPathPayment.isFailure()) {
-                    String information = multiPathPayment.information();
-                    if (Strings.isNotEmpty(information)) {
-                        paymentStatus.failed(
-                                "Unable to find route (trying to send %s): %s"
-                                        .formatted(residualAmount.toStringSat(), information)
-                        );
-                    } else {
-                        paymentStatus.failed(
-                                "Unable to find route (trying to send %s)"
-                                        .formatted(residualAmount.toStringSat())
-                        );
+                    failureCounter++;
+                    logFailureInformation(residualAmount, multiPathPayment);
+                    if (failureCounter > getMaxRetriesAfterFailure()) {
+                        paymentStatus.failed("Giving up after " + failureCounter + " failed attempts to compute route");
+                        return;
                     }
-                    return;
+                    sleepAfterFailure();
+                } else {
+                    failureCounter = 0;
+                    List<Route> routes = multiPathPayment.routes();
+                    for (Route route : routes) {
+                        SendToRouteObserver sendToRouteObserver = multiPathPaymentObserver.getFor(route, paymentHash);
+                        grpcSendToRoute.sendToRoute(route, decodedPaymentRequest, sendToRouteObserver);
+                        paymentStatus.sending(route);
+                    }
                 }
-                List<Route> routes = multiPathPayment.routes();
-                for (Route route : routes) {
-                    SendToRouteObserver sendToRouteObserver = multiPathPaymentObserver.getFor(route, paymentHash);
-                    grpcSendToRoute.sendToRoute(route, decodedPaymentRequest, sendToRouteObserver);
-                    paymentStatus.sending(route);
-                }
+            }
+        }
+
+        private void logFailureInformation(Coins residualAmount, MultiPathPayment multiPathPayment) {
+            String information = multiPathPayment.information();
+            if (Strings.isNotEmpty(information)) {
+                paymentStatus.info(
+                        "Unable to find route (trying to send %s): %s"
+                                .formatted(residualAmount.toStringSat(), information)
+                );
+            } else {
+                paymentStatus.info(
+                        "Unable to find route (trying to send %s)"
+                                .formatted(residualAmount.toStringSat())
+                );
+            }
+        }
+
+        private void sleepAfterFailure() {
+            try {
+                Thread.sleep(getSleepAfterFailureMillis());
+            } catch (InterruptedException ignored) {
+                // ignore
             }
         }
 
@@ -134,6 +163,14 @@ public class PaymentLoop {
             }
             multiPathPaymentObserver.getFailureCode(paymentHash).ifPresent(paymentStatus::failed);
         }
+    }
 
+    private int getSleepAfterFailureMillis() {
+        return configurationService.getIntegerValue(SLEEP_AFTER_FAILURE_MILLISECONDS)
+                .orElse(DEFAULT_SLEEP_MILLISECONDS);
+    }
+
+    private int getMaxRetriesAfterFailure() {
+        return configurationService.getIntegerValue(MAX_RETRIES_AFTER_FAILURE).orElse(DEFAULT_MAX_RETRIES);
     }
 }

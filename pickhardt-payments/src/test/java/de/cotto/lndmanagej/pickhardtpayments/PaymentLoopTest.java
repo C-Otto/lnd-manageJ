@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.pickhardtpayments;
 
+import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.grpc.GrpcSendToRoute;
 import de.cotto.lndmanagej.grpc.SendToRouteObserver;
 import de.cotto.lndmanagej.model.Coins;
@@ -22,6 +23,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static de.cotto.lndmanagej.configuration.TopUpConfigurationSettings.MAX_RETRIES_AFTER_FAILURE;
+import static de.cotto.lndmanagej.configuration.TopUpConfigurationSettings.SLEEP_AFTER_FAILURE_MILLISECONDS;
 import static de.cotto.lndmanagej.model.DecodedPaymentRequestFixtures.DECODED_PAYMENT_REQUEST;
 import static de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPaymentFixtures.MULTI_PATH_PAYMENT;
 import static de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPaymentFixtures.MULTI_PATH_PAYMENT_2;
@@ -60,6 +63,9 @@ class PaymentLoopTest {
     private MultiPathPaymentSplitter multiPathPaymentSplitter;
 
     @Mock
+    private ConfigurationService configurationService;
+
+    @Mock
     private GrpcSendToRoute grpcSendToRoute;
 
     private PaymentStatus paymentStatus;
@@ -67,6 +73,10 @@ class PaymentLoopTest {
     @BeforeEach
     void setUp() {
         lenient().when(multiPathPaymentObserver.getInFlight(PAYMENT_HASH)).thenReturn(Coins.NONE);
+        lenient().when(configurationService.getIntegerValue(SLEEP_AFTER_FAILURE_MILLISECONDS))
+                .thenReturn(Optional.of(1));
+        lenient().when(configurationService.getIntegerValue(MAX_RETRIES_AFTER_FAILURE))
+                .thenReturn(Optional.of(0));
         paymentStatus = new PaymentStatus(PAYMENT_HASH);
     }
 
@@ -82,6 +92,24 @@ class PaymentLoopTest {
                 .contains("Unable to find route (trying to send 123)");
         softly.assertAll();
         verifyNoInteractions(grpcSendToRoute);
+    }
+
+    @Test
+    void tries_again_after_failure_from_splitter() {
+        when(configurationService.getIntegerValue(MAX_RETRIES_AFTER_FAILURE)).thenReturn(Optional.of(1));
+        when(configurationService.getIntegerValue(SLEEP_AFTER_FAILURE_MILLISECONDS)).thenReturn(Optional.of(1));
+        when(multiPathPaymentObserver.isSettled(PAYMENT_HASH))
+                .thenReturn(false)
+                .thenReturn(true);
+        when(multiPathPaymentObserver.getInFlight(PAYMENT_HASH))
+                .thenReturn(Coins.NONE)
+                .thenReturn(DECODED_PAYMENT_REQUEST.amount());
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), any(), any()))
+                .thenReturn(MultiPathPayment.FAILURE)
+                .thenReturn(MULTI_PATH_PAYMENT);
+        paymentLoop.start(DECODED_PAYMENT_REQUEST, PAYMENT_OPTIONS, paymentStatus);
+
+        assertThat(paymentStatus.isFailure()).isFalse();
     }
 
     @Test
