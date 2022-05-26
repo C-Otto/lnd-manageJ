@@ -32,7 +32,7 @@ public record MultiPathPayment(
     }
 
     public boolean isFailure() {
-        return routes.isEmpty() && amount.equals(Coins.NONE);
+        return routes.isEmpty();
     }
 
     public long getFeeRate() {
