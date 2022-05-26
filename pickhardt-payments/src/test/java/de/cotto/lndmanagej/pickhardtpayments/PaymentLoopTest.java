@@ -107,6 +107,20 @@ class PaymentLoopTest {
     }
 
     @Test
+    void fails_after_one_hundred_loop_iterations() {
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), any(), any()))
+                .thenReturn(MULTI_PATH_PAYMENT);
+        paymentLoop.start(DECODED_PAYMENT_REQUEST, PAYMENT_OPTIONS, paymentStatus);
+
+        verify(multiPathPaymentSplitter, times(100)).getMultiPathPaymentTo(any(), any(), any());
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(paymentStatus.isFailure()).isTrue();
+        softly.assertThat(paymentStatus.getMessages().stream().map(InstantWithString::string))
+                .contains("Failing after 100 loop iterations.");
+        softly.assertAll();
+    }
+
+    @Test
     void cancels_invoice_from_own_node() {
         when(grpcGetInfo.getPubkey()).thenReturn(DECODED_PAYMENT_REQUEST.destination());
         when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), any(), any()))
@@ -139,7 +153,7 @@ class PaymentLoopTest {
     }
 
     @Test
-    void fails_after_configured_number_of_attempts() {
+    void fails_after_configured_number_of_retry_attempts() {
         when(configurationService.getIntegerValue(MAX_RETRIES_AFTER_FAILURE)).thenReturn(Optional.of(1));
         when(configurationService.getIntegerValue(SLEEP_AFTER_FAILURE_MILLISECONDS)).thenReturn(Optional.of(1));
         when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), any(), any())).thenReturn(MultiPathPayment.FAILURE);

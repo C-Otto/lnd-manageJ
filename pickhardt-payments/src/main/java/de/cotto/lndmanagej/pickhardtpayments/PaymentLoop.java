@@ -27,6 +27,7 @@ import static de.cotto.lndmanagej.configuration.TopUpConfigurationSettings.SLEEP
 public class PaymentLoop {
     private static final int DEFAULT_MAX_RETRIES = 5;
     private static final int DEFAULT_SLEEP_MILLISECONDS = 500;
+    private static final int MAX_NUMBER_OF_LOOPS = 100;
 
     private static final Duration TIMEOUT = Duration.ofMinutes(5);
     private static final String TIMEOUT_MESSAGE =
@@ -93,7 +94,7 @@ public class PaymentLoop {
         private void start() {
             int loopIterationCounter = 0;
             int failureCounter = 0;
-            while (shouldContinue()) {
+            while (shouldContinue(loopIterationCounter)) {
                 loopIterationCounter++;
                 Coins residualAmount = totalAmountToSend.subtract(inFlight);
                 if (Coins.NONE.equals(residualAmount)) {
@@ -156,7 +157,11 @@ public class PaymentLoop {
             );
         }
 
-        private boolean shouldContinue() {
+        private boolean shouldContinue(int loopIterationCounter) {
+            if (loopIterationCounter >= MAX_NUMBER_OF_LOOPS) {
+                paymentStatus.failed("Failing after " + MAX_NUMBER_OF_LOOPS + " loop iterations.");
+                return false;
+            }
             updateInformation();
             if (!paymentStatus.isPending()) {
                 return false;
