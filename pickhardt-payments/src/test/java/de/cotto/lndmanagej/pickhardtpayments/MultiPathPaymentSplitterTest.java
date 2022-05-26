@@ -123,7 +123,7 @@ class MultiPathPaymentSplitterTest {
             int feeRate = 200;
             Coins amount = Coins.ofSatoshis(1_000_000);
             Policy policy = policyFor(feeRate);
-            PaymentOptions paymentOptions = PaymentOptions.forTopUp(feeRate - 1, PUBKEY_2);
+            PaymentOptions paymentOptions = PaymentOptions.forTopUp(feeRate - 1, 0, PUBKEY_2);
             mockFlow(amount, policy, paymentOptions);
 
             MultiPathPayment multiPathPayment =
@@ -137,7 +137,7 @@ class MultiPathPaymentSplitterTest {
             int feeRate = 200;
             Coins amount = Coins.ofSatoshis(2_000_000);
             Policy policy = policyFor(feeRate);
-            PaymentOptions paymentOptions = PaymentOptions.forTopUp(feeRate, PUBKEY_2);
+            PaymentOptions paymentOptions = PaymentOptions.forTopUp(feeRate, 0, PUBKEY_2);
             mockFlow(amount, policy, paymentOptions);
 
             MultiPathPayment multiPathPayment =
@@ -151,7 +151,7 @@ class MultiPathPaymentSplitterTest {
             mockExtensionEdge(PUBKEY_3, feeRate);
             Coins amount = Coins.ofSatoshis(2_000_000);
             Policy policy = policyFor(0);
-            PaymentOptions paymentOptions = PaymentOptions.forTopUp(feeRate - 1, PUBKEY_2);
+            PaymentOptions paymentOptions = PaymentOptions.forTopUp(feeRate - 1, 0, PUBKEY_2);
             mockFlow(amount, policy, paymentOptions);
 
             MultiPathPayment multiPathPayment =
@@ -197,11 +197,13 @@ class MultiPathPaymentSplitterTest {
 
         @Test
         void one_flow_has_fee_rate_above_limit_but_average_fee_rate_is_below_limit_including_fees_from_first_hop() {
+            // The cheaper flows might fail while the more expensive one settles. This is not what we want, so we have
+            // to disregard all flows.
             mockExtensionEdge(PUBKEY_4, 0);
             int feeRate = 200;
             Coins halfOfAmount = Coins.ofSatoshis(500_000);
             Coins amount = halfOfAmount.add(halfOfAmount);
-            PaymentOptions paymentOptions = PaymentOptions.forTopUp(feeRate - 1, PUBKEY_2);
+            PaymentOptions paymentOptions = PaymentOptions.forTopUp(feeRate - 1, 0, PUBKEY_2);
             Edge edge1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policyFor(0));
             Edge edge2 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policyFor(feeRate));
             Flow flow1 = new Flow(edge1, halfOfAmount);
@@ -348,7 +350,7 @@ class MultiPathPaymentSplitterTest {
         }
 
         private MultiPathPayment attemptTopUpPayment() {
-            PaymentOptions paymentOptions = PaymentOptions.forTopUp(500, PUBKEY_2);
+            PaymentOptions paymentOptions = PaymentOptions.forTopUp(500, 123, PUBKEY_2);
             when(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, AMOUNT, paymentOptions)).thenReturn(new Flows(FLOW));
             return multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_3, AMOUNT, paymentOptions);
         }

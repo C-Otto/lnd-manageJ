@@ -184,7 +184,7 @@ class TopUpServiceTest {
     private void assertTopUp(Coins expectedTopUpAmount, Duration expiry) {
         PaymentStatus paymentStatus = topUpService.topUp(PUBKEY, AMOUNT);
         verify(grpcInvoices).createPaymentRequest(expectedTopUpAmount, DESCRIPTION, expiry);
-        PaymentOptions paymentOptions = PaymentOptions.forTopUp(OUR_FEE_RATE, PUBKEY);
+        PaymentOptions paymentOptions = PaymentOptions.forTopUp(OUR_FEE_RATE, PEER_FEE_RATE, PUBKEY);
         verify(multiPathPaymentSender).payPaymentRequest(DECODED_PAYMENT_REQUEST, paymentOptions);
         assertThat(paymentStatus.isPending()).isTrue();
     }

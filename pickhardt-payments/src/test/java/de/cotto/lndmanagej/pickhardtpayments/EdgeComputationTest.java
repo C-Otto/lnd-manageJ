@@ -9,6 +9,7 @@ import de.cotto.lndmanagej.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.Policy;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.LiquidityBoundsService;
@@ -37,6 +38,7 @@ import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_WITH_BASE_FEE;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_4;
+import static de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions.DEFAULT_PAYMENT_OPTIONS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
@@ -79,23 +81,24 @@ class EdgeComputationTest {
 
     @Test
     void no_graph() {
-        assertThat(edgeComputation.getEdges().edges()).isEmpty();
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges()).isEmpty();
     }
 
     @Test
     void does_not_add_edge_for_disabled_channel() {
         DirectedChannelEdge edge = new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY, PUBKEY_2, POLICY_DISABLED);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));
-        assertThat(edgeComputation.getEdges().edges()).isEmpty();
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges()).isEmpty();
     }
 
     @Test
     void does_not_add_edge_with_fee_rate_at_or_above_limit() {
         int feeRateLimit = 199;
-        Policy policyExpensive = new Policy(200, Coins.NONE, true, 40, Coins.ofSatoshis(0));
+        PaymentOptions paymentOptions = PaymentOptions.forFeeRateLimit(feeRateLimit);
+        Policy policyExpensive = policy(200);
         // needs to be excluded to avoid sending top-up payments in a tiny loop: S-X-S
-        Policy policyAtLimit = new Policy(199, Coins.NONE, true, 40, Coins.ofSatoshis(0));
-        Policy policyOk = new Policy(198, Coins.NONE, true, 40, Coins.ofSatoshis(0));
+        Policy policyAtLimit = policy(199);
+        Policy policyOk = policy(198);
         DirectedChannelEdge edgeExpensive =
                 new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY, PUBKEY_2, policyExpensive);
         DirectedChannelEdge edgeAtLimit =
@@ -103,8 +106,33 @@ class EdgeComputationTest {
         DirectedChannelEdge edgeOk =
                 new DirectedChannelEdge(CHANNEL_ID_3, CAPACITY, PUBKEY, PUBKEY_2, policyOk);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edgeExpensive, edgeAtLimit, edgeOk)));
-        assertThat(edgeComputation.getEdges(feeRateLimit).edges().stream().map(EdgeWithLiquidityInformation::channelId))
-                .containsExactly(CHANNEL_ID_3);
+        assertThat(
+                edgeComputation.getEdges(paymentOptions).edges().stream().map(EdgeWithLiquidityInformation::channelId)
+        ).containsExactly(CHANNEL_ID_3);
+    }
+
+    @Test
+    void does_not_add_first_hop_edge_with_fee_rate_at_or_above_limit_for_first_hops() {
+        Pubkey ownPubkey = EDGE.startNode();
+        Pubkey topUpPeer = PUBKEY_4;
+        int feeRateLimit = 200;
+        int feeRateLimitForFirstHops = 100;
+
+        when(grpcGetInfo.getPubkey()).thenReturn(ownPubkey);
+        PaymentOptions paymentOptions = PaymentOptions.forTopUp(feeRateLimit, feeRateLimitForFirstHops, topUpPeer);
+        Policy lastHopPolicy = policy(199);
+        Policy firstHopPolicyExpensive = policy(100);
+        Policy firstHopPolicyOk = policy(99);
+        DirectedChannelEdge lastHop =
+                new DirectedChannelEdge(CHANNEL_ID, CAPACITY, topUpPeer, ownPubkey, lastHopPolicy);
+        DirectedChannelEdge firstHopExpensive =
+                new DirectedChannelEdge(CHANNEL_ID_2, CAPACITY, ownPubkey, PUBKEY_2, firstHopPolicyExpensive);
+        DirectedChannelEdge firstHopOk =
+                new DirectedChannelEdge(CHANNEL_ID_3, CAPACITY, ownPubkey, PUBKEY_2, firstHopPolicyOk);
+        when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(lastHop, firstHopExpensive, firstHopOk)));
+        assertThat(
+                edgeComputation.getEdges(paymentOptions).edges().stream().map(EdgeWithLiquidityInformation::channelId)
+        ).containsExactlyInAnyOrder(CHANNEL_ID, CHANNEL_ID_3);
     }
 
     @Test
@@ -112,7 +140,7 @@ class EdgeComputationTest {
         DirectedChannelEdge edge =
                 new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY, PUBKEY_2, POLICY_WITH_BASE_FEE);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));
-        assertThat(edgeComputation.getEdges().edges()).isNotEmpty();
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges()).isNotEmpty();
     }
 
     @Test
@@ -124,7 +152,7 @@ class EdgeComputationTest {
         Coins availableKnownLiquidity = getAvailableKnownLiquidity(knownLiquidity);
         when(balanceService.getAvailableLocalBalance(EDGE.channelId())).thenReturn(knownLiquidity);
 
-        assertThat(edgeComputation.getEdges().edges())
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges())
                 .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, availableKnownLiquidity));
     }
 
@@ -143,7 +171,7 @@ class EdgeComputationTest {
                         edge.policy()
                 )
         ));
-        assertThat(edgeComputation.getEdges().edges())
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges())
                 .contains(EdgeWithLiquidityInformation.forKnownLiquidity(edge, fiftyCoins));
     }
 
@@ -152,7 +180,7 @@ class EdgeComputationTest {
         mockEdge();
         when(grpcGetInfo.getPubkey()).thenReturn(EDGE.startNode());
 
-        assertThat(edgeComputation.getEdges().edges())
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges())
                 .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, Coins.NONE));
     }
 
@@ -162,7 +190,7 @@ class EdgeComputationTest {
         mockOfflinePeer();
         when(grpcGetInfo.getPubkey()).thenReturn(EDGE.startNode());
 
-        assertThat(edgeComputation.getEdges().edges())
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges())
                 .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, Coins.NONE));
         verify(balanceService, never()).getAvailableLocalBalance(EDGE.channelId());
     }
@@ -176,7 +204,7 @@ class EdgeComputationTest {
         Coins availableKnownLiquidity = getAvailableKnownLiquidity(knownLiquidity);
         when(balanceService.getAvailableRemoteBalance(EDGE.channelId())).thenReturn(knownLiquidity);
 
-        assertThat(edgeComputation.getEdges().edges())
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges())
                 .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, availableKnownLiquidity));
     }
 
@@ -185,7 +213,7 @@ class EdgeComputationTest {
         mockEdge();
         when(grpcGetInfo.getPubkey()).thenReturn(EDGE.endNode());
 
-        assertThat(edgeComputation.getEdges().edges())
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges())
                 .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, Coins.NONE));
     }
 
@@ -195,7 +223,7 @@ class EdgeComputationTest {
         mockOfflinePeer();
         when(grpcGetInfo.getPubkey()).thenReturn(EDGE.endNode());
 
-        assertThat(edgeComputation.getEdges().edges())
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges())
                 .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, Coins.NONE));
         verify(balanceService, never()).getAvailableLocalBalance(EDGE.channelId());
     }
@@ -211,14 +239,14 @@ class EdgeComputationTest {
         mockEdge();
         Coins upperBound = Coins.ofSatoshis(100);
         mockUpperBound(upperBound);
-        assertThat(edgeComputation.getEdges().edges())
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges())
                 .contains(EdgeWithLiquidityInformation.forUpperBound(EDGE, upperBound));
     }
 
     @Test
     void default_if_no_liquidity_information_is_known() {
         mockEdge();
-        assertThat(edgeComputation.getEdges().edges())
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges())
                 .contains(EdgeWithLiquidityInformation.forUpperBound(EDGE, EDGE.capacity()));
     }
 
@@ -320,5 +348,9 @@ class EdgeComputationTest {
         // reserve 1k sat for on-chain fees (something like having an additional HTLC, commit fee, ...)
         Coins withOnChainReserve = withFeeReserve.subtract(Coins.ofSatoshis(1_000));
         return withOnChainReserve.maximum(Coins.NONE);
+    }
+
+    private static Policy policy(int feeRate) {
+        return new Policy(feeRate, Coins.NONE, true, 40, Coins.ofSatoshis(0));
     }
 }
