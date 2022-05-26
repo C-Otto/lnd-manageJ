@@ -1,5 +1,7 @@
 package de.cotto.lndmanagej.grpc;
 
+import invoicesrpc.InvoicesGrpc;
+import invoicesrpc.InvoicesGrpc.InvoicesBlockingStub;
 import io.grpc.ManagedChannel;
 import io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.NettyChannelBuilder;
@@ -23,6 +25,7 @@ public class StubCreator {
     private final File certFile;
     private final int port;
     private final String host;
+    private final InvoicesBlockingStub invoicesStub;
 
     public StubCreator(File macaroonFile, File certFile, int port, String host) throws IOException {
         this.macaroonFile = macaroonFile;
@@ -34,6 +37,7 @@ public class StubCreator {
         nonBlockingStub = createNonBlockingLightningStub();
         routerStub = createRouterStub();
         nonBlockingRouterStub = createNonBlockingRouterStub();
+        invoicesStub = createInvoicesStub();
     }
 
     public LightningGrpc.LightningBlockingStub getLightningStub() {
@@ -50,6 +54,10 @@ public class StubCreator {
 
     public RouterGrpc.RouterStub getNonBlockingRouterStub() {
         return nonBlockingRouterStub;
+    }
+
+    public InvoicesBlockingStub getInvoicesStub() {
+        return invoicesStub;
     }
 
     public void shutdown() {
@@ -85,6 +93,13 @@ public class StubCreator {
     private RouterGrpc.RouterStub createNonBlockingRouterStub() throws IOException {
         return RouterGrpc
                 .newStub(channel)
+                .withMaxInboundMessageSize(FIFTY_MEGA_BYTE)
+                .withCallCredentials(new MacaroonCallCredential(macaroonFile));
+    }
+
+    private InvoicesBlockingStub createInvoicesStub() throws IOException {
+        return InvoicesGrpc
+                .newBlockingStub(channel)
                 .withMaxInboundMessageSize(FIFTY_MEGA_BYTE)
                 .withCallCredentials(new MacaroonCallCredential(macaroonFile));
     }

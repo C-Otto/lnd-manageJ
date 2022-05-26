@@ -34,10 +34,12 @@ public class GrpcInvoices {
 
     private final GrpcService grpcService;
     private final GrpcPayments grpcPayments;
+    private final GrpcInvoicesService grpcInvoicesService;
 
-    public GrpcInvoices(GrpcService grpcService, GrpcPayments grpcPayments) {
+    public GrpcInvoices(GrpcService grpcService, GrpcPayments grpcPayments, GrpcInvoicesService grpcInvoicesService) {
         this.grpcService = grpcService;
         this.grpcPayments = grpcPayments;
+        this.grpcInvoicesService = grpcInvoicesService;
     }
 
     public int getLimit() {
@@ -60,6 +62,22 @@ public class GrpcInvoices {
                 .orElse(Stream.of())
                 .map(this::toSettledInvoice)
                 .filter(SettledInvoice::isValid);
+    }
+
+    public Optional<DecodedPaymentRequest> createPaymentRequest(Coins amount, String description, Duration expiry) {
+        Invoice invoiceRequest = Invoice.newBuilder()
+                .setMemo(description)
+                .setValueMsat(amount.milliSatoshis())
+                .setExpiry(expiry.get(ChronoUnit.SECONDS))
+                .build();
+        return grpcService.addInvoice(invoiceRequest)
+                .map(AddInvoiceResponse::getPaymentRequest)
+                .map(grpcPayments::decodePaymentRequest)
+                .map(Optional::orElseThrow);
+    }
+
+    public void cancelPaymentRequest(DecodedPaymentRequest decodedPaymentRequest) {
+        grpcInvoicesService.cancelInvoice(decodedPaymentRequest.paymentHash());
     }
 
     private SettledInvoice toSettledInvoice(Invoice lndInvoice) {
@@ -103,17 +121,5 @@ public class GrpcInvoices {
 
     private Stream<Invoice> toStream(Iterator<Invoice> iterator) {
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false);
-    }
-
-    public Optional<DecodedPaymentRequest> createPaymentRequest(Coins amount, String description, Duration expiry) {
-        Invoice invoiceRequest = Invoice.newBuilder()
-                .setMemo(description)
-                .setValueMsat(amount.milliSatoshis())
-                .setExpiry(expiry.get(ChronoUnit.SECONDS))
-                .build();
-        return grpcService.addInvoice(invoiceRequest)
-                .map(AddInvoiceResponse::getPaymentRequest)
-                .map(grpcPayments::decodePaymentRequest)
-                .map(Optional::orElseThrow);
     }
 }

@@ -1,6 +1,8 @@
 package de.cotto.lndmanagej.pickhardtpayments;
 
 import de.cotto.lndmanagej.configuration.ConfigurationService;
+import de.cotto.lndmanagej.grpc.GrpcGetInfo;
+import de.cotto.lndmanagej.grpc.GrpcInvoices;
 import de.cotto.lndmanagej.grpc.GrpcSendToRoute;
 import de.cotto.lndmanagej.grpc.SendToRouteObserver;
 import de.cotto.lndmanagej.model.Coins;
@@ -26,6 +28,7 @@ import java.util.Optional;
 import static de.cotto.lndmanagej.configuration.TopUpConfigurationSettings.MAX_RETRIES_AFTER_FAILURE;
 import static de.cotto.lndmanagej.configuration.TopUpConfigurationSettings.SLEEP_AFTER_FAILURE_MILLISECONDS;
 import static de.cotto.lndmanagej.model.DecodedPaymentRequestFixtures.DECODED_PAYMENT_REQUEST;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_4;
 import static de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPaymentFixtures.MULTI_PATH_PAYMENT;
 import static de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPaymentFixtures.MULTI_PATH_PAYMENT_2;
 import static java.util.Objects.requireNonNull;
@@ -68,6 +71,12 @@ class PaymentLoopTest {
     @Mock
     private GrpcSendToRoute grpcSendToRoute;
 
+    @Mock
+    private GrpcInvoices grpcInvoices;
+
+    @Mock
+    private GrpcGetInfo grpcGetInfo;
+
     private PaymentStatus paymentStatus;
 
     @BeforeEach
@@ -77,6 +86,7 @@ class PaymentLoopTest {
                 .thenReturn(Optional.of(1));
         lenient().when(configurationService.getIntegerValue(MAX_RETRIES_AFTER_FAILURE))
                 .thenReturn(Optional.of(0));
+        lenient().when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY_4);
         paymentStatus = new PaymentStatus(PAYMENT_HASH);
     }
 
@@ -92,6 +102,17 @@ class PaymentLoopTest {
                 .contains("Unable to find route (trying to send 123)");
         softly.assertAll();
         verifyNoInteractions(grpcSendToRoute);
+        verifyNoInteractions(grpcInvoices);
+    }
+
+    @Test
+    void cancels_invoice_from_own_node() {
+        when(grpcGetInfo.getPubkey()).thenReturn(DECODED_PAYMENT_REQUEST.destination());
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), any(), any()))
+                .thenReturn(MultiPathPayment.FAILURE);
+        paymentLoop.start(DECODED_PAYMENT_REQUEST, PAYMENT_OPTIONS, paymentStatus);
+
+        verify(grpcInvoices).cancelPaymentRequest(DECODED_PAYMENT_REQUEST);
     }
 
     @Test
@@ -109,7 +130,22 @@ class PaymentLoopTest {
                 .thenReturn(MULTI_PATH_PAYMENT);
         paymentLoop.start(DECODED_PAYMENT_REQUEST, PAYMENT_OPTIONS, paymentStatus);
 
-        assertThat(paymentStatus.isFailure()).isFalse();
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(paymentStatus.isFailure()).isFalse();
+        softly.assertThat(paymentStatus.getMessages().stream().map(InstantWithString::string))
+                .contains("Trying again...");
+        softly.assertAll();
+    }
+
+    @Test
+    void fails_after_configured_number_of_attempts() {
+        when(configurationService.getIntegerValue(MAX_RETRIES_AFTER_FAILURE)).thenReturn(Optional.of(1));
+        when(configurationService.getIntegerValue(SLEEP_AFTER_FAILURE_MILLISECONDS)).thenReturn(Optional.of(1));
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), any(), any())).thenReturn(MultiPathPayment.FAILURE);
+        paymentLoop.start(DECODED_PAYMENT_REQUEST, PAYMENT_OPTIONS, paymentStatus);
+
+        assertThat(paymentStatus.isFailure()).isTrue();
+        verify(multiPathPaymentSplitter, times(2)).getMultiPathPaymentTo(any(), any(), any());
     }
 
     @Test

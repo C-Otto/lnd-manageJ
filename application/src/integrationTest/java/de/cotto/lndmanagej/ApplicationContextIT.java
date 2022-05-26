@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej;
 
+import de.cotto.lndmanagej.grpc.GrpcInvoicesService;
 import de.cotto.lndmanagej.grpc.GrpcRouterService;
 import de.cotto.lndmanagej.grpc.GrpcService;
 import de.cotto.lndmanagej.grpc.middleware.GrpcMiddlewareService;
@@ -12,21 +13,22 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
+@SuppressWarnings("unused")
 class ApplicationContextIT {
     @Autowired
     private ChannelService channelService;
 
     @MockBean
-    @SuppressWarnings("unused")
     private GrpcService grpcService;
 
     @MockBean
-    @SuppressWarnings("unused")
     private GrpcMiddlewareService grpcMiddlewareService;
 
     @MockBean
-    @SuppressWarnings("unused")
     private GrpcRouterService grpcRouterService;
+
+    @MockBean
+    private GrpcInvoicesService grpcInvoicesService;
 
     @Test
     void contextStarts() {
