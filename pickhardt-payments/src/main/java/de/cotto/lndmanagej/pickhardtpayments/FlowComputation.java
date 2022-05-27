@@ -13,6 +13,7 @@ import java.util.Map;
 
 import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.PIECEWISE_LINEAR_APPROXIMATIONS;
 import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.QUANTIZATION;
+import static de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions.DEFAULT_PAYMENT_OPTIONS;
 
 @Component
 public class FlowComputation {
@@ -45,7 +46,7 @@ public class FlowComputation {
                 Map.of(target, amount),
                 quantization,
                 piecewiseLinearApproximations,
-                paymentOptions.feeRateWeight(),
+                paymentOptions.feeRateWeight().orElse(DEFAULT_PAYMENT_OPTIONS.feeRateWeight().orElseThrow()),
                 grpcGetInfo.getPubkey(),
                 paymentOptions.ignoreFeesForOwnChannels()
         );

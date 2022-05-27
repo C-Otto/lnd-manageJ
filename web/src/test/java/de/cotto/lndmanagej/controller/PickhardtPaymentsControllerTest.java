@@ -43,14 +43,14 @@ class PickhardtPaymentsControllerTest {
 
     static {
         PAYMENT_OPTIONS = new PaymentOptions(
-                123,
+                Optional.of(123),
                 Optional.of(999L),
                 Optional.of(777L),
                 false,
                 Optional.of(PUBKEY_4)
         );
         PAYMENT_OPTIONS_DTO = new PaymentOptionsDto();
-        PAYMENT_OPTIONS_DTO.setFeeRateWeight(PAYMENT_OPTIONS.feeRateWeight());
+        PAYMENT_OPTIONS_DTO.setFeeRateWeight(PAYMENT_OPTIONS.feeRateWeight().orElse(null));
         PAYMENT_OPTIONS_DTO.setFeeRateLimit(PAYMENT_OPTIONS.feeRateLimit().orElse(null));
         PAYMENT_OPTIONS_DTO.setFeeRateLimitExceptIncomingHops(
                 PAYMENT_OPTIONS.feeRateLimitExceptIncomingHops().orElse(null)

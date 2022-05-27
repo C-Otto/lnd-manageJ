@@ -9,7 +9,14 @@ import java.util.Optional;
 import static de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions.DEFAULT_PAYMENT_OPTIONS;
 
 public class PaymentOptionsDto {
-    private int feeRateWeight;
+    public static final PaymentOptionsDto DEFAULT = new PaymentOptionsDto();
+
+    static {
+        DEFAULT.setFeeRateWeight(DEFAULT_PAYMENT_OPTIONS.feeRateWeight().orElse(null));
+    }
+
+    @Nullable
+    private Integer feeRateWeight;
     @Nullable
     private Long feeRateLimit;
     private boolean ignoreFeesForOwnChannels;
@@ -19,13 +26,13 @@ public class PaymentOptionsDto {
     private Long feeRateLimitExceptIncomingHops;
 
     public PaymentOptionsDto() {
-        feeRateWeight = DEFAULT_PAYMENT_OPTIONS.feeRateWeight();
         ignoreFeesForOwnChannels = DEFAULT_PAYMENT_OPTIONS.ignoreFeesForOwnChannels();
     }
 
     public PaymentOptions toModel() {
+
         return new PaymentOptions(
-                feeRateWeight,
+                Optional.ofNullable(feeRateWeight),
                 Optional.ofNullable(feeRateLimit),
                 Optional.ofNullable(feeRateLimitExceptIncomingHops),
                 ignoreFeesForOwnChannels,
@@ -33,7 +40,7 @@ public class PaymentOptionsDto {
         );
     }
 
-    public void setFeeRateWeight(int feeRateWeight) {
+    public void setFeeRateWeight(@Nullable Integer feeRateWeight) {
         this.feeRateWeight = feeRateWeight;
     }
 

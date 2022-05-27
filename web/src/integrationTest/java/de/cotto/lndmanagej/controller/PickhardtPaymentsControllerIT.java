@@ -47,7 +47,7 @@ class PickhardtPaymentsControllerIT {
     private static final String PREFIX = "/beta/pickhardt-payments";
     private static final String PAYMENT_REQUEST = "xxx";
     private static final PaymentOptions PAYMENT_OPTIONS = new PaymentOptions(
-            123,
+            Optional.of(123),
             Optional.of(999L),
             Optional.of(777L),
             false,

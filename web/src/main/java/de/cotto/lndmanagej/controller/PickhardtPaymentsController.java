@@ -26,6 +26,8 @@ import static org.springframework.http.MediaType.APPLICATION_NDJSON;
 @RestController
 @RequestMapping("/beta/pickhardt-payments/")
 public class PickhardtPaymentsController {
+    private static final PaymentOptionsDto PAYMENT_OPTIONS_DTO = PaymentOptionsDto.DEFAULT;
+
     private final MultiPathPaymentSplitter multiPathPaymentSplitter;
     private final MultiPathPaymentSender multiPathPaymentSender;
     private final PaymentStatusStream paymentStatusStream;
@@ -49,7 +51,7 @@ public class PickhardtPaymentsController {
     @Timed
     @GetMapping("/pay-payment-request/{paymentRequest}")
     public ResponseEntity<StreamingResponseBody> payPaymentRequest(@PathVariable String paymentRequest) {
-        return payPaymentRequest(paymentRequest, new PaymentOptionsDto());
+        return payPaymentRequest(paymentRequest, PAYMENT_OPTIONS_DTO);
     }
 
     @Timed
@@ -69,7 +71,7 @@ public class PickhardtPaymentsController {
             @PathVariable Pubkey pubkey,
             @PathVariable long amount
     ) {
-        return sendTo(pubkey, amount, new PaymentOptionsDto());
+        return sendTo(pubkey, amount, PAYMENT_OPTIONS_DTO);
     }
 
     @Timed
@@ -93,7 +95,7 @@ public class PickhardtPaymentsController {
             @PathVariable Pubkey target,
             @PathVariable long amount
     ) {
-        return send(source, target, amount, new PaymentOptionsDto());
+        return send(source, target, amount, PAYMENT_OPTIONS_DTO);
     }
 
     @Timed
@@ -114,7 +116,7 @@ public class PickhardtPaymentsController {
     @Timed
     @GetMapping("/top-up/{pubkey}/amount/{amount}")
     public ResponseEntity<StreamingResponseBody> topUp(@PathVariable Pubkey pubkey, @PathVariable long amount) {
-        return topUp(pubkey, amount, new PaymentOptionsDto());
+        return topUp(pubkey, amount, PAYMENT_OPTIONS_DTO);
     }
 
     @Timed

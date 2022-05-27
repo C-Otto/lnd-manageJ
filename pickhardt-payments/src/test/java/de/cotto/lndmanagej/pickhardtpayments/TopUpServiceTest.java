@@ -163,6 +163,113 @@ class TopUpServiceTest {
         assertTopUp(AMOUNT, DEFAULT_EXPIRY);
     }
 
+    // CPD-OFF
+    @Test
+    void uses_lower_fee_rate_limit_if_configured() {
+        long feeRateLimit = 111L;
+        PaymentOptions given = new PaymentOptions(
+                Optional.empty(),
+                Optional.of(feeRateLimit),
+                Optional.empty(),
+                true,
+                Optional.empty()
+        );
+        PaymentOptions expected = new PaymentOptions(
+                Optional.of(5),
+                Optional.of(feeRateLimit),
+                Optional.of(OUR_FEE_RATE - PEER_FEE_RATE),
+                false,
+                Optional.of(PUBKEY)
+        );
+        when(balanceService.getAvailableLocalBalanceForPeer(PUBKEY)).thenReturn(Coins.NONE);
+        assertTopUp(AMOUNT, DEFAULT_EXPIRY, given, expected);
+    }
+
+    @Test
+    void ignores_configured_lower_fee_rate_limit_if_too_high() {
+        long feeRateLimit = OUR_FEE_RATE + 1;
+        PaymentOptions given = new PaymentOptions(
+                Optional.empty(),
+                Optional.of(feeRateLimit),
+                Optional.empty(),
+                true,
+                Optional.empty()
+        );
+        PaymentOptions expected = new PaymentOptions(
+                Optional.of(5),
+                Optional.of(OUR_FEE_RATE),
+                Optional.of(OUR_FEE_RATE - PEER_FEE_RATE),
+                false,
+                Optional.of(PUBKEY)
+        );
+        when(balanceService.getAvailableLocalBalanceForPeer(PUBKEY)).thenReturn(Coins.NONE);
+        assertTopUp(AMOUNT, DEFAULT_EXPIRY, given, expected);
+    }
+
+    @Test
+    void uses_lower_fee_rate_limit_except_incoming_hops_if_configured() {
+        long feeRateLimitExceptIncomingHops = 0L;
+        PaymentOptions given = new PaymentOptions(
+                Optional.empty(),
+                Optional.empty(),
+                Optional.of(feeRateLimitExceptIncomingHops),
+                true,
+                Optional.empty()
+        );
+        PaymentOptions expected = new PaymentOptions(
+                Optional.of(5),
+                Optional.of(OUR_FEE_RATE),
+                Optional.of(feeRateLimitExceptIncomingHops),
+                false,
+                Optional.of(PUBKEY)
+        );
+        when(balanceService.getAvailableLocalBalanceForPeer(PUBKEY)).thenReturn(Coins.NONE);
+        assertTopUp(AMOUNT, DEFAULT_EXPIRY, given, expected);
+    }
+
+    @Test
+    void ignores_configured_lower_fee_rate_limit_except_incoming_hops_if_too_high() {
+        long feeRateLimitExceptIncomingHops = 2L;
+        PaymentOptions given = new PaymentOptions(
+                Optional.empty(),
+                Optional.empty(),
+                Optional.of(feeRateLimitExceptIncomingHops),
+                true,
+                Optional.empty()
+        );
+        PaymentOptions expected = new PaymentOptions(
+                Optional.of(5),
+                Optional.of(OUR_FEE_RATE),
+                Optional.of(OUR_FEE_RATE - PEER_FEE_RATE),
+                false,
+                Optional.of(PUBKEY)
+        );
+        when(balanceService.getAvailableLocalBalanceForPeer(PUBKEY)).thenReturn(Coins.NONE);
+        assertTopUp(AMOUNT, DEFAULT_EXPIRY, given, expected);
+    }
+
+    @Test
+    void uses_fee_rate_weight_if_configured() {
+        int feeRateWeight = 0;
+        PaymentOptions given = new PaymentOptions(
+                Optional.of(feeRateWeight),
+                Optional.empty(),
+                Optional.empty(),
+                true,
+                Optional.empty()
+        );
+        PaymentOptions expected = new PaymentOptions(
+                Optional.of(feeRateWeight),
+                Optional.of(OUR_FEE_RATE),
+                Optional.of(OUR_FEE_RATE - PEER_FEE_RATE),
+                false,
+                Optional.of(PUBKEY)
+        );
+        when(balanceService.getAvailableLocalBalanceForPeer(PUBKEY)).thenReturn(Coins.NONE);
+        assertTopUp(AMOUNT, DEFAULT_EXPIRY, given, expected);
+    }
+    // CPD-ON
+
     @Test
     void uses_configured_expiry() {
         int expiry = 900;
@@ -183,10 +290,26 @@ class TopUpServiceTest {
     }
 
     private void assertTopUp(Coins expectedTopUpAmount, Duration expiry) {
-        PaymentStatus paymentStatus = topUpService.topUp(PUBKEY, AMOUNT, DEFAULT_PAYMENT_OPTIONS);
-        verify(grpcInvoices).createPaymentRequest(expectedTopUpAmount, DESCRIPTION, expiry);
         PaymentOptions paymentOptions = PaymentOptions.forTopUp(OUR_FEE_RATE, PEER_FEE_RATE, PUBKEY);
-        verify(multiPathPaymentSender).payPaymentRequest(DECODED_PAYMENT_REQUEST, paymentOptions);
+        PaymentOptions emptyPaymentOptions = new PaymentOptions(
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                true,
+                Optional.empty()
+        );
+        assertTopUp(expectedTopUpAmount, expiry, emptyPaymentOptions, paymentOptions);
+    }
+
+    private void assertTopUp(
+            Coins expectedTopUpAmount,
+            Duration expiry,
+            PaymentOptions givenPaymentOptions,
+            PaymentOptions expectedPaymentOptions
+    ) {
+        PaymentStatus paymentStatus = topUpService.topUp(PUBKEY, AMOUNT, givenPaymentOptions);
+        verify(grpcInvoices).createPaymentRequest(expectedTopUpAmount, DESCRIPTION, expiry);
+        verify(multiPathPaymentSender).payPaymentRequest(DECODED_PAYMENT_REQUEST, expectedPaymentOptions);
         assertThat(paymentStatus.isPending()).isTrue();
     }
 
