@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions.DEFAULT_PAYMENT_OPTIONS;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,23 +37,6 @@ class PaymentOptionsDtoTest {
     }
 
     @Test
-    void feeRateLimit_and_feeRateLimitExceptIncomingHops() {
-        PaymentOptionsDto dto = new PaymentOptionsDto();
-        long feeRateLimit = 555;
-        long feeRateLimitExceptIncomingHops = 777;
-        dto.setFeeRateLimit(feeRateLimit);
-        dto.setFeeRateLimitExceptIncomingHops(feeRateLimitExceptIncomingHops);
-        PaymentOptions expected = new PaymentOptions(
-                Optional.empty(),
-                Optional.of(feeRateLimit),
-                Optional.of(feeRateLimitExceptIncomingHops),
-                DEFAULT_PAYMENT_OPTIONS.ignoreFeesForOwnChannels(),
-                Optional.empty()
-        );
-        assertThat(dto.toModel()).isEqualTo(expected);
-    }
-
-    @Test
     void ignoreFeesForOwnChannels() {
         PaymentOptionsDto dto = new PaymentOptionsDto();
         dto.setIgnoreFeesForOwnChannels(false);
@@ -64,20 +46,6 @@ class PaymentOptionsDtoTest {
                 Optional.empty(),
                 false,
                 Optional.empty()
-        );
-        assertThat(dto.toModel()).isEqualTo(expected);
-    }
-
-    @Test
-    void peer() {
-        PaymentOptionsDto dto = new PaymentOptionsDto();
-        dto.setPeer(PUBKEY);
-        PaymentOptions expected = new PaymentOptions(
-                Optional.empty(),
-                Optional.empty(),
-                Optional.empty(),
-                DEFAULT_PAYMENT_OPTIONS.ignoreFeesForOwnChannels(),
-                Optional.of(PUBKEY)
         );
         assertThat(dto.toModel()).isEqualTo(expected);
     }

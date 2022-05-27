@@ -23,7 +23,6 @@ import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
-import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_4;
 import static de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPaymentFixtures.MULTI_PATH_PAYMENT;
 import static de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions.DEFAULT_PAYMENT_OPTIONS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,18 +44,14 @@ class PickhardtPaymentsControllerTest {
         PAYMENT_OPTIONS = new PaymentOptions(
                 Optional.of(123),
                 Optional.of(999L),
-                Optional.of(777L),
+                Optional.empty(),
                 false,
-                Optional.of(PUBKEY_4)
+                Optional.empty()
         );
         PAYMENT_OPTIONS_DTO = new PaymentOptionsDto();
         PAYMENT_OPTIONS_DTO.setFeeRateWeight(PAYMENT_OPTIONS.feeRateWeight().orElse(null));
         PAYMENT_OPTIONS_DTO.setFeeRateLimit(PAYMENT_OPTIONS.feeRateLimit().orElse(null));
-        PAYMENT_OPTIONS_DTO.setFeeRateLimitExceptIncomingHops(
-                PAYMENT_OPTIONS.feeRateLimitExceptIncomingHops().orElse(null)
-        );
         PAYMENT_OPTIONS_DTO.setIgnoreFeesForOwnChannels(PAYMENT_OPTIONS.ignoreFeesForOwnChannels());
-        PAYMENT_OPTIONS_DTO.setPeer(PAYMENT_OPTIONS.peer().orElse(null));
     }
 
     @InjectMocks

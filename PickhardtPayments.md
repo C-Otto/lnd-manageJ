@@ -22,8 +22,27 @@ There is also a lightweight python package being developed which can be used for
    fail because of this if lnd-manageJ does not respond in time (crash, shutdown, ...).
    See https://github.com/lightningnetwork/lnd/issues/6409.
 
-# Fee Rate Weight
-The following endpoints allow you to specify a fee rate weight.
+# Payment Options
+The following endpoints allow you to specify payment options that can be provided as the body of an HTTP `POST` request.
+Note that the content type of the request must be set to `application/json`.
+
+Example body:
+```
+{
+    "feeRateWeight": 0,
+    "feeRateLimit": 123,
+    "ignoreFeesForOwnChannels": true
+}
+```
+
+One component of this is the fee rate weight, explained below.
+The fee rate limit is optional.
+If set, channels with a fee rate of this value or higher are not considered for the payment.
+
+If `ignoreFeesForOwnChannels` is set to true, fee rates configured for your own channels are considered as costs,
+even though you don't have to pay those fees.
+
+## Fee Rate Weight
 The default fee rate weight is 0, which optimizes the computation for reliability and ignores fees.
 
 Any value > 0 takes fees into account. Pick higher fee rate weights to compute cheaper routes.
@@ -56,23 +75,24 @@ configuration file:
 
 You can compute an MPP based on #PickhardtPayments using any of the following endpoints:
 
-* `/beta/pickhardt-payments/from/{source}/to/{target}/amount/{amount}/fee-rate-weight/{feeRateWeight}`
-  * compute an MPP from the given node `source` to the given node `target`, the amount is given in satoshis
-* `/beta/pickhardt-payments/from/{source}/to/{target}/amount/{amount}`
-  * as above, with default fee rate weight 0
-* `/beta/pickhardt-payments/to/{pubkey}/amount/{amount}/fee-rate-weight/{feeRateWeight}`
-  * originate payments from the own node
-* `/beta/pickhardt-payments/to/{pubkey}/amount/{amount}`
-  * as above, with default fee rate weight 0
+* HTTP `POST`: `/beta/pickhardt-payments/from/{source}/to/{target}/amount/{amount}`
+  * compute an MPP from the given node `source` to the given node `target` using the given payment options
+  * the amount is given in satoshis
+* HTTP `GET`: `/beta/pickhardt-payments/from/{source}/to/{target}/amount/{amount}`
+  * as above, with default payment options (fee rate weight 0)
+* HTTP `POST`: `/beta/pickhardt-payments/to/{pubkey}/amount/{amount}`
+  * originate payments from the own node using the given payment options
+* HTTP `GET`: `/beta/pickhardt-payments/to/{pubkey}/amount/{amount}`
+  * as above, with default payment options (fee rate weight 0)
 
 # Paying invoices
 
 Warning: Don't do this on mainnet, yet! This is very much work in progress.
 
-* `/beta/pickhardt-payments/pay-payment-request/{paymentRequest}/fee-rate-weight/{feeRateWeight}`
-  * Pay the given payment request (also known as invoice) using the configured fee rate weight
-* `/beta/pickhardt-payments/pay-payment-request/{paymentRequest}`
-  * as above, with default fee rate weight 0
+* HTTP `POST`: `/beta/pickhardt-payments/pay-payment-request/{paymentRequest}`
+  * Pay the given payment request (also known as invoice) using the given payment options (fee rate weight etc.)
+* HTTP `GET`: `/beta/pickhardt-payments/pay-payment-request/{paymentRequest}`
+  * as above, with default payment options (fee rate weight 0)
 
 The response shows a somewhat readable representation of the payment progress, including the final result.
 
@@ -80,7 +100,7 @@ The response shows a somewhat readable representation of the payment progress, i
 
 Warning: Work in progress.
 
-* `/beta/pickhardt-payments/top-up/{pubkey}/amount/{amount}`
+* HTTP `GET`: `/beta/pickhardt-payments/top-up/{pubkey}/amount/{amount}`
   * Sends satoshis out via some channel and back to the own node through the specified peer so that the local balance
     to that peer is increased.
   * The given amount is the the local balance you'd like to have *after* the payment is done.
@@ -96,6 +116,10 @@ Warning: Work in progress.
       node Z and node A, the whole payment fails (it is not attempted).
   * Invoices (payment requests) created for top-up payments expiry after 30 minutes. This value can be configured as
     `expiry_seconds=`.
+* HTTP `POST`: `/beta/pickhardt-payments/top-up/{pubkey}/amount/{amount}`
+  * allows you to lower the fee rate limit (values higher than the computed fee rate limit are ignored)
+  * allows you to specify a different fee rate weight
+  * The value provided as `ignoreFeesForOwnChannels` is ignored, for top-up such fees are never ignored
 
 The threshold, i.e. the minimum difference between the current local balance and the requested amount, defaults to
 10,000sat. You can configure this value by setting `threshold_sat=` in the configuration file.
