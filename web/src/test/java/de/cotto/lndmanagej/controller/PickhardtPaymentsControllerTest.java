@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.controller.dto.MultiPathPaymentDto;
+import de.cotto.lndmanagej.controller.dto.PaymentOptionsDto;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSender;
@@ -18,9 +19,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_4;
 import static de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPaymentFixtures.MULTI_PATH_PAYMENT;
 import static de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions.DEFAULT_PAYMENT_OPTIONS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,6 +37,27 @@ class PickhardtPaymentsControllerTest {
 
     private static final String PAYMENT_REQUEST = "xxx";
     private static final String STREAM_RESPONSE = "beep beep boop!";
+
+    private static final PaymentOptions PAYMENT_OPTIONS;
+    private static final PaymentOptionsDto PAYMENT_OPTIONS_DTO;
+
+    static {
+        PAYMENT_OPTIONS = new PaymentOptions(
+                123,
+                Optional.of(999L),
+                Optional.of(777L),
+                false,
+                Optional.of(PUBKEY_4)
+        );
+        PAYMENT_OPTIONS_DTO = new PaymentOptionsDto();
+        PAYMENT_OPTIONS_DTO.setFeeRateWeight(PAYMENT_OPTIONS.feeRateWeight());
+        PAYMENT_OPTIONS_DTO.setFeeRateLimit(PAYMENT_OPTIONS.feeRateLimit().orElse(null));
+        PAYMENT_OPTIONS_DTO.setFeeRateLimitExceptIncomingHops(
+                PAYMENT_OPTIONS.feeRateLimitExceptIncomingHops().orElse(null)
+        );
+        PAYMENT_OPTIONS_DTO.setIgnoreFeesForOwnChannels(PAYMENT_OPTIONS.ignoreFeesForOwnChannels());
+        PAYMENT_OPTIONS_DTO.setPeer(PAYMENT_OPTIONS.peer().orElse(null));
+    }
 
     @InjectMocks
     private PickhardtPaymentsController controller;
@@ -70,10 +94,10 @@ class PickhardtPaymentsControllerTest {
     }
 
     @Test
-    void payPaymentRequest_with_fee_rate_weight() {
+    void payPaymentRequest_with_payment_options() {
         PaymentOptions paymentOptions = PaymentOptions.forFeeRateWeight(456);
         when(multiPathPaymentSender.payPaymentRequest(PAYMENT_REQUEST, paymentOptions)).thenReturn(paymentStatus);
-        assertThat(controller.payPaymentRequest(PAYMENT_REQUEST, 456).getStatusCode())
+        assertThat(controller.payPaymentRequest(PAYMENT_REQUEST, withFeeRateWeight(456)).getStatusCode())
                 .isEqualTo(HttpStatus.OK);
     }
 
@@ -86,12 +110,12 @@ class PickhardtPaymentsControllerTest {
     }
 
     @Test
-    void sendTo_with_fee_rate_weight() {
+    void sendTo_with_payment_options() {
         int feeRateWeight = 10;
         PaymentOptions paymentOptions = PaymentOptions.forFeeRateWeight(feeRateWeight);
         when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, Coins.ofSatoshis(456), paymentOptions))
                 .thenReturn(MULTI_PATH_PAYMENT);
-        assertThat(controller.sendTo(PUBKEY, 456, feeRateWeight))
+        assertThat(controller.sendTo(PUBKEY, 456, withFeeRateWeight(feeRateWeight)))
                 .isEqualTo(MultiPathPaymentDto.fromModel(MULTI_PATH_PAYMENT));
     }
 
@@ -108,27 +132,38 @@ class PickhardtPaymentsControllerTest {
     }
 
     @Test
-    void send_with_fee_rate_weight() {
-        int feeRateWeight = 20;
+    void send_with_payment_options() {
         when(multiPathPaymentSplitter.getMultiPathPayment(
                 PUBKEY,
                 PUBKEY_2,
                 Coins.ofSatoshis(123),
-                PaymentOptions.forFeeRateWeight(feeRateWeight)
+                PAYMENT_OPTIONS
         )).thenReturn(MULTI_PATH_PAYMENT);
-        assertThat(controller.send(PUBKEY, PUBKEY_2, 123, feeRateWeight))
+        assertThat(controller.send(PUBKEY, PUBKEY_2, 123, PAYMENT_OPTIONS_DTO))
                 .isEqualTo(MultiPathPaymentDto.fromModel(MULTI_PATH_PAYMENT));
     }
 
     @Test
     void topUp() {
-        controller.topUp(PUBKEY, 123);
-        verify(topUpService).topUp(PUBKEY, Coins.ofSatoshis(123));
+        assertThat(controller.topUp(PUBKEY, 123).getStatusCode()).isEqualTo(HttpStatus.OK);
+        verify(topUpService).topUp(PUBKEY, Coins.ofSatoshis(123), DEFAULT_PAYMENT_OPTIONS);
+    }
+
+    @Test
+    void topUp_with_payment_options() {
+        assertThat(controller.topUp(PUBKEY, 123, PAYMENT_OPTIONS_DTO).getStatusCode()).isEqualTo(HttpStatus.OK);
+        verify(topUpService).topUp(PUBKEY, Coins.ofSatoshis(123), PAYMENT_OPTIONS);
     }
 
     @Test
     void resetCache() {
         controller.resetGraph();
         verify(graphService).resetCache();
+    }
+
+    private static PaymentOptionsDto withFeeRateWeight(int feeRateWeight) {
+        PaymentOptionsDto dto = new PaymentOptionsDto();
+        dto.setFeeRateWeight(feeRateWeight);
+        return dto;
     }
 }

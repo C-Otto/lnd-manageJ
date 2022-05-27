@@ -51,7 +51,7 @@ public class TopUpService {
         this.policyService = policyService;
     }
 
-    public PaymentStatus topUp(Pubkey pubkey, Coins amount) {
+    public PaymentStatus topUp(Pubkey pubkey, Coins amount, PaymentOptions paymentOptions) {
         if (noChannelWith(pubkey)) {
             String alias = nodeService.getAlias(pubkey);
             return PaymentStatus.createFailure("No channel with %s (%s)".formatted(pubkey, alias));

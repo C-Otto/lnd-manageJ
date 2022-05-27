@@ -28,6 +28,7 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.DecodedPaymentRequestFixtures.DECODED_PAYMENT_REQUEST;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
+import static de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions.DEFAULT_PAYMENT_OPTIONS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -182,7 +183,7 @@ class TopUpServiceTest {
     }
 
     private void assertTopUp(Coins expectedTopUpAmount, Duration expiry) {
-        PaymentStatus paymentStatus = topUpService.topUp(PUBKEY, AMOUNT);
+        PaymentStatus paymentStatus = topUpService.topUp(PUBKEY, AMOUNT, DEFAULT_PAYMENT_OPTIONS);
         verify(grpcInvoices).createPaymentRequest(expectedTopUpAmount, DESCRIPTION, expiry);
         PaymentOptions paymentOptions = PaymentOptions.forTopUp(OUR_FEE_RATE, PEER_FEE_RATE, PUBKEY);
         verify(multiPathPaymentSender).payPaymentRequest(DECODED_PAYMENT_REQUEST, paymentOptions);
@@ -190,7 +191,7 @@ class TopUpServiceTest {
     }
 
     private void assertFailure(String reason) {
-        PaymentStatus paymentStatus = topUpService.topUp(PUBKEY, AMOUNT);
+        PaymentStatus paymentStatus = topUpService.topUp(PUBKEY, AMOUNT, DEFAULT_PAYMENT_OPTIONS);
         assertThat(paymentStatus.isFailure()).isTrue();
         assertThat(paymentStatus.getMessages().stream().map(InstantWithString::string)).containsExactly(reason);
         verifyNoInteractions(multiPathPaymentSender);

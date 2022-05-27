@@ -17,20 +17,26 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Optional;
+
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_5;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_4;
 import static de.cotto.lndmanagej.model.RouteFixtures.ROUTE;
 import static de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPaymentFixtures.MULTI_PATH_PAYMENT;
 import static de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions.DEFAULT_PAYMENT_OPTIONS;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -40,6 +46,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class PickhardtPaymentsControllerIT {
     private static final String PREFIX = "/beta/pickhardt-payments";
     private static final String PAYMENT_REQUEST = "xxx";
+    private static final PaymentOptions PAYMENT_OPTIONS = new PaymentOptions(
+            123,
+            Optional.of(999L),
+            Optional.of(777L),
+            false,
+            Optional.of(PUBKEY_4)
+    );
+    private static final String DTO_AS_STRING = "{" +
+            "  \"feeRateWeight\": 123," +
+            "  \"feeRateLimit\": 999," +
+            "  \"feeRateLimitExceptIncomingHops\": 777," +
+            "  \"ignoreFeesForOwnChannels\": false," +
+            "  \"peer\": \"000000000000000000000000000000000000000000000000000000000000000004\"" +
+            "}";
 
     @Autowired
     private MockMvc mockMvc;
@@ -73,12 +93,11 @@ class PickhardtPaymentsControllerIT {
     }
 
     @Test
-    void payPaymentRequest_with_fee_rate_weight() throws Exception {
-        int feeRateWeight = 987;
-        PaymentOptions paymentOptions = PaymentOptions.forFeeRateWeight(feeRateWeight);
-        when(multiPathPaymentSender.payPaymentRequest(PAYMENT_REQUEST, paymentOptions)).thenReturn(paymentStatus);
-        String url = "%s/pay-payment-request/%s/fee-rate-weight/%d".formatted(PREFIX, PAYMENT_REQUEST, feeRateWeight);
-        mockMvc.perform(get(url)).andExpect(status().isOk());
+    void payPaymentRequest_with_payment_options() throws Exception {
+        when(multiPathPaymentSender.payPaymentRequest(PAYMENT_REQUEST, PAYMENT_OPTIONS)).thenReturn(paymentStatus);
+        String url = "%s/pay-payment-request/%s".formatted(PREFIX, PAYMENT_REQUEST);
+        mockMvc.perform(post(url).contentType(APPLICATION_JSON).content(DTO_AS_STRING))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -118,15 +137,13 @@ class PickhardtPaymentsControllerIT {
     }
 
     @Test
-    void sendTo_with_fee_rate_weight() throws Exception {
-        int feeRateWeight = 999;
+    void sendTo_with_payment_options() throws Exception {
         Coins amount = MULTI_PATH_PAYMENT.amount();
-        PaymentOptions paymentOptions = PaymentOptions.forFeeRateWeight(feeRateWeight);
-        when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, amount, paymentOptions))
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, amount, PAYMENT_OPTIONS))
                 .thenReturn(MULTI_PATH_PAYMENT);
-        String url = "%s/to/%s/amount/%d/fee-rate-weight/%d"
-                .formatted(PREFIX, PUBKEY, amount.satoshis(), feeRateWeight);
-        mockMvc.perform(get(url)).andExpect(status().isOk());
+        String url = "%s/to/%s/amount/%d".formatted(PREFIX, PUBKEY, amount.satoshis());
+        mockMvc.perform(post(url).contentType(APPLICATION_JSON).content(DTO_AS_STRING))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -152,21 +169,27 @@ class PickhardtPaymentsControllerIT {
     }
 
     @Test
-    void send_with_fee_rate_weight() throws Exception {
-        int feeRateWeight = 999;
+    void send_with_payment_options() throws Exception {
         Coins amount = MULTI_PATH_PAYMENT.amount();
-        PaymentOptions paymentOptions = PaymentOptions.forFeeRateWeight(feeRateWeight);
-        when(multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_2, amount, paymentOptions))
+        when(multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_2, amount, PAYMENT_OPTIONS))
                 .thenReturn(MULTI_PATH_PAYMENT);
-        String url = "%s/from/%s/to/%s/amount/%d/fee-rate-weight/%d"
-                .formatted(PREFIX, PUBKEY, PUBKEY_2, amount.satoshis(), feeRateWeight);
-        mockMvc.perform(get(url)).andExpect(status().isOk());
+        String url = "%s/from/%s/to/%s/amount/%d".formatted(PREFIX, PUBKEY, PUBKEY_2, amount.satoshis());
+        mockMvc.perform(post(url).contentType(APPLICATION_JSON).content(DTO_AS_STRING))
+                .andExpect(status().isOk());
     }
 
     @Test
     void topUp() throws Exception {
         String url = "%s/top-up/%s/amount/%s".formatted(PREFIX, PUBKEY, "123");
         mockMvc.perform(get(url)).andExpect(status().isOk());
-        verify(topUpService).topUp(PUBKEY, Coins.ofSatoshis(123));
+        verify(topUpService).topUp(PUBKEY, Coins.ofSatoshis(123), DEFAULT_PAYMENT_OPTIONS);
+    }
+
+    @Test
+    void topUp_with_payment_options() throws Exception {
+        when(topUpService.topUp(any(), any(), any())).thenReturn(new PaymentStatus(HexString.EMPTY));
+        String url = "%s/top-up/%s/amount/%s".formatted(PREFIX, PUBKEY, "123");
+        mockMvc.perform(post(url).contentType(APPLICATION_JSON).content(DTO_AS_STRING)).andExpect(status().isOk());
+        verify(topUpService).topUp(PUBKEY, Coins.ofSatoshis(123), PAYMENT_OPTIONS);
     }
 }
