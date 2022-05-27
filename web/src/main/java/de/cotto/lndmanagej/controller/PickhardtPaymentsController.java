@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.controller;
 
 import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.controller.dto.MultiPathPaymentDto;
+import de.cotto.lndmanagej.controller.dto.PaymentOptionsDto;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSender;
@@ -14,16 +15,19 @@ import de.cotto.lndmanagej.service.GraphService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
-import static de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions.DEFAULT_PAYMENT_OPTIONS;
 import static org.springframework.http.MediaType.APPLICATION_NDJSON;
 
 @RestController
 @RequestMapping("/beta/pickhardt-payments/")
 public class PickhardtPaymentsController {
+    private static final PaymentOptionsDto PAYMENT_OPTIONS_DTO = PaymentOptionsDto.DEFAULT;
+
     private final MultiPathPaymentSplitter multiPathPaymentSplitter;
     private final MultiPathPaymentSender multiPathPaymentSender;
     private final PaymentStatusStream paymentStatusStream;
@@ -47,32 +51,18 @@ public class PickhardtPaymentsController {
     @Timed
     @GetMapping("/pay-payment-request/{paymentRequest}")
     public ResponseEntity<StreamingResponseBody> payPaymentRequest(@PathVariable String paymentRequest) {
-        return payPaymentRequest(paymentRequest, DEFAULT_PAYMENT_OPTIONS.feeRateWeight());
+        return payPaymentRequest(paymentRequest, PAYMENT_OPTIONS_DTO);
     }
 
     @Timed
-    @GetMapping("/pay-payment-request/{paymentRequest}/fee-rate-weight/{feeRateWeight}")
+    @PostMapping("/pay-payment-request/{paymentRequest}")
     public ResponseEntity<StreamingResponseBody> payPaymentRequest(
             @PathVariable String paymentRequest,
-            @PathVariable int feeRateWeight
+            @RequestBody PaymentOptionsDto paymentOptionsDto
     ) {
-        PaymentOptions paymentOptions = PaymentOptions.forFeeRateWeight(feeRateWeight);
+        PaymentOptions paymentOptions = paymentOptionsDto.toModel();
         PaymentStatus paymentStatus = multiPathPaymentSender.payPaymentRequest(paymentRequest, paymentOptions);
         return toStream(paymentStatus);
-    }
-
-    @Timed
-    @GetMapping("/to/{pubkey}/amount/{amount}/fee-rate-weight/{feeRateWeight}")
-    public MultiPathPaymentDto sendTo(
-            @PathVariable Pubkey pubkey,
-            @PathVariable long amount,
-            @PathVariable int feeRateWeight
-    ) {
-        Coins coins = Coins.ofSatoshis(amount);
-        PaymentOptions paymentOptions = PaymentOptions.forFeeRateWeight(feeRateWeight);
-        MultiPathPayment multiPathPaymentTo =
-                multiPathPaymentSplitter.getMultiPathPaymentTo(pubkey, coins, paymentOptions);
-        return MultiPathPaymentDto.fromModel(multiPathPaymentTo);
     }
 
     @Timed
@@ -81,22 +71,21 @@ public class PickhardtPaymentsController {
             @PathVariable Pubkey pubkey,
             @PathVariable long amount
     ) {
-        return sendTo(pubkey, amount, DEFAULT_PAYMENT_OPTIONS.feeRateWeight());
+        return sendTo(pubkey, amount, PAYMENT_OPTIONS_DTO);
     }
 
     @Timed
-    @GetMapping("/from/{source}/to/{target}/amount/{amount}/fee-rate-weight/{feeRateWeight}")
-    public MultiPathPaymentDto send(
-            @PathVariable Pubkey source,
-            @PathVariable Pubkey target,
+    @PostMapping("/to/{pubkey}/amount/{amount}")
+    public MultiPathPaymentDto sendTo(
+            @PathVariable Pubkey pubkey,
             @PathVariable long amount,
-            @PathVariable int feeRateWeight
+            @RequestBody PaymentOptionsDto paymentOptionsDto
     ) {
         Coins coins = Coins.ofSatoshis(amount);
-        PaymentOptions paymentOptions = PaymentOptions.forFeeRateWeight(feeRateWeight);
-        MultiPathPayment multiPathPayment =
-                multiPathPaymentSplitter.getMultiPathPayment(source, target, coins, paymentOptions);
-        return MultiPathPaymentDto.fromModel(multiPathPayment);
+        PaymentOptions paymentOptions = paymentOptionsDto.toModel();
+        MultiPathPayment multiPathPaymentTo =
+                multiPathPaymentSplitter.getMultiPathPaymentTo(pubkey, coins, paymentOptions);
+        return MultiPathPaymentDto.fromModel(multiPathPaymentTo);
     }
 
     @Timed
@@ -106,13 +95,38 @@ public class PickhardtPaymentsController {
             @PathVariable Pubkey target,
             @PathVariable long amount
     ) {
-        return send(source, target, amount, DEFAULT_PAYMENT_OPTIONS.feeRateWeight());
+        return send(source, target, amount, PAYMENT_OPTIONS_DTO);
+    }
+
+    @Timed
+    @PostMapping("/from/{source}/to/{target}/amount/{amount}")
+    public MultiPathPaymentDto send(
+            @PathVariable Pubkey source,
+            @PathVariable Pubkey target,
+            @PathVariable long amount,
+            @RequestBody PaymentOptionsDto paymentOptionsDto
+    ) {
+        Coins coins = Coins.ofSatoshis(amount);
+        PaymentOptions paymentOptions = paymentOptionsDto.toModel();
+        MultiPathPayment multiPathPayment =
+                multiPathPaymentSplitter.getMultiPathPayment(source, target, coins, paymentOptions);
+        return MultiPathPaymentDto.fromModel(multiPathPayment);
     }
 
     @Timed
     @GetMapping("/top-up/{pubkey}/amount/{amount}")
     public ResponseEntity<StreamingResponseBody> topUp(@PathVariable Pubkey pubkey, @PathVariable long amount) {
-        PaymentStatus paymentStatus = topUpService.topUp(pubkey, Coins.ofSatoshis(amount));
+        return topUp(pubkey, amount, PAYMENT_OPTIONS_DTO);
+    }
+
+    @Timed
+    @PostMapping("/top-up/{pubkey}/amount/{amount}")
+    public ResponseEntity<StreamingResponseBody> topUp(
+            @PathVariable Pubkey pubkey,
+            @PathVariable long amount,
+            @RequestBody PaymentOptionsDto paymentOptionsDto
+    ) {
+        PaymentStatus paymentStatus = topUpService.topUp(pubkey, Coins.ofSatoshis(amount), paymentOptionsDto.toModel());
         return toStream(paymentStatus);
     }
 

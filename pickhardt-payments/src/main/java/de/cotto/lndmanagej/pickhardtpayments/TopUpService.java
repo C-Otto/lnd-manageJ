@@ -51,7 +51,7 @@ public class TopUpService {
         this.policyService = policyService;
     }
 
-    public PaymentStatus topUp(Pubkey pubkey, Coins amount) {
+    public PaymentStatus topUp(Pubkey pubkey, Coins amount, PaymentOptions paymentOptionsFromRequest) {
         if (noChannelWith(pubkey)) {
             String alias = nodeService.getAlias(pubkey);
             return PaymentStatus.createFailure("No channel with %s (%s)".formatted(pubkey, alias));
@@ -71,10 +71,10 @@ public class TopUpService {
             return PaymentStatus.createFailure(reason);
         }
 
-        return sendPayment(pubkey, topUpAmount);
+        return sendPayment(pubkey, topUpAmount, paymentOptionsFromRequest);
     }
 
-    private PaymentStatus sendPayment(Pubkey pubkey, Coins topUpAmount) {
+    private PaymentStatus sendPayment(Pubkey pubkey, Coins topUpAmount, PaymentOptions paymentOptionsFromRequest) {
         long ourFeeRate = policyService.getMinimumFeeRateTo(pubkey).orElse(0L);
         long peerFeeRate = policyService.getMinimumFeeRateFrom(pubkey).orElse(0L);
         if (peerFeeRate >= ourFeeRate) {
@@ -88,7 +88,7 @@ public class TopUpService {
             String alias = nodeService.getAlias(pubkey);
             return PaymentStatus.createFailure("Unable to create payment request (%s, %s)".formatted(pubkey, alias));
         }
-        PaymentOptions paymentOptions = PaymentOptions.forTopUp(ourFeeRate, peerFeeRate, pubkey);
+        PaymentOptions paymentOptions = getPaymentOptions(pubkey, ourFeeRate, peerFeeRate, paymentOptionsFromRequest);
         return multiPathPaymentSender.payPaymentRequest(paymentRequest, paymentOptions);
     }
 
@@ -113,5 +113,24 @@ public class TopUpService {
         String alias = nodeService.getAlias(pubkey);
         ChannelId channelId = channelService.getOpenChannelsWith(pubkey).iterator().next().getId();
         return "Topping up channel %s with %s (%s)".formatted(channelId, pubkey, alias);
+    }
+
+    private PaymentOptions getPaymentOptions(
+            Pubkey pubkey,
+            long ourFeeRate,
+            long peerFeeRate,
+            PaymentOptions paymentOptionsFromRequest
+    ) {
+        long feeRateLimitExceptIncomingHops = Math.min(
+                ourFeeRate - peerFeeRate,
+                paymentOptionsFromRequest.feeRateLimitExceptIncomingHops().orElse(Long.MAX_VALUE)
+        );
+        return new PaymentOptions(
+                Optional.of(paymentOptionsFromRequest.feeRateWeight().orElse(5)),
+                Optional.of(Math.min(ourFeeRate, paymentOptionsFromRequest.feeRateLimit().orElse(Long.MAX_VALUE))),
+                Optional.of(feeRateLimitExceptIncomingHops),
+                false,
+                Optional.of(pubkey)
+        );
     }
 }

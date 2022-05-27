@@ -11,20 +11,35 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PaymentOptionsTest {
     @Test
     void forFeeRateWeight() {
-        assertThat(PaymentOptions.forFeeRateWeight(12))
-                .isEqualTo(new PaymentOptions(12, Optional.empty(), Optional.empty(), true, Optional.empty()));
+        assertThat(PaymentOptions.forFeeRateWeight(12)).isEqualTo(new PaymentOptions(
+                Optional.of(12),
+                Optional.empty(),
+                Optional.empty(),
+                true,
+                Optional.empty()
+        ));
     }
 
     @Test
     void forFeeRateLimit() {
-        assertThat(PaymentOptions.forFeeRateLimit(123))
-                .isEqualTo(new PaymentOptions(0, Optional.of(123L), Optional.empty(), true, Optional.empty()));
+        assertThat(PaymentOptions.forFeeRateLimit(123)).isEqualTo(new PaymentOptions(
+                Optional.of(0),
+                Optional.of(123L),
+                Optional.empty(),
+                true,
+                Optional.empty()
+        ));
     }
 
     @Test
     void forTopUp() {
-        assertThat(PaymentOptions.forTopUp(123, 100, PUBKEY))
-                .isEqualTo(new PaymentOptions(5, Optional.of(123L), Optional.of(23L), false, Optional.of(PUBKEY)));
+        assertThat(PaymentOptions.forTopUp(123, 100, PUBKEY)).isEqualTo(new PaymentOptions(
+                Optional.of(5),
+                Optional.of(123L),
+                Optional.of(23L),
+                false,
+                Optional.of(PUBKEY)
+        ));
     }
 
     @Test
