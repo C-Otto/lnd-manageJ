@@ -24,7 +24,6 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_5;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
-import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_4;
 import static de.cotto.lndmanagej.model.RouteFixtures.ROUTE;
 import static de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPaymentFixtures.MULTI_PATH_PAYMENT;
 import static de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions.DEFAULT_PAYMENT_OPTIONS;
@@ -49,16 +48,14 @@ class PickhardtPaymentsControllerIT {
     private static final PaymentOptions PAYMENT_OPTIONS = new PaymentOptions(
             Optional.of(123),
             Optional.of(999L),
-            Optional.of(777L),
+            Optional.empty(),
             false,
-            Optional.of(PUBKEY_4)
+            Optional.empty()
     );
     private static final String DTO_AS_STRING = "{" +
             "  \"feeRateWeight\": 123," +
             "  \"feeRateLimit\": 999," +
-            "  \"feeRateLimitExceptIncomingHops\": 777," +
-            "  \"ignoreFeesForOwnChannels\": false," +
-            "  \"peer\": \"000000000000000000000000000000000000000000000000000000000000000004\"" +
+            "  \"ignoreFeesForOwnChannels\": false" +
             "}";
 
     @Autowired

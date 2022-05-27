@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.controller.dto;
 
-import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions;
 
 import javax.annotation.Nullable;
@@ -20,10 +19,6 @@ public class PaymentOptionsDto {
     @Nullable
     private Long feeRateLimit;
     private boolean ignoreFeesForOwnChannels;
-    @Nullable
-    private Pubkey peer;
-    @Nullable
-    private Long feeRateLimitExceptIncomingHops;
 
     public PaymentOptionsDto() {
         ignoreFeesForOwnChannels = DEFAULT_PAYMENT_OPTIONS.ignoreFeesForOwnChannels();
@@ -34,9 +29,9 @@ public class PaymentOptionsDto {
         return new PaymentOptions(
                 Optional.ofNullable(feeRateWeight),
                 Optional.ofNullable(feeRateLimit),
-                Optional.ofNullable(feeRateLimitExceptIncomingHops),
+                Optional.empty(),
                 ignoreFeesForOwnChannels,
-                Optional.ofNullable(peer)
+                Optional.empty()
         );
     }
 
@@ -50,13 +45,5 @@ public class PaymentOptionsDto {
 
     public void setIgnoreFeesForOwnChannels(boolean ignoreFeesForOwnChannels) {
         this.ignoreFeesForOwnChannels = ignoreFeesForOwnChannels;
-    }
-
-    public void setPeer(@Nullable Pubkey peer) {
-        this.peer = peer;
-    }
-
-    public void setFeeRateLimitExceptIncomingHops(@Nullable Long feeRateLimitExceptIncomingHops) {
-        this.feeRateLimitExceptIncomingHops = feeRateLimitExceptIncomingHops;
     }
 }
