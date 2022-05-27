@@ -177,9 +177,16 @@ class PickhardtPaymentsControllerIT {
 
     @Test
     void topUp() throws Exception {
+        PaymentOptions emptyPaymentOptions = new PaymentOptions(
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                true,
+                Optional.empty()
+        );
         String url = "%s/top-up/%s/amount/%s".formatted(PREFIX, PUBKEY, "123");
         mockMvc.perform(get(url)).andExpect(status().isOk());
-        verify(topUpService).topUp(PUBKEY, Coins.ofSatoshis(123), DEFAULT_PAYMENT_OPTIONS);
+        verify(topUpService).topUp(PUBKEY, Coins.ofSatoshis(123), emptyPaymentOptions);
     }
 
     @Test

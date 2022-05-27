@@ -116,7 +116,7 @@ public class PickhardtPaymentsController {
     @Timed
     @GetMapping("/top-up/{pubkey}/amount/{amount}")
     public ResponseEntity<StreamingResponseBody> topUp(@PathVariable Pubkey pubkey, @PathVariable long amount) {
-        return topUp(pubkey, amount, PAYMENT_OPTIONS_DTO);
+        return topUp(pubkey, amount, new PaymentOptionsDto());
     }
 
     @Timed
