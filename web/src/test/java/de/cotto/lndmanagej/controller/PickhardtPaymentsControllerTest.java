@@ -140,8 +140,15 @@ class PickhardtPaymentsControllerTest {
 
     @Test
     void topUp() {
+        PaymentOptions emptyPaymentOptions = new PaymentOptions(
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                true,
+                Optional.empty()
+        );
         assertThat(controller.topUp(PUBKEY, 123).getStatusCode()).isEqualTo(HttpStatus.OK);
-        verify(topUpService).topUp(PUBKEY, Coins.ofSatoshis(123), DEFAULT_PAYMENT_OPTIONS);
+        verify(topUpService).topUp(PUBKEY, Coins.ofSatoshis(123), emptyPaymentOptions);
     }
 
     @Test
