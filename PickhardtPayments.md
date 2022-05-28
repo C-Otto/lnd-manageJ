@@ -38,8 +38,9 @@ Example body:
 One component of this is the fee rate weight, explained below.
 The fee rate limit is optional.
 If set, channels with a fee rate of this value or higher are not considered for the payment.
+Only routes with a fee rate below this limit are attempted.
 
-If `ignoreFeesForOwnChannels` is set to true, fee rates configured for your own channels are considered as costs,
+If `ignoreFeesForOwnChannels` is set to false, fee rates configured for your own channels are considered as costs,
 even though you don't have to pay those fees.
 
 ## Fee Rate Weight
