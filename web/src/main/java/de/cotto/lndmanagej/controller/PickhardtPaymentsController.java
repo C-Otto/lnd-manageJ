@@ -24,7 +24,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import static org.springframework.http.MediaType.APPLICATION_NDJSON;
 
 @RestController
-@RequestMapping("/beta/pickhardt-payments/")
+@RequestMapping("/api/payments/")
 public class PickhardtPaymentsController {
     private static final PaymentOptionsDto PAYMENT_OPTIONS_DTO = PaymentOptionsDto.DEFAULT;
 

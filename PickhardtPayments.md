@@ -10,7 +10,7 @@ https://lists.linuxfoundation.org/pipermail/lightning-dev/2022-March/003510.html
 There is also a lightweight python package being developed which can be used for simulations or to do production tests at: https://github.com/renepickhardt/pickhardtpayments 
 
 # Requirements
-1. Currently (as of v0.14.3-beta, May 2022) lnd does not allow sending a replacement shard once a shard of an active MPP
+1. Currently (as of v0.15.0-beta.rc3, May 2022) lnd does not allow sending a replacement shard once a shard of an active MPP
    fails. This, sadly, is necessary to complete MPPs that regularly run into temporary channel failures due to lack of
    funds. See https://github.com/lightningnetwork/lnd/issues/5746 for a (possible) fix. You might want to stick to
    testnet until this is properly fixed!
@@ -38,8 +38,9 @@ Example body:
 One component of this is the fee rate weight, explained below.
 The fee rate limit is optional.
 If set, channels with a fee rate of this value or higher are not considered for the payment.
+Only routes with a fee rate below this limit are attempted.
 
-If `ignoreFeesForOwnChannels` is set to true, fee rates configured for your own channels are considered as costs,
+If `ignoreFeesForOwnChannels` is set to false, fee rates configured for your own channels are considered as costs,
 even though you don't have to pay those fees.
 
 ## Fee Rate Weight
@@ -75,23 +76,23 @@ configuration file:
 
 You can compute an MPP based on #PickhardtPayments using any of the following endpoints:
 
-* HTTP `POST`: `/beta/pickhardt-payments/from/{source}/to/{target}/amount/{amount}`
+* HTTP `POST`: `/api/payments/from/{source}/to/{target}/amount/{amount}`
   * compute an MPP from the given node `source` to the given node `target` using the given payment options
   * the amount is given in satoshis
-* HTTP `GET`: `/beta/pickhardt-payments/from/{source}/to/{target}/amount/{amount}`
+* HTTP `GET`: `/api/payments/from/{source}/to/{target}/amount/{amount}`
   * as above, with default payment options (fee rate weight 0)
-* HTTP `POST`: `/beta/pickhardt-payments/to/{pubkey}/amount/{amount}`
+* HTTP `POST`: `/api/payments/to/{pubkey}/amount/{amount}`
   * originate payments from the own node using the given payment options
-* HTTP `GET`: `/beta/pickhardt-payments/to/{pubkey}/amount/{amount}`
+* HTTP `GET`: `/api/payments/to/{pubkey}/amount/{amount}`
   * as above, with default payment options (fee rate weight 0)
 
 # Paying invoices
 
 Warning: Don't do this on mainnet, yet! This is very much work in progress.
 
-* HTTP `POST`: `/beta/pickhardt-payments/pay-payment-request/{paymentRequest}`
+* HTTP `POST`: `/api/payments/pay-payment-request/{paymentRequest}`
   * Pay the given payment request (also known as invoice) using the given payment options (fee rate weight etc.)
-* HTTP `GET`: `/beta/pickhardt-payments/pay-payment-request/{paymentRequest}`
+* HTTP `GET`: `/api/payments/pay-payment-request/{paymentRequest}`
   * as above, with default payment options (fee rate weight 0)
 
 The response shows a somewhat readable representation of the payment progress, including the final result.
@@ -100,7 +101,7 @@ The response shows a somewhat readable representation of the payment progress, i
 
 Warning: Work in progress.
 
-* HTTP `GET`: `/beta/pickhardt-payments/top-up/{pubkey}/amount/{amount}`
+* HTTP `GET`: `/api/payments/top-up/{pubkey}/amount/{amount}`
   * Sends satoshis out via some channel and back to the own node through the specified peer so that the local balance
     to that peer is increased.
   * The given amount is the the local balance you'd like to have *after* the payment is done.
@@ -116,7 +117,7 @@ Warning: Work in progress.
       node Z and node A, the whole payment fails (it is not attempted).
   * Invoices (payment requests) created for top-up payments expiry after 30 minutes. This value can be configured as
     `expiry_seconds=`.
-* HTTP `POST`: `/beta/pickhardt-payments/top-up/{pubkey}/amount/{amount}`
+* HTTP `POST`: `/api/payments/top-up/{pubkey}/amount/{amount}`
   * allows you to lower the fee rate limit (values higher than the computed fee rate limit are ignored)
   * allows you to specify a different fee rate weight
   * The value provided as `ignoreFeesForOwnChannels` is ignored, for top-up such fees are never ignored

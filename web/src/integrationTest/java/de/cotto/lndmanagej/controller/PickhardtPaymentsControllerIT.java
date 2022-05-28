@@ -43,7 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import({ObjectMapperConfiguration.class, PaymentStatusStream.class})
 @WebMvcTest(controllers = PickhardtPaymentsController.class)
 class PickhardtPaymentsControllerIT {
-    private static final String PREFIX = "/beta/pickhardt-payments";
+    private static final String PREFIX = "/api/payments";
     private static final String PAYMENT_REQUEST = "xxx";
     private static final PaymentOptions PAYMENT_OPTIONS = new PaymentOptions(
             Optional.of(123),
