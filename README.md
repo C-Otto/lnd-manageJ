@@ -118,6 +118,10 @@ Warnings:
 
 `/api/warnings`: show all warnings for all peers and channels
 
+Payments:
+
+See [PickhardtPayments.md](PickhardtPayments.md).
+
 Legacy:
 
 `/legacy/open-channels/pretty`: a readable list (not JSON!) of all open channels showing channel ID, pubkey, capacity and alias.
