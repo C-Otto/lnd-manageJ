@@ -121,14 +121,11 @@ public class TopUpService {
             long peerFeeRate,
             PaymentOptions paymentOptionsFromRequest
     ) {
-        long feeRateLimitExceptIncomingHops = Math.min(
-                ourFeeRate - peerFeeRate,
-                paymentOptionsFromRequest.feeRateLimitExceptIncomingHops().orElse(Long.MAX_VALUE)
-        );
+        long feeRateLimit = Math.min(ourFeeRate, paymentOptionsFromRequest.feeRateLimit().orElse(Long.MAX_VALUE));
         return new PaymentOptions(
                 Optional.of(paymentOptionsFromRequest.feeRateWeight().orElse(5)),
-                Optional.of(Math.min(ourFeeRate, paymentOptionsFromRequest.feeRateLimit().orElse(Long.MAX_VALUE))),
-                Optional.of(feeRateLimitExceptIncomingHops),
+                Optional.of(feeRateLimit),
+                Optional.of(feeRateLimit - peerFeeRate),
                 false,
                 Optional.of(pubkey)
         );
