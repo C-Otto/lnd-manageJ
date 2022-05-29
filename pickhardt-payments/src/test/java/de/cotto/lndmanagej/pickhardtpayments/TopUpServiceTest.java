@@ -265,6 +265,31 @@ class TopUpServiceTest {
     }
 
     @Test
+    void fee_rate_limit_except_incoming_hops_is_at_least_0() {
+        long peerFeeRate = 50L;
+        long ourFeeRate = 100L;
+        long feeRateLimit = 1;
+        when(policyService.getMinimumFeeRateFrom(PUBKEY)).thenReturn(Optional.of(peerFeeRate));
+        when(policyService.getMinimumFeeRateTo(PUBKEY)).thenReturn(Optional.of(ourFeeRate));
+        PaymentOptions given = new PaymentOptions(
+                Optional.empty(),
+                Optional.of(feeRateLimit),
+                Optional.empty(),
+                true,
+                Optional.empty()
+        );
+        PaymentOptions expected = new PaymentOptions(
+                Optional.of(5),
+                Optional.of(feeRateLimit),
+                Optional.of(0L),
+                false,
+                Optional.of(PUBKEY)
+        );
+        when(balanceService.getAvailableLocalBalanceForPeer(PUBKEY)).thenReturn(Coins.NONE);
+        assertTopUp(AMOUNT, DEFAULT_EXPIRY, given, expected);
+    }
+
+    @Test
     void uses_fee_rate_weight_if_configured() {
         int feeRateWeight = 0;
         PaymentOptions given = new PaymentOptions(

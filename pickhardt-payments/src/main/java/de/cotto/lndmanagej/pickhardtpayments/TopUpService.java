@@ -125,7 +125,7 @@ public class TopUpService {
         return new PaymentOptions(
                 Optional.of(paymentOptionsFromRequest.feeRateWeight().orElse(5)),
                 Optional.of(feeRateLimit),
-                Optional.of(feeRateLimit - peerFeeRate),
+                Optional.of(Math.max(0, feeRateLimit - peerFeeRate)),
                 false,
                 Optional.of(pubkey)
         );
