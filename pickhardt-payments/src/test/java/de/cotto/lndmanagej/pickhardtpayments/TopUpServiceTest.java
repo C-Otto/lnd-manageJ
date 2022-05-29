@@ -166,7 +166,11 @@ class TopUpServiceTest {
     // CPD-OFF
     @Test
     void uses_lower_fee_rate_limit_if_configured() {
-        long feeRateLimit = 111L;
+        long peerFeeRate = 50L;
+        long ourFeeRate = 100L;
+        long feeRateLimit = ourFeeRate - 1;
+        when(policyService.getMinimumFeeRateFrom(PUBKEY)).thenReturn(Optional.of(peerFeeRate));
+        when(policyService.getMinimumFeeRateTo(PUBKEY)).thenReturn(Optional.of(ourFeeRate));
         PaymentOptions given = new PaymentOptions(
                 Optional.empty(),
                 Optional.of(feeRateLimit),
@@ -177,7 +181,7 @@ class TopUpServiceTest {
         PaymentOptions expected = new PaymentOptions(
                 Optional.of(5),
                 Optional.of(feeRateLimit),
-                Optional.of(OUR_FEE_RATE - PEER_FEE_RATE),
+                Optional.of(feeRateLimit - peerFeeRate),
                 false,
                 Optional.of(PUBKEY)
         );
@@ -187,7 +191,11 @@ class TopUpServiceTest {
 
     @Test
     void ignores_configured_lower_fee_rate_limit_if_too_high() {
-        long feeRateLimit = OUR_FEE_RATE + 1;
+        long peerFeeRate = 50L;
+        long ourFeeRate = 100L;
+        long feeRateLimit = ourFeeRate + 1;
+        when(policyService.getMinimumFeeRateFrom(PUBKEY)).thenReturn(Optional.of(peerFeeRate));
+        when(policyService.getMinimumFeeRateTo(PUBKEY)).thenReturn(Optional.of(ourFeeRate));
         PaymentOptions given = new PaymentOptions(
                 Optional.empty(),
                 Optional.of(feeRateLimit),
@@ -197,8 +205,8 @@ class TopUpServiceTest {
         );
         PaymentOptions expected = new PaymentOptions(
                 Optional.of(5),
-                Optional.of(OUR_FEE_RATE),
-                Optional.of(OUR_FEE_RATE - PEER_FEE_RATE),
+                Optional.of(ourFeeRate),
+                Optional.of(ourFeeRate - peerFeeRate),
                 false,
                 Optional.of(PUBKEY)
         );
@@ -207,19 +215,23 @@ class TopUpServiceTest {
     }
 
     @Test
-    void uses_lower_fee_rate_limit_except_incoming_hops_if_configured() {
-        long feeRateLimitExceptIncomingHops = 0L;
+    void adapts_fee_rate_limit_except_incoming_hops_if_fee_rate_limit_is_configured() {
+        long peerFeeRate = 50L;
+        long ourFeeRate = 100L;
+        long feeRateLimit = ourFeeRate - 1;
+        when(policyService.getMinimumFeeRateFrom(PUBKEY)).thenReturn(Optional.of(peerFeeRate));
+        when(policyService.getMinimumFeeRateTo(PUBKEY)).thenReturn(Optional.of(ourFeeRate));
         PaymentOptions given = new PaymentOptions(
                 Optional.empty(),
+                Optional.of(feeRateLimit),
                 Optional.empty(),
-                Optional.of(feeRateLimitExceptIncomingHops),
                 true,
                 Optional.empty()
         );
         PaymentOptions expected = new PaymentOptions(
                 Optional.of(5),
-                Optional.of(OUR_FEE_RATE),
-                Optional.of(feeRateLimitExceptIncomingHops),
+                Optional.of(feeRateLimit),
+                Optional.of(feeRateLimit - peerFeeRate),
                 false,
                 Optional.of(PUBKEY)
         );
@@ -228,19 +240,48 @@ class TopUpServiceTest {
     }
 
     @Test
-    void ignores_configured_lower_fee_rate_limit_except_incoming_hops_if_too_high() {
-        long feeRateLimitExceptIncomingHops = 2L;
+    void does_not_adapt_fee_rate_limit_except_incoming_hops_if_high_fee_rate_limit_is_configured() {
+        long peerFeeRate = 50L;
+        long ourFeeRate = 100L;
+        long feeRateLimit = ourFeeRate + 1;
+        when(policyService.getMinimumFeeRateFrom(PUBKEY)).thenReturn(Optional.of(peerFeeRate));
+        when(policyService.getMinimumFeeRateTo(PUBKEY)).thenReturn(Optional.of(ourFeeRate));
         PaymentOptions given = new PaymentOptions(
                 Optional.empty(),
+                Optional.of(feeRateLimit),
                 Optional.empty(),
-                Optional.of(feeRateLimitExceptIncomingHops),
                 true,
                 Optional.empty()
         );
         PaymentOptions expected = new PaymentOptions(
                 Optional.of(5),
-                Optional.of(OUR_FEE_RATE),
-                Optional.of(OUR_FEE_RATE - PEER_FEE_RATE),
+                Optional.of(ourFeeRate),
+                Optional.of(ourFeeRate - peerFeeRate),
+                false,
+                Optional.of(PUBKEY)
+        );
+        when(balanceService.getAvailableLocalBalanceForPeer(PUBKEY)).thenReturn(Coins.NONE);
+        assertTopUp(AMOUNT, DEFAULT_EXPIRY, given, expected);
+    }
+
+    @Test
+    void fee_rate_limit_except_incoming_hops_is_at_least_0() {
+        long peerFeeRate = 50L;
+        long ourFeeRate = 100L;
+        long feeRateLimit = 1;
+        when(policyService.getMinimumFeeRateFrom(PUBKEY)).thenReturn(Optional.of(peerFeeRate));
+        when(policyService.getMinimumFeeRateTo(PUBKEY)).thenReturn(Optional.of(ourFeeRate));
+        PaymentOptions given = new PaymentOptions(
+                Optional.empty(),
+                Optional.of(feeRateLimit),
+                Optional.empty(),
+                true,
+                Optional.empty()
+        );
+        PaymentOptions expected = new PaymentOptions(
+                Optional.of(5),
+                Optional.of(feeRateLimit),
+                Optional.of(0L),
                 false,
                 Optional.of(PUBKEY)
         );
