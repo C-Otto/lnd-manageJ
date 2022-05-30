@@ -85,13 +85,33 @@ class GrpcPaymentsTest {
     }
 
     @Test
+    void skips_unsuccessful_htlcs() {
+        Route route = Route.newBuilder().addHops(Hop.getDefaultInstance()).build();
+        HTLCAttempt htlc  = HTLCAttempt.newBuilder()
+                .setRoute(route)
+                .setStatus(HTLCAttempt.HTLCStatus.IN_FLIGHT)
+                .build();
+        lnrpc.Payment payment = lnrpc.Payment.newBuilder()
+                .setStatus(PaymentStatus.SUCCEEDED)
+                .addHtlcs(htlc)
+                .build();
+
+        ListPaymentsResponse response = ListPaymentsResponse.newBuilder()
+                .addPayments(payment)
+                .build();
+        when(grpcService.getPayments(anyLong(), anyInt())).thenReturn(Optional.of(response));
+        assertThat(grpcPayments.getPaymentsAfter(0L).orElseThrow().stream().map(Payment::routes))
+                .contains(List.of());
+    }
+
+    @Test
     void payment_without_channel_id() {
         Hop hop = Hop.newBuilder()
                 .setChanId(0L)
                 .setAmtToForwardMsat(123L)
                 .build();
         Route route = Route.newBuilder().addHops(hop).build();
-        HTLCAttempt htlc = HTLCAttempt.newBuilder().setRoute(route).build();
+        HTLCAttempt htlc = HTLCAttempt.newBuilder().setStatus(HTLCAttempt.HTLCStatus.SUCCEEDED).setRoute(route).build();
         lnrpc.Payment result = lnrpc.Payment.newBuilder()
                 .setStatus(PaymentStatus.SUCCEEDED)
                 .setPaymentIndex(PAYMENT.index())
@@ -226,6 +246,7 @@ class GrpcPaymentsTest {
                         .build());
             }
             htlcBuilder.setRoute(routeBuilder.build());
+            htlcBuilder.setStatus(HTLCAttempt.HTLCStatus.SUCCEEDED);
             htlcs.add(htlcBuilder.build());
         }
         lnrpc.Payment.Builder builder = lnrpc.Payment.newBuilder()
