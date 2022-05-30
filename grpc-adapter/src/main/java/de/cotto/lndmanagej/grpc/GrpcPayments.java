@@ -97,7 +97,9 @@ public class GrpcPayments {
                 LocalDateTime.ofInstant(timestamp, ZoneOffset.UTC),
                 Coins.ofMilliSatoshis(lndPayment.getValueMsat()),
                 Coins.ofMilliSatoshis(lndPayment.getFeeMsat()),
-                lndPayment.getHtlcsList().stream().map(htlcAttempt -> toPaymentRoute(htlcAttempt, paymentHash)).toList()
+                lndPayment.getHtlcsList().stream()
+                        .filter(htlcAttempt -> htlcAttempt.getStatus() == HTLCAttempt.HTLCStatus.SUCCEEDED)
+                        .map(htlcAttempt -> toPaymentRoute(htlcAttempt, paymentHash)).toList()
         );
     }
 
