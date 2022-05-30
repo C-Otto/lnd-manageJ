@@ -13,7 +13,7 @@ public class DemoStatusService implements StatusService {
 
     @Override
     public StatusModel getStatus() {
-        return new StatusModel(true, 735_895);
+        return new StatusModel(true, true, 735_895);
     }
 }
 

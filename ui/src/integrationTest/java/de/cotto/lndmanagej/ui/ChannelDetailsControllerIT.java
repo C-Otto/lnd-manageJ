@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.ui;
 
-import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.ui.controller.ChannelDetailsController;
 import de.cotto.lndmanagej.ui.page.PageService;
 import de.cotto.lndmanagej.ui.page.channel.ChannelDetailsPage;
@@ -25,10 +24,6 @@ class ChannelDetailsControllerIT extends BaseControllerIT {
 
     @MockBean
     private PageService pageService;
-
-    @MockBean
-    @SuppressWarnings("unused")
-    private ChannelIdResolver channelIdResolver;
 
     @Test
     void node_details_page() throws Exception {
