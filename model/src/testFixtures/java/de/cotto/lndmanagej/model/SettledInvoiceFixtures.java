@@ -4,10 +4,6 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
-import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
-import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
-import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_4;
-
 public class SettledInvoiceFixtures {
     public static final ZonedDateTime SETTLE_DATE = ZonedDateTime.of(2021, 12, 2, 16, 4, 30, 0, ZoneOffset.UTC);
     public static final int ADD_INDEX = 2;
@@ -36,18 +32,6 @@ public class SettledInvoiceFixtures {
             HASH,
             AMOUNT_PAID,
             MEMO,
-            Optional.empty(),
-            Optional.of(CHANNEL_ID_2)
-    );
-
-    public static final SettledInvoice SETTLED_INVOICE_NO_CHANNEL_ID = new SettledInvoice(
-            ADD_INDEX,
-            SETTLE_INDEX,
-            SETTLE_DATE,
-            HASH,
-            AMOUNT_PAID,
-            MEMO,
-            Optional.empty(),
             Optional.empty()
     );
 
@@ -58,8 +42,7 @@ public class SettledInvoiceFixtures {
             HASH,
             AMOUNT_PAID,
             MEMO,
-            Optional.of(KEYSEND_MESSAGE),
-            Optional.of(CHANNEL_ID_2)
+            Optional.of(KEYSEND_MESSAGE)
     );
 
     public static final SettledInvoice SETTLED_INVOICE_2 = new SettledInvoice(
@@ -69,8 +52,7 @@ public class SettledInvoiceFixtures {
             HASH_2,
             AMOUNT_PAID_2,
             MEMO_2,
-            Optional.empty(),
-            Optional.of(CHANNEL_ID)
+            Optional.empty()
     );
 
     public static final SettledInvoice SETTLED_INVOICE_3 = new SettledInvoice(
@@ -80,8 +62,7 @@ public class SettledInvoiceFixtures {
             HASH_3,
             AMOUNT_PAID_2,
             MEMO_3,
-            Optional.empty(),
-            Optional.of(CHANNEL_ID_2)
+            Optional.empty()
     );
 
     public static final SettledInvoice SETTLED_INVOICE_4 = new SettledInvoice(
@@ -91,7 +72,6 @@ public class SettledInvoiceFixtures {
             HASH_4,
             AMOUNT_PAID_2,
             MEMO_3,
-            Optional.empty(),
-            Optional.of(CHANNEL_ID_4)
+            Optional.empty()
     );
 }

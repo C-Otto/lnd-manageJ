@@ -14,4 +14,6 @@ public class PaymentRouteFixtures {
             new PaymentRoute(List.of(PAYMENT_HOP_CHANNEL_4, PAYMENT_HOP_CHANNEL_3, PAYMENT_HOP_CHANNEL_1));
     public static final PaymentRoute PAYMENT_ROUTE_3_TO_1 =
             new PaymentRoute(List.of(PAYMENT_HOP_CHANNEL_3, PAYMENT_HOP_CHANNEL_1));
+    public static final PaymentRoute PAYMENT_ROUTE_3_TO_2 =
+            new PaymentRoute(List.of(PAYMENT_HOP_CHANNEL_3, PAYMENT_HOP_CHANNEL_2));
 }

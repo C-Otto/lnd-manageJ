@@ -1,8 +1,10 @@
 package de.cotto.lndmanagej.selfpayments.persistence;
 
-import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.invoices.persistence.SettledInvoiceJpaDto;
 import de.cotto.lndmanagej.model.Payment;
 import de.cotto.lndmanagej.model.SettledInvoice;
+import de.cotto.lndmanagej.payments.persistence.PaymentJpaDto;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatcher;
@@ -23,17 +25,26 @@ import static de.cotto.lndmanagej.model.SelfPaymentFixtures.SELF_PAYMENT_2;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE_2;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.longThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SelfPaymentsDaoImplTest {
+    private static final Duration MAX_AGE = Duration.ofDays(12);
     @InjectMocks
     private SelfPaymentsDaoImpl selfPaymentsDaoImpl;
 
     @Mock
     private SelfPaymentsRepository repository;
+
+    private ZonedDateTime now;
+
+    @BeforeEach
+    void setUp() {
+        now = ZonedDateTime.now(ZoneOffset.UTC);
+    }
 
     @Test
     void getAllSelfPayments_empty() {
@@ -49,27 +60,30 @@ class SelfPaymentsDaoImplTest {
 
     @Test
     void getSelfPaymentsToChannel() {
-        Duration maxAge = Duration.ofDays(12);
-        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
-        long epochSeconds = now.minus(maxAge).toEpochSecond();
+        SelfPaymentJpaDto dto = getDto(PAYMENT, SETTLED_INVOICE);
+        when(repository.getSelfPaymentsToChannel(anyLong(), anyLong())).thenReturn(List.of(dto, dto));
+        assertThat(selfPaymentsDaoImpl.getSelfPaymentsToChannel(CHANNEL_ID, MAX_AGE)).hasSize(1);
+    }
+
+    @Test
+    void does_not_return_duplicates() {
+        long epochSeconds = now.minus(MAX_AGE).toEpochSecond();
         when(repository.getSelfPaymentsToChannel(
                 eq(CHANNEL_ID.getShortChannelId()),
                 longThat(isWithinAFewSeconds(epochSeconds))
         )).thenReturn(List.of(getDto(PAYMENT, SETTLED_INVOICE)));
-        assertThat(selfPaymentsDaoImpl.getSelfPaymentsToChannel(CHANNEL_ID, maxAge))
+        assertThat(selfPaymentsDaoImpl.getSelfPaymentsToChannel(CHANNEL_ID, MAX_AGE))
                 .containsExactlyInAnyOrder(SELF_PAYMENT);
     }
 
     @Test
     void getSelfPaymentsFromChannel() {
-        Duration maxAge = Duration.ofDays(13);
-        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
-        long epochSeconds = now.minus(maxAge).toEpochSecond();
+        long epochSeconds = now.minus(MAX_AGE).toEpochSecond();
         when(repository.getSelfPaymentsFromChannel(
                 eq(CHANNEL_ID.getShortChannelId()),
                 longThat(isWithinAFewSeconds(epochSeconds))
         )).thenReturn(List.of(getDto(PAYMENT, SETTLED_INVOICE)));
-        assertThat(selfPaymentsDaoImpl.getSelfPaymentsFromChannel(CHANNEL_ID, maxAge))
+        assertThat(selfPaymentsDaoImpl.getSelfPaymentsFromChannel(CHANNEL_ID, MAX_AGE))
                 .containsExactlyInAnyOrder(SELF_PAYMENT);
     }
 
@@ -80,12 +94,8 @@ class SelfPaymentsDaoImplTest {
 
     private SelfPaymentJpaDto getDto(Payment payment, SettledInvoice settledInvoice) {
         return new SelfPaymentJpaDto(
-                settledInvoice.memo(),
-                settledInvoice.settleDate().toEpochSecond(),
-                settledInvoice.amountPaid().milliSatoshis(),
-                payment.fees().milliSatoshis(),
-                payment.getFirstChannel().map(ChannelId::getShortChannelId).orElse(0L),
-                settledInvoice.receivedVia().map(ChannelId::getShortChannelId).orElse(0L)
+                SettledInvoiceJpaDto.createFromModel(settledInvoice),
+                PaymentJpaDto.createFromModel(payment)
         );
     }
 }

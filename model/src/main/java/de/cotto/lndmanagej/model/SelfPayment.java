@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.model;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public record SelfPayment(
@@ -8,8 +9,7 @@ public record SelfPayment(
         ZonedDateTime settleDate,
         Coins amountPaid,
         Coins fees,
-        Optional<ChannelId> firstChannel,
-        Optional<ChannelId> lastChannel
+        List<SelfPaymentRoute> routes
 ) {
     public SelfPayment(Payment payment, SettledInvoice settledInvoice) {
         this(
@@ -17,8 +17,14 @@ public record SelfPayment(
                 settledInvoice.settleDate(),
                 settledInvoice.amountPaid(),
                 payment.fees(),
-                payment.getFirstChannel(),
-                settledInvoice.receivedVia()
+                getRoutes(payment)
         );
+    }
+
+    private static List<SelfPaymentRoute> getRoutes(Payment payment) {
+        return payment.routes().stream()
+                .map(SelfPaymentRoute::create)
+                .flatMap(Optional::stream)
+                .toList();
     }
 }

@@ -72,12 +72,26 @@ public class SelfPaymentsService {
     }
 
     private List<SelfPayment> getSelfPaymentsFromChannelWithoutCache(ChannelIdAndMaxAge channelIdAndMaxAge) {
-        return dao.getSelfPaymentsFromChannel(channelIdAndMaxAge.channelId(), channelIdAndMaxAge.maxAge()).stream()
+        ChannelId channelId = channelIdAndMaxAge.channelId();
+        return dao.getSelfPaymentsFromChannel(channelId, channelIdAndMaxAge.maxAge()).stream()
+                .filter(selfPayment -> noLowerChannelIdAsFirstHop(channelId, selfPayment))
                 .distinct()
                 .toList();
     }
 
     private List<SelfPayment> getSelfPaymentsToChannelWithoutCache(ChannelIdAndMaxAge channelIdAndMaxAge) {
-        return dao.getSelfPaymentsToChannel(channelIdAndMaxAge.channelId(), channelIdAndMaxAge.maxAge());
+        ChannelId channelId = channelIdAndMaxAge.channelId();
+        return dao.getSelfPaymentsToChannel(channelId, channelIdAndMaxAge.maxAge()).stream()
+                .filter(selfPayment -> noLowerChannelIdAsLastHop(channelId, selfPayment))
+                .distinct()
+                .toList();
+    }
+
+    private boolean noLowerChannelIdAsFirstHop(ChannelId channelId, SelfPayment selfPayment) {
+        return selfPayment.routes().stream().allMatch(route -> channelId.compareTo(route.channelIdOut()) <= 0);
+    }
+
+    private boolean noLowerChannelIdAsLastHop(ChannelId channelId, SelfPayment selfPayment) {
+        return selfPayment.routes().stream().allMatch(route -> channelId.compareTo(route.channelIdIn()) <= 0);
     }
 }

@@ -12,8 +12,7 @@ public record SettledInvoice(
         String hash,
         Coins amountPaid,
         String memo,
-        Optional<String> keysendMessage,
-        Optional<ChannelId> receivedVia
+        Optional<String> keysendMessage
 ) {
     public static final SettledInvoice INVALID = new SettledInvoice(
             -1,
@@ -22,7 +21,6 @@ public record SettledInvoice(
             "",
             Coins.NONE,
             "",
-            Optional.empty(),
             Optional.empty()
     );
 

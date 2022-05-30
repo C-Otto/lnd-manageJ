@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.invoices.persistence;
 
-import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.SettledInvoice;
 
@@ -45,7 +44,6 @@ public class SettledInvoiceJpaDto {
     @Nullable
     @Column(length = KEYSEND_MESSAGE_LENGTH)
     private String keysendMessage;
-    private long receivedVia;
 
     public SettledInvoiceJpaDto() {
         // for JPA
@@ -60,18 +58,11 @@ public class SettledInvoiceJpaDto {
         jpaDto.amountPaid = settledInvoice.amountPaid().milliSatoshis();
         jpaDto.memo = settledInvoice.memo();
         jpaDto.keysendMessage = getTruncatedKeysendMessage(settledInvoice);
-        jpaDto.receivedVia = settledInvoice.receivedVia().map(ChannelId::getShortChannelId).orElse(0L);
         return jpaDto;
     }
 
     public SettledInvoice toModel() {
         ZonedDateTime dateTime = LocalDateTime.ofEpochSecond(settleDate, 0, UTC).atZone(UTC);
-        Optional<ChannelId> channelId;
-        if (receivedVia > 0) {
-            channelId = Optional.of(ChannelId.fromShortChannelId(receivedVia));
-        } else {
-            channelId = Optional.empty();
-        }
         return new SettledInvoice(
                 addIndex,
                 settleIndex,
@@ -79,8 +70,7 @@ public class SettledInvoiceJpaDto {
                 Objects.requireNonNull(hash),
                 Coins.ofMilliSatoshis(amountPaid),
                 Objects.requireNonNull(memo),
-                Optional.ofNullable(keysendMessage),
-                channelId
+                Optional.ofNullable(keysendMessage)
         );
     }
 
@@ -111,10 +101,6 @@ public class SettledInvoiceJpaDto {
     @Nullable
     public String getKeysendMessage() {
         return keysendMessage;
-    }
-
-    public long getReceivedVia() {
-        return receivedVia;
     }
 
     @Nullable

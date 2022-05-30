@@ -8,6 +8,7 @@ import de.cotto.lndmanagej.model.PaymentRoute;
 import de.cotto.lndmanagej.model.RebalanceReport;
 import de.cotto.lndmanagej.model.SelfPayment;
 import de.cotto.lndmanagej.model.SettledInvoice;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,12 +25,13 @@ import java.util.Set;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_4;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_3;
-import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT_CREATION_DATE_TIME;
+import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT_CREATION;
 import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT_FEES;
 import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT_HASH;
 import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT_INDEX;
@@ -129,7 +131,7 @@ class RebalanceServiceTest {
 
     @Test
     void getReportForChannel_with_max_age() {
-        Duration maxAge = Duration.between(PAYMENT_CREATION_DATE_TIME, LocalDateTime.now(ZoneOffset.UTC));
+        Duration maxAge = Duration.between(PAYMENT_CREATION, LocalDateTime.now(ZoneOffset.UTC));
         RebalanceReport expected = new RebalanceReport(
                 Coins.NONE,
                 Coins.NONE,
@@ -360,6 +362,33 @@ class RebalanceServiceTest {
     }
 
     @Test
+    void two_different_source_channels_memo_mentions_one_of_the_first_hops() {
+        String memo = "y" + CHANNEL_ID.getShortChannelId();
+        Payment payment = mockMppWithTwoRoutes();
+        when(selfPaymentsService.getSelfPaymentsFromChannel(CHANNEL_ID, DEFAULT_MAX_AGE)).thenReturn(List.of(
+                new SelfPayment(payment, getSettledInvoice(memo, 0))
+        ));
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(rebalanceService.getSourceCostsForChannel(CHANNEL_ID)).isEqualTo(Coins.ofMilliSatoshis(10));
+        softly.assertThat(rebalanceService.getSourceCostsForChannel(CHANNEL_ID_2)).isEqualTo(Coins.NONE);
+        softly.assertAll();
+    }
+
+    @Test
+    void two_different_source_channels_memo_mentions_one_of_the_last_hops() {
+        String memo = "x" + CHANNEL_ID_4.getShortChannelId();
+        Payment payment = mockMppWithTwoRoutes();
+        when(selfPaymentsService.getSelfPaymentsToChannel(CHANNEL_ID_3, DEFAULT_MAX_AGE)).thenReturn(List.of());
+        when(selfPaymentsService.getSelfPaymentsToChannel(CHANNEL_ID_4, DEFAULT_MAX_AGE)).thenReturn(List.of(
+                new SelfPayment(payment, getSettledInvoice(memo, 0))
+        ));
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(rebalanceService.getTargetCostsForChannel(CHANNEL_ID_3)).isEqualTo(Coins.NONE);
+        softly.assertThat(rebalanceService.getTargetCostsForChannel(CHANNEL_ID_4)).isEqualTo(Coins.ofMilliSatoshis(10));
+        softly.assertAll();
+    }
+
+    @Test
     void getSourceCostsForChannel_id_not_in_memo() {
         mockSelfPaymentsFromChannel("something");
         assertThat(rebalanceService.getSourceCostsForChannel(CHANNEL_ID)).isEqualTo(Coins.NONE);
@@ -491,7 +520,7 @@ class RebalanceServiceTest {
     void getTargetCostsForChannel_source_channel_not_known() {
         List<PaymentRoute> noRoute = List.of(new PaymentRoute(List.of()));
         Payment payment = new Payment(
-                PAYMENT_INDEX, PAYMENT_HASH, PAYMENT_CREATION_DATE_TIME, PAYMENT_VALUE, PAYMENT_FEES, noRoute
+                PAYMENT_INDEX, PAYMENT_HASH, PAYMENT_CREATION, PAYMENT_VALUE, PAYMENT_FEES, noRoute
         );
         SettledInvoice settledInvoice = getSettledInvoice("something", 0);
         when(selfPaymentsService.getSelfPaymentsToChannel(CHANNEL_ID_2, DEFAULT_MAX_AGE))
@@ -516,7 +545,7 @@ class RebalanceServiceTest {
     private SelfPayment getSelfPayment(String memo, int offset) {
         List<PaymentRoute> routes = getSingleRoute();
         Payment payment = new Payment(
-                PAYMENT_INDEX, PAYMENT_HASH, PAYMENT_CREATION_DATE_TIME, PAYMENT_VALUE, PAYMENT_FEES, routes
+                PAYMENT_INDEX, PAYMENT_HASH, PAYMENT_CREATION, PAYMENT_VALUE, PAYMENT_FEES, routes
         );
         SettledInvoice settledInvoice = getSettledInvoice(memo, offset);
         return new SelfPayment(payment, settledInvoice);
@@ -530,8 +559,7 @@ class RebalanceServiceTest {
                 HASH,
                 AMOUNT_PAID,
                 memo,
-                Optional.empty(),
-                Optional.of(CHANNEL_ID_2)
+                Optional.empty()
         );
     }
 
@@ -578,5 +606,19 @@ class RebalanceServiceTest {
                 getSelfPayment("to " + CHANNEL_ID_2, 1),
                 getSelfPayment("to " + CHANNEL_ID_2, 2)
         ));
+    }
+
+    private Payment mockMppWithTwoRoutes() {
+        PaymentHop firstHop1 = new PaymentHop(CHANNEL_ID, Coins.NONE);
+        PaymentHop lastHop1 = new PaymentHop(CHANNEL_ID_3, Coins.NONE);
+        PaymentRoute route1 = new PaymentRoute(List.of(firstHop1, lastHop1));
+
+        PaymentHop firstHop2 = new PaymentHop(CHANNEL_ID_2, Coins.NONE);
+        PaymentHop lastHop2 = new PaymentHop(CHANNEL_ID_4, Coins.NONE);
+        PaymentRoute route2 = new PaymentRoute(List.of(firstHop2, lastHop2));
+        List<PaymentRoute> routes = List.of(route1, route2);
+        return new Payment(
+                PAYMENT_INDEX, PAYMENT_HASH, PAYMENT_CREATION, PAYMENT_VALUE, PAYMENT_FEES, routes
+        );
     }
 }

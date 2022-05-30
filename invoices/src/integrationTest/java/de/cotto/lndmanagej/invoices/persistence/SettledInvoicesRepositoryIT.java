@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
 
-import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
@@ -64,8 +63,7 @@ class SettledInvoicesRepositoryIT {
                         "",
                         Coins.NONE,
                         "",
-                        Optional.empty(),
-                        Optional.of(CHANNEL_ID)
+                        Optional.empty()
                 )
         );
     }
