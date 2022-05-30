@@ -1,4 +1,6 @@
 package de.cotto.lndmanagej.ui.dto;
 
-public record StatusModel(boolean synced, int blockHeight) {
+import javax.annotation.Nullable;
+
+public record StatusModel(boolean connected, boolean synced, @Nullable Integer blockHeight) {
 }

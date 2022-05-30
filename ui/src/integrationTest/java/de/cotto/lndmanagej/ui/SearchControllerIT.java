@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.ui;
 
-import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.ui.controller.SearchController;
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
@@ -46,10 +45,6 @@ class SearchControllerIT extends BaseControllerIT {
     @MockBean
     private PageService pageService;
 
-    @MockBean
-    @SuppressWarnings("unused")
-    private ChannelIdResolver channelIdResolver;
-
     @Test
     void search_noOpenChannels_errorPage() throws Exception {
         when(dataService.getOpenChannels()).thenReturn(List.of());
@@ -72,7 +67,7 @@ class SearchControllerIT extends BaseControllerIT {
 
     @Test
     void searchForChannelId_viaChannelPoint_found() throws Exception {
-        when(channelIdResolver.resolveFromChannelPoint(CHANNEL_POINT)).thenReturn(Optional.of(CHANNEL_ID));
+        when(getChannelIdResolverMockBean().resolveFromChannelPoint(CHANNEL_POINT)).thenReturn(Optional.of(CHANNEL_ID));
         searchForChannelId(CHANNEL_POINT.toString());
     }
 

@@ -5,5 +5,4 @@ import de.cotto.lndmanagej.ui.dto.StatusModel;
 public interface StatusService {
 
     StatusModel getStatus();
-
 }

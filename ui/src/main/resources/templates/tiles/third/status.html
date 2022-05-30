@@ -11,8 +11,24 @@
             </div>
         </div>
         <div class="card-body">
-            <p style="margin-bottom: 0;"
-               th:text="'Synced: ' + ${status.synced} + '&nbsp;&nbsp;&nbsp;Block Height: '+${@formatter.formatNumber(status.blockHeight)}"></p>
+
+            <div th:if="!${status.connected}">
+                <p>Not connected.</p>
+                <p>Verify LND is running and double-check the connection settings in lnd-manageJ.conf</p>
+                <a href="/status" class="btn btn-dark mb-3 me-2 mb-md-0 text-decoration-none lh-1">
+                    <div th:replace="~{fragments/icons :: arrow-repeat}"/>
+                    Test Connection
+                </a>
+            </div>
+
+            <div th:if="${status.connected}">
+                <p th:text="'Synced: ' + ${status.synced} + '&nbsp;&nbsp;&nbsp;Block Height: '+${@formatter.formatNumber(status.blockHeight)}"></p>
+                <a href="/" class="btn btn-dark mb-3 me-2 mb-md-0 text-decoration-none lh-1" th:if="${!status.synced}">
+                    <div th:replace="~{fragments/icons :: arrow-repeat}"/>
+                    Refresh
+                </a>
+            </div>
+
         </div>
     </div>
 </div>
