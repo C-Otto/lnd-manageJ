@@ -38,7 +38,7 @@ public class SelfPaymentsDaoImpl implements SelfPaymentsDao {
     }
 
     private List<SelfPayment> toModel(List<SelfPaymentJpaDto> selfPayments) {
-        return selfPayments.stream().map(SelfPaymentJpaDto::toModel).toList();
+        return selfPayments.stream().map(SelfPaymentJpaDto::toModel).distinct().toList();
     }
 
     private long getMinimumEpochSecond(Duration maxAge) {

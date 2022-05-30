@@ -16,7 +16,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "payment_routes")
-class PaymentRouteJpaDto {
+public class PaymentRouteJpaDto {
     @Id
     @GeneratedValue
     @SuppressWarnings("unused")

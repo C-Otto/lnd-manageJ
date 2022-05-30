@@ -28,14 +28,4 @@ class SelfPaymentDtoTest {
     void fees() {
         assertThat(dto.feesMilliSat()).isEqualTo(String.valueOf(SELF_PAYMENT.fees().milliSatoshis()));
     }
-
-    @Test
-    void firstChannel() {
-        assertThat(dto.firstChannel()).isEqualTo(SELF_PAYMENT.firstChannel().orElseThrow());
-    }
-
-    @Test
-    void lastChannel() {
-        assertThat(dto.lastChannel()).isEqualTo(SELF_PAYMENT.lastChannel().orElseThrow());
-    }
 }

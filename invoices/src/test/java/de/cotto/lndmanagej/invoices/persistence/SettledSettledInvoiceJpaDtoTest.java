@@ -6,12 +6,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
-import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.KEYSEND_MESSAGE;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE_KEYSEND;
-import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE_NO_CHANNEL_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SettledSettledInvoiceJpaDtoTest {
@@ -26,7 +23,6 @@ class SettledSettledInvoiceJpaDtoTest {
         assertThat(jpaDto.getAmountPaid()).isEqualTo(SETTLED_INVOICE.amountPaid().milliSatoshis());
         assertThat(jpaDto.getMemo()).isEqualTo(SETTLED_INVOICE.memo());
         assertThat(jpaDto.getKeysendMessage()).isNull();
-        assertThat(jpaDto.getReceivedVia()).isEqualTo(CHANNEL_ID_2.getShortChannelId());
     }
 
     @Test
@@ -57,21 +53,9 @@ class SettledSettledInvoiceJpaDtoTest {
     }
 
     @Test
-    void createFromModel_without_receivedVia_channel() {
-        SettledInvoiceJpaDto jpaDto = SettledInvoiceJpaDto.createFromModel(SETTLED_INVOICE_NO_CHANNEL_ID);
-        assertThat(jpaDto.getReceivedVia()).isEqualTo(0L);
-    }
-
-    @Test
     void toModel() {
         assertThat(SettledInvoiceJpaDto.createFromModel(SETTLED_INVOICE).toModel())
                 .isEqualTo(SETTLED_INVOICE);
-    }
-
-    @Test
-    void toModel_without_receivedVia_channel() {
-        assertThat(SettledInvoiceJpaDto.createFromModel(SETTLED_INVOICE_NO_CHANNEL_ID).toModel())
-                .isEqualTo(SETTLED_INVOICE_NO_CHANNEL_ID);
     }
 
     @Test
@@ -92,8 +76,7 @@ class SettledSettledInvoiceJpaDtoTest {
                 SettledInvoiceFixtures.HASH,
                 SettledInvoiceFixtures.AMOUNT_PAID,
                 SettledInvoiceFixtures.MEMO,
-                Optional.of(longMessage),
-                Optional.of(CHANNEL_ID)
+                Optional.of(longMessage)
         ));
     }
 }

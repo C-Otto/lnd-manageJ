@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
 
-import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.ADD_INDEX;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.AMOUNT_PAID;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.HASH;
@@ -28,7 +27,6 @@ class SettledInvoiceTest {
                 "",
                 Coins.NONE,
                 "",
-                Optional.empty(),
                 Optional.empty()
         );
         assertThat(SettledInvoice.INVALID).isEqualTo(expected);
@@ -78,10 +76,5 @@ class SettledInvoiceTest {
     @Test
     void keysendMessage() {
         assertThat(SETTLED_INVOICE_KEYSEND.keysendMessage()).contains(KEYSEND_MESSAGE);
-    }
-
-    @Test
-    void receivedVia() {
-        assertThat(SETTLED_INVOICE.receivedVia()).contains(CHANNEL_ID_2);
     }
 }

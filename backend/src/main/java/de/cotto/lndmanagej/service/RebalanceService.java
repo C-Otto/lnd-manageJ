@@ -7,6 +7,7 @@ import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.RebalanceReport;
 import de.cotto.lndmanagej.model.SelfPayment;
+import de.cotto.lndmanagej.model.SelfPaymentRoute;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -231,10 +232,8 @@ public class RebalanceService {
     }
 
     private boolean memoDoesNotMentionFirstHopChannel(SelfPayment selfPayment) {
-        ChannelId firstChannel = selfPayment.firstChannel().orElse(null);
-        if (firstChannel == null) {
-            return true;
-        }
-        return !memoMentionsChannel(selfPayment, firstChannel);
+        return selfPayment.routes().stream()
+                .map(SelfPaymentRoute::channelIdOut)
+                .noneMatch(firstChannel -> memoMentionsChannel(selfPayment, firstChannel));
     }
 }

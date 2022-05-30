@@ -13,12 +13,12 @@ import java.util.List;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_4;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.SelfPaymentFixtures.SELF_PAYMENT;
 import static de.cotto.lndmanagej.model.SelfPaymentFixtures.SELF_PAYMENT_2;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.not;
+import static de.cotto.lndmanagej.model.SelfPaymentFixtures.SELF_PAYMENT_4;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -65,20 +65,23 @@ class SelfPaymentsControllerIT {
     @Test
     void getSelfPaymentsToChannel() throws Exception {
         when(selfPaymentsService.getSelfPaymentsToChannel(CHANNEL_ID))
-                .thenReturn(List.of(SELF_PAYMENT, SELF_PAYMENT_2));
+                .thenReturn(List.of(SELF_PAYMENT, SELF_PAYMENT_4));
         mockMvc.perform(get(CHANNEL_PREFIX + "/self-payments-to-channel/"))
                 .andExpect(jsonPath("$.selfPayments[0].memo", is(SELF_PAYMENT.memo())))
                 .andExpect(jsonPath("$.selfPayments[0].settleDate", is(SELF_PAYMENT.settleDate().toString())))
                 .andExpect(jsonPath("$.selfPayments[0].amountPaidMilliSat", is(msat(SELF_PAYMENT.amountPaid()))))
                 .andExpect(jsonPath("$.selfPayments[0].feesMilliSat", is(msat(SELF_PAYMENT.fees()))))
-                .andExpect(jsonPath("$.selfPayments[0].firstChannel", is(CHANNEL_ID_4.toString())))
-                .andExpect(jsonPath("$.selfPayments[0].lastChannel", is(CHANNEL_ID_2.toString())))
-                .andExpect(jsonPath("$.selfPayments[1].memo", is(SELF_PAYMENT_2.memo())))
-                .andExpect(jsonPath("$.selfPayments[1].settleDate", is(SELF_PAYMENT_2.settleDate().toString())))
-                .andExpect(jsonPath("$.selfPayments[1].amountPaidMilliSat", is(msat(SELF_PAYMENT_2.amountPaid()))))
-                .andExpect(jsonPath("$.selfPayments[1].feesMilliSat", is(msat(SELF_PAYMENT_2.fees()))))
-                .andExpect(jsonPath("$.selfPayments[1].firstChannel", is(not(empty()))))
-                .andExpect(jsonPath("$.selfPayments[1].lastChannel", is(CHANNEL_ID.toString())))
+                .andExpect(jsonPath("$.selfPayments[0].routes[0].channelIdOut", is(CHANNEL_ID_4.toString())))
+                .andExpect(jsonPath("$.selfPayments[0].routes[0].amountMilliSat", is("2000")))
+                .andExpect(jsonPath("$.selfPayments[0].routes[0].channelIdIn", is(CHANNEL_ID_2.toString())))
+                .andExpect(jsonPath("$.selfPayments[1].memo", is(SELF_PAYMENT_4.memo())))
+                .andExpect(jsonPath("$.selfPayments[1].settleDate", is(SELF_PAYMENT_4.settleDate().toString())))
+                .andExpect(jsonPath("$.selfPayments[1].amountPaidMilliSat", is(msat(SELF_PAYMENT_4.amountPaid()))))
+                .andExpect(jsonPath("$.selfPayments[1].feesMilliSat", is(msat(SELF_PAYMENT_4.fees()))))
+                .andExpect(jsonPath("$.selfPayments[1].routes[0].channelIdOut", is(CHANNEL_ID_4.toString())))
+                .andExpect(jsonPath("$.selfPayments[1].routes[0].channelIdIn", is(CHANNEL_ID.toString())))
+                .andExpect(jsonPath("$.selfPayments[1].routes[1].channelIdOut", is(CHANNEL_ID_3.toString())))
+                .andExpect(jsonPath("$.selfPayments[1].routes[1].channelIdIn", is(CHANNEL_ID_2.toString())))
                 .andExpect(jsonPath("$.feesMilliSat", is("20")))
                 .andExpect(jsonPath("$.amountPaidMilliSat", is("4690")));
     }

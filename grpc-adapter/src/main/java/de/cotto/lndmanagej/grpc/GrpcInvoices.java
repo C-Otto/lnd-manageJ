@@ -1,7 +1,6 @@
 package de.cotto.lndmanagej.grpc;
 
 import com.google.protobuf.ByteString;
-import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.DecodedPaymentRequest;
 import de.cotto.lndmanagej.model.SettledInvoice;
@@ -91,8 +90,7 @@ public class GrpcInvoices {
                 HEX_FORMAT.formatHex(lndInvoice.getRHash().toByteArray()),
                 Coins.ofMilliSatoshis(lndInvoice.getAmtPaidMsat()),
                 lndInvoice.getMemo(),
-                getKeysendMessage(lndInvoice),
-                getLastHopChannelId(lndInvoice)
+                getKeysendMessage(lndInvoice)
         );
     }
 
@@ -108,14 +106,6 @@ public class GrpcInvoices {
                     return map.get(KEYSEND_DATA_V2);
                 })
                 .map(ByteString::toStringUtf8)
-                .findFirst();
-    }
-
-    private Optional<ChannelId> getLastHopChannelId(Invoice lndInvoice) {
-        return lndInvoice.getHtlcsList().stream()
-                .map(InvoiceHTLC::getChanId)
-                .filter(channelId -> channelId > 0)
-                .map(ChannelId::fromShortChannelId)
                 .findFirst();
     }
 
