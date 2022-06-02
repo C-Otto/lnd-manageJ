@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.controller;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
+import de.cotto.lndmanagej.service.PolicyService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -29,6 +30,10 @@ class LegacyControllerIT {
     @MockBean
     @SuppressWarnings("unused")
     private NodeService nodeService;
+
+    @MockBean
+    @SuppressWarnings("unused")
+    private PolicyService policyService;
 
     @MockBean
     private ChannelService channelService;
