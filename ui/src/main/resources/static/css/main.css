@@ -58,3 +58,7 @@
   text-align: center;
   padding: 5px 10px 5px 15px;
 }
+
+.link-button:hover {
+  color: #0a58ca;
+}
