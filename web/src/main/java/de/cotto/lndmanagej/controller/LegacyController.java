@@ -37,6 +37,7 @@ public class LegacyController {
                     return localOpenChannel.getId().getCompactForm() +
                             "\t" + pubkey +
                             "\t" + localOpenChannel.getCapacity().toStringSat() +
+                            "\t" + localOpenChannel.getBalanceInformation().localAvailable().toStringSat() +
                             "\t" + nodeService.getAlias(pubkey);
                 })
                 .collect(Collectors.joining(NEWLINE));

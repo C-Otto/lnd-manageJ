@@ -36,13 +36,16 @@ class LegacyControllerTest {
 
     @Test
     void getOpenChannelIdsPretty() {
+        String balance1 = LOCAL_OPEN_CHANNEL.getBalanceInformation().localAvailable().toStringSat();
+        String balance2 = LOCAL_OPEN_CHANNEL_TO_NODE_3.getBalanceInformation().localAvailable().toStringSat();
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(nodeService.getAlias(PUBKEY_3)).thenReturn(ALIAS_3);
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_TO_NODE_3));
-        assertThat(legacyController.getOpenChannelIdsPretty()).isEqualTo(
-                CHANNEL_ID_COMPACT + "\t" + PUBKEY_2 + "\t" + CAPACITY.toStringSat() + "\t" + ALIAS_2 + "\n" +
-                        CHANNEL_ID_COMPACT_4 + "\t" + PUBKEY_3 + "\t" + CAPACITY_2.toStringSat() + "\t" + ALIAS_3
-        );
+        assertThat(legacyController.getOpenChannelIdsPretty())
+                .isEqualTo("%s\t%s\t%s\t%s\t%s\n%s\t%s\t%s\t%s\t%s".formatted(
+                        CHANNEL_ID_COMPACT, PUBKEY_2, CAPACITY.toStringSat(), balance1, ALIAS_2,
+                        CHANNEL_ID_COMPACT_4, PUBKEY_3, CAPACITY_2.toStringSat(), balance2, ALIAS_3
+                ));
     }
 
     @Test
