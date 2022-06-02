@@ -2,12 +2,14 @@ package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
+import de.cotto.lndmanagej.service.PolicyService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
 import java.util.Set;
 
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
@@ -18,6 +20,8 @@ import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHAN
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_TO_NODE_3;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_3;
+import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_1;
+import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,15 +38,27 @@ class LegacyControllerTest {
     @Mock
     private ChannelService channelService;
 
+    @Mock
+    private PolicyService policyService;
+
     @Test
     void getOpenChannelIdsPretty() {
+        String balance1 = LOCAL_OPEN_CHANNEL.getBalanceInformation().localAvailable().toStringSat();
+        String balance2 = LOCAL_OPEN_CHANNEL_TO_NODE_3.getBalanceInformation().localAvailable().toStringSat();
+        long ppm1 = POLICY_1.feeRate();
+        long ppm2 = POLICY_2.feeRate();
+        when(policyService.getPolicyTo(LOCAL_OPEN_CHANNEL.getId(), LOCAL_OPEN_CHANNEL.getRemotePubkey()))
+                .thenReturn(Optional.of(POLICY_1));
+        when(policyService.getPolicyTo(LOCAL_OPEN_CHANNEL_TO_NODE_3.getId(), PUBKEY_3))
+                .thenReturn(Optional.of(POLICY_2));
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(nodeService.getAlias(PUBKEY_3)).thenReturn(ALIAS_3);
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_TO_NODE_3));
-        assertThat(legacyController.getOpenChannelIdsPretty()).isEqualTo(
-                CHANNEL_ID_COMPACT + "\t" + PUBKEY_2 + "\t" + CAPACITY + "\t" + ALIAS_2 + "\n" +
-                        CHANNEL_ID_COMPACT_4 + "\t" + PUBKEY_3 + "\t" + CAPACITY_2 + "\t" + ALIAS_3
-        );
+        assertThat(legacyController.getOpenChannelIdsPretty())
+                .isEqualTo("%s\t%s\t%s\t%s\t%s\t%s\n%s\t%s\t%s\t%s\t%s\t%s".formatted(
+                        CHANNEL_ID_COMPACT, PUBKEY_2, CAPACITY.toStringSat(), balance1, ppm1, ALIAS_2,
+                        CHANNEL_ID_COMPACT_4, PUBKEY_3, CAPACITY_2.toStringSat(), balance2, ppm2, ALIAS_3
+                ));
     }
 
     @Test
