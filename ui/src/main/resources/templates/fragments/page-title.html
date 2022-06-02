@@ -7,8 +7,8 @@
     <h1 class="h3" th:text="${text}"></h1>
 </div>
 
-<li th:fragment="ext-link-item(text, link)" class="ms-3">
-    <a class="link-button" target="_blank" th:href="${link}">
+<li th:fragment="ext-link-item(text, link, title)" class="ms-3">
+    <a class="link-button" target="_blank" th:href="${link}" th:title="${title}">
         <span th:text="${text}"></span>
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor"
              class="bi bi-box-arrow-up-right" viewBox="0 0 16 16" style="padding-bottom: 3px;">
@@ -27,21 +27,50 @@
     </div>
 
     <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
-        <div th:replace="~{fragments/page-title :: ext-link-item('1ML', 'https://1ml.com/channel/'+${channelId.shortChannelId})}"/>
-        <div th:replace="~{fragments/page-title :: ext-link-item('Amboss', 'https://www.amboss.space/edge/'+${channelId.shortChannelId})}"/>
+        <div th:replace="~{fragments/page-title :: ext-link-item('1ML', 'https://1ml.com/channel/'+${channelId.shortChannelId}, 'View on www.1ml.com')}"/>
+        <div th:replace="~{fragments/page-title :: ext-link-item('Amboss', 'https://amboss.space/edge/'+${channelId.shortChannelId}, 'View on www.amboss.space')}"/>
     </ul>
 </div>
 
-<div th:fragment="node-link-title(alias, pubkey)"
-     class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+<div th:fragment="node-link-title(alias, pubkey)" class="pt-3 pb-2 mb-3 border-bottom">
+    <div th:replace="~{fragments/page-title :: alias-and-links(${alias}, ${pubkey})}"/>
+    <div th:replace="~{fragments/page-title :: copy-pubkey(${pubkey})}"/>
+</div>
+
+<div th:fragment="alias-and-links(alias,pubkey)"
+     class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center">
     <div class="col-md-4 d-flex align-items-center">
         <h1 class="h3" th:text="${alias}"></h1>
     </div>
 
     <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
-        <div th:replace="~{fragments/page-title :: ext-link-item('1ML', 'https://1ml.com/node/'+${pubkey})}"/>
-        <div th:replace="~{fragments/page-title :: ext-link-item('Amboss', 'https://www.amboss.space/node/'+${pubkey})}"/>
+        <div th:replace="~{fragments/page-title :: ext-link-item('1ML', 'https://1ml.com/node/'+${pubkey}, 'View on www.1ml.com')}"/>
+        <div th:replace="~{fragments/page-title :: ext-link-item('Amboss', 'https://www.amboss.space/node/'+${pubkey}, 'View on www.amboss.space')}"/>
     </ul>
+</div>
+
+<div th:fragment="copy-pubkey(pubkey)">
+    <span style="font-size: 1rem" th:text="${pubkey}"></span>
+    <input id="copyToClipboard" th:value="${pubkey}" style="display: none">
+    <button class="link-button" style="padding: 0px 2px" onclick="copyToClipboard()" title="Copy to clipboard">
+        <span id="copy-icon" data-feather="copy"></span>
+        <span id="copy-done" style="display: none; color: darkGreen" data-feather="check"></span>
+    </button>
+    <script>
+        function copyToClipboard() {
+          var copyText = document.getElementById("copyToClipboard");
+          copyText.select();
+          copyText.setSelectionRange(0, 99999);
+          navigator.clipboard.writeText(copyText.value);
+
+          var copyIcon = document.getElementById("copy-icon");
+          copyIcon.style.display = 'none';
+
+          var copyDoneIcon = document.getElementById("copy-done");
+          copyDoneIcon.style.display = 'unset';
+        }
+
+    </script>
 </div>
 
 </html>
