@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.controller;
 
+import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.PolicyService;
@@ -43,8 +44,8 @@ class LegacyControllerTest {
 
     @Test
     void getOpenChannelIdsPretty() {
-        String balance1 = LOCAL_OPEN_CHANNEL.getBalanceInformation().localAvailable().toStringSat();
-        String balance2 = LOCAL_OPEN_CHANNEL_TO_NODE_3.getBalanceInformation().localAvailable().toStringSat();
+        Coins balance1 = LOCAL_OPEN_CHANNEL.getBalanceInformation().localAvailable();
+        Coins balance2 = LOCAL_OPEN_CHANNEL_TO_NODE_3.getBalanceInformation().localAvailable();
         long ppm1 = POLICY_1.feeRate();
         long ppm2 = POLICY_2.feeRate();
         when(policyService.getPolicyTo(LOCAL_OPEN_CHANNEL.getId(), LOCAL_OPEN_CHANNEL.getRemotePubkey()))
@@ -55,10 +56,22 @@ class LegacyControllerTest {
         when(nodeService.getAlias(PUBKEY_3)).thenReturn(ALIAS_3);
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_TO_NODE_3));
         assertThat(legacyController.getOpenChannelIdsPretty())
-                .isEqualTo("%s\t%s\t%s\t%s\t%s\t%s\n%s\t%s\t%s\t%s\t%s\t%s".formatted(
-                        CHANNEL_ID_COMPACT, PUBKEY_2, CAPACITY.toStringSat(), balance1, ppm1, ALIAS_2,
-                        CHANNEL_ID_COMPACT_4, PUBKEY_3, CAPACITY_2.toStringSat(), balance2, ppm2, ALIAS_3
+                .isEqualTo("%s\t%s %s %s %s %s\n%s\t%s %s %s %s %s".formatted(
+                        CHANNEL_ID_COMPACT, PUBKEY_2, padded(CAPACITY), padded(balance1), padded(ppm1), ALIAS_2,
+                        CHANNEL_ID_COMPACT_4, PUBKEY_3, padded(CAPACITY_2), padded(balance2), padded(ppm2), ALIAS_3
                 ));
+    }
+
+    private String padded(long longValue) {
+        return String.format("%,6d", longValue);
+    }
+
+    private String padded(Coins coins) {
+        return padded(coins.toStringSat());
+    }
+
+    private static String padded(String string) {
+        return String.format("%11s", string);
     }
 
     @Test

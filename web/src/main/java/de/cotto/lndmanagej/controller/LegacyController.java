@@ -44,11 +44,19 @@ public class LegacyController {
                             .orElse(0L);
                     return localOpenChannel.getId().getCompactForm() +
                             "\t" + pubkey +
-                            "\t" + localOpenChannel.getCapacity().toStringSat() +
-                            "\t" + localOpenChannel.getBalanceInformation().localAvailable().toStringSat() +
-                            "\t" + ppm +
-                            "\t" + nodeService.getAlias(pubkey);
+                            " " + padded(localOpenChannel.getCapacity().toStringSat()) +
+                            " " + padded(localOpenChannel.getBalanceInformation().localAvailable().toStringSat()) +
+                            " " + padded(ppm) +
+                            " " + nodeService.getAlias(pubkey);
                 })
                 .collect(Collectors.joining(NEWLINE));
+    }
+
+    private String padded(long longValue) {
+        return String.format("%,6d", longValue);
+    }
+
+    private String padded(String string) {
+        return String.format("%11s", string);
     }
 }
