@@ -4,6 +4,8 @@ import de.cotto.lndmanagej.service.OwnNodeService;
 import de.cotto.lndmanagej.ui.dto.StatusModel;
 import org.springframework.stereotype.Component;
 
+import java.util.NoSuchElementException;
+
 @Component
 public class StatusServiceImpl implements StatusService {
 
@@ -15,6 +17,17 @@ public class StatusServiceImpl implements StatusService {
 
     @Override
     public StatusModel getStatus() {
-        return new StatusModel(ownNodeService.isSyncedToChain(), ownNodeService.getBlockHeight());
+
+        boolean connected = true;
+        boolean synced = ownNodeService.isSyncedToChain();
+        Integer blockHeight = null;
+        try {
+            blockHeight = ownNodeService.getBlockHeight();
+        } catch (NoSuchElementException e) {
+            connected = false;
+        }
+
+        return new StatusModel(connected, synced, blockHeight);
     }
+
 }

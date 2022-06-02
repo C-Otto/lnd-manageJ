@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.ui;
 
-import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.ui.controller.DashboardController;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
@@ -28,10 +27,6 @@ class DashboardControllerIT extends BaseControllerIT {
 
     @MockBean
     private PageService pageService;
-
-    @MockBean
-    @SuppressWarnings("unused")
-    private ChannelIdResolver channelIdResolver;
 
     @Test
     void empty_dashboard() throws Exception {

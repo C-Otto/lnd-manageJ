@@ -5,7 +5,6 @@
 <body>
 
 <div class="row top-space">
-    <div th:replace="~{tiles/third/status :: tile(${status})}"/>
 
     <th:block th:each="node : ${warnings.nodesWithWarnings}" class="list-group-item">
         <div th:replace="~{tiles/third/node-warning :: tile(${node.alias}, ${node.pubkey}, ${node.warnings})}"/>

@@ -1,6 +1,6 @@
 package de.cotto.lndmanagej.ui;
 
-import de.cotto.lndmanagej.ui.interceptor.StatusModelInterceptor;
+import de.cotto.lndmanagej.ui.interceptor.StatusInterceptor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,7 +17,7 @@ class WebMvcConfigTest {
     WebMvcConfig config;
 
     @Mock
-    StatusModelInterceptor statusModelInterceptor;
+    StatusInterceptor statusInterceptor;
 
     @Mock
     InterceptorRegistry interceptorRegistry;
@@ -25,7 +25,7 @@ class WebMvcConfigTest {
     @Test
     void addInterceptors() {
         config.addInterceptors(interceptorRegistry);
-        verify(interceptorRegistry).addInterceptor(statusModelInterceptor);
+        verify(interceptorRegistry).addInterceptor(statusInterceptor);
     }
 
 }
