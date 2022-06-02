@@ -8,7 +8,6 @@ import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import de.cotto.lndmanagej.ui.page.PageService;
 import de.cotto.lndmanagej.ui.page.channel.ChannelDetailsPage;
 import de.cotto.lndmanagej.ui.page.general.ErrorPage;
-import de.cotto.lndmanagej.ui.page.node.NodeDetailsPage;
 import de.cotto.lndmanagej.ui.page.node.NodesPage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +23,6 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_PEER;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.ui.dto.ChannelDetailsDtoFixture.CHANNEL_DETAILS_DTO;
-import static de.cotto.lndmanagej.ui.dto.NodeDetailsDtoFixture.NODE_DETAILS_MODEL;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -68,16 +66,16 @@ class SearchControllerTest {
     @Test
     void by_pubkey() {
         when(dataService.getOpenChannels()).thenReturn(List.of(OPEN_CHANNEL_DTO));
-        when(pageService.nodeDetails(PUBKEY)).thenReturn(new NodeDetailsPage(NODE_DETAILS_MODEL));
-        assertThat(searchController.search(PUBKEY.toString(), model)).isEqualTo("node-details");
+        assertThat(searchController.search(PUBKEY.toString(), model))
+                .isEqualTo("redirect:/node/" + PUBKEY);
     }
 
     @Test
-    void by_alias_infix_one_result() {
+    void by_alias_infix_one_result_redirect() {
         String query = "BERT";
         when(dataService.getOpenChannels()).thenReturn(List.of(OPEN_CHANNEL_DTO));
-        when(pageService.nodeDetails(PUBKEY)).thenReturn(new NodeDetailsPage(NODE_DETAILS_MODEL));
-        assertThat(searchController.search(query, model)).isEqualTo("node-details");
+        assertThat(searchController.search(query, model))
+                .isEqualTo("redirect:/node/027abc123abc123abc123abc123123abc123abc123abc123abc123abc123abc121");
     }
 
     @Test

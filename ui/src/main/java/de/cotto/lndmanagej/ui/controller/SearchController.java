@@ -46,7 +46,7 @@ public class SearchController {
 
         Pubkey pubkey = getForPubkey(query, openChannels).orElse(null);
         if (pubkey != null) {
-            return pageService.nodeDetails(pubkey).create(model);
+            return redirectToNodeDetails(pubkey);
         }
 
         String lowercaseQuery = query.toLowerCase(Locale.US);
@@ -59,10 +59,14 @@ public class SearchController {
         }
 
         if (matchingChannels.size() == SINGLE_NODE) {
-            return pageService.nodeDetails(matchingChannels.get(0).remotePubkey()).create(model);
+            return redirectToNodeDetails(matchingChannels.get(0).remotePubkey());
         }
 
         return pageService.nodes(matchingChannels).create(model);
+    }
+
+    private String redirectToNodeDetails(Pubkey pubkey) {
+        return "redirect:/node/" + pubkey.toString();
     }
 
     private Optional<ChannelId> getForChannelId(String query, List<OpenChannelDto> openChannels) {
