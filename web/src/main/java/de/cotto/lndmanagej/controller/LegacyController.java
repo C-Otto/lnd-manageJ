@@ -36,7 +36,7 @@ public class LegacyController {
                     Pubkey pubkey = localOpenChannel.getRemotePubkey();
                     return localOpenChannel.getId().getCompactForm() +
                             "\t" + pubkey +
-                            "\t" + localOpenChannel.getCapacity() +
+                            "\t" + localOpenChannel.getCapacity().toStringSat() +
                             "\t" + nodeService.getAlias(pubkey);
                 })
                 .collect(Collectors.joining(NEWLINE));
