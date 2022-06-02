@@ -55,4 +55,5 @@ public class PageService {
     public ErrorPage error(String errorMessage) {
         return new ErrorPage(errorMessage);
     }
+
 }
