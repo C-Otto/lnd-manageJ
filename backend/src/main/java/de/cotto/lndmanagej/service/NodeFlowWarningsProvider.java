@@ -63,7 +63,6 @@ public class NodeFlowWarningsProvider implements NodeWarningsProvider {
     private int getDaysToConsider(Pubkey pubkey) {
         OptionalInt openHeightOldestOpenChannel = channelService.getOpenChannelsWith(pubkey).stream()
                 .map(channelService::getOpenHeight)
-                .flatMap(Optional::stream)
                 .mapToInt(h -> h)
                 .max();
         if (openHeightOldestOpenChannel.isEmpty()) {

@@ -30,6 +30,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class NodeFlowWarningsProviderTest {
     private static final int EXPECTED_BLOCKS_PER_DAY = 144;
+
     @InjectMocks
     private NodeFlowWarningsProvider warningsProvider;
 
@@ -55,7 +56,7 @@ class NodeFlowWarningsProviderTest {
     @Test
     void getNodeWarnings_no_flow_old_channel() {
         when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL));
-        when(channelService.getOpenHeight(LOCAL_OPEN_CHANNEL)).thenReturn(Optional.of(BLOCK_HEIGHT));
+        when(channelService.getOpenHeight(LOCAL_OPEN_CHANNEL)).thenReturn(BLOCK_HEIGHT);
         assertThat(warningsProvider.getNodeWarnings(PUBKEY)).containsExactly(new NodeNoFlowWarning(90));
     }
 
@@ -105,13 +106,13 @@ class NodeFlowWarningsProviderTest {
         when(configurationService.getIntegerValue(NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER))
                 .thenReturn(Optional.of(120));
         when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL_2));
-        when(channelService.getOpenHeight(LOCAL_OPEN_CHANNEL_2)).thenReturn(Optional.of(BLOCK_HEIGHT));
+        when(channelService.getOpenHeight(LOCAL_OPEN_CHANNEL_2)).thenReturn(BLOCK_HEIGHT);
         assertThat(warningsProvider.getNodeWarnings(PUBKEY)).containsExactly(new NodeNoFlowWarning(120));
     }
 
     private void mockOpenChannelWithAgeInBlocks(int channelAgeInBlocks) {
         when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL));
-        when(channelService.getOpenHeight(LOCAL_OPEN_CHANNEL)).thenReturn(Optional.of(BLOCK_HEIGHT));
+        when(channelService.getOpenHeight(LOCAL_OPEN_CHANNEL)).thenReturn(BLOCK_HEIGHT);
         when(ownNodeService.getBlockHeight()).thenReturn(BLOCK_HEIGHT + channelAgeInBlocks);
     }
 }
