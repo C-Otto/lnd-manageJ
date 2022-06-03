@@ -17,6 +17,9 @@ import static java.util.stream.Collectors.toSet;
 
 public abstract class UiDataService {
 
+    private static final int EXPECTED_MINUTES_PER_BLOCK = 10;
+    private static final int MINUTES_PER_DAY = 1_440;
+
     public UiDataService() {
         // default constructor
     }
@@ -42,5 +45,10 @@ public abstract class UiDataService {
 
     public List<NodeDto> createNodeList() {
         return createNodeList(getOpenChannels());
+    }
+
+    public int calculateDaysOfBlocks(int currentBlockHeight, int pastBlockHeight) {
+        int channelAgeInBlocks = currentBlockHeight - pastBlockHeight;
+        return (int) Math.ceil((double) channelAgeInBlocks * EXPECTED_MINUTES_PER_BLOCK / MINUTES_PER_DAY);
     }
 }
