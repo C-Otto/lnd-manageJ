@@ -75,14 +75,4 @@
     </table>
 </div>
 
-
-<ul th:fragment="channel-list-group (title, channels)" class="list-group">
-    <li class="list-group-item disabled" aria-disabled="true" th:text="${title}"></li>
-
-    <li th:each="chan : ${channels}" class="list-group-item">
-        <a th:text="${chan}" th:href="@{/channel/{id}(id=${chan.shortChannelId})}"></a>
-    </li>
-
-</ul>
-
 </html>
