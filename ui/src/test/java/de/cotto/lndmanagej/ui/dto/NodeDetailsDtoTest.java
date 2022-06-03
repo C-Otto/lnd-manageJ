@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
-import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_4;
 import static de.cotto.lndmanagej.model.FeeReportFixtures.FEE_REPORT;
@@ -23,6 +22,7 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static de.cotto.lndmanagej.model.warnings.NodeWarningsFixtures.NODE_WARNINGS;
 import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixture.BALANCE_INFORMATION_MODEL_2;
+import static de.cotto.lndmanagej.ui.dto.ClosedChannelDtoFixture.CLOSED_CHANNEL_DTO;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class NodeDetailsDtoTest {
@@ -32,7 +32,7 @@ class NodeDetailsDtoTest {
                 PUBKEY,
                 ALIAS,
                 List.of(CHANNEL_ID),
-                List.of(CHANNEL_ID_2),
+                List.of(CLOSED_CHANNEL_DTO),
                 List.of(CHANNEL_ID_3),
                 List.of(CHANNEL_ID_4),
                 OnChainCostsDto.createFromModel(ON_CHAIN_COSTS),
@@ -43,6 +43,6 @@ class NodeDetailsDtoTest {
                 RebalanceReportDto.createFromModel(REBALANCE_REPORT),
                 NODE_WARNINGS.descriptions()
         );
-        assertThat(NodeDetailsDto.createFromModel(NODE_DETAILS)).isEqualTo(expected);
+        assertThat(NodeDetailsDto.create(NODE_DETAILS, List.of(CLOSED_CHANNEL_DTO))).isEqualTo(expected);
     }
 }
