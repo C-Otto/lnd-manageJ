@@ -2,7 +2,6 @@ package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.grpc.GrpcChannels;
 import de.cotto.lndmanagej.grpc.GrpcClosedChannels;
-import de.cotto.lndmanagej.transactions.service.TransactionService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,8 +30,6 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL_2;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL_TO_NODE_3;
-import static de.cotto.lndmanagej.transactions.model.TransactionFixtures.BLOCK_HEIGHT;
-import static de.cotto.lndmanagej.transactions.model.TransactionFixtures.TRANSACTION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -40,9 +37,6 @@ import static org.mockito.Mockito.when;
 class ChannelServiceTest {
     @InjectMocks
     private ChannelService channelService;
-
-    @Mock
-    private TransactionService transactionService;
 
     @Mock
     private GrpcChannels grpcChannels;
@@ -276,16 +270,7 @@ class ChannelServiceTest {
     }
 
     @Test
-    void getOpenHeight_unknown_transaction() {
-        when(transactionService.getTransaction(LOCAL_OPEN_CHANNEL.getChannelPoint().getTransactionHash()))
-                .thenReturn(Optional.empty());
-        assertThat(channelService.getOpenHeight(LOCAL_OPEN_CHANNEL)).isEmpty();
-    }
-
-    @Test
     void getOpenHeight() {
-        when(transactionService.getTransaction(LOCAL_OPEN_CHANNEL.getChannelPoint().getTransactionHash()))
-                .thenReturn(Optional.of(TRANSACTION));
-        assertThat(channelService.getOpenHeight(LOCAL_OPEN_CHANNEL)).contains(BLOCK_HEIGHT);
+        assertThat(channelService.getOpenHeight(LOCAL_OPEN_CHANNEL)).isEqualTo(712_345);
     }
 }
