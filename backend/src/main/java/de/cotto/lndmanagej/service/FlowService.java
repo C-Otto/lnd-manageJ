@@ -66,8 +66,7 @@ public class FlowService {
                 getSumOfAmounts(forwardingEventsService.getEventsWithOutgoingChannel(channelId, maxAge));
         List<ForwardingEvent> incomingEvents = forwardingEventsService.getEventsWithIncomingChannel(channelId, maxAge);
         Coins forwardedReceived = getSumOfAmounts(incomingEvents);
-        Coins forwardingFeesReceived = getSumOfFees(incomingEvents
-        );
+        Coins forwardingFeesReceived = getSumOfFees(incomingEvents);
         Coins rebalanceSent = rebalanceService.getAmountFromChannel(channelId, maxAge);
         Coins rebalanceReceived = rebalanceService.getAmountToChannel(channelId, maxAge);
         Coins rebalanceSupportSent = rebalanceService.getSupportAsSourceAmountFromChannel(channelId, maxAge);
