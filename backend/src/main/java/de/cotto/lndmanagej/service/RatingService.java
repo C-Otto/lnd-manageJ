@@ -61,14 +61,16 @@ public class RatingService {
                 rebalanceService.getReportForChannel(channelId, DURATION_FOR_ANALYSIS);
         long feeRate = policyService.getMinimumFeeRateTo(localOpenChannel.getRemotePubkey()).orElse(0L);
         long localAvailableMilliSat = localOpenChannel.getBalanceInformation().localAvailable().milliSatoshis();
+        double millionSat = 1.0 * localAvailableMilliSat / 1_000 / 1_000_000;
 
         long rating = 1;
         rating += feeReport.earned().milliSatoshis();
         rating += feeReport.sourced().milliSatoshis();
         rating += rebalanceReport.supportAsSourceAmount().milliSatoshis() / 10;
         rating += rebalanceReport.supportAsTargetAmount().milliSatoshis() / 10;
-        rating += (long) (1.0 * feeRate * localAvailableMilliSat / 1_000 / 1_000_000 / 10);
-        return Optional.of(new Rating(rating));
+        rating += (long) (1.0 * feeRate * millionSat / 10);
+        long scaledRating = (long) (rating / Math.max(1, millionSat));
+        return Optional.of(new Rating(scaledRating));
     }
 
     private int getAgeInDays(ChannelId channelId) {
