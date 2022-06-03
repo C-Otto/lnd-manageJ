@@ -14,6 +14,7 @@ import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.ui.UiDataService;
 import de.cotto.lndmanagej.ui.dto.BalanceInformationModel;
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
+import de.cotto.lndmanagej.ui.dto.ClosedChannelDto;
 import de.cotto.lndmanagej.ui.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
@@ -24,6 +25,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static de.cotto.lndmanagej.model.CloseInitiator.LOCAL;
+import static de.cotto.lndmanagej.model.CloseInitiator.REMOTE;
+import static de.cotto.lndmanagej.model.ClosedChannelFixtures.CLOSE_HEIGHT;
 import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT;
 import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT_OFFLINE;
 import static de.cotto.lndmanagej.model.OpenCloseStatus.CLOSED;
@@ -36,6 +40,9 @@ import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveOpenInitiato
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.derivePolicies;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveRebalanceReport;
 import static de.cotto.lndmanagej.ui.dto.BalanceInformationModel.EMPTY;
+import static de.cotto.lndmanagej.ui.dto.CloseType.BREACH_FORCE_CLOSE;
+import static de.cotto.lndmanagej.ui.dto.CloseType.COOP_CLOSE;
+import static de.cotto.lndmanagej.ui.dto.CloseType.FORCE_CLOSE;
 
 @SuppressWarnings("PMD.ExcessiveImports")
 @Component
@@ -252,9 +259,9 @@ public class DemoDataService extends UiDataService {
                 Pubkey.create(node.pubkey()),
                 node.alias(),
                 channels.stream().map(OpenChannelDto::channelId).toList(),
-                List.of(CLOSED_CHANNEL),
+                closedChannels(),
                 List.of(ChannelId.fromCompactForm("712345x124x2")),
-                List.of(ChannelId.fromCompactForm("712345x124x3")),
+                getPendingForceClosingChannels(),
                 deriveOnChainCosts(firstChannel.channelId()),
                 firstChannel.balanceInformation(),
                 OnlineReportDto.createFromModel(onlineReport),
@@ -262,6 +269,23 @@ public class DemoDataService extends UiDataService {
                 deriveFlowReport(firstChannel.channelId()),
                 deriveRebalanceReport(firstChannel.channelId()),
                 warnings);
+    }
+
+    private static List<ChannelId> getPendingForceClosingChannels() {
+        return List.of(
+                ChannelId.fromCompactForm("712345x124x3"),
+                ChannelId.fromCompactForm("712345x124x4"),
+                ChannelId.fromCompactForm("712345x124x5")
+        );
+    }
+
+    private static List<ClosedChannelDto> closedChannels() {
+        return List.of(
+                new ClosedChannelDto(CLOSED_CHANNEL, COOP_CLOSE, REMOTE, CLOSE_HEIGHT),
+                new ClosedChannelDto(CLOSED_CHANNEL, COOP_CLOSE, LOCAL, CLOSE_HEIGHT),
+                new ClosedChannelDto(CLOSED_CHANNEL, BREACH_FORCE_CLOSE, LOCAL, CLOSE_HEIGHT),
+                new ClosedChannelDto(CLOSED_CHANNEL, FORCE_CLOSE, LOCAL, CLOSE_HEIGHT)
+        );
     }
 
 }

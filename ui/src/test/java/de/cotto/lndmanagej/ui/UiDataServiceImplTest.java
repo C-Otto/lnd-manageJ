@@ -33,6 +33,7 @@ import static de.cotto.lndmanagej.controller.dto.NodeDetailsDtoFixture.NODE_DETA
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.ChannelDetailsFixtures.CHANNEL_DETAILS;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.FeeReportFixtures.FEE_REPORT;
 import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
@@ -146,6 +147,7 @@ class UiDataServiceImplTest {
     @Test
     void getNodeDetails() {
         when(nodeController.getDetails(PUBKEY)).thenReturn(NODE_DETAILS_DTO);
+        when(channelService.getClosedChannelsWith(PUBKEY)).thenReturn(Set.of(CLOSED_CHANNEL));
         assertThat(uiDataService.getNodeDetails(PUBKEY)).isEqualTo(NODE_DETAILS_MODEL);
     }
 }
