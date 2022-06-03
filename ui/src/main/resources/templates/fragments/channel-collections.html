@@ -35,10 +35,10 @@
         <tbody>
         <tr th:each="channel : ${channels}">
 
-            <td th:if="${channel.privateChannel}">
+            <td th:if="${channel.privateChannel}" title="private channel">
                 <div th:replace="~{fragments/channel-collections :: icon-private}"/>
             </td>
-            <td th:unless="${channel.privateChannel}">
+            <td th:unless="${channel.privateChannel}" title="public channel">
                 <div th:replace="~{fragments/channel-collections :: icon-public}"/>
             </td>
 
