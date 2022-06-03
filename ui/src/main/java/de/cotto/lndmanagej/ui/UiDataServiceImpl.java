@@ -16,6 +16,7 @@ import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
+import de.cotto.lndmanagej.service.OwnNodeService;
 import de.cotto.lndmanagej.ui.dto.BalanceInformationModel;
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.ui.dto.CloseType;
@@ -37,6 +38,7 @@ public class UiDataServiceImpl extends UiDataService {
     private final NodeController nodeController;
     private final NodeService nodeService;
     private final ChannelService channelService;
+    private final OwnNodeService ownNodeService;
 
     public UiDataServiceImpl(
             ChannelController channelController,
@@ -44,7 +46,8 @@ public class UiDataServiceImpl extends UiDataService {
             WarningsController warningsController,
             NodeController nodeController,
             NodeService nodeService,
-            ChannelService channelService
+            ChannelService channelService,
+            OwnNodeService ownNodeService
     ) {
         super();
         this.channelController = channelController;
@@ -53,6 +56,7 @@ public class UiDataServiceImpl extends UiDataService {
         this.nodeController = nodeController;
         this.nodeService = nodeService;
         this.channelService = channelService;
+        this.ownNodeService = ownNodeService;
     }
 
     @Override
@@ -82,10 +86,12 @@ public class UiDataServiceImpl extends UiDataService {
     @Override
     public ChannelDetailsDto getChannelDetails(ChannelId channelId) throws NotFoundException {
         de.cotto.lndmanagej.controller.dto.ChannelDetailsDto details = channelController.getDetails(channelId);
+        int channelAgeInDays = calculateDaysOfBlocks(ownNodeService.getBlockHeight(), details.openHeight());
         return new ChannelDetailsDto(
                 channelId,
                 details.remotePubkey(),
                 details.remoteAlias(),
+                channelAgeInDays,
                 details.status(),
                 details.openInitiator(),
                 map(details.balance()),

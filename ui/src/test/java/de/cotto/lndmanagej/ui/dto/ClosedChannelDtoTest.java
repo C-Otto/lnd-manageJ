@@ -41,4 +41,9 @@ class ClosedChannelDtoTest {
     void createFromModel() {
         assertThat(ClosedChannelDto.createFromModel(CLOSED_CHANNEL)).isEqualTo(CLOSED_CHANNEL_DTO);
     }
+
+    @Test
+    void testToString() {
+        assertThat(CLOSED_CHANNEL_DTO.toString()).isEqualTo(CHANNEL_ID.toString());
+    }
 }

@@ -16,6 +16,7 @@ public record ChannelDetailsDto(
         ChannelId channelId,
         Pubkey remotePubkey,
         String remoteAlias,
+        int channelAge,
         ChannelStatusDto channelStatus,
         OpenInitiator openInitiator,
         BalanceInformationModel balanceInformation,

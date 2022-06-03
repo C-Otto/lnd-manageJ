@@ -16,6 +16,7 @@ import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.controller.dto.RebalanceReportDto;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
+import de.cotto.lndmanagej.service.OwnNodeService;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import org.junit.jupiter.api.Test;
@@ -76,6 +77,9 @@ class UiDataServiceImplTest {
     @Mock
     private NodeService nodeService;
 
+    @Mock
+    private OwnNodeService ownNodeService;
+
     @Test
     void getWarnings() {
         NodesAndChannelsWithWarningsDto warnings = new NodesAndChannelsWithWarningsDto(List.of(), List.of());
@@ -109,12 +113,15 @@ class UiDataServiceImplTest {
 
     @Test
     void getChannelDetails() throws Exception {
-        when(channelController.getDetails(CHANNEL_ID)).thenReturn(ChannelDetailsDto.createFromModel(CHANNEL_DETAILS));
+        ChannelDetailsDto channelDetailsDto = ChannelDetailsDto.createFromModel(CHANNEL_DETAILS);
+        when(channelController.getDetails(CHANNEL_ID)).thenReturn(channelDetailsDto);
+        when(ownNodeService.getBlockHeight()).thenReturn(764_905);
         assertThat(uiDataService.getChannelDetails(CHANNEL_ID)).isEqualTo(
                 new de.cotto.lndmanagej.ui.dto.ChannelDetailsDto(
                         CHANNEL_ID,
                         PUBKEY_2,
                         ALIAS,
+                        365,
                         CHANNEL_STATUS_PRIVATE_OPEN,
                         LOCAL,
                         BALANCE_INFORMATION_MODEL,
