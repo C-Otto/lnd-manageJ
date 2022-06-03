@@ -142,7 +142,7 @@ class RatingServiceTest {
                     Coins.NONE,
                     Coins.NONE,
                     Coins.NONE,
-                    Coins.ofMilliSatoshis(1_234),
+                    Coins.ofMilliSatoshis(1_234_567),
                     Coins.NONE
             );
             lenient().when(rebalanceService.getReportForChannel(CHANNEL_ID, DURATION_FOR_ANALYSIS))
@@ -158,7 +158,7 @@ class RatingServiceTest {
                     Coins.NONE,
                     Coins.NONE,
                     Coins.NONE,
-                    Coins.ofMilliSatoshis(1_234)
+                    Coins.ofMilliSatoshis(1_234_567)
             );
             lenient().when(rebalanceService.getReportForChannel(CHANNEL_ID, DURATION_FOR_ANALYSIS))
                     .thenReturn(rebalanceReport);
@@ -179,21 +179,21 @@ class RatingServiceTest {
         }
 
         @Test
-        void scaled_divided_by_million_sats_local() {
+        void divided_by_million_sats_local() {
             Coins localAvailable = Coins.ofSatoshis(2_500_000);
             long expected = (long) ((1 + 100_000) / 2.5);
             assertScaledRating(localAvailable, expected);
         }
 
         @Test
-        void scaled_not_divided_if_zero_balance() {
+        void not_divided_if_zero_balance() {
             Coins localAvailable = Coins.NONE;
             long expected = 1 + 100_000;
             assertScaledRating(localAvailable, expected);
         }
 
         @Test
-        void scaled_not_divided_if_local_balance_below_one_million() {
+        void not_divided_if_local_balance_below_one_million() {
             Coins localAvailable = Coins.ofSatoshis(999_999);
             long expected = 1 + 100_000;
             assertScaledRating(localAvailable, expected);

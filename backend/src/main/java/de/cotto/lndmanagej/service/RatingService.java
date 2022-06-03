@@ -66,8 +66,8 @@ public class RatingService {
         long rating = 1;
         rating += feeReport.earned().milliSatoshis();
         rating += feeReport.sourced().milliSatoshis();
-        rating += rebalanceReport.supportAsSourceAmount().milliSatoshis() / 10;
-        rating += rebalanceReport.supportAsTargetAmount().milliSatoshis() / 10;
+        rating += rebalanceReport.supportAsSourceAmount().milliSatoshis() / 10_000;
+        rating += rebalanceReport.supportAsTargetAmount().milliSatoshis() / 10_000;
         rating += (long) (1.0 * feeRate * millionSat / 10);
         long scaledRating = (long) (rating / Math.max(1, millionSat));
         return Optional.of(new Rating(scaledRating));
