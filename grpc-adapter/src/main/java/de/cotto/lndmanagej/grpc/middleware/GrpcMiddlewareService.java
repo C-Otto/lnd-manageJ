@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import java.util.Collection;
 
 @Component
-public class GrpcMiddlewareService {
+public class GrpcMiddlewareService implements ObserverIsDoneListener {
     private final GrpcService grpcService;
     private final Collection<RequestListener<?>> requestListeners;
     private final Collection<ResponseListener<?>> responseListeners;
@@ -28,9 +28,18 @@ public class GrpcMiddlewareService {
         RequestAndResponseStreamObserver requestAndResponseStreamObserver = new RequestAndResponseStreamObserver();
         StreamObserver<RPCMiddlewareResponse> responseObserver =
                 grpcService.registerMiddleware(requestAndResponseStreamObserver);
-        requestAndResponseStreamObserver.initialize(responseObserver);
+        requestAndResponseStreamObserver.initialize(responseObserver, this);
         responseListeners.forEach(requestAndResponseStreamObserver::addResponseListener);
         requestListeners.forEach(requestAndResponseStreamObserver::addRequestListener);
     }
 
+    @Override
+    public void onIsDone() {
+        try {
+            Thread.sleep(10_000);
+        } catch (InterruptedException e) {
+            // ignore
+        }
+        registerMiddleware();
+    }
 }

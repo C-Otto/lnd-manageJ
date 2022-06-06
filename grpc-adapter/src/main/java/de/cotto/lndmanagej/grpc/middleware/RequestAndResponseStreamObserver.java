@@ -27,6 +27,8 @@ class RequestAndResponseStreamObserver implements StreamObserver<RPCMiddlewareRe
 
     @CheckForNull
     private StreamObserver<RPCMiddlewareResponse> responseObserver;
+    @CheckForNull
+    private ObserverIsDoneListener observerIsDoneListener;
     private final Multimap<String, RequestListener<?>> requestListeners = ArrayListMultimap.create();
     private final Multimap<String, ResponseListener<?>> responseListeners = ArrayListMultimap.create();
     private final ExecutorService executorService = Executors.newCachedThreadPool();
@@ -35,8 +37,12 @@ class RequestAndResponseStreamObserver implements StreamObserver<RPCMiddlewareRe
         // default constructor
     }
 
-    public void initialize(StreamObserver<RPCMiddlewareResponse> responseObserver) {
+    public void initialize(
+            StreamObserver<RPCMiddlewareResponse> responseObserver,
+            ObserverIsDoneListener observerIsDoneListener
+    ) {
         this.responseObserver = responseObserver;
+        this.observerIsDoneListener = observerIsDoneListener;
         RPCMiddlewareResponse registrationMessage =
                 RPCMiddlewareResponse.newBuilder().setRegister(REGISTRATION).build();
         responseObserver.onNext(registrationMessage);
@@ -54,12 +60,12 @@ class RequestAndResponseStreamObserver implements StreamObserver<RPCMiddlewareRe
 
     @Override
     public void onError(Throwable throwable) {
-        // ignore
+        Objects.requireNonNull(observerIsDoneListener).onIsDone();
     }
 
     @Override
     public void onCompleted() {
-        // ignore
+        Objects.requireNonNull(observerIsDoneListener).onIsDone();
     }
 
     private void handleRequest(RPCMiddlewareRequest value) {
