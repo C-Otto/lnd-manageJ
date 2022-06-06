@@ -36,6 +36,7 @@
                 <span th:text="'Open Costs: ' + ${@formatter.formatNumber(channel.onChainCosts.openCostsSat)} + ' sats'"
                       th:if="${channel.openInitiator.name} != 'REMOTE'"></span>
             </p>
+            <p th:text="'Channel age: ' + ${channel.channelAge}+ ' days'"></p>
             <p th:text="'Capacity: ' + ${@formatter.formatNumber(channel.capacitySat)}+ ' sats'"></p>
         </div>
     </div>

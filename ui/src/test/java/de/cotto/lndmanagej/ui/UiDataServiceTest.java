@@ -28,6 +28,21 @@ class UiDataServiceTest {
         assertThat(uiDataService.createNodeList()).containsExactly(NODE_DTO);
     }
 
+    @Test
+    void calculateDaysOfBlocks_oneHour() {
+        assertThat(uiDataService.calculateDaysOfBlocks(123_456, 123_450)).isEqualTo(1);
+    }
+
+    @Test
+    void calculateDaysOfBlocks_oneDay() {
+        assertThat(uiDataService.calculateDaysOfBlocks(123_456, 123_312)).isEqualTo(1);
+    }
+
+    @Test
+    void calculateDaysOfBlocks_twoDays() {
+        assertThat(uiDataService.calculateDaysOfBlocks(123_456, 123_311)).isEqualTo(2);
+    }
+
     private static class TestableUiDataService extends UiDataService {
         @Override
         public NodesAndChannelsWithWarningsDto getWarnings() {

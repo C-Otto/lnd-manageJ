@@ -5,7 +5,7 @@
 <footer th:fragment="footer" class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
     <div class="col-md-4 d-flex align-items-center">
         <div th:if="${status.connected}">
-            <a href="/" class="mb-3 me-2 mb-md-0 text-muted text-decoration-none lh-1">
+            <a href="/" class="mb-3 me-2 mb-md-0 text-muted text-decoration-none lh-1" title="Dashboard">
                 <div th:replace="~{fragments/icons :: arrow-up}"/>
             </a>
             <span class="text-muted">Updated at &nbsp;</span>
@@ -17,17 +17,17 @@
 
     <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
         <li class="ms-3">
-            <a class="text-muted" href="https://github.com/C-Otto/lnd-manageJ/issues">
+            <a class="text-muted" href="https://github.com/C-Otto/lnd-manageJ/issues" title="File Issue">
                 <div th:replace="~{fragments/icons :: message}"/>
             </a>
         </li>
         <li class="ms-3">
-            <a class="text-muted" href="https://twitter.com/c_otto83">
+            <a class="text-muted" href="https://twitter.com/c_otto83" title="Twitter">
                 <div th:replace="~{fragments/icons :: twitter}"/>
             </a>
         </li>
         <li class="ms-3">
-            <a class="text-muted" href="https://github.com/C-Otto/lnd-manageJ">
+            <a class="text-muted" href="https://github.com/C-Otto/lnd-manageJ" title="Github">
                 <div th:replace="~{fragments/icons :: github}"/>
             </a>
         </li>

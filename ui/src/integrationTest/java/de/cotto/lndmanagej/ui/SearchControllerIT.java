@@ -84,21 +84,19 @@ class SearchControllerIT extends BaseControllerIT {
 
     @Test
     void searchForPubkey_found() throws Exception {
-        searchAndExpectSingleNode(NODE_DETAILS_MODEL.node().toString());
+        searchAndExpectRedirect(NODE_DETAILS_MODEL.node().toString());
     }
 
     @Test
     void searchForAlias_found() throws Exception {
-        searchAndExpectSingleNode("albert");
+        searchAndExpectRedirect("albert");
     }
 
-    private void searchAndExpectSingleNode(String query) throws Exception {
+    private void searchAndExpectRedirect(String query) throws Exception {
         when(dataService.getOpenChannels()).thenReturn(List.of(OPEN_CHANNEL_DTO));
         when(pageService.nodeDetails(any())).thenReturn(new NodeDetailsPage(NODE_DETAILS_MODEL));
         mockMvc.perform(MockMvcRequestBuilders.get("/search?q=" + query))
-                .andExpect(status().isOk())
-                .andExpect(model().attribute("pubkey", is(OPEN_CHANNEL_DTO.remotePubkey())))
-                .andExpect(view().name("node-details"));
+                .andExpect(status().is3xxRedirection());
     }
 
     @Test

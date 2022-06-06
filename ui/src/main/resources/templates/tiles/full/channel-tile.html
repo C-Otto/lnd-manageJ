@@ -15,21 +15,89 @@
             <div class="container" style="padding-left: 0; padding-right: 0;">
                 <div class="row align-items-start">
                     <div class="tile-column-left col">
-                        <div th:replace="~{fragments/channel-collections :: channel-list-group ('Open', ${node.channels})}"/>
+                        <div th:replace="~{tiles/full/channel-tile :: channel-list-group ('Open', ${node.channels})}"/>
                     </div>
                     <div class="tile-column col">
-                        <div th:replace="~{fragments/channel-collections :: channel-list-group ('Closed', ${node.closedChannels})}"/>
+                        <div th:replace="~{tiles/full/channel-tile :: closed-channel-list-group ('Closed', ${node.closedChannels})}"/>
                     </div>
                     <div class="tile-column col">
-                        <div th:replace="~{fragments/channel-collections :: channel-list-group ('Waiting Close', ${node.waitingCloseChannels})}"/>
+                        <div th:replace="~{tiles/full/channel-tile :: channel-list-group ('Waiting Close', ${node.waitingCloseChannels})}"/>
                     </div>
                     <div class="tile-column-right col">
-                        <div th:replace="~{fragments/channel-collections :: channel-list-group ('Pending Force Closing', ${node.pendingForceClosingChannels})}"/>
+                        <div th:replace="~{tiles/full/channel-tile :: channel-list-group ('Pending Force Closing', ${node.pendingForceClosingChannels})}"/>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<ul th:fragment="channel-list-group (title, channels)" class="list-group">
+    <li class="list-group-item disabled" aria-disabled="true" th:text="${title}"></li>
+
+    <li class="list-group-item" th:if="${channels.size >= 1}">
+        <a th:text="${channels.get(0)}" th:href="@{/channel/{id}(id=${channels.get(0).shortChannelId})}"></a>
+    </li>
+
+    <li class="list-group-item" th:if="${channels.size >= 2}">
+        <a th:text="${channels.get(1)}" th:href="@{/channel/{id}(id=${channels.get(1).shortChannelId})}"></a>
+    </li>
+
+    <li class="list-group-item" th:if="${channels.size == 3}">
+        <a th:text="${channels.get(2)}" th:href="@{/channel/{id}(id=${channels.get(2).shortChannelId})}"></a>
+    </li>
+
+    <div th:if="${channels.size > 3}">
+        <details>
+            <summary>
+                <li class="list-group-item">
+                    <span th:text="'('+${channels.size - 2} + ') more channels...'"></span>
+                    <div class="chevron">
+                        <span data-feather="chevron-right"></span>
+                    </div>
+                </li>
+            </summary>
+            <li th:each="chan, iterator : ${channels}" class="list-group-item" th:if="${iterator.index >= 2}">
+                <a th:text="${chan}" th:href="@{/channel/{id}(id=${chan.shortChannelId})}"></a>
+            </li>
+        </details>
+    </div>
+</ul>
+
+<ul th:fragment="closed-channel-list-group (title, channels)" class="list-group">
+    <li class="list-group-item disabled" aria-disabled="true" th:text="${title}"></li>
+
+    <li class="list-group-item" th:if="${channels.size >= 1}">
+        <a th:text="${channels.get(0)}" th:href="@{/channel/{id}(id=${channels.get(0).shortChannelId})}"></a>
+        <span th:text="'(' + ${channels.get(0).closeType.toString + ')'}"></span>
+    </li>
+
+    <li class="list-group-item" th:if="${channels.size >= 2}">
+        <a th:text="${channels.get(1)}" th:href="@{/channel/{id}(id=${channels.get(1).shortChannelId})}"></a>
+        <span th:text="'(' + ${channels.get(1).closeType.toString + ')'}"></span>
+    </li>
+
+    <li class="list-group-item" th:if="${channels.size == 3}">
+        <a th:text="${channels.get(2)}" th:href="@{/channel/{id}(id=${channels.get(2).shortChannelId})}"></a>
+        <span th:text="'(' + ${channels.get(2).closeType.toString + ')'}"></span>
+    </li>
+
+    <div th:if="${channels.size > 3}">
+        <details>
+            <summary>
+                <li class="list-group-item">
+                    <span th:text="'('+${channels.size - 2} + ') more channels...'"></span>
+                    <div class="chevron">
+                        <span data-feather="chevron-right"></span>
+                    </div>
+                </li>
+            </summary>
+            <li th:each="chan, iterator : ${channels}" class="list-group-item" th:if="${iterator.index >= 2}">
+                <a th:text="${chan}" th:href="@{/channel/{id}(id=${chan.shortChannelId})}"></a>
+                <span th:text="'(' + ${channels.get(iterator.index).closeType.toString + ')'}"></span>
+            </li>
+        </details>
+    </div>
+</ul>
 
 </html>

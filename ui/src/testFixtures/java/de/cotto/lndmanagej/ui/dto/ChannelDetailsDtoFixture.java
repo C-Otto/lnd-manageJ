@@ -25,6 +25,7 @@ public class ChannelDetailsDtoFixture {
             CHANNEL_ID,
             PUBKEY,
             "Albert",
+            365,
             CHANNEL_STATUS_PUBLIC_OPEN,
             LOCAL,
             BALANCE_INFORMATION_MODEL,

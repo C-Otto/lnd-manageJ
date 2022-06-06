@@ -16,7 +16,7 @@ public record NodeDetailsDto(
         Pubkey node,
         String alias,
         List<ChannelId> channels,
-        List<ChannelId> closedChannels,
+        List<ClosedChannelDto> closedChannels,
         List<ChannelId> waitingCloseChannels,
         List<ChannelId> pendingForceClosingChannels,
         OnChainCostsDto onChainCosts,
@@ -27,12 +27,12 @@ public record NodeDetailsDto(
         RebalanceReportDto rebalanceReport,
         Set<String> warnings
 ) {
-    public static NodeDetailsDto createFromModel(NodeDetails nodeDetails) {
+    public static NodeDetailsDto create(NodeDetails nodeDetails, List<ClosedChannelDto> closedChannels) {
         return new NodeDetailsDto(
                 nodeDetails.pubkey(),
                 nodeDetails.alias(),
                 nodeDetails.channels(),
-                nodeDetails.closedChannels(),
+                closedChannels,
                 nodeDetails.waitingCloseChannels(),
                 nodeDetails.pendingForceClosingChannels(),
                 OnChainCostsDto.createFromModel(nodeDetails.onChainCosts()),

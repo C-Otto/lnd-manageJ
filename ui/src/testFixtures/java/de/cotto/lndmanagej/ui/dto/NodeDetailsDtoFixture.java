@@ -17,6 +17,7 @@ import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static de.cotto.lndmanagej.model.warnings.ChannelWarningsFixtures.CHANNEL_WARNINGS;
 import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixture.BALANCE_INFORMATION_MODEL;
+import static de.cotto.lndmanagej.ui.dto.ClosedChannelDtoFixture.CLOSED_CHANNEL_DTO;
 
 public class NodeDetailsDtoFixture {
 
@@ -24,7 +25,7 @@ public class NodeDetailsDtoFixture {
             PubkeyFixtures.PUBKEY,
             "Albert",
             List.of(CHANNEL_ID),
-            List.of(CHANNEL_ID),
+            List.of(CLOSED_CHANNEL_DTO),
             List.of(CHANNEL_ID),
             List.of(CHANNEL_ID),
             OnChainCostsDto.createFromModel(ON_CHAIN_COSTS),

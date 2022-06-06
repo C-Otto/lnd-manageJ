@@ -35,10 +35,10 @@
         <tbody>
         <tr th:each="channel : ${channels}">
 
-            <td th:if="${channel.privateChannel}">
+            <td th:if="${channel.privateChannel}" title="private channel">
                 <div th:replace="~{fragments/channel-collections :: icon-private}"/>
             </td>
-            <td th:unless="${channel.privateChannel}">
+            <td th:unless="${channel.privateChannel}" title="public channel">
                 <div th:replace="~{fragments/channel-collections :: icon-public}"/>
             </td>
 
@@ -74,15 +74,5 @@
         </tbody>
     </table>
 </div>
-
-
-<ul th:fragment="channel-list-group (title, channels)" class="list-group">
-    <li class="list-group-item disabled" aria-disabled="true" th:text="${title}"></li>
-
-    <li th:each="chan : ${channels}" class="list-group-item">
-        <a th:text="${chan}" th:href="@{/channel/{id}(id=${chan.shortChannelId})}"></a>
-    </li>
-
-</ul>
 
 </html>
