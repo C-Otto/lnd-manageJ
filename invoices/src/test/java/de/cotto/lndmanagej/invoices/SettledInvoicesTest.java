@@ -4,6 +4,7 @@ import de.cotto.lndmanagej.grpc.GrpcInvoices;
 import de.cotto.lndmanagej.model.SettledInvoice;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
@@ -94,6 +95,14 @@ class SettledInvoicesTest {
         settledInvoices.refresh();
         verify(dao).save(List.of(SETTLED_INVOICE));
         verify(dao).save(List.of(SETTLED_INVOICE_2));
+    }
+
+    @Test
+    @Timeout(1)
+    void refresh_terminates_if_there_are_only_invalid_invoices() {
+        when(grpcInvoices.getSettledInvoicesAfter(ADD_INDEX_OFFSET))
+                .thenReturn(Optional.of(List.of(SettledInvoice.INVALID)));
+        settledInvoices.refresh();
     }
 
     @Test
