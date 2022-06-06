@@ -25,7 +25,7 @@ import static org.springframework.http.MediaType.APPLICATION_NDJSON;
 
 @RestController
 @RequestMapping("/api/payments/")
-public class PickhardtPaymentsController {
+public class PaymentsController {
     private static final PaymentOptionsDto PAYMENT_OPTIONS_DTO = PaymentOptionsDto.DEFAULT;
 
     private final MultiPathPaymentSplitter multiPathPaymentSplitter;
@@ -34,7 +34,7 @@ public class PickhardtPaymentsController {
     private final TopUpService topUpService;
     private final GraphService graphService;
 
-    public PickhardtPaymentsController(
+    public PaymentsController(
             MultiPathPaymentSplitter multiPathPaymentSplitter,
             MultiPathPaymentSender multiPathPaymentSender,
             PaymentStatusStream paymentStatusStream,
