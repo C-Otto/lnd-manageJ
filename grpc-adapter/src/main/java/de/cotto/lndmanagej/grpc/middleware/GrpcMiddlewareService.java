@@ -12,6 +12,7 @@ public class GrpcMiddlewareService implements ObserverIsDoneListener {
     private final GrpcService grpcService;
     private final Collection<RequestListener<?>> requestListeners;
     private final Collection<ResponseListener<?>> responseListeners;
+    private boolean connected;
 
     public GrpcMiddlewareService(
             GrpcService grpcService,
@@ -24,7 +25,19 @@ public class GrpcMiddlewareService implements ObserverIsDoneListener {
         registerMiddleware();
     }
 
+    public boolean isConnected() {
+        return connected;
+    }
+
+    @Override
+    public void onIsDone() {
+        connected = false;
+        sleep();
+        registerMiddleware();
+    }
+
     private void registerMiddleware() {
+        connected = true;
         RequestAndResponseStreamObserver requestAndResponseStreamObserver = new RequestAndResponseStreamObserver();
         StreamObserver<RPCMiddlewareResponse> responseObserver =
                 grpcService.registerMiddleware(requestAndResponseStreamObserver);
@@ -33,13 +46,11 @@ public class GrpcMiddlewareService implements ObserverIsDoneListener {
         requestListeners.forEach(requestAndResponseStreamObserver::addRequestListener);
     }
 
-    @Override
-    public void onIsDone() {
+    private void sleep() {
         try {
             Thread.sleep(10_000);
         } catch (InterruptedException e) {
             // ignore
         }
-        registerMiddleware();
     }
 }

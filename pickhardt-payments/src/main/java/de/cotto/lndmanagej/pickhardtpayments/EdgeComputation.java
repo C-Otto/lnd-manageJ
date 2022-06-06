@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.pickhardtpayments;
 import com.google.common.collect.Sets;
 import de.cotto.lndmanagej.grpc.GrpcGetInfo;
 import de.cotto.lndmanagej.grpc.GrpcGraph;
+import de.cotto.lndmanagej.grpc.middleware.GrpcMiddlewareService;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.DirectedChannelEdge;
@@ -36,6 +37,7 @@ public class EdgeComputation {
     private final BalanceService balanceService;
     private final LiquidityBoundsService liquidityBoundsService;
     private final RouteHintService routeHintService;
+    private final GrpcMiddlewareService grpcMiddlewareService;
 
     public EdgeComputation(
             GrpcGraph grpcGraph,
@@ -43,7 +45,8 @@ public class EdgeComputation {
             ChannelService channelService,
             BalanceService balanceService,
             LiquidityBoundsService liquidityBoundsService,
-            RouteHintService routeHintService
+            RouteHintService routeHintService,
+            GrpcMiddlewareService grpcMiddlewareService
     ) {
         this.grpcGraph = grpcGraph;
         this.grpcGetInfo = grpcGetInfo;
@@ -51,12 +54,17 @@ public class EdgeComputation {
         this.balanceService = balanceService;
         this.liquidityBoundsService = liquidityBoundsService;
         this.routeHintService = routeHintService;
+        this.grpcMiddlewareService = grpcMiddlewareService;
     }
 
     public EdgesWithLiquidityInformation getEdges(PaymentOptions paymentOptions) {
+        if (noMiddlewareSupport()) {
+            logger.error("Middleware needs to be connected");
+            return EdgesWithLiquidityInformation.EMPTY;
+        }
         Set<DirectedChannelEdge> channelEdges = grpcGraph.getChannelEdges().orElse(null);
         if (channelEdges == null) {
-            logger.warn("Unable to get graph");
+            logger.error("Unable to get graph");
             return EdgesWithLiquidityInformation.EMPTY;
         }
         Set<EdgeWithLiquidityInformation> edgesWithLiquidityInformation = new LinkedHashSet<>();
@@ -165,5 +173,9 @@ public class EdgeComputation {
     private Coins getAvailableLiquidityUpperBound(Edge edge, Coins lowerBound) {
         Coins upperBound = liquidityBoundsService.getAssumedLiquidityUpperBound(edge).orElse(null);
         return edge.capacity().minimum(upperBound).maximum(lowerBound);
+    }
+
+    private boolean noMiddlewareSupport() {
+        return !grpcMiddlewareService.isConnected();
     }
 }

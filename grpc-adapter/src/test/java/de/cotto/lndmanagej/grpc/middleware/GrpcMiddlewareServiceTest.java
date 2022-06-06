@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
@@ -40,6 +41,8 @@ class GrpcMiddlewareServiceTest {
     @Mock
     private ResponseListener<?> responseListener;
 
+    private GrpcMiddlewareService grpcMiddlewareService;
+
     @BeforeEach
     @SuppressWarnings("unchecked")
     void setUp() {
@@ -47,7 +50,8 @@ class GrpcMiddlewareServiceTest {
         when(responseListener.getResponseType()).thenReturn(RESPONSE_TYPE);
         ArgumentCaptor<StreamObserver<RPCMiddlewareRequest>> captor = ArgumentCaptor.forClass(StreamObserver.class);
         when(grpcService.registerMiddleware(captor.capture())).thenReturn(streamResponseObserver);
-        new GrpcMiddlewareService(grpcService, Set.of(requestListener), Set.of(responseListener));
+        grpcMiddlewareService =
+                new GrpcMiddlewareService(grpcService, Set.of(requestListener), Set.of(responseListener));
         streamRequestObserver = captor.getValue();
     }
 
@@ -85,6 +89,11 @@ class GrpcMiddlewareServiceTest {
         await().atMost(1, TimeUnit.SECONDS).untilAsserted(
                 () -> verify(responseListener).acceptResponse(expectedPayload, 456)
         );
+    }
+
+    @Test
+    void isConnected() {
+        assertThat(grpcMiddlewareService.isConnected()).isTrue();
     }
 
     private boolean isRegistrationMessage(RPCMiddlewareResponse value) {

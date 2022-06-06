@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.pickhardtpayments;
 
 import de.cotto.lndmanagej.grpc.GrpcGetInfo;
 import de.cotto.lndmanagej.grpc.GrpcGraph;
+import de.cotto.lndmanagej.grpc.middleware.GrpcMiddlewareService;
 import de.cotto.lndmanagej.model.ChannelCoreInformation;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.DirectedChannelEdge;
@@ -77,15 +78,25 @@ class EdgeComputationTest {
     @Mock
     private RouteHintService routeHintService;
 
+    @Mock
+    private GrpcMiddlewareService grpcMiddlewareService;
+
     @BeforeEach
     void setUp() {
         lenient().when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY_4);
         lenient().when(nodeService.getNode(any())).thenReturn(NODE_PEER);
         lenient().when(liquidityBoundsService.getAssumedLiquidityLowerBound(any())).thenReturn(Coins.NONE);
+        lenient().when(grpcMiddlewareService.isConnected()).thenReturn(true);
     }
 
     @Test
     void no_graph() {
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges()).isEmpty();
+    }
+
+    @Test
+    void middleware_not_connected() {
+        when(grpcMiddlewareService.isConnected()).thenReturn(false);
         assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges()).isEmpty();
     }
 
