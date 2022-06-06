@@ -156,7 +156,7 @@ public class EdgeComputation {
     }
 
     private Optional<Coins> getLocalChannelAvailable(ChannelId channelId, Function<ChannelId, Coins> balanceProvider) {
-        LocalChannel localChannel = channelService.getLocalChannel(channelId).orElse(null);
+        LocalChannel localChannel = channelService.getOpenChannel(channelId).orElse(null);
         if (localChannel == null) {
             return Optional.of(Coins.NONE);
         }

@@ -163,7 +163,7 @@ class EdgeComputationTest {
     void adds_liquidity_information_for_local_channel_as_source() {
         mockEdge();
         when(grpcGetInfo.getPubkey()).thenReturn(EDGE.startNode());
-        when(channelService.getLocalChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+        when(channelService.getOpenChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         Coins knownLiquidity = Coins.ofSatoshis(4_567);
         Coins availableKnownLiquidity = getAvailableKnownLiquidity(knownLiquidity);
         when(balanceService.getAvailableLocalBalance(EDGE.channelId())).thenReturn(knownLiquidity);
@@ -215,7 +215,7 @@ class EdgeComputationTest {
     void adds_liquidity_information_for_local_channel_as_target() {
         mockEdge();
         when(grpcGetInfo.getPubkey()).thenReturn(EDGE.endNode());
-        when(channelService.getLocalChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+        when(channelService.getOpenChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         Coins knownLiquidity = Coins.ofSatoshis(4_567);
         Coins availableKnownLiquidity = getAvailableKnownLiquidity(knownLiquidity);
         when(balanceService.getAvailableRemoteBalance(EDGE.channelId())).thenReturn(knownLiquidity);
@@ -247,7 +247,7 @@ class EdgeComputationTest {
     private void mockOfflinePeer() {
         Pubkey remotePubkey = LOCAL_OPEN_CHANNEL.getRemotePubkey();
         when(nodeService.getNode(remotePubkey)).thenReturn(new Node(remotePubkey, "", 0, false));
-        when(channelService.getLocalChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+        when(channelService.getOpenChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
     }
 
     @Test
@@ -278,7 +278,7 @@ class EdgeComputationTest {
         when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY);
         Coins knownLiquidity = Coins.ofSatoshis(4_567);
         Coins availableKnownLiquidity = getAvailableKnownLiquidity(knownLiquidity);
-        when(channelService.getLocalChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+        when(channelService.getOpenChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         when(balanceService.getAvailableLocalBalance(EDGE.channelId())).thenReturn(knownLiquidity);
         assertThat(edgeComputation.getEdgeWithLiquidityInformation(EDGE))
                 .isEqualTo(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, availableKnownLiquidity));
@@ -289,7 +289,7 @@ class EdgeComputationTest {
         when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY_2);
         Coins knownLiquidity = Coins.ofSatoshis(4_567);
         Coins availableKnownLiquidity = getAvailableKnownLiquidity(knownLiquidity);
-        when(channelService.getLocalChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+        when(channelService.getOpenChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         when(balanceService.getAvailableRemoteBalance(EDGE.channelId())).thenReturn(knownLiquidity);
         assertThat(edgeComputation.getEdgeWithLiquidityInformation(EDGE))
                 .isEqualTo(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, availableKnownLiquidity));
