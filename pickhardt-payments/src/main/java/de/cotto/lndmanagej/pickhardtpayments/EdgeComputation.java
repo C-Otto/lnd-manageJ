@@ -3,12 +3,13 @@ package de.cotto.lndmanagej.pickhardtpayments;
 import com.google.common.collect.Sets;
 import de.cotto.lndmanagej.grpc.GrpcGetInfo;
 import de.cotto.lndmanagej.grpc.GrpcGraph;
+import de.cotto.lndmanagej.grpc.middleware.GrpcMiddlewareService;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.DirectedChannelEdge;
 import de.cotto.lndmanagej.model.Edge;
 import de.cotto.lndmanagej.model.EdgeWithLiquidityInformation;
-import de.cotto.lndmanagej.model.LocalChannel;
+import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.Policy;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgesWithLiquidityInformation;
@@ -16,7 +17,6 @@ import de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.LiquidityBoundsService;
-import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.RouteHintService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,33 +34,37 @@ public class EdgeComputation {
     private final GrpcGraph grpcGraph;
     private final GrpcGetInfo grpcGetInfo;
     private final ChannelService channelService;
-    private final NodeService nodeService;
     private final BalanceService balanceService;
     private final LiquidityBoundsService liquidityBoundsService;
     private final RouteHintService routeHintService;
+    private final GrpcMiddlewareService grpcMiddlewareService;
 
     public EdgeComputation(
             GrpcGraph grpcGraph,
             GrpcGetInfo grpcGetInfo,
             ChannelService channelService,
-            NodeService nodeService,
             BalanceService balanceService,
             LiquidityBoundsService liquidityBoundsService,
-            RouteHintService routeHintService
+            RouteHintService routeHintService,
+            GrpcMiddlewareService grpcMiddlewareService
     ) {
         this.grpcGraph = grpcGraph;
         this.grpcGetInfo = grpcGetInfo;
         this.channelService = channelService;
-        this.nodeService = nodeService;
         this.balanceService = balanceService;
         this.liquidityBoundsService = liquidityBoundsService;
         this.routeHintService = routeHintService;
+        this.grpcMiddlewareService = grpcMiddlewareService;
     }
 
     public EdgesWithLiquidityInformation getEdges(PaymentOptions paymentOptions) {
+        if (noMiddlewareSupport()) {
+            logger.error("Middleware needs to be connected");
+            return EdgesWithLiquidityInformation.EMPTY;
+        }
         Set<DirectedChannelEdge> channelEdges = grpcGraph.getChannelEdges().orElse(null);
         if (channelEdges == null) {
-            logger.warn("Unable to get graph");
+            logger.error("Unable to get graph");
             return EdgesWithLiquidityInformation.EMPTY;
         }
         Set<EdgeWithLiquidityInformation> edgesWithLiquidityInformation = new LinkedHashSet<>();
@@ -156,11 +160,11 @@ public class EdgeComputation {
     }
 
     private Optional<Coins> getLocalChannelAvailable(ChannelId channelId, Function<ChannelId, Coins> balanceProvider) {
-        LocalChannel localChannel = channelService.getLocalChannel(channelId).orElse(null);
+        LocalOpenChannel localChannel = channelService.getOpenChannel(channelId).orElse(null);
         if (localChannel == null) {
             return Optional.of(Coins.NONE);
         }
-        if (nodeService.getNode(localChannel.getRemotePubkey()).online()) {
+        if (localChannel.getStatus().active()) {
             return Optional.of(balanceProvider.apply(channelId));
         }
         return Optional.of(Coins.NONE);
@@ -169,5 +173,9 @@ public class EdgeComputation {
     private Coins getAvailableLiquidityUpperBound(Edge edge, Coins lowerBound) {
         Coins upperBound = liquidityBoundsService.getAssumedLiquidityUpperBound(edge).orElse(null);
         return edge.capacity().minimum(upperBound).maximum(lowerBound);
+    }
+
+    private boolean noMiddlewareSupport() {
+        return !grpcMiddlewareService.isConnected();
     }
 }

@@ -2,11 +2,14 @@ package de.cotto.lndmanagej.pickhardtpayments;
 
 import de.cotto.lndmanagej.grpc.GrpcGetInfo;
 import de.cotto.lndmanagej.grpc.GrpcGraph;
+import de.cotto.lndmanagej.grpc.middleware.GrpcMiddlewareService;
+import de.cotto.lndmanagej.model.ChannelCoreInformation;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.DirectedChannelEdge;
 import de.cotto.lndmanagej.model.Edge;
 import de.cotto.lndmanagej.model.EdgeWithLiquidityInformation;
-import de.cotto.lndmanagej.model.Node;
+import de.cotto.lndmanagej.model.LocalOpenChannel;
+import de.cotto.lndmanagej.model.LocalOpenChannelFixtures;
 import de.cotto.lndmanagej.model.Policy;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions;
@@ -25,13 +28,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 import java.util.Set;
 
+import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
+import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_PEER;
+import static de.cotto.lndmanagej.model.OpenInitiator.LOCAL;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_1;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_DISABLED;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_WITH_BASE_FEE;
@@ -72,15 +78,25 @@ class EdgeComputationTest {
     @Mock
     private RouteHintService routeHintService;
 
+    @Mock
+    private GrpcMiddlewareService grpcMiddlewareService;
+
     @BeforeEach
     void setUp() {
         lenient().when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY_4);
         lenient().when(nodeService.getNode(any())).thenReturn(NODE_PEER);
         lenient().when(liquidityBoundsService.getAssumedLiquidityLowerBound(any())).thenReturn(Coins.NONE);
+        lenient().when(grpcMiddlewareService.isConnected()).thenReturn(true);
     }
 
     @Test
     void no_graph() {
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges()).isEmpty();
+    }
+
+    @Test
+    void middleware_not_connected() {
+        when(grpcMiddlewareService.isConnected()).thenReturn(false);
         assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges()).isEmpty();
     }
 
@@ -163,7 +179,7 @@ class EdgeComputationTest {
     void adds_liquidity_information_for_local_channel_as_source() {
         mockEdge();
         when(grpcGetInfo.getPubkey()).thenReturn(EDGE.startNode());
-        when(channelService.getLocalChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+        when(channelService.getOpenChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         Coins knownLiquidity = Coins.ofSatoshis(4_567);
         Coins availableKnownLiquidity = getAvailableKnownLiquidity(knownLiquidity);
         when(balanceService.getAvailableLocalBalance(EDGE.channelId())).thenReturn(knownLiquidity);
@@ -201,9 +217,9 @@ class EdgeComputationTest {
     }
 
     @Test
-    void reduces_liquidity_to_zero_for_offline_peer_as_end_node() {
+    void reduces_liquidity_to_zero_for_inactive_channel_as_last_hop() {
         mockEdge();
-        mockOfflinePeer();
+        mockInactiveChannel();
         when(grpcGetInfo.getPubkey()).thenReturn(EDGE.startNode());
 
         assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges())
@@ -215,7 +231,7 @@ class EdgeComputationTest {
     void adds_liquidity_information_for_local_channel_as_target() {
         mockEdge();
         when(grpcGetInfo.getPubkey()).thenReturn(EDGE.endNode());
-        when(channelService.getLocalChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+        when(channelService.getOpenChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         Coins knownLiquidity = Coins.ofSatoshis(4_567);
         Coins availableKnownLiquidity = getAvailableKnownLiquidity(knownLiquidity);
         when(balanceService.getAvailableRemoteBalance(EDGE.channelId())).thenReturn(knownLiquidity);
@@ -233,22 +249,18 @@ class EdgeComputationTest {
                 .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, Coins.NONE));
     }
 
+    // CPD-OFF
     @Test
-    void reduces_liquidity_to_zero_for_offline_peer_as_start_node() {
+    void reduces_liquidity_to_zero_for_inactive_channel_as_first_hop() {
         mockEdge();
-        mockOfflinePeer();
+        mockInactiveChannel();
         when(grpcGetInfo.getPubkey()).thenReturn(EDGE.endNode());
 
         assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges())
                 .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, Coins.NONE));
         verify(balanceService, never()).getAvailableLocalBalance(EDGE.channelId());
     }
-
-    private void mockOfflinePeer() {
-        Pubkey remotePubkey = LOCAL_OPEN_CHANNEL.getRemotePubkey();
-        when(nodeService.getNode(remotePubkey)).thenReturn(new Node(remotePubkey, "", 0, false));
-        when(channelService.getLocalChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
-    }
+    // CPD-ON
 
     @Test
     void adds_upper_bound_from_liquidity_bounds_service() {
@@ -278,10 +290,18 @@ class EdgeComputationTest {
         when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY);
         Coins knownLiquidity = Coins.ofSatoshis(4_567);
         Coins availableKnownLiquidity = getAvailableKnownLiquidity(knownLiquidity);
-        when(channelService.getLocalChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+        when(channelService.getOpenChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         when(balanceService.getAvailableLocalBalance(EDGE.channelId())).thenReturn(knownLiquidity);
         assertThat(edgeComputation.getEdgeWithLiquidityInformation(EDGE))
                 .isEqualTo(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, availableKnownLiquidity));
+    }
+
+    @Test
+    void getEdgeWithLiquidityInformation_first_node_is_own_node_but_channel_is_inactive() {
+        mockInactiveChannel();
+        when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY);
+        assertThat(edgeComputation.getEdgeWithLiquidityInformation(EDGE))
+                .isEqualTo(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, Coins.NONE));
     }
 
     @Test
@@ -289,7 +309,7 @@ class EdgeComputationTest {
         when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY_2);
         Coins knownLiquidity = Coins.ofSatoshis(4_567);
         Coins availableKnownLiquidity = getAvailableKnownLiquidity(knownLiquidity);
-        when(channelService.getLocalChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+        when(channelService.getOpenChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         when(balanceService.getAvailableRemoteBalance(EDGE.channelId())).thenReturn(knownLiquidity);
         assertThat(edgeComputation.getEdgeWithLiquidityInformation(EDGE))
                 .isEqualTo(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, availableKnownLiquidity));
@@ -368,5 +388,21 @@ class EdgeComputationTest {
 
     private static Policy policy(int feeRate) {
         return new Policy(feeRate, Coins.NONE, true, 40, Coins.ofSatoshis(0));
+    }
+
+    private void mockInactiveChannel() {
+        LocalOpenChannel inactiveChannel = new LocalOpenChannel(
+                new ChannelCoreInformation(CHANNEL_ID, CHANNEL_POINT, CAPACITY),
+                PUBKEY,
+                PUBKEY_2,
+                BALANCE_INFORMATION,
+                LOCAL,
+                LocalOpenChannelFixtures.TOTAL_SENT,
+                LocalOpenChannelFixtures.TOTAL_RECEIVED,
+                false,
+                false,
+                LocalOpenChannelFixtures.NUM_UPDATES
+        );
+        when(channelService.getOpenChannel(EDGE.channelId())).thenReturn(Optional.of(inactiveChannel));
     }
 }

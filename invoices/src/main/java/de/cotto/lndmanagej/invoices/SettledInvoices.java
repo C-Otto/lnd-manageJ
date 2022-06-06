@@ -21,13 +21,15 @@ public class SettledInvoices {
     @Scheduled(fixedDelay = 10, timeUnit = TimeUnit.SECONDS)
     public void refresh() {
         List<SettledInvoice> settledInvoices;
+        List<SettledInvoice> validInvoices;
         do {
             settledInvoices = grpcInvoices.getSettledInvoicesAfter(dao.getAddIndexOffset()).orElse(null);
             if (settledInvoices == null) {
                 return;
             }
-            dao.save(settledInvoices.stream().filter(SettledInvoice::isValid).toList());
-        } while (settledInvoices.size() == grpcInvoices.getLimit());
+            validInvoices = settledInvoices.stream().filter(SettledInvoice::isValid).toList();
+            dao.save(validInvoices);
+        } while (settledInvoices.size() == grpcInvoices.getLimit() && !validInvoices.isEmpty());
 
         grpcInvoices.getNewSettledInvoicesAfter(dao.getSettleIndexOffset())
                 .filter(SettledInvoice::isValid)

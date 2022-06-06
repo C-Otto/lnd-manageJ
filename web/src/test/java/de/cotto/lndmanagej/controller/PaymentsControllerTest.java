@@ -32,7 +32,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class PickhardtPaymentsControllerTest {
+class PaymentsControllerTest {
 
     private static final String PAYMENT_REQUEST = "xxx";
     private static final String STREAM_RESPONSE = "beep beep boop!";
@@ -55,7 +55,7 @@ class PickhardtPaymentsControllerTest {
     }
 
     @InjectMocks
-    private PickhardtPaymentsController controller;
+    private PaymentsController controller;
 
     @Mock
     private MultiPathPaymentSplitter multiPathPaymentSplitter;

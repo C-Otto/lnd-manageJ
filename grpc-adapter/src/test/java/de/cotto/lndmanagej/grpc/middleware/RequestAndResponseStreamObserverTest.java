@@ -15,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -43,21 +42,26 @@ class RequestAndResponseStreamObserverTest {
     @Mock
     private ResponseListener<String> responseListener;
 
+    @Mock
+    private ObserverIsDoneListener observerIsDoneListener;
+
     @BeforeEach
     void setUp() {
         lenient().when(requestListener.getRequestType()).thenReturn(REQUEST_LISTENER_TYPE);
         lenient().when(responseListener.getResponseType()).thenReturn(RESPONSE_LISTENER_TYPE);
-        observer.initialize(responseObserver);
+        observer.initialize(responseObserver, observerIsDoneListener);
     }
 
     @Test
     void onError() {
-        assertThatCode(() -> observer.onError(new NullPointerException())).doesNotThrowAnyException();
+        observer.onError(new NullPointerException());
+        verify(observerIsDoneListener).onIsDone();
     }
 
     @Test
     void onCompleted() {
-        assertThatCode(() -> observer.onCompleted()).doesNotThrowAnyException();
+        observer.onCompleted();
+        verify(observerIsDoneListener).onIsDone();
     }
 
     @Nested

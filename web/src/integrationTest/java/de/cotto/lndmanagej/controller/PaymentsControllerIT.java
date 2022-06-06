@@ -41,8 +41,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SuppressWarnings("CPD-START")
 @Import({ObjectMapperConfiguration.class, PaymentStatusStream.class})
-@WebMvcTest(controllers = PickhardtPaymentsController.class)
-class PickhardtPaymentsControllerIT {
+@WebMvcTest(controllers = PaymentsController.class)
+class PaymentsControllerIT {
     private static final String PREFIX = "/api/payments";
     private static final String PAYMENT_REQUEST = "xxx";
     private static final PaymentOptions PAYMENT_OPTIONS = new PaymentOptions(
