@@ -35,15 +35,18 @@ import static de.cotto.lndmanagej.model.OpenInitiator.LOCAL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assumptions.assumeThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class RatingServiceTest {
-    private static final Duration DEFAULT_DURATION_FOR_ANALYSIS = Duration.ofDays(30);
+    private static final int ANALYSIS_DAYS = 30;
+    private static final Duration DEFAULT_DURATION_FOR_ANALYSIS = Duration.ofDays(ANALYSIS_DAYS);
     private static final Duration DEFAULT_MIN_AGE = Duration.ofDays(30);
 
     @InjectMocks
@@ -67,6 +70,9 @@ class RatingServiceTest {
     @Mock
     private ConfigurationService configurationService;
 
+    @Mock
+    private BalanceService balanceService;
+
     @BeforeEach
     void setUp() {
         int daysAhead = LOCAL_OPEN_CHANNEL_2.getId().getBlockHeight() + 100 * 24 * 60 / 10;
@@ -74,6 +80,8 @@ class RatingServiceTest {
         lenient().when(feeService.getFeeReportForChannel(any(), any())).thenReturn(FeeReport.EMPTY);
         lenient().when(rebalanceService.getReportForChannel(any(), any())).thenReturn(RebalanceReport.EMPTY);
         lenient().when(configurationService.getIntegerValue(any())).thenReturn(Optional.empty());
+        lenient().when(balanceService.getLocalBalanceAverage(any(), anyInt()))
+                .thenReturn(Optional.of(Coins.ofSatoshis(1_000_000)));
     }
 
     @Test
@@ -89,17 +97,21 @@ class RatingServiceTest {
 
     @Test
     void getRatingForPeer_one_channel() {
+        when(feeService.getFeeReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
+                .thenReturn(new FeeReport(Coins.ofMilliSatoshis(30_000), Coins.NONE));
         when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL));
         when(channelService.getOpenChannel(LOCAL_OPEN_CHANNEL.getId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
-        assertThat(ratingService.getRatingForPeer(PUBKEY)).isEqualTo(new Rating(1));
+        assertThat(ratingService.getRatingForPeer(PUBKEY)).isEqualTo(new Rating(30_000 / 30));
     }
 
     @Test
     void getRatingForPeer_two_channels() {
+        when(feeService.getFeeReportForChannel(any(), any()))
+                .thenReturn(new FeeReport(Coins.ofMilliSatoshis(10_000 * ANALYSIS_DAYS), Coins.NONE));
         when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2));
         when(channelService.getOpenChannel(LOCAL_OPEN_CHANNEL.getId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         when(channelService.getOpenChannel(LOCAL_OPEN_CHANNEL_2.getId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_2));
-        assertThat(ratingService.getRatingForPeer(PUBKEY)).isEqualTo(new Rating(2));
+        assertThat(ratingService.getRatingForPeer(PUBKEY)).isEqualTo(new Rating(2 * 10_000));
     }
 
     @Test
@@ -135,7 +147,7 @@ class RatingServiceTest {
 
         @Test
         void idle() {
-            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(1));
+            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(0));
         }
 
         @Test
@@ -148,18 +160,18 @@ class RatingServiceTest {
 
         @Test
         void earned() {
-            Coins feesEarned = Coins.ofMilliSatoshis(123);
+            Coins feesEarned = Coins.ofMilliSatoshis(123 * ANALYSIS_DAYS);
             when(feeService.getFeeReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
                     .thenReturn(new FeeReport(feesEarned, Coins.NONE));
-            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(1 + 123));
+            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(123));
         }
 
         @Test
         void sourced() {
-            Coins feesSourced = Coins.ofMilliSatoshis(123);
+            Coins feesSourced = Coins.ofMilliSatoshis(123 * ANALYSIS_DAYS);
             when(feeService.getFeeReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
                     .thenReturn(new FeeReport(Coins.NONE, feesSourced));
-            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(1 + 123));
+            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(123));
         }
 
         @Test
@@ -169,12 +181,12 @@ class RatingServiceTest {
                     Coins.NONE,
                     Coins.NONE,
                     Coins.NONE,
-                    Coins.ofMilliSatoshis(1_234_567),
+                    Coins.ofMilliSatoshis(1_234_567 * ANALYSIS_DAYS),
                     Coins.NONE
             );
             lenient().when(rebalanceService.getReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
                     .thenReturn(rebalanceReport);
-            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(1 + 123));
+            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(123));
         }
 
         @Test
@@ -185,11 +197,11 @@ class RatingServiceTest {
                     Coins.NONE,
                     Coins.NONE,
                     Coins.NONE,
-                    Coins.ofMilliSatoshis(1_234_567)
+                    Coins.ofMilliSatoshis(1_234_567 * ANALYSIS_DAYS)
             );
             lenient().when(rebalanceService.getReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
                     .thenReturn(rebalanceReport);
-            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(1 + 123));
+            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(123));
         }
 
         @Test
@@ -201,36 +213,54 @@ class RatingServiceTest {
             int feeRate = 123_456;
             mockOutgoingFeeRate(feeRate);
             long maxEarnings = (long) (1.0 * feeRate * balanceMilliSat / 1_000 / 1_000_000.0);
-            assumeThat(maxEarnings).isGreaterThanOrEqualTo(10);
-            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating((1 + maxEarnings / 10) / 2));
+            assumeThat(maxEarnings).isGreaterThanOrEqualTo(10 * ANALYSIS_DAYS);
+            assertThat(ratingService.getRatingForChannel(CHANNEL_ID))
+                    .contains(new Rating(maxEarnings / 10 / ANALYSIS_DAYS));
         }
 
         @Test
-        void divided_by_million_sats_local() {
-            Coins localAvailable = Coins.ofSatoshis(2_500_000);
+        void divided_by_average_million_sats_local() {
+            Coins localAvailableAverage = Coins.ofSatoshis(2_500_000);
             long expected = (long) ((1 + 100_000) / 2.5);
+            assertScaledRating(localAvailableAverage, expected);
+        }
+
+        @Test
+        void zero_balance_on_average() {
+            when(balanceService.getLocalBalanceAverage(CHANNEL_ID, ANALYSIS_DAYS))
+                    .thenReturn(Optional.of(Coins.NONE));
+            when(channelService.getOpenChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+            when(feeService.getFeeReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
+                    .thenReturn(new FeeReport(Coins.ofMilliSatoshis(100_000 * ANALYSIS_DAYS), Coins.NONE));
+            assertThatCode(() -> ratingService.getRatingForChannel(CHANNEL_ID)).doesNotThrowAnyException();
+        }
+
+        @Test
+        void divided_by_average_million_sats_local_if_less_than_one_million_sat() {
+            Coins localAvailable = Coins.ofSatoshis(500_000);
+            long expected = 100_000 * 2;
             assertScaledRating(localAvailable, expected);
         }
 
         @Test
-        void not_divided_if_zero_balance() {
-            Coins localAvailable = Coins.NONE;
-            long expected = 1 + 100_000;
-            assertScaledRating(localAvailable, expected);
-        }
-
-        @Test
-        void not_divided_if_local_balance_below_one_million() {
-            Coins localAvailable = Coins.ofSatoshis(999_999);
-            long expected = 1 + 100_000;
-            assertScaledRating(localAvailable, expected);
+        void scaled_by_days() {
+            int daysForAnalysis = 123;
+            when(configurationService.getIntegerValue(DAYS_FOR_ANALYSIS)).thenReturn(Optional.of(daysForAnalysis));
+            int blockHeight = CHANNEL_ID.getBlockHeight() + 1_000 * 24 * 60 / 10;
+            when(ownNodeService.getBlockHeight()).thenReturn(blockHeight);
+            when(channelService.getOpenChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+            when(feeService.getFeeReportForChannel(CHANNEL_ID, Duration.ofDays(daysForAnalysis)))
+                    .thenReturn(new FeeReport(Coins.ofMilliSatoshis(100_000), Coins.NONE));
+            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(100_000 / daysForAnalysis));
         }
 
         private void assertScaledRating(Coins localAvailable, long expectedRating) {
             LocalOpenChannel localOpenChannel = getLocalOpenChannel(localAvailable);
             when(channelService.getOpenChannel(CHANNEL_ID)).thenReturn(Optional.of(localOpenChannel));
+            when(balanceService.getLocalBalanceAverage(CHANNEL_ID, ANALYSIS_DAYS))
+                    .thenReturn(Optional.of(localAvailable));
             when(feeService.getFeeReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
-                    .thenReturn(new FeeReport(Coins.ofMilliSatoshis(100_000), Coins.NONE));
+                    .thenReturn(new FeeReport(Coins.ofMilliSatoshis(100_000 * ANALYSIS_DAYS), Coins.NONE));
             assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(expectedRating));
         }
 

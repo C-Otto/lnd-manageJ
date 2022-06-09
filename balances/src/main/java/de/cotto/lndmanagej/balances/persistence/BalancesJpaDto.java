@@ -16,7 +16,7 @@ import java.time.ZoneOffset;
 @Entity
 @IdClass(BalancesId.class)
 @Table(name = "balances")
-class BalancesJpaDto {
+public class BalancesJpaDto {
     @Id
     private long timestamp;
 
@@ -28,7 +28,7 @@ class BalancesJpaDto {
     private long remoteBalance;
     private long remoteReserved;
 
-    BalancesJpaDto() {
+    public BalancesJpaDto() {
         // for JPA
     }
 

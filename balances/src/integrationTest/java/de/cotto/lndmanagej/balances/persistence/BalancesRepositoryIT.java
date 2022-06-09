@@ -147,6 +147,37 @@ class BalancesRepositoryIT {
                 .contains(balancesLessThanMaximum.balanceInformation().localBalance());
     }
 
+    @Test
+    void average_empty() {
+        assertThat(repository.getAverageLocalBalance(
+                CHANNEL_ID.getShortChannelId(),
+                14
+        )).isEmpty();
+    }
+
+    @Test
+    void average() {
+        assumeThat(localBalance(BALANCES_OLD) > localBalance(BALANCES)).isTrue();
+        repository.save(BalancesJpaDto.fromModel(BALANCES));
+        repository.save(BalancesJpaDto.fromModel(BALANCES_OLD));
+        long sum = BALANCES.balanceInformation().localBalance().satoshis() +
+                BALANCES_OLD.balanceInformation().localBalance().satoshis();
+        assertThat(repository.getAverageLocalBalance(CHANNEL_ID.getShortChannelId(), 14)).contains(sum / 2);
+    }
+
+    @Test
+    void average_too_old() {
+        LocalDateTime now = TIMESTAMP;
+        Balances balanceYoungEnough = createBalances(Coins.ofSatoshis(123_456), now);
+        Balances balancesMaximumButOld = createBalances(Coins.ofSatoshis(1), now.minusDays(1));
+        long timestamp = balancesMaximumButOld.timestamp().toEpochSecond(ZoneOffset.UTC);
+
+        repository.save(BalancesJpaDto.fromModel(balanceYoungEnough));
+        repository.save(BalancesJpaDto.fromModel(balancesMaximumButOld));
+        assertThat(repository.getAverageLocalBalance(CHANNEL_ID.getShortChannelId(), timestamp))
+                .contains(balanceYoungEnough.balanceInformation().localBalance().satoshis());
+    }
+
     private long localBalance(Balances balances) {
         return balances.balanceInformation().localBalance().milliSatoshis();
     }

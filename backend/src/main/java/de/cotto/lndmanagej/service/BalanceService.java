@@ -83,4 +83,9 @@ public class BalanceService {
     public Optional<Coins> getLocalBalanceMaximum(ChannelId channelId, int days) {
         return balancesDao.getLocalBalanceMaximum(channelId, days);
     }
+
+    @Timed
+    public Optional<Coins> getLocalBalanceAverage(ChannelId channelId, int days) {
+        return balancesDao.getLocalBalanceAverage(channelId, days);
+    }
 }

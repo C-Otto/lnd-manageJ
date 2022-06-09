@@ -53,6 +53,15 @@ class BalancesDaoImpl implements BalancesDao {
         );
     }
 
+    @Override
+    public Optional<Coins> getLocalBalanceAverage(ChannelId channelId, int days) {
+        long timestamp = getTimestamp(days);
+        return balancesRepository.getAverageLocalBalance(
+                channelId.getShortChannelId(),
+                timestamp
+        ).map(Coins::ofSatoshis);
+    }
+
     private Optional<Coins> getLocalBalance(Optional<BalancesJpaDto> balances) {
         return balances
                 .map(BalancesJpaDto::toModel)

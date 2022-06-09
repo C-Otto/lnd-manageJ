@@ -134,6 +134,19 @@ class BalanceServiceTest {
         assertThat(balanceService.getLocalBalanceMaximum(CHANNEL_ID, days)).contains(coins);
     }
 
+    @Test
+    void getLocalBalanceAverage_empty() {
+        assertThat(balanceService.getLocalBalanceAverage(CHANNEL_ID, 14)).isEmpty();
+    }
+
+    @Test
+    void getLocalBalanceAverage() {
+        int days = 14;
+        Coins coins = Coins.ofSatoshis(456);
+        when(balancesDao.getLocalBalanceAverage(CHANNEL_ID, days)).thenReturn(Optional.of(coins));
+        assertThat(balanceService.getLocalBalanceAverage(CHANNEL_ID, days)).contains(coins);
+    }
+
     private void mockChannels() {
         when(grpcChannels.getChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         when(grpcChannels.getChannel(CHANNEL_ID_2)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_2));
