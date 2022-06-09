@@ -89,6 +89,8 @@ class RatingServiceTest {
 
     @Test
     void getRatingForPeer_one_channel() {
+        when(feeService.getFeeReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
+                .thenReturn(new FeeReport(Coins.ofMilliSatoshis(1), Coins.NONE));
         when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL));
         when(channelService.getOpenChannel(LOCAL_OPEN_CHANNEL.getId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         assertThat(ratingService.getRatingForPeer(PUBKEY)).isEqualTo(new Rating(1));
@@ -96,6 +98,8 @@ class RatingServiceTest {
 
     @Test
     void getRatingForPeer_two_channels() {
+        when(feeService.getFeeReportForChannel(any(), any()))
+                .thenReturn(new FeeReport(Coins.ofMilliSatoshis(1), Coins.NONE));
         when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2));
         when(channelService.getOpenChannel(LOCAL_OPEN_CHANNEL.getId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         when(channelService.getOpenChannel(LOCAL_OPEN_CHANNEL_2.getId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_2));
@@ -135,7 +139,7 @@ class RatingServiceTest {
 
         @Test
         void idle() {
-            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(1));
+            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(0));
         }
 
         @Test
@@ -151,7 +155,7 @@ class RatingServiceTest {
             Coins feesEarned = Coins.ofMilliSatoshis(123);
             when(feeService.getFeeReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
                     .thenReturn(new FeeReport(feesEarned, Coins.NONE));
-            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(1 + 123));
+            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(123));
         }
 
         @Test
@@ -159,7 +163,7 @@ class RatingServiceTest {
             Coins feesSourced = Coins.ofMilliSatoshis(123);
             when(feeService.getFeeReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
                     .thenReturn(new FeeReport(Coins.NONE, feesSourced));
-            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(1 + 123));
+            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(123));
         }
 
         @Test
@@ -174,7 +178,7 @@ class RatingServiceTest {
             );
             lenient().when(rebalanceService.getReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
                     .thenReturn(rebalanceReport);
-            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(1 + 123));
+            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(123));
         }
 
         @Test
@@ -189,7 +193,7 @@ class RatingServiceTest {
             );
             lenient().when(rebalanceService.getReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
                     .thenReturn(rebalanceReport);
-            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(1 + 123));
+            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(123));
         }
 
         @Test
@@ -202,7 +206,7 @@ class RatingServiceTest {
             mockOutgoingFeeRate(feeRate);
             long maxEarnings = (long) (1.0 * feeRate * balanceMilliSat / 1_000 / 1_000_000.0);
             assumeThat(maxEarnings).isGreaterThanOrEqualTo(10);
-            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating((1 + maxEarnings / 10) / 2));
+            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating((maxEarnings / 10) / 2));
         }
 
         @Test
@@ -215,14 +219,14 @@ class RatingServiceTest {
         @Test
         void not_divided_if_zero_balance() {
             Coins localAvailable = Coins.NONE;
-            long expected = 1 + 100_000;
+            long expected = 100_000;
             assertScaledRating(localAvailable, expected);
         }
 
         @Test
         void not_divided_if_local_balance_below_one_million() {
             Coins localAvailable = Coins.ofSatoshis(999_999);
-            long expected = 1 + 100_000;
+            long expected = 100_000;
             assertScaledRating(localAvailable, expected);
         }
 

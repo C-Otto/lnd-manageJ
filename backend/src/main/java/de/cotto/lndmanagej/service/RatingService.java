@@ -71,8 +71,7 @@ public class RatingService {
         long localAvailableMilliSat = localOpenChannel.getBalanceInformation().localAvailable().milliSatoshis();
         double millionSat = 1.0 * localAvailableMilliSat / 1_000 / 1_000_000;
 
-        long rating = 1;
-        rating += feeReport.earned().milliSatoshis();
+        long rating = feeReport.earned().milliSatoshis();
         rating += feeReport.sourced().milliSatoshis();
         rating += rebalanceReport.supportAsSourceAmount().milliSatoshis() / 10_000;
         rating += rebalanceReport.supportAsTargetAmount().milliSatoshis() / 10_000;
