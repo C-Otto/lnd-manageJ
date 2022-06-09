@@ -13,4 +13,6 @@ public interface BalancesDao {
     Optional<Coins> getLocalBalanceMinimum(ChannelId channelId, int days);
 
     Optional<Coins> getLocalBalanceMaximum(ChannelId channelId, int days);
+
+    Optional<Coins> getLocalBalanceAverage(ChannelId channelId, int days);
 }

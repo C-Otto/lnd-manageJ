@@ -115,6 +115,25 @@ class BalancesDaoImplTest {
         );
     }
 
+    @Test
+    void getLocalBalanceAverage_empty() {
+        assertThat(dao.getLocalBalanceAverage(CHANNEL_ID, 1)).isEmpty();
+    }
+
+    @Test
+    void getLocalBalanceAverage() {
+        int days = 14;
+        Coins averageLocalBalance = Coins.ofSatoshis(456);
+        when(balancesRepository.getAverageLocalBalance(eq(CHANNEL_ID.getShortChannelId()), anyLong()))
+                .thenReturn(Optional.of(averageLocalBalance.satoshis()));
+        assertThat(dao.getLocalBalanceAverage(CHANNEL_ID, days)).contains(averageLocalBalance);
+
+        long expectedTimestamp = ZonedDateTime.now(ZoneOffset.UTC).minusDays(days).toEpochSecond();
+        verify(balancesRepository).getAverageLocalBalance(anyLong(),
+                longThat(timestamp -> timestamp > 0.95 * expectedTimestamp && timestamp < 1.05 * expectedTimestamp)
+        );
+    }
+
     private Balances getWithLocalBalance(Coins localBalance) {
         BalanceInformation balanceInformation =
                 new BalanceInformation(localBalance, LOCAL_RESERVE, REMOTE_BALANCE, REMOTE_RESERVE);

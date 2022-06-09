@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.service;
 import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.Pubkey;
@@ -29,6 +30,7 @@ public class RatingService {
     private final RebalanceService rebalanceService;
     private final PolicyService policyService;
     private final ConfigurationService configurationService;
+    private final BalanceService balanceService;
 
     public RatingService(
             ChannelService channelService,
@@ -36,7 +38,8 @@ public class RatingService {
             FeeService feeService,
             RebalanceService rebalanceService,
             PolicyService policyService,
-            ConfigurationService configurationService
+            ConfigurationService configurationService,
+            BalanceService balanceService
     ) {
         this.channelService = channelService;
         this.ownNodeService = ownNodeService;
@@ -44,6 +47,7 @@ public class RatingService {
         this.rebalanceService = rebalanceService;
         this.policyService = policyService;
         this.configurationService = configurationService;
+        this.balanceService = balanceService;
     }
 
     public Rating getRatingForPeer(Pubkey peer) {
@@ -70,13 +74,15 @@ public class RatingService {
         long feeRate = policyService.getMinimumFeeRateTo(localOpenChannel.getRemotePubkey()).orElse(0L);
         long localAvailableMilliSat = localOpenChannel.getBalanceInformation().localAvailable().milliSatoshis();
         double millionSat = 1.0 * localAvailableMilliSat / 1_000 / 1_000_000;
+        long averageSat = balanceService.getLocalBalanceAverage(channelId, (int) durationForAnalysis.toDays())
+                .orElse(Coins.NONE).satoshis();
 
         long rating = feeReport.earned().milliSatoshis();
         rating += feeReport.sourced().milliSatoshis();
         rating += rebalanceReport.supportAsSourceAmount().milliSatoshis() / 10_000;
         rating += rebalanceReport.supportAsTargetAmount().milliSatoshis() / 10_000;
         rating += (long) (1.0 * feeRate * millionSat / 10);
-        double scaledByLiquidity = rating / Math.max(1, millionSat);
+        double scaledByLiquidity = 1.0 * rating * 1_000_000 / averageSat;
         double scaledByDays = scaledByLiquidity / durationForAnalysis.toDays();
         return Optional.of(new Rating((long) scaledByDays));
     }
