@@ -8,8 +8,13 @@ import de.cotto.lndmanagej.model.Coins;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -55,11 +60,45 @@ class BalancesDaoImpl implements BalancesDao {
 
     @Override
     public Optional<Coins> getLocalBalanceAverage(ChannelId channelId, int days) {
-        long timestamp = getTimestamp(days);
-        return balancesRepository.getAverageLocalBalance(
-                channelId.getShortChannelId(),
-                timestamp
-        ).map(Coins::ofSatoshis);
+        List<Balances> entries = getEntries(channelId, days);
+        long totalSatoshis = 0;
+        long totalMinutes = 0;
+        LocalDateTime previous = LocalDateTime.now(ZoneOffset.UTC);
+        LocalDateTime maxAge = LocalDateTime.now(ZoneOffset.UTC).minusDays(days);
+        for (Balances balances : entries) {
+            long satoshis = balances.balanceInformation().localBalance().satoshis();
+            LocalDateTime timestamp = balances.timestamp();
+            if (timestamp.isBefore(maxAge)) {
+                timestamp = maxAge;
+            }
+            Duration duration = Duration.between(timestamp, previous);
+            long minutes = duration.getSeconds() / 60;
+            totalSatoshis += satoshis * minutes;
+            totalMinutes += minutes;
+            previous = timestamp;
+        }
+        if (totalMinutes == 0) {
+            return Optional.empty();
+        }
+        Coins average = Coins.ofSatoshis(totalSatoshis / totalMinutes);
+        return Optional.of(average);
+    }
+
+    private List<Balances> getEntries(ChannelId channelId, int days) {
+        long shortChannelId = channelId.getShortChannelId();
+        LocalDateTime threshold = LocalDateTime.now(ZoneOffset.UTC).minusDays(days);
+        List<Balances> entries = new ArrayList<>();
+        Iterator<Balances> iterator = balancesRepository.findByChannelIdOrderByTimestampDesc(shortChannelId)
+                .map(BalancesJpaDto::toModel)
+                .iterator();
+        while (iterator.hasNext()) {
+            Balances balances = iterator.next();
+            entries.add(balances);
+            if (balances.timestamp().isBefore(threshold)) {
+                break;
+            }
+        }
+        return entries;
     }
 
     private Optional<Coins> getLocalBalance(Optional<BalancesJpaDto> balances) {

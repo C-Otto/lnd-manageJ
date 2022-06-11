@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.balances.persistence;
 import de.cotto.lndmanagej.balances.Balances;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Coins;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static de.cotto.lndmanagej.balances.BalancesFixtures.BALANCES;
 import static de.cotto.lndmanagej.balances.BalancesFixtures.TIMESTAMP;
@@ -115,28 +117,61 @@ class BalancesDaoImplTest {
         );
     }
 
-    @Test
-    void getLocalBalanceAverage_empty() {
-        assertThat(dao.getLocalBalanceAverage(CHANNEL_ID, 1)).isEmpty();
-    }
+    @Nested
+    class GetLocalBalanceAverage {
 
-    @Test
-    void getLocalBalanceAverage() {
-        int days = 14;
-        Coins averageLocalBalance = Coins.ofSatoshis(456);
-        when(balancesRepository.getAverageLocalBalance(eq(CHANNEL_ID.getShortChannelId()), anyLong()))
-                .thenReturn(Optional.of(averageLocalBalance.satoshis()));
-        assertThat(dao.getLocalBalanceAverage(CHANNEL_ID, days)).contains(averageLocalBalance);
+        private static final int DAYS = 14;
 
-        long expectedTimestamp = ZonedDateTime.now(ZoneOffset.UTC).minusDays(days).toEpochSecond();
-        verify(balancesRepository).getAverageLocalBalance(anyLong(),
-                longThat(timestamp -> timestamp > 0.95 * expectedTimestamp && timestamp < 1.05 * expectedTimestamp)
-        );
+        @Test
+        void empty() {
+            assertThat(dao.getLocalBalanceAverage(CHANNEL_ID, 1)).isEmpty();
+        }
+
+        @Test
+        void one_entry() {
+            Balances balances = getWithLocalBalance(Coins.ofSatoshis(100), 10);
+            Coins expected = balances.balanceInformation().localBalance();
+            when(balancesRepository.findByChannelIdOrderByTimestampDesc(eq(CHANNEL_ID.getShortChannelId())))
+                    .thenReturn(Stream.of(BalancesJpaDto.fromModel(balances)));
+            assertThat(dao.getLocalBalanceAverage(CHANNEL_ID, DAYS)).contains(expected);
+        }
+
+        @Test
+        void two_entries_same_duration() {
+            Balances balances1 = getWithLocalBalance(Coins.ofSatoshis(100), 10);
+            Balances balances2 = getWithLocalBalance(Coins.ofSatoshis(300), 20);
+            when(balancesRepository.findByChannelIdOrderByTimestampDesc(anyLong()))
+                    .thenReturn(Stream.of(BalancesJpaDto.fromModel(balances1), BalancesJpaDto.fromModel(balances2)));
+            assertThat(dao.getLocalBalanceAverage(CHANNEL_ID, DAYS)).contains(Coins.ofSatoshis(200));
+        }
+
+        @Test
+        void one_old_entry() {
+            Balances balances = getWithLocalBalance(Coins.ofSatoshis(300), 99 * 24 * 60);
+            when(balancesRepository.findByChannelIdOrderByTimestampDesc(anyLong()))
+                    .thenReturn(Stream.of(BalancesJpaDto.fromModel(balances)));
+            assertThat(dao.getLocalBalanceAverage(CHANNEL_ID, DAYS))
+                    .contains(balances.balanceInformation().localBalance());
+        }
+
+        @Test
+        void two_entries_one_very_old() {
+            Balances balances1 = getWithLocalBalance(Coins.ofSatoshis(100), 7 * 24 * 60);
+            Balances balances2 = getWithLocalBalance(Coins.ofSatoshis(300), 99 * 24 * 60);
+            Coins expected = Coins.ofSatoshis(199);
+            when(balancesRepository.findByChannelIdOrderByTimestampDesc(anyLong()))
+                    .thenReturn(Stream.of(BalancesJpaDto.fromModel(balances1), BalancesJpaDto.fromModel(balances2)));
+            assertThat(dao.getLocalBalanceAverage(CHANNEL_ID, DAYS)).contains(expected);
+        }
     }
 
     private Balances getWithLocalBalance(Coins localBalance) {
+        return getWithLocalBalance(localBalance, 0);
+    }
+
+    private Balances getWithLocalBalance(Coins localBalance, int ageInMinutes) {
         BalanceInformation balanceInformation =
                 new BalanceInformation(localBalance, LOCAL_RESERVE, REMOTE_BALANCE, REMOTE_RESERVE);
-        return new Balances(TIMESTAMP, CHANNEL_ID, balanceInformation);
+        return new Balances(TIMESTAMP.minusMinutes(ageInMinutes), CHANNEL_ID, balanceInformation);
     }
 }

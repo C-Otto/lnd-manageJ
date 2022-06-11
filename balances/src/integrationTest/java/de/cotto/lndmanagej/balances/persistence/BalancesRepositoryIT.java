@@ -24,6 +24,8 @@ import static org.assertj.core.api.Assumptions.assumeThat;
 
 @DataJpaTest
 class BalancesRepositoryIT {
+    private static final long SHORT_ID = CHANNEL_ID.getShortChannelId();
+
     @Autowired
     private BalancesRepository repository;
 
@@ -35,14 +37,14 @@ class BalancesRepositoryIT {
 
     @Test
     void findTopByChannelIdOrderByTimestampDesc_not_found() {
-        assertThat(repository.findTopByChannelIdOrderByTimestampDesc(CHANNEL_ID.getShortChannelId()))
+        assertThat(repository.findTopByChannelIdOrderByTimestampDesc(SHORT_ID))
                 .isEmpty();
     }
 
     @Test
     void findTopByChannelIdOrderByTimestampDesc() {
         repository.save(BalancesJpaDto.fromModel(BALANCES));
-        assertThat(repository.findTopByChannelIdOrderByTimestampDesc(CHANNEL_ID.getShortChannelId()))
+        assertThat(repository.findTopByChannelIdOrderByTimestampDesc(SHORT_ID))
                 .map(BalancesJpaDto::toModel).contains(BALANCES);
     }
 
@@ -57,7 +59,7 @@ class BalancesRepositoryIT {
     void findTopByChannelIdOrderByTimestampDesc_returns_most_recent() {
         repository.save(BalancesJpaDto.fromModel(BALANCES));
         repository.save(BalancesJpaDto.fromModel(BALANCES_OLD));
-        assertThat(repository.findTopByChannelIdOrderByTimestampDesc(CHANNEL_ID.getShortChannelId()))
+        assertThat(repository.findTopByChannelIdOrderByTimestampDesc(SHORT_ID))
                 .map(BalancesJpaDto::toModel).contains(BALANCES);
     }
 
@@ -92,27 +94,17 @@ class BalancesRepositoryIT {
 
         repository.save(BalancesJpaDto.fromModel(balancesMinimumButOld));
         repository.save(BalancesJpaDto.fromModel(balancesMoreThanMinimum));
-        assertThat(repository.findTopByChannelIdAndTimestampAfterOrderByLocalBalance(
-                CHANNEL_ID.getShortChannelId(),
-                timestamp
-        )).map(BalancesJpaDto::toModel)
+        assertThat(repository.findTopByChannelIdAndTimestampAfterOrderByLocalBalance(SHORT_ID, timestamp))
+                .map(BalancesJpaDto::toModel)
                 .map(Balances::balanceInformation)
                 .map(BalanceInformation::localBalance)
                 .contains(balancesMoreThanMinimum.balanceInformation().localBalance());
     }
 
-    private Balances createBalances(Coins localBalance, LocalDateTime timestamp) {
-        BalanceInformation balanceInformation =
-                new BalanceInformation(localBalance, LOCAL_RESERVE, REMOTE_BALANCE, REMOTE_RESERVE);
-        return new Balances(timestamp, CHANNEL_ID, balanceInformation);
-    }
-
     @Test
     void maximum_empty() {
-        assertThat(repository.findTopByChannelIdAndTimestampAfterOrderByLocalBalanceDesc(
-                CHANNEL_ID.getShortChannelId(),
-                14
-        )).isEmpty();
+        assertThat(repository.findTopByChannelIdAndTimestampAfterOrderByLocalBalanceDesc(SHORT_ID, 14))
+                .isEmpty();
     }
 
     @Test
@@ -120,10 +112,8 @@ class BalancesRepositoryIT {
         assumeThat(localBalance(BALANCES_OLD) > localBalance(BALANCES)).isTrue();
         repository.save(BalancesJpaDto.fromModel(BALANCES));
         repository.save(BalancesJpaDto.fromModel(BALANCES_OLD));
-        assertThat(repository.findTopByChannelIdAndTimestampAfterOrderByLocalBalanceDesc(
-                CHANNEL_ID.getShortChannelId(),
-                14
-        )).map(BalancesJpaDto::toModel)
+        assertThat(repository.findTopByChannelIdAndTimestampAfterOrderByLocalBalanceDesc(SHORT_ID, 14))
+                .map(BalancesJpaDto::toModel)
                 .map(Balances::balanceInformation)
                 .map(BalanceInformation::localBalance)
                 .contains(BALANCES_OLD.balanceInformation().localBalance());
@@ -138,44 +128,32 @@ class BalancesRepositoryIT {
 
         repository.save(BalancesJpaDto.fromModel(balancesMaximumButOld));
         repository.save(BalancesJpaDto.fromModel(balancesLessThanMaximum));
-        assertThat(repository.findTopByChannelIdAndTimestampAfterOrderByLocalBalance(
-                CHANNEL_ID.getShortChannelId(),
-                timestamp
-        )).map(BalancesJpaDto::toModel)
+        assertThat(repository.findTopByChannelIdAndTimestampAfterOrderByLocalBalance(SHORT_ID, timestamp))
+                .map(BalancesJpaDto::toModel)
                 .map(Balances::balanceInformation)
                 .map(BalanceInformation::localBalance)
                 .contains(balancesLessThanMaximum.balanceInformation().localBalance());
     }
 
     @Test
-    void average_empty() {
-        assertThat(repository.getAverageLocalBalance(
-                CHANNEL_ID.getShortChannelId(),
-                14
-        )).isEmpty();
+    void findByChannelIdOrderByTimestampDesc_empty() {
+        assertThat(repository.findByChannelIdOrderByTimestampDesc(SHORT_ID)).isEmpty();
     }
 
     @Test
-    void average() {
+    void findByChannelIdOrderByTimestampDesc() {
         assumeThat(localBalance(BALANCES_OLD) > localBalance(BALANCES)).isTrue();
         repository.save(BalancesJpaDto.fromModel(BALANCES));
         repository.save(BalancesJpaDto.fromModel(BALANCES_OLD));
-        long sum = BALANCES.balanceInformation().localBalance().satoshis() +
-                BALANCES_OLD.balanceInformation().localBalance().satoshis();
-        assertThat(repository.getAverageLocalBalance(CHANNEL_ID.getShortChannelId(), 14)).contains(sum / 2);
+        assertThat(repository.findByChannelIdOrderByTimestampDesc(SHORT_ID))
+                .map(BalancesJpaDto::toModel)
+                .containsExactly(BALANCES, BALANCES_OLD);
     }
 
-    @Test
-    void average_too_old() {
-        LocalDateTime now = TIMESTAMP;
-        Balances balanceYoungEnough = createBalances(Coins.ofSatoshis(123_456), now);
-        Balances balancesMaximumButOld = createBalances(Coins.ofSatoshis(1), now.minusDays(1));
-        long timestamp = balancesMaximumButOld.timestamp().toEpochSecond(ZoneOffset.UTC);
-
-        repository.save(BalancesJpaDto.fromModel(balanceYoungEnough));
-        repository.save(BalancesJpaDto.fromModel(balancesMaximumButOld));
-        assertThat(repository.getAverageLocalBalance(CHANNEL_ID.getShortChannelId(), timestamp))
-                .contains(balanceYoungEnough.balanceInformation().localBalance().satoshis());
+    private Balances createBalances(Coins localBalance, LocalDateTime timestamp) {
+        BalanceInformation balanceInformation =
+                new BalanceInformation(localBalance, LOCAL_RESERVE, REMOTE_BALANCE, REMOTE_RESERVE);
+        return new Balances(timestamp, CHANNEL_ID, balanceInformation);
     }
 
     private long localBalance(Balances balances) {
