@@ -3,8 +3,10 @@ package de.cotto.lndmanagej.service;
 import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FeeReport;
+import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.Rating;
@@ -12,7 +14,12 @@ import de.cotto.lndmanagej.model.RebalanceReport;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.Set;
 
 import static de.cotto.lndmanagej.configuration.RatingConfigurationSettings.DAYS_FOR_ANALYSIS;
 import static de.cotto.lndmanagej.configuration.RatingConfigurationSettings.MIN_AGE_DAYS_FOR_ANALYSIS;
@@ -51,19 +58,25 @@ public class RatingService {
     }
 
     public Rating getRatingForPeer(Pubkey peer) {
-        return channelService.getOpenChannelsWith(peer).stream()
-                .map(Channel::getId).map(this::getRatingForChannel)
+        Set<ChannelId> eligibleChannels = getEligibleChannels(peer);
+        return eligibleChannels.stream()
+                .map(channelId -> getRatingForChannel(channelId, eligibleChannels))
                 .flatMap(Optional::stream)
                 .reduce(Rating.EMPTY, Rating::add);
     }
 
     public Optional<Rating> getRatingForChannel(ChannelId channelId) {
-        int ageInDays = getAgeInDays(channelId);
-        if (ageInDays < getDefaultMinAgeDaysForAnalysis()) {
-            return Optional.of(Rating.EMPTY);
+        return channelService.getOpenChannel(channelId).map(LocalChannel::getRemotePubkey)
+                .map(this::getEligibleChannels)
+                .flatMap(eligibleChannels -> getRatingForChannel(channelId, eligibleChannels));
+    }
+
+    private Optional<Rating> getRatingForChannel(ChannelId channelId, Set<ChannelId> eligibleChannels) {
+        if (!eligibleChannels.contains(channelId)) {
+            return Optional.empty();
         }
-        LocalOpenChannel localOpenChannel = channelService.getOpenChannel(channelId).orElse(null);
-        if (localOpenChannel == null) {
+        LocalChannel localChannel = channelService.getLocalChannel(channelId).orElse(null);
+        if (localChannel == null) {
             return Optional.empty();
         }
         Duration durationForAnalysis = getDurationForAnalysis();
@@ -71,8 +84,8 @@ public class RatingService {
                 feeService.getFeeReportForChannel(channelId, durationForAnalysis);
         RebalanceReport rebalanceReport =
                 rebalanceService.getReportForChannel(channelId, durationForAnalysis);
-        long feeRate = policyService.getMinimumFeeRateTo(localOpenChannel.getRemotePubkey()).orElse(0L);
-        long localAvailableMilliSat = localOpenChannel.getBalanceInformation().localAvailable().milliSatoshis();
+        long feeRate = policyService.getMinimumFeeRateTo(localChannel.getRemotePubkey()).orElse(0L);
+        long localAvailableMilliSat = getLocalAvailableMilliSat(localChannel);
         double millionSat = 1.0 * localAvailableMilliSat / 1_000 / 1_000_000;
         long averageSat = balanceService.getLocalBalanceAverage(channelId, (int) durationForAnalysis.toDays())
                 .orElse(Coins.NONE).satoshis();
@@ -87,6 +100,13 @@ public class RatingService {
         return Optional.of(new Rating((long) scaledByDays));
     }
 
+    private static long getLocalAvailableMilliSat(LocalChannel localChannel) {
+        if (localChannel instanceof LocalOpenChannel openChannel) {
+            return openChannel.getBalanceInformation().localAvailable().milliSatoshis();
+        }
+        return 0;
+    }
+
     private int getDefaultMinAgeDaysForAnalysis() {
         return configurationService.getIntegerValue(MIN_AGE_DAYS_FOR_ANALYSIS)
                 .orElse(DEFAULT_MIN_AGE_DAYS_FOR_ANALYSIS);
@@ -98,8 +118,41 @@ public class RatingService {
         );
     }
 
-    private int getAgeInDays(ChannelId channelId) {
-        int channelAgeInBlocks = ownNodeService.getBlockHeight() - channelId.getBlockHeight();
-        return (int) Math.ceil(channelAgeInBlocks * 1.0 * EXPECTED_MINUTES_PER_BLOCK / MINUTES_PER_DAY);
+    private Set<ChannelId> getEligibleChannels(Pubkey peer) {
+        Set<LocalOpenChannel> openChannels = channelService.getOpenChannelsWith(peer);
+        Set<ChannelId> result = new LinkedHashSet<>(openChannels.stream().map(Channel::getId).toList());
+        if (openChannels.isEmpty()) {
+            return result;
+        }
+        int minHeight = getEarliestOpenHeight(openChannels).orElseThrow();
+        while (true) {
+            List<ClosedChannel> recentlyClosed = getClosedChannelsClosedAtOrAfter(peer, minHeight);
+            result.addAll(recentlyClosed.stream().map(Channel::getId).toList());
+            int newMinHeight = getEarliestOpenHeight(recentlyClosed).orElse(minHeight);
+            if (newMinHeight >= minHeight) {
+                break;
+            }
+            minHeight = newMinHeight;
+        }
+        int ageInDays = getAgeInDays(minHeight);
+        if (ageInDays < getDefaultMinAgeDaysForAnalysis()) {
+            return Set.of();
+        }
+        return result;
+    }
+
+    private int getAgeInDays(int openHeight) {
+        int channelAgeInBlocks = ownNodeService.getBlockHeight() - openHeight;
+        return (int) Math.floor(channelAgeInBlocks * 1.0 * EXPECTED_MINUTES_PER_BLOCK / MINUTES_PER_DAY);
+    }
+
+    private OptionalInt getEarliestOpenHeight(Collection<? extends Channel> channels) {
+        return channels.stream().mapToInt(c -> c.getId().getBlockHeight()).min();
+    }
+
+    private List<ClosedChannel> getClosedChannelsClosedAtOrAfter(Pubkey peer, int minHeight) {
+        return channelService.getClosedChannelsWith(peer).stream()
+                .filter(c -> c.getCloseHeight() >= minHeight)
+                .toList();
     }
 }
