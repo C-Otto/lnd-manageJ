@@ -7,6 +7,7 @@ public enum WarningsConfigurationSettings implements ConfigurationSetting {
     CHANNEL_FLUCTUATION_UPPER_THRESHOLD("channel_fluctuation_upper_threshold"),
     NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER("node_flow_maximum_days_to_consider"),
     NODE_FLOW_MINIMUM_DAYS_FOR_WARNING("node_flow_minimum_days_for_warning"),
+    NODE_RATING_THRESHOLD("node_rating_threshold"),
     MAX_NUM_UPDATES("max_num_updates");
 
     private final String name;

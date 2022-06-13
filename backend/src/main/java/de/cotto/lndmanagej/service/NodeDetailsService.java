@@ -10,6 +10,7 @@ import de.cotto.lndmanagej.model.NodeDetails;
 import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.model.OnlineReport;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.model.Rating;
 import de.cotto.lndmanagej.model.RebalanceReport;
 import de.cotto.lndmanagej.model.warnings.NodeWarnings;
 import org.springframework.stereotype.Component;
@@ -30,7 +31,9 @@ public class NodeDetailsService {
     private final OnlinePeersService onlinePeersService;
     private final NodeWarningsService warningsService;
     private final FlowService flowService;
+    private final RatingService ratingService;
 
+    @SuppressWarnings("PMD.ExcessiveParameterList")
     public NodeDetailsService(
             ChannelService channelService,
             NodeService nodeService,
@@ -40,7 +43,8 @@ public class NodeDetailsService {
             RebalanceService rebalanceService,
             OnlinePeersService onlinePeersService,
             NodeWarningsService warningsService,
-            FlowService flowService
+            FlowService flowService,
+            RatingService ratingService
     ) {
         this.channelService = channelService;
         this.nodeService = nodeService;
@@ -51,6 +55,7 @@ public class NodeDetailsService {
         this.onlinePeersService = onlinePeersService;
         this.warningsService = warningsService;
         this.flowService = flowService;
+        this.ratingService = ratingService;
     }
 
     public NodeDetails getDetails(Pubkey pubkey) {
@@ -62,6 +67,7 @@ public class NodeDetailsService {
         CompletableFuture<FlowReport> flowReport = getFlowReport(pubkey);
         CompletableFuture<RebalanceReport> rebalanceReport = getRebalanceReport(pubkey);
         CompletableFuture<NodeWarnings> nodeWarnings = getNodeWarnings(pubkey);
+        CompletableFuture<Rating> rating = getRating(pubkey);
         List<ChannelId> openChannelIds =
                 getSortedChannelIds(channelService.getOpenChannelsWith(pubkey));
         List<ChannelId> closedChannelIds =
@@ -84,7 +90,8 @@ public class NodeDetailsService {
                     feeReport.get(),
                     flowReport.get(),
                     rebalanceReport.get(),
-                    nodeWarnings.get()
+                    nodeWarnings.get(),
+                    rating.get()
             );
         } catch (InterruptedException | ExecutionException exception) {
             throw new IllegalStateException("Unable to compute node details for " + pubkey, exception);
@@ -113,6 +120,10 @@ public class NodeDetailsService {
 
     private CompletableFuture<NodeWarnings> getNodeWarnings(Pubkey pubkey) {
         return CompletableFuture.supplyAsync(() -> warningsService.getNodeWarnings(pubkey));
+    }
+
+    private CompletableFuture<Rating> getRating(Pubkey pubkey) {
+        return CompletableFuture.supplyAsync(() -> ratingService.getRatingForPeer(pubkey));
     }
 
     private CompletableFuture<BalanceInformation> getBalanceInformation(Pubkey pubkey) {

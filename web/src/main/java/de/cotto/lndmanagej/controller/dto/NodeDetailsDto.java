@@ -20,7 +20,8 @@ public record NodeDetailsDto(
         FeeReportDto feeReport,
         FlowReportDto flowReport,
         RebalanceReportDto rebalanceReport,
-        Set<String> warnings
+        Set<String> warnings,
+        long rating
 ) {
     public static NodeDetailsDto createFromModel(NodeDetails nodeDetails) {
         return new NodeDetailsDto(
@@ -36,7 +37,8 @@ public record NodeDetailsDto(
                 FeeReportDto.createFromModel(nodeDetails.feeReport()),
                 FlowReportDto.createFromModel(nodeDetails.flowReport()),
                 RebalanceReportDto.createFromModel(nodeDetails.rebalanceReport()),
-                nodeDetails.warnings().descriptions()
+                nodeDetails.warnings().descriptions(),
+                nodeDetails.rating().getRating()
         );
     }
 }

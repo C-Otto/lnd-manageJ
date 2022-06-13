@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.controller.dto;
 
+import de.cotto.lndmanagej.model.RatingFixtures;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -36,7 +37,8 @@ class NodeDetailsDtoTest {
                 FeeReportDto.createFromModel(FEE_REPORT),
                 FlowReportDto.createFromModel(FLOW_REPORT),
                 RebalanceReportDto.createFromModel(REBALANCE_REPORT),
-                NODE_WARNINGS.descriptions()
+                NODE_WARNINGS.descriptions(),
+                RatingFixtures.RATING.getRating()
         );
         assertThat(NodeDetailsDto.createFromModel(NODE_DETAILS)).isEqualTo(expected);
     }

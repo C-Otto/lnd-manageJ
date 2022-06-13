@@ -17,6 +17,7 @@ public record NodeDetails(
         FeeReport feeReport,
         FlowReport flowReport,
         RebalanceReport rebalanceReport,
-        NodeWarnings warnings
+        NodeWarnings warnings,
+        Rating rating
 ) {
 }
