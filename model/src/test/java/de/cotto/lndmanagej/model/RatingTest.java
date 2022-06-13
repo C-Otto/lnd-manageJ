@@ -20,7 +20,7 @@ class RatingTest {
 
     @Test
     void getRating() {
-        assertThat(Rating.EMPTY.getRating()).isEqualTo(0);
+        assertThat(Rating.EMPTY.getRating()).isEqualTo(-1);
         assertThat(new Rating(1).getRating()).isEqualTo(1);
     }
 

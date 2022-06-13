@@ -8,7 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RatingDtoTest {
     @Test
     void fromModel_empty() {
-        assertThat(RatingDto.fromModel(Rating.EMPTY)).isEqualTo(new RatingDto(0, "Unable to compute rating"));
+        assertThat(RatingDto.fromModel(Rating.EMPTY)).isEqualTo(new RatingDto(-1, "Unable to compute rating"));
     }
 
     @Test

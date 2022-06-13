@@ -30,6 +30,6 @@ public class NodeDetailsDtoFixture {
             FlowReportDto.createFromModel(FLOW_REPORT),
             RebalanceReportDto.createFromModel(REBALANCE_REPORT),
             CHANNEL_WARNINGS.descriptions(),
-            RatingFixtures.RATING.getRating()
+            RatingDto.fromModel(RatingFixtures.RATING)
     );
 }

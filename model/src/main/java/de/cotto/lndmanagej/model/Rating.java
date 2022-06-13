@@ -26,6 +26,6 @@ public record Rating(Optional<Long> rating) {
     }
 
     public long getRating() {
-        return rating.orElse(0L);
+        return rating.orElse(-1L);
     }
 }
