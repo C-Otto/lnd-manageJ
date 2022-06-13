@@ -182,6 +182,8 @@ class ChannelControllerIT {
                 .andExpect(jsonPath("$.flowReport.rebalanceSupportReceivedMilliSat", is("10")))
                 .andExpect(jsonPath("$.flowReport.totalSentMilliSat", is("70006")))
                 .andExpect(jsonPath("$.flowReport.totalReceivedMilliSat", is("63020")))
+                .andExpect(jsonPath("$.rating.rating", is(123)))
+                .andExpect(jsonPath("$.rating.message", is("")))
                 .andExpect(jsonPath("$.warnings", containsInAnyOrder(
                         "Channel has accumulated 101,000 updates"
                 )));

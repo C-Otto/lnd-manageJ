@@ -11,6 +11,7 @@ public record ChannelDetails(
         FeeReport feeReport,
         FlowReport flowReport,
         RebalanceReport rebalanceReport,
-        ChannelWarnings warnings
+        ChannelWarnings warnings,
+        Rating rating
 ) {
 }

@@ -14,6 +14,7 @@ import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
+import static de.cotto.lndmanagej.model.RatingFixtures.RATING;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static de.cotto.lndmanagej.model.warnings.NodeWarningsFixtures.NODE_WARNINGS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -82,5 +83,10 @@ class NodeDetailsTest {
     @Test
     void warnings() {
         assertThat(NODE_DETAILS.warnings()).isEqualTo(NODE_WARNINGS);
+    }
+
+    @Test
+    void rating() {
+        assertThat(NODE_DETAILS.rating()).isEqualTo(RATING);
     }
 }

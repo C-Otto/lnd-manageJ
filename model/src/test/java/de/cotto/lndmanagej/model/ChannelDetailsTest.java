@@ -10,6 +10,7 @@ import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHAN
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES_FOR_LOCAL_CHANNEL;
+import static de.cotto.lndmanagej.model.RatingFixtures.RATING;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static de.cotto.lndmanagej.model.warnings.ChannelWarningsFixtures.CHANNEL_WARNINGS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -58,5 +59,10 @@ class ChannelDetailsTest {
     @Test
     void warnings() {
         assertThat(CHANNEL_DETAILS.warnings()).isEqualTo(CHANNEL_WARNINGS);
+    }
+
+    @Test
+    void rating() {
+        assertThat(CHANNEL_DETAILS.rating()).isEqualTo(RATING);
     }
 }

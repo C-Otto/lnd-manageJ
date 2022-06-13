@@ -4,6 +4,7 @@ import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelDetails;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.PoliciesForLocalChannel;
+import de.cotto.lndmanagej.model.Rating;
 import de.cotto.lndmanagej.model.RebalanceReport;
 import de.cotto.lndmanagej.model.warnings.ChannelWarnings;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +28,7 @@ import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES_FOR_LOCAL_CHANNEL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
+import static de.cotto.lndmanagej.model.RatingFixtures.RATING;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
 import static de.cotto.lndmanagej.model.warnings.ChannelWarningsFixtures.CHANNEL_WARNINGS;
@@ -61,6 +63,9 @@ class ChannelDetailsServiceTest {
     private PolicyService policyService;
 
     @Mock
+    private RatingService ratingService;
+
+    @Mock
     private ChannelWarningsService channelWarningsService;
 
     @BeforeEach
@@ -71,6 +76,7 @@ class ChannelDetailsServiceTest {
         lenient().when(flowService.getFlowReportForChannel(CHANNEL_ID)).thenReturn(FLOW_REPORT);
         lenient().when(policyService.getPolicies(LOCAL_OPEN_CHANNEL)).thenReturn(POLICIES_FOR_LOCAL_CHANNEL);
         lenient().when(channelWarningsService.getChannelWarnings(CHANNEL_ID)).thenReturn(ChannelWarnings.NONE);
+        lenient().when(ratingService.getRatingForChannel(CHANNEL_ID)).thenReturn(Optional.of(Rating.EMPTY));
     }
 
     @Test
@@ -81,6 +87,7 @@ class ChannelDetailsServiceTest {
         when(rebalanceService.getReportForChannel(CHANNEL_ID)).thenReturn(REBALANCE_REPORT);
         when(channelWarningsService.getChannelWarnings(CHANNEL_ID)).thenReturn(CHANNEL_WARNINGS);
         when(policyService.getPolicies(LOCAL_OPEN_CHANNEL_PRIVATE)).thenReturn(POLICIES_FOR_LOCAL_CHANNEL);
+        when(ratingService.getRatingForChannel(CHANNEL_ID)).thenReturn(Optional.of(RATING));
         assertThat(channelDetailsService.getDetails(LOCAL_OPEN_CHANNEL_PRIVATE)).isEqualTo(CHANNEL_DETAILS);
     }
 
@@ -95,7 +102,8 @@ class ChannelDetailsServiceTest {
                 FEE_REPORT,
                 FLOW_REPORT,
                 RebalanceReport.EMPTY,
-                ChannelWarnings.NONE
+                ChannelWarnings.NONE,
+                Rating.EMPTY
         );
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(balanceService.getBalanceInformation(CHANNEL_ID))
@@ -129,7 +137,8 @@ class ChannelDetailsServiceTest {
                 FEE_REPORT,
                 FLOW_REPORT,
                 RebalanceReport.EMPTY,
-                ChannelWarnings.NONE
+                ChannelWarnings.NONE,
+                Rating.EMPTY
         );
     }
 }
