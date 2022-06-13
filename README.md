@@ -69,6 +69,7 @@ Channel specific: `/api/channel/{ID}/` (where `{ID}` is the channel ID) followed
  * `open-costs`: the on-chain costs you paid to open the channel (in satoshis)
  * `close-costs`: the on-chain costs you paid to close the channel (in satoshis)
  * `sweep-costs`: the on-chain costs you paid to sweep funds after a force-close (this may be negative) (in satoshis)
+ * `rating`: rating (see [rating.md](rating.md))
  * `rebalance-source-costs`: the fees you paid to rebalance the channel, taking funds out of it (in milli-satoshis)
  * `rebalance-source-amount`: the amount of funds you took out of the channel as part of rebalancing (in milli-satoshis)
  * `rebalance-target-costs`: the fees you paid to rebalance the channel, putting funds into it (in milli-satoshis)
@@ -100,6 +101,7 @@ Node specific: `/api/node/{PUBKEY}/` (where `{PUBKEY}` is the node pubkey) follo
  * `flow-report`: the aggregated flow report (see channel endpoint)
  * `flow-report/last-days/{DAYS}`: as above, but limited to the last `{DAYS}` days
  * `on-chain-costs`: aggregated on-chain costs (see channel endpoints `open-costs`, `close-costs`, `sweep-costs`)
+ * `rating`: rating (see [rating.md](rating.md))
  * `rebalance-source-costs`: aggregated costs (see channel endpoint)
  * `rebalance-source-amount`: aggregated amount (see channel endpoint)
  * `rebalance-target-costs`: aggregated costs (see channel endpoint)
