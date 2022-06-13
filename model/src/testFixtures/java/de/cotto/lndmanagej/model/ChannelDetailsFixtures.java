@@ -11,6 +11,7 @@ import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHAN
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES_FOR_LOCAL_CHANNEL;
+import static de.cotto.lndmanagej.model.RatingFixtures.RATING;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT_2;
 import static de.cotto.lndmanagej.model.warnings.ChannelWarningsFixtures.CHANNEL_WARNINGS;
@@ -25,7 +26,8 @@ public class ChannelDetailsFixtures {
             FEE_REPORT,
             FLOW_REPORT,
             REBALANCE_REPORT,
-            CHANNEL_WARNINGS
+            CHANNEL_WARNINGS,
+            RATING
     );
 
     public static final ChannelDetails CHANNEL_DETAILS_2 = new ChannelDetails(
@@ -37,7 +39,8 @@ public class ChannelDetailsFixtures {
             FEE_REPORT,
             FLOW_REPORT_2,
             REBALANCE_REPORT_2,
-            CHANNEL_WARNINGS
+            CHANNEL_WARNINGS,
+            RATING
     );
 
     public static final ChannelDetails CHANNEL_DETAILS_CLOSED = new ChannelDetails(
@@ -49,6 +52,7 @@ public class ChannelDetailsFixtures {
             FEE_REPORT,
             FLOW_REPORT,
             REBALANCE_REPORT,
-            ChannelWarnings.NONE
+            ChannelWarnings.NONE,
+            RATING
     );
 }

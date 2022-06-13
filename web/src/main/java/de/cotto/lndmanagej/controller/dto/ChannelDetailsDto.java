@@ -10,11 +10,13 @@ import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.model.OpenInitiator;
 import de.cotto.lndmanagej.model.PoliciesForLocalChannel;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.model.Rating;
 import de.cotto.lndmanagej.model.RebalanceReport;
 import de.cotto.lndmanagej.model.warnings.ChannelWarnings;
 
 import java.util.Set;
 
+@SuppressWarnings("PMD.ExcessiveParameterList")
 public record ChannelDetailsDto(
         String channelIdShort,
         String channelIdCompact,
@@ -36,7 +38,8 @@ public record ChannelDetailsDto(
         FlowReportDto flowReport,
         RebalanceReportDto rebalanceReport,
         long numUpdates,
-        Set<String> warnings
+        Set<String> warnings,
+        RatingDto rating
 ) {
     public ChannelDetailsDto(
             ChannelDto channelDto,
@@ -47,7 +50,8 @@ public record ChannelDetailsDto(
             FeeReport feeReport,
             FlowReport flowReport,
             RebalanceReport rebalanceReport,
-            ChannelWarnings channelWarnings
+            ChannelWarnings channelWarnings,
+            Rating rating
     ) {
         this(
                 channelDto.channelIdShort(),
@@ -70,7 +74,8 @@ public record ChannelDetailsDto(
                 FlowReportDto.createFromModel(flowReport),
                 RebalanceReportDto.createFromModel(rebalanceReport),
                 channelDto.numUpdates(),
-                channelWarnings.descriptions()
+                channelWarnings.descriptions(),
+                RatingDto.fromModel(rating)
         );
     }
 
@@ -83,7 +88,8 @@ public record ChannelDetailsDto(
             FeeReport feeReport,
             FlowReport flowReport,
             RebalanceReport rebalanceReport,
-            ChannelWarnings channelWarnings
+            ChannelWarnings channelWarnings,
+            Rating rating
     ) {
         this(
                 new ChannelDto(localChannel),
@@ -94,7 +100,8 @@ public record ChannelDetailsDto(
                 feeReport,
                 flowReport,
                 rebalanceReport,
-                channelWarnings
+                channelWarnings,
+                rating
         );
     }
 
@@ -108,7 +115,8 @@ public record ChannelDetailsDto(
                 channelDetails.feeReport(),
                 channelDetails.flowReport(),
                 channelDetails.rebalanceReport(),
-                channelDetails.warnings()
+                channelDetails.warnings(),
+                channelDetails.rating()
         );
     }
 }
