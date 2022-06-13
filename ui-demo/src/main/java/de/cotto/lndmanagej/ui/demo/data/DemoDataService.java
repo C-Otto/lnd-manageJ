@@ -122,9 +122,9 @@ public class DemoDataService extends UiDataService {
     @Override
     public NodesAndChannelsWithWarningsDto getWarnings() {
         return new NodesAndChannelsWithWarningsDto(List.of(ACINQ_WARNING, POCKET_WARNING), List.of(
-                createChannelWarning(B_CASH_IS_TRASH.channelId(), "Channel has accumulated 500000 updates."),
-                createChannelWarning(TRY_BITCOIN.channelId(), "Channel has accumulated 600000 updates."),
-                createChannelWarning(WOS.channelId(), "Channel has accumulated 700000 updates.")));
+                createChannelWarning(B_CASH_IS_TRASH.channelId(), "Channel has accumulated 500,000 updates."),
+                createChannelWarning(TRY_BITCOIN.channelId(), "Channel has accumulated 600,000 updates."),
+                createChannelWarning(WOS.channelId(), "Channel has accumulated 700,000 updates.")));
     }
 
     @Override
