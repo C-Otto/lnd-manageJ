@@ -38,7 +38,7 @@ class NodeDetailsDtoTest {
                 FlowReportDto.createFromModel(FLOW_REPORT),
                 RebalanceReportDto.createFromModel(REBALANCE_REPORT),
                 NODE_WARNINGS.descriptions(),
-                RatingFixtures.RATING.getRating()
+                RatingDto.fromModel(RatingFixtures.RATING)
         );
         assertThat(NodeDetailsDto.createFromModel(NODE_DETAILS)).isEqualTo(expected);
     }

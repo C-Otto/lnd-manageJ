@@ -44,7 +44,7 @@ class RatingControllerIT {
     void getRatingForPeer_no_rating() throws Exception {
         when(ratingService.getRatingForPeer(PUBKEY)).thenReturn(Rating.EMPTY);
         mockMvc.perform(get(PREFIX + "/peer/" + PUBKEY + RATING))
-                .andExpect(content().json("{\"rating\":  0, \"message\":  \"Unable to compute rating\"}"));
+                .andExpect(content().json("{\"rating\":  -1, \"message\":  \"Unable to compute rating\"}"));
     }
 
     @Test
@@ -64,6 +64,6 @@ class RatingControllerIT {
     void getRatingForChannel_empty() throws Exception {
         when(ratingService.getRatingForChannel(CHANNEL_ID)).thenReturn(Optional.of(Rating.EMPTY));
         mockMvc.perform(get(PREFIX + "/channel/" + CHANNEL_ID + RATING))
-                .andExpect(content().json("{\"rating\":  0, \"message\":  \"Unable to compute rating\"}"));
+                .andExpect(content().json("{\"rating\":  -1, \"message\":  \"Unable to compute rating\"}"));
     }
 }

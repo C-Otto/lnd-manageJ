@@ -124,7 +124,8 @@ class NodeControllerIT {
                 .andExpect(jsonPath("$.onlineReport.changes", is(5)))
                 .andExpect(jsonPath("$.onlineReport.daysForChanges", is(7)))
                 .andExpect(jsonPath("$.onlineReport.since", is("2021-12-23T01:02:03Z")))
-                .andExpect(jsonPath("$.rating", is(123)));
+                .andExpect(jsonPath("$.rating.rating", is(123)))
+                .andExpect(jsonPath("$.rating.message", is("")));
     }
 
     @Test
