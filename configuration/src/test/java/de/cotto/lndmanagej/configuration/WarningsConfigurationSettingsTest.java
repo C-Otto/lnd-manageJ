@@ -7,6 +7,7 @@ import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.CH
 import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.MAX_NUM_UPDATES;
 import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER;
 import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.NODE_FLOW_MINIMUM_DAYS_FOR_WARNING;
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.NODE_RATING_THRESHOLD;
 import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.ONLINE_CHANGES_THRESHOLD;
 import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.ONLINE_PERCENTAGE_THRESHOLD;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,5 +55,11 @@ class WarningsConfigurationSettingsTest {
     void onlineChangesThreshold() {
         assertThat(ONLINE_CHANGES_THRESHOLD.getSection()).isEqualTo(SECTION_NAME);
         assertThat(ONLINE_CHANGES_THRESHOLD.getName()).isEqualTo("online_changes_threshold");
+    }
+
+    @Test
+    void nodeRatingThreshold() {
+        assertThat(NODE_RATING_THRESHOLD.getSection()).isEqualTo(SECTION_NAME);
+        assertThat(NODE_RATING_THRESHOLD.getName()).isEqualTo("node_rating_threshold");
     }
 }

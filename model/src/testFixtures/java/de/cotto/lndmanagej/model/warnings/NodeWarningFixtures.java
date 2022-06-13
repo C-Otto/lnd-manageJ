@@ -10,4 +10,5 @@ public class NodeWarningFixtures {
     public static final NodeOnlineChangesWarning NODE_ONLINE_CHANGES_WARNING_2 =
             new NodeOnlineChangesWarning(99, 14);
     public static final NodeNoFlowWarning NODE_NO_FLOW_WARNING = new NodeNoFlowWarning(16);
+    public static final NodeRatingWarning NODE_RATING_WARNING = new NodeRatingWarning(1_234_567, 2_345_678);
 }
