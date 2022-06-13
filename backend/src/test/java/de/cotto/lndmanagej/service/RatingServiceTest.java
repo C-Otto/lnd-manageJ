@@ -3,8 +3,14 @@ package de.cotto.lndmanagej.service;
 import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelCoreInformation;
+import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.ClosedChannel;
+import de.cotto.lndmanagej.model.ClosedChannelFixtures;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.CoopClosedChannel;
+import de.cotto.lndmanagej.model.CoopClosedChannelBuilder;
 import de.cotto.lndmanagej.model.FeeReport;
+import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannelFixtures;
 import de.cotto.lndmanagej.model.Rating;
@@ -18,8 +24,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static de.cotto.lndmanagej.configuration.RatingConfigurationSettings.DAYS_FOR_ANALYSIS;
 import static de.cotto.lndmanagej.configuration.RatingConfigurationSettings.MIN_AGE_DAYS_FOR_ANALYSIS;
@@ -28,6 +36,7 @@ import static de.cotto.lndmanagej.model.BalanceInformationFixtures.REMOTE_BALANC
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.REMOTE_RESERVE;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
@@ -77,7 +86,8 @@ class RatingServiceTest {
     void setUp() {
         int daysAhead = LOCAL_OPEN_CHANNEL_2.getId().getBlockHeight() + 100 * 24 * 60 / 10;
         lenient().when(ownNodeService.getBlockHeight()).thenReturn(daysAhead);
-        lenient().when(feeService.getFeeReportForChannel(any(), any())).thenReturn(FeeReport.EMPTY);
+        lenient().when(feeService.getFeeReportForChannel(any(), any()))
+                .thenReturn(new FeeReport(Coins.ofMilliSatoshis(10_000 * ANALYSIS_DAYS), Coins.NONE));
         lenient().when(rebalanceService.getReportForChannel(any(), any())).thenReturn(RebalanceReport.EMPTY);
         lenient().when(configurationService.getIntegerValue(any())).thenReturn(Optional.empty());
         lenient().when(balanceService.getLocalBalanceAverage(any(), anyInt()))
@@ -86,37 +96,40 @@ class RatingServiceTest {
 
     @Test
     void getRatingForPeer_no_channel() {
+        mockChannels();
         assertThat(ratingService.getRatingForPeer(PUBKEY)).isEqualTo(Rating.EMPTY);
     }
 
     @Test
     void getRatingForPeer_channel_too_young() {
-        when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL));
-        assertThat(ratingService.getRatingForPeer(PUBKEY)).isEqualTo(Rating.EMPTY);
+        when(ownNodeService.getBlockHeight()).thenReturn(LOCAL_OPEN_CHANNEL.getId().getBlockHeight() + 10);
+        mockChannels(LOCAL_OPEN_CHANNEL);
+        assertThat(ratingService.getRatingForPeer(PUBKEY_2)).isEqualTo(Rating.EMPTY);
     }
 
     @Test
     void getRatingForPeer_one_channel() {
-        when(feeService.getFeeReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
-                .thenReturn(new FeeReport(Coins.ofMilliSatoshis(30_000), Coins.NONE));
-        when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL));
-        when(channelService.getOpenChannel(LOCAL_OPEN_CHANNEL.getId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
-        assertThat(ratingService.getRatingForPeer(PUBKEY)).isEqualTo(new Rating(30_000 / 30));
+        mockChannels(LOCAL_OPEN_CHANNEL);
+        assertThat(ratingService.getRatingForPeer(PUBKEY_2)).isEqualTo(new Rating(10_000));
     }
 
     @Test
     void getRatingForPeer_two_channels() {
-        when(feeService.getFeeReportForChannel(any(), any()))
-                .thenReturn(new FeeReport(Coins.ofMilliSatoshis(10_000 * ANALYSIS_DAYS), Coins.NONE));
-        when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2));
-        when(channelService.getOpenChannel(LOCAL_OPEN_CHANNEL.getId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
-        when(channelService.getOpenChannel(LOCAL_OPEN_CHANNEL_2.getId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL_2));
-        assertThat(ratingService.getRatingForPeer(PUBKEY)).isEqualTo(new Rating(2 * 10_000));
+        mockChannels(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2);
+        assertThat(ratingService.getRatingForPeer(PUBKEY_2)).isEqualTo(new Rating(2 * 10_000));
     }
 
     @Test
     void getRatingForChannel_not_found() {
+        mockChannels(LOCAL_OPEN_CHANNEL_2);
         assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).isEmpty();
+    }
+
+    @Test
+    void getRatingForChannel_not_found_on_second_request() {
+        mockChannels(LOCAL_OPEN_CHANNEL_2);
+        when(channelService.getLocalChannel(CHANNEL_ID_2)).thenReturn(Optional.empty());
+        assertThat(ratingService.getRatingForChannel(CHANNEL_ID_2)).isEmpty();
     }
 
     @Test
@@ -124,7 +137,8 @@ class RatingServiceTest {
         int defaultMinAge = (int) DEFAULT_MIN_AGE.toDays();
         int blockHeight = CHANNEL_ID.getBlockHeight() + (defaultMinAge - 1) * 24 * 60 / 10;
         when(ownNodeService.getBlockHeight()).thenReturn(blockHeight);
-        assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(Rating.EMPTY);
+        mockChannels(LOCAL_OPEN_CHANNEL);
+        assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).isEmpty();
     }
 
     @Test
@@ -132,7 +146,67 @@ class RatingServiceTest {
         when(configurationService.getIntegerValue(MIN_AGE_DAYS_FOR_ANALYSIS)).thenReturn(Optional.of(40));
         int blockHeight = CHANNEL_ID.getBlockHeight() + 35 * 24 * 60 / 10;
         when(ownNodeService.getBlockHeight()).thenReturn(blockHeight);
-        assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(Rating.EMPTY);
+        mockChannels(LOCAL_OPEN_CHANNEL);
+        assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).isEmpty();
+    }
+
+    @Nested
+    class YoungOpenChannelWithOverlappingClosedChannel {
+        @BeforeEach
+        void setUp() {
+            int openHeight = CHANNEL_ID.getBlockHeight();
+            int defaultMinAge = (int) DEFAULT_MIN_AGE.toDays();
+            int blockHeight = openHeight + (defaultMinAge - 1) * 24 * 60 / 10;
+            when(ownNodeService.getBlockHeight()).thenReturn(blockHeight);
+            CoopClosedChannel closedChannel = getCoopClosedChannel(openHeight - 999, openHeight);
+            mockChannels(LOCAL_OPEN_CHANNEL, closedChannel);
+        }
+
+        @Test
+        void getRatingForChannel() {
+            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(10_000));
+        }
+
+        @Test
+        void getRatingForPeer() {
+            assertThat(ratingService.getRatingForPeer(PUBKEY_2)).isEqualTo(new Rating(20_000));
+        }
+    }
+
+    @Test
+    void young_open_channel_with_overlapping_but_also_young_closed_channel_with_overlapping_old_closed_channel() {
+        int openHeightOpenChannel = CHANNEL_ID.getBlockHeight();
+        int openHeightClosedChannel = openHeightOpenChannel - 1;
+        int openHeightClosedChannelOld = openHeightOpenChannel - 144;
+
+        int defaultMinAge = (int) DEFAULT_MIN_AGE.toDays();
+        int blockHeight = openHeightOpenChannel + (defaultMinAge - 1) * 24 * 60 / 10;
+        when(ownNodeService.getBlockHeight()).thenReturn(blockHeight);
+
+        CoopClosedChannel closedChannelYoung = getCoopClosedChannel(openHeightClosedChannel, openHeightOpenChannel);
+        CoopClosedChannel closedChannelOld = getCoopClosedChannel(openHeightClosedChannelOld, openHeightClosedChannel);
+        assumeThat(blockHeight - openHeightClosedChannel).isLessThan(defaultMinAge * 24 * 60 / 10);
+        assumeThat(blockHeight - openHeightClosedChannelOld).isGreaterThanOrEqualTo(defaultMinAge * 24 * 60 / 10);
+
+        mockChannels(LOCAL_OPEN_CHANNEL, closedChannelYoung, closedChannelOld);
+        assertThat(ratingService.getRatingForPeer(PUBKEY_2)).isEqualTo(new Rating(30_000));
+    }
+
+    @Test
+    void young_open_channel_with_non_overlapping_closed_channel() {
+        int openHeightOpenChannel = CHANNEL_ID.getBlockHeight();
+        int openHeightClosedChannel = openHeightOpenChannel - 1_000;
+
+        int defaultMinAge = (int) DEFAULT_MIN_AGE.toDays();
+        int blockHeight = openHeightOpenChannel + (defaultMinAge - 1) * 24 * 60 / 10;
+        when(ownNodeService.getBlockHeight()).thenReturn(blockHeight);
+
+        CoopClosedChannel closedChannelWithGap =
+                getCoopClosedChannel(openHeightClosedChannel, openHeightOpenChannel - 1);
+        assumeThat(blockHeight - openHeightClosedChannel).isGreaterThanOrEqualTo(defaultMinAge * 24 * 60 / 10);
+
+        mockChannels(LOCAL_OPEN_CHANNEL, closedChannelWithGap);
+        assertThat(ratingService.getRatingForPeer(PUBKEY_2)).isEqualTo(Rating.EMPTY);
     }
 
     @Nested
@@ -141,7 +215,9 @@ class RatingServiceTest {
         void setUp() {
             Coins localAvailable = Coins.ofSatoshis(1_000_000);
             LocalOpenChannel localOpenChannel = getLocalOpenChannel(localAvailable);
-            when(channelService.getOpenChannel(CHANNEL_ID)).thenReturn(Optional.of(localOpenChannel));
+            mockChannels(localOpenChannel);
+            lenient().when(feeService.getFeeReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
+                    .thenReturn(FeeReport.EMPTY);
             mockOutgoingFeeRate(0);
         }
 
@@ -208,7 +284,7 @@ class RatingServiceTest {
         void potential_forward_fees() {
             LocalOpenChannel localOpenChannel = getLocalOpenChannel(Coins.ofSatoshis(2_000_000));
             long balanceMilliSat = localOpenChannel.getBalanceInformation().localAvailable().milliSatoshis();
-            when(channelService.getOpenChannel(CHANNEL_ID)).thenReturn(Optional.of(localOpenChannel));
+            when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(localOpenChannel));
 
             int feeRate = 123_456;
             mockOutgoingFeeRate(feeRate);
@@ -229,7 +305,7 @@ class RatingServiceTest {
         void zero_balance_on_average() {
             when(balanceService.getLocalBalanceAverage(CHANNEL_ID, ANALYSIS_DAYS))
                     .thenReturn(Optional.of(Coins.NONE));
-            when(channelService.getOpenChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+            when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
             when(feeService.getFeeReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
                     .thenReturn(new FeeReport(Coins.ofMilliSatoshis(100_000 * ANALYSIS_DAYS), Coins.NONE));
             assertThatCode(() -> ratingService.getRatingForChannel(CHANNEL_ID)).doesNotThrowAnyException();
@@ -248,7 +324,7 @@ class RatingServiceTest {
             when(configurationService.getIntegerValue(DAYS_FOR_ANALYSIS)).thenReturn(Optional.of(daysForAnalysis));
             int blockHeight = CHANNEL_ID.getBlockHeight() + 1_000 * 24 * 60 / 10;
             when(ownNodeService.getBlockHeight()).thenReturn(blockHeight);
-            when(channelService.getOpenChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+            when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
             when(feeService.getFeeReportForChannel(CHANNEL_ID, Duration.ofDays(daysForAnalysis)))
                     .thenReturn(new FeeReport(Coins.ofMilliSatoshis(100_000), Coins.NONE));
             assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(100_000 / daysForAnalysis));
@@ -256,7 +332,7 @@ class RatingServiceTest {
 
         private void assertScaledRating(Coins localAvailable, long expectedRating) {
             LocalOpenChannel localOpenChannel = getLocalOpenChannel(localAvailable);
-            when(channelService.getOpenChannel(CHANNEL_ID)).thenReturn(Optional.of(localOpenChannel));
+            when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(localOpenChannel));
             when(balanceService.getLocalBalanceAverage(CHANNEL_ID, ANALYSIS_DAYS))
                     .thenReturn(Optional.of(localAvailable));
             when(feeService.getFeeReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
@@ -289,5 +365,37 @@ class RatingServiceTest {
             lenient().when(policyService.getMinimumFeeRateTo(LOCAL_OPEN_CHANNEL.getRemotePubkey()))
                     .thenReturn(Optional.of(feeRate));
         }
+    }
+
+    private void mockChannels(LocalChannel... localChannels) {
+        Set<LocalOpenChannel> openChannels = Arrays.stream(localChannels)
+                .filter(c -> c instanceof LocalOpenChannel)
+                .map(c -> (LocalOpenChannel) c)
+                .collect(Collectors.toSet());
+        Set<ClosedChannel> closedChannels = Arrays.stream(localChannels)
+                .filter(c -> c instanceof ClosedChannel)
+                .map(c -> (ClosedChannel) c)
+                .collect(Collectors.toSet());
+        for (LocalChannel localChannel : localChannels) {
+            lenient().when(channelService.getLocalChannel(localChannel.getId()))
+                    .thenReturn(Optional.of(localChannel));
+        }
+        lenient().when(channelService.getOpenChannelsWith(PUBKEY_2)).thenReturn(openChannels);
+        for (LocalOpenChannel localOpenChannel : openChannels) {
+            lenient().when(channelService.getOpenChannel(localOpenChannel.getId()))
+                    .thenReturn(Optional.of(localOpenChannel));
+        }
+        lenient().when(channelService.getClosedChannelsWith(PUBKEY_2)).thenReturn(closedChannels);
+        for (ClosedChannel closedChannel : closedChannels) {
+            lenient().when(channelService.getClosedChannel(closedChannel.getId()))
+                    .thenReturn(Optional.of(closedChannel));
+        }
+    }
+
+    private CoopClosedChannel getCoopClosedChannel(int openHeight, int closeHeight) {
+        return ClosedChannelFixtures.getWithDefaults(new CoopClosedChannelBuilder())
+                .withChannelId(ChannelId.fromCompactForm(openHeight + "x0x0"))
+                .withCloseHeight(closeHeight)
+                .build();
     }
 }
