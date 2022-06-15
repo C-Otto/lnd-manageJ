@@ -75,9 +75,9 @@ public abstract class UiDataService {
             case "ratio" -> Comparator.comparing(c -> c.balanceInformation().getOutboundPercentage());
             case "outbound" -> Comparator.comparingLong(c -> c.balanceInformation().localBalanceSat());
             case "capacity" -> Comparator.comparing(OpenChannelDto::capacitySat);
-            case "localbasefee" -> Comparator.comparing(c -> c.policies().local().baseFeeMilliSat());
+            case "localbasefee" -> Comparator.comparing(c -> Long.parseLong(c.policies().local().baseFeeMilliSat()));
             case "localfeerate" -> Comparator.comparing(c -> c.policies().local().feeRatePpm());
-            case "remotebasefee" -> Comparator.comparing(c -> c.policies().remote().baseFeeMilliSat());
+            case "remotebasefee" -> Comparator.comparing(c -> Long.parseLong(c.policies().remote().baseFeeMilliSat()));
             case "remotefeerate" -> Comparator.comparing(c -> c.policies().remote().feeRatePpm());
             case "alias" -> Comparator.comparing(OpenChannelDto::remoteAlias);
             default -> Comparator.comparing(OpenChannelDto::channelId);
