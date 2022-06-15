@@ -19,7 +19,7 @@
     <table class="channel-table table table-hover">
         <thead>
         <tr>
-            <th scope="col" style="text-align: right;">Pvt</th>
+            <th scope="col" style="text-align: right;">Public</th>
             <th scope="col" style="text-align: right;">Inbound</th>
             <th scope="col" style="text-align: center;">Ratio</th>
             <th scope="col" style="text-align: right;">Outbound</th>
@@ -35,7 +35,7 @@
         <tbody>
         <tr th:each="channel : ${channels}">
 
-            <td th:if="${channel.privateChannel}" title="private channel">
+            <td th:if="${channel.privateChannel}" title="unannounced channel">
                 <div th:replace="~{fragments/channel-collections :: icon-private}"/>
             </td>
             <td th:unless="${channel.privateChannel}" title="public channel">
