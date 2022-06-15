@@ -28,8 +28,9 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static de.cotto.lndmanagej.ui.dto.ChannelDetailsDtoFixture.CHANNEL_DETAILS_DTO;
 import static de.cotto.lndmanagej.ui.dto.NodeDetailsDtoFixture.NODE_DETAILS_MODEL;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
-import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO2;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -76,26 +77,31 @@ class PageServiceTest {
     }
 
     @Test
-    void dashboard_channels_sorted() {
-        List<OpenChannelDto> channels = List.of(OPEN_CHANNEL_DTO2, OPEN_CHANNEL_DTO);
-        mockChannelsAndNodesWithoutWarning(channels, List.of());
-
-        List<OpenChannelDto> channelsSorted = List.of(OPEN_CHANNEL_DTO, OPEN_CHANNEL_DTO2);
-        assertThat(pageService.dashboard().getChannels()).isEqualTo(channelsSorted);
+    void dashboard_with_sort_key() {
+        mockChannelsAndNodesWithoutWarning(List.of(), List.of());
+        pageService.dashboard("bar");
+        verify(dataService).getOpenChannels("bar");
     }
 
     private void mockChannelsAndNodesWithoutWarning(List<OpenChannelDto> channels, List<NodeDto> nodes) {
-        when(dataService.getOpenChannels()).thenReturn(channels);
+        when(dataService.getOpenChannels(any())).thenReturn(channels);
         when(dataService.createNodeList()).thenReturn(nodes);
         when(dataService.getWarnings()).thenReturn(NodesAndChannelsWithWarningsDto.NONE);
     }
 
     @Test
     void channels() {
-        when(dataService.getOpenChannels()).thenReturn(List.of(OPEN_CHANNEL_DTO));
+        when(dataService.getOpenChannels(null)).thenReturn(List.of(OPEN_CHANNEL_DTO));
         assertThat(pageService.channels()).usingRecursiveComparison().isEqualTo(
                 new ChannelsPage(List.of(OPEN_CHANNEL_DTO))
         );
+    }
+
+    @Test
+    void channels_with_sort_key() {
+        when(dataService.getOpenChannels(any())).thenReturn(List.of());
+        pageService.channels("foo");
+        verify(dataService).getOpenChannels("foo");
     }
 
     @Test

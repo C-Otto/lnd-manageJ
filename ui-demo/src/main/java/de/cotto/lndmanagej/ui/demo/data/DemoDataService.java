@@ -20,6 +20,7 @@ import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -128,8 +129,11 @@ public class DemoDataService extends UiDataService {
     }
 
     @Override
-    public List<OpenChannelDto> getOpenChannels() {
-        return List.of(C_OTTO, ACINQ, TRY_BITCOIN, KRAKEN, WOS, B_CASH_IS_TRASH, POCKET, ACINQ2, B_CASH_IS_TRASH2);
+    public List<OpenChannelDto> getOpenChannels(@Nullable String sort) {
+        return sort(
+                List.of(C_OTTO, ACINQ, TRY_BITCOIN, KRAKEN, WOS, B_CASH_IS_TRASH, POCKET, ACINQ2, B_CASH_IS_TRASH2),
+                sort
+        );
     }
 
     private List<OpenChannelDto> getOpenChannels(Pubkey pubkey) {

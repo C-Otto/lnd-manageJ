@@ -13,6 +13,7 @@ import de.cotto.lndmanagej.ui.page.node.NodeDetailsPage;
 import de.cotto.lndmanagej.ui.page.node.NodesPage;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 @Component
@@ -25,15 +26,23 @@ public class PageService {
     }
 
     public DashboardPage dashboard() {
+        return dashboard(null);
+    }
+
+    public DashboardPage dashboard(@Nullable String sort) {
         return new DashboardPage(
-                dataService.getOpenChannels(),
+                dataService.getOpenChannels(sort),
                 dataService.createNodeList(),
                 dataService.getWarnings()
         );
     }
 
     public ChannelsPage channels() {
-        return new ChannelsPage(dataService.getOpenChannels());
+        return channels(null);
+    }
+
+    public ChannelsPage channels(@Nullable String sort) {
+        return new ChannelsPage(dataService.getOpenChannels(sort));
     }
 
     public ChannelDetailsPage channelDetails(ChannelId channelId) throws NotFoundException {
