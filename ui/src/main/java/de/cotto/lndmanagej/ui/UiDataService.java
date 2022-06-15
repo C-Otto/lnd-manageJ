@@ -9,7 +9,9 @@ import de.cotto.lndmanagej.ui.dto.NodeDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -26,7 +28,11 @@ public abstract class UiDataService {
 
     public abstract NodesAndChannelsWithWarningsDto getWarnings();
 
-    public abstract List<OpenChannelDto> getOpenChannels();
+    public List<OpenChannelDto> getOpenChannels() {
+        return getOpenChannels(null);
+    }
+
+    public abstract List<OpenChannelDto> getOpenChannels(@Nullable String sort);
 
     public abstract ChannelDetailsDto getChannelDetails(ChannelId channelId) throws NotFoundException;
 
@@ -50,5 +56,31 @@ public abstract class UiDataService {
     public int calculateDaysOfBlocks(int currentBlockHeight, int pastBlockHeight) {
         int channelAgeInBlocks = currentBlockHeight - pastBlockHeight;
         return (int) Math.ceil((double) channelAgeInBlocks * EXPECTED_MINUTES_PER_BLOCK / MINUTES_PER_DAY);
+    }
+
+    protected List<OpenChannelDto> sort(List<OpenChannelDto> input, @Nullable String sort) {
+        if (sort == null) {
+            return sort(input, "ratio");
+        }
+        Comparator<OpenChannelDto> comparator = getComparator(sort)
+                .thenComparing(OpenChannelDto::channelId);
+        return input.stream().sorted(comparator).toList();
+    }
+
+    @SuppressWarnings("PMD.CyclomaticComplexity")
+    private static Comparator<OpenChannelDto> getComparator(String sort) {
+        return switch (sort) {
+            case "announced" -> Comparator.comparing(OpenChannelDto::privateChannel);
+            case "inbound" -> Comparator.comparingLong(c -> c.balanceInformation().remoteAvailableSat());
+            case "ratio" -> Comparator.comparing(c -> c.balanceInformation().getOutboundPercentage());
+            case "outbound" -> Comparator.comparingLong(c -> c.balanceInformation().localAvailableSat());
+            case "capacity" -> Comparator.comparing(OpenChannelDto::capacitySat);
+            case "localbasefee" -> Comparator.comparing(c -> c.policies().local().baseFeeMilliSat());
+            case "localfeerate" -> Comparator.comparing(c -> c.policies().local().feeRatePpm());
+            case "remotebasefee" -> Comparator.comparing(c -> c.policies().remote().baseFeeMilliSat());
+            case "remotefeerate" -> Comparator.comparing(c -> c.policies().remote().feeRatePpm());
+            case "alias" -> Comparator.comparing(OpenChannelDto::remoteAlias);
+            default -> Comparator.comparing(OpenChannelDto::channelId);
+        };
     }
 }

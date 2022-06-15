@@ -30,7 +30,7 @@ class DashboardControllerIT extends BaseControllerIT {
 
     @Test
     void empty_dashboard() throws Exception {
-        when(pageService.dashboard()).thenReturn(new DashboardPage(List.of(), List.of(), NONE));
+        when(pageService.dashboard(null)).thenReturn(new DashboardPage(List.of(), List.of(), NONE));
         mockMvc.perform(get("/")).andExpect(status().isOk());
     }
 
@@ -38,7 +38,7 @@ class DashboardControllerIT extends BaseControllerIT {
     void dashboard() throws Exception {
         OpenChannelDto channel = OPEN_CHANNEL_DTO;
         NodeDto node = new NodeDto(channel.remotePubkey().toString(), channel.remoteAlias(), true);
-        when(pageService.dashboard()).thenReturn(
+        when(pageService.dashboard(null)).thenReturn(
                 new DashboardPage(List.of(channel), List.of(node), NONE)
         );
         mockMvc.perform(get("/")).andExpect(status().isOk());

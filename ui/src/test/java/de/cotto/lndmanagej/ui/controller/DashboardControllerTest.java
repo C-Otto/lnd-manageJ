@@ -1,11 +1,7 @@
 package de.cotto.lndmanagej.ui.controller;
 
 import de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto;
-import de.cotto.lndmanagej.controller.dto.PoliciesDto;
-import de.cotto.lndmanagej.model.Coins;
-import de.cotto.lndmanagej.ui.dto.BalanceInformationModel;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
-import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import de.cotto.lndmanagej.ui.page.PageService;
 import de.cotto.lndmanagej.ui.page.channel.ChannelsPage;
 import de.cotto.lndmanagej.ui.page.general.DashboardPage;
@@ -20,14 +16,11 @@ import org.springframework.ui.Model;
 import java.util.List;
 import java.util.Map;
 
-import static de.cotto.lndmanagej.model.BalanceInformationFixtures.REMOTE_BALANCE;
-import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_PEER;
-import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES_FOR_LOCAL_CHANNEL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
-import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.CAPACITY_SAT;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,28 +41,33 @@ class DashboardControllerTest {
     @Test
     void dashboard() {
         NodesAndChannelsWithWarningsDto warnings = NodesAndChannelsWithWarningsDto.NONE;
-        when(pageService.dashboard()).thenReturn(new DashboardPage(List.of(), List.of(), warnings));
-        assertThat(dashboardController.dashboard(model)).isEqualTo("dashboard");
+        when(pageService.dashboard(null)).thenReturn(new DashboardPage(List.of(), List.of(), warnings));
+        assertThat(dashboardController.dashboard(model, null)).isEqualTo("dashboard");
         verify(model).addAllAttributes(
                 Map.of(NODES_KEY, List.of(), CHANNELS_KEY, List.of(), "warnings", warnings)
         );
     }
 
     @Test
+    void dashboard_forwards_sort_key_to_page() {
+        NodesAndChannelsWithWarningsDto warnings = NodesAndChannelsWithWarningsDto.NONE;
+        when(pageService.dashboard(any())).thenReturn(new DashboardPage(List.of(), List.of(), warnings));
+        dashboardController.dashboard(model, "xxx");
+        verify(pageService).dashboard("xxx");
+    }
+
+    @Test
     void channels() {
-        when(pageService.channels()).thenReturn(new ChannelsPage(List.of(OPEN_CHANNEL_DTO)));
-        assertThat(dashboardController.channels(model)).isEqualTo(CHANNELS_KEY);
+        when(pageService.channels(null)).thenReturn(new ChannelsPage(List.of(OPEN_CHANNEL_DTO)));
+        assertThat(dashboardController.channels(model, null)).isEqualTo(CHANNELS_KEY);
         verify(model).addAllAttributes(Map.of(CHANNELS_KEY, List.of(OPEN_CHANNEL_DTO)));
     }
 
     @Test
-    void channels_sorted_by_outbound() {
-        OpenChannelDto channelA = withBalance("A", Coins.ofSatoshis(2));
-        OpenChannelDto channelB = withBalance("B", Coins.ofSatoshis(3));
-        OpenChannelDto channelC = withBalance("C", Coins.ofSatoshis(1));
-        when(pageService.channels()).thenReturn(new ChannelsPage(List.of(channelA, channelB, channelC)));
-        assertThat(dashboardController.channels(model)).isEqualTo(CHANNELS_KEY);
-        verify(model).addAllAttributes(Map.of(CHANNELS_KEY, List.of(channelC, channelA, channelB)));
+    void channels_forwards_sort_key_to_page() {
+        when(pageService.channels(any())).thenReturn(new ChannelsPage(List.of()));
+        dashboardController.channels(model, "yyy");
+        verify(pageService).channels("yyy");
     }
 
     @Test
@@ -78,16 +76,5 @@ class DashboardControllerTest {
         when(pageService.nodes()).thenReturn(new NodesPage(List.of(nodeDto)));
         assertThat(dashboardController.nodes(model)).isEqualTo(NODES_KEY);
         verify(model).addAllAttributes(Map.of(NODES_KEY, List.of(nodeDto)));
-    }
-
-    private OpenChannelDto withBalance(String alias, Coins localBalance) {
-        return new OpenChannelDto(
-                CHANNEL_ID,
-                alias,
-                PUBKEY,
-                PoliciesDto.createFromModel(POLICIES_FOR_LOCAL_CHANNEL),
-                new BalanceInformationModel(localBalance.satoshis(), 0, 0, REMOTE_BALANCE.satoshis(), 0, 0),
-                CAPACITY_SAT,
-                false);
     }
 }

@@ -4,6 +4,9 @@ import de.cotto.lndmanagej.ui.page.PageService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.annotation.Nullable;
 
 @Controller
 public class DashboardController {
@@ -15,13 +18,13 @@ public class DashboardController {
     }
 
     @GetMapping("/")
-    public String dashboard(Model model) {
-        return page.dashboard().create(model);
+    public String dashboard(Model model, @Nullable @RequestParam(required = false) String sort) {
+        return page.dashboard(sort).create(model);
     }
 
     @GetMapping(path = {"/channel", "/channels"})
-    public String channels(Model model) {
-        return page.channels().create(model);
+    public String channels(Model model, @Nullable @RequestParam(required = false) String sort) {
+        return page.channels(sort).create(model);
     }
 
     @GetMapping(path = {"/node", "/nodes"})

@@ -13,9 +13,4 @@ public record OpenChannelDto(
         long capacitySat,
         boolean privateChannel
 ) {
-
-    public double getOutboundPercentage() {
-        return balanceInformation().getOutboundPercentage();
-    }
-
 }
