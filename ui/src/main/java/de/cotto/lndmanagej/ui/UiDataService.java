@@ -44,7 +44,7 @@ public abstract class UiDataService {
         Set<Pubkey> pubkeys = openChannels.stream()
                 .map(OpenChannelDto::remotePubkey)
                 .collect(toSet());
-        return pubkeys.stream()
+        return pubkeys.parallelStream()
                 .map(this::getNode)
                 .toList();
     }

@@ -68,7 +68,7 @@ public class UiDataServiceImpl extends UiDataService {
     @Override
     public List<OpenChannelDto> getOpenChannels(@Nullable String sort) {
         ChannelsDto openChannels = statusController.getOpenChannels();
-        return sort(openChannels.channels().stream()
+        return sort(openChannels.channels().parallelStream()
                 .map(this::toOpenChannelDto)
                 .toList(), sort);
     }
