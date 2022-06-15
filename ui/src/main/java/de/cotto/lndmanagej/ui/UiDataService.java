@@ -71,9 +71,9 @@ public abstract class UiDataService {
     private static Comparator<OpenChannelDto> getComparator(String sort) {
         return switch (sort) {
             case "announced" -> Comparator.comparing(OpenChannelDto::privateChannel);
-            case "inbound" -> Comparator.comparingLong(c -> c.balanceInformation().remoteAvailableSat());
+            case "inbound" -> Comparator.comparingLong(c -> c.balanceInformation().remoteBalanceSat());
             case "ratio" -> Comparator.comparing(c -> c.balanceInformation().getOutboundPercentage());
-            case "outbound" -> Comparator.comparingLong(c -> c.balanceInformation().localAvailableSat());
+            case "outbound" -> Comparator.comparingLong(c -> c.balanceInformation().localBalanceSat());
             case "capacity" -> Comparator.comparing(OpenChannelDto::capacitySat);
             case "localbasefee" -> Comparator.comparing(c -> c.policies().local().baseFeeMilliSat());
             case "localfeerate" -> Comparator.comparing(c -> c.policies().local().feeRatePpm());
