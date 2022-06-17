@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 import static de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto.NONE;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE;
@@ -48,6 +49,11 @@ class UiDataServiceTest {
         @Override
         public NodesAndChannelsWithWarningsDto getWarnings() {
             return NONE;
+        }
+
+        @Override
+        public Set<Pubkey> getPubkeys() {
+            return Set.of(PUBKEY);
         }
 
         @Override

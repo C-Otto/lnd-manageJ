@@ -44,6 +44,7 @@ import static de.cotto.lndmanagej.ui.dto.BalanceInformationModel.EMPTY;
 import static de.cotto.lndmanagej.ui.dto.CloseType.BREACH_FORCE_CLOSE;
 import static de.cotto.lndmanagej.ui.dto.CloseType.COOP_CLOSE;
 import static de.cotto.lndmanagej.ui.dto.CloseType.FORCE_CLOSE;
+import static java.util.stream.Collectors.toSet;
 
 @SuppressWarnings("PMD.ExcessiveImports")
 @Component
@@ -136,7 +137,12 @@ public class DemoDataService extends UiDataService {
         );
     }
 
-    private List<OpenChannelDto> getOpenChannels(Pubkey pubkey) {
+    @Override
+    public Set<Pubkey> getPubkeys() {
+        return getOpenChannels(null).stream().map(OpenChannelDto::remotePubkey).collect(toSet());
+    }
+
+    private List<OpenChannelDto> getOpenChannelsWith(Pubkey pubkey) {
         return getOpenChannels().stream()
                 .filter(channel -> channel.remotePubkey().equals(pubkey))
                 .collect(Collectors.toList());
@@ -159,7 +165,7 @@ public class DemoDataService extends UiDataService {
                 .filter(c -> c.channelId().equals(channelId))
                 .map(ChannelWithWarningsDto::warnings)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
+                .collect(toSet());
     }
 
     @Override
@@ -172,7 +178,7 @@ public class DemoDataService extends UiDataService {
 
     @Override
     public NodeDetailsDto getNodeDetails(Pubkey pubkey) {
-        List<OpenChannelDto> openChannels = getOpenChannels(pubkey);
+        List<OpenChannelDto> openChannels = getOpenChannelsWith(pubkey);
         return createNodeDetails(getNode(pubkey), openChannels, getNodeWarnings(pubkey));
     }
 
@@ -181,7 +187,7 @@ public class DemoDataService extends UiDataService {
                 .filter(p -> p.pubkey().equals(pubkey))
                 .map(NodeWithWarningsDto::warnings)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
+                .collect(toSet());
     }
 
     static boolean isOnline(ChannelId channelId) {
