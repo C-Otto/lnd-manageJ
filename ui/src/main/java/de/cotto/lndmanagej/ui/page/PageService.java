@@ -15,6 +15,9 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
+
+import static java.util.stream.Collectors.toSet;
 
 @Component
 public class PageService {
@@ -54,7 +57,8 @@ public class PageService {
     }
 
     public NodesPage nodes(List<OpenChannelDto> channels) {
-        return new NodesPage(dataService.createNodeList(channels));
+        Set<Pubkey> pubkeys = channels.stream().map(OpenChannelDto::remotePubkey).collect(toSet());
+        return new NodesPage(dataService.createNodeList(pubkeys));
     }
 
     public NodeDetailsPage nodeDetails(Pubkey pubkey) {

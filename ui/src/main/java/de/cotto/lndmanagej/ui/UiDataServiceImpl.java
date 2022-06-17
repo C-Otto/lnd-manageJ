@@ -30,6 +30,8 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 
+import static java.util.stream.Collectors.toSet;
+
 @Component
 public class UiDataServiceImpl extends UiDataService {
 
@@ -63,6 +65,11 @@ public class UiDataServiceImpl extends UiDataService {
     @Override
     public NodesAndChannelsWithWarningsDto getWarnings() {
         return warningsController.getWarnings();
+    }
+
+    @Override
+    public Set<Pubkey> getPubkeys() {
+        return channelService.getOpenChannels().stream().map(LocalChannel::getRemotePubkey).collect(toSet());
     }
 
     @Override

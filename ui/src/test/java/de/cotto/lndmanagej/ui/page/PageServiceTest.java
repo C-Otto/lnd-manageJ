@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Set;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE;
@@ -140,7 +141,7 @@ class PageServiceTest {
     void nodes_for_channels() {
         NodeDto nodeDto = new NodeDto(PUBKEY.toString(), NODE.alias(), true);
         List<OpenChannelDto> channels = List.of(OPEN_CHANNEL_DTO);
-        when(dataService.createNodeList(channels)).thenReturn(List.of(nodeDto));
+        when(dataService.createNodeList(Set.of(PUBKEY))).thenReturn(List.of(nodeDto));
 
         assertThat(pageService.nodes(channels)).usingRecursiveComparison().isEqualTo(
                 new NodesPage(List.of(nodeDto))

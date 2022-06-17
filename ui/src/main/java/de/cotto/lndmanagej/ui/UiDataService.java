@@ -15,8 +15,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
-import static java.util.stream.Collectors.toSet;
-
 public abstract class UiDataService {
 
     private static final int EXPECTED_MINUTES_PER_BLOCK = 10;
@@ -34,23 +32,22 @@ public abstract class UiDataService {
 
     public abstract List<OpenChannelDto> getOpenChannels(@Nullable String sort);
 
+    public abstract Set<Pubkey> getPubkeys();
+
     public abstract ChannelDetailsDto getChannelDetails(ChannelId channelId) throws NotFoundException;
 
     public abstract NodeDto getNode(Pubkey pubkey);
 
     public abstract NodeDetailsDto getNodeDetails(Pubkey pubkey);
 
-    public List<NodeDto> createNodeList(Collection<OpenChannelDto> openChannels) {
-        Set<Pubkey> pubkeys = openChannels.stream()
-                .map(OpenChannelDto::remotePubkey)
-                .collect(toSet());
+    public List<NodeDto> createNodeList(Collection<Pubkey> pubkeys) {
         return pubkeys.parallelStream()
                 .map(this::getNode)
                 .toList();
     }
 
     public List<NodeDto> createNodeList() {
-        return createNodeList(getOpenChannels());
+        return createNodeList(getPubkeys());
     }
 
     public int calculateDaysOfBlocks(int currentBlockHeight, int pastBlockHeight) {

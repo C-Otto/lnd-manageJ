@@ -56,6 +56,7 @@ import static de.cotto.lndmanagej.model.OpenInitiator.LOCAL;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES_FOR_LOCAL_CHANNEL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static de.cotto.lndmanagej.model.warnings.ChannelWarningFixtures.CHANNEL_NUM_UPDATES_WARNING;
 import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixture.BALANCE_INFORMATION_MODEL;
@@ -97,6 +98,13 @@ class UiDataServiceImplTest {
         NodesAndChannelsWithWarningsDto warnings = new NodesAndChannelsWithWarningsDto(List.of(), List.of());
         when(warningsController.getWarnings()).thenReturn(warnings);
         assertThat(uiDataService.getWarnings()).isEqualTo(warnings);
+    }
+
+    @Test
+    void getPubkeys() {
+        when(channelService.getOpenChannels())
+                .thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_PRIVATE, LOCAL_OPEN_CHANNEL_TO_NODE_3));
+        assertThat(uiDataService.getPubkeys()).isEqualTo(Set.of(PUBKEY_2, PUBKEY_3));
     }
 
     @Test
