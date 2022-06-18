@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.model.ChannelIdResolver;
+import de.cotto.lndmanagej.model.PubkeyAndFeeRate;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.GraphService;
 import de.cotto.lndmanagej.service.OwnNodeService;
@@ -17,6 +18,8 @@ import java.util.stream.Stream;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_TO_NODE_3;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -106,5 +109,18 @@ class StatusControllerIT {
         when(graphService.getNumberOfChannels()).thenReturn(123);
         mockMvc.perform(get(PREFIX + "/known-channels"))
                 .andExpect(jsonPath("$", is(123)));
+    }
+
+    @Test
+    void getNodesWithHighIncomingFeeRate() throws Exception {
+        when(graphService.getNodesWithHighFeeRate()).thenReturn(List.of(
+                new PubkeyAndFeeRate(PUBKEY, 123),
+                new PubkeyAndFeeRate(PUBKEY_2, 456)
+        ));
+        mockMvc.perform(get(PREFIX + "/nodes-with-high-incoming-fee-rate"))
+                .andExpect(jsonPath("$.entries[0].pubkey", is(PUBKEY.toString())))
+                .andExpect(jsonPath("$.entries[0].feeRate", is(123)))
+                .andExpect(jsonPath("$.entries[1].pubkey", is(PUBKEY_2.toString())))
+                .andExpect(jsonPath("$.entries[1].feeRate", is(456)));
     }
 }

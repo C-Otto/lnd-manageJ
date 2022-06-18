@@ -1,9 +1,12 @@
 package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.controller.dto.ChannelsDto;
+import de.cotto.lndmanagej.controller.dto.PubkeyAndFeeRateDto;
+import de.cotto.lndmanagej.controller.dto.PubkeysAndFeeRatesDto;
 import de.cotto.lndmanagej.controller.dto.PubkeysDto;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.model.PubkeyAndFeeRate;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.GraphService;
 import de.cotto.lndmanagej.service.OwnNodeService;
@@ -22,6 +25,7 @@ import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_TO_NODE_3;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -107,5 +111,19 @@ class StatusControllerTest {
     void getKnownChannels() {
         when(graphService.getNumberOfChannels()).thenReturn(123);
         assertThat(statusController.getKnownChannels()).isEqualTo(123);
+    }
+
+    @Test
+    void getNodesWithHighIncomingFeeRate() {
+        when(graphService.getNodesWithHighFeeRate()).thenReturn(List.of(
+                new PubkeyAndFeeRate(PUBKEY, 123),
+                new PubkeyAndFeeRate(PUBKEY_2, 456)
+        ));
+        assertThat(statusController.getNodesWithHighIncomingFeeRate()).isEqualTo(
+                new PubkeysAndFeeRatesDto(List.of(
+                        new PubkeyAndFeeRateDto(PUBKEY, 123),
+                        new PubkeyAndFeeRateDto(PUBKEY_2, 456)
+                ))
+        );
     }
 }

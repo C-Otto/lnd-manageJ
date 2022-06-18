@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.controller;
 import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.controller.dto.ChannelsDto;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
+import de.cotto.lndmanagej.controller.dto.PubkeysAndFeeRatesDto;
 import de.cotto.lndmanagej.controller.dto.PubkeysDto;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.LocalChannel;
@@ -93,4 +94,11 @@ public class StatusController {
     public int getKnownChannels() {
         return graphService.getNumberOfChannels();
     }
+
+    @Timed
+    @GetMapping("/nodes-with-high-incoming-fee-rate")
+    public PubkeysAndFeeRatesDto getNodesWithHighIncomingFeeRate() {
+        return PubkeysAndFeeRatesDto.create(graphService.getNodesWithHighFeeRate());
+    }
+
 }
