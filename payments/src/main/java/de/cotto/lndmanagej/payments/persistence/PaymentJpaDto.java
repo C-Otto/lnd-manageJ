@@ -5,6 +5,7 @@ import de.cotto.lndmanagej.model.Payment;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Index;
@@ -25,6 +26,8 @@ public class PaymentJpaDto {
     @Nullable
     private String hash;
     private long timestamp;
+
+    @Column(name = "val")
     private long value;
     private long fees;
 
