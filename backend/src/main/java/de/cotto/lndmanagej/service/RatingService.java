@@ -1,5 +1,7 @@
 package de.cotto.lndmanagej.service;
 
+import com.github.benmanes.caffeine.cache.LoadingCache;
+import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
@@ -30,6 +32,8 @@ public class RatingService {
     private static final double MINUTES_PER_DAY = 24 * 60;
     private static final int DEFAULT_MIN_AGE_DAYS_FOR_ANALYSIS = 30;
     private static final int DEFAULT_DAYS_FOR_ANALYSIS = 30;
+    private static final Duration EXPIRY = Duration.ofHours(1);
+    private static final Duration REFRESH = Duration.ofMillis(30);
 
     private final ChannelService channelService;
     private final OwnNodeService ownNodeService;
@@ -38,6 +42,14 @@ public class RatingService {
     private final PolicyService policyService;
     private final ConfigurationService configurationService;
     private final BalanceService balanceService;
+    private final LoadingCache<Pubkey, Rating> peerCache = new CacheBuilder()
+            .withExpiry(EXPIRY)
+            .withRefresh(REFRESH)
+            .build(this::getRatingForPeerWithoutCache);
+    private final LoadingCache<ChannelId, Optional<Rating>> channelCache = new CacheBuilder()
+            .withExpiry(EXPIRY)
+            .withRefresh(REFRESH)
+            .build(this::getRatingForChannelWithoutCache);
 
     public RatingService(
             ChannelService channelService,
@@ -58,17 +70,11 @@ public class RatingService {
     }
 
     public Rating getRatingForPeer(Pubkey peer) {
-        Set<ChannelId> eligibleChannels = getEligibleChannels(peer);
-        return eligibleChannels.stream()
-                .map(channelId -> getRatingForChannel(channelId, eligibleChannels))
-                .flatMap(Optional::stream)
-                .reduce(Rating.EMPTY, Rating::add);
+        return peerCache.get(peer);
     }
 
     public Optional<Rating> getRatingForChannel(ChannelId channelId) {
-        return channelService.getOpenChannel(channelId).map(LocalChannel::getRemotePubkey)
-                .map(this::getEligibleChannels)
-                .flatMap(eligibleChannels -> getRatingForChannel(channelId, eligibleChannels));
+        return channelCache.get(channelId);
     }
 
     private Optional<Rating> getRatingForChannel(ChannelId channelId, Set<ChannelId> eligibleChannels) {
@@ -100,24 +106,6 @@ public class RatingService {
         return Optional.of(new Rating((long) scaledByDays));
     }
 
-    private static long getLocalAvailableMilliSat(LocalChannel localChannel) {
-        if (localChannel instanceof LocalOpenChannel openChannel) {
-            return openChannel.getBalanceInformation().localAvailable().milliSatoshis();
-        }
-        return 0;
-    }
-
-    private int getDefaultMinAgeDaysForAnalysis() {
-        return configurationService.getIntegerValue(MIN_AGE_DAYS_FOR_ANALYSIS)
-                .orElse(DEFAULT_MIN_AGE_DAYS_FOR_ANALYSIS);
-    }
-
-    private Duration getDurationForAnalysis() {
-        return Duration.ofDays(
-                configurationService.getIntegerValue(DAYS_FOR_ANALYSIS).orElse(DEFAULT_DAYS_FOR_ANALYSIS)
-        );
-    }
-
     private Set<ChannelId> getEligibleChannels(Pubkey peer) {
         Set<LocalOpenChannel> openChannels = channelService.getOpenChannelsWith(peer);
         Set<ChannelId> result = new LinkedHashSet<>(openChannels.stream().map(Channel::getId).toList());
@@ -139,6 +127,38 @@ public class RatingService {
             return Set.of();
         }
         return result;
+    }
+
+    private static long getLocalAvailableMilliSat(LocalChannel localChannel) {
+        if (localChannel instanceof LocalOpenChannel openChannel) {
+            return openChannel.getBalanceInformation().localAvailable().milliSatoshis();
+        }
+        return 0;
+    }
+
+    private int getDefaultMinAgeDaysForAnalysis() {
+        return configurationService.getIntegerValue(MIN_AGE_DAYS_FOR_ANALYSIS)
+                .orElse(DEFAULT_MIN_AGE_DAYS_FOR_ANALYSIS);
+    }
+
+    private Optional<Rating> getRatingForChannelWithoutCache(ChannelId channelId) {
+        return channelService.getOpenChannel(channelId).map(LocalChannel::getRemotePubkey)
+                .map(this::getEligibleChannels)
+                .flatMap(eligibleChannels -> getRatingForChannel(channelId, eligibleChannels));
+    }
+
+    private Rating getRatingForPeerWithoutCache(Pubkey peer) {
+        Set<ChannelId> eligibleChannels = getEligibleChannels(peer);
+        return eligibleChannels.stream()
+                .map(channelId -> getRatingForChannel(channelId, eligibleChannels))
+                .flatMap(Optional::stream)
+                .reduce(Rating.EMPTY, Rating::add);
+    }
+
+    private Duration getDurationForAnalysis() {
+        return Duration.ofDays(
+                configurationService.getIntegerValue(DAYS_FOR_ANALYSIS).orElse(DEFAULT_DAYS_FOR_ANALYSIS)
+        );
     }
 
     private int getAgeInDays(int openHeight) {
