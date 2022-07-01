@@ -18,16 +18,27 @@
 <div th:fragment="channel-table" class="table-responsive table-sm" xmlns:th="https://www.thymeleaf.org">
     <table class="channel-table table table-hover">
         <thead>
+        <tr>
+            <th style="border-style: none"></th>
+            <th style="border-style: none"></th>
+            <th style="border-style: none"></th>
+            <th style="border-style: none"></th>
+            <th style="border-style: none"></th>
+            <th colspan="2" style="padding-top: 0.25rem; padding-bottom:0; text-align: center; border-style: none">Local</th>
+            <th colspan="2" style="padding-top: 0.25rem; padding-bottom:0; text-align: center; border-style: none">Remote</th>
+            <th style="border-style: none"></th>
+            <th style="border-style: none"></th>
+        </tr>
         <tr style="cursor: pointer">
-            <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=announced\';'">Public</th>
+            <th scope="col" style="text-align: left;" th:onclick="'window.location.href=\'?sort=announced\';'">Public</th>
             <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=inbound\';'">Inbound</th>
             <th scope="col" style="text-align: center;" th:onclick="'window.location.href=\'?sort=ratio\';'">Ratio</th>
             <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=outbound\';'">Outbound</th>
             <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=capacity\';'">Capacity</th>
-            <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=localbasefee\';'">Base Fee (local)</th>
-            <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=localfeerate\';'">Fee Rate (local)</th>
-            <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=remotebasefee\';'">Base Fee (remote)</th>
-            <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=remotefeerate\';'">Fee Rate (remote)</th>
+            <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=localbasefee\';'">Base Fee</th>
+            <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=localfeerate\';'">Fee Rate</th>
+            <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=remotebasefee\';'">Base Fee</th>
+            <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=remotefeerate\';'">Fee Rate</th>
             <th scope="col" th:onclick="'window.location.href=\'?sort=alias\';'">Alias</th>
             <th scope="col" th:onclick="'window.location.href=\'?sort=channelid\';'">Channel ID</th>
         </tr>
