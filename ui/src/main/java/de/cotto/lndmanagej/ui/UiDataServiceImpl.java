@@ -116,7 +116,8 @@ public class UiDataServiceImpl extends UiDataService {
                 details.feeReport(),
                 details.flowReport(),
                 details.rebalanceReport(),
-                details.warnings()
+                details.warnings(),
+                details.rating()
         );
     }
 
