@@ -33,6 +33,7 @@ import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
 
+@SuppressWarnings("PMD.ExcessiveImports")
 @Component
 public class UiDataServiceImpl extends UiDataService {
 
