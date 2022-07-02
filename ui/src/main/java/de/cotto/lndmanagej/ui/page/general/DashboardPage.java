@@ -19,7 +19,9 @@ public class DashboardPage extends ThymeleafPage {
     }
 
     private List<NodeDto> sort(List<NodeDto> nodes) {
-        return nodes.stream().sorted(new NodeDto.OnlineStatusAndAliasComparator()).toList();
+        return nodes.stream()
+                .sorted(NodeDto.getDefaultComparator())
+                .toList();
     }
 
     public List<NodeDto> getNodes() {
