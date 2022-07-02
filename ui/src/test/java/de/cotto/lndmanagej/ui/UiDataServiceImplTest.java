@@ -14,6 +14,7 @@ import de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.controller.dto.PolicyDto;
+import de.cotto.lndmanagej.controller.dto.RatingDto;
 import de.cotto.lndmanagej.controller.dto.RebalanceReportDto;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Coins;
@@ -297,8 +298,8 @@ class UiDataServiceImplTest {
                         FeeReportDto.createFromModel(FEE_REPORT),
                         FlowReportDto.createFromModel(FLOW_REPORT),
                         RebalanceReportDto.createFromModel(REBALANCE_REPORT),
-                        Set.of(CHANNEL_NUM_UPDATES_WARNING.description())
-                ));
+                        Set.of(CHANNEL_NUM_UPDATES_WARNING.description()),
+                        RatingDto.fromModel(RATING)));
     }
 
     @Test

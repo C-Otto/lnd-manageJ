@@ -119,6 +119,7 @@ public class DemoDataService extends UiDataService {
             "No flow in the past 35 days.");
 
     public static final ChannelId CLOSED_CHANNEL = ChannelId.fromCompactForm("712345x124x1");
+    public static final RatingDto RATING = RatingDto.fromModel(new Rating(700L));
 
     public DemoDataService() {
         super();
@@ -248,8 +249,8 @@ public class DemoDataService extends UiDataService {
                 deriveFeeReport(channel.channelId()),
                 deriveFlowReport(channel.channelId()),
                 deriveRebalanceReport(channel.channelId()),
-                warnings
-        );
+                warnings,
+                RatingDto.fromModel(new Rating(channel.rating())));
     }
 
     private ChannelDetailsDto createClosedChannelDetails(Set<String> warnings) {
@@ -267,8 +268,8 @@ public class DemoDataService extends UiDataService {
                 deriveFeeReport(CLOSED_CHANNEL),
                 deriveFlowReport(CLOSED_CHANNEL),
                 deriveRebalanceReport(CLOSED_CHANNEL),
-                warnings
-        );
+                warnings,
+                RATING);
     }
 
     private static NodeDetailsDto createNodeDetails(NodeDto node, List<OpenChannelDto> channels, Set<String> warnings) {
