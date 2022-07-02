@@ -37,7 +37,7 @@ class DashboardControllerIT extends BaseControllerIT {
     @Test
     void dashboard() throws Exception {
         OpenChannelDto channel = OPEN_CHANNEL_DTO;
-        NodeDto node = new NodeDto(channel.remotePubkey().toString(), channel.remoteAlias(), true);
+        NodeDto node = new NodeDto(channel.remotePubkey().toString(), channel.remoteAlias(), true, 1234);
         when(pageService.dashboard(null)).thenReturn(
                 new DashboardPage(List.of(channel), List.of(node), NONE)
         );

@@ -39,6 +39,7 @@ import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveFlowReport;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveOnChainCosts;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveOpenInitiator;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.derivePolicies;
+import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveRating;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveRebalanceReport;
 import static de.cotto.lndmanagej.ui.dto.BalanceInformationModel.EMPTY;
 import static de.cotto.lndmanagej.ui.dto.CloseType.BREACH_FORCE_CLOSE;
@@ -170,10 +171,13 @@ public class DemoDataService extends UiDataService {
 
     @Override
     public NodeDto getNode(Pubkey pubkey) {
-        return getOpenChannels().stream()
+        List<OpenChannelDto> channels = getOpenChannels().stream()
                 .filter(channel -> channel.remotePubkey().equals(pubkey))
-                .map(channel -> new NodeDto(pubkey.toString(), channel.remoteAlias(), isOnline(channel.channelId())))
-                .findFirst().orElseThrow();
+                .toList();
+        String alias = channels.stream().findFirst().orElseThrow().remoteAlias();
+        boolean isOnline = isOnline(channels.stream().findFirst().orElseThrow().channelId());
+        long rating = channels.stream().mapToLong(OpenChannelDto::rating).sum();
+        return new NodeDto(pubkey.toString(), alias, isOnline, rating);
     }
 
     @Override
@@ -212,10 +216,11 @@ public class DemoDataService extends UiDataService {
         ChannelId channelId = ChannelId.fromCompactForm(compactChannelId);
         Pubkey remotePubkey = Pubkey.create(pubkey);
         PoliciesDto policies = PoliciesDto.createFromModel(derivePolicies(channelId));
-        boolean isPrivateChannel = deriveChannelStatus(channelId).privateChannel();
+        boolean isPrivate = deriveChannelStatus(channelId).privateChannel();
         long capacity = local + remote;
         BalanceInformationModel balance = createBalanceInformation(local, remote);
-        return new OpenChannelDto(channelId, alias, remotePubkey, policies, balance, capacity, isPrivateChannel);
+        long rating = deriveRating(channelId);
+        return new OpenChannelDto(channelId, alias, remotePubkey, policies, balance, capacity, isPrivate, rating);
     }
 
     private static BalanceInformationModel createBalanceInformation(long local, long remote) {

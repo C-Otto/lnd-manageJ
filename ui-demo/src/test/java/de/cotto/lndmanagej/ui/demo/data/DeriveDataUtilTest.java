@@ -43,4 +43,10 @@ class DeriveDataUtilTest {
         assertEquals(OpenInitiator.LOCAL, DeriveDataUtil.deriveOpenInitiator(CHANNEL_ID));
         assertEquals(OpenInitiator.LOCAL, DeriveDataUtil.deriveOpenInitiator(CHANNEL_ID));
     }
+
+    @Test
+    void deriveRating_sameChannelId_sameResult() {
+        assertEquals(51_361, DeriveDataUtil.deriveRating(CHANNEL_ID));
+        assertEquals(51_361, DeriveDataUtil.deriveRating(CHANNEL_ID));
+    }
 }

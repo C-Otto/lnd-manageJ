@@ -18,6 +18,7 @@ import java.util.Map;
 
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_PEER;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
+import static de.cotto.lndmanagej.model.RatingFixtures.RATING;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -72,7 +73,7 @@ class DashboardControllerTest {
 
     @Test
     void nodes() {
-        NodeDto nodeDto = new NodeDto(PUBKEY.toString(), NODE_PEER.alias(), true);
+        NodeDto nodeDto = new NodeDto(PUBKEY.toString(), NODE_PEER.alias(), true, RATING.getRating());
         when(pageService.nodes()).thenReturn(new NodesPage(List.of(nodeDto)));
         assertThat(dashboardController.nodes(model)).isEqualTo(NODES_KEY);
         verify(model).addAllAttributes(Map.of(NODES_KEY, List.of(nodeDto)));

@@ -26,8 +26,10 @@ import static de.cotto.lndmanagej.model.NodeFixtures.NODE;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
+import static de.cotto.lndmanagej.model.RatingFixtures.RATING;
 import static de.cotto.lndmanagej.ui.dto.ChannelDetailsDtoFixture.CHANNEL_DETAILS_DTO;
 import static de.cotto.lndmanagej.ui.dto.NodeDetailsDtoFixture.NODE_DETAILS_MODEL;
+import static de.cotto.lndmanagej.ui.dto.NodeDtoFixture.NODE_DTO;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -45,7 +47,7 @@ class PageServiceTest {
     @Test
     void dashboard() {
         List<OpenChannelDto> channels = List.of(OPEN_CHANNEL_DTO);
-        List<NodeDto> nodes = List.of(new NodeDto(PUBKEY.toString(), NODE.alias(), true));
+        List<NodeDto> nodes = List.of(NODE_DTO);
         mockChannelsAndNodesWithoutWarning(channels, nodes);
 
         assertThat(pageService.dashboard()).usingRecursiveComparison().isEqualTo(
@@ -55,9 +57,9 @@ class PageServiceTest {
 
     @Test
     void dashboard_nodes_alphabeticalOrder() {
-        NodeDto bob = new NodeDto(PUBKEY.toString(), "Bob", true);
-        NodeDto alice = new NodeDto(PUBKEY_3.toString(), "Alice", true);
-        NodeDto charlie = new NodeDto(PUBKEY_2.toString(), "Charlie", true);
+        NodeDto bob = new NodeDto(PUBKEY.toString(), "Bob", true, RATING.getRating());
+        NodeDto alice = new NodeDto(PUBKEY_3.toString(), "Alice", true, RATING.getRating());
+        NodeDto charlie = new NodeDto(PUBKEY_2.toString(), "Charlie", true, RATING.getRating());
         List<NodeDto> nodesUnsorted = List.of(bob, charlie, alice);
         mockChannelsAndNodesWithoutWarning(List.of(), nodesUnsorted);
 
@@ -67,9 +69,9 @@ class PageServiceTest {
 
     @Test
     void dashboard_nodes_grouped_offline_first() {
-        NodeDto offlineNode1 = new NodeDto(PUBKEY_3.toString(), "Offline-Node1", false);
-        NodeDto onlineNode = new NodeDto(PUBKEY.toString(), "Online-Node", true);
-        NodeDto offlineNode2 = new NodeDto(PUBKEY_2.toString(), "Offline-Node2", false);
+        NodeDto offlineNode1 = new NodeDto(PUBKEY_3.toString(), "Offline-Node1", false, RATING.getRating());
+        NodeDto onlineNode = new NodeDto(PUBKEY.toString(), "Online-Node", true, RATING.getRating());
+        NodeDto offlineNode2 = new NodeDto(PUBKEY_2.toString(), "Offline-Node2", false, RATING.getRating());
         List<NodeDto> nodesUnsorted = List.of(onlineNode, offlineNode2, offlineNode1);
         mockChannelsAndNodesWithoutWarning(List.of(), nodesUnsorted);
 
@@ -117,7 +119,7 @@ class PageServiceTest {
 
     @Test
     void nodes() {
-        NodeDto nodeDto = new NodeDto(PUBKEY.toString(), NODE.alias(), true);
+        NodeDto nodeDto = new NodeDto(PUBKEY.toString(), NODE.alias(), true, RATING.getRating());
         when(dataService.createNodeList()).thenReturn(List.of(nodeDto));
 
         assertThat(pageService.nodes()).usingRecursiveComparison().isEqualTo(
@@ -127,9 +129,9 @@ class PageServiceTest {
 
     @Test
     void nodes_sorted() {
-        NodeDto bob = new NodeDto(PUBKEY.toString(), "Bob", true);
-        NodeDto alice = new NodeDto(PUBKEY_3.toString(), "alice", true);
-        NodeDto charlie = new NodeDto(PUBKEY_2.toString(), "Charlie", false);
+        NodeDto bob = new NodeDto(PUBKEY.toString(), "Bob", true, RATING.getRating());
+        NodeDto alice = new NodeDto(PUBKEY_3.toString(), "alice", true, RATING.getRating());
+        NodeDto charlie = new NodeDto(PUBKEY_2.toString(), "Charlie", false, RATING.getRating());
         List<NodeDto> nodesUnsorted = List.of(bob, charlie, alice);
         when(dataService.createNodeList()).thenReturn(nodesUnsorted);
 
@@ -139,7 +141,7 @@ class PageServiceTest {
 
     @Test
     void nodes_for_channels() {
-        NodeDto nodeDto = new NodeDto(PUBKEY.toString(), NODE.alias(), true);
+        NodeDto nodeDto = new NodeDto(PUBKEY.toString(), NODE.alias(), true, RATING.getRating());
         List<OpenChannelDto> channels = List.of(OPEN_CHANNEL_DTO);
         when(dataService.createNodeList(Set.of(PUBKEY))).thenReturn(List.of(nodeDto));
 

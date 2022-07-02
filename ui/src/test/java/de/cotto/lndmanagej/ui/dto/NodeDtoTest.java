@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.ui.dto;
 import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
+import static de.cotto.lndmanagej.model.RatingFixtures.RATING;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class NodeDtoTest {
@@ -35,6 +36,6 @@ class NodeDtoTest {
     }
 
     private NodeDto node(String alias, boolean online) {
-        return new NodeDto(PUBKEY.toString(), alias, online);
+        return new NodeDto(PUBKEY.toString(), alias, online, RATING.getRating());
     }
 }

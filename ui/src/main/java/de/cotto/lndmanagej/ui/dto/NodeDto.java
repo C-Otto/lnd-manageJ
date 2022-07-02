@@ -3,7 +3,7 @@ package de.cotto.lndmanagej.ui.dto;
 import java.io.Serializable;
 import java.util.Comparator;
 
-public record NodeDto(String pubkey, String alias, boolean online) {
+public record NodeDto(String pubkey, String alias, boolean online, long rating) {
 
     public static class OnlineStatusAndAliasComparator implements Comparator<NodeDto>, Serializable {
 

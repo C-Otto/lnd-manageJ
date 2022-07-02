@@ -121,11 +121,12 @@ class SearchControllerIT extends BaseControllerIT {
                 channelDetails.policies(),
                 channelDetails.balanceInformation(),
                 channelDetails.capacitySat(),
-                false);
+                false,
+                1234);
     }
 
     public NodeDto nodeDto(OpenChannelDto channel) {
-        return new NodeDto(channel.remotePubkey().toString(), channel.remoteAlias(), true);
+        return new NodeDto(channel.remotePubkey().toString(), channel.remoteAlias(), true, 1234);
     }
 
 }
