@@ -76,7 +76,7 @@ public abstract class UiDataService {
             case "localfeerate" -> Comparator.comparing(c -> c.policies().local().feeRatePpm());
             case "remotebasefee" -> Comparator.comparing(c -> Long.parseLong(c.policies().remote().baseFeeMilliSat()));
             case "remotefeerate" -> Comparator.comparing(c -> c.policies().remote().feeRatePpm());
-            case "alias" -> Comparator.comparing(OpenChannelDto::remoteAlias);
+            case "alias" -> Comparator.comparing(OpenChannelDto::remoteAlias, String.CASE_INSENSITIVE_ORDER);
             case "channel-rating" -> Comparator.comparing(OpenChannelDto::rating);
             default -> Comparator.comparing(OpenChannelDto::channelId);
         };
