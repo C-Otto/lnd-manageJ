@@ -28,6 +28,7 @@
             <th colspan="2" style="padding-top: 0.25rem; padding-bottom:0; text-align: center; border-style: none">Remote</th>
             <th style="border-style: none"></th>
             <th style="border-style: none"></th>
+            <th style="border-style: none"></th>
         </tr>
         <tr style="cursor: pointer">
             <th scope="col" style="text-align: left;" th:onclick="'window.location.href=\'?sort=announced\';'">Public</th>
@@ -39,6 +40,7 @@
             <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=localfeerate\';'">Fee Rate</th>
             <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=remotebasefee\';'">Base Fee</th>
             <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=remotefeerate\';'">Fee Rate</th>
+            <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=rating\';'">Rating</th>
             <th scope="col" th:onclick="'window.location.href=\'?sort=alias\';'">Alias</th>
             <th scope="col" th:onclick="'window.location.href=\'?sort=channelid\';'">Channel ID</th>
         </tr>
@@ -74,6 +76,9 @@
                 style="text-align: right;"></td>
 
             <td th:text="${@formatter.formatNumber(channel.policies.remote.feeRatePpm)}"
+                style="text-align: right;"></td>
+
+            <td th:text="${@formatter.formatNumber(channel.rating)}"
                 style="text-align: right;"></td>
 
             <td th:text="${channel.remoteAlias}"></td>

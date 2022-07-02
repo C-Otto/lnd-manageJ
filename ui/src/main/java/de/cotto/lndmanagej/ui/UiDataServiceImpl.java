@@ -8,15 +8,16 @@ import de.cotto.lndmanagej.controller.WarningsController;
 import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.ChannelsDto;
 import de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto;
-import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.model.Rating;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.OwnNodeService;
+import de.cotto.lndmanagej.service.RatingService;
 import de.cotto.lndmanagej.ui.dto.BalanceInformationModel;
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.ui.dto.CloseType;
@@ -42,6 +43,7 @@ public class UiDataServiceImpl extends UiDataService {
     private final NodeService nodeService;
     private final ChannelService channelService;
     private final OwnNodeService ownNodeService;
+    private final RatingService ratingService;
 
     public UiDataServiceImpl(
             ChannelController channelController,
@@ -50,8 +52,8 @@ public class UiDataServiceImpl extends UiDataService {
             NodeController nodeController,
             NodeService nodeService,
             ChannelService channelService,
-            OwnNodeService ownNodeService
-    ) {
+            OwnNodeService ownNodeService,
+            RatingService ratingService) {
         super();
         this.channelController = channelController;
         this.statusController = statusController;
@@ -60,6 +62,7 @@ public class UiDataServiceImpl extends UiDataService {
         this.nodeService = nodeService;
         this.channelService = channelService;
         this.ownNodeService = ownNodeService;
+        this.ratingService = ratingService;
     }
 
     @Override
@@ -82,13 +85,16 @@ public class UiDataServiceImpl extends UiDataService {
 
     private OpenChannelDto toOpenChannelDto(ChannelId channelId) {
         LocalChannel localChannel = channelService.getLocalChannel(channelId).orElseThrow();
-        Pubkey pubkey = localChannel.getRemotePubkey();
-        long capacitySat = localChannel.getCapacity().satoshis();
-        boolean privateChannel = localChannel.getStatus().privateChannel();
-        String alias = nodeController.getAlias(pubkey);
-        PoliciesDto policies = channelController.getPolicies(channelId);
-        BalanceInformationDto balance = channelController.getBalance(channelId);
-        return new OpenChannelDto(channelId, alias, pubkey, policies, map(balance), capacitySat, privateChannel);
+        return new OpenChannelDto(
+                channelId,
+                nodeController.getAlias(localChannel.getRemotePubkey()),
+                localChannel.getRemotePubkey(),
+                channelController.getPolicies(channelId),
+                map(channelController.getBalance(channelId)),
+                localChannel.getCapacity().satoshis(),
+                localChannel.getStatus().privateChannel(),
+                ratingService.getRatingForChannel(channelId).orElse(Rating.EMPTY).getRating()
+        );
     }
 
     @Override
@@ -116,7 +122,8 @@ public class UiDataServiceImpl extends UiDataService {
     @Override
     public NodeDto getNode(Pubkey pubkey) {
         Node node = nodeService.getNode(pubkey);
-        return new NodeDto(node.pubkey().toString(), node.alias(), node.online());
+        Rating rating = ratingService.getRatingForPeer(pubkey);
+        return new NodeDto(node.pubkey().toString(), node.alias(), node.online(), rating.getRating());
     }
 
     @Override

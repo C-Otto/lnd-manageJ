@@ -20,6 +20,7 @@ import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.OwnNodeService;
+import de.cotto.lndmanagej.service.RatingService;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,6 +58,7 @@ import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES_FOR_LOCAL_CHANNE
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
+import static de.cotto.lndmanagej.model.RatingFixtures.RATING;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static de.cotto.lndmanagej.model.warnings.ChannelWarningFixtures.CHANNEL_NUM_UPDATES_WARNING;
 import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixture.BALANCE_INFORMATION_MODEL;
@@ -93,6 +95,9 @@ class UiDataServiceImplTest {
     @Mock
     private OwnNodeService ownNodeService;
 
+    @Mock
+    private RatingService ratingService;
+
     @Test
     void getWarnings() {
         NodesAndChannelsWithWarningsDto warnings = new NodesAndChannelsWithWarningsDto(List.of(), List.of());
@@ -117,6 +122,7 @@ class UiDataServiceImplTest {
         when(channelController.getPolicies(CHANNEL_ID)).thenReturn(policies);
         when(channelController.getBalance(CHANNEL_ID)).thenReturn(balance);
         when(statusController.getOpenChannels()).thenReturn(new ChannelsDto(List.of(CHANNEL_ID)));
+        when(ratingService.getRatingForChannel(CHANNEL_ID)).thenReturn(Optional.of(RATING));
 
         assertThat(uiDataService.getOpenChannels()).containsExactly(
                 new OpenChannelDto(
@@ -126,8 +132,8 @@ class UiDataServiceImplTest {
                         policies,
                         BALANCE_INFORMATION_MODEL,
                         CAPACITY_SAT,
-                        false
-                )
+                        false,
+                        RATING.getRating())
         );
     }
 
@@ -306,8 +312,9 @@ class UiDataServiceImplTest {
     @Test
     void getNode() {
         when(nodeService.getNode(PUBKEY)).thenReturn(NODE_PEER);
+        when(ratingService.getRatingForPeer(PUBKEY)).thenReturn(RATING);
         assertThat(uiDataService.getNode(PUBKEY)).isEqualTo(
-                new NodeDto(PUBKEY.toString(), NODE_PEER.alias(), true)
+                new NodeDto(PUBKEY.toString(), NODE_PEER.alias(), true, RATING.getRating())
         );
     }
 
