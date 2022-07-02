@@ -7,10 +7,12 @@ import de.cotto.lndmanagej.controller.dto.NodeWithWarningsDto;
 import de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto;
 import de.cotto.lndmanagej.controller.dto.OnlineReportDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
+import de.cotto.lndmanagej.controller.dto.RatingDto;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ChannelStatus;
 import de.cotto.lndmanagej.model.OnlineReport;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.model.Rating;
 import de.cotto.lndmanagej.ui.UiDataService;
 import de.cotto.lndmanagej.ui.dto.BalanceInformationModel;
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
@@ -176,8 +178,8 @@ public class DemoDataService extends UiDataService {
                 .toList();
         String alias = channels.stream().findFirst().orElseThrow().remoteAlias();
         boolean isOnline = isOnline(channels.stream().findFirst().orElseThrow().channelId());
-        long rating = channels.stream().mapToLong(OpenChannelDto::rating).sum();
-        return new NodeDto(pubkey.toString(), alias, isOnline, rating);
+        Rating rating = sumRatings(channels);
+        return new NodeDto(pubkey.toString(), alias, isOnline, rating.getRating());
     }
 
     @Override
@@ -285,7 +287,8 @@ public class DemoDataService extends UiDataService {
                 deriveFeeReport(firstChannel.channelId()),
                 deriveFlowReport(firstChannel.channelId()),
                 deriveRebalanceReport(firstChannel.channelId()),
-                warnings);
+                warnings,
+                RatingDto.fromModel(sumRatings(channels)));
     }
 
     private static List<ChannelId> getPendingForceClosingChannels() {
@@ -305,6 +308,10 @@ public class DemoDataService extends UiDataService {
         );
     }
 
+    private static Rating sumRatings(List<OpenChannelDto> channels) {
+        long sum = channels.stream().mapToLong(OpenChannelDto::rating).sum();
+        return new Rating(sum);
+    }
 }
 
 
