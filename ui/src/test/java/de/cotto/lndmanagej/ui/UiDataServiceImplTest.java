@@ -18,6 +18,7 @@ import de.cotto.lndmanagej.controller.dto.RatingDto;
 import de.cotto.lndmanagej.controller.dto.RebalanceReportDto;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.Rating;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.OwnNodeService;
@@ -248,6 +249,15 @@ class UiDataServiceImplTest {
             when(nodeController.getAlias(LOCAL_OPEN_CHANNEL_TO_NODE_3.getRemotePubkey())).thenReturn("a");
             assertThat(uiDataService.getOpenChannels("alias").stream().map(OpenChannelDto::channelId))
                     .containsExactly(CHANNEL_ID, CHANNEL_ID_2, CHANNEL_ID_3);
+        }
+
+        @Test
+        void by_rating() {
+            when(ratingService.getRatingForChannel(CHANNEL_ID)).thenReturn(Optional.of(new Rating(2)));
+            when(ratingService.getRatingForChannel(CHANNEL_ID_2)).thenReturn(Optional.of(new Rating(3)));
+            when(ratingService.getRatingForChannel(CHANNEL_ID_3)).thenReturn(Optional.of(new Rating(1)));
+            assertThat(uiDataService.getOpenChannels("channel-rating").stream().map(OpenChannelDto::channelId))
+                    .containsExactly(CHANNEL_ID_3, CHANNEL_ID, CHANNEL_ID_2);
         }
 
         private static PolicyDto policy(int feeRate, int baseFee) {
