@@ -11,14 +11,8 @@ public class NodesPage extends ThymeleafPage {
 
     public NodesPage(List<NodeDto> nodes) {
         super();
-        this.nodes = sort(nodes);
+        this.nodes = nodes;
         add("nodes", this.nodes);
-    }
-
-    private List<NodeDto> sort(List<NodeDto> nodes) {
-        return nodes.stream()
-                .sorted(NodeDto.getDefaultComparator())
-                .toList();
     }
 
     @Override

@@ -7,6 +7,7 @@ import de.cotto.lndmanagej.controller.dto.PolicyDto;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.ui.UiDataService;
 import de.cotto.lndmanagej.ui.controller.param.SortBy;
 import de.cotto.lndmanagej.ui.dto.BalanceInformationModel;
@@ -42,6 +43,8 @@ import static de.cotto.lndmanagej.model.RatingFixtures.RATING;
 import static de.cotto.lndmanagej.ui.dto.ChannelDetailsDtoFixture.CHANNEL_DETAILS_DTO;
 import static de.cotto.lndmanagej.ui.dto.NodeDetailsDtoFixture.NODE_DETAILS_MODEL;
 import static de.cotto.lndmanagej.ui.dto.NodeDtoFixture.NODE_DTO;
+import static de.cotto.lndmanagej.ui.dto.NodeDtoFixture.NODE_DTO_2;
+import static de.cotto.lndmanagej.ui.dto.NodeDtoFixture.NODE_DTO_3;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.CAPACITY_SAT;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO2;
@@ -121,7 +124,9 @@ class PageServiceTest {
     void nodes() {
         when(dataService.createNodeList()).thenReturn(List.of(NODE_DTO));
 
-        assertThat(pageService.nodes()).usingRecursiveComparison().isEqualTo(new NodesPage(List.of(NODE_DTO)));
+        assertThat(pageService.nodes(SortBy.DEFAULT_SORT))
+                .usingRecursiveComparison()
+                .isEqualTo(new NodesPage(List.of(NODE_DTO)));
     }
 
     @Test
@@ -133,7 +138,7 @@ class PageServiceTest {
         when(dataService.createNodeList()).thenReturn(nodesUnsorted);
 
         List<NodeDto> nodesSorted = List.of(charlie, alice, bob);
-        assertThat(pageService.nodes().getNodes()).isEqualTo(nodesSorted);
+        assertThat(pageService.nodes(SortBy.DEFAULT_SORT).getNodes()).isEqualTo(nodesSorted);
     }
 
     @Test
@@ -142,7 +147,7 @@ class PageServiceTest {
         List<OpenChannelDto> channels = List.of(OPEN_CHANNEL_DTO);
         when(dataService.createNodeList(Set.of(PUBKEY))).thenReturn(List.of(nodeDto));
 
-        assertThat(pageService.nodes(channels)).usingRecursiveComparison().isEqualTo(
+        assertThat(pageService.nodes(channels, SortBy.DEFAULT_SORT)).usingRecursiveComparison().isEqualTo(
                 new NodesPage(List.of(nodeDto))
         );
     }
@@ -299,7 +304,7 @@ class PageServiceTest {
                     channelWithRating(CHANNEL_ID_2, 3),
                     channelWithRating(CHANNEL_ID_3, 1)
             ));
-            assertThat(pageService.dashboard(SortBy.CHANNEL_RATING).getChannels().stream()
+            assertThat(pageService.dashboard(SortBy.RATING).getChannels().stream()
                     .map(OpenChannelDto::channelId))
                     .containsExactly(CHANNEL_ID_3, CHANNEL_ID, CHANNEL_ID_2);
         }
@@ -365,6 +370,50 @@ class PageServiceTest {
 
         private BalanceInformation balanceWithLocalSat(int satoshis) {
             return new BalanceInformation(Coins.ofSatoshis(satoshis), Coins.NONE, Coins.ofSatoshis(1), Coins.NONE);
+        }
+    }
+
+    @Nested
+    class NodesSorted {
+
+        @Test
+        void by_nodeRating() {
+            when(dataService.createNodeList()).thenReturn(List.of(
+                    nodeWithRating(PUBKEY, 2),
+                    nodeWithRating(PUBKEY_2, 3),
+                    nodeWithRating(PUBKEY_3, 1)
+            ));
+            assertThat(pageService.dashboard(SortBy.NODE_RATING).getNodes().stream()
+                    .map(NodeDto::pubkey))
+                    .containsExactly(PUBKEY_3.toString(), PUBKEY.toString(), PUBKEY_2.toString());
+        }
+
+        @Test
+        void by_nodeAlias() {
+            when(dataService.createNodeList()).thenReturn(List.of(
+                    node(PUBKEY, "A", false),
+                    node(PUBKEY_2, "b", true),
+                    node(PUBKEY_3, "C", false)
+            ));
+            assertThat(pageService.dashboard(SortBy.NODE_ALIAS).getNodes().stream()
+                    .map(NodeDto::pubkey))
+                    .containsExactly(PUBKEY.toString(), PUBKEY_2.toString(), PUBKEY_3.toString());
+        }
+
+        @Test
+        void by_pubkey() {
+            when(dataService.createNodeList()).thenReturn(List.of(NODE_DTO_3, NODE_DTO, NODE_DTO_2));
+            assertThat(pageService.dashboard(SortBy.PUBKEY).getNodes().stream()
+                    .map(NodeDto::pubkey))
+                    .containsExactly(PUBKEY.toString(), PUBKEY_2.toString(), PUBKEY_3.toString());
+        }
+
+        private NodeDto nodeWithRating(Pubkey pubkey, long rating) {
+            return new NodeDto(pubkey.toString(), "node-with-rating", true, rating);
+        }
+
+        private NodeDto node(Pubkey pubkey, String alias, boolean online) {
+            return new NodeDto(pubkey.toString(), alias, online, RATING.getRating());
         }
     }
 
