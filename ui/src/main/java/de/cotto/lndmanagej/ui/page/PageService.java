@@ -71,17 +71,17 @@ public class PageService {
     @SuppressWarnings("PMD.CyclomaticComplexity")
     private static Comparator<OpenChannelDto> channelComparator(SortBy sort) {
         return switch (sort) {
-            case announced -> Comparator.comparing(OpenChannelDto::privateChannel);
-            case inbound -> Comparator.comparingLong(c -> c.balanceInformation().remoteBalanceSat());
-            case outbound -> Comparator.comparingLong(c -> c.balanceInformation().localBalanceSat());
-            case capacity -> Comparator.comparing(OpenChannelDto::capacitySat);
-            case localbasefee -> Comparator.comparing(c -> Long.parseLong(c.policies().local().baseFeeMilliSat()));
-            case localfeerate -> Comparator.comparing(c -> c.policies().local().feeRatePpm());
-            case remotebasefee -> Comparator.comparing(c -> Long.parseLong(c.policies().remote().baseFeeMilliSat()));
-            case remotefeerate -> Comparator.comparing(c -> c.policies().remote().feeRatePpm());
-            case alias -> Comparator.comparing(OpenChannelDto::remoteAlias, String.CASE_INSENSITIVE_ORDER);
-            case channelrating -> Comparator.comparing(OpenChannelDto::rating);
-            case channelid -> Comparator.comparing(OpenChannelDto::channelId);
+            case ANNOUNCED -> Comparator.comparing(OpenChannelDto::privateChannel);
+            case INBOUND -> Comparator.comparingLong(c -> c.balanceInformation().remoteBalanceSat());
+            case OUTBOUND -> Comparator.comparingLong(c -> c.balanceInformation().localBalanceSat());
+            case CAPACITY -> Comparator.comparing(OpenChannelDto::capacitySat);
+            case LOCAL_BASE_FEE -> Comparator.comparing(c -> Long.parseLong(c.policies().local().baseFeeMilliSat()));
+            case LOCAL_FEE_RATE -> Comparator.comparing(c -> c.policies().local().feeRatePpm());
+            case REMOTE_BASE_FEE -> Comparator.comparing(c -> Long.parseLong(c.policies().remote().baseFeeMilliSat()));
+            case REMOTE_FEE_RATE -> Comparator.comparing(c -> c.policies().remote().feeRatePpm());
+            case ALIAS -> Comparator.comparing(OpenChannelDto::remoteAlias, String.CASE_INSENSITIVE_ORDER);
+            case CHANNEL_RATING -> Comparator.comparing(OpenChannelDto::rating);
+            case CHANNEL_ID -> Comparator.comparing(OpenChannelDto::channelId);
             default -> Comparator.comparing(c -> c.balanceInformation().getOutboundPercentage());
         };
     }

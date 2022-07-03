@@ -31,19 +31,13 @@ class DashboardControllerIT extends BaseControllerIT {
 
     @Test
     void dashboard_empty_okay() throws Exception {
-        when(pageService.dashboard(SortBy.defaultSort)).thenReturn(new DashboardPage(List.of(), List.of(), NONE));
+        when(pageService.dashboard(SortBy.DEFAULT_SORT)).thenReturn(new DashboardPage(List.of(), List.of(), NONE));
         mockMvc.perform(get("/")).andExpect(status().isOk());
     }
 
     @Test
-    void dashboard_unsupportedQueryParameter_badRequest() throws Exception {
-        mockMvc.perform(get("/").param("sort", "unsupported-param"))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     void dashboard_defaultSorting_ok() throws Exception {
-        when(pageService.dashboard(SortBy.defaultSort)).thenReturn(
+        when(pageService.dashboard(SortBy.DEFAULT_SORT)).thenReturn(
                 new DashboardPage(List.of(OPEN_CHANNEL_DTO), List.of(NODE_DTO), NONE)
         );
         mockMvc.perform(get("/")).andExpect(status().isOk());
@@ -51,7 +45,7 @@ class DashboardControllerIT extends BaseControllerIT {
 
     @Test
     void dashboard_byAlias_ok() throws Exception {
-        when(pageService.dashboard(SortBy.alias)).thenReturn(
+        when(pageService.dashboard(SortBy.ALIAS)).thenReturn(
                 new DashboardPage(List.of(OPEN_CHANNEL_DTO), List.of(NODE_DTO), NONE)
         );
         mockMvc.perform(get("/").param("sort", "alias"))
@@ -60,8 +54,8 @@ class DashboardControllerIT extends BaseControllerIT {
 
     @Test
     void channels_byRating_ok() throws Exception {
-        when(pageService.channels(SortBy.channelrating)).thenReturn(new ChannelsPage(List.of(OPEN_CHANNEL_DTO)));
-        mockMvc.perform(get("/channels/").param("sort", "channelrating"))
+        when(pageService.channels(SortBy.CHANNEL_RATING)).thenReturn(new ChannelsPage(List.of(OPEN_CHANNEL_DTO)));
+        mockMvc.perform(get("/channels/").param("sort", "channel-rating"))
                 .andExpect(status().isOk());
     }
 }
