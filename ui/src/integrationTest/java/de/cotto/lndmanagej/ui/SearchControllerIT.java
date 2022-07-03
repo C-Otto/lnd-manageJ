@@ -22,12 +22,14 @@ import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
+import static de.cotto.lndmanagej.ui.controller.param.SortBy.DEFAULT_SORT;
 import static de.cotto.lndmanagej.ui.dto.ChannelDetailsDtoFixture.CHANNEL_DETAILS_DTO;
 import static de.cotto.lndmanagej.ui.dto.NodeDetailsDtoFixture.NODE_DETAILS_MODEL;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO2;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -102,7 +104,7 @@ class SearchControllerIT extends BaseControllerIT {
     @Test
     void searchForAlias_multipleResults() throws Exception {
         when(dataService.getOpenChannels()).thenReturn(List.of(OPEN_CHANNEL_DTO, OPEN_CHANNEL_DTO2));
-        when(pageService.nodes(any())).thenReturn(nodesPage(OPEN_CHANNEL_DTO, OPEN_CHANNEL_DTO2));
+        when(pageService.nodes(any(), eq(DEFAULT_SORT))).thenReturn(nodesPage(OPEN_CHANNEL_DTO, OPEN_CHANNEL_DTO2));
         mockMvc.perform(MockMvcRequestBuilders.get("/search?q=alb"))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("nodes"))

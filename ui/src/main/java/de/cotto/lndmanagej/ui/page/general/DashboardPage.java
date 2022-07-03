@@ -15,7 +15,7 @@ public class DashboardPage extends ThymeleafPage {
                          List<NodeDto> nodes,
                          NodesAndChannelsWithWarningsDto warnings) {
         super();
-        this.nodes = nodes.stream().sorted(NodeDto.getDefaultComparator()).toList();
+        this.nodes = nodes;
         this.channels = channels;
         add("warnings", warnings);
         add("channels", this.channels);

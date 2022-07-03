@@ -29,8 +29,8 @@ public class DashboardController {
     }
 
     @GetMapping(path = {"/node", "/nodes"})
-    public String nodes(Model model) {
-        return page.nodes().create(model);
+    public String nodes(Model model, @Nullable @RequestParam(required = false) SortBy sort) {
+        return page.nodes(getOrDefault(sort)).create(model);
     }
 
     private SortBy getOrDefault(@Nullable SortBy sort) {

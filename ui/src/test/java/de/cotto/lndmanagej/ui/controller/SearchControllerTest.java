@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.ui.controller;
 import de.cotto.lndmanagej.controller.ChannelIdConverter;
 import de.cotto.lndmanagej.controller.NotFoundException;
 import de.cotto.lndmanagej.ui.UiDataService;
+import de.cotto.lndmanagej.ui.controller.param.SortBy;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import de.cotto.lndmanagej.ui.page.PageService;
 import de.cotto.lndmanagej.ui.page.channel.ChannelDetailsPage;
@@ -82,7 +83,7 @@ class SearchControllerTest {
         String query = "BERT";
         List<OpenChannelDto> channels = List.of(OPEN_CHANNEL_DTO, OPEN_CHANNEL_DTO);
         when(dataService.getOpenChannels()).thenReturn(channels);
-        when(pageService.nodes(channels)).thenReturn(new NodesPage(List.of(NODE_DTO)));
+        when(pageService.nodes(channels, SortBy.DEFAULT_SORT)).thenReturn(new NodesPage(List.of(NODE_DTO)));
         assertThat(searchController.search(query, model)).isEqualTo("nodes");
     }
 

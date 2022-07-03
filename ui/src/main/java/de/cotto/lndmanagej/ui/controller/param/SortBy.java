@@ -12,6 +12,13 @@ public enum SortBy {
     LOCAL_FEE_RATE,
     REMOTE_FEE_RATE,
     ALIAS,
-    CHANNEL_RATING,
-    CHANNEL_ID;
+    RATING,
+    CHANNEL_ID,
+    NODE_ALIAS,
+    NODE_RATING,
+    PUBKEY,
+    ONLINE;
+
+    public static final String SORT_PARAM_KEY = "sort";
+
 }
