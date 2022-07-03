@@ -19,8 +19,8 @@ import java.util.Map;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_PEER;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.RatingFixtures.RATING;
-import static de.cotto.lndmanagej.ui.controller.param.SortBy.defaultSort;
-import static de.cotto.lndmanagej.ui.controller.param.SortBy.ratio;
+import static de.cotto.lndmanagej.ui.controller.param.SortBy.DEFAULT_SORT;
+import static de.cotto.lndmanagej.ui.controller.param.SortBy.RATIO;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,8 +44,8 @@ class DashboardControllerTest {
     @Test
     void dashboard() {
         NodesAndChannelsWithWarningsDto warnings = NodesAndChannelsWithWarningsDto.NONE;
-        when(pageService.dashboard(defaultSort)).thenReturn(new DashboardPage(List.of(), List.of(), warnings));
-        assertThat(dashboardController.dashboard(model, defaultSort)).isEqualTo("dashboard");
+        when(pageService.dashboard(DEFAULT_SORT)).thenReturn(new DashboardPage(List.of(), List.of(), warnings));
+        assertThat(dashboardController.dashboard(model, DEFAULT_SORT)).isEqualTo("dashboard");
         verify(model).addAllAttributes(
                 Map.of(NODES_KEY, List.of(), CHANNELS_KEY, List.of(), "warnings", warnings)
         );
@@ -55,22 +55,22 @@ class DashboardControllerTest {
     void dashboard_forwards_sort_key_to_page() {
         NodesAndChannelsWithWarningsDto warnings = NodesAndChannelsWithWarningsDto.NONE;
         when(pageService.dashboard(any())).thenReturn(new DashboardPage(List.of(), List.of(), warnings));
-        dashboardController.dashboard(model, ratio);
-        verify(pageService).dashboard(ratio);
+        dashboardController.dashboard(model, RATIO);
+        verify(pageService).dashboard(RATIO);
     }
 
     @Test
     void channels() {
-        when(pageService.channels(defaultSort)).thenReturn(new ChannelsPage(List.of(OPEN_CHANNEL_DTO)));
-        assertThat(dashboardController.channels(model, null)).isEqualTo(CHANNELS_KEY);
+        when(pageService.channels(DEFAULT_SORT)).thenReturn(new ChannelsPage(List.of(OPEN_CHANNEL_DTO)));
+        assertThat(dashboardController.channels(model, DEFAULT_SORT)).isEqualTo(CHANNELS_KEY);
         verify(model).addAllAttributes(Map.of(CHANNELS_KEY, List.of(OPEN_CHANNEL_DTO)));
     }
 
     @Test
     void channels_forwards_sort_key_to_page() {
         when(pageService.channels(any())).thenReturn(new ChannelsPage(List.of()));
-        dashboardController.channels(model, ratio);
-        verify(pageService).channels(ratio);
+        dashboardController.channels(model, RATIO);
+        verify(pageService).channels(RATIO);
     }
 
     @Test

@@ -63,7 +63,7 @@ class PageServiceTest {
         List<NodeDto> nodes = List.of(NODE_DTO);
         mockChannelsAndNodesWithoutWarning(channels, nodes);
 
-        assertThat(pageService.dashboard(SortBy.defaultSort)).usingRecursiveComparison().isEqualTo(
+        assertThat(pageService.dashboard(SortBy.DEFAULT_SORT)).usingRecursiveComparison().isEqualTo(
                 new DashboardPage(channels, nodes, NodesAndChannelsWithWarningsDto.NONE)
         );
     }
@@ -77,7 +77,7 @@ class PageServiceTest {
         mockChannelsAndNodesWithoutWarning(List.of(), nodesUnsorted);
 
         List<NodeDto> nodesSorted = List.of(alice, bob, charlie);
-        assertThat(pageService.dashboard(SortBy.defaultSort).getNodes()).isEqualTo(nodesSorted);
+        assertThat(pageService.dashboard(SortBy.DEFAULT_SORT).getNodes()).isEqualTo(nodesSorted);
     }
 
     @Test
@@ -89,7 +89,7 @@ class PageServiceTest {
         mockChannelsAndNodesWithoutWarning(List.of(), nodesUnsorted);
 
         List<NodeDto> nodesSorted = List.of(offlineNode1, offlineNode2, onlineNode);
-        assertThat(pageService.dashboard(SortBy.defaultSort).getNodes()).isEqualTo(nodesSorted);
+        assertThat(pageService.dashboard(SortBy.DEFAULT_SORT).getNodes()).isEqualTo(nodesSorted);
     }
 
     private void mockChannelsAndNodesWithoutWarning(List<OpenChannelDto> channels, List<NodeDto> nodes) {
@@ -102,7 +102,7 @@ class PageServiceTest {
     void channels() {
         when(dataService.getOpenChannels()).thenReturn(List.of(OPEN_CHANNEL_DTO));
 
-        assertThat(pageService.channels(SortBy.defaultSort)).usingRecursiveComparison().isEqualTo(
+        assertThat(pageService.channels(SortBy.DEFAULT_SORT)).usingRecursiveComparison().isEqualTo(
                 new ChannelsPage(List.of(OPEN_CHANNEL_DTO))
         );
     }
@@ -173,7 +173,7 @@ class PageServiceTest {
                     channel(CHANNEL_ID_2, balanceWithLocalSat(400)),
                     channel(CHANNEL_ID_3, balanceWithLocalSat(100))
             ));
-            assertThat(pageService.dashboard(SortBy.defaultSort).getChannels().stream().map(OpenChannelDto::channelId))
+            assertThat(pageService.dashboard(SortBy.DEFAULT_SORT).getChannels().stream().map(OpenChannelDto::channelId))
                     .containsExactly(CHANNEL_ID_3, CHANNEL_ID, CHANNEL_ID_2);
         }
 
@@ -184,7 +184,7 @@ class PageServiceTest {
                     channel(CHANNEL_ID_2, balanceWithLocalSat(40)),
                     channel(CHANNEL_ID_3, balanceWithLocalSat(20))
             ));
-            assertThat(pageService.dashboard(SortBy.ratio).getChannels().stream().map(OpenChannelDto::channelId))
+            assertThat(pageService.dashboard(SortBy.RATIO).getChannels().stream().map(OpenChannelDto::channelId))
                     .containsExactly(CHANNEL_ID, CHANNEL_ID_3, CHANNEL_ID_2);
         }
 
@@ -195,7 +195,7 @@ class PageServiceTest {
                     UNANNOUNCED_CHANNEL,
                     OPEN_CHANNEL_DTO2
             ));
-            assertThat(pageService.dashboard(SortBy.announced).getChannels().stream()
+            assertThat(pageService.dashboard(SortBy.ANNOUNCED).getChannels().stream()
                     .map(OpenChannelDto::privateChannel))
                     .containsExactly(false, false, true);
         }
@@ -207,7 +207,7 @@ class PageServiceTest {
                     channel(CHANNEL_ID_2, balanceWithRemoteSat(400)),
                     channel(CHANNEL_ID_3, balanceWithRemoteSat(100))
             ));
-            assertThat(pageService.dashboard(SortBy.inbound).getChannels().stream().map(OpenChannelDto::channelId))
+            assertThat(pageService.dashboard(SortBy.INBOUND).getChannels().stream().map(OpenChannelDto::channelId))
                     .containsExactly(CHANNEL_ID, CHANNEL_ID_3, CHANNEL_ID_2);
         }
 
@@ -218,7 +218,7 @@ class PageServiceTest {
                     channel(CHANNEL_ID_2, balanceWithLocalSat(99)),
                     channel(CHANNEL_ID_3, balanceWithLocalSat(10))
             ));
-            assertThat(pageService.dashboard(SortBy.outbound).getChannels().stream().map(OpenChannelDto::channelId))
+            assertThat(pageService.dashboard(SortBy.OUTBOUND).getChannels().stream().map(OpenChannelDto::channelId))
                     .containsExactly(CHANNEL_ID, CHANNEL_ID_3, CHANNEL_ID_2);
         }
 
@@ -229,7 +229,7 @@ class PageServiceTest {
                     channel(CHANNEL_ID_2, 3_000_000),
                     channel(CHANNEL_ID_3, 2_000_000)
             ));
-            assertThat(pageService.dashboard(SortBy.capacity).getChannels().stream().map(OpenChannelDto::channelId))
+            assertThat(pageService.dashboard(SortBy.CAPACITY).getChannels().stream().map(OpenChannelDto::channelId))
                     .containsExactly(CHANNEL_ID, CHANNEL_ID_3, CHANNEL_ID_2);
         }
 
@@ -240,7 +240,8 @@ class PageServiceTest {
                     channel(CHANNEL_ID_2, new PoliciesDto(policy(0, 2), ZERO_POLICY)),
                     channel(CHANNEL_ID_3, new PoliciesDto(policy(0, 1), ZERO_POLICY))
             ));
-            assertThat(pageService.dashboard(SortBy.localbasefee).getChannels().stream().map(OpenChannelDto::channelId))
+            assertThat(pageService.dashboard(SortBy.LOCAL_BASE_FEE).getChannels().stream()
+                    .map(OpenChannelDto::channelId))
                     .containsExactly(CHANNEL_ID, CHANNEL_ID_3, CHANNEL_ID_2);
         }
 
@@ -251,7 +252,7 @@ class PageServiceTest {
                     channel(CHANNEL_ID_2, new PoliciesDto(ZERO_POLICY, policy(0, 2))),
                     channel(CHANNEL_ID_3, new PoliciesDto(ZERO_POLICY, policy(0, 1)))
             ));
-            assertThat(pageService.dashboard(SortBy.remotebasefee).getChannels().stream()
+            assertThat(pageService.dashboard(SortBy.REMOTE_BASE_FEE).getChannels().stream()
                     .map(OpenChannelDto::channelId))
                     .containsExactly(CHANNEL_ID, CHANNEL_ID_3, CHANNEL_ID_2);
         }
@@ -263,7 +264,8 @@ class PageServiceTest {
                     channel(CHANNEL_ID_2, new PoliciesDto(policy(2, 0), ZERO_POLICY)),
                     channel(CHANNEL_ID_3, new PoliciesDto(policy(3, 0), ZERO_POLICY))
             ));
-            assertThat(pageService.dashboard(SortBy.localfeerate).getChannels().stream().map(OpenChannelDto::channelId))
+            assertThat(pageService.dashboard(SortBy.LOCAL_FEE_RATE).getChannels().stream()
+                    .map(OpenChannelDto::channelId))
                     .containsExactly(CHANNEL_ID_2, CHANNEL_ID_3, CHANNEL_ID);
         }
 
@@ -274,7 +276,7 @@ class PageServiceTest {
                     channel(CHANNEL_ID_2, new PoliciesDto(ZERO_POLICY, policy(5, 2))),
                     channel(CHANNEL_ID_3, new PoliciesDto(ZERO_POLICY, policy(3, 1)))
             ));
-            assertThat(pageService.dashboard(SortBy.remotefeerate).getChannels().stream()
+            assertThat(pageService.dashboard(SortBy.REMOTE_FEE_RATE).getChannels().stream()
                     .map(OpenChannelDto::channelId))
                     .containsExactly(CHANNEL_ID, CHANNEL_ID_3, CHANNEL_ID_2);
         }
@@ -286,7 +288,7 @@ class PageServiceTest {
                     channel(CHANNEL_ID_2, "Bob"),
                     channel(CHANNEL_ID_3, "alice")
             ));
-            assertThat(pageService.dashboard(SortBy.alias).getChannels().stream().map(OpenChannelDto::channelId))
+            assertThat(pageService.dashboard(SortBy.ALIAS).getChannels().stream().map(OpenChannelDto::channelId))
                     .containsExactly(CHANNEL_ID_3, CHANNEL_ID_2, CHANNEL_ID);
         }
 
@@ -297,7 +299,7 @@ class PageServiceTest {
                     channelWithRating(CHANNEL_ID_2, 3),
                     channelWithRating(CHANNEL_ID_3, 1)
             ));
-            assertThat(pageService.dashboard(SortBy.channelrating).getChannels().stream()
+            assertThat(pageService.dashboard(SortBy.CHANNEL_RATING).getChannels().stream()
                     .map(OpenChannelDto::channelId))
                     .containsExactly(CHANNEL_ID_3, CHANNEL_ID, CHANNEL_ID_2);
         }
@@ -309,7 +311,7 @@ class PageServiceTest {
                     channel(CHANNEL_ID_2, balanceWithLocalSat(2)),
                     channel(CHANNEL_ID_3, balanceWithLocalSat(1))
             ));
-            assertThat(pageService.dashboard(SortBy.channelid).getChannels().stream().map(OpenChannelDto::channelId))
+            assertThat(pageService.dashboard(SortBy.CHANNEL_ID).getChannels().stream().map(OpenChannelDto::channelId))
                     .containsExactly(CHANNEL_ID, CHANNEL_ID_2, CHANNEL_ID_3);
         }
 

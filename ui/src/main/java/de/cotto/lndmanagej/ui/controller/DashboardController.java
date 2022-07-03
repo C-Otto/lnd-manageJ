@@ -34,7 +34,7 @@ public class DashboardController {
     }
 
     private SortBy getOrDefault(@Nullable SortBy sort) {
-        return sort == null ? SortBy.defaultSort : sort;
+        return sort == null ? SortBy.DEFAULT_SORT : sort;
     }
 
 }

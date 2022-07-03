@@ -1,18 +1,17 @@
 package de.cotto.lndmanagej.ui.controller.param;
 
-@SuppressWarnings("PMD.FieldNamingConventions")
 public enum SortBy {
-    defaultSort,
-    ratio,
-    announced,
-    inbound,
-    outbound,
-    capacity,
-    localbasefee,
-    remotebasefee,
-    localfeerate,
-    remotefeerate,
-    alias,
-    channelrating,
-    channelid;
+    DEFAULT_SORT,
+    RATIO,
+    ANNOUNCED,
+    INBOUND,
+    OUTBOUND,
+    CAPACITY,
+    LOCAL_BASE_FEE,
+    REMOTE_BASE_FEE,
+    LOCAL_FEE_RATE,
+    REMOTE_FEE_RATE,
+    ALIAS,
+    CHANNEL_RATING,
+    CHANNEL_ID;
 }
