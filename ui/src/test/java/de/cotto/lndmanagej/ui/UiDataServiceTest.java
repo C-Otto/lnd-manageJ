@@ -9,7 +9,6 @@ import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import org.junit.jupiter.api.Test;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 
@@ -56,7 +55,7 @@ class UiDataServiceTest {
         }
 
         @Override
-        public List<OpenChannelDto> getOpenChannels(@Nullable String sort) {
+        public List<OpenChannelDto> getOpenChannels() {
             return List.of(OPEN_CHANNEL_DTO);
         }
 
