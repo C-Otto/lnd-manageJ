@@ -27,7 +27,6 @@ import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 
@@ -77,11 +76,11 @@ public class UiDataServiceImpl extends UiDataService {
     }
 
     @Override
-    public List<OpenChannelDto> getOpenChannels(@Nullable String sort) {
+    public List<OpenChannelDto> getOpenChannels() {
         ChannelsDto openChannels = statusController.getOpenChannels();
-        return sort(openChannels.channels().parallelStream()
+        return openChannels.channels().parallelStream()
                 .map(this::toOpenChannelDto)
-                .toList(), sort);
+                .toList();
     }
 
     private OpenChannelDto toOpenChannelDto(ChannelId channelId) {

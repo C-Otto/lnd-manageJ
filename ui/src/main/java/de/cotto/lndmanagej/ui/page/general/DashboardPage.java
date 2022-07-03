@@ -9,19 +9,17 @@ import java.util.List;
 public class DashboardPage extends ThymeleafPage {
 
     private final List<NodeDto> nodes;
+    private final List<OpenChannelDto> channels;
 
-    public DashboardPage(List<OpenChannelDto> channels, List<NodeDto> nodes, NodesAndChannelsWithWarningsDto warnings) {
+    public DashboardPage(List<OpenChannelDto> channels,
+                         List<NodeDto> nodes,
+                         NodesAndChannelsWithWarningsDto warnings) {
         super();
-        this.nodes = sort(nodes);
+        this.nodes = nodes.stream().sorted(NodeDto.getDefaultComparator()).toList();
+        this.channels = channels;
         add("warnings", warnings);
-        add("channels", channels);
+        add("channels", this.channels);
         add("nodes", this.nodes);
-    }
-
-    private List<NodeDto> sort(List<NodeDto> nodes) {
-        return nodes.stream()
-                .sorted(NodeDto.getDefaultComparator())
-                .toList();
     }
 
     public List<NodeDto> getNodes() {
@@ -33,4 +31,7 @@ public class DashboardPage extends ThymeleafPage {
         return "dashboard";
     }
 
+    public List<OpenChannelDto> getChannels() {
+        return channels;
+    }
 }

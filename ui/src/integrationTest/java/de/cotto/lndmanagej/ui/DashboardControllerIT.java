@@ -1,9 +1,9 @@
 package de.cotto.lndmanagej.ui;
 
 import de.cotto.lndmanagej.ui.controller.DashboardController;
-import de.cotto.lndmanagej.ui.dto.NodeDto;
-import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
+import de.cotto.lndmanagej.ui.controller.param.SortBy;
 import de.cotto.lndmanagej.ui.page.PageService;
+import de.cotto.lndmanagej.ui.page.channel.ChannelsPage;
 import de.cotto.lndmanagej.ui.page.general.DashboardPage;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto.NONE;
+import static de.cotto.lndmanagej.ui.dto.NodeDtoFixture.NODE_DTO;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -29,18 +30,38 @@ class DashboardControllerIT extends BaseControllerIT {
     private PageService pageService;
 
     @Test
-    void empty_dashboard() throws Exception {
-        when(pageService.dashboard(null)).thenReturn(new DashboardPage(List.of(), List.of(), NONE));
+    void dashboard_empty_okay() throws Exception {
+        when(pageService.dashboard(SortBy.defaultSort)).thenReturn(new DashboardPage(List.of(), List.of(), NONE));
         mockMvc.perform(get("/")).andExpect(status().isOk());
     }
 
     @Test
-    void dashboard() throws Exception {
-        OpenChannelDto channel = OPEN_CHANNEL_DTO;
-        NodeDto node = new NodeDto(channel.remotePubkey().toString(), channel.remoteAlias(), true, 1234);
-        when(pageService.dashboard(null)).thenReturn(
-                new DashboardPage(List.of(channel), List.of(node), NONE)
+    void dashboard_unsupportedQueryParameter_badRequest() throws Exception {
+        mockMvc.perform(get("/").param("sort", "unsupported-param"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void dashboard_defaultSorting_ok() throws Exception {
+        when(pageService.dashboard(SortBy.defaultSort)).thenReturn(
+                new DashboardPage(List.of(OPEN_CHANNEL_DTO), List.of(NODE_DTO), NONE)
         );
         mockMvc.perform(get("/")).andExpect(status().isOk());
+    }
+
+    @Test
+    void dashboard_byAlias_ok() throws Exception {
+        when(pageService.dashboard(SortBy.alias)).thenReturn(
+                new DashboardPage(List.of(OPEN_CHANNEL_DTO), List.of(NODE_DTO), NONE)
+        );
+        mockMvc.perform(get("/").param("sort", "alias"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void channels_byRating_ok() throws Exception {
+        when(pageService.channels(SortBy.channelrating)).thenReturn(new ChannelsPage(List.of(OPEN_CHANNEL_DTO)));
+        mockMvc.perform(get("/channels/").param("sort", "channelrating"))
+                .andExpect(status().isOk());
     }
 }

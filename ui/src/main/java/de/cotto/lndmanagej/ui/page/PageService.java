@@ -4,6 +4,7 @@ import de.cotto.lndmanagej.controller.NotFoundException;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.ui.UiDataService;
+import de.cotto.lndmanagej.ui.controller.param.SortBy;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import de.cotto.lndmanagej.ui.page.channel.ChannelDetailsPage;
 import de.cotto.lndmanagej.ui.page.channel.ChannelsPage;
@@ -13,7 +14,7 @@ import de.cotto.lndmanagej.ui.page.node.NodeDetailsPage;
 import de.cotto.lndmanagej.ui.page.node.NodesPage;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Nullable;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -28,24 +29,16 @@ public class PageService {
         this.dataService = dataService;
     }
 
-    public DashboardPage dashboard() {
-        return dashboard(null);
-    }
-
-    public DashboardPage dashboard(@Nullable String sort) {
+    public DashboardPage dashboard(SortBy sort) {
         return new DashboardPage(
-                dataService.getOpenChannels(sort),
+                sort(dataService.getOpenChannels(), sort),
                 dataService.createNodeList(),
                 dataService.getWarnings()
         );
     }
 
-    public ChannelsPage channels() {
-        return channels(null);
-    }
-
-    public ChannelsPage channels(@Nullable String sort) {
-        return new ChannelsPage(dataService.getOpenChannels(sort));
+    public ChannelsPage channels(SortBy sortBy) {
+        return new ChannelsPage(sort(dataService.getOpenChannels(), sortBy));
     }
 
     public ChannelDetailsPage channelDetails(ChannelId channelId) throws NotFoundException {
@@ -69,4 +62,27 @@ public class PageService {
         return new ErrorPage(errorMessage);
     }
 
+    private List<OpenChannelDto> sort(List<OpenChannelDto> channels, SortBy sort) {
+        return channels.stream()
+                .sorted(channelComparator(sort).thenComparing(OpenChannelDto::channelId))
+                .toList();
+    }
+
+    @SuppressWarnings("PMD.CyclomaticComplexity")
+    private static Comparator<OpenChannelDto> channelComparator(SortBy sort) {
+        return switch (sort) {
+            case announced -> Comparator.comparing(OpenChannelDto::privateChannel);
+            case inbound -> Comparator.comparingLong(c -> c.balanceInformation().remoteBalanceSat());
+            case outbound -> Comparator.comparingLong(c -> c.balanceInformation().localBalanceSat());
+            case capacity -> Comparator.comparing(OpenChannelDto::capacitySat);
+            case localbasefee -> Comparator.comparing(c -> Long.parseLong(c.policies().local().baseFeeMilliSat()));
+            case localfeerate -> Comparator.comparing(c -> c.policies().local().feeRatePpm());
+            case remotebasefee -> Comparator.comparing(c -> Long.parseLong(c.policies().remote().baseFeeMilliSat()));
+            case remotefeerate -> Comparator.comparing(c -> c.policies().remote().feeRatePpm());
+            case alias -> Comparator.comparing(OpenChannelDto::remoteAlias, String.CASE_INSENSITIVE_ORDER);
+            case channelrating -> Comparator.comparing(OpenChannelDto::rating);
+            case channelid -> Comparator.comparing(OpenChannelDto::channelId);
+            default -> Comparator.comparing(c -> c.balanceInformation().getOutboundPercentage());
+        };
+    }
 }
