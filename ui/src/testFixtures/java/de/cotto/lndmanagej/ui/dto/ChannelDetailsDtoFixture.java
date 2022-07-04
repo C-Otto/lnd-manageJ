@@ -38,5 +38,6 @@ public class ChannelDetailsDtoFixture {
             FlowReportDto.createFromModel(FLOW_REPORT),
             RebalanceReportDto.createFromModel(REBALANCE_REPORT),
             CHANNEL_WARNINGS.descriptions(),
-            RatingDto.fromModel(RATING));
+            RatingDto.fromModel(RATING)
+    );
 }
