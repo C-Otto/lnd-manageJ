@@ -9,20 +9,18 @@ import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import org.junit.jupiter.api.Test;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 
 import static de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto.NONE;
-import static de.cotto.lndmanagej.model.NodeFixtures.NODE;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.ui.dto.ChannelDetailsDtoFixture.CHANNEL_DETAILS_DTO;
 import static de.cotto.lndmanagej.ui.dto.NodeDetailsDtoFixture.NODE_DETAILS_MODEL;
+import static de.cotto.lndmanagej.ui.dto.NodeDtoFixture.NODE_DTO;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class UiDataServiceTest {
-    private static final NodeDto NODE_DTO = new NodeDto(PUBKEY.toString(), NODE.alias(), true);
     private final UiDataService uiDataService = new TestableUiDataService();
 
     @Test
@@ -57,7 +55,7 @@ class UiDataServiceTest {
         }
 
         @Override
-        public List<OpenChannelDto> getOpenChannels(@Nullable String sort) {
+        public List<OpenChannelDto> getOpenChannels() {
             return List.of(OPEN_CHANNEL_DTO);
         }
 

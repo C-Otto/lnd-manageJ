@@ -38,6 +38,7 @@
             </p>
             <p th:text="'Channel age: ' + ${channel.channelAge}+ ' days'"></p>
             <p th:text="'Capacity: ' + ${@formatter.formatNumber(channel.capacitySat)}+ ' sats'"></p>
+            <p style="margin-bottom: 0" th:text="'Channel Rating: ' + ${@formatter.formatNumber(channel.rating.rating)}"></p>
         </div>
     </div>
 </div>

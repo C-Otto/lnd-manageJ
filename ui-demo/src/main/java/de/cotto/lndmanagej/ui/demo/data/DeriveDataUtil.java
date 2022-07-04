@@ -98,8 +98,13 @@ public final class DeriveDataUtil {
         return new Policy(feeRate, baseFee, enabled, timeLockDelta, MAX_HTLC);
     }
 
-    public static ChannelStatusDto deriveChannelStatus(ChannelId channelId) {
+    static ChannelStatusDto deriveChannelStatus(ChannelId channelId) {
         boolean privateChannel = createRandomGenerator(channelId).nextInt(10) <= 1;
         return ChannelStatusDto.createFromModel(new ChannelStatus(privateChannel, true, false, OPEN));
     }
+
+    static long deriveRating(ChannelId channelId) {
+        return createRandomGenerator(channelId).nextInt(100_000);
+    }
+
 }

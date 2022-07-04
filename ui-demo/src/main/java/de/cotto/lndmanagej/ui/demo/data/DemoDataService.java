@@ -7,10 +7,12 @@ import de.cotto.lndmanagej.controller.dto.NodeWithWarningsDto;
 import de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto;
 import de.cotto.lndmanagej.controller.dto.OnlineReportDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
+import de.cotto.lndmanagej.controller.dto.RatingDto;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ChannelStatus;
 import de.cotto.lndmanagej.model.OnlineReport;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.model.Rating;
 import de.cotto.lndmanagej.ui.UiDataService;
 import de.cotto.lndmanagej.ui.dto.BalanceInformationModel;
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
@@ -20,7 +22,6 @@ import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -39,6 +40,7 @@ import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveFlowReport;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveOnChainCosts;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveOpenInitiator;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.derivePolicies;
+import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveRating;
 import static de.cotto.lndmanagej.ui.demo.data.DeriveDataUtil.deriveRebalanceReport;
 import static de.cotto.lndmanagej.ui.dto.BalanceInformationModel.EMPTY;
 import static de.cotto.lndmanagej.ui.dto.CloseType.BREACH_FORCE_CLOSE;
@@ -116,6 +118,7 @@ public class DemoDataService extends UiDataService {
             "No flow in the past 35 days.");
 
     public static final ChannelId CLOSED_CHANNEL = ChannelId.fromCompactForm("712345x124x1");
+    public static final RatingDto RATING = RatingDto.fromModel(new Rating(700L));
 
     public DemoDataService() {
         super();
@@ -130,16 +133,13 @@ public class DemoDataService extends UiDataService {
     }
 
     @Override
-    public List<OpenChannelDto> getOpenChannels(@Nullable String sort) {
-        return sort(
-                List.of(C_OTTO, ACINQ, TRY_BITCOIN, KRAKEN, WOS, B_CASH_IS_TRASH, POCKET, ACINQ2, B_CASH_IS_TRASH2),
-                sort
-        );
+    public List<OpenChannelDto> getOpenChannels() {
+        return List.of(C_OTTO, ACINQ, TRY_BITCOIN, KRAKEN, WOS, B_CASH_IS_TRASH, POCKET, ACINQ2, B_CASH_IS_TRASH2);
     }
 
     @Override
     public Set<Pubkey> getPubkeys() {
-        return getOpenChannels(null).stream().map(OpenChannelDto::remotePubkey).collect(toSet());
+        return getOpenChannels().stream().map(OpenChannelDto::remotePubkey).collect(toSet());
     }
 
     private List<OpenChannelDto> getOpenChannelsWith(Pubkey pubkey) {
@@ -170,10 +170,13 @@ public class DemoDataService extends UiDataService {
 
     @Override
     public NodeDto getNode(Pubkey pubkey) {
-        return getOpenChannels().stream()
+        List<OpenChannelDto> channels = getOpenChannels().stream()
                 .filter(channel -> channel.remotePubkey().equals(pubkey))
-                .map(channel -> new NodeDto(pubkey.toString(), channel.remoteAlias(), isOnline(channel.channelId())))
-                .findFirst().orElseThrow();
+                .toList();
+        String alias = channels.stream().findFirst().orElseThrow().remoteAlias();
+        boolean isOnline = isOnline(channels.stream().findFirst().orElseThrow().channelId());
+        Rating rating = sumRatings(channels);
+        return new NodeDto(pubkey.toString(), alias, isOnline, rating.getRating());
     }
 
     @Override
@@ -212,10 +215,11 @@ public class DemoDataService extends UiDataService {
         ChannelId channelId = ChannelId.fromCompactForm(compactChannelId);
         Pubkey remotePubkey = Pubkey.create(pubkey);
         PoliciesDto policies = PoliciesDto.createFromModel(derivePolicies(channelId));
-        boolean isPrivateChannel = deriveChannelStatus(channelId).privateChannel();
+        boolean isPrivate = deriveChannelStatus(channelId).privateChannel();
         long capacity = local + remote;
         BalanceInformationModel balance = createBalanceInformation(local, remote);
-        return new OpenChannelDto(channelId, alias, remotePubkey, policies, balance, capacity, isPrivateChannel);
+        long rating = deriveRating(channelId);
+        return new OpenChannelDto(channelId, alias, remotePubkey, policies, balance, capacity, isPrivate, rating);
     }
 
     private static BalanceInformationModel createBalanceInformation(long local, long remote) {
@@ -241,8 +245,8 @@ public class DemoDataService extends UiDataService {
                 deriveFeeReport(channel.channelId()),
                 deriveFlowReport(channel.channelId()),
                 deriveRebalanceReport(channel.channelId()),
-                warnings
-        );
+                warnings,
+                RatingDto.fromModel(new Rating(channel.rating())));
     }
 
     private ChannelDetailsDto createClosedChannelDetails(Set<String> warnings) {
@@ -260,8 +264,8 @@ public class DemoDataService extends UiDataService {
                 deriveFeeReport(CLOSED_CHANNEL),
                 deriveFlowReport(CLOSED_CHANNEL),
                 deriveRebalanceReport(CLOSED_CHANNEL),
-                warnings
-        );
+                warnings,
+                RATING);
     }
 
     private static NodeDetailsDto createNodeDetails(NodeDto node, List<OpenChannelDto> channels, Set<String> warnings) {
@@ -280,7 +284,8 @@ public class DemoDataService extends UiDataService {
                 deriveFeeReport(firstChannel.channelId()),
                 deriveFlowReport(firstChannel.channelId()),
                 deriveRebalanceReport(firstChannel.channelId()),
-                warnings);
+                warnings,
+                RatingDto.fromModel(sumRatings(channels)));
     }
 
     private static List<ChannelId> getPendingForceClosingChannels() {
@@ -300,6 +305,10 @@ public class DemoDataService extends UiDataService {
         );
     }
 
+    private static Rating sumRatings(List<OpenChannelDto> channels) {
+        long sum = channels.stream().mapToLong(OpenChannelDto::rating).sum();
+        return new Rating(sum);
+    }
 }
 
 

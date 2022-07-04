@@ -5,6 +5,7 @@ import de.cotto.lndmanagej.controller.NotFoundException;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.ui.UiDataService;
+import de.cotto.lndmanagej.ui.controller.param.SortBy;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import de.cotto.lndmanagej.ui.page.PageService;
 import org.springframework.stereotype.Controller;
@@ -62,7 +63,7 @@ public class SearchController {
             return redirectToNodeDetails(matchingChannels.get(0).remotePubkey());
         }
 
-        return pageService.nodes(matchingChannels).create(model);
+        return pageService.nodes(matchingChannels, SortBy.DEFAULT_SORT).create(model);
     }
 
     private String redirectToNodeDetails(Pubkey pubkey) {

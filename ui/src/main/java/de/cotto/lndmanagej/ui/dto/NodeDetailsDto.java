@@ -4,6 +4,7 @@ import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.FlowReportDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.controller.dto.OnlineReportDto;
+import de.cotto.lndmanagej.controller.dto.RatingDto;
 import de.cotto.lndmanagej.controller.dto.RebalanceReportDto;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.NodeDetails;
@@ -25,7 +26,8 @@ public record NodeDetailsDto(
         FeeReportDto feeReport,
         FlowReportDto flowReport,
         RebalanceReportDto rebalanceReport,
-        Set<String> warnings
+        Set<String> warnings,
+        RatingDto rating
 ) {
     public static NodeDetailsDto create(NodeDetails nodeDetails, List<ClosedChannelDto> closedChannels) {
         return new NodeDetailsDto(
@@ -41,7 +43,8 @@ public record NodeDetailsDto(
                 FeeReportDto.createFromModel(nodeDetails.feeReport()),
                 FlowReportDto.createFromModel(nodeDetails.flowReport()),
                 RebalanceReportDto.createFromModel(nodeDetails.rebalanceReport()),
-                nodeDetails.warnings().descriptions()
+                nodeDetails.warnings().descriptions(),
+                RatingDto.fromModel(nodeDetails.rating())
         );
     }
 }

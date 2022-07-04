@@ -4,6 +4,7 @@ import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.FlowReportDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.controller.dto.OnlineReportDto;
+import de.cotto.lndmanagej.controller.dto.RatingDto;
 import de.cotto.lndmanagej.controller.dto.RebalanceReportDto;
 import de.cotto.lndmanagej.model.PubkeyFixtures;
 
@@ -14,6 +15,7 @@ import static de.cotto.lndmanagej.model.FeeReportFixtures.FEE_REPORT;
 import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT;
+import static de.cotto.lndmanagej.model.RatingFixtures.RATING;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static de.cotto.lndmanagej.model.warnings.ChannelWarningsFixtures.CHANNEL_WARNINGS;
 import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixture.BALANCE_INFORMATION_MODEL;
@@ -34,5 +36,7 @@ public class NodeDetailsDtoFixture {
             FeeReportDto.createFromModel(FEE_REPORT),
             FlowReportDto.createFromModel(FLOW_REPORT),
             RebalanceReportDto.createFromModel(REBALANCE_REPORT),
-            CHANNEL_WARNINGS.descriptions());
+            CHANNEL_WARNINGS.descriptions(),
+            RatingDto.fromModel(RATING)
+    );
 }

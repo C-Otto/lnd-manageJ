@@ -4,43 +4,49 @@ import de.cotto.lndmanagej.model.OpenInitiator;
 import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class DeriveDataUtilTest {
 
     @Test
     void deriveRebalanceReport_sameChannelId_sameResult() {
-        assertEquals("269000", DeriveDataUtil.deriveRebalanceReport(CHANNEL_ID).sourceAmountMilliSat());
-        assertEquals("269000", DeriveDataUtil.deriveRebalanceReport(CHANNEL_ID).sourceAmountMilliSat());
+        assertThat(DeriveDataUtil.deriveRebalanceReport(CHANNEL_ID).sourceAmountMilliSat()).isEqualTo("269000");
+        assertThat(DeriveDataUtil.deriveRebalanceReport(CHANNEL_ID).sourceAmountMilliSat()).isEqualTo("269000");
     }
 
     @Test
     void deriveFeeReport_sameChannelId_sameResult() {
-        assertEquals("188477", DeriveDataUtil.deriveFeeReport(CHANNEL_ID).earnedMilliSat());
-        assertEquals("188477", DeriveDataUtil.deriveFeeReport(CHANNEL_ID).earnedMilliSat());
+        assertThat(DeriveDataUtil.deriveFeeReport(CHANNEL_ID).earnedMilliSat()).isEqualTo("188477");
+        assertThat(DeriveDataUtil.deriveFeeReport(CHANNEL_ID).earnedMilliSat()).isEqualTo("188477");
     }
 
     @Test
     void deriveFlowReport_sameChannelId_sameResult() {
-        assertEquals("88477000", DeriveDataUtil.deriveFlowReport(CHANNEL_ID).forwardedSentMilliSat());
-        assertEquals("88477000", DeriveDataUtil.deriveFlowReport(CHANNEL_ID).forwardedSentMilliSat());
+        assertThat(DeriveDataUtil.deriveFlowReport(CHANNEL_ID).forwardedSentMilliSat()).isEqualTo("88477000");
+        assertThat(DeriveDataUtil.deriveFlowReport(CHANNEL_ID).forwardedSentMilliSat()).isEqualTo("88477000");
     }
 
     @Test
     void derivePolicy_sameChannelId_sameResult() {
-        assertEquals(770L, DeriveDataUtil.derivePolicy(CHANNEL_ID).feeRate());
-        assertEquals(770L, DeriveDataUtil.derivePolicy(CHANNEL_ID).feeRate());
+        assertThat(DeriveDataUtil.derivePolicy(CHANNEL_ID).feeRate()).isEqualTo(770L);
+        assertThat(DeriveDataUtil.derivePolicy(CHANNEL_ID).feeRate()).isEqualTo(770L);
     }
 
     @Test
     void deriveOnChainCosts_sameChannelId_sameResult() {
-        assertEquals("1849", DeriveDataUtil.deriveOnChainCosts(CHANNEL_ID).sweepCostsSat());
-        assertEquals("1849", DeriveDataUtil.deriveOnChainCosts(CHANNEL_ID).sweepCostsSat());
+        assertThat(DeriveDataUtil.deriveOnChainCosts(CHANNEL_ID).sweepCostsSat()).isEqualTo("1849");
+        assertThat(DeriveDataUtil.deriveOnChainCosts(CHANNEL_ID).sweepCostsSat()).isEqualTo("1849");
     }
 
     @Test
     void deriveOpenInitiator_sameChannelId_sameResult() {
-        assertEquals(OpenInitiator.LOCAL, DeriveDataUtil.deriveOpenInitiator(CHANNEL_ID));
-        assertEquals(OpenInitiator.LOCAL, DeriveDataUtil.deriveOpenInitiator(CHANNEL_ID));
+        assertThat(DeriveDataUtil.deriveOpenInitiator(CHANNEL_ID)).isEqualTo(OpenInitiator.LOCAL);
+        assertThat(DeriveDataUtil.deriveOpenInitiator(CHANNEL_ID)).isEqualTo(OpenInitiator.LOCAL);
+    }
+
+    @Test
+    void deriveRating_sameChannelId_sameResult() {
+        assertThat(DeriveDataUtil.deriveRating(CHANNEL_ID)).isEqualTo(51_361);
+        assertThat(DeriveDataUtil.deriveRating(CHANNEL_ID)).isEqualTo(51_361);
     }
 }

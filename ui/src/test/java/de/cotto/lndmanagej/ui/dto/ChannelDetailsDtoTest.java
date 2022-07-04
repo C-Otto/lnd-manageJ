@@ -4,6 +4,7 @@ import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.FlowReportDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
+import de.cotto.lndmanagej.controller.dto.RatingDto;
 import de.cotto.lndmanagej.controller.dto.RebalanceReportDto;
 import de.cotto.lndmanagej.model.OpenInitiator;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES_FOR_LOCAL_CHANNEL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
+import static de.cotto.lndmanagej.model.RatingFixtures.RATING;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static de.cotto.lndmanagej.model.warnings.ChannelWarningsFixtures.CHANNEL_WARNINGS;
 import static de.cotto.lndmanagej.ui.dto.ChannelDetailsDtoFixture.CHANNEL_DETAILS_DTO;
@@ -82,6 +84,11 @@ class ChannelDetailsDtoTest {
     @Test
     void warnings() {
         assertThat(CHANNEL_DETAILS_DTO.warnings()).isEqualTo(CHANNEL_WARNINGS.descriptions());
+    }
+
+    @Test
+    void rating() {
+        assertThat(CHANNEL_DETAILS_DTO.rating()).isEqualTo(RatingDto.fromModel(RATING));
     }
     // CPD-ON
 }

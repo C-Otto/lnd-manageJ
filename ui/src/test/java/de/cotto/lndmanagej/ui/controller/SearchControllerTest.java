@@ -3,7 +3,7 @@ package de.cotto.lndmanagej.ui.controller;
 import de.cotto.lndmanagej.controller.ChannelIdConverter;
 import de.cotto.lndmanagej.controller.NotFoundException;
 import de.cotto.lndmanagej.ui.UiDataService;
-import de.cotto.lndmanagej.ui.dto.NodeDto;
+import de.cotto.lndmanagej.ui.controller.param.SortBy;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import de.cotto.lndmanagej.ui.page.PageService;
 import de.cotto.lndmanagej.ui.page.channel.ChannelDetailsPage;
@@ -20,9 +20,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
-import static de.cotto.lndmanagej.model.NodeFixtures.NODE_PEER;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.ui.dto.ChannelDetailsDtoFixture.CHANNEL_DETAILS_DTO;
+import static de.cotto.lndmanagej.ui.dto.NodeDtoFixture.NODE_DTO;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -83,8 +83,7 @@ class SearchControllerTest {
         String query = "BERT";
         List<OpenChannelDto> channels = List.of(OPEN_CHANNEL_DTO, OPEN_CHANNEL_DTO);
         when(dataService.getOpenChannels()).thenReturn(channels);
-        NodeDto nodeDto = new NodeDto(PUBKEY.toString(), NODE_PEER.alias(), true);
-        when(pageService.nodes(channels)).thenReturn(new NodesPage(List.of(nodeDto)));
+        when(pageService.nodes(channels, SortBy.DEFAULT_SORT)).thenReturn(new NodesPage(List.of(NODE_DTO)));
         assertThat(searchController.search(query, model)).isEqualTo("nodes");
     }
 

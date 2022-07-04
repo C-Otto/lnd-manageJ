@@ -4,6 +4,8 @@ import de.cotto.lndmanagej.controller.NotFoundException;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.ui.UiDataService;
+import de.cotto.lndmanagej.ui.controller.param.SortBy;
+import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import de.cotto.lndmanagej.ui.page.channel.ChannelDetailsPage;
 import de.cotto.lndmanagej.ui.page.channel.ChannelsPage;
@@ -13,12 +15,14 @@ import de.cotto.lndmanagej.ui.page.node.NodeDetailsPage;
 import de.cotto.lndmanagej.ui.page.node.NodesPage;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Nullable;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
+import static de.cotto.lndmanagej.ui.controller.param.SortBy.NODE_ALIAS;
 import static java.util.stream.Collectors.toSet;
 
+@SuppressWarnings("PMD.TooManyMethods")
 @Component
 public class PageService {
 
@@ -28,37 +32,29 @@ public class PageService {
         this.dataService = dataService;
     }
 
-    public DashboardPage dashboard() {
-        return dashboard(null);
-    }
-
-    public DashboardPage dashboard(@Nullable String sort) {
+    public DashboardPage dashboard(SortBy sortBy) {
         return new DashboardPage(
-                dataService.getOpenChannels(sort),
-                dataService.createNodeList(),
+                sortChannels(dataService.getOpenChannels(), sortBy),
+                sortNodes(dataService.createNodeList(), sortBy),
                 dataService.getWarnings()
         );
     }
 
-    public ChannelsPage channels() {
-        return channels(null);
-    }
-
-    public ChannelsPage channels(@Nullable String sort) {
-        return new ChannelsPage(dataService.getOpenChannels(sort));
+    public ChannelsPage channels(SortBy sortBy) {
+        return new ChannelsPage(sortChannels(dataService.getOpenChannels(), sortBy));
     }
 
     public ChannelDetailsPage channelDetails(ChannelId channelId) throws NotFoundException {
         return new ChannelDetailsPage(dataService.getChannelDetails(channelId));
     }
 
-    public NodesPage nodes() {
-        return new NodesPage(dataService.createNodeList());
+    public NodesPage nodes(SortBy sortBy) {
+        return new NodesPage(sortNodes(dataService.createNodeList(), sortBy));
     }
 
-    public NodesPage nodes(List<OpenChannelDto> channels) {
+    public NodesPage nodes(List<OpenChannelDto> channels, SortBy sortBy) {
         Set<Pubkey> pubkeys = channels.stream().map(OpenChannelDto::remotePubkey).collect(toSet());
-        return new NodesPage(dataService.createNodeList(pubkeys));
+        return new NodesPage(sortNodes(dataService.createNodeList(pubkeys), sortBy));
     }
 
     public NodeDetailsPage nodeDetails(Pubkey pubkey) {
@@ -69,4 +65,42 @@ public class PageService {
         return new ErrorPage(errorMessage);
     }
 
+    private List<OpenChannelDto> sortChannels(List<OpenChannelDto> channels, SortBy sortBy) {
+        return channels.stream()
+                .sorted(channelComparator(sortBy).thenComparing(OpenChannelDto::channelId))
+                .toList();
+    }
+
+    @SuppressWarnings("PMD.CyclomaticComplexity")
+    private static Comparator<OpenChannelDto> channelComparator(SortBy sortBy) {
+        return switch (sortBy) {
+            case ANNOUNCED -> Comparator.comparing(OpenChannelDto::privateChannel);
+            case INBOUND -> Comparator.comparingLong(c -> c.balanceInformation().remoteBalanceSat());
+            case OUTBOUND -> Comparator.comparingLong(c -> c.balanceInformation().localBalanceSat());
+            case CAPACITY -> Comparator.comparing(OpenChannelDto::capacitySat);
+            case LOCAL_BASE_FEE -> Comparator.comparing(c -> Long.parseLong(c.policies().local().baseFeeMilliSat()));
+            case LOCAL_FEE_RATE -> Comparator.comparing(c -> c.policies().local().feeRatePpm());
+            case REMOTE_BASE_FEE -> Comparator.comparing(c -> Long.parseLong(c.policies().remote().baseFeeMilliSat()));
+            case REMOTE_FEE_RATE -> Comparator.comparing(c -> c.policies().remote().feeRatePpm());
+            case ALIAS -> Comparator.comparing(OpenChannelDto::remoteAlias, String.CASE_INSENSITIVE_ORDER);
+            case RATING -> Comparator.comparing(OpenChannelDto::rating);
+            case CHANNEL_ID -> Comparator.comparing(OpenChannelDto::channelId);
+            default -> Comparator.comparing(c -> c.balanceInformation().getOutboundPercentage());
+        };
+    }
+
+    private List<NodeDto> sortNodes(List<NodeDto> nodes, SortBy sortBy) {
+        return nodes.stream()
+                .sorted(nodeComparator(sortBy).thenComparing(NodeDto::pubkey))
+                .toList();
+    }
+
+    private static Comparator<NodeDto> nodeComparator(SortBy sortBy) {
+        return switch (sortBy) {
+            case NODE_RATING -> Comparator.comparing(NodeDto::rating);
+            case NODE_ALIAS -> Comparator.comparing(NodeDto::alias, String.CASE_INSENSITIVE_ORDER);
+            case PUBKEY -> Comparator.comparing(NodeDto::pubkey);
+            default -> Comparator.comparing(NodeDto::online).thenComparing(nodeComparator(NODE_ALIAS));
+        };
+    }
 }

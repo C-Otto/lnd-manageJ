@@ -10,12 +10,14 @@
 
     <div th:replace="~{tiles/full/channel-tile :: tile(${node})}"/>
 
+    <div th:replace="~{tiles/third/node-details :: tile(${node})}"/>
     <div th:replace="~{tiles/third/balance :: tile(${node.balance})}"/>
     <div th:replace="~{tiles/third/rebalance-report :: tile(${node.rebalanceReport})}"/>
-    <div th:replace="~{tiles/third/on-chain-costs :: tile(${node.onChainCosts}, true)}"/>
 
+    <div th:replace="~{tiles/third/on-chain-costs :: tile(${node.onChainCosts}, true)}"/>
     <div th:replace="~{tiles/third/fee-report :: tile(${node.feeReport})}"/>
     <div th:replace="~{tiles/third/online-report :: tile(${node.onlineReport})}"/>
+
     <div th:replace="~{tiles/third/node-warning :: tile('Warning', null, ${node.warnings})}"/>
 
 </div>

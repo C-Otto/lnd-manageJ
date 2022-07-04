@@ -3,38 +3,29 @@ package de.cotto.lndmanagej.ui.dto;
 import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
+import static de.cotto.lndmanagej.model.RatingFixtures.RATING;
+import static de.cotto.lndmanagej.ui.dto.NodeDtoFixture.NODE_DTO;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class NodeDtoTest {
 
-    public static final String ALICE = "alice";
-    public static final String BOB = "bob";
-
-    private static final NodeDto.OnlineStatusAndAliasComparator COMPARATOR
-            = new NodeDto.OnlineStatusAndAliasComparator();
-
     @Test
-    void compare_differentStatus_byStatus() {
-        NodeDto alice = node(ALICE, true);
-        NodeDto bob = node(BOB, false);
-        assertThat(COMPARATOR.compare(alice, bob)).isPositive();
+    void alias() {
+        assertThat(NODE_DTO.alias()).isEqualTo("Node");
     }
 
     @Test
-    void compare_bothOnline_byAlias() {
-        NodeDto alice = node(ALICE, true);
-        NodeDto bob = node(BOB, true);
-        assertThat(COMPARATOR.compare(alice, bob)).isNegative();
+    void pubkey() {
+        assertThat(NODE_DTO.pubkey()).isEqualTo(PUBKEY.toString());
     }
 
     @Test
-    void compare_bothOffline_byAlias() {
-        NodeDto alice = node(ALICE, false);
-        NodeDto bob = node(BOB, false);
-        assertThat(COMPARATOR.compare(alice, bob)).isNegative();
+    void online() {
+        assertThat(NODE_DTO.online()).isTrue();
     }
 
-    private NodeDto node(String alias, boolean online) {
-        return new NodeDto(PUBKEY.toString(), alias, online);
+    @Test
+    void rating() {
+        assertThat(NODE_DTO.rating()).isEqualTo(RATING.getRating());
     }
 }
