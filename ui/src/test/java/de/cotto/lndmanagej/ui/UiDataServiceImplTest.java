@@ -149,7 +149,9 @@ class UiDataServiceImplTest {
                         FlowReportDto.createFromModel(FLOW_REPORT),
                         RebalanceReportDto.createFromModel(REBALANCE_REPORT),
                         Set.of(CHANNEL_NUM_UPDATES_WARNING.description()),
-                        RatingDto.fromModel(RATING)));
+                        RatingDto.fromModel(RATING)
+                )
+        );
     }
 
     @Test

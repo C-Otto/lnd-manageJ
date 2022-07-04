@@ -44,7 +44,8 @@ class NodeDetailsDtoTest {
                 FlowReportDto.createFromModel(FLOW_REPORT),
                 RebalanceReportDto.createFromModel(REBALANCE_REPORT),
                 NODE_WARNINGS.descriptions(),
-                RatingDto.fromModel(RATING));
+                RatingDto.fromModel(RATING)
+        );
         assertThat(NodeDetailsDto.create(NODE_DETAILS, List.of(CLOSED_CHANNEL_DTO))).isEqualTo(expected);
     }
 }

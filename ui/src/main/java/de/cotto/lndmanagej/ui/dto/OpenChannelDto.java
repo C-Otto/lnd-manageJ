@@ -12,5 +12,6 @@ public record OpenChannelDto(
         BalanceInformationModel balanceInformation,
         long capacitySat,
         boolean privateChannel,
-        long rating) {
+        long rating
+) {
 }

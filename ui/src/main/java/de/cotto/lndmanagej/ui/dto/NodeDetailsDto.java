@@ -27,7 +27,8 @@ public record NodeDetailsDto(
         FlowReportDto flowReport,
         RebalanceReportDto rebalanceReport,
         Set<String> warnings,
-        RatingDto rating) {
+        RatingDto rating
+) {
     public static NodeDetailsDto create(NodeDetails nodeDetails, List<ClosedChannelDto> closedChannels) {
         return new NodeDetailsDto(
                 nodeDetails.pubkey(),
@@ -43,6 +44,7 @@ public record NodeDetailsDto(
                 FlowReportDto.createFromModel(nodeDetails.flowReport()),
                 RebalanceReportDto.createFromModel(nodeDetails.rebalanceReport()),
                 nodeDetails.warnings().descriptions(),
-                RatingDto.fromModel(nodeDetails.rating()));
+                RatingDto.fromModel(nodeDetails.rating())
+        );
     }
 }

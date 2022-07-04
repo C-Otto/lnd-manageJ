@@ -53,7 +53,8 @@ public class UiDataServiceImpl extends UiDataService {
             NodeService nodeService,
             ChannelService channelService,
             OwnNodeService ownNodeService,
-            RatingService ratingService) {
+            RatingService ratingService
+    ) {
         super();
         this.channelController = channelController;
         this.statusController = statusController;
