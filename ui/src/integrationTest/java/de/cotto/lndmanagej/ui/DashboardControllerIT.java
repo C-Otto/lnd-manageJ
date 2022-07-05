@@ -14,7 +14,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
-import static de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto.NONE;
 import static de.cotto.lndmanagej.ui.controller.param.SortBy.SORT_PARAM_KEY;
 import static de.cotto.lndmanagej.ui.dto.NodeDtoFixture.NODE_DTO;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
@@ -33,14 +32,14 @@ class DashboardControllerIT extends BaseControllerIT {
 
     @Test
     void dashboard_empty_okay() throws Exception {
-        when(pageService.dashboard(SortBy.DEFAULT_SORT)).thenReturn(new DashboardPage(List.of(), List.of(), NONE));
+        when(pageService.dashboard(SortBy.DEFAULT_SORT)).thenReturn(new DashboardPage(List.of(), List.of(), List.of()));
         mockMvc.perform(get("/")).andExpect(status().isOk());
     }
 
     @Test
     void dashboard_defaultSorting_ok() throws Exception {
         when(pageService.dashboard(SortBy.DEFAULT_SORT)).thenReturn(
-                new DashboardPage(List.of(OPEN_CHANNEL_DTO), List.of(NODE_DTO), NONE)
+                new DashboardPage(List.of(OPEN_CHANNEL_DTO), List.of(NODE_DTO), List.of())
         );
         mockMvc.perform(get("/")).andExpect(status().isOk());
     }
@@ -48,7 +47,7 @@ class DashboardControllerIT extends BaseControllerIT {
     @Test
     void dashboard_byAlias_ok() throws Exception {
         when(pageService.dashboard(SortBy.ALIAS)).thenReturn(
-                new DashboardPage(List.of(OPEN_CHANNEL_DTO), List.of(NODE_DTO), NONE)
+                new DashboardPage(List.of(OPEN_CHANNEL_DTO), List.of(NODE_DTO), List.of())
         );
         mockMvc.perform(get("/").param(SORT_PARAM_KEY, "alias"))
                 .andExpect(status().isOk());
@@ -57,7 +56,7 @@ class DashboardControllerIT extends BaseControllerIT {
     @Test
     void dashboard_byNodeAlias_ok() throws Exception {
         when(pageService.dashboard(SortBy.NODE_ALIAS)).thenReturn(
-                new DashboardPage(List.of(OPEN_CHANNEL_DTO), List.of(NODE_DTO), NONE)
+                new DashboardPage(List.of(OPEN_CHANNEL_DTO), List.of(NODE_DTO), List.of())
         );
         mockMvc.perform(get("/").param("sort", "node-alias"))
                 .andExpect(status().isOk());

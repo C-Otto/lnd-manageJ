@@ -2,9 +2,6 @@ package de.cotto.lndmanagej.ui.demo.data;
 
 import de.cotto.lndmanagej.controller.NotFoundException;
 import de.cotto.lndmanagej.controller.dto.ChannelStatusDto;
-import de.cotto.lndmanagej.controller.dto.ChannelWithWarningsDto;
-import de.cotto.lndmanagej.controller.dto.NodeWithWarningsDto;
-import de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto;
 import de.cotto.lndmanagej.controller.dto.OnlineReportDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.controller.dto.RatingDto;
@@ -22,7 +19,7 @@ import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -107,29 +104,14 @@ public class DemoDataService extends UiDataService {
             18_099_100,
             900_900);
 
-    public static final NodeWithWarningsDto ACINQ_WARNING = createNodeWithWarnings(
-            ACINQ.remoteAlias(),
-            ACINQ.remotePubkey(),
-            "Node has been online 86% in the past 14 days");
-
-    public static final NodeWithWarningsDto POCKET_WARNING = createNodeWithWarnings(
-            POCKET.remoteAlias(),
-            POCKET.remotePubkey(),
-            "No flow in the past 35 days.");
-
     public static final ChannelId CLOSED_CHANNEL = ChannelId.fromCompactForm("712345x124x1");
     public static final RatingDto RATING = RatingDto.fromModel(new Rating(700L));
 
-    public DemoDataService() {
-        super();
-    }
+    private final DemoWarningService warningService;
 
-    @Override
-    public NodesAndChannelsWithWarningsDto getWarnings() {
-        return new NodesAndChannelsWithWarningsDto(List.of(ACINQ_WARNING, POCKET_WARNING), List.of(
-                createChannelWarning(B_CASH_IS_TRASH.channelId(), "Channel has accumulated 500,000 updates."),
-                createChannelWarning(TRY_BITCOIN.channelId(), "Channel has accumulated 600,000 updates."),
-                createChannelWarning(WOS.channelId(), "Channel has accumulated 700,000 updates.")));
+    public DemoDataService(DemoWarningService warningService) {
+        super();
+        this.warningService = warningService;
     }
 
     @Override
@@ -151,21 +133,13 @@ public class DemoDataService extends UiDataService {
     @Override
     public ChannelDetailsDto getChannelDetails(ChannelId channelId) throws NotFoundException {
         if (CLOSED_CHANNEL.equals(channelId)) {
-            return createClosedChannelDetails(getChannelWarnings(channelId));
+            return createClosedChannelDetails(warningService.getChannelWarnings(channelId));
         }
         OpenChannelDto localOpenChannel = getOpenChannels().stream()
                 .filter(c -> channelId.equals(c.channelId()))
                 .findFirst()
                 .orElseThrow(NotFoundException::new);
-        return createChannelDetails(localOpenChannel, getChannelWarnings(channelId));
-    }
-
-    private Set<String> getChannelWarnings(ChannelId channelId) {
-        return getWarnings().channelsWithWarnings().stream()
-                .filter(c -> c.channelId().equals(channelId))
-                .map(ChannelWithWarningsDto::warnings)
-                .flatMap(Collection::stream)
-                .collect(toSet());
+        return createChannelDetails(localOpenChannel, warningService.getChannelWarnings(channelId));
     }
 
     @Override
@@ -182,27 +156,11 @@ public class DemoDataService extends UiDataService {
     @Override
     public NodeDetailsDto getNodeDetails(Pubkey pubkey) {
         List<OpenChannelDto> openChannels = getOpenChannelsWith(pubkey);
-        return createNodeDetails(getNode(pubkey), openChannels, getNodeWarnings(pubkey));
-    }
-
-    private Set<String> getNodeWarnings(Pubkey pubkey) {
-        return getWarnings().nodesWithWarnings().stream()
-                .filter(p -> p.pubkey().equals(pubkey))
-                .map(NodeWithWarningsDto::warnings)
-                .flatMap(Collection::stream)
-                .collect(toSet());
+        return createNodeDetails(getNode(pubkey), openChannels, warningService.getNodeWarnings(pubkey));
     }
 
     static boolean isOnline(ChannelId channelId) {
         return channelId.getShortChannelId() % 4 != 0;
-    }
-
-    private static NodeWithWarningsDto createNodeWithWarnings(String alias, Pubkey pubkey, String... warnings) {
-        return new NodeWithWarningsDto(Set.of(warnings), alias, pubkey);
-    }
-
-    private static ChannelWithWarningsDto createChannelWarning(ChannelId channelId, String... warnings) {
-        return new ChannelWithWarningsDto(Set.of(warnings), channelId);
     }
 
     private static OpenChannelDto createOpenChannel(
@@ -268,7 +226,10 @@ public class DemoDataService extends UiDataService {
                 RATING);
     }
 
-    private static NodeDetailsDto createNodeDetails(NodeDto node, List<OpenChannelDto> channels, Set<String> warnings) {
+    private static NodeDetailsDto createNodeDetails(
+            NodeDto node,
+            List<OpenChannelDto> channels,
+            List<String> warnings) {
         OpenChannelDto firstChannel = channels.stream().findFirst().orElseThrow();
         OnlineReport onlineReport = node.online() ? ONLINE_REPORT : ONLINE_REPORT_OFFLINE;
         return new NodeDetailsDto(
@@ -284,7 +245,7 @@ public class DemoDataService extends UiDataService {
                 deriveFeeReport(firstChannel.channelId()),
                 deriveFlowReport(firstChannel.channelId()),
                 deriveRebalanceReport(firstChannel.channelId()),
-                warnings,
+                new HashSet<>(warnings),
                 RatingDto.fromModel(sumRatings(channels)));
     }
 

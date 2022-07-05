@@ -4,6 +4,7 @@ import de.cotto.lndmanagej.controller.ChannelIdConverter;
 import de.cotto.lndmanagej.controller.PubkeyConverter;
 import de.cotto.lndmanagej.ui.StatusServiceImpl;
 import de.cotto.lndmanagej.ui.UiDataServiceImpl;
+import de.cotto.lndmanagej.ui.WarningServiceImpl;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -26,7 +27,8 @@ import org.springframework.context.annotation.Import;
         basePackages = {"de.cotto.lndmanagej.ui"},
         excludeFilters = {
             @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = UiDataServiceImpl.class),
-            @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = StatusServiceImpl.class)
+            @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = StatusServiceImpl.class),
+            @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = WarningServiceImpl.class)
         }
 )
 @Import({ChannelIdConverter.class, PubkeyConverter.class})

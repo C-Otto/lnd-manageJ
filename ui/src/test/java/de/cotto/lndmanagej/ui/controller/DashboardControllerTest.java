@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.ui.controller;
 
-import de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.page.PageService;
 import de.cotto.lndmanagej.ui.page.channel.ChannelsPage;
@@ -43,18 +42,16 @@ class DashboardControllerTest {
 
     @Test
     void dashboard() {
-        NodesAndChannelsWithWarningsDto warnings = NodesAndChannelsWithWarningsDto.NONE;
-        when(pageService.dashboard(DEFAULT_SORT)).thenReturn(new DashboardPage(List.of(), List.of(), warnings));
+        when(pageService.dashboard(DEFAULT_SORT)).thenReturn(new DashboardPage(List.of(), List.of(), List.of()));
         assertThat(dashboardController.dashboard(model, DEFAULT_SORT)).isEqualTo("dashboard");
         verify(model).addAllAttributes(
-                Map.of(NODES_KEY, List.of(), CHANNELS_KEY, List.of(), "warnings", warnings)
+                Map.of(NODES_KEY, List.of(), CHANNELS_KEY, List.of(), "warnings", List.of())
         );
     }
 
     @Test
     void dashboard_forwards_sort_key_to_page() {
-        NodesAndChannelsWithWarningsDto warnings = NodesAndChannelsWithWarningsDto.NONE;
-        when(pageService.dashboard(any())).thenReturn(new DashboardPage(List.of(), List.of(), warnings));
+        when(pageService.dashboard(any())).thenReturn(new DashboardPage(List.of(), List.of(), List.of()));
         dashboardController.dashboard(model, RATIO);
         verify(pageService).dashboard(RATIO);
     }

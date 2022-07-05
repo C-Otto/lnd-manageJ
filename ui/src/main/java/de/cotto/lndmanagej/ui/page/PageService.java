@@ -4,6 +4,7 @@ import de.cotto.lndmanagej.controller.NotFoundException;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.ui.UiDataService;
+import de.cotto.lndmanagej.ui.WarningService;
 import de.cotto.lndmanagej.ui.controller.param.SortBy;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
@@ -27,16 +28,18 @@ import static java.util.stream.Collectors.toSet;
 public class PageService {
 
     private final UiDataService dataService;
+    private final WarningService warningService;
 
-    public PageService(UiDataService dataService) {
+    public PageService(UiDataService dataService, WarningService warningService) {
         this.dataService = dataService;
+        this.warningService = warningService;
     }
 
     public DashboardPage dashboard(SortBy sortBy) {
         return new DashboardPage(
                 sortChannels(dataService.getOpenChannels(), sortBy),
                 sortNodes(dataService.createNodeList(), sortBy),
-                dataService.getWarnings()
+                warningService.getWarnings()
         );
     }
 

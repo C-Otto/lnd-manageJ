@@ -1,0 +1,33 @@
+<!doctype html>
+
+<html xmlns:th="https://www.thymeleaf.org">
+
+<div th:fragment="tile (warning)" class="tile col-sm-3">
+    <div class="card border-secondary">
+        <div class="card-header">
+            <div class="fs-4 mb-0">
+                <div th:replace="~{fragments/icons :: warning}"/>
+                <span><a th:text="${warning.alias}" th:href="@{/node/{id}(id=${warning.pubkey})}"></a></span>
+            </div>
+        </div>
+        <div class="card-body" style="padding-top: 0.5rem; padding-bottom: 0.5rem;">
+            <ol class="list-group list-group-flush">
+                <li th:each="nodeWarning : ${warning.nodeWarnings}"
+                    class="list-group-item" style="padding-left: 0; padding-right: 0;">
+                    <span th:text="${nodeWarning}"></span>
+                </li>
+                <li th:each="channelWarning : ${warning.channelWarnings}"
+                    class="list-group-item" style="padding-left: 0; padding-right: 0;">
+                    <span th:text="${channelWarning.description}"></span>
+                    <span>
+                        <a th:text="' ('+${channelWarning.channelId}+')'"
+                           th:href="@{/channel/{id}(id=${channelWarning.channelId.shortChannelId})}">
+                        </a>
+                    </span>
+                </li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+</html>
