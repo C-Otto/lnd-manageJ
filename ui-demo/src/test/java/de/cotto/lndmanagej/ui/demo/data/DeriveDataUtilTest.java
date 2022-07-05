@@ -28,8 +28,10 @@ class DeriveDataUtilTest {
 
     @Test
     void derivePolicy_sameChannelId_sameResult() {
-        assertThat(DeriveDataUtil.derivePolicy(CHANNEL_ID).feeRate()).isEqualTo(770L);
-        assertThat(DeriveDataUtil.derivePolicy(CHANNEL_ID).feeRate()).isEqualTo(770L);
+        assertThat(DeriveDataUtil.derivePolicy(CHANNEL_ID.getShortChannelId()).feeRate())
+                .isEqualTo(770L);
+        assertThat(DeriveDataUtil.derivePolicy(CHANNEL_ID.getShortChannelId()).feeRate())
+                .isEqualTo(770L);
     }
 
     @Test
