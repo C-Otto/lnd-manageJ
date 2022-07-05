@@ -1,8 +1,8 @@
 package de.cotto.lndmanagej.ui.page.general;
 
-import de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
+import de.cotto.lndmanagej.ui.dto.warning.DashboardWarningDto;
 
 import java.util.List;
 
@@ -11,9 +11,11 @@ public class DashboardPage extends ThymeleafPage {
     private final List<NodeDto> nodes;
     private final List<OpenChannelDto> channels;
 
-    public DashboardPage(List<OpenChannelDto> channels,
-                         List<NodeDto> nodes,
-                         NodesAndChannelsWithWarningsDto warnings) {
+    public DashboardPage(
+            List<OpenChannelDto> channels,
+            List<NodeDto> nodes,
+            List<DashboardWarningDto> warnings
+    ) {
         super();
         this.nodes = nodes;
         this.channels = channels;
@@ -26,12 +28,12 @@ public class DashboardPage extends ThymeleafPage {
         return nodes;
     }
 
+    public List<OpenChannelDto> getChannels() {
+        return channels;
+    }
+
     @Override
     public String getView() {
         return "dashboard";
-    }
-
-    public List<OpenChannelDto> getChannels() {
-        return channels;
     }
 }

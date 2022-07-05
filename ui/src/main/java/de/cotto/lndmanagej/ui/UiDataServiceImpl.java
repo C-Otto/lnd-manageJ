@@ -4,10 +4,8 @@ import de.cotto.lndmanagej.controller.ChannelController;
 import de.cotto.lndmanagej.controller.NodeController;
 import de.cotto.lndmanagej.controller.NotFoundException;
 import de.cotto.lndmanagej.controller.StatusController;
-import de.cotto.lndmanagej.controller.WarningsController;
 import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.ChannelsDto;
-import de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.LocalChannel;
@@ -37,7 +35,6 @@ import static java.util.stream.Collectors.toSet;
 public class UiDataServiceImpl extends UiDataService {
 
     private final StatusController statusController;
-    private final WarningsController warningsController;
     private final ChannelController channelController;
     private final NodeController nodeController;
     private final NodeService nodeService;
@@ -48,7 +45,6 @@ public class UiDataServiceImpl extends UiDataService {
     public UiDataServiceImpl(
             ChannelController channelController,
             StatusController statusController,
-            WarningsController warningsController,
             NodeController nodeController,
             NodeService nodeService,
             ChannelService channelService,
@@ -58,17 +54,11 @@ public class UiDataServiceImpl extends UiDataService {
         super();
         this.channelController = channelController;
         this.statusController = statusController;
-        this.warningsController = warningsController;
         this.nodeController = nodeController;
         this.nodeService = nodeService;
         this.channelService = channelService;
         this.ownNodeService = ownNodeService;
         this.ratingService = ratingService;
-    }
-
-    @Override
-    public NodesAndChannelsWithWarningsDto getWarnings() {
-        return warningsController.getWarnings();
     }
 
     @Override

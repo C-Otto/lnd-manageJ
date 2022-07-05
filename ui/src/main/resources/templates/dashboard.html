@@ -6,12 +6,8 @@
 
 <div class="row top-space">
 
-    <th:block th:each="node : ${warnings.nodesWithWarnings}" class="list-group-item">
-        <div th:replace="~{tiles/third/node-warning :: tile(${node.alias}, ${node.pubkey}, ${node.warnings})}"/>
-    </th:block>
-
-    <th:block th:each="channel : ${warnings.channelsWithWarnings}" class="list-group-item">
-        <div th:replace="~{tiles/third/channel-warning :: tile(${channel.channelId}, ${channel.channelId.shortChannelId}, ${channel.warnings})}"/>
+    <th:block th:each="warning : ${warnings}" class="list-group-item">
+        <div th:replace="~{tiles/third/dashboard-warning :: tile(${warning})}"/>
     </th:block>
 
     <div th:replace="~{tiles/full/all-channels :: tile}"/>

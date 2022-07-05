@@ -4,13 +4,11 @@ import de.cotto.lndmanagej.controller.ChannelController;
 import de.cotto.lndmanagej.controller.NodeController;
 import de.cotto.lndmanagej.controller.NotFoundException;
 import de.cotto.lndmanagej.controller.StatusController;
-import de.cotto.lndmanagej.controller.WarningsController;
 import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.controller.dto.ChannelsDto;
 import de.cotto.lndmanagej.controller.dto.FeeReportDto;
 import de.cotto.lndmanagej.controller.dto.FlowReportDto;
-import de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto;
 import de.cotto.lndmanagej.controller.dto.OnChainCostsDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.controller.dto.RatingDto;
@@ -69,9 +67,6 @@ class UiDataServiceImplTest {
     private StatusController statusController;
 
     @Mock
-    private WarningsController warningsController;
-
-    @Mock
     private ChannelController channelController;
 
     @Mock
@@ -88,13 +83,6 @@ class UiDataServiceImplTest {
 
     @Mock
     private RatingService ratingService;
-
-    @Test
-    void getWarnings() {
-        NodesAndChannelsWithWarningsDto warnings = new NodesAndChannelsWithWarningsDto(List.of(), List.of());
-        when(warningsController.getWarnings()).thenReturn(warnings);
-        assertThat(uiDataService.getWarnings()).isEqualTo(warnings);
-    }
 
     @Test
     void getPubkeys() {
