@@ -24,22 +24,40 @@
             <th style="border-style: none"></th>
             <th style="border-style: none"></th>
             <th style="border-style: none"></th>
-            <th colspan="2" style="padding-top: 0.25rem; padding-bottom:0; text-align: center; border-style: none">Local</th>
-            <th colspan="2" style="padding-top: 0.25rem; padding-bottom:0; text-align: center; border-style: none">Remote</th>
+            <th colspan="2" style="padding-top: 0.25rem; padding-bottom:0; text-align: center; border-style: none">
+                Local
+            </th>
+            <th colspan="2" style="padding-top: 0.25rem; padding-bottom:0; text-align: center; border-style: none">
+                Remote
+            </th>
             <th style="border-style: none"></th>
             <th style="border-style: none"></th>
             <th style="border-style: none"></th>
         </tr>
         <tr style="cursor: pointer">
-            <th scope="col" style="text-align: left;" th:onclick="'window.location.href=\'?sort=announced\';'">Public</th>
-            <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=inbound\';'">Inbound</th>
+            <th scope="col" style="text-align: left;" th:onclick="'window.location.href=\'?sort=announced\';'">Public
+            </th>
+            <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=inbound\';'">Inbound
+            </th>
             <th scope="col" style="text-align: center;" th:onclick="'window.location.href=\'?sort=ratio\';'">Ratio</th>
-            <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=outbound\';'">Outbound</th>
-            <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=capacity\';'">Capacity</th>
-            <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=local-base-fee\';'">Base Fee</th>
-            <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=local-fee-rate\';'">Fee Rate</th>
-            <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=remote-base-fee\';'">Base Fee</th>
-            <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=remote-fee-rate\';'">Fee Rate</th>
+            <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=outbound\';'">
+                Outbound
+            </th>
+            <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=capacity\';'">
+                Capacity
+            </th>
+            <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=local-base-fee\';'">
+                Base Fee
+            </th>
+            <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=local-fee-rate\';'">Fee
+                Rate
+            </th>
+            <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=remote-base-fee\';'">
+                Base Fee
+            </th>
+            <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=remote-fee-rate\';'">
+                Fee Rate
+            </th>
             <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=rating\';'">Rating</th>
             <th scope="col" th:onclick="'window.location.href=\'?sort=alias\';'">Alias</th>
             <th scope="col" th:onclick="'window.location.href=\'?sort=channel-id\';'">Channel ID</th>
@@ -68,15 +86,20 @@
             <td th:text="${@formatter.formatNumber(channel.capacitySat)}" style="text-align: right;"></td>
 
             <td th:text="${@formatter.formatNumber(channel.policies.local.baseFeeMilliSat)}"
-                style="text-align: right;"></td>
+                style="text-align: right;" th:styleappend="${channel.policies.local.enabled ? '' : 'color: darkRed;'}"
+                th:title="${channel.policies.local.enabled ? 'enabled' : 'disabled'}"></td>
 
-            <td th:text="${@formatter.formatNumber(channel.policies.local.feeRatePpm)}" style="text-align: right;"></td>
+            <td th:text="${@formatter.formatNumber(channel.policies.local.feeRatePpm)}"
+                style="text-align: right;" th:styleappend="${channel.policies.local.enabled ? '' : 'color: darkRed;'}"
+                th:title="${channel.policies.local.enabled ? 'enabled' : 'disabled'}"></td>
 
             <td th:text="${@formatter.formatNumber(channel.policies.remote.baseFeeMilliSat)}"
-                style="text-align: right;"></td>
+                style="text-align: right;" th:styleappend="${channel.policies.remote.enabled ? '' : 'color: darkRed;'}"
+                th:title="${channel.policies.remote.enabled ? 'enabled' : 'disabled'}"></td>
 
             <td th:text="${@formatter.formatNumber(channel.policies.remote.feeRatePpm)}"
-                style="text-align: right;"></td>
+                style="text-align: right;" th:styleappend="${channel.policies.remote.enabled ? '' : 'color: darkRed;'}"
+                th:title="${channel.policies.remote.enabled ? 'enabled' : 'disabled'}"></td>
 
             <td th:text="${@formatter.formatNumber(channel.rating)}"
                 style="text-align: right;"></td>

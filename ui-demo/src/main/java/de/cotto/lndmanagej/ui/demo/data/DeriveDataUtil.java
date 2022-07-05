@@ -31,12 +31,12 @@ public final class DeriveDataUtil {
         // util class
     }
 
-    private static RandomGenerator createRandomGenerator(ChannelId channelId) {
-        return new Random(channelId.getShortChannelId());
+    private static RandomGenerator createRandomGenerator(long seed) {
+        return new Random(seed);
     }
 
     static RebalanceReportDto deriveRebalanceReport(ChannelId channelId) {
-        RandomGenerator rand = createRandomGenerator(channelId);
+        RandomGenerator rand = createRandomGenerator(channelId.getShortChannelId());
         return RebalanceReportDto.createFromModel(new RebalanceReport(
                 Coins.ofSatoshis(rand.nextInt(5000)),
                 Coins.ofSatoshis(rand.nextInt(1000)),
@@ -48,7 +48,7 @@ public final class DeriveDataUtil {
     }
 
     static FlowReportDto deriveFlowReport(ChannelId channelId) {
-        RandomGenerator rand = createRandomGenerator(channelId);
+        RandomGenerator rand = createRandomGenerator(channelId.getShortChannelId());
         FlowReport flowReport = new FlowReport(
                 Coins.ofSatoshis(rand.nextLong(100_000)),
                 Coins.ofSatoshis(rand.nextLong(100_000)),
@@ -64,7 +64,7 @@ public final class DeriveDataUtil {
     }
 
     static FeeReportDto deriveFeeReport(ChannelId channelId) {
-        RandomGenerator rand = createRandomGenerator(channelId);
+        RandomGenerator rand = createRandomGenerator(channelId.getShortChannelId());
         long earned = rand.nextLong(1_000_000);
         long sourced = rand.nextLong(100_000);
         return FeeReportDto.createFromModel(
@@ -72,7 +72,7 @@ public final class DeriveDataUtil {
     }
 
     static OnChainCostsDto deriveOnChainCosts(ChannelId channelId) {
-        RandomGenerator rand = createRandomGenerator(channelId);
+        RandomGenerator rand = createRandomGenerator(channelId.getShortChannelId());
         return new OnChainCostsDto(
                 String.valueOf(rand.nextLong(2000)),
                 String.valueOf(rand.nextLong(2000)),
@@ -81,30 +81,32 @@ public final class DeriveDataUtil {
     }
 
     static OpenInitiator deriveOpenInitiator(ChannelId channelId) {
-        boolean local = createRandomGenerator(channelId).nextInt(10) <= 3;
+        boolean local = createRandomGenerator(channelId.getShortChannelId()).nextInt(10) <= 3;
         return local ? LOCAL : REMOTE;
     }
 
     static PoliciesForLocalChannel derivePolicies(ChannelId channelId) {
-        return new PoliciesForLocalChannel(derivePolicy(channelId), derivePolicy(channelId));
+        Policy local = derivePolicy(channelId.getShortChannelId() + 1);
+        Policy remote = derivePolicy(channelId.getShortChannelId() + 2);
+        return new PoliciesForLocalChannel(local, remote);
     }
 
-    static Policy derivePolicy(ChannelId channelId) {
-        RandomGenerator rand = createRandomGenerator(channelId);
+    static Policy derivePolicy(long randomGeneratorSeed) {
+        RandomGenerator rand = createRandomGenerator(randomGeneratorSeed);
         long feeRate = rand.nextLong(100) * 10;
         Coins baseFee = Coins.ofMilliSatoshis(rand.nextLong(2) * 1000);
-        boolean enabled = rand.nextInt(10) == 0;
+        boolean enabled = rand.nextInt(10) != 0;
         int timeLockDelta = (rand.nextInt(5) + 1) * 10;
         return new Policy(feeRate, baseFee, enabled, timeLockDelta, MAX_HTLC);
     }
 
     static ChannelStatusDto deriveChannelStatus(ChannelId channelId) {
-        boolean privateChannel = createRandomGenerator(channelId).nextInt(10) <= 1;
+        boolean privateChannel = createRandomGenerator(channelId.getShortChannelId()).nextInt(10) <= 1;
         return ChannelStatusDto.createFromModel(new ChannelStatus(privateChannel, true, false, OPEN));
     }
 
     static long deriveRating(ChannelId channelId) {
-        return createRandomGenerator(channelId).nextInt(100_000);
+        return createRandomGenerator(channelId.getShortChannelId()).nextInt(100_000);
     }
 
 }
