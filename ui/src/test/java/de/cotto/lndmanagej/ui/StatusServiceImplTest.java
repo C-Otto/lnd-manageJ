@@ -28,6 +28,7 @@ class StatusServiceImplTest {
     void getStatus_notConnected() {
         when(ownNodeService.isSyncedToChain()).thenReturn(false);
         when(ownNodeService.getBlockHeight()).thenThrow(new NoSuchElementException());
+
         assertThat(statusService.getStatus()).isEqualTo(STATUS_MODEL_NOT_CONNECTED);
     }
 
@@ -35,6 +36,7 @@ class StatusServiceImplTest {
     void getStatus_notSynced() {
         when(ownNodeService.isSyncedToChain()).thenReturn(false);
         when(ownNodeService.getBlockHeight()).thenReturn(111_000);
+
         assertThat(statusService.getStatus()).isEqualTo(STATUS_MODEL_NOT_SYNCED);
     }
 
@@ -42,7 +44,7 @@ class StatusServiceImplTest {
     void getStatus_synced() {
         when(ownNodeService.isSyncedToChain()).thenReturn(true);
         when(ownNodeService.getBlockHeight()).thenReturn(111_111);
+
         assertThat(statusService.getStatus()).isEqualTo(STATUS_MODEL);
     }
-
 }

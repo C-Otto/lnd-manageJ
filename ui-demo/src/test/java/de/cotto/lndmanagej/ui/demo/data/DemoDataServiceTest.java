@@ -5,6 +5,7 @@ import de.cotto.lndmanagej.ui.dto.NodeDetailsDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
@@ -20,6 +21,14 @@ class DemoDataServiceTest {
 
     @InjectMocks
     private DemoDataService demoDataService;
+
+    @SuppressWarnings("unused")
+    @Mock
+    private DemoStatusService demoStatusService;
+
+    @SuppressWarnings("unused")
+    @Mock
+    private DemoWarningService warningService;
 
     @Test
     void getOpenChannels_deliversTestData() {
@@ -42,21 +51,6 @@ class DemoDataServiceTest {
         NodeDetailsDto kraken = demoDataService.getNodeDetails(KRAKEN.remotePubkey());
         assertNotNull(kraken);
         assertFalse(kraken.onlineReport().online());
-    }
-
-    @Test
-    void getWarnings_exists() {
-        assertNotNull(demoDataService.getWarnings());
-    }
-
-    @Test
-    void getWarnings_hasNodeWithWarnings() {
-        assertNotNull(demoDataService.getWarnings().nodesWithWarnings());
-    }
-
-    @Test
-    void getWarnings_hasChannelWarnings() {
-        assertNotNull(demoDataService.getWarnings().channelsWithWarnings());
     }
 
     @Test

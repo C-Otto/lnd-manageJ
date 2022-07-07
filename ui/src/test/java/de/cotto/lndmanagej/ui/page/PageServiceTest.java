@@ -1,7 +1,6 @@
 package de.cotto.lndmanagej.ui.page;
 
 import de.cotto.lndmanagej.controller.NotFoundException;
-import de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.controller.dto.PolicyDto;
 import de.cotto.lndmanagej.model.BalanceInformation;
@@ -9,6 +8,7 @@ import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.ui.UiDataService;
+import de.cotto.lndmanagej.ui.WarningService;
 import de.cotto.lndmanagej.ui.controller.param.SortBy;
 import de.cotto.lndmanagej.ui.dto.BalanceInformationModel;
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
@@ -60,6 +60,9 @@ class PageServiceTest {
     @Mock
     private UiDataService dataService;
 
+    @Mock
+    private WarningService warningService;
+
     @Test
     void dashboard() {
         List<OpenChannelDto> channels = List.of(OPEN_CHANNEL_DTO);
@@ -67,7 +70,7 @@ class PageServiceTest {
         mockChannelsAndNodesWithoutWarning(channels, nodes);
 
         assertThat(pageService.dashboard(SortBy.DEFAULT_SORT)).usingRecursiveComparison().isEqualTo(
-                new DashboardPage(channels, nodes, NodesAndChannelsWithWarningsDto.NONE)
+                new DashboardPage(channels, nodes, List.of())
         );
     }
 
@@ -98,7 +101,7 @@ class PageServiceTest {
     private void mockChannelsAndNodesWithoutWarning(List<OpenChannelDto> channels, List<NodeDto> nodes) {
         when(dataService.getOpenChannels()).thenReturn(channels);
         when(dataService.createNodeList()).thenReturn(nodes);
-        when(dataService.getWarnings()).thenReturn(NodesAndChannelsWithWarningsDto.NONE);
+        when(warningService.getWarnings()).thenReturn(List.of());
     }
 
     @Test
@@ -416,5 +419,4 @@ class PageServiceTest {
             return new NodeDto(pubkey.toString(), alias, online, RATING.getRating());
         }
     }
-
 }

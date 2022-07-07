@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.ui;
 
-import de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
@@ -12,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Set;
 
-import static de.cotto.lndmanagej.controller.dto.NodesAndChannelsWithWarningsDto.NONE;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.ui.dto.ChannelDetailsDtoFixture.CHANNEL_DETAILS_DTO;
 import static de.cotto.lndmanagej.ui.dto.NodeDetailsDtoFixture.NODE_DETAILS_MODEL;
@@ -44,10 +42,6 @@ class UiDataServiceTest {
     }
 
     private static class TestableUiDataService extends UiDataService {
-        @Override
-        public NodesAndChannelsWithWarningsDto getWarnings() {
-            return NONE;
-        }
 
         @Override
         public Set<Pubkey> getPubkeys() {

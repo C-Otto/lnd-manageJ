@@ -11,7 +11,29 @@
             </div>
         </div>
         <div class="card-body">
-            <div th:replace="~{fragments/node-collections :: node-table}"/>
+            <div class="table-responsive table-sm">
+                <table class="node-table table table-hover">
+                    <thead>
+                    <tr style="cursor: pointer">
+                        <th scope="col" th:onclick="'window.location.href=\'?sort=online\';'">Online</th>
+                        <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=node-rating\';'">Rating</th>
+                        <th scope="col" th:onclick="'window.location.href=\'?sort=node-alias\';'">Alias</th>
+                        <th scope="col" th:onclick="'window.location.href=\'?sort=pubkey\';'">Pubkey</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="node : ${nodes}">
+                        <td>
+                            <span th:if="${node.online}" data-feather="check-circle" style="color: darkGreen;"></span>
+                            <span th:unless="${node.online}" data-feather="slash" style="color: darkRed;"></span>
+                        </td>
+                        <td th:text="${@formatter.formatNumber(node.rating)}" style="text-align: right;"></td>
+                        <td th:text="${node.alias}"></td>
+                        <td><a th:text="${node.pubkey}" th:href="@{/node/{id}(id=${node.pubkey})}"></a></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

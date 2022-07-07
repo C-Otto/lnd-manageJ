@@ -29,5 +29,4 @@ public class StatusServiceImpl implements StatusService {
 
         return new StatusModel(connected, synced, blockHeight);
     }
-
 }

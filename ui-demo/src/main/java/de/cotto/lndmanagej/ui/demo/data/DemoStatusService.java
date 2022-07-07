@@ -8,13 +8,14 @@ import org.springframework.stereotype.Component;
 public class DemoStatusService implements StatusService {
 
     public DemoStatusService() {
-        super();
+        // default
     }
 
     @Override
     public StatusModel getStatus() {
         return new StatusModel(true, true, 735_895);
     }
+
 }
 
 

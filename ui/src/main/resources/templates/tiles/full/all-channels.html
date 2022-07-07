@@ -11,7 +11,104 @@
             </div>
         </div>
         <div class="card-body">
-            <div th:replace="~{fragments/channel-collections :: channel-table}"/>
+            <div th:fragment="channel-table" class="table-responsive table-sm" xmlns:th="https://www.thymeleaf.org">
+                <table class="channel-table table table-hover">
+                    <thead>
+                    <tr>
+                        <th style="border-style: none"></th>
+                        <th style="border-style: none"></th>
+                        <th style="border-style: none"></th>
+                        <th style="border-style: none"></th>
+                        <th style="border-style: none"></th>
+                        <th colspan="2" style="padding-top: 0.25rem; padding-bottom:0; text-align: center; border-style: none">
+                            Local
+                        </th>
+                        <th colspan="2" style="padding-top: 0.25rem; padding-bottom:0; text-align: center; border-style: none">
+                            Remote
+                        </th>
+                        <th style="border-style: none"></th>
+                        <th style="border-style: none"></th>
+                        <th style="border-style: none"></th>
+                    </tr>
+                    <tr style="cursor: pointer">
+                        <th scope="col" style="text-align: left;" th:onclick="'window.location.href=\'?sort=announced\';'">Public
+                        </th>
+                        <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=inbound\';'">Inbound
+                        </th>
+                        <th scope="col" style="text-align: center;" th:onclick="'window.location.href=\'?sort=ratio\';'">Ratio</th>
+                        <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=outbound\';'">
+                            Outbound
+                        </th>
+                        <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=capacity\';'">
+                            Capacity
+                        </th>
+                        <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=local-base-fee\';'">
+                            Base Fee
+                        </th>
+                        <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=local-fee-rate\';'">Fee
+                            Rate
+                        </th>
+                        <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=remote-base-fee\';'">
+                            Base Fee
+                        </th>
+                        <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=remote-fee-rate\';'">
+                            Fee Rate
+                        </th>
+                        <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=rating\';'">Rating</th>
+                        <th scope="col" th:onclick="'window.location.href=\'?sort=alias\';'">Alias</th>
+                        <th scope="col" th:onclick="'window.location.href=\'?sort=channel-id\';'">Channel ID</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="channel : ${channels}">
+
+                        <td th:if="${channel.privateChannel}" title="unannounced channel">
+                            <div th:replace="~{fragments/icons :: private}"/>
+                        </td>
+                        <td th:unless="${channel.privateChannel}" title="public channel">
+                            <div th:replace="~{fragments/icons :: public}"/>
+                        </td>
+
+                        <td th:text="${@formatter.formatNumber(channel.balanceInformation.remoteBalanceSat)}"
+                            style="color: darkRed; text-align: right; padding-left:0;"></td>
+
+                        <td style="width: 260px">
+                            <div th:replace="~{fragments/balance-bar :: channel-table-column(${channel.balanceInformation})}"/>
+                        </td>
+
+                        <td th:text="${@formatter.formatNumber(channel.balanceInformation.localBalanceSat)}"
+                            style="color: darkGreen; text-align: right;"></td>
+
+                        <td th:text="${@formatter.formatNumber(channel.capacitySat)}" style="text-align: right;"></td>
+
+                        <td th:text="${@formatter.formatNumber(channel.policies.local.baseFeeMilliSat)}"
+                            style="text-align: right;" th:styleappend="${channel.policies.local.enabled ? '' : 'color: darkRed;'}"
+                            th:title="${channel.policies.local.enabled ? 'enabled' : 'disabled'}"></td>
+
+                        <td th:text="${@formatter.formatNumber(channel.policies.local.feeRatePpm)}"
+                            style="text-align: right;" th:styleappend="${channel.policies.local.enabled ? '' : 'color: darkRed;'}"
+                            th:title="${channel.policies.local.enabled ? 'enabled' : 'disabled'}"></td>
+
+                        <td th:text="${@formatter.formatNumber(channel.policies.remote.baseFeeMilliSat)}"
+                            style="text-align: right;" th:styleappend="${channel.policies.remote.enabled ? '' : 'color: darkRed;'}"
+                            th:title="${channel.policies.remote.enabled ? 'enabled' : 'disabled'}"></td>
+
+                        <td th:text="${@formatter.formatNumber(channel.policies.remote.feeRatePpm)}"
+                            style="text-align: right;" th:styleappend="${channel.policies.remote.enabled ? '' : 'color: darkRed;'}"
+                            th:title="${channel.policies.remote.enabled ? 'enabled' : 'disabled'}"></td>
+
+                        <td th:text="${@formatter.formatNumber(channel.rating)}"
+                            style="text-align: right;"></td>
+
+                        <td th:text="${channel.remoteAlias}"></td>
+
+                        <td><a th:text="${channel.channelId}"
+                               th:href="@{/channel/{id}(id=${channel.channelId.shortChannelId})}"></a></td>
+
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
