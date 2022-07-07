@@ -5,7 +5,7 @@
 <div th:fragment="node-table" class="table-responsive table-sm">
     <table class="node-table table table-hover">
         <thead>
-        <tr>
+        <tr style="cursor: pointer">
             <th scope="col" th:onclick="'window.location.href=\'?sort=online\';'">Online</th>
             <th scope="col" style="text-align: right;" th:onclick="'window.location.href=\'?sort=node-rating\';'">Rating</th>
             <th scope="col" th:onclick="'window.location.href=\'?sort=node-alias\';'">Alias</th>
