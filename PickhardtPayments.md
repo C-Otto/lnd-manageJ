@@ -17,10 +17,11 @@ There is also a lightweight python package being developed which can be used for
 2. The graph algorithm implementation used to do the heavy lifting currently is only supported for amd64 (x86_64) on
    Linux, Windows, and Mac systems. See https://github.com/C-Otto/lnd-manageJ/issues/13.
 3. You need to enable middleware support in lnd: add a section `[rpcmiddleware]` with `rpcmiddleware.enable=true` to 
-   your `lnd.conf`, restart lnd and restart lnd-manageJ. Once enabled, lnd-manageJ will spy on every RPC request and
+   your `lnd.conf` and restart lnd. Once enabled, lnd-manageJ will spy on every RPC request and
    response, without changing/blocking any of the data. However, despite the read-only configuration, requests may
    fail because of this if lnd-manageJ does not respond in time (crash, shutdown, ...).
-   See https://github.com/lightningnetwork/lnd/issues/6409.
+   See https://github.com/lightningnetwork/lnd/issues/6409. To mitigate this risk, you can add
+   `rpcmiddleware.intercepttimeout=10s` to the same section (the default is 2s).
 
 # Payment Options
 The following endpoints allow you to specify payment options that can be provided as the body of an HTTP `POST` request.
