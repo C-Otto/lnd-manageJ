@@ -10,17 +10,17 @@ https://lists.linuxfoundation.org/pipermail/lightning-dev/2022-March/003510.html
 There is also a lightweight python package being developed which can be used for simulations or to do production tests at: https://github.com/renepickhardt/pickhardtpayments 
 
 # Requirements
-1. Currently (as of v0.15.0-beta.rc3, May 2022) lnd does not allow sending a replacement shard once a shard of an active MPP
+1. Currently (as of v0.15.0-beta, July 2022) lnd does not allow sending a replacement shard once a shard of an active MPP
    fails. This, sadly, is necessary to complete MPPs that regularly run into temporary channel failures due to lack of
-   funds. See https://github.com/lightningnetwork/lnd/issues/5746 for a (possible) fix. You might want to stick to
-   testnet until this is properly fixed!
+   funds. See https://github.com/lightningnetwork/lnd/issues/5746 for a (possible) fix. You might want to wait until the fix is merged (and part of a released version of lnd).
 2. The graph algorithm implementation used to do the heavy lifting currently is only supported for amd64 (x86_64) on
    Linux, Windows, and Mac systems. See https://github.com/C-Otto/lnd-manageJ/issues/13.
 3. You need to enable middleware support in lnd: add a section `[rpcmiddleware]` with `rpcmiddleware.enable=true` to 
-   your `lnd.conf`, restart lnd and restart lnd-manageJ. Once enabled, lnd-manageJ will spy on every RPC request and
+   your `lnd.conf` and restart lnd. Once enabled, lnd-manageJ will spy on every RPC request and
    response, without changing/blocking any of the data. However, despite the read-only configuration, requests may
    fail because of this if lnd-manageJ does not respond in time (crash, shutdown, ...).
-   See https://github.com/lightningnetwork/lnd/issues/6409.
+   See https://github.com/lightningnetwork/lnd/issues/6409. To mitigate this risk, you can add
+   `rpcmiddleware.intercepttimeout=10s` to the same section (the default is 2s).
 
 # Payment Options
 The following endpoints allow you to specify payment options that can be provided as the body of an HTTP `POST` request.
@@ -88,8 +88,6 @@ You can compute an MPP based on #PickhardtPayments using any of the following en
 
 # Paying invoices
 
-Warning: Don't do this on mainnet, yet! This is very much work in progress.
-
 * HTTP `POST`: `/api/payments/pay-payment-request/{paymentRequest}`
   * Pay the given payment request (also known as invoice) using the given payment options (fee rate weight etc.)
 * HTTP `GET`: `/api/payments/pay-payment-request/{paymentRequest}`
@@ -98,8 +96,6 @@ Warning: Don't do this on mainnet, yet! This is very much work in progress.
 The response shows a somewhat readable representation of the payment progress, including the final result.
 
 # Top Up
-
-Warning: Work in progress.
 
 * HTTP `GET`: `/api/payments/top-up/{pubkey}/amount/{amount}`
   * Sends satoshis out via some channel and back to the own node through the specified peer so that the local balance
