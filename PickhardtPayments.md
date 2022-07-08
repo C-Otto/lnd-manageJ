@@ -10,7 +10,7 @@ https://lists.linuxfoundation.org/pipermail/lightning-dev/2022-March/003510.html
 There is also a lightweight python package being developed which can be used for simulations or to do production tests at: https://github.com/renepickhardt/pickhardtpayments 
 
 # Requirements
-1. Currently (as of v0.15.0-beta.rc3, May 2022) lnd does not allow sending a replacement shard once a shard of an active MPP
+1. Currently (as of v0.15.0-beta, July 2022) lnd does not allow sending a replacement shard once a shard of an active MPP
    fails. This, sadly, is necessary to complete MPPs that regularly run into temporary channel failures due to lack of
    funds. See https://github.com/lightningnetwork/lnd/issues/5746 for a (possible) fix. You might want to stick to
    testnet until this is properly fixed!
