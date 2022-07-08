@@ -2,3 +2,4 @@
 !gradle/wrapper/gradle-wrapper.jar
 .idea
 build/
+lnd-manageJ.db
