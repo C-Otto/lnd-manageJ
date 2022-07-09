@@ -2,3 +2,5 @@
 !gradle/wrapper/gradle-wrapper.jar
 .idea
 build/
+lnd-manageJ.trace.db
+lnd-manageJ.mv.db
