@@ -159,8 +159,8 @@ Once lnd-manageJ is running, you can access the full (non-demo) UI at the same a
 The service is intended to run 24/7 to collect statistics about your node.
 You may restart both the service and lnd at any time.
 
-### Using SQLite
-Install Java 17 and run `./start-sqlite.sh`.
+### Using H2
+Install Java 17 and run `./start-h2.sh`.
 
 ### Using PostgreSQL (recommended)
 Install PostgreSQL (Debian: `apt install postgresql`) and create a database named `lndmanagej` and a user `bitcoin`.

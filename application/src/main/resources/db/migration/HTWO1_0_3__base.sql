@@ -1,3 +1,22 @@
+create table if not exists flyway_schema_history
+(
+    installed_rank integer                 not null
+        constraint flyway_schema_history_pk
+            primary key,
+    version        varchar(50),
+    description    varchar(200)            not null,
+    type           varchar(20)             not null,
+    script         varchar(1000)           not null,
+    checksum       integer,
+    installed_by   varchar(100)            not null,
+    installed_on   timestamp default now() not null,
+    execution_time integer                 not null,
+    success        boolean                 not null
+);
+
+create index if not exists flyway_schema_history_s_idx
+    on flyway_schema_history (success);
+
 create table if not exists balances
 (
     channel_id      bigint not null,
@@ -64,7 +83,7 @@ create table if not exists payments
     fees          bigint not null,
     hash          varchar(255),
     timestamp     bigint not null,
-    value         bigint not null
+    val           bigint not null
 );
 
 create index if not exists idx8fs5vewf99rse8wl890u7ruuw
@@ -99,7 +118,6 @@ create table if not exists settled_invoices
     hash            varchar(255),
     keysend_message varchar(5000),
     memo            varchar(255),
-    received_via    bigint not null,
     settle_date     bigint not null,
     settle_index    bigint not null
         constraint uk4xcaoj9cf5dd0l9ldjeo376r6
