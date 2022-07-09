@@ -11,9 +11,7 @@ dependencies {
     runtimeOnly project(':statistics')
     runtimeOnly project(':selfpayments')
     runtimeOnly 'org.postgresql:postgresql'
-    runtimeOnly 'org.xerial:sqlite-jdbc'
     runtimeOnly 'org.flywaydb:flyway-core'
-    implementation 'org.hibernate:hibernate-core'
     integrationTestRuntimeOnly 'com.h2database:h2'
     integrationTestImplementation 'com.ryantenney.metrics:metrics-spring:3.1.3'
     integrationTestImplementation 'io.grpc:grpc-stub:1.45.1'
@@ -30,13 +28,10 @@ jacocoTestCoverageVerification {
         rules.forEach {rule ->
             rule.limits.forEach {limit ->
                 if (limit.counter == 'INSTRUCTION') {
-                    limit.minimum = 0.12
-                }
-                if (limit.counter == 'CLASS') {
-                    limit.minimum = 0.6
+                    limit.minimum = 0.83
                 }
                 if (limit.counter == 'METHOD') {
-                    limit.minimum = 0.11
+                    limit.minimum = 0.73
                 }
             }
         }
