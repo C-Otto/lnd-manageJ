@@ -12,7 +12,7 @@ There is also a lightweight python package being developed which can be used for
 # Requirements
 1. Currently (as of v0.15.0-beta, July 2022) lnd does not allow sending a replacement shard once a shard of an active MPP
    fails. This, sadly, is necessary to complete MPPs that regularly run into temporary channel failures due to lack of
-   funds. See https://github.com/lightningnetwork/lnd/issues/5746 for a (possible) fix. You might want to wait until the fix is merged (and part of a released version of lnd).
+   funds. This is fixed with https://github.com/lightningnetwork/lnd/issues/5746, scheduled for lnd v0.15.1-beta.
 2. The graph algorithm implementation used to do the heavy lifting currently is only supported for amd64 (x86_64) on
    Linux, Windows, and Mac systems. See https://github.com/C-Otto/lnd-manageJ/issues/13.
 3. You need to enable middleware support in lnd: add a section `[rpcmiddleware]` with `rpcmiddleware.enable=true` to 
