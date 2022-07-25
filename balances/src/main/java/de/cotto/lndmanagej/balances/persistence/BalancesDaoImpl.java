@@ -59,22 +59,35 @@ class BalancesDaoImpl implements BalancesDao {
     }
 
     @Override
-    public Optional<Coins> getLocalBalanceAverage(ChannelId channelId, int days) {
+    public Optional<Coins> getLocalBalanceAverageOpenChannel(ChannelId channelId, int days) {
+        return getLocalBalanceAverage(channelId, days, true);
+    }
+
+    @Override
+    public Optional<Coins> getLocalBalanceAverageClosedChannel(ChannelId channelId, int days) {
+        return getLocalBalanceAverage(channelId, days, false);
+    }
+
+    private Optional<Coins> getLocalBalanceAverage(ChannelId channelId, int days, boolean open) {
         List<Balances> entries = getEntries(channelId, days);
         long totalSatoshis = 0;
         long totalMinutes = 0;
         LocalDateTime previous = LocalDateTime.now(ZoneOffset.UTC);
         LocalDateTime maxAge = LocalDateTime.now(ZoneOffset.UTC).minusDays(days);
+        boolean first = true;
         for (Balances balances : entries) {
-            long satoshis = balances.balanceInformation().localBalance().satoshis();
             LocalDateTime timestamp = balances.timestamp();
             if (timestamp.isBefore(maxAge)) {
                 timestamp = maxAge;
             }
-            Duration duration = Duration.between(timestamp, previous);
-            long minutes = duration.getSeconds() / 60;
-            totalSatoshis += satoshis * minutes;
-            totalMinutes += minutes;
+            if (!first || open) {
+                long satoshis = balances.balanceInformation().localBalance().satoshis();
+                Duration duration = Duration.between(timestamp, previous);
+                long minutes = duration.getSeconds() / 60;
+                totalSatoshis += satoshis * minutes;
+                totalMinutes += minutes;
+            }
+            first = false;
             previous = timestamp;
         }
         if (totalMinutes == 0) {

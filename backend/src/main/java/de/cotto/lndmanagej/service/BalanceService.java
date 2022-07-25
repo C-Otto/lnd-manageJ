@@ -86,6 +86,9 @@ public class BalanceService {
 
     @Timed
     public Optional<Coins> getLocalBalanceAverage(ChannelId channelId, int days) {
-        return balancesDao.getLocalBalanceAverage(channelId, days);
+        if (channelService.isClosed(channelId)) {
+            return balancesDao.getLocalBalanceAverageClosedChannel(channelId, days);
+        }
+        return balancesDao.getLocalBalanceAverageOpenChannel(channelId, days);
     }
 }
