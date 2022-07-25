@@ -129,7 +129,7 @@ public class RatingService {
         return result;
     }
 
-    private static long getLocalAvailableMilliSat(LocalChannel localChannel) {
+    private long getLocalAvailableMilliSat(LocalChannel localChannel) {
         if (localChannel instanceof LocalOpenChannel openChannel) {
             return openChannel.getBalanceInformation().localAvailable().milliSatoshis();
         }
