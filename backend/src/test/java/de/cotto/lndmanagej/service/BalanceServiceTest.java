@@ -143,7 +143,16 @@ class BalanceServiceTest {
     void getLocalBalanceAverage() {
         int days = 14;
         Coins coins = Coins.ofSatoshis(456);
-        when(balancesDao.getLocalBalanceAverage(CHANNEL_ID, days)).thenReturn(Optional.of(coins));
+        when(balancesDao.getLocalBalanceAverageOpenChannel(CHANNEL_ID, days)).thenReturn(Optional.of(coins));
+        assertThat(balanceService.getLocalBalanceAverage(CHANNEL_ID, days)).contains(coins);
+    }
+
+    @Test
+    void getLocalBalanceAverage_closed_channel() {
+        int days = 14;
+        Coins coins = Coins.ofSatoshis(456);
+        when(channelService.isClosed(CHANNEL_ID)).thenReturn(true);
+        when(balancesDao.getLocalBalanceAverageClosedChannel(CHANNEL_ID, days)).thenReturn(Optional.of(coins));
         assertThat(balanceService.getLocalBalanceAverage(CHANNEL_ID, days)).contains(coins);
     }
 

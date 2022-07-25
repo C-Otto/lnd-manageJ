@@ -312,6 +312,16 @@ class RatingServiceTest {
         }
 
         @Test
+        void no_average_balance_available() {
+            when(balanceService.getLocalBalanceAverage(CHANNEL_ID, ANALYSIS_DAYS))
+                    .thenReturn(Optional.empty());
+            when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+            when(feeService.getFeeReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
+                    .thenReturn(new FeeReport(Coins.ofMilliSatoshis(200_000 * ANALYSIS_DAYS), Coins.NONE));
+            assertThatCode(() -> ratingService.getRatingForChannel(CHANNEL_ID)).doesNotThrowAnyException();
+        }
+
+        @Test
         void divided_by_average_million_sats_local_if_less_than_one_million_sat() {
             Coins localAvailable = Coins.ofSatoshis(500_000);
             long expected = 100_000 * 2;

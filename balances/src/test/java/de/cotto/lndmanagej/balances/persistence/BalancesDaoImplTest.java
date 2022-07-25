@@ -124,7 +124,7 @@ class BalancesDaoImplTest {
 
         @Test
         void empty() {
-            assertThat(dao.getLocalBalanceAverage(CHANNEL_ID, 1)).isEmpty();
+            assertThat(dao.getLocalBalanceAverageOpenChannel(CHANNEL_ID, 1)).isEmpty();
         }
 
         @Test
@@ -133,7 +133,7 @@ class BalancesDaoImplTest {
             Coins expected = balances.balanceInformation().localBalance();
             when(balancesRepository.findByChannelIdOrderByTimestampDesc(eq(CHANNEL_ID.getShortChannelId())))
                     .thenReturn(Stream.of(BalancesJpaDto.fromModel(balances)));
-            assertThat(dao.getLocalBalanceAverage(CHANNEL_ID, DAYS)).contains(expected);
+            assertThat(dao.getLocalBalanceAverageOpenChannel(CHANNEL_ID, DAYS)).contains(expected);
         }
 
         @Test
@@ -142,7 +142,7 @@ class BalancesDaoImplTest {
             Balances balances2 = getWithLocalBalance(Coins.ofSatoshis(300), 20);
             when(balancesRepository.findByChannelIdOrderByTimestampDesc(anyLong()))
                     .thenReturn(Stream.of(BalancesJpaDto.fromModel(balances1), BalancesJpaDto.fromModel(balances2)));
-            assertThat(dao.getLocalBalanceAverage(CHANNEL_ID, DAYS)).contains(Coins.ofSatoshis(200));
+            assertThat(dao.getLocalBalanceAverageOpenChannel(CHANNEL_ID, DAYS)).contains(Coins.ofSatoshis(200));
         }
 
         @Test
@@ -150,7 +150,7 @@ class BalancesDaoImplTest {
             Balances balances = getWithLocalBalance(Coins.ofSatoshis(300), 99 * 24 * 60);
             when(balancesRepository.findByChannelIdOrderByTimestampDesc(anyLong()))
                     .thenReturn(Stream.of(BalancesJpaDto.fromModel(balances)));
-            assertThat(dao.getLocalBalanceAverage(CHANNEL_ID, DAYS))
+            assertThat(dao.getLocalBalanceAverageOpenChannel(CHANNEL_ID, DAYS))
                     .contains(balances.balanceInformation().localBalance());
         }
 
@@ -161,7 +161,22 @@ class BalancesDaoImplTest {
             Coins expected = Coins.ofSatoshis(199);
             when(balancesRepository.findByChannelIdOrderByTimestampDesc(anyLong()))
                     .thenReturn(Stream.of(BalancesJpaDto.fromModel(balances1), BalancesJpaDto.fromModel(balances2)));
-            assertThat(dao.getLocalBalanceAverage(CHANNEL_ID, DAYS)).contains(expected);
+            assertThat(dao.getLocalBalanceAverageOpenChannel(CHANNEL_ID, DAYS)).contains(expected);
+        }
+
+        @Test
+        void old_entries_then_closed() {
+            Balances balances1 = getWithLocalBalance(Coins.ofSatoshis(1), 80);
+            Balances balances2 = getWithLocalBalance(Coins.ofSatoshis(1_000_000), 90);
+            Balances balances3 = getWithLocalBalance(Coins.ofSatoshis(2_000_000), 100);
+            Coins expected = Coins.ofSatoshis(1_500_000);
+            when(balancesRepository.findByChannelIdOrderByTimestampDesc(eq(CHANNEL_ID.getShortChannelId())))
+                    .thenReturn(Stream.of(
+                            BalancesJpaDto.fromModel(balances1),
+                            BalancesJpaDto.fromModel(balances2),
+                            BalancesJpaDto.fromModel(balances3)
+                    ));
+            assertThat(dao.getLocalBalanceAverageClosedChannel(CHANNEL_ID, DAYS)).contains(expected);
         }
     }
 
