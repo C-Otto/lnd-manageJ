@@ -50,6 +50,10 @@ public class RatingService {
             .withExpiry(EXPIRY)
             .withRefresh(REFRESH)
             .build(this::getRatingForChannelWithoutCache);
+    private final LoadingCache<Pubkey, Set<ChannelId>> getEligibleChannelsCache = new CacheBuilder()
+            .withExpiry(EXPIRY)
+            .withRefresh(REFRESH)
+            .build(this::getEligibleChannelsWithoutCache);
 
     public RatingService(
             ChannelService channelService,
@@ -107,6 +111,10 @@ public class RatingService {
     }
 
     private Set<ChannelId> getEligibleChannels(Pubkey peer) {
+        return getEligibleChannelsCache.get(peer);
+    }
+
+    private Set<ChannelId> getEligibleChannelsWithoutCache(Pubkey peer) {
         Set<LocalOpenChannel> openChannels = channelService.getOpenChannelsWith(peer);
         Set<ChannelId> result = new LinkedHashSet<>(openChannels.stream().map(Channel::getId).toList());
         if (openChannels.isEmpty()) {
