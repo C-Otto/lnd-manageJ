@@ -36,14 +36,14 @@ class RatingControllerIT {
     @Test
     void getRatingForPeer() throws Exception {
         when(ratingService.getRatingForPeer(PUBKEY)).thenReturn(new Rating(123));
-        mockMvc.perform(get(PREFIX + "/peer/" + PUBKEY + RATING))
+        mockMvc.perform(get(PREFIX + "/node/" + PUBKEY + RATING))
                 .andExpect(content().json("{\"rating\":  123, \"message\":  \"\"}"));
     }
 
     @Test
     void getRatingForPeer_no_rating() throws Exception {
         when(ratingService.getRatingForPeer(PUBKEY)).thenReturn(Rating.EMPTY);
-        mockMvc.perform(get(PREFIX + "/peer/" + PUBKEY + RATING))
+        mockMvc.perform(get(PREFIX + "/node/" + PUBKEY + RATING))
                 .andExpect(content().json("{\"rating\":  -1, \"message\":  \"Unable to compute rating\"}"));
     }
 
