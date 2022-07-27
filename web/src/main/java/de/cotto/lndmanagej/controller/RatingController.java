@@ -24,7 +24,7 @@ public class RatingController {
     }
 
     @Timed
-    @GetMapping("/peer/{peer}/rating")
+    @GetMapping("/node/{peer}/rating")
     public RatingDto getRatingForPeer(@PathVariable Pubkey peer) {
         Rating rating = ratingService.getRatingForPeer(peer);
         return RatingDto.fromModel(rating);
