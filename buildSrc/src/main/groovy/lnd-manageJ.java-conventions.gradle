@@ -26,9 +26,9 @@ repositories {
     mavenCentral()
 }
 
-//tasks.withType(JavaCompile).configureEach {
-//    options.compilerArgs << '-Werror'
-//}
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs << '-Werror'
+}
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
