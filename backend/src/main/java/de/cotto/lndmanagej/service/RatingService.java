@@ -90,15 +90,20 @@ public class RatingService {
             return Optional.empty();
         }
         Duration durationForAnalysis = getDurationForAnalysis();
-        FeeReport feeReport =
-                feeService.getFeeReportForChannel(channelId, durationForAnalysis);
-        RebalanceReport rebalanceReport =
-                rebalanceService.getReportForChannel(channelId, durationForAnalysis);
+        Optional<Coins> averageLocalBalanceOptional =
+                balanceService.getLocalBalanceAverage(channelId, (int) durationForAnalysis.toDays());
+        if (averageLocalBalanceOptional.isEmpty()) {
+            return Optional.empty();
+        }
+        FeeReport feeReport = feeService.getFeeReportForChannel(channelId, durationForAnalysis);
+        RebalanceReport rebalanceReport = rebalanceService.getReportForChannel(channelId, durationForAnalysis);
         long feeRate = policyService.getMinimumFeeRateTo(localChannel.getRemotePubkey()).orElse(0L);
         long localAvailableMilliSat = getLocalAvailableMilliSat(localChannel);
         double millionSat = 1.0 * localAvailableMilliSat / 1_000 / 1_000_000;
-        long averageSat = balanceService.getLocalBalanceAverage(channelId, (int) durationForAnalysis.toDays())
-                .orElse(Coins.NONE).satoshis();
+        long averageSat = averageLocalBalanceOptional.get().satoshis();
+        if (averageSat == 0) {
+            averageSat = 1;
+        }
 
         long rating = feeReport.earned().milliSatoshis();
         rating += feeReport.sourced().milliSatoshis();
