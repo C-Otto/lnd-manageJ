@@ -44,7 +44,6 @@ import static de.cotto.lndmanagej.model.OpenInitiator.LOCAL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assumptions.assumeThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -306,9 +305,8 @@ class RatingServiceTest {
             when(balanceService.getLocalBalanceAverage(CHANNEL_ID, ANALYSIS_DAYS))
                     .thenReturn(Optional.of(Coins.NONE));
             when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
-            when(feeService.getFeeReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
-                    .thenReturn(new FeeReport(Coins.ofMilliSatoshis(100_000 * ANALYSIS_DAYS), Coins.NONE));
-            assertThatCode(() -> ratingService.getRatingForChannel(CHANNEL_ID)).doesNotThrowAnyException();
+            long averageSat = ratingService.getRatingForChannel(CHANNEL_ID).map(Rating::getRating).orElseThrow();
+            assertThat(averageSat).isLessThan(Integer.MAX_VALUE);
         }
 
         @Test
@@ -316,9 +314,7 @@ class RatingServiceTest {
             when(balanceService.getLocalBalanceAverage(CHANNEL_ID, ANALYSIS_DAYS))
                     .thenReturn(Optional.empty());
             when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
-            when(feeService.getFeeReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
-                    .thenReturn(new FeeReport(Coins.ofMilliSatoshis(200_000 * ANALYSIS_DAYS), Coins.NONE));
-            assertThatCode(() -> ratingService.getRatingForChannel(CHANNEL_ID)).doesNotThrowAnyException();
+            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).isEmpty();
         }
 
         @Test
