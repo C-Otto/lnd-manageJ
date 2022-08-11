@@ -6,8 +6,10 @@
     <div class="card border-secondary">
         <div class="card-header">
             <div class="fs-4 mb-0">
-                <div th:replace="~{fragments/icons :: warning}"/>
-                <span><a th:text="${warning.alias}" th:href="@{/node/{id}(id=${warning.pubkey})}"></a></span>
+                <div class="tile-title">
+                    <div th:replace="~{fragments/icons :: warning}"/>
+                    <span><a th:text="${warning.alias}" th:href="@{/node/{id}(id=${warning.pubkey})}"></a></span>
+                </div>
             </div>
         </div>
         <div class="card-body" style="padding-top: 0.5rem; padding-bottom: 0.5rem;">
