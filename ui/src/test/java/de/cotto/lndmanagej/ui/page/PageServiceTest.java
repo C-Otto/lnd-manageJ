@@ -14,6 +14,7 @@ import de.cotto.lndmanagej.ui.dto.BalanceInformationModel;
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
+import de.cotto.lndmanagej.ui.dto.warning.DashboardWarningDto;
 import de.cotto.lndmanagej.ui.page.channel.ChannelDetailsPage;
 import de.cotto.lndmanagej.ui.page.channel.ChannelsPage;
 import de.cotto.lndmanagej.ui.page.general.DashboardPage;
@@ -49,6 +50,9 @@ import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.CAPACITY_SAT;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO2;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.UNANNOUNCED_CHANNEL;
+import static de.cotto.lndmanagej.ui.dto.warning.DashboardWarningsFixture.DASHBOARD_WARNING;
+import static de.cotto.lndmanagej.ui.dto.warning.DashboardWarningsFixture.DASHBOARD_WARNING_2;
+import static de.cotto.lndmanagej.ui.dto.warning.DashboardWarningsFixture.DASHBOARD_WARNING_3;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -64,13 +68,26 @@ class PageServiceTest {
     private WarningService warningService;
 
     @Test
-    void dashboard() {
+    void dashboard_noWarnings() {
         List<OpenChannelDto> channels = List.of(OPEN_CHANNEL_DTO);
         List<NodeDto> nodes = List.of(NODE_DTO);
-        mockChannelsAndNodesWithoutWarning(channels, nodes);
+        mockChannelsAndNodesAndWarnings(channels, nodes, List.of());
 
         assertThat(pageService.dashboard(SortBy.DEFAULT_SORT)).usingRecursiveComparison().isEqualTo(
                 new DashboardPage(channels, nodes, List.of())
+        );
+    }
+
+    @Test
+    void dashboard_withWarnings_sorted() {
+        List<OpenChannelDto> channels = List.of(OPEN_CHANNEL_DTO);
+        List<NodeDto> nodes = List.of(NODE_DTO);
+        List<DashboardWarningDto> warnings = List.of(DASHBOARD_WARNING, DASHBOARD_WARNING_2, DASHBOARD_WARNING_3);
+        mockChannelsAndNodesAndWarnings(channels, nodes, warnings);
+
+        List<DashboardWarningDto> sortedWarnings = List.of(DASHBOARD_WARNING_2, DASHBOARD_WARNING, DASHBOARD_WARNING_3);
+        assertThat(pageService.dashboard(SortBy.DEFAULT_SORT)).usingRecursiveComparison().isEqualTo(
+                new DashboardPage(channels, nodes, sortedWarnings)
         );
     }
 
@@ -80,7 +97,7 @@ class PageServiceTest {
         NodeDto alice = new NodeDto(PUBKEY_3.toString(), "Alice", true, RATING.getRating());
         NodeDto charlie = new NodeDto(PUBKEY_2.toString(), "Charlie", true, RATING.getRating());
         List<NodeDto> nodesUnsorted = List.of(bob, charlie, alice);
-        mockChannelsAndNodesWithoutWarning(List.of(), nodesUnsorted);
+        mockChannelsAndNodesAndWarnings(List.of(), nodesUnsorted, List.of());
 
         List<NodeDto> nodesSorted = List.of(alice, bob, charlie);
         assertThat(pageService.dashboard(SortBy.DEFAULT_SORT).getNodes()).isEqualTo(nodesSorted);
@@ -92,16 +109,20 @@ class PageServiceTest {
         NodeDto onlineNode = new NodeDto(PUBKEY.toString(), "Online-Node", true, RATING.getRating());
         NodeDto offlineNode2 = new NodeDto(PUBKEY_2.toString(), "Offline-Node2", false, RATING.getRating());
         List<NodeDto> nodesUnsorted = List.of(onlineNode, offlineNode2, offlineNode1);
-        mockChannelsAndNodesWithoutWarning(List.of(), nodesUnsorted);
+        mockChannelsAndNodesAndWarnings(List.of(), nodesUnsorted, List.of());
 
         List<NodeDto> nodesSorted = List.of(offlineNode1, offlineNode2, onlineNode);
         assertThat(pageService.dashboard(SortBy.DEFAULT_SORT).getNodes()).isEqualTo(nodesSorted);
     }
 
-    private void mockChannelsAndNodesWithoutWarning(List<OpenChannelDto> channels, List<NodeDto> nodes) {
+    private void mockChannelsAndNodesAndWarnings(
+            List<OpenChannelDto> channels,
+            List<NodeDto> nodes,
+            List<DashboardWarningDto> warnings
+    ) {
         when(dataService.getOpenChannels()).thenReturn(channels);
         when(dataService.createNodeList()).thenReturn(nodes);
-        when(warningService.getWarnings()).thenReturn(List.of());
+        when(warningService.getWarnings()).thenReturn(warnings);
     }
 
     @Test

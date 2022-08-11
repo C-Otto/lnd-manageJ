@@ -31,17 +31,15 @@ public class DemoWarningService extends WarningService {
     public static final DashboardWarningDto POCKET_WARNING = new DashboardWarningDto(
             POCKET.remoteAlias(),
             POCKET.remotePubkey(),
-            List.of("No flow in the past 35 days.", "Rating of 182 is below threshold of 1,000"),
-            List.of()
+            List.of("Rating of 182 is below threshold of 1,000"),
+            List.of(new ChannelWarningDto(POCKET.channelId(), "Channel has accumulated 500,000 updates."))
     );
 
     public static final DashboardWarningDto BCASH_WARNING = new DashboardWarningDto(
             B_CASH_IS_TRASH.remoteAlias(),
             B_CASH_IS_TRASH.remotePubkey(),
-            List.of("Node has been online 66% in the past 14 days."),
-            List.of(new ChannelWarningDto(
-                    B_CASH_IS_TRASH.channelId(), "Channel has accumulated 500,000 updates.")
-            )
+            List.of("Node has been online 66% in the past 14 days.", "No flow in the past 35 days."),
+            List.of()
     );
 
     public static final DashboardWarningDto TRY_BTC_WARNING = new DashboardWarningDto(

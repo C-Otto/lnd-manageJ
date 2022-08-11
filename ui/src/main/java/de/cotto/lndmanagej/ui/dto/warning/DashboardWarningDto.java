@@ -11,4 +11,7 @@ public record DashboardWarningDto(
         List<ChannelWarningDto> channelWarnings
 ) {
 
+    public int numberOfWarningItems() {
+        return nodeWarnings.size() + channelWarnings.size();
+    }
 }
