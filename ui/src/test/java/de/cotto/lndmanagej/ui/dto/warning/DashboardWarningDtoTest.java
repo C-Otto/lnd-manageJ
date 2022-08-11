@@ -30,4 +30,9 @@ class DashboardWarningDtoTest {
     void channelWarnings() {
         assertThat(DASHBOARD_WARNING.channelWarnings()).isEqualTo(List.of(CHANNEL_WARNING_DTO));
     }
+
+    @Test
+    void getNumberOfWarnings() {
+        assertThat(DASHBOARD_WARNING.numberOfWarningItems()).isEqualTo(2);
+    }
 }

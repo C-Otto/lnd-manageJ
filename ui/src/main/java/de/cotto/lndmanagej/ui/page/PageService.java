@@ -8,6 +8,7 @@ import de.cotto.lndmanagej.ui.WarningService;
 import de.cotto.lndmanagej.ui.controller.param.SortBy;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
+import de.cotto.lndmanagej.ui.dto.warning.DashboardWarningDto;
 import de.cotto.lndmanagej.ui.page.channel.ChannelDetailsPage;
 import de.cotto.lndmanagej.ui.page.channel.ChannelsPage;
 import de.cotto.lndmanagej.ui.page.general.DashboardPage;
@@ -39,8 +40,15 @@ public class PageService {
         return new DashboardPage(
                 sortChannels(dataService.getOpenChannels(), sortBy),
                 sortNodes(dataService.createNodeList(), sortBy),
-                warningService.getWarnings()
+                sortWarnings(warningService.getWarnings())
         );
+    }
+
+    private List<DashboardWarningDto> sortWarnings(List<DashboardWarningDto> warnings) {
+        return warnings.stream()
+                .sorted(Comparator.comparing(DashboardWarningDto::numberOfWarningItems)
+                        .reversed().thenComparing(DashboardWarningDto::pubkey))
+                .toList();
     }
 
     public ChannelsPage channels(SortBy sortBy) {
