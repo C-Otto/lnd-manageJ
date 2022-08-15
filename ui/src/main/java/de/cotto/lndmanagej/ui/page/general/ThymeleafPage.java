@@ -7,6 +7,7 @@ import java.util.Map;
 
 public abstract class ThymeleafPage {
 
+    private static final String VIEW_KEY = "page";
     private final Map<String, Object> modelAttributes = new HashMap<>();
 
     public ThymeleafPage() {
@@ -24,6 +25,7 @@ public abstract class ThymeleafPage {
     }
 
     public String create(Model model) {
+        model.addAttribute(VIEW_KEY, getView());
         model.addAllAttributes(getModelAttributes());
         return getView();
     }
