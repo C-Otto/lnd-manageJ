@@ -68,6 +68,7 @@ class GrpcSendToRouteTest {
     void sends_to_converted_route() {
         grpcSendToRoute.sendToRoute(ROUTE, DECODED_PAYMENT_REQUEST, observer);
         RouterOuterClass.SendToRouteRequest expectedRequest = RouterOuterClass.SendToRouteRequest.newBuilder()
+                .setSkipTempErr(true)
                 .setRoute(Route.newBuilder()
                         .setTotalTimeLock(ROUTE.getTotalTimeLock(BLOCK_HEIGHT, DECODED_PAYMENT_REQUEST.cltvExpiry()))
                         .addHops(Hop.newBuilder()
