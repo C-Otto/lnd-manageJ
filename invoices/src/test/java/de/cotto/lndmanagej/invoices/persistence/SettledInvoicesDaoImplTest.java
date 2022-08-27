@@ -8,19 +8,27 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE_2;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.longThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SettledInvoicesDaoImplTest {
+    private static final Duration MAX_AGE = Duration.ofDays(10 * 365);
+
     @InjectMocks
     private SettledInvoicesDaoImpl dao;
 
@@ -70,6 +78,30 @@ class SettledInvoicesDaoImplTest {
         dao.save(Set.of(SETTLED_INVOICE, SETTLED_INVOICE_2));
         Set<SettledInvoice> expected = Set.of(SETTLED_INVOICE, SETTLED_INVOICE_2);
         verify(repository).saveAll(argThat(isSet(expected)));
+    }
+
+    @Test
+    void getInvoicesPaidVia_empty() {
+        assertThat(dao.getInvoicesPaidVia(CHANNEL_ID, Duration.ofMinutes(1))).isEmpty();
+    }
+
+    @Test
+    void getInvoicesPaidVia() {
+        SettledInvoiceJpaDto jpaDto = SettledInvoiceJpaDto.createFromModel(SETTLED_INVOICE);
+        when(repository.findAllByReceivedViaChannelIdAndSettleDateAfter(eq(CHANNEL_ID.getShortChannelId()), anyLong()))
+                .thenReturn(List.of(jpaDto));
+        assertThat(dao.getInvoicesPaidVia(CHANNEL_ID, MAX_AGE)).containsExactly(SETTLED_INVOICE);
+    }
+
+    @Test
+    void getInvoicesPaidVia_with_max_age() {
+        Duration maxAge = Duration.ofDays(17);
+        long expectedTimestamp = Instant.now().minus(maxAge).getEpochSecond() * 1_000;
+        dao.getInvoicesPaidVia(CHANNEL_ID, maxAge);
+        verify(repository).findAllByReceivedViaChannelIdAndSettleDateAfter(
+                anyLong(),
+                longThat(timestamp -> Math.abs(expectedTimestamp - timestamp) <= 5_000)
+        );
     }
 
     @SuppressWarnings("PMD.LinguisticNaming")

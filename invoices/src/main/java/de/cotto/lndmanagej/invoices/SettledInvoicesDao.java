@@ -1,8 +1,11 @@
 package de.cotto.lndmanagej.invoices;
 
+import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.SettledInvoice;
 
+import java.time.Duration;
 import java.util.Collection;
+import java.util.List;
 
 public interface SettledInvoicesDao {
     void save(Collection<SettledInvoice> settledInvoices);
@@ -12,4 +15,6 @@ public interface SettledInvoicesDao {
     long getAddIndexOffset();
 
     long getSettleIndexOffset();
+
+    List<SettledInvoice> getInvoicesPaidVia(ChannelId channelId, Duration maxAge);
 }

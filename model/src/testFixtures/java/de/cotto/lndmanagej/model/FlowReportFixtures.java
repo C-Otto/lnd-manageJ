@@ -10,7 +10,8 @@ public class FlowReportFixtures {
             Coins.ofSatoshis(51),
             Coins.ofMilliSatoshis(123),
             Coins.ofMilliSatoshis(1),
-            Coins.ofMilliSatoshis(456)
+            Coins.ofMilliSatoshis(456),
+            Coins.ofMilliSatoshis(1500)
     );
     public static final FlowReport FLOW_REPORT_2 = new FlowReport(
             Coins.ofSatoshis(1),
@@ -21,6 +22,7 @@ public class FlowReportFixtures {
             Coins.ofSatoshis(61),
             Coins.ofSatoshis(9),
             Coins.ofMilliSatoshis(2),
-            Coins.ofMilliSatoshis(10)
+            Coins.ofMilliSatoshis(10),
+            Coins.ofMilliSatoshis(1)
     );
 }

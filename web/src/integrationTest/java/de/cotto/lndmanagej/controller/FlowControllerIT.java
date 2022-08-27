@@ -48,8 +48,9 @@ class FlowControllerIT {
                 .andExpect(jsonPath("$.rebalanceSupportSentMilliSat", is("9000")))
                 .andExpect(jsonPath("$.rebalanceSupportFeesSentMilliSat", is("2")))
                 .andExpect(jsonPath("$.rebalanceSupportReceivedMilliSat", is("10")))
+                .andExpect(jsonPath("$.receivedViaPaymentsMilliSat", is("1")))
                 .andExpect(jsonPath("$.totalSentMilliSat", is("70006")))
-                .andExpect(jsonPath("$.totalReceivedMilliSat", is("63020")));
+                .andExpect(jsonPath("$.totalReceivedMilliSat", is("63021")));
     }
 
     @Test
@@ -72,8 +73,9 @@ class FlowControllerIT {
                 .andExpect(jsonPath("$.rebalanceSupportSentMilliSat", is("123")))
                 .andExpect(jsonPath("$.rebalanceSupportFeesSentMilliSat", is("1")))
                 .andExpect(jsonPath("$.rebalanceSupportReceivedMilliSat", is("456")))
+                .andExpect(jsonPath("$.receivedViaPaymentsMilliSat", is("1500")))
                 .andExpect(jsonPath("$.totalSentMilliSat", is("1100129")))
-                .andExpect(jsonPath("$.totalReceivedMilliSat", is("9052457")));
+                .andExpect(jsonPath("$.totalReceivedMilliSat", is("9053957")));
     }
 
     @Test

@@ -58,6 +58,7 @@ public final class DeriveDataUtil {
                 Coins.ofSatoshis(rand.nextLong(100)),
                 Coins.ofSatoshis(rand.nextLong(200)),
                 Coins.ofSatoshis(rand.nextLong(10)),
+                Coins.ofSatoshis(rand.nextLong(1000)),
                 Coins.ofSatoshis(rand.nextLong(1000))
         );
         return FlowReportDto.createFromModel(flowReport);

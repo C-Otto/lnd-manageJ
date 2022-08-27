@@ -13,6 +13,7 @@ public record FlowReportDto(
         String rebalanceSupportSentMilliSat,
         String rebalanceSupportFeesSentMilliSat,
         String rebalanceSupportReceivedMilliSat,
+        String receivedViaPaymentsMilliSat,
         String totalSentMilliSat,
         String totalReceivedMilliSat
 ) {
@@ -27,6 +28,7 @@ public record FlowReportDto(
             Coins rebalanceSupportSent,
             Coins rebalanceSupportFeesSent,
             Coins rebalanceSupportReceived,
+            Coins receivedViaPayments,
             Coins totalSent,
             Coins totalReceived
     ) {
@@ -40,6 +42,7 @@ public record FlowReportDto(
                 String.valueOf(rebalanceSupportSent.milliSatoshis()),
                 String.valueOf(rebalanceSupportFeesSent.milliSatoshis()),
                 String.valueOf(rebalanceSupportReceived.milliSatoshis()),
+                String.valueOf(receivedViaPayments.milliSatoshis()),
                 String.valueOf(totalSent.milliSatoshis()),
                 String.valueOf(totalReceived.milliSatoshis())
         );
@@ -56,6 +59,7 @@ public record FlowReportDto(
                 flowReport.rebalanceSupportSent(),
                 flowReport.rebalanceSupportFeesSent(),
                 flowReport.rebalanceSupportReceived(),
+                flowReport.receivedViaPayments(),
                 flowReport.totalSent(),
                 flowReport.totalReceived()
         );

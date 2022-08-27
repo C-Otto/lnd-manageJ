@@ -17,6 +17,7 @@ class FlowReportDtoTest {
     private static final Coins REBALANCE_SUPPORT_SENT = Coins.ofMilliSatoshis(7);
     private static final Coins REBALANCE_SUPPORT_FEES_SENT = Coins.ofMilliSatoshis(8);
     private static final Coins REBALANCE_SUPPORT_RECEIVED = Coins.ofMilliSatoshis(9);
+    private static final Coins RECEIVED_VIA_PAYMENTS = Coins.ofMilliSatoshis(10);
     private static final Coins TOTAL_SENT = Coins.ofMilliSatoshis(10);
     private static final Coins TOTAL_RECEIVED = Coins.ofMilliSatoshis(11);
 
@@ -31,6 +32,7 @@ class FlowReportDtoTest {
                     REBALANCE_SUPPORT_SENT,
                     REBALANCE_SUPPORT_FEES_SENT,
                     REBALANCE_SUPPORT_RECEIVED,
+                    RECEIVED_VIA_PAYMENTS,
                     TOTAL_SENT,
                     TOTAL_RECEIVED
             );
@@ -113,8 +115,9 @@ class FlowReportDtoTest {
                 "123",
                 "1",
                 "456",
+                "1500",
                 "1100129",
-                "9052457"
+                "9053957"
         ));
     }
 }

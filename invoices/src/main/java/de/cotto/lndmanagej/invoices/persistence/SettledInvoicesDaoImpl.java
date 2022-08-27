@@ -1,10 +1,13 @@
 package de.cotto.lndmanagej.invoices.persistence;
 
 import de.cotto.lndmanagej.invoices.SettledInvoicesDao;
+import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.SettledInvoice;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 
@@ -38,5 +41,19 @@ public class SettledInvoicesDaoImpl implements SettledInvoicesDao {
     @Override
     public long getSettleIndexOffset() {
         return repository.getMaxSettledIndexWithoutGaps();
+    }
+
+    @Override
+    public List<SettledInvoice> getInvoicesPaidVia(ChannelId channelId, Duration maxAge) {
+        return repository.findAllByReceivedViaChannelIdAndSettleDateAfter(
+                        channelId.getShortChannelId(),
+                        getAfterEpochMilliSeconds(maxAge)
+                ).stream()
+                .map(SettledInvoiceJpaDto::toModel)
+                .toList();
+    }
+
+    private long getAfterEpochMilliSeconds(Duration maxAge) {
+        return Instant.now().toEpochMilli() - maxAge.getSeconds() * 1_000;
     }
 }

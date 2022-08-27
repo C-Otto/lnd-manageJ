@@ -9,9 +9,11 @@ public record FlowReport(
         Coins rebalanceReceived,
         Coins rebalanceSupportSent,
         Coins rebalanceSupportFeesSent,
-        Coins rebalanceSupportReceived
+        Coins rebalanceSupportReceived,
+        Coins receivedViaPayments
 ) {
     public static final FlowReport EMPTY = new FlowReport(
+            Coins.NONE,
             Coins.NONE,
             Coins.NONE,
             Coins.NONE,
@@ -33,7 +35,8 @@ public record FlowReport(
                 rebalanceReceived.add(other.rebalanceReceived),
                 rebalanceSupportSent.add(other.rebalanceSupportSent),
                 rebalanceSupportFeesSent.add(other.rebalanceSupportFeesSent),
-                rebalanceSupportReceived.add(other.rebalanceSupportReceived)
+                rebalanceSupportReceived.add(other.rebalanceSupportReceived),
+                receivedViaPayments.add(other.receivedViaPayments)
         );
     }
 
@@ -49,6 +52,7 @@ public record FlowReport(
         return forwardedReceived
                 .add(forwardingFeesReceived)
                 .add(rebalanceReceived)
-                .add(rebalanceSupportReceived);
+                .add(rebalanceSupportReceived)
+                .add(receivedViaPayments);
     }
 }

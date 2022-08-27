@@ -21,17 +21,20 @@ public class FlowService {
     private final ForwardingEventsService forwardingEventsService;
     private final ChannelService channelService;
     private final RebalanceService rebalanceService;
+    private final SettledInvoicesService settledInvoicesService;
     private final ClosedChannelAwareCache<FlowReport> cache;
 
     public FlowService(
             ForwardingEventsService forwardingEventsService,
             ChannelService channelService,
             RebalanceService rebalanceService,
+            SettledInvoicesService settledInvoicesService,
             OwnNodeService ownNodeService
     ) {
         this.forwardingEventsService = forwardingEventsService;
         this.channelService = channelService;
         this.rebalanceService = rebalanceService;
+        this.settledInvoicesService = settledInvoicesService;
         cache = ClosedChannelAwareCache.builder(channelService, ownNodeService)
                 .withExpiry(EXPIRY)
                 .withRefresh(REFRESH)
@@ -73,6 +76,11 @@ public class FlowService {
         Coins rebalanceSupportReceived = rebalanceService.getSupportAsTargetAmountToChannel(channelId, maxAge);
         Coins rebalanceFeesSent = rebalanceService.getSourceCostsForChannel(channelId, maxAge);
         Coins rebalanceSupportFeesSent = rebalanceService.getSupportAsSourceCostsFromChannel(channelId, maxAge);
+        Coins receivedViaPayments = settledInvoicesService.getAmountReceivedViaChannel(channelId, maxAge)
+                .subtract(rebalanceReceived)
+                .subtract(rebalanceSupportReceived)
+                .maximum(Coins.NONE);
+
         return new FlowReport(
                 forwardedSent,
                 forwardedReceived,
@@ -82,7 +90,8 @@ public class FlowService {
                 rebalanceReceived,
                 rebalanceSupportSent,
                 rebalanceSupportFeesSent,
-                rebalanceSupportReceived
+                rebalanceSupportReceived,
+                receivedViaPayments
         );
     }
 

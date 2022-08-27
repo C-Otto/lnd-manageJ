@@ -53,18 +53,24 @@ class FlowReportTest {
     }
 
     @Test
+    void receivedViaPayments() {
+        assertThat(FLOW_REPORT.receivedViaPayments()).isEqualTo(Coins.ofMilliSatoshis(1_500));
+    }
+
+    @Test
     void totalSent() {
         assertThat(FLOW_REPORT.totalSent()).isEqualTo(Coins.ofMilliSatoshis(1_100_129));
     }
 
     @Test
     void totalReceived() {
-        assertThat(FLOW_REPORT.totalReceived()).isEqualTo(Coins.ofMilliSatoshis(9_052_457));
+        assertThat(FLOW_REPORT.totalReceived()).isEqualTo(Coins.ofMilliSatoshis(9_053_957));
     }
 
     @Test
     void empty() {
         assertThat(FlowReport.EMPTY).isEqualTo(new FlowReport(
+                Coins.NONE,
                 Coins.NONE,
                 Coins.NONE,
                 Coins.NONE,
@@ -93,7 +99,8 @@ class FlowReportTest {
                 Coins.ofSatoshis(112),
                 Coins.ofMilliSatoshis(9_123),
                 Coins.ofMilliSatoshis(3),
-                Coins.ofMilliSatoshis(466)
+                Coins.ofMilliSatoshis(466),
+                Coins.ofMilliSatoshis(1_501)
         ));
     }
 }
