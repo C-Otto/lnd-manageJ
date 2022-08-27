@@ -114,6 +114,7 @@ Node specific: `/api/node/{PUBKEY}/` (where `{PUBKEY}` is the node pubkey) follo
    * "No flow in the past `X` days" (if `X` >= 30)
    * "Node has been online `X`% in the past 7 days" (if `X` < 80)
    * "Node changed between online and offline `X` times in the past 7 days" (if `X` > 50)
+   * "Rating of `X` is below threshold of `Y`" (if `X < Y` with `Y` defaulting to `1,000`)
  * `details`: all of the above
 
 Warnings:
