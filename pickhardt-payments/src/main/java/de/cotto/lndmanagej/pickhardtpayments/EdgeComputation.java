@@ -59,7 +59,7 @@ public class EdgeComputation {
 
     public EdgesWithLiquidityInformation getEdges(PaymentOptions paymentOptions) {
         if (noMiddlewareSupport()) {
-            logger.error("Middleware needs to be connected");
+            logger.error("Middleware needs to be connected, see requirements section in PickhardtPayments.md");
             return EdgesWithLiquidityInformation.EMPTY;
         }
         Set<DirectedChannelEdge> channelEdges = grpcGraph.getChannelEdges().orElse(null);
