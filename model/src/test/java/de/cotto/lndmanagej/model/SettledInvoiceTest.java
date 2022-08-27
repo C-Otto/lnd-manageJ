@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Map;
 import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.ADD_INDEX;
@@ -27,7 +28,8 @@ class SettledInvoiceTest {
                 "",
                 Coins.NONE,
                 "",
-                Optional.empty()
+                Optional.empty(),
+                Map.of()
         );
         assertThat(SettledInvoice.INVALID).isEqualTo(expected);
     }

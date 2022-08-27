@@ -1,20 +1,26 @@
 package de.cotto.lndmanagej.invoices.persistence;
 
+import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.SettledInvoice;
 
 import javax.annotation.Nullable;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
 import static java.time.ZoneOffset.UTC;
+import static java.util.stream.Collectors.toMap;
 
 @Entity
 @Table(
@@ -45,6 +51,11 @@ public class SettledInvoiceJpaDto {
     @Column(length = KEYSEND_MESSAGE_LENGTH)
     private String keysendMessage;
 
+    @Nullable
+    @ElementCollection
+    @CollectionTable(name = "settled_invoice_received_via")
+    private List<ReceivedViaJpaDto> receivedVia;
+
     public SettledInvoiceJpaDto() {
         // for JPA
     }
@@ -58,6 +69,12 @@ public class SettledInvoiceJpaDto {
         jpaDto.amountPaid = settledInvoice.amountPaid().milliSatoshis();
         jpaDto.memo = settledInvoice.memo();
         jpaDto.keysendMessage = getTruncatedKeysendMessage(settledInvoice);
+        jpaDto.receivedVia = settledInvoice.receivedVia().entrySet().stream()
+                .map(entry -> new ReceivedViaJpaDto(
+                        entry.getKey().getShortChannelId(),
+                        entry.getValue().milliSatoshis())
+                )
+                .toList();
         return jpaDto;
     }
 
@@ -70,8 +87,16 @@ public class SettledInvoiceJpaDto {
                 Objects.requireNonNull(hash),
                 Coins.ofMilliSatoshis(amountPaid),
                 Objects.requireNonNull(memo),
-                Optional.ofNullable(keysendMessage)
+                Optional.ofNullable(keysendMessage),
+                getReceivedVia()
         );
+    }
+
+    private Map<ChannelId, Coins> getReceivedVia() {
+        return Objects.requireNonNull(receivedVia).stream().collect(toMap(
+                entry -> ChannelId.fromShortChannelId(entry.getChannelId()),
+                entry -> Coins.ofMilliSatoshis(entry.getAmount())
+        ));
     }
 
     public long getAddIndex() {

@@ -4,6 +4,7 @@ import de.cotto.lndmanagej.model.SettledInvoice;
 import de.cotto.lndmanagej.model.SettledInvoiceFixtures;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
 import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.KEYSEND_MESSAGE;
@@ -76,7 +77,8 @@ class SettledSettledInvoiceJpaDtoTest {
                 SettledInvoiceFixtures.HASH,
                 SettledInvoiceFixtures.AMOUNT_PAID,
                 SettledInvoiceFixtures.MEMO,
-                Optional.of(longMessage)
+                Optional.of(longMessage),
+                Map.of()
         ));
     }
 }

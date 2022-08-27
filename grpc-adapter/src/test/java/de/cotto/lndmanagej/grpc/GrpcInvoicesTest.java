@@ -1,11 +1,13 @@
 package de.cotto.lndmanagej.grpc;
 
 import com.google.protobuf.ByteString;
+import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.SettledInvoice;
 import lnrpc.AddInvoiceResponse;
 import lnrpc.Invoice;
 import lnrpc.InvoiceHTLC;
+import lnrpc.InvoiceHTLCState;
 import lnrpc.ListInvoiceResponse;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -16,6 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.annotation.Nullable;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HexFormat;
 import java.util.LinkedHashMap;
@@ -23,6 +27,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_4;
 import static de.cotto.lndmanagej.model.DecodedPaymentRequestFixtures.DECODED_PAYMENT_REQUEST;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.KEYSEND_MESSAGE;
 import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE;
@@ -115,7 +123,7 @@ class GrpcInvoicesTest {
         void with_keysend_message_just_preimage() {
             LinkedHashMap<Long, ByteString> customRecords = new LinkedHashMap<>();
             customRecords.put(5_482_373_484L, ByteString.copyFromUtf8("000"));
-            mockResponse(invoice(SETTLED, SETTLED_INVOICE_KEYSEND, customRecords));
+            mockResponse(invoice(SETTLED, SETTLED_INVOICE_KEYSEND, customRecords, List.of()));
             assertThat(grpcInvoices.getSettledInvoicesAfter(0L)).contains(
                     List.of(SETTLED_INVOICE)
             );
@@ -125,7 +133,71 @@ class GrpcInvoicesTest {
         void with_keysend_message_without_preimage() {
             LinkedHashMap<Long, ByteString> customRecords = new LinkedHashMap<>();
             customRecords.put(7_629_168L, ByteString.copyFromUtf8(KEYSEND_MESSAGE));
-            mockResponse(invoice(SETTLED, SETTLED_INVOICE_KEYSEND, customRecords));
+            mockResponse(invoice(SETTLED, SETTLED_INVOICE_KEYSEND, customRecords, List.of()));
+            assertThat(grpcInvoices.getSettledInvoicesAfter(0L)).contains(
+                    List.of(SETTLED_INVOICE)
+            );
+        }
+
+        @Test
+        void received_via_single_channel() {
+            SettledInvoice expected = invoiceWithReceivedVia(Map.of(
+                    CHANNEL_ID_3, Coins.ofMilliSatoshis(CHANNEL_ID_3.getShortChannelId()))
+            );
+            mockResponse(settledInvoiceReceivedVia(CHANNEL_ID_3));
+            assertThat(grpcInvoices.getSettledInvoicesAfter(0L)).contains(
+                    List.of(expected)
+            );
+        }
+
+        @Test
+        void received_via_two_channels() {
+            SettledInvoice expected = invoiceWithReceivedVia(Map.of(
+                    CHANNEL_ID_3, Coins.ofMilliSatoshis(CHANNEL_ID_3.getShortChannelId()),
+                    CHANNEL_ID_4, Coins.ofMilliSatoshis(CHANNEL_ID_4.getShortChannelId())
+            ));
+            mockResponse(settledInvoiceReceivedVia(CHANNEL_ID_3, CHANNEL_ID_4));
+            assertThat(grpcInvoices.getSettledInvoicesAfter(0L)).contains(
+                    List.of(expected)
+            );
+        }
+
+        @Test
+        void received_via_two_htlcs_in_same_channel() {
+            SettledInvoice expected = invoiceWithReceivedVia(Map.of(
+                    CHANNEL_ID, Coins.ofMilliSatoshis(CHANNEL_ID.getShortChannelId() * 2)
+            ));
+            mockResponse(settledInvoiceReceivedVia(CHANNEL_ID, CHANNEL_ID));
+            assertThat(grpcInvoices.getSettledInvoicesAfter(0L)).contains(
+                    List.of(expected)
+            );
+        }
+
+        @Test
+        void received_via_single_channel_with_additional_canceled_htlc() {
+            List<InvoiceHTLC> htlcs = new ArrayList<>();
+
+            InvoiceHTLC.Builder htlcBuilder = InvoiceHTLC.newBuilder();
+            htlcBuilder.setChanId(CHANNEL_ID_2.getShortChannelId());
+            htlcBuilder.setAmtMsat(CHANNEL_ID_2.getShortChannelId());
+            htlcBuilder.setState(InvoiceHTLCState.CANCELED);
+            htlcs.add(htlcBuilder.build());
+            htlcBuilder.setChanId(CHANNEL_ID.getShortChannelId());
+            htlcBuilder.setAmtMsat(CHANNEL_ID.getShortChannelId());
+            htlcBuilder.setState(InvoiceHTLCState.SETTLED);
+            htlcs.add(htlcBuilder.build());
+
+            Invoice invoice = Invoice.newBuilder()
+                    .setState(SETTLED)
+                    .setAddIndex(SETTLED_INVOICE.addIndex())
+                    .setSettleIndex(SETTLED_INVOICE.settleIndex())
+                    .setRHash(ByteString.copyFrom(HEX_FORMAT.parseHex(SETTLED_INVOICE.hash())))
+                    .setMemo(SETTLED_INVOICE.memo())
+                    .setSettleDate(SETTLED_INVOICE.settleDate().toEpochSecond())
+                    .setAmtPaidMsat(SETTLED_INVOICE.amountPaid().milliSatoshis())
+                    .addAllHtlcs(htlcs)
+                    .build();
+            mockResponse(invoice);
             assertThat(grpcInvoices.getSettledInvoicesAfter(0L)).contains(
                     List.of(SETTLED_INVOICE)
             );
@@ -135,6 +207,19 @@ class GrpcInvoicesTest {
             when(grpcService.getInvoices(anyLong(), anyInt())).thenReturn(Optional.of(ListInvoiceResponse.newBuilder()
                     .addInvoices(invoice)
                     .build()));
+        }
+
+        private SettledInvoice invoiceWithReceivedVia(Map<ChannelId, Coins> receivedVia) {
+            return new SettledInvoice(
+                    SETTLED_INVOICE.addIndex(),
+                    SETTLED_INVOICE.settleIndex(),
+                    SETTLED_INVOICE.settleDate(),
+                    SETTLED_INVOICE.hash(),
+                    SETTLED_INVOICE.amountPaid(),
+                    SETTLED_INVOICE.memo(),
+                    SETTLED_INVOICE.keysendMessage(),
+                    receivedVia
+            );
         }
 
         @Test
@@ -229,33 +314,55 @@ class GrpcInvoicesTest {
         LinkedHashMap<Long, ByteString> customRecords = new LinkedHashMap<>();
         customRecords.put(5_482_373_484L, ByteString.copyFromUtf8("000"));
         customRecords.put(7_629_168L, ByteString.copyFromUtf8(KEYSEND_MESSAGE));
-        return invoice(SETTLED, SETTLED_INVOICE_KEYSEND, customRecords);
+        return invoice(SETTLED, SETTLED_INVOICE_KEYSEND, customRecords, List.of());
     }
 
     private Invoice keysendInvoiceV2() {
         LinkedHashMap<Long, ByteString> customRecords = new LinkedHashMap<>();
         customRecords.put(5_482_373_484L, ByteString.copyFromUtf8("000"));
         customRecords.put(34_349_334L, ByteString.copyFromUtf8(KEYSEND_MESSAGE));
-        return invoice(SETTLED, SETTLED_INVOICE_KEYSEND, customRecords);
+        return invoice(SETTLED, SETTLED_INVOICE_KEYSEND, customRecords, List.of());
+    }
+
+    private Invoice settledInvoiceReceivedVia(ChannelId... channelIds) {
+        List<Long> receivedVia = Arrays.stream(channelIds).map(ChannelId::getShortChannelId).toList();
+        return invoice(SETTLED, SETTLED_INVOICE, Map.of(), receivedVia);
     }
 
     private Invoice invoice(
             Invoice.InvoiceState state,
             @Nullable SettledInvoice settledInvoice
     ) {
-        return invoice(state, settledInvoice, Map.of());
+        return invoice(state, settledInvoice, Map.of(), List.of());
     }
 
     private Invoice invoice(
             Invoice.InvoiceState state,
             @Nullable SettledInvoice settledInvoice,
-            Map<Long, ByteString> customRecords
+            Map<Long, ByteString> customRecords,
+            List<Long> receivedVia
     ) {
         if (settledInvoice == null) {
             return Invoice.newBuilder().setState(state).build();
         }
-        InvoiceHTLC.Builder htlcBuilder = InvoiceHTLC.newBuilder();
-        InvoiceHTLC htlc = htlcBuilder.putAllCustomRecords(customRecords).build();
+        List<InvoiceHTLC> htlcs = new ArrayList<>();
+        if (receivedVia.isEmpty()) {
+            InvoiceHTLC.Builder htlcBuilder = InvoiceHTLC.newBuilder();
+            htlcBuilder.putAllCustomRecords(customRecords);
+            htlcBuilder.setChanId(CHANNEL_ID.getShortChannelId());
+            htlcBuilder.setAmtMsat(CHANNEL_ID.getShortChannelId());
+            htlcBuilder.setState(InvoiceHTLCState.SETTLED);
+            htlcs.add(htlcBuilder.build());
+        } else {
+            for (long channelId : receivedVia) {
+                InvoiceHTLC.Builder htlcBuilder = InvoiceHTLC.newBuilder();
+                htlcBuilder.putAllCustomRecords(customRecords);
+                htlcBuilder.setChanId(channelId);
+                htlcBuilder.setAmtMsat(channelId);
+                htlcBuilder.setState(InvoiceHTLCState.SETTLED);
+                htlcs.add(htlcBuilder.build());
+            }
+        }
         return Invoice.newBuilder()
                 .setState(state)
                 .setAddIndex(settledInvoice.addIndex())
@@ -264,7 +371,7 @@ class GrpcInvoicesTest {
                 .setMemo(settledInvoice.memo())
                 .setSettleDate(settledInvoice.settleDate().toEpochSecond())
                 .setAmtPaidMsat(settledInvoice.amountPaid().milliSatoshis())
-                .addHtlcs(htlc)
+                .addAllHtlcs(htlcs)
                 .build();
     }
 }

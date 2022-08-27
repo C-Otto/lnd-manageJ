@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.model;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Map;
 import java.util.Optional;
 
 public record SettledInvoice(
@@ -12,7 +13,8 @@ public record SettledInvoice(
         String hash,
         Coins amountPaid,
         String memo,
-        Optional<String> keysendMessage
+        Optional<String> keysendMessage,
+        Map<ChannelId, Coins> receivedVia
 ) {
     public static final SettledInvoice INVALID = new SettledInvoice(
             -1,
@@ -21,7 +23,8 @@ public record SettledInvoice(
             "",
             Coins.NONE,
             "",
-            Optional.empty()
+            Optional.empty(),
+            Map.of()
     );
 
     public boolean isValid() {

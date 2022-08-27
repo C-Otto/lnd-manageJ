@@ -1,12 +1,14 @@
 package de.cotto.lndmanagej.grpc;
 
 import com.google.protobuf.ByteString;
+import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.DecodedPaymentRequest;
 import de.cotto.lndmanagej.model.SettledInvoice;
 import lnrpc.AddInvoiceResponse;
 import lnrpc.Invoice;
 import lnrpc.InvoiceHTLC;
+import lnrpc.InvoiceHTLCState;
 import lnrpc.ListInvoiceResponse;
 import org.springframework.stereotype.Component;
 
@@ -16,12 +18,14 @@ import java.time.temporal.ChronoUnit;
 import java.util.HexFormat;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Spliterators;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.time.ZoneOffset.UTC;
+import static java.util.stream.Collectors.toMap;
 
 @Component
 public class GrpcInvoices {
@@ -90,14 +94,15 @@ public class GrpcInvoices {
                 HEX_FORMAT.formatHex(lndInvoice.getRHash().toByteArray()),
                 Coins.ofMilliSatoshis(lndInvoice.getAmtPaidMsat()),
                 lndInvoice.getMemo(),
-                getKeysendMessage(lndInvoice)
+                getKeysendMessage(lndInvoice),
+                getReceivedVia(lndInvoice)
         );
     }
 
     private Optional<String> getKeysendMessage(Invoice lndInvoice) {
         return lndInvoice.getHtlcsList().stream()
                 .map(InvoiceHTLC::getCustomRecordsMap)
-                .filter(map1 -> map1.containsKey(KEYSEND_PREIMAGE))
+                .filter(map -> map.containsKey(KEYSEND_PREIMAGE))
                 .filter(map -> map.containsKey(KEYSEND_DATA) || map.containsKey(KEYSEND_DATA_V2))
                 .map(map -> {
                     if (map.containsKey(KEYSEND_DATA)) {
@@ -107,6 +112,16 @@ public class GrpcInvoices {
                 })
                 .map(ByteString::toStringUtf8)
                 .findFirst();
+    }
+
+    private Map<ChannelId, Coins> getReceivedVia(Invoice lndInvoice) {
+        return lndInvoice.getHtlcsList().stream()
+                .filter(invoiceHTLC -> invoiceHTLC.getState().equals(InvoiceHTLCState.SETTLED))
+                .collect(toMap(
+                        invoiceHTLC -> ChannelId.fromShortChannelId(invoiceHTLC.getChanId()),
+                        invoiceHTLC -> Coins.ofMilliSatoshis(invoiceHTLC.getAmtMsat()),
+                        Coins::add
+                ));
     }
 
     private Stream<Invoice> toStream(Iterator<Invoice> iterator) {

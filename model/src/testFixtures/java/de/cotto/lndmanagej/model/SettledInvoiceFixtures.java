@@ -2,7 +2,10 @@ package de.cotto.lndmanagej.model;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Map;
 import java.util.Optional;
+
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 
 public class SettledInvoiceFixtures {
     public static final ZonedDateTime SETTLE_DATE = ZonedDateTime.of(2021, 12, 2, 16, 4, 30, 0, ZoneOffset.UTC);
@@ -32,7 +35,8 @@ public class SettledInvoiceFixtures {
             HASH,
             AMOUNT_PAID,
             MEMO,
-            Optional.empty()
+            Optional.empty(),
+            Map.of(CHANNEL_ID, Coins.ofMilliSatoshis(CHANNEL_ID.getShortChannelId()))
     );
 
     public static final SettledInvoice SETTLED_INVOICE_KEYSEND = new SettledInvoice(
@@ -42,7 +46,8 @@ public class SettledInvoiceFixtures {
             HASH,
             AMOUNT_PAID,
             MEMO,
-            Optional.of(KEYSEND_MESSAGE)
+            Optional.of(KEYSEND_MESSAGE),
+            Map.of(CHANNEL_ID, Coins.ofMilliSatoshis(CHANNEL_ID.getShortChannelId()))
     );
 
     public static final SettledInvoice SETTLED_INVOICE_2 = new SettledInvoice(
@@ -52,7 +57,8 @@ public class SettledInvoiceFixtures {
             HASH_2,
             AMOUNT_PAID_2,
             MEMO_2,
-            Optional.empty()
+            Optional.empty(),
+            Map.of(CHANNEL_ID, Coins.ofMilliSatoshis(CHANNEL_ID.getShortChannelId()))
     );
 
     public static final SettledInvoice SETTLED_INVOICE_3 = new SettledInvoice(
@@ -62,7 +68,8 @@ public class SettledInvoiceFixtures {
             HASH_3,
             AMOUNT_PAID_2,
             MEMO_3,
-            Optional.empty()
+            Optional.empty(),
+            Map.of(CHANNEL_ID, Coins.ofMilliSatoshis(CHANNEL_ID.getShortChannelId()))
     );
 
     public static final SettledInvoice SETTLED_INVOICE_4 = new SettledInvoice(
@@ -72,6 +79,7 @@ public class SettledInvoiceFixtures {
             HASH_4,
             AMOUNT_PAID_2,
             MEMO_3,
-            Optional.empty()
+            Optional.empty(),
+            Map.of(CHANNEL_ID, Coins.ofMilliSatoshis(CHANNEL_ID.getShortChannelId()))
     );
 }

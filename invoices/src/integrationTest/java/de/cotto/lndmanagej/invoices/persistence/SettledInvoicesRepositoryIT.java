@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -63,7 +64,8 @@ class SettledInvoicesRepositoryIT {
                         "",
                         Coins.NONE,
                         "",
-                        Optional.empty()
+                        Optional.empty(),
+                        Map.of()
                 )
         );
     }

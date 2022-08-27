@@ -19,6 +19,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -559,7 +560,8 @@ class RebalanceServiceTest {
                 HASH,
                 AMOUNT_PAID,
                 memo,
-                Optional.empty()
+                Optional.empty(),
+                Map.of()
         );
     }
 
