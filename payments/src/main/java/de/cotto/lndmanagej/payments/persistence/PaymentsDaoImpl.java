@@ -11,10 +11,14 @@ import java.util.List;
 @Component
 @Transactional
 public class PaymentsDaoImpl implements PaymentsDao {
-    private final PaymentsRepository repository;
+    private static final int ID_OF_SETTLED_INDEX_ENTITY = 0;
 
-    public PaymentsDaoImpl(PaymentsRepository repository) {
+    private final PaymentsRepository repository;
+    private final SettledPaymentIndexRepository settledPaymentIndexRepository;
+
+    public PaymentsDaoImpl(PaymentsRepository repository, SettledPaymentIndexRepository settledPaymentIndexRepository) {
         this.repository = repository;
+        this.settledPaymentIndexRepository = settledPaymentIndexRepository;
     }
 
     @Override
@@ -33,5 +37,21 @@ public class PaymentsDaoImpl implements PaymentsDao {
     @Override
     public long getIndexOffset() {
         return repository.getMaxIndex();
+    }
+
+    @Override
+    public long getAllSettledIndexOffset() {
+        return settledPaymentIndexRepository.findByEntityId(ID_OF_SETTLED_INDEX_ENTITY)
+                .map(SettledPaymentIndexJpaDto::getAllSettledIndexOffset)
+                .orElse(0L);
+    }
+
+    @Override
+    public void setAllSettledIndexOffset(long offset) {
+        SettledPaymentIndexJpaDto entity = settledPaymentIndexRepository
+                .findByEntityId(ID_OF_SETTLED_INDEX_ENTITY)
+                .orElseGet(SettledPaymentIndexJpaDto::new);
+        entity.setAllSettledIndexOffset(offset);
+        settledPaymentIndexRepository.save(entity);
     }
 }

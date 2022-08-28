@@ -10,4 +10,8 @@ public interface PaymentsDao {
     void save(Payment payment);
 
     long getIndexOffset();
+
+    long getAllSettledIndexOffset();
+
+    void setAllSettledIndexOffset(long offset);
 }
