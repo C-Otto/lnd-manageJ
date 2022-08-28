@@ -17,6 +17,7 @@ import lnrpc.ListPaymentsResponse;
 import lnrpc.PayReq;
 import lnrpc.Payment.PaymentStatus;
 import lnrpc.Route;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -60,86 +61,149 @@ class GrpcPaymentsTest {
     @Mock
     private GrpcService grpcService;
 
-    @Test
-    void empty_optional() {
-        when(grpcService.getPayments(anyLong(), anyInt(), anyBoolean())).thenReturn(Optional.empty());
-        assertThat(grpcPayments.getPaymentsAfter(0L)).isEmpty();
+    @Nested
+    class GetPaymentsAfter {
+        @Test
+        void empty_optional() {
+            when(grpcService.getPayments(anyLong(), anyInt(), anyBoolean())).thenReturn(Optional.empty());
+            assertThat(grpcPayments.getPaymentsAfter(0L)).isEmpty();
+        }
+
+        @Test
+        void no_payment() {
+            mockResponse();
+            assertThat(grpcPayments.getPaymentsAfter(0L)).contains(List.of());
+        }
+
+        @Test
+        void with_payments() {
+            mockResponse(payment(PaymentStatus.SUCCEEDED, PAYMENT), payment(PaymentStatus.SUCCEEDED, PAYMENT_2));
+            assertThat(grpcPayments.getPaymentsAfter(0L)).contains(
+                    List.of(PAYMENT, PAYMENT_2)
+            );
+        }
+
+        @Test
+        void skips_unsuccessful_htlcs() {
+            Route route = Route.newBuilder().addHops(Hop.getDefaultInstance()).build();
+            HTLCAttempt htlc = HTLCAttempt.newBuilder()
+                    .setRoute(route)
+                    .setStatus(HTLCAttempt.HTLCStatus.IN_FLIGHT)
+                    .build();
+            lnrpc.Payment payment = lnrpc.Payment.newBuilder()
+                    .setStatus(PaymentStatus.SUCCEEDED)
+                    .addHtlcs(htlc)
+                    .build();
+
+            mockResponse(payment);
+            assertThat(grpcPayments.getPaymentsAfter(0L).orElseThrow().stream().map(Payment::routes))
+                    .contains(List.of());
+        }
+
+        @Test
+        void payment_without_channel_id() {
+            Hop hop = Hop.newBuilder()
+                    .setChanId(0L)
+                    .setAmtToForwardMsat(123L)
+                    .build();
+            Route route = Route.newBuilder().addHops(hop).build();
+            HTLCAttempt htlc = HTLCAttempt.newBuilder()
+                    .setStatus(HTLCAttempt.HTLCStatus.SUCCEEDED)
+                    .setRoute(route)
+                    .build();
+            lnrpc.Payment payment = lnrpc.Payment.newBuilder()
+                    .setStatus(PaymentStatus.SUCCEEDED)
+                    .setPaymentIndex(PAYMENT.index())
+                    .setPaymentHash(PAYMENT.paymentHash())
+                    .setValueMsat(PAYMENT.value().milliSatoshis())
+                    .setFeeMsat(PAYMENT.fees().milliSatoshis())
+                    .setCreationTimeNs(PAYMENT.creationDateTime().toInstant(ZoneOffset.UTC).toEpochMilli() * 1_000)
+                    .addHtlcs(htlc)
+                    .build();
+            mockResponse(payment);
+            assertThat(grpcPayments.getPaymentsAfter(0L).orElseThrow().get(0).routes()).hasSize(1);
+        }
+
+        @Test
+        void ignores_non_settled_payment() {
+            mockResponse(payment(PaymentStatus.IN_FLIGHT, null));
+            assertThat(grpcPayments.getPaymentsAfter(0L)).contains(List.of());
+        }
+
+        @Test
+        void starts_at_the_beginning() {
+            grpcPayments.getPaymentsAfter(ADD_INDEX_OFFSET);
+            verify(grpcService).getPayments(eq(ADD_INDEX_OFFSET), anyInt(), anyBoolean());
+        }
+
+        @Test
+        void uses_limit() {
+            grpcPayments.getPaymentsAfter(ADD_INDEX_OFFSET);
+            verify(grpcService).getPayments(eq(ADD_INDEX_OFFSET), eq(LIMIT), anyBoolean());
+        }
+
+        @Test
+        void only_requests_settled_payment() {
+            grpcPayments.getPaymentsAfter(ADD_INDEX_OFFSET);
+            verify(grpcService).getPayments(anyLong(), anyInt(), eq(false));
+        }
     }
 
-    @Test
-    void no_payment() {
-        mockResponse();
-        assertThat(grpcPayments.getPaymentsAfter(0L)).contains(List.of());
-    }
+    @Nested
+    class GetAllPaymentsAfter {
+        @Test
+        void empty_optional() {
+            when(grpcService.getPayments(anyLong(), anyInt(), anyBoolean())).thenReturn(Optional.empty());
+            assertThat(grpcPayments.getAllPaymentsAfter(0L)).isEmpty();
+        }
 
-    @Test
-    void with_payments() {
-        mockResponse(payment(PaymentStatus.SUCCEEDED, PAYMENT), payment(PaymentStatus.SUCCEEDED, PAYMENT_2));
-        assertThat(grpcPayments.getPaymentsAfter(0L)).contains(
-                List.of(PAYMENT, PAYMENT_2)
-        );
-    }
+        @Test
+        void no_payment() {
+            mockResponse();
+            assertThat(grpcPayments.getAllPaymentsAfter(0L)).contains(List.of());
+        }
 
-    @Test
-    void skips_unsuccessful_htlcs() {
-        Route route = Route.newBuilder().addHops(Hop.getDefaultInstance()).build();
-        HTLCAttempt htlc = HTLCAttempt.newBuilder()
-                .setRoute(route)
-                .setStatus(HTLCAttempt.HTLCStatus.IN_FLIGHT)
-                .build();
-        lnrpc.Payment payment = lnrpc.Payment.newBuilder()
-                .setStatus(PaymentStatus.SUCCEEDED)
-                .addHtlcs(htlc)
-                .build();
+        @Test
+        void with_payments() {
+            mockResponse(payment(PaymentStatus.SUCCEEDED, PAYMENT), payment(PaymentStatus.SUCCEEDED, PAYMENT_2));
+            assertThat(grpcPayments.getAllPaymentsAfter(0L)).contains(
+                    List.of(Optional.of(PAYMENT), Optional.of(PAYMENT_2))
+            );
+        }
 
-        mockResponse(payment);
-        assertThat(grpcPayments.getPaymentsAfter(0L).orElseThrow().stream().map(Payment::routes))
-                .contains(List.of());
-    }
+        @Test
+        void with_failed_payment() {
+            mockResponse(payment(PaymentStatus.FAILED, PAYMENT), payment(PaymentStatus.SUCCEEDED, PAYMENT_2));
+            assertThat(grpcPayments.getAllPaymentsAfter(0L)).contains(
+                    List.of(Optional.empty(), Optional.of(PAYMENT_2))
+            );
+        }
 
-    @Test
-    void payment_without_channel_id() {
-        Hop hop = Hop.newBuilder()
-                .setChanId(0L)
-                .setAmtToForwardMsat(123L)
-                .build();
-        Route route = Route.newBuilder().addHops(hop).build();
-        HTLCAttempt htlc = HTLCAttempt.newBuilder().setStatus(HTLCAttempt.HTLCStatus.SUCCEEDED).setRoute(route).build();
-        lnrpc.Payment payment = lnrpc.Payment.newBuilder()
-                .setStatus(PaymentStatus.SUCCEEDED)
-                .setPaymentIndex(PAYMENT.index())
-                .setPaymentHash(PAYMENT.paymentHash())
-                .setValueMsat(PAYMENT.value().milliSatoshis())
-                .setFeeMsat(PAYMENT.fees().milliSatoshis())
-                .setCreationTimeNs(PAYMENT.creationDateTime().toInstant(ZoneOffset.UTC).toEpochMilli() * 1_000)
-                .addHtlcs(htlc)
-                .build();
-        mockResponse(payment);
-        assertThat(grpcPayments.getPaymentsAfter(0L).orElseThrow().get(0).routes()).hasSize(1);
-    }
+        @Test
+        void with_in_flight_payment() {
+            mockResponse(payment(PaymentStatus.IN_FLIGHT, PAYMENT), payment(PaymentStatus.SUCCEEDED, PAYMENT_2));
+            assertThat(grpcPayments.getAllPaymentsAfter(0L)).contains(
+                    List.of(Optional.empty(), Optional.of(PAYMENT_2))
+            );
+        }
 
-    @Test
-    void ignores_non_settled_payment() {
-        mockResponse(payment(PaymentStatus.IN_FLIGHT, null));
-        assertThat(grpcPayments.getPaymentsAfter(0L)).contains(List.of());
-    }
+        @Test
+        void starts_at_the_beginning() {
+            grpcPayments.getAllPaymentsAfter(ADD_INDEX_OFFSET);
+            verify(grpcService).getPayments(eq(ADD_INDEX_OFFSET), anyInt(), anyBoolean());
+        }
 
-    @Test
-    void starts_at_the_beginning() {
-        grpcPayments.getPaymentsAfter(ADD_INDEX_OFFSET);
-        verify(grpcService).getPayments(eq(ADD_INDEX_OFFSET), anyInt(), anyBoolean());
-    }
+        @Test
+        void uses_limit() {
+            grpcPayments.getAllPaymentsAfter(ADD_INDEX_OFFSET);
+            verify(grpcService).getPayments(eq(ADD_INDEX_OFFSET), eq(LIMIT), anyBoolean());
+        }
 
-    @Test
-    void uses_limit() {
-        grpcPayments.getPaymentsAfter(ADD_INDEX_OFFSET);
-        verify(grpcService).getPayments(eq(ADD_INDEX_OFFSET), eq(LIMIT), anyBoolean());
-    }
-
-    @Test
-    void only_requests_settled_payment() {
-        grpcPayments.getPaymentsAfter(ADD_INDEX_OFFSET);
-        verify(grpcService).getPayments(anyLong(), anyInt(), eq(false));
+        @Test
+        void also_requests_non_settled_payment() {
+            grpcPayments.getAllPaymentsAfter(ADD_INDEX_OFFSET);
+            verify(grpcService).getPayments(anyLong(), anyInt(), eq(true));
+        }
     }
 
     @Test

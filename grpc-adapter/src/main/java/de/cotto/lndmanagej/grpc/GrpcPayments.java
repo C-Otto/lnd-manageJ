@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static lnrpc.Payment.PaymentStatus.SUCCEEDED;
 
@@ -42,11 +43,13 @@ public class GrpcPayments {
     }
 
     public Optional<List<Payment>> getPaymentsAfter(long offset) {
-        ListPaymentsResponse list = grpcService.getPayments(offset, LIMIT, false).orElse(null);
-        if (list == null) {
-            return Optional.empty();
-        }
-        return Optional.of(list.getPaymentsList().stream().map(this::toPayment).flatMap(Optional::stream).toList());
+        return getPaymentOptionals(offset, false)
+                .map(payments -> payments.flatMap(Optional::stream).toList());
+    }
+
+    public Optional<List<Optional<Payment>>> getAllPaymentsAfter(long offset) {
+        return getPaymentOptionals(offset, true)
+                .map(Stream::toList);
     }
 
     public Optional<DecodedPaymentRequest> decodePaymentRequest(String paymentRequest) {
@@ -68,6 +71,14 @@ public class GrpcPayments {
                             getRouteHints(destination, payReq.getRouteHintsList())
                     );
                 });
+    }
+
+    private Optional<Stream<Optional<Payment>>> getPaymentOptionals(long offset, boolean includeIncomplete) {
+        ListPaymentsResponse list = grpcService.getPayments(offset, LIMIT, includeIncomplete).orElse(null);
+        if (list == null) {
+            return Optional.empty();
+        }
+        return Optional.of(list.getPaymentsList().stream().map(this::toPayment));
     }
 
     private Set<RouteHint> getRouteHints(Pubkey destination, List<lnrpc.RouteHint> routeHintsList) {
