@@ -42,11 +42,11 @@ public class GrpcPayments {
     }
 
     public Optional<List<Payment>> getPaymentsAfter(long offset) {
-        ListPaymentsResponse list = grpcService.getPayments(offset, LIMIT).orElse(null);
+        ListPaymentsResponse list = grpcService.getPayments(offset, LIMIT, false).orElse(null);
         if (list == null) {
             return Optional.empty();
         }
-        return Optional.of(list.getPaymentsList().stream().map(this::toPayment).toList());
+        return Optional.of(list.getPaymentsList().stream().map(this::toPayment).flatMap(Optional::stream).toList());
     }
 
     public Optional<DecodedPaymentRequest> decodePaymentRequest(String paymentRequest) {
@@ -85,13 +85,13 @@ public class GrpcPayments {
                 ).collect(Collectors.toSet());
     }
 
-    private Payment toPayment(lnrpc.Payment lndPayment) {
+    private Optional<Payment> toPayment(lnrpc.Payment lndPayment) {
         if (lndPayment.getStatus() != SUCCEEDED) {
-            throw new IllegalStateException("");
+            return Optional.empty();
         }
         Instant timestamp = Instant.ofEpochMilli(lndPayment.getCreationTimeNs() / 1_000);
         String paymentHash = lndPayment.getPaymentHash();
-        return new Payment(
+        return Optional.of(new Payment(
                 lndPayment.getPaymentIndex(),
                 paymentHash,
                 LocalDateTime.ofInstant(timestamp, ZoneOffset.UTC),
@@ -100,7 +100,7 @@ public class GrpcPayments {
                 lndPayment.getHtlcsList().stream()
                         .filter(htlcAttempt -> htlcAttempt.getStatus() == HTLCAttempt.HTLCStatus.SUCCEEDED)
                         .map(htlcAttempt -> toPaymentRoute(htlcAttempt, paymentHash)).toList()
-        );
+        ));
     }
 
     private PaymentRoute toPaymentRoute(HTLCAttempt htlcAttempt, String paymentHash) {

@@ -179,8 +179,9 @@ public class GrpcService extends GrpcBase {
         return get(() -> lightningStub.listInvoices(request));
     }
 
-    public Optional<ListPaymentsResponse> getPayments(long offset, int limit) {
+    public Optional<ListPaymentsResponse> getPayments(long offset, int limit, boolean includeIncomplete) {
         ListPaymentsRequest request = ListPaymentsRequest.newBuilder()
+                .setIncludeIncomplete(includeIncomplete)
                 .setIndexOffset(offset)
                 .setMaxPayments(limit)
                 .setIncludeIncomplete(false)
