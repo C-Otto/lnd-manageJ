@@ -60,7 +60,8 @@ class FlowServiceTest {
         lenient().when(rebalanceService.getSourceCostsForChannel(any())).thenReturn(Coins.NONE);
         lenient().when(rebalanceService.getSourceCostsForChannel(any(), any())).thenReturn(Coins.NONE);
         lenient().when(rebalanceService.getSupportAsSourceCostsFromChannel(any(), any())).thenReturn(Coins.NONE);
-        lenient().when(settledInvoicesService.getAmountReceivedViaChannel(any(), any())).thenReturn(Coins.NONE);
+        lenient().when(settledInvoicesService.getAmountReceivedViaChannelWithoutSelfPayments(any(), any()))
+                .thenReturn(Coins.NONE);
     }
 
     @Test
@@ -79,9 +80,9 @@ class FlowServiceTest {
         mockRebalanceFromTo(DEFAULT_MAX_AGE, CHANNEL_ID_2, 3, 4);
         mockRebalanceSupportFromTo(DEFAULT_MAX_AGE, CHANNEL_ID, 555, 6);
         mockRebalanceSupportFromTo(DEFAULT_MAX_AGE, CHANNEL_ID_2, 7, 888);
-        when(settledInvoicesService.getAmountReceivedViaChannel(CHANNEL_ID, DEFAULT_MAX_AGE))
+        when(settledInvoicesService.getAmountReceivedViaChannelWithoutSelfPayments(CHANNEL_ID, DEFAULT_MAX_AGE))
                 .thenReturn(Coins.ofMilliSatoshis(1_500_000));
-        when(settledInvoicesService.getAmountReceivedViaChannel(CHANNEL_ID_2, DEFAULT_MAX_AGE))
+        when(settledInvoicesService.getAmountReceivedViaChannelWithoutSelfPayments(CHANNEL_ID_2, DEFAULT_MAX_AGE))
                 .thenReturn(Coins.ofMilliSatoshis(915_000));
         FlowReport flowReport = new FlowReport(
                 Coins.ofSatoshis(1_000 + 50),
@@ -93,7 +94,7 @@ class FlowServiceTest {
                 Coins.ofSatoshis(555 + 7),
                 Coins.ofMilliSatoshis(555 + 7),
                 Coins.ofSatoshis(6 + 888),
-                Coins.ofMilliSatoshis(1_500_000 + 915_000 - 2_000 - 4_000 - 6_000 - 888_000)
+                Coins.ofMilliSatoshis(1_500_000 + 915_000)
         );
         assertThat(flowService.getFlowReportForPeer(PUBKEY)).isEqualTo(flowReport);
         verify(forwardingEventsService).getEventsWithOutgoingChannel(CHANNEL_ID, DEFAULT_MAX_AGE);
@@ -113,9 +114,9 @@ class FlowServiceTest {
         mockRebalanceFromTo(maxAge, CHANNEL_ID_2, 333, 4);
         mockRebalanceSupportFromTo(maxAge, CHANNEL_ID, 5, 6);
         mockRebalanceSupportFromTo(maxAge, CHANNEL_ID_2, 7, 8);
-        when(settledInvoicesService.getAmountReceivedViaChannel(CHANNEL_ID, maxAge))
+        when(settledInvoicesService.getAmountReceivedViaChannelWithoutSelfPayments(CHANNEL_ID, maxAge))
                 .thenReturn(Coins.ofMilliSatoshis(1_500_000));
-        when(settledInvoicesService.getAmountReceivedViaChannel(CHANNEL_ID_2, maxAge))
+        when(settledInvoicesService.getAmountReceivedViaChannelWithoutSelfPayments(CHANNEL_ID_2, maxAge))
                 .thenReturn(Coins.ofMilliSatoshis(15_000));
         when(channelService.getAllChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, CLOSED_CHANNEL_2));
         FlowReport flowReport = new FlowReport(
@@ -128,7 +129,7 @@ class FlowServiceTest {
                 Coins.ofSatoshis(5 + 7),
                 Coins.ofMilliSatoshis(5 + 7),
                 Coins.ofSatoshis(6 + 8),
-                Coins.ofMilliSatoshis(1_500_000 + 15_000 - 2_000 - 4_000 - 6_000 - 8_000)
+                Coins.ofMilliSatoshis(1_500_000 + 15_000)
         );
         assertThat(flowService.getFlowReportForPeer(PUBKEY, maxAge)).isEqualTo(flowReport);
     }
@@ -139,7 +140,7 @@ class FlowServiceTest {
         mockReceived(DEFAULT_MAX_AGE, CHANNEL_ID, 9_001L);
         mockRebalanceFromTo(DEFAULT_MAX_AGE, CHANNEL_ID, 100, 200);
         mockRebalanceSupportFromTo(DEFAULT_MAX_AGE, CHANNEL_ID, 5, 6);
-        when(settledInvoicesService.getAmountReceivedViaChannel(CHANNEL_ID, DEFAULT_MAX_AGE))
+        when(settledInvoicesService.getAmountReceivedViaChannelWithoutSelfPayments(CHANNEL_ID, DEFAULT_MAX_AGE))
                 .thenReturn(Coins.ofMilliSatoshis(1_500_000));
         FlowReport flowReport = new FlowReport(
                 Coins.ofSatoshis(1_050),
@@ -151,7 +152,7 @@ class FlowServiceTest {
                 Coins.ofSatoshis(5),
                 Coins.ofMilliSatoshis(5),
                 Coins.ofSatoshis(6),
-                Coins.ofMilliSatoshis(1_500_000 - 200_000 - 6_000)
+                Coins.ofMilliSatoshis(1_500_000)
         );
         assertThat(flowService.getFlowReportForChannel(CHANNEL_ID)).isEqualTo(flowReport);
         verify(forwardingEventsService).getEventsWithOutgoingChannel(CHANNEL_ID, DEFAULT_MAX_AGE);
@@ -165,7 +166,7 @@ class FlowServiceTest {
         mockReceived(maxAge, CHANNEL_ID, 1_000L, 8_001L);
         mockRebalanceFromTo(maxAge, CHANNEL_ID, 101, 201);
         mockRebalanceSupportFromTo(maxAge, CHANNEL_ID, 5, 6);
-        when(settledInvoicesService.getAmountReceivedViaChannel(CHANNEL_ID, maxAge))
+        when(settledInvoicesService.getAmountReceivedViaChannelWithoutSelfPayments(CHANNEL_ID, maxAge))
                 .thenReturn(Coins.ofMilliSatoshis(1_500_000));
         FlowReport flowReport = new FlowReport(
                 Coins.ofSatoshis(1_000 + 50),
@@ -177,7 +178,7 @@ class FlowServiceTest {
                 Coins.ofSatoshis(5),
                 Coins.ofMilliSatoshis(5),
                 Coins.ofSatoshis(6),
-                Coins.ofMilliSatoshis(1_500_000 - 201_000 - 6_000)
+                Coins.ofMilliSatoshis(1_500_000)
         );
         assertThat(flowService.getFlowReportForChannel(CHANNEL_ID, maxAge)).isEqualTo(flowReport);
     }
@@ -185,7 +186,7 @@ class FlowServiceTest {
     @Test
     void getFlowReportForChannel_includes_receivedViaPayments() {
         Coins expectedReceivedViaPayments = Coins.ofMilliSatoshis(1);
-        when(settledInvoicesService.getAmountReceivedViaChannel(CHANNEL_ID, DEFAULT_MAX_AGE))
+        when(settledInvoicesService.getAmountReceivedViaChannelWithoutSelfPayments(CHANNEL_ID, DEFAULT_MAX_AGE))
                 .thenReturn(expectedReceivedViaPayments);
         assertThat(flowService.getFlowReportForChannel(CHANNEL_ID).receivedViaPayments())
                 .isEqualTo(expectedReceivedViaPayments);
@@ -196,20 +197,8 @@ class FlowServiceTest {
         Coins expectedReceivedViaPayments = Coins.NONE;
         Coins expectedRebalanceReceived = Coins.ofSatoshis(1);
         mockRebalanceFromTo(DEFAULT_MAX_AGE, CHANNEL_ID, 0, expectedRebalanceReceived.satoshis());
-        when(settledInvoicesService.getAmountReceivedViaChannel(CHANNEL_ID, DEFAULT_MAX_AGE))
+        when(settledInvoicesService.getAmountReceivedViaChannelWithoutSelfPayments(CHANNEL_ID, DEFAULT_MAX_AGE))
                 .thenReturn(expectedReceivedViaPayments);
-        assertThat(flowService.getFlowReportForChannel(CHANNEL_ID).receivedViaPayments())
-                .isEqualTo(expectedReceivedViaPayments);
-    }
-
-    @Test
-    void getFlowReportForChannel_self_payments_do_not_count_for_receivedViaPayments() {
-        Coins expectedReceivedViaPayments = Coins.ofSatoshis(3);
-        Coins expectedRebalanceReceived = Coins.ofSatoshis(1);
-
-        mockRebalanceFromTo(DEFAULT_MAX_AGE, CHANNEL_ID, 0, expectedRebalanceReceived.satoshis());
-        when(settledInvoicesService.getAmountReceivedViaChannel(CHANNEL_ID, DEFAULT_MAX_AGE))
-                .thenReturn(expectedReceivedViaPayments.add(expectedRebalanceReceived));
         assertThat(flowService.getFlowReportForChannel(CHANNEL_ID).receivedViaPayments())
                 .isEqualTo(expectedReceivedViaPayments);
     }

@@ -44,13 +44,11 @@ public class SettledInvoicesDaoImpl implements SettledInvoicesDao {
     }
 
     @Override
-    public List<SettledInvoice> getInvoicesPaidVia(ChannelId channelId, Duration maxAge) {
-        return repository.findAllByReceivedViaChannelIdAndSettleDateAfter(
+    public List<SettledInvoice> getInvoicesWithoutSelfPaymentsPaidVia(ChannelId channelId, Duration maxAge) {
+        return repository.getInvoicesWithoutSelfPaymentsPaidVia(
                         channelId.getShortChannelId(),
                         getAfterEpochMilliSeconds(maxAge)
-                ).stream()
-                .map(SettledInvoiceJpaDto::toModel)
-                .toList();
+                ).stream().map(SettledInvoiceJpaDto::toModel).toList();
     }
 
     private long getAfterEpochMilliSeconds(Duration maxAge) {

@@ -31,30 +31,31 @@ class SettledInvoicesServiceTest {
     private SettledInvoicesDao dao;
 
     @Test
-    void getAmountReceivedViaChannel_no_settled_invoices() {
-        assertThat(settledInvoicesService.getAmountReceivedViaChannel(CHANNEL_ID, MAX_AGE))
+    void getAmountReceivedViaChannelWithoutSelfPayments_no_settled_invoices() {
+        assertThat(settledInvoicesService.getAmountReceivedViaChannelWithoutSelfPayments(CHANNEL_ID, MAX_AGE))
                 .isEqualTo(Coins.NONE);
     }
 
     @Test
-    void getAmountReceivedViaChannel() {
+    void getAmountReceivedViaChannelWithoutSelfPayments() {
         Coins amountReceivedPerInvoice = Coins.ofMilliSatoshis(CHANNEL_ID.getShortChannelId());
-        when(dao.getInvoicesPaidVia(CHANNEL_ID, MAX_AGE)).thenReturn(List.of(SETTLED_INVOICE));
-        assertThat(settledInvoicesService.getAmountReceivedViaChannel(CHANNEL_ID, MAX_AGE))
+        when(dao.getInvoicesWithoutSelfPaymentsPaidVia(CHANNEL_ID, MAX_AGE)).thenReturn(List.of(SETTLED_INVOICE));
+        assertThat(settledInvoicesService.getAmountReceivedViaChannelWithoutSelfPayments(CHANNEL_ID, MAX_AGE))
                 .isEqualTo(amountReceivedPerInvoice);
     }
 
     @Test
-    void getAmountReceivedViaChannel_two_invoices() {
+    void getAmountReceivedViaChannelWithoutSelfPayments_two_invoices() {
         Coins amountReceivedPerInvoice = Coins.ofMilliSatoshis(CHANNEL_ID.getShortChannelId());
         Coins expected = amountReceivedPerInvoice.add(amountReceivedPerInvoice);
-        when(dao.getInvoicesPaidVia(CHANNEL_ID, MAX_AGE)).thenReturn(List.of(SETTLED_INVOICE, SETTLED_INVOICE_2));
-        assertThat(settledInvoicesService.getAmountReceivedViaChannel(CHANNEL_ID, MAX_AGE))
+        when(dao.getInvoicesWithoutSelfPaymentsPaidVia(CHANNEL_ID, MAX_AGE))
+                .thenReturn(List.of(SETTLED_INVOICE, SETTLED_INVOICE_2));
+        assertThat(settledInvoicesService.getAmountReceivedViaChannelWithoutSelfPayments(CHANNEL_ID, MAX_AGE))
                 .isEqualTo(expected);
     }
 
     @Test
-    void getAmountReceivedViaChannel_invoice_paid_via_two_channels() {
+    void getAmountReceivedViaChannelWithoutSelfPayments_invoice_paid_via_two_channels() {
         Coins oneMilliSatoshi = Coins.ofMilliSatoshis(1);
         SettledInvoice invoice = new SettledInvoice(
                 SETTLED_INVOICE.addIndex(),
@@ -66,8 +67,8 @@ class SettledInvoicesServiceTest {
                 SETTLED_INVOICE.keysendMessage(),
                 Map.of(CHANNEL_ID, oneMilliSatoshi, CHANNEL_ID_2, AMOUNT_PAID.subtract(oneMilliSatoshi))
         );
-        when(dao.getInvoicesPaidVia(CHANNEL_ID, MAX_AGE)).thenReturn(List.of(invoice));
-        assertThat(settledInvoicesService.getAmountReceivedViaChannel(CHANNEL_ID, MAX_AGE))
+        when(dao.getInvoicesWithoutSelfPaymentsPaidVia(CHANNEL_ID, MAX_AGE)).thenReturn(List.of(invoice));
+        assertThat(settledInvoicesService.getAmountReceivedViaChannelWithoutSelfPayments(CHANNEL_ID, MAX_AGE))
                 .isEqualTo(oneMilliSatoshi);
     }
 }

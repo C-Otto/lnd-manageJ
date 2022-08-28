@@ -76,10 +76,8 @@ public class FlowService {
         Coins rebalanceSupportReceived = rebalanceService.getSupportAsTargetAmountToChannel(channelId, maxAge);
         Coins rebalanceFeesSent = rebalanceService.getSourceCostsForChannel(channelId, maxAge);
         Coins rebalanceSupportFeesSent = rebalanceService.getSupportAsSourceCostsFromChannel(channelId, maxAge);
-        Coins receivedViaPayments = settledInvoicesService.getAmountReceivedViaChannel(channelId, maxAge)
-                .subtract(rebalanceReceived)
-                .subtract(rebalanceSupportReceived)
-                .maximum(Coins.NONE);
+        Coins receivedViaPayments =
+                settledInvoicesService.getAmountReceivedViaChannelWithoutSelfPayments(channelId, maxAge);
 
         return new FlowReport(
                 forwardedSent,

@@ -2,7 +2,11 @@ package de.cotto.lndmanagej.invoices.persistence;
 
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.Payment;
 import de.cotto.lndmanagej.model.SettledInvoice;
+import de.cotto.lndmanagej.payments.persistence.PaymentJpaDto;
+import de.cotto.lndmanagej.payments.persistence.PaymentsRepository;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -22,6 +26,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SettledInvoicesRepositoryIT {
     @Autowired
     private SettledInvoicesRepository repository;
+
+    @Autowired
+    private PaymentsRepository paymentsRepository;
 
     @Test
     void getMaxSettledIndexWithoutGaps_no_invoice() {
@@ -61,70 +68,87 @@ class SettledInvoicesRepositoryIT {
         assertThat(repository.getMaxAddIndex()).isEqualTo(3L);
     }
 
-    @Test
-    void findAllByReceivedViaChannelIdAndSettleDateAfter_no_invoice() {
-        assertThat(repository.findAllByReceivedViaChannelIdAndSettleDateAfter(CHANNEL_ID.getShortChannelId(), 0))
-                .isEmpty();
-    }
+    @Nested
+    class GetInvoicesWithoutSelfPaymentsPaidVia {
+        @Test
+        void no_invoice() {
+            assertThat(repository.getInvoicesWithoutSelfPaymentsPaidVia(CHANNEL_ID.getShortChannelId(), 0))
+                    .isEmpty();
+        }
 
-    @Test
-    void findAllByReceivedViaChannelIdAndSettleDateAfter_wrong_channel_id() {
-        repository.save(invoice(1, 1, Map.of(CHANNEL_ID, Coins.ofSatoshis(100))));
-        assertThat(repository.findAllByReceivedViaChannelIdAndSettleDateAfter(CHANNEL_ID_2.getShortChannelId(), 0))
-                .isEmpty();
-    }
+        @Test
+        void wrong_channel_id() {
+            repository.save(invoice(1, 1, Map.of(CHANNEL_ID, Coins.ofSatoshis(100))));
+            assertThat(repository.getInvoicesWithoutSelfPaymentsPaidVia(CHANNEL_ID_2.getShortChannelId(), 0))
+                    .isEmpty();
+        }
 
-    @Test
-    void findAllByReceivedViaChannelIdAndSettleDateAfter_expected_channel_id() {
-        Map<ChannelId, Coins> expected = Map.of(CHANNEL_ID, Coins.ofSatoshis(100));
-        repository.save(invoice(1, 1, expected));
-        assertReceivedVia(CHANNEL_ID, List.of(expected));
-    }
+        @Test
+        void expected_channel_id() {
+            Map<ChannelId, Coins> expected = Map.of(CHANNEL_ID, Coins.ofSatoshis(100));
+            repository.save(invoice(1, 1, expected));
+            assertReceivedVia(CHANNEL_ID, List.of(expected));
+        }
 
-    @Test
-    void findAllByReceivedViaChannelIdAndSettleDateAfter_just_within_max_age() {
-        Map<ChannelId, Coins> tooOld = Map.of(CHANNEL_ID, Coins.ofSatoshis(100));
-        SettledInvoiceJpaDto invoice = invoice(1, 1, tooOld);
-        repository.save(invoice);
-        long timestamp = invoice.getSettleDate() - 1;
-        List<SettledInvoiceJpaDto> invoices =
-                repository.findAllByReceivedViaChannelIdAndSettleDateAfter(CHANNEL_ID.getShortChannelId(), timestamp);
-        assertThat(invoices).isNotEmpty();
-    }
+        @Test
+        void just_within_max_age() {
+            Map<ChannelId, Coins> tooOld = Map.of(CHANNEL_ID, Coins.ofSatoshis(100));
+            SettledInvoiceJpaDto invoice = invoice(1, 1, tooOld);
+            repository.save(invoice);
+            long timestamp = invoice.getSettleDate() - 1;
+            List<SettledInvoiceJpaDto> invoices =
+                    repository.getInvoicesWithoutSelfPaymentsPaidVia(CHANNEL_ID.getShortChannelId(), timestamp);
+            assertThat(invoices).isNotEmpty();
+        }
 
-    @Test
-    void findAllByReceivedViaChannelIdAndSettleDateAfter_expected_channel_id_but_too_old() {
-        Map<ChannelId, Coins> tooOld = Map.of(CHANNEL_ID, Coins.ofSatoshis(100));
-        SettledInvoiceJpaDto invoice = invoice(1, 1, tooOld);
-        repository.save(invoice);
-        long timestamp = invoice.getSettleDate();
-        List<SettledInvoiceJpaDto> invoices =
-                repository.findAllByReceivedViaChannelIdAndSettleDateAfter(CHANNEL_ID.getShortChannelId(), timestamp);
-        assertThat(invoices).isEmpty();
-    }
+        @Test
+        void too_old() {
+            Map<ChannelId, Coins> tooOld = Map.of(CHANNEL_ID, Coins.ofSatoshis(100));
+            SettledInvoiceJpaDto invoice = invoice(1, 1, tooOld);
+            repository.save(invoice);
+            long timestamp = invoice.getSettleDate();
+            List<SettledInvoiceJpaDto> invoices =
+                    repository.getInvoicesWithoutSelfPaymentsPaidVia(CHANNEL_ID.getShortChannelId(), timestamp);
+            assertThat(invoices).isEmpty();
+        }
 
-    @Test
-    void findAllByReceivedViaChannelIdAndSettleDateAfter_one_of_two_channels_matches() {
-        Map<ChannelId, Coins> expected = Map.of(CHANNEL_ID, Coins.ofSatoshis(100), CHANNEL_ID_2, Coins.ofSatoshis(50));
-        repository.save(invoice(1, 1, expected));
-        assertReceivedVia(CHANNEL_ID, List.of(expected));
-    }
+        @Test
+        void self_payment() {
+            Map<ChannelId, Coins> receivedVia = Map.of(CHANNEL_ID, Coins.ofSatoshis(100));
+            SettledInvoiceJpaDto invoice = invoice(1, 1, receivedVia);
+            paymentsRepository.save(payment(invoice.getHash()));
+            repository.save(invoice);
+            List<SettledInvoiceJpaDto> invoices =
+                    repository.getInvoicesWithoutSelfPaymentsPaidVia(CHANNEL_ID.getShortChannelId(), 0);
+            assertThat(invoices).isEmpty();
+        }
 
-    @Test
-    void findAllByReceivedViaChannelIdAndSettleDateAfter_several_invoices() {
-        Map<ChannelId, Coins> expected1 = Map.of(CHANNEL_ID, Coins.ofSatoshis(100), CHANNEL_ID_2, Coins.ofSatoshis(50));
-        Map<ChannelId, Coins> expected2 = Map.of(CHANNEL_ID_3, Coins.ofSatoshis(3), CHANNEL_ID_2, Coins.ofSatoshis(4));
-        repository.save(invoice(1, 1, expected1));
-        repository.save(invoice(2, 2, Map.of(CHANNEL_ID, Coins.ofSatoshis(1), CHANNEL_ID_3, Coins.ofSatoshis(2))));
-        repository.save(invoice(3, 3, expected2));
-        assertReceivedVia(CHANNEL_ID_2, List.of(expected1, expected2));
-    }
+        @Test
+        void one_of_two_channels_matches() {
+            Map<ChannelId, Coins> expected =
+                    Map.of(CHANNEL_ID, Coins.ofSatoshis(100), CHANNEL_ID_2, Coins.ofSatoshis(50));
+            repository.save(invoice(1, 1, expected));
+            assertReceivedVia(CHANNEL_ID, List.of(expected));
+        }
 
-    private void assertReceivedVia(ChannelId channelId, List<Map<ChannelId, Coins>> expected) {
-        assertThat(repository.findAllByReceivedViaChannelIdAndSettleDateAfter(channelId.getShortChannelId(), 0))
-                .map(SettledInvoiceJpaDto::toModel)
-                .map(SettledInvoice::receivedVia)
-                .isEqualTo(expected);
+        @Test
+        void several_invoices() {
+            Map<ChannelId, Coins> expected1 =
+                    Map.of(CHANNEL_ID, Coins.ofSatoshis(100), CHANNEL_ID_2, Coins.ofSatoshis(50));
+            Map<ChannelId, Coins> expected2 =
+                    Map.of(CHANNEL_ID_3, Coins.ofSatoshis(3), CHANNEL_ID_2, Coins.ofSatoshis(4));
+            repository.save(invoice(1, 1, expected1));
+            repository.save(invoice(2, 2, Map.of(CHANNEL_ID, Coins.ofSatoshis(1), CHANNEL_ID_3, Coins.ofSatoshis(2))));
+            repository.save(invoice(3, 3, expected2));
+            assertReceivedVia(CHANNEL_ID_2, List.of(expected1, expected2));
+        }
+
+        private void assertReceivedVia(ChannelId channelId, List<Map<ChannelId, Coins>> expected) {
+            assertThat(repository.getInvoicesWithoutSelfPaymentsPaidVia(channelId.getShortChannelId(), 0))
+                    .map(SettledInvoiceJpaDto::toModel)
+                    .map(SettledInvoice::receivedVia)
+                    .isEqualTo(expected);
+        }
     }
 
     private SettledInvoiceJpaDto invoice(int addIndex, int settleIndex) {
@@ -142,6 +166,17 @@ class SettledInvoicesRepositoryIT {
                         Optional.empty(),
                         receivedVia
                 )
+        );
+    }
+
+    private PaymentJpaDto payment(String hash) {
+        return PaymentJpaDto.createFromModel(new Payment(
+                0,
+                hash,
+                LocalDateTime.of(2020, 1, 2, 3, 4),
+                Coins.NONE,
+                Coins.NONE,
+                List.of())
         );
     }
 }

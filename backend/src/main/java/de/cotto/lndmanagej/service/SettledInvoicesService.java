@@ -16,8 +16,8 @@ public class SettledInvoicesService {
         this.dao = dao;
     }
 
-    public Coins getAmountReceivedViaChannel(ChannelId channelId, Duration maxAge) {
-        return dao.getInvoicesPaidVia(channelId, maxAge).stream()
+    public Coins getAmountReceivedViaChannelWithoutSelfPayments(ChannelId channelId, Duration maxAge) {
+        return dao.getInvoicesWithoutSelfPaymentsPaidVia(channelId, maxAge).stream()
                 .map(SettledInvoice::receivedVia)
                 .map(receivedVia -> receivedVia.getOrDefault(channelId, Coins.NONE))
                 .reduce(Coins.NONE, Coins::add);

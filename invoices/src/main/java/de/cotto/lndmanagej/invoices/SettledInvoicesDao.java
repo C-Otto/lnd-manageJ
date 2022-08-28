@@ -16,5 +16,5 @@ public interface SettledInvoicesDao {
 
     long getSettleIndexOffset();
 
-    List<SettledInvoice> getInvoicesPaidVia(ChannelId channelId, Duration maxAge);
+    List<SettledInvoice> getInvoicesWithoutSelfPaymentsPaidVia(ChannelId channelId, Duration maxAge);
 }

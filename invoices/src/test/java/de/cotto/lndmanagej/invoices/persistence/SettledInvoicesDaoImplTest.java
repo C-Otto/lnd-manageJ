@@ -82,23 +82,23 @@ class SettledInvoicesDaoImplTest {
 
     @Test
     void getInvoicesPaidVia_empty() {
-        assertThat(dao.getInvoicesPaidVia(CHANNEL_ID, Duration.ofMinutes(1))).isEmpty();
+        assertThat(dao.getInvoicesWithoutSelfPaymentsPaidVia(CHANNEL_ID, Duration.ofMinutes(1))).isEmpty();
     }
 
     @Test
     void getInvoicesPaidVia() {
         SettledInvoiceJpaDto jpaDto = SettledInvoiceJpaDto.createFromModel(SETTLED_INVOICE);
-        when(repository.findAllByReceivedViaChannelIdAndSettleDateAfter(eq(CHANNEL_ID.getShortChannelId()), anyLong()))
+        when(repository.getInvoicesWithoutSelfPaymentsPaidVia(eq(CHANNEL_ID.getShortChannelId()), anyLong()))
                 .thenReturn(List.of(jpaDto));
-        assertThat(dao.getInvoicesPaidVia(CHANNEL_ID, MAX_AGE)).containsExactly(SETTLED_INVOICE);
+        assertThat(dao.getInvoicesWithoutSelfPaymentsPaidVia(CHANNEL_ID, MAX_AGE)).containsExactly(SETTLED_INVOICE);
     }
 
     @Test
     void getInvoicesPaidVia_with_max_age() {
         Duration maxAge = Duration.ofDays(17);
         long expectedTimestamp = Instant.now().minus(maxAge).getEpochSecond() * 1_000;
-        dao.getInvoicesPaidVia(CHANNEL_ID, maxAge);
-        verify(repository).findAllByReceivedViaChannelIdAndSettleDateAfter(
+        dao.getInvoicesWithoutSelfPaymentsPaidVia(CHANNEL_ID, maxAge);
+        verify(repository).getInvoicesWithoutSelfPaymentsPaidVia(
                 anyLong(),
                 longThat(timestamp -> Math.abs(expectedTimestamp - timestamp) <= 5_000)
         );

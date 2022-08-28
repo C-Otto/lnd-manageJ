@@ -13,5 +13,9 @@ public interface SettledInvoicesRepository extends JpaRepository<SettledInvoiceJ
             "i.settleIndex = (SELECT COUNT(j) FROM SettledInvoiceJpaDto j WHERE j.settleIndex <= i.settleIndex)")
     long getMaxSettledIndexWithoutGaps();
 
-    List<SettledInvoiceJpaDto> findAllByReceivedViaChannelIdAndSettleDateAfter(long channelId, long timestamp);
+    @Query("SELECT s FROM SettledInvoiceJpaDto s " +
+            "JOIN s.receivedVia v " +
+            "LEFT JOIN PaymentJpaDto p ON (s.hash = p.hash) " +
+            "WHERE s.settleDate > ?2 AND v.channelId = ?1 AND p IS NULL")
+    List<SettledInvoiceJpaDto> getInvoicesWithoutSelfPaymentsPaidVia(long channelId, long timestamp);
 }
