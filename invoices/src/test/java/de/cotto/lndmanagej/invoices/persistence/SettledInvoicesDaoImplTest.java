@@ -94,13 +94,13 @@ class SettledInvoicesDaoImplTest {
     }
 
     @Test
-    void getInvoicesPaidVia_with_max_age() {
+    void getInvoicesPaidVia_with_max_age_in_seconds() {
         Duration maxAge = Duration.ofDays(17);
-        long expectedTimestamp = Instant.now().minus(maxAge).getEpochSecond() * 1_000;
+        long expectedTimestamp = Instant.now().minus(maxAge).getEpochSecond();
         dao.getInvoicesWithoutSelfPaymentsPaidVia(CHANNEL_ID, maxAge);
         verify(repository).getInvoicesWithoutSelfPaymentsPaidVia(
                 anyLong(),
-                longThat(timestamp -> Math.abs(expectedTimestamp - timestamp) <= 5_000)
+                longThat(timestamp -> Math.abs(expectedTimestamp - timestamp) <= 5)
         );
     }
 
