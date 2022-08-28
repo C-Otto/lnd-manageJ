@@ -10,6 +10,7 @@ import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.CoopClosedChannel;
 import de.cotto.lndmanagej.model.CoopClosedChannelBuilder;
 import de.cotto.lndmanagej.model.FeeReport;
+import de.cotto.lndmanagej.model.FlowReport;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannelFixtures;
@@ -81,6 +82,9 @@ class RatingServiceTest {
     @Mock
     private BalanceService balanceService;
 
+    @Mock
+    private FlowService flowService;
+
     @BeforeEach
     void setUp() {
         int daysAhead = LOCAL_OPEN_CHANNEL_2.getId().getBlockHeight() + 100 * 24 * 60 / 10;
@@ -91,6 +95,7 @@ class RatingServiceTest {
         lenient().when(configurationService.getIntegerValue(any())).thenReturn(Optional.empty());
         lenient().when(balanceService.getLocalBalanceAverage(any(), anyInt()))
                 .thenReturn(Optional.of(Coins.ofSatoshis(1_000_000)));
+        lenient().when(flowService.getFlowReportForChannel(any(), any())).thenReturn(FlowReport.EMPTY);
     }
 
     @Test
@@ -291,6 +296,25 @@ class RatingServiceTest {
             assumeThat(maxEarnings).isGreaterThanOrEqualTo(10 * ANALYSIS_DAYS);
             assertThat(ratingService.getRatingForChannel(CHANNEL_ID))
                     .contains(new Rating(maxEarnings / 10 / ANALYSIS_DAYS));
+        }
+
+        @Test
+        void received_via_payments() {
+            Coins receivedViaPayments = Coins.ofMilliSatoshis(123_456 * ANALYSIS_DAYS);
+            FlowReport flowReport = new FlowReport(
+                    Coins.NONE,
+                    Coins.NONE,
+                    Coins.NONE,
+                    Coins.NONE,
+                    Coins.NONE,
+                    Coins.NONE,
+                    Coins.NONE,
+                    Coins.NONE,
+                    Coins.NONE,
+                    receivedViaPayments
+            );
+            when(flowService.getFlowReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS)).thenReturn(flowReport);
+            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(123_456));
         }
 
         @Test

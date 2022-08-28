@@ -8,6 +8,7 @@ import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FeeReport;
+import de.cotto.lndmanagej.model.FlowReport;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.Pubkey;
@@ -42,6 +43,7 @@ public class RatingService {
     private final PolicyService policyService;
     private final ConfigurationService configurationService;
     private final BalanceService balanceService;
+    private final FlowService flowService;
     private final LoadingCache<Pubkey, Rating> peerCache = new CacheBuilder()
             .withExpiry(EXPIRY)
             .withRefresh(REFRESH)
@@ -62,7 +64,8 @@ public class RatingService {
             RebalanceService rebalanceService,
             PolicyService policyService,
             ConfigurationService configurationService,
-            BalanceService balanceService
+            BalanceService balanceService,
+            FlowService flowService
     ) {
         this.channelService = channelService;
         this.ownNodeService = ownNodeService;
@@ -71,6 +74,7 @@ public class RatingService {
         this.policyService = policyService;
         this.configurationService = configurationService;
         this.balanceService = balanceService;
+        this.flowService = flowService;
     }
 
     public Rating getRatingForPeer(Pubkey peer) {
@@ -97,6 +101,7 @@ public class RatingService {
         }
         FeeReport feeReport = feeService.getFeeReportForChannel(channelId, durationForAnalysis);
         RebalanceReport rebalanceReport = rebalanceService.getReportForChannel(channelId, durationForAnalysis);
+        FlowReport flowReport = flowService.getFlowReportForChannel(channelId, durationForAnalysis);
         long feeRate = policyService.getMinimumFeeRateTo(localChannel.getRemotePubkey()).orElse(0L);
         long localAvailableMilliSat = getLocalAvailableMilliSat(localChannel);
         double millionSat = 1.0 * localAvailableMilliSat / 1_000 / 1_000_000;
@@ -107,6 +112,7 @@ public class RatingService {
 
         long rating = feeReport.earned().milliSatoshis();
         rating += feeReport.sourced().milliSatoshis();
+        rating += flowReport.receivedViaPayments().milliSatoshis();
         rating += rebalanceReport.supportAsSourceAmount().milliSatoshis() / 10_000;
         rating += rebalanceReport.supportAsTargetAmount().milliSatoshis() / 10_000;
         rating += (long) (1.0 * feeRate * millionSat / 10);

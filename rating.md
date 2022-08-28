@@ -7,19 +7,22 @@ other channels/nodes on your peer.
 The higher the rating, the better the channel/peer. The following values are taken into account to compute the final
 rating:
 
-1. Earned fees
+1. Received Payments
+
+   For each mSAT received via a (non-self) payment via the channel/peer, the rating is increased by 1.
+2. Earned fees
 
    For each mSAT earned by routing out via the channel/peer, the rating is increased by 1. 
-2. Sourced fees
+3. Sourced fees
 
    For each mSAT earned by sats coming in from the channel/peer, but going out via some OTHER peer, the rating is increased by 1.
-3. Rebalance Support (source)
+4. Rebalance Support (source)
 
    For each 10,000 mSAT taken from the local balance as part of a rebalance transaction (increasing the local balance to some other peer), the rating is increased by 1.
-4. Rebalance Support (target)
+5. Rebalance Support (target)
 
    For each 10,000 mSAT received as part of a rebalance transaction (increasing the remote balance of some other peer), the rating is increased by 1.
-5. Potential earnings
+6. Potential earnings
 
    For each 10 mSAT that could be earned by routing the local balance at the current fee rate, the rating is increased by 1. 
 
@@ -31,6 +34,7 @@ divided by 10 for an average local balance of 10M satoshis, and the value is mul
 As such, when considering 30 days for the analysis, a rating of 1,000 could mean:
 
 - the channel/peer earned 30 satoshis with an average local balance of 1M sat, and currently no local balance
+- you received a payment worth 30 satoshis via the channel/peer with an average local balance of 1M sat, and currently no local balance
 - the channel/peer earned 30 satoshis with an average local balance of 1M sat, a current local balance of 10M sat, and a fee rate of 0pm
 - the channel/peer earned 0 satoshis with an average local balance of 1M sat, a current local balance of 10M sat, and a fee rate of 30pm
 - the channel/peer earned 0 satoshis with an average local balance of 1M sat, a current local balance of 5M sat, and a fee rate of 60pm
