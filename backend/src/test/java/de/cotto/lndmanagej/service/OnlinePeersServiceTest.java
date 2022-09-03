@@ -86,12 +86,12 @@ class OnlinePeersServiceTest {
     @Nested
     class GetOnlinePercentage {
         @Test
-        void getOnlinePercentage_no_data() {
+        void no_data() {
             assertThat(onlinePeersService.getOnlinePercentage(PUBKEY)).isZero();
         }
 
         @Test
-        void getOnlinePercentage_always_online() {
+        void always_online() {
             ZonedDateTime early = ZonedDateTime.of(2018, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
             when(dao.getAllForPeerUpToAgeInDays(PUBKEY, FOURTEEN_DAYS))
                     .thenReturn(List.of(new OnlineStatus(true, early)));
@@ -99,7 +99,7 @@ class OnlinePeersServiceTest {
         }
 
         @Test
-        void getOnlinePercentage_always_offline() {
+        void always_offline() {
             ZonedDateTime early = ZonedDateTime.of(2018, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
             when(dao.getAllForPeerUpToAgeInDays(PUBKEY, FOURTEEN_DAYS))
                     .thenReturn(List.of(new OnlineStatus(false, early)));
@@ -107,7 +107,7 @@ class OnlinePeersServiceTest {
         }
 
         @Test
-        void getOnlinePercentage_limited_data_offline() {
+        void limited_data_offline() {
             ZonedDateTime oneHourAgo = NOW.minusHours(1);
             when(dao.getAllForPeerUpToAgeInDays(PUBKEY, FOURTEEN_DAYS))
                     .thenReturn(List.of(new OnlineStatus(false, oneHourAgo)));
@@ -115,7 +115,7 @@ class OnlinePeersServiceTest {
         }
 
         @Test
-        void getOnlinePercentage_limited_data_online() {
+        void limited_data_online() {
             ZonedDateTime oneHourAgo = NOW.minusHours(1);
             when(dao.getAllForPeerUpToAgeInDays(PUBKEY, FOURTEEN_DAYS))
                     .thenReturn(List.of(new OnlineStatus(true, oneHourAgo)));
@@ -123,7 +123,7 @@ class OnlinePeersServiceTest {
         }
 
         @Test
-        void getOnlinePercentage_limited_data_online_then_offline() {
+        void limited_data_online_then_offline() {
             ZonedDateTime twoHoursAgo = NOW.minusHours(2);
             ZonedDateTime oneHourAgo = NOW.minusHours(1);
             when(dao.getAllForPeerUpToAgeInDays(PUBKEY, FOURTEEN_DAYS)).thenReturn(List.of(
@@ -134,7 +134,7 @@ class OnlinePeersServiceTest {
         }
 
         @Test
-        void getOnlinePercentage_many_state_changes() {
+        void many_state_changes() {
             ZonedDateTime fiveHoursAgo = NOW.minusHours(5);
             ZonedDateTime fourHoursAgo = NOW.minusHours(4);
             ZonedDateTime threeHoursAgo = NOW.minusHours(3);
@@ -151,7 +151,7 @@ class OnlinePeersServiceTest {
         }
 
         @Test
-        void getOnlinePercentage_limited_data_offline_then_online() {
+        void limited_data_offline_then_online() {
             ZonedDateTime twoHoursAgo = NOW.minusHours(2);
             ZonedDateTime oneHourAgo = NOW.minusHours(1);
             when(dao.getAllForPeerUpToAgeInDays(PUBKEY, FOURTEEN_DAYS)).thenReturn(List.of(
@@ -162,7 +162,7 @@ class OnlinePeersServiceTest {
         }
 
         @Test
-        void getOnlinePercentage_cuts_off_old_data() {
+        void cuts_off_old_data() {
             ZonedDateTime twoYearsAgo = NOW.minusYears(2);
             ZonedDateTime oneYearAgo = NOW.minusYears(1);
             ZonedDateTime thirteenDaysAgo = NOW.minusDays(6);
@@ -175,7 +175,7 @@ class OnlinePeersServiceTest {
         }
 
         @Test
-        void getOnlinePercentage_is_rounded() {
+        void is_rounded() {
             mockFor12PercentOffline();
             assertThat(onlinePeersService.getOnlinePercentage(PUBKEY)).isCloseTo(88, offset(1));
         }
