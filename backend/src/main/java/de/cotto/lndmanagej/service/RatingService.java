@@ -3,9 +3,7 @@ package de.cotto.lndmanagej.service;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.configuration.ConfigurationService;
-import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
-import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.FlowReport;
@@ -17,11 +15,7 @@ import de.cotto.lndmanagej.model.RebalanceReport;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.Set;
 
 import static de.cotto.lndmanagej.configuration.RatingConfigurationSettings.DAYS_FOR_ANALYSIS;
@@ -29,21 +23,19 @@ import static de.cotto.lndmanagej.configuration.RatingConfigurationSettings.MIN_
 
 @Component
 public class RatingService {
-    private static final int EXPECTED_MINUTES_PER_BLOCK = 10;
-    private static final double MINUTES_PER_DAY = 24 * 60;
     private static final int DEFAULT_MIN_AGE_DAYS_FOR_ANALYSIS = 30;
     private static final int DEFAULT_DAYS_FOR_ANALYSIS = 30;
     private static final Duration EXPIRY = Duration.ofHours(1);
     private static final Duration REFRESH = Duration.ofMillis(30);
 
     private final ChannelService channelService;
-    private final OwnNodeService ownNodeService;
     private final FeeService feeService;
     private final RebalanceService rebalanceService;
     private final PolicyService policyService;
     private final ConfigurationService configurationService;
     private final BalanceService balanceService;
     private final FlowService flowService;
+    private final OverlappingChannelsService overlappingChannelsService;
     private final LoadingCache<Pubkey, Rating> peerCache = new CacheBuilder()
             .withExpiry(EXPIRY)
             .withRefresh(REFRESH)
@@ -59,22 +51,22 @@ public class RatingService {
 
     public RatingService(
             ChannelService channelService,
-            OwnNodeService ownNodeService,
             FeeService feeService,
             RebalanceService rebalanceService,
             PolicyService policyService,
             ConfigurationService configurationService,
             BalanceService balanceService,
-            FlowService flowService
+            FlowService flowService,
+            OverlappingChannelsService overlappingChannelsService
     ) {
         this.channelService = channelService;
-        this.ownNodeService = ownNodeService;
         this.feeService = feeService;
         this.rebalanceService = rebalanceService;
         this.policyService = policyService;
         this.configurationService = configurationService;
         this.balanceService = balanceService;
         this.flowService = flowService;
+        this.overlappingChannelsService = overlappingChannelsService;
     }
 
     public Rating getRatingForPeer(Pubkey peer) {
@@ -125,27 +117,16 @@ public class RatingService {
         return getEligibleChannelsCache.get(peer);
     }
 
-    private Set<ChannelId> getEligibleChannelsWithoutCache(Pubkey peer) {
-        Set<LocalOpenChannel> openChannels = channelService.getOpenChannelsWith(peer);
-        Set<ChannelId> result = new LinkedHashSet<>(openChannels.stream().map(Channel::getId).toList());
-        if (openChannels.isEmpty()) {
-            return result;
-        }
-        int minHeight = getEarliestOpenHeight(openChannels).orElseThrow();
-        while (true) {
-            List<ClosedChannel> recentlyClosed = getClosedChannelsClosedAtOrAfter(peer, minHeight);
-            result.addAll(recentlyClosed.stream().map(Channel::getId).toList());
-            int newMinHeight = getEarliestOpenHeight(recentlyClosed).orElse(minHeight);
-            if (newMinHeight >= minHeight) {
-                break;
-            }
-            minHeight = newMinHeight;
-        }
-        int ageInDays = getAgeInDays(minHeight);
-        if (ageInDays < getDefaultMinAgeDaysForAnalysis()) {
+    private Set<ChannelId> getEligibleChannelsWithoutCache(Pubkey pubkey) {
+        Set<ChannelId> candidates = overlappingChannelsService.getTransitiveOpenChannels(pubkey);
+        if (candidates.isEmpty()) {
             return Set.of();
         }
-        return result;
+        Duration ageOfOldestCandidate = overlappingChannelsService.getAgeOfEarliestOpenHeight(candidates);
+        if (ageOfOldestCandidate.compareTo(getMinAgeDaysForAnalysis()) < 0) {
+            return Set.of();
+        }
+        return candidates;
     }
 
     private long getLocalAvailableMilliSat(LocalChannel localChannel) {
@@ -155,9 +136,10 @@ public class RatingService {
         return 0;
     }
 
-    private int getDefaultMinAgeDaysForAnalysis() {
-        return configurationService.getIntegerValue(MIN_AGE_DAYS_FOR_ANALYSIS)
+    private Duration getMinAgeDaysForAnalysis() {
+        int days = configurationService.getIntegerValue(MIN_AGE_DAYS_FOR_ANALYSIS)
                 .orElse(DEFAULT_MIN_AGE_DAYS_FOR_ANALYSIS);
+        return Duration.ofDays(days);
     }
 
     private Optional<Rating> getRatingForChannelWithoutCache(ChannelId channelId) {
@@ -178,20 +160,5 @@ public class RatingService {
         return Duration.ofDays(
                 configurationService.getIntegerValue(DAYS_FOR_ANALYSIS).orElse(DEFAULT_DAYS_FOR_ANALYSIS)
         );
-    }
-
-    private int getAgeInDays(int openHeight) {
-        int channelAgeInBlocks = ownNodeService.getBlockHeight() - openHeight;
-        return (int) Math.floor(channelAgeInBlocks * 1.0 * EXPECTED_MINUTES_PER_BLOCK / MINUTES_PER_DAY);
-    }
-
-    private OptionalInt getEarliestOpenHeight(Collection<? extends Channel> channels) {
-        return channels.stream().mapToInt(c -> c.getId().getBlockHeight()).min();
-    }
-
-    private List<ClosedChannel> getClosedChannelsClosedAtOrAfter(Pubkey peer, int minHeight) {
-        return channelService.getClosedChannelsWith(peer).stream()
-                .filter(c -> c.getCloseHeight() >= minHeight)
-                .toList();
     }
 }

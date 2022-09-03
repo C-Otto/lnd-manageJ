@@ -20,7 +20,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -58,7 +57,6 @@ class RatingServiceTest {
     private static final Duration DEFAULT_DURATION_FOR_ANALYSIS = Duration.ofDays(ANALYSIS_DAYS);
     private static final Duration DEFAULT_MIN_AGE = Duration.ofDays(30);
 
-    @InjectMocks
     private RatingService ratingService;
 
     @Mock
@@ -96,6 +94,20 @@ class RatingServiceTest {
         lenient().when(balanceService.getLocalBalanceAverage(any(), anyInt()))
                 .thenReturn(Optional.of(Coins.ofSatoshis(1_000_000)));
         lenient().when(flowService.getFlowReportForChannel(any(), any())).thenReturn(FlowReport.EMPTY);
+        OverlappingChannelsService overlappingChannelsService = new OverlappingChannelsService(
+                channelService,
+                ownNodeService
+        );
+        ratingService = new RatingService(
+                channelService,
+                feeService,
+                rebalanceService,
+                policyService,
+                configurationService,
+                balanceService,
+                flowService,
+                overlappingChannelsService
+        );
     }
 
     @Test
