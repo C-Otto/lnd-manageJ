@@ -1,9 +1,11 @@
 package de.cotto.lndmanagej.service;
 
+import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.OnlineReport;
 import de.cotto.lndmanagej.model.OnlineReportFixtures;
 import de.cotto.lndmanagej.model.OnlineStatus;
 import de.cotto.lndmanagej.onlinepeers.OnlinePeersDao;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,11 +13,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Duration;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_PEER;
 import static de.cotto.lndmanagej.model.OnlineStatusFixtures.ONLINE_STATUS;
@@ -38,6 +43,17 @@ class OnlinePeersServiceTest {
 
     @Mock
     private OnlinePeersDao dao;
+
+    @Mock
+    private OverlappingChannelsService overlappingChannelsService;
+
+    @BeforeEach
+    void setUp() {
+        Set<ChannelId> channelIds = Set.of(CHANNEL_ID);
+        lenient().when(overlappingChannelsService.getTransitiveOpenChannels(PUBKEY)).thenReturn(channelIds);
+        lenient().when(overlappingChannelsService.getAgeOfEarliestOpenHeight(channelIds))
+                .thenReturn(Duration.ofDays(3650));
+    }
 
     @Nested
     class GetOnlineReport {
@@ -87,6 +103,12 @@ class OnlinePeersServiceTest {
     class GetOnlinePercentage {
         @Test
         void no_data() {
+            assertThat(onlinePeersService.getOnlinePercentage(PUBKEY)).isZero();
+        }
+
+        @Test
+        void no_channel() {
+            when(overlappingChannelsService.getTransitiveOpenChannels(PUBKEY)).thenReturn(Set.of());
             assertThat(onlinePeersService.getOnlinePercentage(PUBKEY)).isZero();
         }
 
@@ -172,6 +194,20 @@ class OnlinePeersServiceTest {
                     new OnlineStatus(true, twoYearsAgo)
             ));
             assertThat(onlinePeersService.getOnlinePercentage(PUBKEY)).isCloseTo(42, offset(1));
+        }
+
+        @Test
+        void ignores_data_before_oldest_open_channel() {
+            Set<ChannelId> channelIds = Set.of(CHANNEL_ID);
+            when(overlappingChannelsService.getTransitiveOpenChannels(PUBKEY)).thenReturn(channelIds);
+            when(overlappingChannelsService.getAgeOfEarliestOpenHeight(channelIds)).thenReturn(Duration.ofDays(2));
+            ZonedDateTime twoYearsAgo = NOW.minusYears(2);
+            ZonedDateTime yesterday = NOW.minusDays(1);
+            when(dao.getAllForPeerUpToAgeInDays(PUBKEY, FOURTEEN_DAYS)).thenReturn(List.of(
+                    new OnlineStatus(true, yesterday),
+                    new OnlineStatus(false, twoYearsAgo)
+            ));
+            assertThat(onlinePeersService.getOnlinePercentage(PUBKEY)).isCloseTo(50, offset(1));
         }
 
         @Test

@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.service;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
+import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.OnlineReport;
 import de.cotto.lndmanagej.model.OnlineStatus;
@@ -14,6 +15,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
+import java.util.Set;
 
 @Component
 public class OnlinePeersService {
@@ -25,9 +27,11 @@ public class OnlinePeersService {
     private final OnlinePeersDao dao;
     private final LoadingCache<Pubkey, Integer> onlinePercentageCache;
     private final LoadingCache<Pubkey, Integer> changesCache;
+    private final OverlappingChannelsService overlappingChannelsService;
 
-    public OnlinePeersService(OnlinePeersDao dao) {
+    public OnlinePeersService(OnlinePeersDao dao, OverlappingChannelsService overlappingChannelsService) {
         this.dao = dao;
+        this.overlappingChannelsService = overlappingChannelsService;
         onlinePercentageCache = new CacheBuilder()
                 .withRefresh(CACHE_REFRESH)
                 .withExpiry(CACHE_EXPIRY)
@@ -83,7 +87,7 @@ public class OnlinePeersService {
         Duration total = Duration.ZERO;
         Duration online = Duration.ZERO;
         ZonedDateTime intervalStart = ZonedDateTime.now(ZoneOffset.UTC);
-        ZonedDateTime cutoff = intervalStart.minusDays(DAYS_FOR_ONLINE_PERCENTAGE);
+        ZonedDateTime cutoff = getCutoff(intervalStart, pubkey);
         for (OnlineStatus onlineStatus : dao.getAllForPeerUpToAgeInDays(pubkey, DAYS_FOR_ONLINE_PERCENTAGE)) {
             ZonedDateTime intervalEnd = onlineStatus.since();
             if (intervalEnd.isBefore(cutoff)) {
@@ -100,6 +104,21 @@ public class OnlinePeersService {
             return 0;
         }
         return getRoundedPercentage(total, online);
+    }
+
+    private ZonedDateTime getCutoff(ZonedDateTime intervalStart, Pubkey pubkey) {
+        ZonedDateTime defaultCutoff = intervalStart.minusDays(DAYS_FOR_ONLINE_PERCENTAGE);
+        Set<ChannelId> channelsToConsider = overlappingChannelsService.getTransitiveOpenChannels(pubkey);
+        if (channelsToConsider.isEmpty()) {
+            return defaultCutoff;
+        }
+        Duration ageOfOldestChannel = overlappingChannelsService.getAgeOfEarliestOpenHeight(channelsToConsider);
+
+        ZonedDateTime cutoffForOldestOpenChannel = intervalStart.minus(ageOfOldestChannel);
+        if (defaultCutoff.isBefore(cutoffForOldestOpenChannel)) {
+            return cutoffForOldestOpenChannel;
+        }
+        return defaultCutoff;
     }
 
     private int getRoundedPercentage(Duration total, Duration offline) {
