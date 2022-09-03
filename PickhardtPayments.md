@@ -21,6 +21,7 @@ There is also a lightweight python package being developed which can be used for
    fail because of this if lnd-manageJ does not respond in time (crash, shutdown, ...).
    See https://github.com/lightningnetwork/lnd/issues/6409. To mitigate this risk, you can add
    `rpcmiddleware.intercepttimeout=10s` to the same section (the default is 2s).
+4. You need to enable the feature in your configuration file (see below).
 
 # Payment Options
 The following endpoints allow you to specify payment options that can be provided as the body of an HTTP `POST` request.
@@ -56,6 +57,10 @@ A value of 1 seems to be a good compromise (using the default quantization value
 You can configure the following values in the `[pickhardt-payments]` section of your `~/.config/lnd-manageJ.conf`
 configuration file:
 
+* `enabled` (default false): must be set to true if you want to use the feature:
+  * the middleware (collecting channel liquidity information in the background) is only
+    registered if set to true
+  * changing this value requires a restart of lnd-manageJ
 * `liquidity_information_max_age_in_seconds` (default 600, 10 minutes):
   * lower/upper bound information observed from payment failures are only kept this long
   * this information is kept for each pair of peers

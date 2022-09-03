@@ -4,7 +4,8 @@ public enum PickhardtPaymentsConfigurationSettings implements ConfigurationSetti
     LIQUIDITY_INFORMATION_MAX_AGE("liquidity_information_max_age_in_seconds"),
     USE_MISSION_CONTROL("use_mission_control"),
     QUANTIZATION("quantization"),
-    PIECEWISE_LINEAR_APPROXIMATIONS("piecewise_linear_approximations");
+    PIECEWISE_LINEAR_APPROXIMATIONS("piecewise_linear_approximations"),
+    ENABLED("enabled");
 
     private final String name;
 

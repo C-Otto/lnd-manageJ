@@ -1,5 +1,7 @@
 package de.cotto.lndmanagej.grpc.middleware;
 
+import de.cotto.lndmanagej.configuration.ConfigurationService;
+import de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings;
 import de.cotto.lndmanagej.grpc.GrpcService;
 import io.grpc.stub.StreamObserver;
 import lnrpc.RPCMiddlewareResponse;
@@ -12,16 +14,19 @@ public class GrpcMiddlewareService implements ObserverIsDoneListener {
     private final GrpcService grpcService;
     private final Collection<RequestListener<?>> requestListeners;
     private final Collection<ResponseListener<?>> responseListeners;
+    private final ConfigurationService configurationService;
     private boolean connected;
 
     public GrpcMiddlewareService(
             GrpcService grpcService,
             Collection<RequestListener<?>> requestListeners,
-            Collection<ResponseListener<?>> responseListeners
+            Collection<ResponseListener<?>> responseListeners,
+            ConfigurationService configurationService
     ) {
         this.grpcService = grpcService;
         this.requestListeners = requestListeners;
         this.responseListeners = responseListeners;
+        this.configurationService = configurationService;
         registerMiddleware();
     }
 
@@ -37,6 +42,9 @@ public class GrpcMiddlewareService implements ObserverIsDoneListener {
     }
 
     private void registerMiddleware() {
+        if (isDisabledInConfiguration()) {
+            return;
+        }
         connected = true;
         RequestAndResponseStreamObserver requestAndResponseStreamObserver = new RequestAndResponseStreamObserver();
         StreamObserver<RPCMiddlewareResponse> responseObserver =
@@ -52,5 +60,12 @@ public class GrpcMiddlewareService implements ObserverIsDoneListener {
         } catch (InterruptedException e) {
             // ignore
         }
+    }
+
+    @SuppressWarnings("PMD.UnnecessaryLocalBeforeReturn")
+    private boolean isDisabledInConfiguration() {
+        boolean isEnabled = configurationService.getBooleanValue(PickhardtPaymentsConfigurationSettings.ENABLED)
+                .orElse(false);
+        return !isEnabled;
     }
 }
