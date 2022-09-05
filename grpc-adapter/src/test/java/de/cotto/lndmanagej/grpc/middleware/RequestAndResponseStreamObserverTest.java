@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.concurrent.TimeUnit;
@@ -50,6 +51,29 @@ class RequestAndResponseStreamObserverTest {
         lenient().when(requestListener.getRequestType()).thenReturn(REQUEST_LISTENER_TYPE);
         lenient().when(responseListener.getResponseType()).thenReturn(RESPONSE_LISTENER_TYPE);
         observer.initialize(responseObserver, observerIsDoneListener);
+    }
+
+    @Nested
+    class ErrorBeforeInitialization {
+        @BeforeEach
+        void setUp() {
+            observer = new RequestAndResponseStreamObserver();
+            observer.onError(new NullPointerException());
+        }
+
+        @Test
+        void sends_isDone_after_initialization() {
+            observer.initialize(responseObserver, observerIsDoneListener);
+            verify(observerIsDoneListener).onIsDone();
+        }
+
+        @Test
+        void does_not_attempt_to_register_middleware() {
+            //noinspection unchecked
+            Mockito.reset(responseObserver);
+            observer.initialize(responseObserver, observerIsDoneListener);
+            verify(responseObserver, never()).onNext(any());
+        }
     }
 
     @Test
