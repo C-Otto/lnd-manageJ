@@ -12,8 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
-import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_TO_NODE_3;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.*;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_2;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_3;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
@@ -91,6 +90,16 @@ class NodeWarningsServiceTest {
         assertThat(nodeWarningsService.getNodeWarnings()).containsExactlyInAnyOrderEntriesOf(Map.of(
                 NODE_2, new NodeWarnings(NODE_ONLINE_PERCENTAGE_WARNING),
                 NODE_3, new NodeWarnings(NODE_ONLINE_CHANGES_WARNING)
+        ));
+    }
+
+    @Test
+    void getNodeWarnings_duplicate_nodes() {
+        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2));
+        when(provider1.getNodeWarnings(PUBKEY_2)).thenReturn(Stream.of(NODE_ONLINE_CHANGES_WARNING));
+        when(provider2.getNodeWarnings(PUBKEY_2)).thenReturn(Stream.of(NODE_ONLINE_CHANGES_WARNING));
+        assertThat(nodeWarningsService.getNodeWarnings()).containsExactlyInAnyOrderEntriesOf(Map.of(
+                NODE_2, new NodeWarnings(NODE_ONLINE_CHANGES_WARNING)
         ));
     }
 }
