@@ -12,7 +12,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.*;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_TO_NODE_3;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_2;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_3;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
