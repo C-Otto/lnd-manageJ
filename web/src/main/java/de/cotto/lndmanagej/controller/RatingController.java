@@ -32,7 +32,7 @@ public class RatingController {
 
     @Timed
     @GetMapping("/channel/{channelId}/rating")
-    public RatingDto getRatingForChannel(ChannelId channelId) throws NotFoundException {
+    public RatingDto getRatingForChannel(@PathVariable ChannelId channelId) throws NotFoundException {
         return ratingService.getRatingForChannel(channelId)
                 .map(RatingDto::fromModel)
                 .orElseThrow(NotFoundException::new);
