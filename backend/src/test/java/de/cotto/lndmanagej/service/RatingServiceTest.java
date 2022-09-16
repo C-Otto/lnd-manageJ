@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -126,13 +127,30 @@ class RatingServiceTest {
     @Test
     void getRatingForPeer_one_channel() {
         mockChannels(LOCAL_OPEN_CHANNEL);
-        assertThat(ratingService.getRatingForPeer(PUBKEY_2)).isEqualTo(new Rating(10_000));
+        assertThat(ratingService.getRatingForPeer(PUBKEY_2).rating()).contains(10_000L);
+    }
+
+    @Test
+    void getRatingForPeer_includes_details() {
+        mockChannels(LOCAL_OPEN_CHANNEL);
+        Map<String, Object> expectedDetails = Map.of(
+                "712345x123x1 earned", 300_000L,
+                "712345x123x1 sourced", 0L,
+                "712345x123x1 received via payments", 0L,
+                "712345x123x1 support as source", 0L,
+                "712345x123x1 support as target", 0L,
+                "712345x123x1 future earnings", 0L,
+                "712345x123x1 scaled by days", 1.0 / 30,
+                "712345x123x1 scaled by liquidity", 1.0d,
+                "712345x123x1 rating", 10_000L
+        );
+        assertThat(ratingService.getRatingForPeer(PUBKEY_2).details()).isEqualTo(expectedDetails);
     }
 
     @Test
     void getRatingForPeer_two_channels() {
         mockChannels(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2);
-        assertThat(ratingService.getRatingForPeer(PUBKEY_2)).isEqualTo(new Rating(2 * 10_000));
+        assertThat(ratingService.getRatingForPeer(PUBKEY_2).rating()).contains(2 * 10_000L);
     }
 
     @Test
@@ -180,12 +198,12 @@ class RatingServiceTest {
 
         @Test
         void getRatingForChannel() {
-            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(10_000));
+            assertThat(ratingService.getRatingForChannel(CHANNEL_ID).orElseThrow().rating()).contains(10_000L);
         }
 
         @Test
         void getRatingForPeer() {
-            assertThat(ratingService.getRatingForPeer(PUBKEY_2)).isEqualTo(new Rating(20_000));
+            assertThat(ratingService.getRatingForPeer(PUBKEY_2).rating()).contains(20_000L);
         }
     }
 
@@ -205,7 +223,7 @@ class RatingServiceTest {
         assumeThat(blockHeight - openHeightClosedChannelOld).isGreaterThanOrEqualTo(defaultMinAge * 24 * 60 / 10);
 
         mockChannels(LOCAL_OPEN_CHANNEL, closedChannelYoung, closedChannelOld);
-        assertThat(ratingService.getRatingForPeer(PUBKEY_2)).isEqualTo(new Rating(30_000));
+        assertThat(ratingService.getRatingForPeer(PUBKEY_2).rating()).contains(30_000L);
     }
 
     @Test
@@ -239,7 +257,7 @@ class RatingServiceTest {
 
         @Test
         void idle() {
-            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(0));
+            assertThat(ratingService.getRatingForChannel(CHANNEL_ID).orElseThrow().rating()).contains(0L);
         }
 
         @Test
@@ -255,7 +273,7 @@ class RatingServiceTest {
             Coins feesEarned = Coins.ofMilliSatoshis(123 * ANALYSIS_DAYS);
             when(feeService.getFeeReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
                     .thenReturn(new FeeReport(feesEarned, Coins.NONE));
-            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(123));
+            assertThat(ratingService.getRatingForChannel(CHANNEL_ID).orElseThrow().rating()).contains(123L);
         }
 
         @Test
@@ -263,7 +281,7 @@ class RatingServiceTest {
             Coins feesSourced = Coins.ofMilliSatoshis(123 * ANALYSIS_DAYS);
             when(feeService.getFeeReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
                     .thenReturn(new FeeReport(Coins.NONE, feesSourced));
-            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(123));
+            assertThat(ratingService.getRatingForChannel(CHANNEL_ID).orElseThrow().rating()).contains(123L);
         }
 
         @Test
@@ -278,7 +296,7 @@ class RatingServiceTest {
             );
             lenient().when(rebalanceService.getReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
                     .thenReturn(rebalanceReport);
-            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(123));
+            assertThat(ratingService.getRatingForChannel(CHANNEL_ID).orElseThrow().rating()).contains(123L);
         }
 
         @Test
@@ -293,7 +311,7 @@ class RatingServiceTest {
             );
             lenient().when(rebalanceService.getReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
                     .thenReturn(rebalanceReport);
-            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(123));
+            assertThat(ratingService.getRatingForChannel(CHANNEL_ID).orElseThrow().rating()).contains(123L);
         }
 
         @Test
@@ -306,8 +324,8 @@ class RatingServiceTest {
             mockOutgoingFeeRate(feeRate);
             long maxEarnings = (long) (1.0 * feeRate * balanceMilliSat / 1_000 / 1_000_000.0);
             assumeThat(maxEarnings).isGreaterThanOrEqualTo(10 * ANALYSIS_DAYS);
-            assertThat(ratingService.getRatingForChannel(CHANNEL_ID))
-                    .contains(new Rating(maxEarnings / 10 / ANALYSIS_DAYS));
+            assertThat(ratingService.getRatingForChannel(CHANNEL_ID).orElseThrow().rating())
+                    .contains(maxEarnings / 10 / ANALYSIS_DAYS);
         }
 
         @Test
@@ -326,7 +344,7 @@ class RatingServiceTest {
                     receivedViaPayments
             );
             when(flowService.getFlowReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS)).thenReturn(flowReport);
-            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(123_456));
+            assertThat(ratingService.getRatingForChannel(CHANNEL_ID).orElseThrow().rating()).contains(123_456L);
         }
 
         @Test
@@ -369,7 +387,8 @@ class RatingServiceTest {
             when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
             when(feeService.getFeeReportForChannel(CHANNEL_ID, Duration.ofDays(daysForAnalysis)))
                     .thenReturn(new FeeReport(Coins.ofMilliSatoshis(100_000), Coins.NONE));
-            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(100_000 / daysForAnalysis));
+            assertThat(ratingService.getRatingForChannel(CHANNEL_ID).orElseThrow().rating())
+                    .contains(100_000L / daysForAnalysis);
         }
 
         private void assertScaledRating(Coins localAvailable, long expectedRating) {
@@ -379,7 +398,7 @@ class RatingServiceTest {
                     .thenReturn(Optional.of(localAvailable));
             when(feeService.getFeeReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
                     .thenReturn(new FeeReport(Coins.ofMilliSatoshis(100_000 * ANALYSIS_DAYS), Coins.NONE));
-            assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(new Rating(expectedRating));
+            assertThat(ratingService.getRatingForChannel(CHANNEL_ID).orElseThrow().rating()).contains(expectedRating);
         }
 
         private LocalOpenChannel getLocalOpenChannel(Coins localAvailable) {

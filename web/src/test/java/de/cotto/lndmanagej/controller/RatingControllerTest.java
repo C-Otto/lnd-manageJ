@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Map;
 import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
@@ -47,7 +48,7 @@ class RatingControllerTest {
 
     @Test
     void getRatingForChannel() throws Exception {
-        Rating rating = new Rating(1);
+        Rating rating = new Rating(1, Map.of("some", "details"));
         when(ratingService.getRatingForChannel(CHANNEL_ID)).thenReturn(Optional.of(rating));
         assertThat(ratingController.getRatingForChannel(CHANNEL_ID)).isEqualTo(RatingDto.fromModel(rating));
     }

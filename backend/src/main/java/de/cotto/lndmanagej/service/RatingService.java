@@ -15,6 +15,8 @@ import de.cotto.lndmanagej.model.RebalanceReport;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -102,15 +104,53 @@ public class RatingService {
             averageSat = 1;
         }
 
-        long rating = feeReport.earned().milliSatoshis();
-        rating += feeReport.sourced().milliSatoshis();
-        rating += flowReport.receivedViaPayments().milliSatoshis();
-        rating += rebalanceReport.supportAsSourceAmount().milliSatoshis() / 10_000;
-        rating += rebalanceReport.supportAsTargetAmount().milliSatoshis() / 10_000;
-        rating += (long) (1.0 * feeRate * millionSat / 10);
+        long rating = 0;
+        Map<Object, Object> details = new LinkedHashMap<>();
+        rating += addToRating(channelId,
+                details,
+                feeReport.earned().milliSatoshis(),
+                "earned"
+        );
+        rating += addToRating(channelId,
+                details,
+                feeReport.sourced().milliSatoshis(),
+                "sourced"
+        );
+        rating += addToRating(channelId,
+                details,
+                flowReport.receivedViaPayments().milliSatoshis(),
+                "received via payments"
+        );
+        rating += addToRating(channelId,
+                details,
+                rebalanceReport.supportAsSourceAmount().milliSatoshis() / 10_000,
+                "support as source"
+        );
+        rating += addToRating(channelId,
+                details,
+                rebalanceReport.supportAsTargetAmount().milliSatoshis() / 10_000,
+                "support as target"
+        );
+        rating += addToRating(channelId,
+                details,
+                (long) (1.0 * feeRate * millionSat / 10),
+                "future earnings"
+        );
+
         double scaledByLiquidity = 1.0 * rating * 1_000_000 / averageSat;
         double scaledByDays = scaledByLiquidity / durationForAnalysis.toDays();
-        return Optional.of(new Rating((long) scaledByDays));
+        long finalRating = (long) scaledByDays;
+
+        details.put(channelId + " scaled by liquidity", 1_000_000.0 / averageSat);
+        details.put(channelId + " scaled by days", 1.0 / durationForAnalysis.toDays());
+        details.put(channelId + " rating", finalRating);
+
+        return Optional.of(new Rating(finalRating, details));
+    }
+
+    private static long addToRating(ChannelId channelId, Map<Object, Object> ratingDetails, long value, String key) {
+        ratingDetails.put(channelId + " " + key, value);
+        return value;
     }
 
     private Set<ChannelId> getEligibleChannels(Pubkey peer) {

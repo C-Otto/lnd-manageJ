@@ -1,12 +1,18 @@
 package de.cotto.lndmanagej.model;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 
-public record Rating(Optional<Long> rating) {
-    public static final Rating EMPTY = new Rating(Optional.empty());
+public record Rating(Optional<Long> rating, Map<Object, Object> details) {
+    public static final Rating EMPTY = new Rating(Optional.empty(), Map.of());
 
     public Rating(long rating) {
-        this(Optional.of(rating));
+        this(rating, Map.of());
+    }
+
+    public Rating(long rating, Map<Object, Object> details) {
+        this(Optional.of(rating), details);
     }
 
     public Rating add(Rating other) {
@@ -18,7 +24,10 @@ public record Rating(Optional<Long> rating) {
         if (otherRating == null) {
             return this;
         }
-        return new Rating(thisRating + otherRating);
+        Map<Object, Object> combinedDetails = new LinkedHashMap<>();
+        combinedDetails.putAll(details);
+        combinedDetails.putAll(other.details);
+        return new Rating(thisRating + otherRating, combinedDetails);
     }
 
     public boolean isEmpty() {
