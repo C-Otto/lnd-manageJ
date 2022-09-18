@@ -16,6 +16,7 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_4;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_TO_NODE_3;
+import static de.cotto.lndmanagej.model.warnings.ChannelWarningFixtures.CHANNEL_BALANCE_FLUCTUATION_WARNING;
 import static de.cotto.lndmanagej.model.warnings.ChannelWarningFixtures.CHANNEL_NUM_UPDATES_WARNING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -73,5 +74,17 @@ class ChannelWarningsServiceTest {
         assertThat(channelWarningsService.getChannelWarnings()).containsExactlyInAnyOrderEntriesOf(Map.of(
                 LOCAL_OPEN_CHANNEL, new ChannelWarnings(CHANNEL_NUM_UPDATES_WARNING)
         ));
+    }
+
+    @Test
+    void getChannelWarnings_two_different_warnings_for_same_channel() {
+        when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL));
+        when(provider1.getChannelWarnings(CHANNEL_ID)).thenReturn(Stream.of(CHANNEL_NUM_UPDATES_WARNING));
+        when(provider2.getChannelWarnings(CHANNEL_ID)).thenReturn(Stream.of(CHANNEL_BALANCE_FLUCTUATION_WARNING));
+        ChannelWarnings expectedWarnings =
+                new ChannelWarnings(CHANNEL_NUM_UPDATES_WARNING, CHANNEL_BALANCE_FLUCTUATION_WARNING);
+        assertThat(channelWarningsService.getChannelWarnings()).containsEntry(
+                LOCAL_OPEN_CHANNEL, expectedWarnings
+        );
     }
 }
