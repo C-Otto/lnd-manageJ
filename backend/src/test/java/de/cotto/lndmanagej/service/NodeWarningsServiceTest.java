@@ -99,9 +99,9 @@ class NodeWarningsServiceTest {
     void getNodeWarnings_duplicate_nodes() {
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2));
         when(provider1.getNodeWarnings(PUBKEY_2)).thenReturn(Stream.of(NODE_ONLINE_CHANGES_WARNING));
-        when(provider2.getNodeWarnings(PUBKEY_2)).thenReturn(Stream.of(NODE_ONLINE_CHANGES_WARNING));
+        when(provider2.getNodeWarnings(PUBKEY_2)).thenReturn(Stream.of(NODE_ONLINE_PERCENTAGE_WARNING));
         assertThat(nodeWarningsService.getNodeWarnings()).containsExactlyInAnyOrderEntriesOf(Map.of(
-                NODE_2, new NodeWarnings(NODE_ONLINE_CHANGES_WARNING)
+                NODE_2, new NodeWarnings(NODE_ONLINE_CHANGES_WARNING, NODE_ONLINE_PERCENTAGE_WARNING)
         ));
     }
 }
