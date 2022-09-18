@@ -96,7 +96,7 @@ class NodeWarningsServiceTest {
     }
 
     @Test
-    void getNodeWarnings_duplicate_nodes() {
+    void getNodeWarnings_two_different_warnings_for_same_node() {
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2));
         when(provider1.getNodeWarnings(PUBKEY_2)).thenReturn(Stream.of(NODE_ONLINE_CHANGES_WARNING));
         when(provider2.getNodeWarnings(PUBKEY_2)).thenReturn(Stream.of(NODE_ONLINE_PERCENTAGE_WARNING));
