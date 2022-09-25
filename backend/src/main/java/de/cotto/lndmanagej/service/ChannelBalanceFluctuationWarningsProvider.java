@@ -1,7 +1,6 @@
 package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.configuration.ConfigurationService;
-import de.cotto.lndmanagej.configuration.WarningsConfigurationSettings;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.LocalChannel;
@@ -12,6 +11,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.CHANNEL_FLUCTUATION_LOWER_THRESHOLD;
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.CHANNEL_FLUCTUATION_UPPER_THRESHOLD;
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.CHANNEL_FLUCTUATION_WARNING_IGNORE_CHANNEL;
 
 @Component
 public class ChannelBalanceFluctuationWarningsProvider implements ChannelWarningsProvider {
@@ -35,6 +38,9 @@ public class ChannelBalanceFluctuationWarningsProvider implements ChannelWarning
 
     @Override
     public Stream<ChannelWarning> getChannelWarnings(ChannelId channelId) {
+        if (ignoreWarning(channelId)) {
+            return Stream.empty();
+        }
         return Stream.of(getBalanceFluctuatingWarning(channelId)).flatMap(Optional::stream);
     }
 
@@ -57,12 +63,16 @@ public class ChannelBalanceFluctuationWarningsProvider implements ChannelWarning
     }
 
     private int getLowerThreshold() {
-        return configurationService.getIntegerValue(WarningsConfigurationSettings.CHANNEL_FLUCTUATION_LOWER_THRESHOLD)
+        return configurationService.getIntegerValue(CHANNEL_FLUCTUATION_LOWER_THRESHOLD)
                 .orElse(DEFAULT_LOWER_THRESHOLD);
     }
 
     private int getUpperThreshold() {
-        return configurationService.getIntegerValue(WarningsConfigurationSettings.CHANNEL_FLUCTUATION_UPPER_THRESHOLD)
+        return configurationService.getIntegerValue(CHANNEL_FLUCTUATION_UPPER_THRESHOLD)
                 .orElse(DEFAULT_UPPER_THRESHOLD);
+    }
+
+    private boolean ignoreWarning(ChannelId channelId) {
+        return configurationService.getChannelIds(CHANNEL_FLUCTUATION_WARNING_IGNORE_CHANNEL).contains(channelId);
     }
 }

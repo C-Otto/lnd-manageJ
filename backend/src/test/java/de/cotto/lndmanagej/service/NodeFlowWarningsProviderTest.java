@@ -16,6 +16,7 @@ import java.util.Set;
 
 import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER;
 import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.NODE_FLOW_MINIMUM_DAYS_FOR_WARNING;
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.NODE_FLOW_WARNING_IGNORE_NODE;
 import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
@@ -108,6 +109,12 @@ class NodeFlowWarningsProviderTest {
         when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL_2));
         when(channelService.getOpenHeight(LOCAL_OPEN_CHANNEL_2)).thenReturn(BLOCK_HEIGHT);
         assertThat(warningsProvider.getNodeWarnings(PUBKEY)).containsExactly(new NodeNoFlowWarning(120));
+    }
+
+    @Test
+    void getNodeWarnings_ignoredViaConfig_noWarning() {
+        when(configurationService.getPubkeys(NODE_FLOW_WARNING_IGNORE_NODE)).thenReturn(Set.of(PUBKEY));
+        assertThat(warningsProvider.getNodeWarnings(PUBKEY)).isEmpty();
     }
 
     private void mockOpenChannelWithAgeInBlocks(int channelAgeInBlocks) {
