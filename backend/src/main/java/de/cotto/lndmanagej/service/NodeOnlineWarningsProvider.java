@@ -1,7 +1,6 @@
 package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.configuration.ConfigurationService;
-import de.cotto.lndmanagej.configuration.WarningsConfigurationSettings;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.warnings.NodeOnlineChangesWarning;
 import de.cotto.lndmanagej.model.warnings.NodeOnlinePercentageWarning;
@@ -12,6 +11,10 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.ONLINE_CHANGES_THRESHOLD;
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.ONLINE_PERCENTAGE_THRESHOLD;
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.ONLINE_WARNING_IGNORE_NODE;
 
 @Component
 public class NodeOnlineWarningsProvider implements NodeWarningsProvider {
@@ -31,11 +34,18 @@ public class NodeOnlineWarningsProvider implements NodeWarningsProvider {
 
     @Override
     public Stream<NodeWarning> getNodeWarnings(Pubkey pubkey) {
+        if (ignoreWarnings(pubkey)) {
+            return Stream.empty();
+        }
         return Stream.of(
                         (Function<Pubkey, Optional<NodeWarning>>) this::getOnlinePercentageWarning,
                         this::getOnlineChangesWarning
                 ).map(function -> function.apply(pubkey))
                 .flatMap(Optional::stream);
+    }
+
+    private boolean ignoreWarnings(Pubkey pubkey) {
+        return configurationService.getPubkeys(ONLINE_WARNING_IGNORE_NODE).contains(pubkey);
     }
 
     private Optional<NodeWarning> getOnlinePercentageWarning(Pubkey pubkey) {
@@ -57,12 +67,12 @@ public class NodeOnlineWarningsProvider implements NodeWarningsProvider {
     }
 
     private int getOnlinePercentageThreshold() {
-        return configurationService.getIntegerValue(WarningsConfigurationSettings.ONLINE_PERCENTAGE_THRESHOLD)
+        return configurationService.getIntegerValue(ONLINE_PERCENTAGE_THRESHOLD)
                 .orElse(DEFAULT_ONLINE_PERCENTAGE_THRESHOLD);
     }
 
     private int getOnlineChangesThreshold() {
-        return configurationService.getIntegerValue(WarningsConfigurationSettings.ONLINE_CHANGES_THRESHOLD)
+        return configurationService.getIntegerValue(ONLINE_CHANGES_THRESHOLD)
                 .orElse(DEFAULT_ONLINE_CHANGES_THRESHOLD);
     }
 }

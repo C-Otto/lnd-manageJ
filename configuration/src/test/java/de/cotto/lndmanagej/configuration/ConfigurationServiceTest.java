@@ -11,12 +11,18 @@ import java.util.Map;
 import java.util.Set;
 
 import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.USE_MISSION_CONTROL;
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.MAX_NUM_UPDATES_IGNORE_CHANNEL;
 import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.ONLINE_CHANGES_THRESHOLD;
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.ONLINE_WARNING_IGNORE_NODE;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.ResolutionFixtures.ANCHOR_CLAIMED;
 import static de.cotto.lndmanagej.model.ResolutionFixtures.COMMIT_CLAIMED;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -101,6 +107,45 @@ class ConfigurationServiceTest {
         when(iniFileReader.getValues(ALIASES_SECTION)).thenReturn(Map.of(PUBKEY.toString(), Set.of(first, second)));
         String actual = configurationService.getHardcodedAlias(PUBKEY).orElseThrow();
         assertThat(Set.of(first, second).contains(actual)).isTrue();
+    }
+
+    @Test
+    void getPubkeys_not_known_empty() {
+        assertThat(configurationService.getPubkeys(ONLINE_WARNING_IGNORE_NODE)).isEmpty();
+    }
+
+    @Test
+    void getPubkeys_forWarningConfig_twoInConfig() {
+        WarningsConfigurationSettings config = ONLINE_WARNING_IGNORE_NODE;
+        when(iniFileReader.getValues(config.getSection()))
+                .thenReturn(Map.of(config.getName(), Set.of(PUBKEY.toString(), PUBKEY_2.toString())));
+        assertThat(configurationService.getPubkeys(config)).containsExactlyInAnyOrder(PUBKEY, PUBKEY_2);
+    }
+
+    @Test
+    void getChannelIds_not_known_empty() {
+        assertThat(configurationService.getChannelIds(MAX_NUM_UPDATES_IGNORE_CHANNEL)).isEmpty();
+    }
+
+    @Test
+    void getChannelIds_forWarningConfig_threeInConfig() {
+        WarningsConfigurationSettings config = MAX_NUM_UPDATES_IGNORE_CHANNEL;
+        when(iniFileReader.getValues(config.getSection()))
+                .thenReturn(Map.of(config.getName(),
+                        Set.of(
+                                CHANNEL_ID.getCompactForm(),
+                                CHANNEL_ID_2.getCompactFormLnd(),
+                                String.valueOf(CHANNEL_ID_3.getShortChannelId())
+                        )));
+        assertThat(configurationService.getChannelIds(config))
+                .containsExactlyInAnyOrder(CHANNEL_ID, CHANNEL_ID_2, CHANNEL_ID_3);
+    }
+
+    @Test()
+    void getChannelIds_forInvalidWarningConfig_error() {
+        WarningsConfigurationSettings config = MAX_NUM_UPDATES_IGNORE_CHANNEL;
+        when(iniFileReader.getValues(config.getSection())).thenReturn(Map.of(config.getName(), Set.of("invalid_chan")));
+        assertThatIllegalArgumentException().isThrownBy(() -> configurationService.getChannelIds(config));
     }
 
     @Nested

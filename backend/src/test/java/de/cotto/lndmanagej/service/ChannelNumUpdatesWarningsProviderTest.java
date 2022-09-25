@@ -11,8 +11,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+import java.util.Set;
 
 import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.MAX_NUM_UPDATES;
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.MAX_NUM_UPDATES_IGNORE_CHANNEL;
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
@@ -64,6 +66,13 @@ class ChannelNumUpdatesWarningsProviderTest {
         when(configurationService.getIntegerValue(MAX_NUM_UPDATES)).thenReturn(Optional.of(10));
         when(channelService.getOpenChannel(CHANNEL_ID)).thenReturn(Optional.of(createChannel(11)));
         assertThat(warningsProvider.getChannelWarnings(CHANNEL_ID)).hasSize(1);
+    }
+
+    @Test
+    void getChannelWarnings_ignoredViaConfig_noWarning() {
+        when(configurationService.getChannelIds(MAX_NUM_UPDATES_IGNORE_CHANNEL))
+                .thenReturn(Set.of(CHANNEL_ID));
+        assertThat(warningsProvider.getChannelWarnings(CHANNEL_ID)).isEmpty();
     }
 
     private LocalOpenChannel createChannel(long numUpdates) {

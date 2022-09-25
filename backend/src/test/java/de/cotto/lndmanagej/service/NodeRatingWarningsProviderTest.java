@@ -10,8 +10,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+import java.util.Set;
 
 import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.NODE_RATING_THRESHOLD;
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.NODE_RATING_WARNING_IGNORE_NODE;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -50,5 +52,11 @@ class NodeRatingWarningsProviderTest {
         when(configurationService.getIntegerValue(NODE_RATING_THRESHOLD)).thenReturn(Optional.of(1_002));
         when(ratingService.getRatingForPeer(PUBKEY)).thenReturn(new Rating(1_001));
         assertThat(nodeRatingWarningsProvider.getNodeWarnings(PUBKEY)).contains(new NodeRatingWarning(1_001, 1_002));
+    }
+
+    @Test
+    void getNodeWarnings_ignoredViaConfig_noWarning() {
+        when(configurationService.getPubkeys(NODE_RATING_WARNING_IGNORE_NODE)).thenReturn(Set.of(PUBKEY));
+        assertThat(nodeRatingWarningsProvider.getNodeWarnings(PUBKEY)).isEmpty();
     }
 }

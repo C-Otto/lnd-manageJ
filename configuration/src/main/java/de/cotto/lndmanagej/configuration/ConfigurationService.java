@@ -39,6 +39,26 @@ public class ConfigurationService {
         return getStringValue(ALIASES_SECTION, pubkey.toString());
     }
 
+    public Set<ChannelId> getChannelIds(WarningsConfigurationSettings configurationSetting) {
+        Set<String> values = iniFileReader.getValues(configurationSetting.getSection())
+                .getOrDefault(configurationSetting.getName(), Set.of());
+        return values.stream().map(this::toChannelId).collect(toSet());
+    }
+
+    public Set<Pubkey> getPubkeys(WarningsConfigurationSettings configurationSetting) {
+        Set<String> values = iniFileReader.getValues(configurationSetting.getSection())
+                .getOrDefault(configurationSetting.getName(), Set.of());
+        return values.stream().map(Pubkey::create).collect(toSet());
+    }
+
+    private ChannelId toChannelId(String channelIdString) {
+        try {
+            return ChannelId.fromShortChannelId(Long.parseLong(channelIdString));
+        } catch (NumberFormatException e) {
+            return ChannelId.fromCompactForm(channelIdString);
+        }
+    }
+
     public Set<Resolution> getHardcodedResolutions(ChannelId channelId) {
         Map<String, Set<String>> values = iniFileReader.getValues(RESOLUTIONS_SECTION);
         Set<String> forShortChannelId = values.getOrDefault(String.valueOf(channelId.getShortChannelId()), Set.of());

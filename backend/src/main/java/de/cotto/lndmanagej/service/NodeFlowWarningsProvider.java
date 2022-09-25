@@ -1,7 +1,6 @@
 package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.configuration.ConfigurationService;
-import de.cotto.lndmanagej.configuration.WarningsConfigurationSettings;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FlowReport;
 import de.cotto.lndmanagej.model.Pubkey;
@@ -14,6 +13,10 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.Stream;
+
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER;
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.NODE_FLOW_MINIMUM_DAYS_FOR_WARNING;
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.NODE_FLOW_WARNING_IGNORE_NODE;
 
 @Component
 public class NodeFlowWarningsProvider implements NodeWarningsProvider {
@@ -40,7 +43,14 @@ public class NodeFlowWarningsProvider implements NodeWarningsProvider {
 
     @Override
     public Stream<NodeWarning> getNodeWarnings(Pubkey pubkey) {
+        if (ignoreWarnings(pubkey)) {
+            return Stream.empty();
+        }
         return Stream.of(getNoFlowWarning(pubkey)).flatMap(Optional::stream);
+    }
+
+    private boolean ignoreWarnings(Pubkey pubkey) {
+        return configurationService.getPubkeys(NODE_FLOW_WARNING_IGNORE_NODE).contains(pubkey);
     }
 
     private Optional<NodeWarning> getNoFlowWarning(Pubkey pubkey) {
@@ -81,12 +91,12 @@ public class NodeFlowWarningsProvider implements NodeWarningsProvider {
     }
 
     private int getMinimumDaysForWarning() {
-        return configurationService.getIntegerValue(WarningsConfigurationSettings.NODE_FLOW_MINIMUM_DAYS_FOR_WARNING)
+        return configurationService.getIntegerValue(NODE_FLOW_MINIMUM_DAYS_FOR_WARNING)
                 .orElse(DEFAULT_MINIMUM_DAYS_FOR_WARNING);
     }
 
     private int getMaxDaysToConsider() {
-        return configurationService.getIntegerValue(WarningsConfigurationSettings.NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER)
+        return configurationService.getIntegerValue(NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER)
                 .orElse(DEFAULT_MAXIMUM_DAYS_TO_CONSIDER);
     }
 }

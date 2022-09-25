@@ -1,7 +1,6 @@
 package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.configuration.ConfigurationService;
-import de.cotto.lndmanagej.configuration.WarningsConfigurationSettings;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.Rating;
 import de.cotto.lndmanagej.model.warnings.NodeRatingWarning;
@@ -11,6 +10,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.NODE_RATING_THRESHOLD;
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.NODE_RATING_WARNING_IGNORE_NODE;
 
 @Component
 public class NodeRatingWarningsProvider implements NodeWarningsProvider {
@@ -28,7 +30,14 @@ public class NodeRatingWarningsProvider implements NodeWarningsProvider {
 
     @Override
     public Stream<NodeWarning> getNodeWarnings(Pubkey pubkey) {
+        if (ignoreWarnings(pubkey)) {
+            return Stream.empty();
+        }
         return Stream.of(getRatingWarning(pubkey)).flatMap(Optional::stream);
+    }
+
+    private boolean ignoreWarnings(Pubkey pubkey) {
+        return configurationService.getPubkeys(NODE_RATING_WARNING_IGNORE_NODE).contains(pubkey);
     }
 
     private Optional<NodeWarning> getRatingWarning(Pubkey pubkey) {
@@ -45,7 +54,7 @@ public class NodeRatingWarningsProvider implements NodeWarningsProvider {
     }
 
     private long getThreshold() {
-        return configurationService.getIntegerValue(WarningsConfigurationSettings.NODE_RATING_THRESHOLD)
+        return configurationService.getIntegerValue(NODE_RATING_THRESHOLD)
                 .orElse(DEFAULT_THRESHOLD);
     }
 }
