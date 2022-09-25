@@ -4,6 +4,7 @@ import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.FlowReport;
 import de.cotto.lndmanagej.model.warnings.NodeNoFlowWarning;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,6 +22,8 @@ import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static de.cotto.lndmanagej.transactions.model.TransactionFixtures.BLOCK_HEIGHT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -111,15 +114,29 @@ class NodeFlowWarningsProviderTest {
         assertThat(warningsProvider.getNodeWarnings(PUBKEY)).containsExactly(new NodeNoFlowWarning(120));
     }
 
-    @Test
-    void getNodeWarnings_ignoredViaConfig_noWarning() {
-        when(configurationService.getPubkeys(NODE_FLOW_WARNING_IGNORE_NODE)).thenReturn(Set.of(PUBKEY));
-        assertThat(warningsProvider.getNodeWarnings(PUBKEY)).isEmpty();
+    @Nested
+    class IgnoredWarnings {
+        @BeforeEach
+        void setUp() {
+            mockOpenChannelWithAgeInBlocks(45 * EXPECTED_BLOCKS_PER_DAY);
+        }
+
+        @Test
+        void no_warning_for_ignored_node() {
+            when(configurationService.getPubkeys(NODE_FLOW_WARNING_IGNORE_NODE)).thenReturn(Set.of(PUBKEY_3, PUBKEY));
+            assertThat(warningsProvider.getNodeWarnings(PUBKEY)).isEmpty();
+        }
+
+        @Test
+        void warning_if_other_node_is_ignored() {
+            when(configurationService.getPubkeys(NODE_FLOW_WARNING_IGNORE_NODE)).thenReturn(Set.of(PUBKEY_3, PUBKEY_2));
+            assertThat(warningsProvider.getNodeWarnings(PUBKEY)).isNotEmpty();
+        }
     }
 
     private void mockOpenChannelWithAgeInBlocks(int channelAgeInBlocks) {
-        when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL));
-        when(channelService.getOpenHeight(LOCAL_OPEN_CHANNEL)).thenReturn(BLOCK_HEIGHT);
-        when(ownNodeService.getBlockHeight()).thenReturn(BLOCK_HEIGHT + channelAgeInBlocks);
+        lenient().when(channelService.getOpenChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL));
+        lenient().when(channelService.getOpenHeight(LOCAL_OPEN_CHANNEL)).thenReturn(BLOCK_HEIGHT);
+        lenient().when(ownNodeService.getBlockHeight()).thenReturn(BLOCK_HEIGHT + channelAgeInBlocks);
     }
 }
