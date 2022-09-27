@@ -46,7 +46,7 @@ As such, when considering 30 days for the analysis, a rating of 1,000 could mean
 
 ## Warning
 A warning is shown for nodes which have a rating below the configured threshold.
-The default threshold is 1,000, which can be changed via `node_rating_treshold=` in the `[warnings]` section of the
+The default threshold is 1,000, which can be changed via `node_rating_threshold=` in the `[warnings]` section of the
 configuration file.
 
 ## Configuration
