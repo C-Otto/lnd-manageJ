@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.ChannelIdParser;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.warnings.ChannelBalanceFluctuationWarning;
@@ -25,15 +26,18 @@ public class ChannelBalanceFluctuationWarningsProvider implements ChannelWarning
     private final ChannelService channelService;
     private final BalanceService balanceService;
     private final ConfigurationService configurationService;
+    private final ChannelIdParser channelIdParser;
 
     public ChannelBalanceFluctuationWarningsProvider(
             ChannelService channelService,
             BalanceService balanceService,
-            ConfigurationService configurationService
+            ConfigurationService configurationService,
+            ChannelIdParser channelIdParser
     ) {
         this.channelService = channelService;
         this.balanceService = balanceService;
         this.configurationService = configurationService;
+        this.channelIdParser = channelIdParser;
     }
 
     @Override
@@ -73,6 +77,9 @@ public class ChannelBalanceFluctuationWarningsProvider implements ChannelWarning
     }
 
     private boolean ignoreWarning(ChannelId channelId) {
-        return configurationService.getChannelIds(CHANNEL_FLUCTUATION_WARNING_IGNORE_CHANNEL).contains(channelId);
+        return configurationService.getChannelIds(
+                CHANNEL_FLUCTUATION_WARNING_IGNORE_CHANNEL,
+                channelIdParser::parseFromString
+        ).contains(channelId);
     }
 }

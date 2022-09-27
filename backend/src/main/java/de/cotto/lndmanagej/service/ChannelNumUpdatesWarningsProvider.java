@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.ChannelIdParser;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.warnings.ChannelNumUpdatesWarning;
 import de.cotto.lndmanagej.model.warnings.ChannelWarning;
@@ -20,10 +21,16 @@ public class ChannelNumUpdatesWarningsProvider implements ChannelWarningsProvide
 
     private final ChannelService channelService;
     private final ConfigurationService configurationService;
+    private final ChannelIdParser channelIdParser;
 
-    public ChannelNumUpdatesWarningsProvider(ChannelService channelService, ConfigurationService configurationService) {
+    public ChannelNumUpdatesWarningsProvider(
+            ChannelService channelService,
+            ConfigurationService configurationService,
+            ChannelIdParser channelIdParser
+    ) {
         this.channelService = channelService;
         this.configurationService = configurationService;
+        this.channelIdParser = channelIdParser;
     }
 
     @Override
@@ -45,6 +52,7 @@ public class ChannelNumUpdatesWarningsProvider implements ChannelWarningsProvide
     }
 
     private boolean ignoreWarning(ChannelId channelId) {
-        return configurationService.getChannelIds(MAX_NUM_UPDATES_IGNORE_CHANNEL).contains(channelId);
+        return configurationService.getChannelIds(MAX_NUM_UPDATES_IGNORE_CHANNEL, channelIdParser::parseFromString)
+                .contains(channelId);
     }
 }

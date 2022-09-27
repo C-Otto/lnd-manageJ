@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
+import de.cotto.lndmanagej.model.ChannelIdParser;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.GraphService;
@@ -20,7 +21,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 @WebMvcTest(controllers = StatusController.class)
-@Import(ObjectMapperConfiguration.class)
+@Import({ObjectMapperConfiguration.class, ChannelIdParser.class})
 class ObjectMapperConfigurationIT {
     private static final String PREFIX = "/api/status/";
 

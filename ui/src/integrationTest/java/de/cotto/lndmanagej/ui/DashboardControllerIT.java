@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.ui;
 
+import de.cotto.lndmanagej.model.ChannelIdParser;
 import de.cotto.lndmanagej.ui.controller.DashboardController;
 import de.cotto.lndmanagej.ui.controller.param.SortBy;
 import de.cotto.lndmanagej.ui.page.PageService;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -22,6 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = DashboardController.class)
+@Import(ChannelIdParser.class)
 class DashboardControllerIT extends BaseControllerIT {
 
     @Autowired
