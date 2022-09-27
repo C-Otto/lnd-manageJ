@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.ui;
 
+import de.cotto.lndmanagej.model.ChannelIdParser;
 import de.cotto.lndmanagej.ui.controller.NodeDetailsController;
 import de.cotto.lndmanagej.ui.page.PageService;
 import de.cotto.lndmanagej.ui.page.node.NodeDetailsPage;
@@ -7,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static de.cotto.lndmanagej.ui.dto.NodeDetailsDtoFixture.NODE_DETAILS_MODEL;
@@ -16,6 +18,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = NodeDetailsController.class)
+@Import(ChannelIdParser.class)
 class NodeDetailsControllerIT extends BaseControllerIT {
 
     @Autowired

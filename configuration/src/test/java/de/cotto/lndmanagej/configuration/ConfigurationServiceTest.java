@@ -1,5 +1,7 @@
 package de.cotto.lndmanagej.configuration;
 
+import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.ChannelIdParser;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +19,8 @@ import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.ON
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_4;
+import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.ResolutionFixtures.ANCHOR_CLAIMED;
@@ -41,6 +45,9 @@ class ConfigurationServiceTest {
 
     @Mock
     private IniFileReader iniFileReader;
+
+    @Mock
+    private ChannelIdParser channelIdParser;
 
     @Test
     void getHardcodedResolutions_empty() {
@@ -124,28 +131,39 @@ class ConfigurationServiceTest {
 
     @Test
     void getChannelIds_not_known_empty() {
-        assertThat(configurationService.getChannelIds(MAX_NUM_UPDATES_IGNORE_CHANNEL)).isEmpty();
+        Set<ChannelId> channelIds =
+                configurationService.getChannelIds(MAX_NUM_UPDATES_IGNORE_CHANNEL, channelIdParser::parseFromString);
+        assertThat(channelIds).isEmpty();
     }
 
     @Test
-    void getChannelIds_forWarningConfig_threeInConfig() {
+    void getChannelIds_forWarningConfig_fourInConfig() {
+        when(channelIdParser.parseFromString(CHANNEL_ID.getCompactForm())).thenReturn(CHANNEL_ID);
+        when(channelIdParser.parseFromString(CHANNEL_ID_2.getCompactFormLnd())).thenReturn(CHANNEL_ID_2);
+        when(channelIdParser.parseFromString(String.valueOf(CHANNEL_ID_3.getShortChannelId())))
+                .thenReturn(CHANNEL_ID_3);
+        when(channelIdParser.parseFromString(CHANNEL_POINT.toString())).thenReturn(CHANNEL_ID_4);
         WarningsConfigurationSettings config = MAX_NUM_UPDATES_IGNORE_CHANNEL;
         when(iniFileReader.getValues(config.getSection()))
                 .thenReturn(Map.of(config.getName(),
                         Set.of(
                                 CHANNEL_ID.getCompactForm(),
                                 CHANNEL_ID_2.getCompactFormLnd(),
-                                String.valueOf(CHANNEL_ID_3.getShortChannelId())
+                                String.valueOf(CHANNEL_ID_3.getShortChannelId()),
+                                CHANNEL_POINT.toString()
                         )));
-        assertThat(configurationService.getChannelIds(config))
-                .containsExactlyInAnyOrder(CHANNEL_ID, CHANNEL_ID_2, CHANNEL_ID_3);
+        assertThat(configurationService.getChannelIds(config, channelIdParser::parseFromString))
+                .containsExactlyInAnyOrder(CHANNEL_ID, CHANNEL_ID_2, CHANNEL_ID_3, CHANNEL_ID_4);
     }
 
     @Test()
     void getChannelIds_forInvalidWarningConfig_error() {
+        when(channelIdParser.parseFromString("invalid_chan")).thenThrow(new IllegalArgumentException());
         WarningsConfigurationSettings config = MAX_NUM_UPDATES_IGNORE_CHANNEL;
         when(iniFileReader.getValues(config.getSection())).thenReturn(Map.of(config.getName(), Set.of("invalid_chan")));
-        assertThatIllegalArgumentException().isThrownBy(() -> configurationService.getChannelIds(config));
+        assertThatIllegalArgumentException().isThrownBy(
+                () -> configurationService.getChannelIds(config, channelIdParser::parseFromString)
+        );
     }
 
     @Nested

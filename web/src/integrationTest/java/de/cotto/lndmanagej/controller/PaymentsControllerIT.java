@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
+import de.cotto.lndmanagej.model.ChannelIdParser;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.HexString;
@@ -40,8 +41,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SuppressWarnings("CPD-START")
-@Import({ObjectMapperConfiguration.class, PaymentStatusStream.class})
 @WebMvcTest(controllers = PaymentsController.class)
+@Import({ObjectMapperConfiguration.class, PaymentStatusStream.class, ChannelIdParser.class})
 class PaymentsControllerIT {
     private static final String PREFIX = "/api/payments";
     private static final String PAYMENT_REQUEST = "xxx";

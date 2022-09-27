@@ -12,6 +12,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
@@ -39,24 +40,19 @@ public class ConfigurationService {
         return getStringValue(ALIASES_SECTION, pubkey.toString());
     }
 
-    public Set<ChannelId> getChannelIds(WarningsConfigurationSettings configurationSetting) {
+    public Set<ChannelId> getChannelIds(
+            WarningsConfigurationSettings configurationSetting,
+            Function<String, ChannelId> channelIdParser
+    ) {
         Set<String> values = iniFileReader.getValues(configurationSetting.getSection())
                 .getOrDefault(configurationSetting.getName(), Set.of());
-        return values.stream().map(this::toChannelId).collect(toSet());
+        return values.stream().map(channelIdParser).collect(toSet());
     }
 
     public Set<Pubkey> getPubkeys(WarningsConfigurationSettings configurationSetting) {
         Set<String> values = iniFileReader.getValues(configurationSetting.getSection())
                 .getOrDefault(configurationSetting.getName(), Set.of());
         return values.stream().map(Pubkey::create).collect(toSet());
-    }
-
-    private ChannelId toChannelId(String channelIdString) {
-        try {
-            return ChannelId.fromShortChannelId(Long.parseLong(channelIdString));
-        } catch (NumberFormatException e) {
-            return ChannelId.fromCompactForm(channelIdString);
-        }
     }
 
     public Set<Resolution> getHardcodedResolutions(ChannelId channelId) {

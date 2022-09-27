@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.ui.demo;
 
 import de.cotto.lndmanagej.controller.ChannelIdConverter;
 import de.cotto.lndmanagej.controller.PubkeyConverter;
+import de.cotto.lndmanagej.model.ChannelIdParser;
 import de.cotto.lndmanagej.ui.StatusServiceImpl;
 import de.cotto.lndmanagej.ui.UiDataServiceImpl;
 import de.cotto.lndmanagej.ui.WarningServiceImpl;
@@ -31,7 +32,7 @@ import org.springframework.context.annotation.Import;
             @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = WarningServiceImpl.class)
         }
 )
-@Import({ChannelIdConverter.class, PubkeyConverter.class})
+@Import({ChannelIdConverter.class, PubkeyConverter.class, ChannelIdParser.class})
 @SuppressWarnings("PMD.UseUtilityClass")
 public class DemoApplication {
 

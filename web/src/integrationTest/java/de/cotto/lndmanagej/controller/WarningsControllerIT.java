@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.controller;
 
+import de.cotto.lndmanagej.model.ChannelIdParser;
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.model.warnings.ChannelWarnings;
 import de.cotto.lndmanagej.model.warnings.NodeWarnings;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Map;
@@ -33,6 +35,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @WebMvcTest(controllers = WarningsController.class)
+@Import(ChannelIdParser.class)
 class WarningsControllerIT {
     private static final String NODE_PREFIX = "/api/node/" + PUBKEY;
     private static final String CHANNEL_PREFIX = "/api/channel/" + CHANNEL_ID;

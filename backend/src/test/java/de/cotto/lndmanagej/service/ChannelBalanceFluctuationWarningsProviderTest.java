@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.configuration.ConfigurationService;
+import de.cotto.lndmanagej.model.ChannelIdParser;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.warnings.ChannelBalanceFluctuationWarning;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +25,7 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -44,6 +46,10 @@ class ChannelBalanceFluctuationWarningsProviderTest {
 
     @Mock
     private ConfigurationService configurationService;
+
+    @Mock
+    @SuppressWarnings("unused")
+    private ChannelIdParser channelIdParser;
 
     @BeforeEach
     void setUp() {
@@ -126,14 +132,14 @@ class ChannelBalanceFluctuationWarningsProviderTest {
 
         @Test
         void no_warning_for_ignored_channel() {
-            when(configurationService.getChannelIds(CHANNEL_FLUCTUATION_WARNING_IGNORE_CHANNEL))
+            when(configurationService.getChannelIds(eq(CHANNEL_FLUCTUATION_WARNING_IGNORE_CHANNEL), any()))
                     .thenReturn(Set.of(CHANNEL_ID_3, CHANNEL_ID));
             assertThat(warningsProvider.getChannelWarnings(CHANNEL_ID)).isEmpty();
         }
 
         @Test
         void warning_if_other_channel_is_ignored() {
-            when(configurationService.getChannelIds(CHANNEL_FLUCTUATION_WARNING_IGNORE_CHANNEL))
+            when(configurationService.getChannelIds(eq(CHANNEL_FLUCTUATION_WARNING_IGNORE_CHANNEL), any()))
                     .thenReturn(Set.of(CHANNEL_ID_2, CHANNEL_ID_3));
             assertThat(warningsProvider.getChannelWarnings(CHANNEL_ID)).isNotEmpty();
         }
