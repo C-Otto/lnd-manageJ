@@ -18,6 +18,7 @@ public class PaymentStatus {
     private int numberOfAttemptedRoutes;
     private final List<InstantWithString> messages = new ArrayList<>();
 
+    @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
     public PaymentStatus(HexString paymentHash) {
         if (!paymentHash.equals(HexString.EMPTY)) {
             info("Initializing payment " + paymentHash);
