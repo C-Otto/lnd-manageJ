@@ -144,7 +144,8 @@ class RatingServiceTest {
                 "712345x123x1 scaled by liquidity", 1.0d,
                 "712345x123x1 rating", 10_000L
         );
-        assertThat(ratingService.getRatingForPeer(PUBKEY_2).details()).isEqualTo(expectedDetails);
+        assertThat(ratingService.getRatingForPeer(PUBKEY_2).details())
+                .containsExactlyInAnyOrderEntriesOf(expectedDetails);
     }
 
     @Test
