@@ -1,3 +1,5 @@
+import net.ltgt.gradle.errorprone.CheckSeverity
+
 plugins {
     id 'net.ltgt.errorprone'
     id 'net.ltgt.nullaway'
@@ -16,7 +18,7 @@ tasks.withType(JavaCompile).configureEach {
     options.errorprone.disable('EqualsGetClass')
     options.errorprone.excludedPaths = ".*/generated/.*"
     options.errorprone.nullaway {
-        severity = net.ltgt.gradle.errorprone.CheckSeverity.ERROR
+        severity = CheckSeverity.ERROR
         excludedFieldAnnotations.add('org.mockito.Mock')
         excludedFieldAnnotations.add('org.mockito.Captor')
         excludedFieldAnnotations.add('org.springframework.beans.factory.annotation.Value')
