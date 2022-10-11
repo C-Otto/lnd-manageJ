@@ -102,26 +102,17 @@ class GrpcPaymentsTest {
 
         @Test
         void payment_without_channel_id() {
-            Hop hop = Hop.newBuilder()
-                    .setChanId(0L)
-                    .setAmtToForwardMsat(123L)
-                    .build();
-            Route route = Route.newBuilder().addHops(hop).build();
-            HTLCAttempt htlc = HTLCAttempt.newBuilder()
-                    .setStatus(HTLCAttempt.HTLCStatus.SUCCEEDED)
-                    .setRoute(route)
-                    .build();
-            lnrpc.Payment payment = lnrpc.Payment.newBuilder()
-                    .setStatus(PaymentStatus.SUCCEEDED)
-                    .setPaymentIndex(PAYMENT.index())
-                    .setPaymentHash(PAYMENT.paymentHash())
-                    .setValueMsat(PAYMENT.value().milliSatoshis())
-                    .setFeeMsat(PAYMENT.fees().milliSatoshis())
-                    .setCreationTimeNs(PAYMENT.creationDateTime().toInstant(ZoneOffset.UTC).toEpochMilli() * 1_000)
-                    .addHtlcs(htlc)
-                    .build();
-            mockResponse(payment);
+            mockPaymentWithHop(0L);
             assertThat(grpcPayments.getPaymentsAfter(0L).orElseThrow().get(0).routes()).hasSize(1);
+        }
+
+        @Test
+        void payment_with_very_large_channel_id() {
+            ChannelId channelId = ChannelId.fromCompactForm("16735713:1045061:30574");
+            mockPaymentWithHop(channelId.getShortChannelId());
+            List<PaymentRoute> routes = grpcPayments.getPaymentsAfter(0L).orElseThrow().get(0).routes();
+            assertThat(routes).hasSize(1);
+            assertThat(routes.get(0).hops().get(0).channelId()).isEqualTo(channelId);
         }
 
         @Test
@@ -146,6 +137,28 @@ class GrpcPaymentsTest {
         void only_requests_settled_payment() {
             grpcPayments.getPaymentsAfter(ADD_INDEX_OFFSET);
             verify(grpcService).getPayments(anyLong(), anyInt(), eq(false));
+        }
+
+        private void mockPaymentWithHop(long channelId) {
+            Hop hop = Hop.newBuilder()
+                    .setChanId(channelId)
+                    .setAmtToForwardMsat(123L)
+                    .build();
+            Route route = Route.newBuilder().addHops(hop).build();
+            HTLCAttempt htlc = HTLCAttempt.newBuilder()
+                    .setStatus(HTLCAttempt.HTLCStatus.SUCCEEDED)
+                    .setRoute(route)
+                    .build();
+            lnrpc.Payment payment = lnrpc.Payment.newBuilder()
+                    .setStatus(PaymentStatus.SUCCEEDED)
+                    .setPaymentIndex(PAYMENT.index())
+                    .setPaymentHash(PAYMENT.paymentHash())
+                    .setValueMsat(PAYMENT.value().milliSatoshis())
+                    .setFeeMsat(PAYMENT.fees().milliSatoshis())
+                    .setCreationTimeNs(PAYMENT.creationDateTime().toInstant(ZoneOffset.UTC).toEpochMilli() * 1_000)
+                    .addHtlcs(htlc)
+                    .build();
+            mockResponse(payment);
         }
     }
 

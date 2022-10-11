@@ -4,9 +4,12 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigInteger;
+
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_COMPACT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 class ChannelIdTest {
@@ -61,6 +64,32 @@ class ChannelIdTest {
             ChannelId channelId = ChannelId.fromCompactForm("704776:2087:1");
             assertThat(channelId.getShortChannelId()).isEqualTo(774_909_407_114_231_809L);
         }
+
+        @Test
+        void id_with_64th_bit_can_be_parsed() {
+            ChannelId channelId = ChannelId.fromCompactForm("16735713:1045061:30574");
+            assertThat(channelId.getShortChannelId()).isEqualTo(new BigInteger("18401111111111112558").longValue());
+        }
+
+        @Test
+        void id_with_64th_bit_has_positive_block_height() {
+            ChannelId channelId = ChannelId.fromCompactForm("16735713:1045061:30574");
+            assertThat(channelId.getCompactForm()).isEqualTo("16735713x1045061x30574");
+            assertThat(channelId.getBlockHeight()).isEqualTo(16_735_713);
+        }
+
+        @Test
+        void largest_possible_channel_id() {
+            ChannelId channelId = ChannelId.fromShortChannelId(new BigInteger("18446744073709551615"));
+            assertThat(channelId.getShortChannelId()).isEqualTo(new BigInteger("18446744073709551615").longValue());
+        }
+
+        @Test
+        void too_large_with_64_bit() {
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(
+                    () -> ChannelId.fromShortChannelId(new BigInteger("18446744073709551616"))
+            );
+        }
     }
 
     @Nested
@@ -103,6 +132,12 @@ class ChannelIdTest {
         void large_output() {
             ChannelId channelId = ChannelId.fromShortChannelId(774_909_407_114_231_931L);
             assertThat(channelId.getShortChannelId()).isEqualTo(774_909_407_114_231_931L);
+        }
+
+        @Test
+        void more_than_63_bit() {
+            ChannelId channelId = ChannelId.fromShortChannelId(new BigInteger("18401111111111112558"));
+            assertThat(channelId.getCompactForm()).isEqualTo("16735713x1045061x30574");
         }
     }
 

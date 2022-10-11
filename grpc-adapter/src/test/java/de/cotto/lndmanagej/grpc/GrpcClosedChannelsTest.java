@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -102,10 +103,10 @@ class GrpcClosedChannelsTest {
                         closedChannel(CHANNEL_ID_2_SHORT, COOPERATIVE_CLOSE, INITIATOR_UNKNOWN, INITIATOR_UNKNOWN)
                 )
         );
-        assertThat(grpcClosedChannels.getClosedChannels()).containsExactly(
-                entry(CLOSED_CHANNEL.getId(), CLOSED_CHANNEL),
-                entry(CLOSED_CHANNEL_2.getId(), CLOSED_CHANNEL_2)
-        );
+        assertThat(grpcClosedChannels.getClosedChannels()).isEqualTo(Map.of(
+                CLOSED_CHANNEL.getId(), CLOSED_CHANNEL,
+                CLOSED_CHANNEL_2.getId(), CLOSED_CHANNEL_2
+        ));
         verify(channelIdResolver, never()).resolveFromChannelPoint(any());
     }
 

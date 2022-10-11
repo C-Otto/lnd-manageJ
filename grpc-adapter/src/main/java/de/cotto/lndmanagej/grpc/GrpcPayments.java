@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -125,7 +126,7 @@ public class GrpcPayments {
     private PaymentHop toHop(Hop hop, String paymentHash) {
         try {
             return new PaymentHop(
-                    ChannelId.fromShortChannelId(hop.getChanId()),
+                    ChannelId.fromShortChannelId(new BigInteger(Long.toUnsignedString(hop.getChanId()))),
                     Coins.ofMilliSatoshis(hop.getAmtToForwardMsat())
             );
         } catch (IllegalArgumentException exception) {
