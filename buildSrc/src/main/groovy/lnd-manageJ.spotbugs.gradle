@@ -1,8 +1,10 @@
+import com.github.spotbugs.snom.SpotBugsTask
+
 plugins {
     id 'com.github.spotbugs'
 }
 
-tasks.withType(com.github.spotbugs.snom.SpotBugsTask).forEach { spotbugsTask ->
+tasks.withType(SpotBugsTask).forEach { spotbugsTask ->
     spotbugsTask.configure {
         reports.configure {
             xml.enabled = false
@@ -16,7 +18,7 @@ spotbugs {
 }
 
 tasks.withType(Test).forEach { testTask ->
-    tasks.withType(com.github.spotbugs.snom.SpotBugsTask).forEach { spotbugsTask ->
+    tasks.withType(SpotBugsTask).forEach { spotbugsTask ->
         String expected = ("spotbugs" + testTask.getName()).toLowerCase()
         if (expected == spotbugsTask.getName().toLowerCase()) {
             testTask.shouldRunAfter(spotbugsTask)
