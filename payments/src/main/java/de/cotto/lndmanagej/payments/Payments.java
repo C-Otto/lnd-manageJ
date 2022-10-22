@@ -32,6 +32,7 @@ public class Payments {
     @Scheduled(fixedDelay = 10, timeUnit = TimeUnit.SECONDS)
     public void loadOldSettledPayments() {
         List<Optional<Payment>> paymentOptionals;
+        OptionalLong maxIndex;
         do {
             long offsetSettledPayments = dao.getAllSettledIndexOffset();
             long offsetKnownPayments = dao.getIndexOffset();
@@ -39,10 +40,10 @@ public class Payments {
                 return;
             }
             paymentOptionals = grpcPayments.getAllPaymentsAfter(offsetSettledPayments).orElse(List.of());
-            OptionalLong maxIndex = getMaxIndexAllSettled(paymentOptionals);
+            maxIndex = getMaxIndexAllSettled(paymentOptionals);
             dao.save(paymentOptionals.stream().flatMap(Optional::stream).toList());
             maxIndex.ifPresent(dao::setAllSettledIndexOffset);
-        } while (paymentOptionals.size() == grpcPayments.getLimit());
+        } while (paymentOptionals.size() == grpcPayments.getLimit() && maxIndex.isPresent());
 
     }
 

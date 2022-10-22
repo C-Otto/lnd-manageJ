@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -147,6 +148,14 @@ class PaymentsTest {
             payments.loadOldSettledPayments();
             verify(dao).save(List.of(PAYMENT));
             verify(dao).save(List.of(PAYMENT_2));
+        }
+
+        @Test
+        void does_not_repeat_if_at_limit_but_without_settled_payment() {
+            when(grpcPayments.getAllPaymentsAfter(ALL_SETTLED_INDEX_OFFSET))
+                    .thenReturn(Optional.of(List.of(Optional.empty())));
+            payments.loadOldSettledPayments();
+            verify(dao, times(1)).save(anyList());
         }
     }
 }
