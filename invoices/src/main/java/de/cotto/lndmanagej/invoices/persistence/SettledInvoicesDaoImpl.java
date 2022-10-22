@@ -14,10 +14,17 @@ import java.util.List;
 @Component
 @Transactional
 public class SettledInvoicesDaoImpl implements SettledInvoicesDao {
-    private final SettledInvoicesRepository repository;
+    private static final int ID_OF_SETTLED_INDEX_ENTITY = 0;
 
-    public SettledInvoicesDaoImpl(SettledInvoicesRepository repository) {
+    private final SettledInvoicesRepository repository;
+    private final SettledInvoicesIndexRepository settledInvoicesIndexRepository;
+
+    public SettledInvoicesDaoImpl(
+            SettledInvoicesRepository repository,
+            SettledInvoicesIndexRepository settledInvoicesIndexRepository
+    ) {
         this.repository = repository;
+        this.settledInvoicesIndexRepository = settledInvoicesIndexRepository;
     }
 
     @Override
@@ -26,11 +33,13 @@ public class SettledInvoicesDaoImpl implements SettledInvoicesDao {
                 .map(SettledInvoiceJpaDto::createFromModel)
                 .toList();
         repository.saveAll(converted);
+        updateSettleIndexOffset();
     }
 
     @Override
     public void save(SettledInvoice settledInvoice) {
         repository.save(SettledInvoiceJpaDto.createFromModel(settledInvoice));
+        updateSettleIndexOffset();
     }
 
     @Override
@@ -40,7 +49,7 @@ public class SettledInvoicesDaoImpl implements SettledInvoicesDao {
 
     @Override
     public long getSettleIndexOffset() {
-        return repository.getMaxSettledIndexWithoutGaps();
+        return repository.getMaxSettledIndexWithoutGaps(getKnownSettledIndex());
     }
 
     @Override
@@ -49,6 +58,21 @@ public class SettledInvoicesDaoImpl implements SettledInvoicesDao {
                         channelId.getShortChannelId(),
                         getAfterEpochSeconds(maxAge)
                 ).stream().map(SettledInvoiceJpaDto::toModel).toList();
+    }
+
+    private long getKnownSettledIndex() {
+        return settledInvoicesIndexRepository.findByEntityId(ID_OF_SETTLED_INDEX_ENTITY)
+                .map(SettledInvoicesIndexJpaDto::getAllSettledIndexOffset)
+                .orElse(0L);
+    }
+
+    private void updateSettleIndexOffset() {
+        SettledInvoicesIndexJpaDto entity = settledInvoicesIndexRepository
+                .findByEntityId(ID_OF_SETTLED_INDEX_ENTITY)
+                .orElseGet(SettledInvoicesIndexJpaDto::new);
+        long newIndex = repository.getMaxSettledIndexWithoutGaps(entity.getAllSettledIndexOffset());
+        entity.setAllSettledIndexOffset(newIndex);
+        settledInvoicesIndexRepository.save(entity);
     }
 
     private long getAfterEpochSeconds(Duration maxAge) {

@@ -32,7 +32,7 @@ class SettledInvoicesRepositoryIT {
 
     @Test
     void getMaxSettledIndexWithoutGaps_no_invoice() {
-        assertThat(repository.getMaxSettledIndexWithoutGaps()).isEqualTo(0);
+        assertThat(repository.getMaxSettledIndexWithoutGaps(0)).isEqualTo(0);
     }
 
     @Test
@@ -42,17 +42,25 @@ class SettledInvoicesRepositoryIT {
         repository.save(invoice(5, 3));
         repository.save(invoice(6, 5));
         repository.save(invoice(7, 4));
-        assertThat(repository.getMaxSettledIndexWithoutGaps()).isEqualTo(5);
+        assertThat(repository.getMaxSettledIndexWithoutGaps(0)).isEqualTo(5);
     }
 
     @Test
     void getMaxSettleIndexWithoutGaps_gap_in_settleIndex() {
-        repository.save(invoice(1, 1));
-        repository.save(invoice(2, 2));
-        repository.save(invoice(5, 3));
-        repository.save(invoice(6, 6));
-        repository.save(invoice(7, 5));
-        assertThat(repository.getMaxSettledIndexWithoutGaps()).isEqualTo(3L);
+        saveWithGapAfterSettleIndexThree();
+        assertThat(repository.getMaxSettledIndexWithoutGaps(0)).isEqualTo(3L);
+    }
+
+    @Test
+    void getMaxSettleIndexWithoutGaps_gap_in_settleIndex_smaller_known_index() {
+        saveWithGapAfterSettleIndexThree();
+        assertThat(repository.getMaxSettledIndexWithoutGaps(1)).isEqualTo(3L);
+    }
+
+    @Test
+    void getMaxSettleIndexWithoutGaps_gap_in_settleIndex_at_known_index() {
+        saveWithGapAfterSettleIndexThree();
+        assertThat(repository.getMaxSettledIndexWithoutGaps(3)).isEqualTo(3L);
     }
 
     @Test
@@ -178,5 +186,13 @@ class SettledInvoicesRepositoryIT {
                 Coins.NONE,
                 List.of())
         );
+    }
+
+    private void saveWithGapAfterSettleIndexThree() {
+        repository.save(invoice(1, 1));
+        repository.save(invoice(2, 2));
+        repository.save(invoice(5, 3));
+        repository.save(invoice(6, 6));
+        repository.save(invoice(7, 5));
     }
 }

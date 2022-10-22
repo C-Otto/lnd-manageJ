@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,16 +36,34 @@ class SettledInvoicesDaoImplTest {
     @Mock
     private SettledInvoicesRepository repository;
 
+    @Mock
+    private SettledInvoicesIndexRepository indexRepository;
+
     @Test
     void getSettleIndexOffset_initially_0() {
-        when(repository.getMaxSettledIndexWithoutGaps()).thenReturn(0L);
+        mockKnownIndex(0L);
+        when(repository.getMaxSettledIndexWithoutGaps(0)).thenReturn(0L);
+        assertThat(dao.getSettleIndexOffset()).isEqualTo(0);
+    }
+
+    @Test
+    void getSettleIndexOffset_initially_0_when_no_index_is_known() {
+        when(repository.getMaxSettledIndexWithoutGaps(0)).thenReturn(0L);
         assertThat(dao.getSettleIndexOffset()).isEqualTo(0);
     }
 
     @Test
     void getSettleIndexOffset() {
         long expectedOffset = 123;
-        when(repository.getMaxSettledIndexWithoutGaps()).thenReturn(expectedOffset);
+        when(repository.getMaxSettledIndexWithoutGaps(anyLong())).thenReturn(expectedOffset);
+        assertThat(dao.getSettleIndexOffset()).isEqualTo(expectedOffset);
+    }
+
+    @Test
+    void getSettleIndexOffset_uses_known_offset() {
+        mockKnownIndex(100);
+        long expectedOffset = 123;
+        when(repository.getMaxSettledIndexWithoutGaps(100)).thenReturn(expectedOffset);
         assertThat(dao.getSettleIndexOffset()).isEqualTo(expectedOffset);
     }
 
@@ -68,6 +87,14 @@ class SettledInvoicesDaoImplTest {
     }
 
     @Test
+    void save_single_updates_index_of_known_settled_invoices() {
+        mockKnownIndex(100L);
+        when(repository.getMaxSettledIndexWithoutGaps(100)).thenReturn(123L);
+        dao.save(SETTLED_INVOICE);
+        verify(indexRepository).save(argThat(dto -> dto.getAllSettledIndexOffset() == 123));
+    }
+
+    @Test
     void save_empty() {
         dao.save(Set.of());
         verify(repository).saveAll(List.of());
@@ -78,6 +105,14 @@ class SettledInvoicesDaoImplTest {
         dao.save(Set.of(SETTLED_INVOICE, SETTLED_INVOICE_2));
         Set<SettledInvoice> expected = Set.of(SETTLED_INVOICE, SETTLED_INVOICE_2);
         verify(repository).saveAll(argThat(isSet(expected)));
+    }
+
+    @Test
+    void save_two_updates_index_of_known_settled_invoices() {
+        mockKnownIndex(100L);
+        when(repository.getMaxSettledIndexWithoutGaps(100)).thenReturn(123L);
+        dao.save(Set.of(SETTLED_INVOICE, SETTLED_INVOICE_2));
+        verify(indexRepository).save(argThat(dto -> dto.getAllSettledIndexOffset() == 123));
     }
 
     @Test
@@ -110,5 +145,11 @@ class SettledInvoicesDaoImplTest {
                 .map(SettledInvoiceJpaDto::toModel)
                 .collect(Collectors.toSet())
                 .equals(expected);
+    }
+
+    private void mockKnownIndex(long index) {
+        SettledInvoicesIndexJpaDto indexJpaDto = new SettledInvoicesIndexJpaDto();
+        indexJpaDto.setAllSettledIndexOffset(index);
+        when(indexRepository.findByEntityId(0)).thenReturn(Optional.of(indexJpaDto));
     }
 }
