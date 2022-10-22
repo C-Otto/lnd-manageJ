@@ -184,7 +184,6 @@ public class GrpcService extends GrpcBase {
                 .setIncludeIncomplete(includeIncomplete)
                 .setIndexOffset(offset)
                 .setMaxPayments(limit)
-                .setIncludeIncomplete(false)
                 .setReversed(false)
                 .build();
         return get(() -> lightningStub.listPayments(request));
