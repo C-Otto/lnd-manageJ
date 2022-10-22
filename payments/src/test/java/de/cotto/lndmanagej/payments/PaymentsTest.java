@@ -121,6 +121,15 @@ class PaymentsTest {
         }
 
         @Test
+        void keeps_index_after_saving_if_no_payments_are_settled() {
+            when(grpcPayments.getAllPaymentsAfter(ALL_SETTLED_INDEX_OFFSET)).thenReturn(
+                    Optional.of(List.of(Optional.empty(), Optional.empty(), Optional.empty()))
+            ).thenReturn(Optional.of(List.of()));
+            payments.loadOldSettledPayments();
+            verify(dao, never()).setAllSettledIndexOffset(anyLong());
+        }
+
+        @Test
         void ignores_non_settled_payments() {
             when(grpcPayments.getAllPaymentsAfter(ALL_SETTLED_INDEX_OFFSET)).thenReturn(
                     Optional.of(List.of(Optional.empty(), Optional.of(PAYMENT_2)))

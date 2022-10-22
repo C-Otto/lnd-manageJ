@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -38,19 +39,18 @@ public class Payments {
                 return;
             }
             paymentOptionals = grpcPayments.getAllPaymentsAfter(offsetSettledPayments).orElse(List.of());
-            long maxIndex = getMaxIndexAllSettled(paymentOptionals);
+            OptionalLong maxIndex = getMaxIndexAllSettled(paymentOptionals);
             dao.save(paymentOptionals.stream().flatMap(Optional::stream).toList());
-            dao.setAllSettledIndexOffset(maxIndex);
+            maxIndex.ifPresent(dao::setAllSettledIndexOffset);
         } while (paymentOptionals.size() == grpcPayments.getLimit());
 
     }
 
-    private static long getMaxIndexAllSettled(List<Optional<Payment>> paymentOptionals) {
+    private static OptionalLong getMaxIndexAllSettled(List<Optional<Payment>> paymentOptionals) {
         return paymentOptionals.stream()
                 .takeWhile(Optional::isPresent)
                 .flatMap(Optional::stream)
                 .mapToLong(Payment::index)
-                .max()
-                .orElse(0L);
+                .max();
     }
 }
