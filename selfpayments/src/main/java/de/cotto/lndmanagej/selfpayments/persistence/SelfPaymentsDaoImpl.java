@@ -21,11 +21,6 @@ public class SelfPaymentsDaoImpl implements SelfPaymentsDao {
     }
 
     @Override
-    public List<SelfPayment> getAllSelfPayments() {
-        return toModel(repository.getAllSelfPayments());
-    }
-
-    @Override
     public List<SelfPayment> getSelfPaymentsToChannel(ChannelId channelId, Duration maxAge) {
         long minimumEpochSecond = getMinimumEpochSecond(maxAge);
         return toModel(repository.getSelfPaymentsToChannel(channelId.getShortChannelId(), minimumEpochSecond));

@@ -12,12 +12,6 @@ public interface SelfPaymentsRepository extends JpaRepository<SelfPaymentsReposi
     @Query("SELECT NEW de.cotto.lndmanagej.selfpayments.persistence.SelfPaymentJpaDto(i, p) " +
             "FROM PaymentJpaDto p " +
             "JOIN SettledInvoiceJpaDto i ON p.hash = i.hash " +
-            "ORDER BY i.settleDate ASC")
-    List<SelfPaymentJpaDto> getAllSelfPayments();
-
-    @Query("SELECT NEW de.cotto.lndmanagej.selfpayments.persistence.SelfPaymentJpaDto(i, p) " +
-            "FROM PaymentJpaDto p " +
-            "JOIN SettledInvoiceJpaDto i ON p.hash = i.hash " +
             "JOIN p.routes route " +
             "JOIN route.hops hop " +
             "WHERE INDEX(hop) = SIZE(route.hops) - 1" +

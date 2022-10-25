@@ -51,12 +51,6 @@ class SelfPaymentsRepositoryIT {
     }
 
     @Test
-    void getSelfPayments() {
-        assertThat(repository.getAllSelfPayments()).map(SelfPaymentJpaDto::toModel)
-                .containsExactlyInAnyOrder(SELF_PAYMENT, SELF_PAYMENT_2, SELF_PAYMENT_3, SELF_PAYMENT_4);
-    }
-
-    @Test
     void getSelfPaymentsToChannel() {
         assertThat(repository.getSelfPaymentsToChannel(CHANNEL_ID_2.getShortChannelId(), 0))
                 .map(SelfPaymentJpaDto::toModel)

@@ -1,8 +1,6 @@
 package de.cotto.lndmanagej.selfpayments.persistence;
 
 import de.cotto.lndmanagej.invoices.persistence.SettledInvoiceJpaDto;
-import de.cotto.lndmanagej.model.Payment;
-import de.cotto.lndmanagej.model.SettledInvoice;
 import de.cotto.lndmanagej.payments.persistence.PaymentJpaDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,12 +16,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
-import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT;
-import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT_2;
 import static de.cotto.lndmanagej.model.SelfPaymentFixtures.SELF_PAYMENT;
-import static de.cotto.lndmanagej.model.SelfPaymentFixtures.SELF_PAYMENT_2;
-import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE;
-import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE_2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -47,20 +40,8 @@ class SelfPaymentsDaoImplTest {
     }
 
     @Test
-    void getAllSelfPayments_empty() {
-        assertThat(selfPaymentsDaoImpl.getAllSelfPayments()).isEmpty();
-    }
-
-    @Test
-    void getAllSelfPayments() {
-        when(repository.getAllSelfPayments())
-                .thenReturn(List.of(getDto(PAYMENT, SETTLED_INVOICE), getDto(PAYMENT_2, SETTLED_INVOICE_2)));
-        assertThat(selfPaymentsDaoImpl.getAllSelfPayments()).containsExactlyInAnyOrder(SELF_PAYMENT, SELF_PAYMENT_2);
-    }
-
-    @Test
     void getSelfPaymentsToChannel() {
-        SelfPaymentJpaDto dto = getDto(PAYMENT, SETTLED_INVOICE);
+        SelfPaymentJpaDto dto = getDto();
         when(repository.getSelfPaymentsToChannel(anyLong(), anyLong())).thenReturn(List.of(dto, dto));
         assertThat(selfPaymentsDaoImpl.getSelfPaymentsToChannel(CHANNEL_ID, MAX_AGE)).hasSize(1);
     }
@@ -71,7 +52,7 @@ class SelfPaymentsDaoImplTest {
         when(repository.getSelfPaymentsToChannel(
                 eq(CHANNEL_ID.getShortChannelId()),
                 longThat(isWithinAFewSeconds(epochSeconds))
-        )).thenReturn(List.of(getDto(PAYMENT, SETTLED_INVOICE)));
+        )).thenReturn(List.of(getDto()));
         assertThat(selfPaymentsDaoImpl.getSelfPaymentsToChannel(CHANNEL_ID, MAX_AGE))
                 .containsExactlyInAnyOrder(SELF_PAYMENT);
     }
@@ -82,7 +63,7 @@ class SelfPaymentsDaoImplTest {
         when(repository.getSelfPaymentsFromChannel(
                 eq(CHANNEL_ID.getShortChannelId()),
                 longThat(isWithinAFewSeconds(epochSeconds))
-        )).thenReturn(List.of(getDto(PAYMENT, SETTLED_INVOICE)));
+        )).thenReturn(List.of(getDto()));
         assertThat(selfPaymentsDaoImpl.getSelfPaymentsFromChannel(CHANNEL_ID, MAX_AGE))
                 .containsExactlyInAnyOrder(SELF_PAYMENT);
     }
@@ -92,10 +73,10 @@ class SelfPaymentsDaoImplTest {
         return value -> Math.abs(value - epochSeconds) < 10_000;
     }
 
-    private SelfPaymentJpaDto getDto(Payment payment, SettledInvoice settledInvoice) {
+    private SelfPaymentJpaDto getDto() {
         return new SelfPaymentJpaDto(
-                SettledInvoiceJpaDto.createFromModel(settledInvoice),
-                PaymentJpaDto.createFromModel(payment)
+                SettledInvoiceJpaDto.createFromModel(de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE),
+                PaymentJpaDto.createFromModel(de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT)
         );
     }
 }
