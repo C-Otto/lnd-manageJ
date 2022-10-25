@@ -1,6 +1,9 @@
 package de.cotto.lndmanagej.model;
 
-import java.util.List;
+import java.util.Optional;
 
-public record PaymentRoute(List<PaymentHop> hops) {
+public record PaymentRoute(Optional<PaymentHop> firstHop, Optional<PaymentHop> lastHop) {
+    public PaymentRoute(PaymentHop firstHop, PaymentHop lastHop) {
+        this(Optional.of(firstHop), Optional.of(lastHop));
+    }
 }

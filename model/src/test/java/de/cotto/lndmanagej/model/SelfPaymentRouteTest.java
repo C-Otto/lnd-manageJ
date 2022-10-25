@@ -2,7 +2,7 @@ package de.cotto.lndmanagej.model;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
+import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
@@ -32,14 +32,25 @@ class SelfPaymentRouteTest {
     @Test
     void create() {
         SelfPaymentRoute expected = new SelfPaymentRoute(CHANNEL_ID_3, Coins.ofSatoshis(123), CHANNEL_ID_4);
-        PaymentHop hop1 = new PaymentHop(CHANNEL_ID_3, Coins.NONE);
-        PaymentHop hop2 = new PaymentHop(CHANNEL_ID, Coins.NONE);
-        PaymentHop hop3 = new PaymentHop(CHANNEL_ID_4, Coins.ofSatoshis(123));
-        assertThat(SelfPaymentRoute.create(new PaymentRoute(List.of(hop1, hop2, hop3)))).contains(expected);
+        PaymentHop firstHop = new PaymentHop(CHANNEL_ID_3, Coins.NONE, true);
+        PaymentHop lastHop = new PaymentHop(CHANNEL_ID_4, Coins.ofSatoshis(123), false);
+        assertThat(SelfPaymentRoute.create(new PaymentRoute(firstHop, lastHop))).contains(expected);
     }
 
     @Test
     void create_no_hops() {
-        assertThat(SelfPaymentRoute.create(new PaymentRoute(List.of()))).isEmpty();
+        assertThat(SelfPaymentRoute.create(new PaymentRoute(Optional.empty(), Optional.empty()))).isEmpty();
+    }
+
+    @Test
+    void create_just_first_hop() {
+        PaymentHop firstHop = new PaymentHop(CHANNEL_ID_4, Coins.ofSatoshis(123), true);
+        assertThat(SelfPaymentRoute.create(new PaymentRoute(Optional.of(firstHop), Optional.empty()))).isEmpty();
+    }
+
+    @Test
+    void create_just_last_hop() {
+        PaymentHop lastHop = new PaymentHop(CHANNEL_ID_4, Coins.ofSatoshis(123), false);
+        assertThat(SelfPaymentRoute.create(new PaymentRoute(Optional.empty(), Optional.of(lastHop)))).isEmpty();
     }
 }

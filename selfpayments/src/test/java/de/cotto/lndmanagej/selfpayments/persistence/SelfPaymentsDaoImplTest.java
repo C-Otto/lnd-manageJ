@@ -16,7 +16,9 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT;
 import static de.cotto.lndmanagej.model.SelfPaymentFixtures.SELF_PAYMENT;
+import static de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -75,8 +77,8 @@ class SelfPaymentsDaoImplTest {
 
     private SelfPaymentJpaDto getDto() {
         return new SelfPaymentJpaDto(
-                SettledInvoiceJpaDto.createFromModel(de.cotto.lndmanagej.model.SettledInvoiceFixtures.SETTLED_INVOICE),
-                PaymentJpaDto.createFromModel(de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT)
+                SettledInvoiceJpaDto.createFromModel(SETTLED_INVOICE),
+                PaymentJpaDto.createFromModel(PAYMENT)
         );
     }
 }

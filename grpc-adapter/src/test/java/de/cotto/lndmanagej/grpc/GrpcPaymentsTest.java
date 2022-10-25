@@ -112,7 +112,7 @@ class GrpcPaymentsTest {
             mockPaymentWithHop(channelId.getShortChannelId());
             List<PaymentRoute> routes = grpcPayments.getPaymentsAfter(0L).orElseThrow().get(0).routes();
             assertThat(routes).hasSize(1);
-            assertThat(routes.get(0).hops().get(0).channelId()).isEqualTo(channelId);
+            assertThat(routes.get(0).firstHop().orElseThrow().channelId()).isEqualTo(channelId);
         }
 
         @Test
@@ -308,12 +308,8 @@ class GrpcPaymentsTest {
         List<HTLCAttempt> htlcs = new ArrayList<>();
         for (PaymentRoute paymentRoute : payment.routes()) {
             Route.Builder routeBuilder = Route.newBuilder();
-            for (PaymentHop hop : paymentRoute.hops()) {
-                routeBuilder.addHops(Hop.newBuilder()
-                        .setChanId(hop.channelId().getShortChannelId())
-                        .setAmtToForwardMsat(hop.amount().milliSatoshis())
-                        .build());
-            }
+            paymentRoute.firstHop().ifPresent(hop -> addHop(routeBuilder, hop));
+            paymentRoute.lastHop().ifPresent(hop -> addHop(routeBuilder, hop));
             htlcBuilder.setRoute(routeBuilder.build());
             htlcBuilder.setStatus(HTLCAttempt.HTLCStatus.SUCCEEDED);
             htlcs.add(htlcBuilder.build());
@@ -327,5 +323,12 @@ class GrpcPaymentsTest {
                 .setCreationTimeNs(payment.creationDateTime().toInstant(ZoneOffset.UTC).toEpochMilli() * 1_000);
         htlcs.forEach(builder::addHtlcs);
         return builder.build();
+    }
+
+    private static void addHop(Route.Builder routeBuilder, PaymentHop hop) {
+        routeBuilder.addHops(Hop.newBuilder()
+                .setChanId(hop.channelId().getShortChannelId())
+                .setAmtToForwardMsat(hop.amount().milliSatoshis())
+                .build());
     }
 }

@@ -116,19 +116,22 @@ public class GrpcPayments {
     }
 
     private PaymentRoute toPaymentRoute(HTLCAttempt htlcAttempt, String paymentHash) {
-        List<PaymentHop> hops = htlcAttempt.getRoute().getHopsList().stream()
-                .filter(hop -> hop.getChanId() != 0)
-                .map(hop -> toHop(hop, paymentHash))
-                .toList();
-        return new PaymentRoute(hops);
+        List<Hop> hopsList = htlcAttempt.getRoute().getHopsList();
+        Optional<PaymentHop> first = toHop(hopsList.get(0), paymentHash, true);
+        Optional<PaymentHop> last = toHop(hopsList.get(hopsList.size() - 1), paymentHash, false);
+        return new PaymentRoute(first, last);
     }
 
-    private PaymentHop toHop(Hop hop, String paymentHash) {
+    private Optional<PaymentHop> toHop(Hop hop, String paymentHash, boolean first) {
+        if (hop.getChanId() == 0) {
+            return Optional.empty();
+        }
         try {
-            return new PaymentHop(
+            return Optional.of(new PaymentHop(
                     ChannelId.fromShortChannelId(new BigInteger(Long.toUnsignedString(hop.getChanId()))),
-                    Coins.ofMilliSatoshis(hop.getAmtToForwardMsat())
-            );
+                    Coins.ofMilliSatoshis(hop.getAmtToForwardMsat()),
+                    first
+            ));
         } catch (IllegalArgumentException exception) {
             logger.error("Unable to parse hop {} in payment with payment hash {}", hop, paymentHash);
             throw exception;

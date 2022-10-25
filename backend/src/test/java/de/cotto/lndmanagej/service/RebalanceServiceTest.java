@@ -519,7 +519,7 @@ class RebalanceServiceTest {
 
     @Test
     void getTargetCostsForChannel_source_channel_not_known() {
-        List<PaymentRoute> noRoute = List.of(new PaymentRoute(List.of()));
+        List<PaymentRoute> noRoute = List.of(new PaymentRoute(Optional.empty(), Optional.empty()));
         Payment payment = new Payment(
                 PAYMENT_INDEX, PAYMENT_HASH, PAYMENT_CREATION, PAYMENT_VALUE, PAYMENT_FEES, noRoute
         );
@@ -566,9 +566,9 @@ class RebalanceServiceTest {
     }
 
     private List<PaymentRoute> getSingleRoute() {
-        PaymentHop firstHop = new PaymentHop(CHANNEL_ID, Coins.NONE);
-        PaymentHop lastHop = new PaymentHop(CHANNEL_ID_2, Coins.NONE);
-        PaymentRoute route = new PaymentRoute(List.of(firstHop, lastHop));
+        PaymentHop firstHop = new PaymentHop(CHANNEL_ID, Coins.NONE, true);
+        PaymentHop lastHop = new PaymentHop(CHANNEL_ID_2, Coins.NONE, false);
+        PaymentRoute route = new PaymentRoute(firstHop, lastHop);
         return List.of(route);
     }
 
@@ -611,13 +611,13 @@ class RebalanceServiceTest {
     }
 
     private Payment mockMppWithTwoRoutes() {
-        PaymentHop firstHop1 = new PaymentHop(CHANNEL_ID, Coins.NONE);
-        PaymentHop lastHop1 = new PaymentHop(CHANNEL_ID_3, Coins.NONE);
-        PaymentRoute route1 = new PaymentRoute(List.of(firstHop1, lastHop1));
+        PaymentHop firstHop1 = new PaymentHop(CHANNEL_ID, Coins.NONE, true);
+        PaymentHop lastHop1 = new PaymentHop(CHANNEL_ID_3, Coins.NONE, false);
+        PaymentRoute route1 = new PaymentRoute(firstHop1, lastHop1);
 
-        PaymentHop firstHop2 = new PaymentHop(CHANNEL_ID_2, Coins.NONE);
-        PaymentHop lastHop2 = new PaymentHop(CHANNEL_ID_4, Coins.NONE);
-        PaymentRoute route2 = new PaymentRoute(List.of(firstHop2, lastHop2));
+        PaymentHop firstHop2 = new PaymentHop(CHANNEL_ID_2, Coins.NONE, true);
+        PaymentHop lastHop2 = new PaymentHop(CHANNEL_ID_4, Coins.NONE, false);
+        PaymentRoute route2 = new PaymentRoute(firstHop2, lastHop2);
         List<PaymentRoute> routes = List.of(route1, route2);
         return new Payment(
                 PAYMENT_INDEX, PAYMENT_HASH, PAYMENT_CREATION, PAYMENT_VALUE, PAYMENT_FEES, routes

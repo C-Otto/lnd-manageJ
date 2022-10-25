@@ -28,6 +28,12 @@ class ChannelIdParserTest {
     }
 
     @Test
+    void parseFromString_from_short_channel_id() {
+        String shortChannelId = String.valueOf(CHANNEL_ID.getShortChannelId());
+        assertThat(channelIdParser.parseFromString(shortChannelId)).isEqualTo(CHANNEL_ID);
+    }
+
+    @Test
     void parseFromString_from_compact_form_with_x() {
         assertThat(channelIdParser.parseFromString("712345x123x1")).isEqualTo(CHANNEL_ID);
     }

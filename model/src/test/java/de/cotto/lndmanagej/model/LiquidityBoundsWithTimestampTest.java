@@ -16,6 +16,14 @@ class LiquidityBoundsWithTimestampTest {
     private static final Duration MAX_AGE = Duration.ofHours(1);
 
     @Test
+    void createFromLiquidityBounds() {
+        LiquidityBounds expected = new LiquidityBounds(Coins.ofSatoshis(1), null, Coins.NONE);
+        LiquidityBoundsWithTimestamp entry = new LiquidityBoundsWithTimestamp(expected);
+        assertThat(entry.liquidityBounds()).isEqualTo(expected);
+        assertThat(entry.timestamp()).isAfter(Instant.now().minus(10, ChronoUnit.SECONDS));
+    }
+
+    @Test
     void isTooOld_for_max_age_old_entry() {
         LiquidityBoundsWithTimestamp entry = new LiquidityBoundsWithTimestamp(
                 LIQUIDITY_BOUNDS,

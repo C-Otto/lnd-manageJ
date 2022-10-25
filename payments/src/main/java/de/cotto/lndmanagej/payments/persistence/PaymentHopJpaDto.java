@@ -10,22 +10,28 @@ import javax.persistence.Embeddable;
 class PaymentHopJpaDto {
     private long channelId;
     private long amount;
+    private boolean first;
 
     @SuppressWarnings("unused")
     public PaymentHopJpaDto() {
         // for JPA
     }
 
-    public PaymentHopJpaDto(long channelId, long amount) {
+    public PaymentHopJpaDto(long channelId, long amount, boolean first) {
         this.channelId = channelId;
         this.amount = amount;
+        this.first = first;
     }
 
     public static PaymentHopJpaDto createFromModel(PaymentHop paymentHop) {
-        return new PaymentHopJpaDto(paymentHop.channelId().getShortChannelId(), paymentHop.amount().milliSatoshis());
+        return new PaymentHopJpaDto(
+                paymentHop.channelId().getShortChannelId(),
+                paymentHop.amount().milliSatoshis(),
+                paymentHop.first()
+        );
     }
 
     public PaymentHop toModel() {
-        return new PaymentHop(ChannelId.fromShortChannelId(channelId), Coins.ofMilliSatoshis(amount));
+        return new PaymentHop(ChannelId.fromShortChannelId(channelId), Coins.ofMilliSatoshis(amount), first);
     }
 }

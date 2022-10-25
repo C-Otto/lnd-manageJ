@@ -14,7 +14,7 @@ public interface SelfPaymentsRepository extends JpaRepository<SelfPaymentsReposi
             "JOIN SettledInvoiceJpaDto i ON p.hash = i.hash " +
             "JOIN p.routes route " +
             "JOIN route.hops hop " +
-            "WHERE INDEX(hop) = SIZE(route.hops) - 1" +
+            "WHERE hop.first = false " +
             "AND hop.channelId = ?1 " +
             "AND i.settleDate >= ?2 " +
             "ORDER BY i.settleDate ASC")
@@ -25,7 +25,7 @@ public interface SelfPaymentsRepository extends JpaRepository<SelfPaymentsReposi
             "JOIN SettledInvoiceJpaDto i ON p.hash = i.hash " +
             "JOIN p.routes route " +
             "JOIN route.hops hop " +
-            "WHERE INDEX(hop) = 0 " +
+            "WHERE hop.first = true " +
             "AND hop.channelId = ?1 " +
             "AND i.settleDate >= ?2 " +
             "ORDER BY i.settleDate ASC")
