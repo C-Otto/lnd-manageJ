@@ -33,7 +33,7 @@ public class PaymentJpaDto {
 
     @Nullable
     @OrderColumn
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PaymentRouteJpaDto> routes;
 
     public PaymentJpaDto() {
