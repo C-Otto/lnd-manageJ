@@ -1,0 +1,1 @@
+ALTER TABLE payment_route_hops ADD PRIMARY KEY (payment_route_jpa_dto_route_id, first);
