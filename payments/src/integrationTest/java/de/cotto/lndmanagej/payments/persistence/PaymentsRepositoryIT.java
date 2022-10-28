@@ -58,7 +58,8 @@ class PaymentsRepositoryIT {
     }
 
     private int countEntries(String table) {
-        Number singleResult = (Number) entityManager.createNativeQuery("SELECT COUNT(*) FROM " + table).getSingleResult();
+        Number singleResult =
+                (Number) entityManager.createNativeQuery("SELECT COUNT(*) FROM " + table).getSingleResult();
         return singleResult.intValue();
     }
 
