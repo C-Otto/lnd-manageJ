@@ -124,6 +124,11 @@
         <exclude name="DataflowAnomalyAnalysis"/>
         <exclude name="MissingSerialVersionUID"/>
     </rule>
+    <rule ref="category/java/errorprone.xml/TestClassWithoutTestCases">
+        <properties>
+            <property name="testClassPattern" value="^(?:.*\.)?.*Tests?$|^(?:.*\.)?.*TestCase$" />
+        </properties>
+    </rule>
 
     <rule ref="category/java/multithreading.xml">
         <exclude name="DoNotUseThreads"/>
