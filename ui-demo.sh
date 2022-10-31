@@ -3,4 +3,4 @@ if [ "x$TERM" == "xdumb" ];
 then
   export TERM="xterm"
 fi
-./gradlew ui-demo:bootRun
+./gradlew :ui-demo:bootRun
