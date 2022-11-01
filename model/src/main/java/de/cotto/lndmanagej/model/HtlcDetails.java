@@ -1,5 +1,7 @@
 package de.cotto.lndmanagej.model;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+
 import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.Objects;
@@ -36,26 +38,31 @@ public record HtlcDetails(
         @Nullable
         private Instant timestamp;
 
+        @CanIgnoreReturnValue
         public Builder withIncomingChannelId(long incomingChannelId) {
             this.incomingChannelId = ChannelId.fromShortChannelId(incomingChannelId);
             return this;
         }
 
+        @CanIgnoreReturnValue
         public Builder withOutgoingChannelId(long outgoingChannelId) {
             this.outgoingChannelId = ChannelId.fromShortChannelId(outgoingChannelId);
             return this;
         }
 
+        @CanIgnoreReturnValue
         public Builder withIncomingHtlcId(long incomingHtlcId) {
             this.incomingHtlcId = incomingHtlcId;
             return this;
         }
 
+        @CanIgnoreReturnValue
         public Builder withOutgoingHtlcId(long outgoingHtlcId) {
             this.outgoingHtlcId = outgoingHtlcId;
             return this;
         }
 
+        @CanIgnoreReturnValue
         public Builder withTimestamp(long timestampNs) {
             this.timestamp = Instant.ofEpochSecond(0, timestampNs);
             return this;

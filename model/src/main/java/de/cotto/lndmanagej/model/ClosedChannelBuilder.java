@@ -1,5 +1,7 @@
 package de.cotto.lndmanagej.model;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+
 import javax.annotation.Nullable;
 import java.util.Set;
 
@@ -41,56 +43,67 @@ public abstract class ClosedChannelBuilder<T extends ClosedChannel> {
         // default constructor
     }
 
+    @CanIgnoreReturnValue
     public ClosedChannelBuilder<T> withChannelId(ChannelId channelId) {
         this.channelId = channelId;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public ClosedChannelBuilder<T> withChannelPoint(ChannelPoint channelPoint) {
         this.channelPoint = channelPoint;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public ClosedChannelBuilder<T> withCapacity(Coins capacity) {
         this.capacity = capacity;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public ClosedChannelBuilder<T> withOwnPubkey(Pubkey ownPubkey) {
         this.ownPubkey = ownPubkey;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public ClosedChannelBuilder<T> withRemotePubkey(Pubkey remotePubkey) {
         this.remotePubkey = remotePubkey;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public ClosedChannelBuilder<T> withCloseTransactionHash(TransactionHash closeTransactionHash) {
         this.closeTransactionHash = closeTransactionHash;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public ClosedChannelBuilder<T> withOpenInitiator(OpenInitiator openInitiator) {
         this.openInitiator = openInitiator;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public ClosedChannelBuilder<T> withCloseInitiator(CloseInitiator closeInitiator) {
         this.closeInitiator = closeInitiator;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public ClosedChannelBuilder<T> withCloseHeight(int closeHeight) {
         this.closeHeight = closeHeight;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public ClosedChannelBuilder<T> withResolutions(Set<Resolution> resolutions) {
         this.resolutions = resolutions;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public ClosedChannelBuilder<T> withIsPrivate(boolean isPrivate) {
         this.isPrivate = isPrivate;
         return this;

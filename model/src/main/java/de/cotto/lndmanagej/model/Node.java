@@ -1,5 +1,7 @@
 package de.cotto.lndmanagej.model;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -65,16 +67,19 @@ public record Node(
 
         private boolean online;
 
+        @CanIgnoreReturnValue
         public Builder withAlias(String alias) {
             this.alias = alias;
             return this;
         }
 
+        @CanIgnoreReturnValue
         public Builder withLastUpdate(int lastUpdate) {
             this.lastUpdate = lastUpdate;
             return this;
         }
 
+        @CanIgnoreReturnValue
         public Builder withPubkey(Pubkey pubkey) {
             this.pubkey = pubkey;
             if (alias == null) {
@@ -83,6 +88,7 @@ public record Node(
             return this;
         }
 
+        @CanIgnoreReturnValue
         public Builder withOnlineStatus(boolean online) {
             this.online = online;
             return this;

@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.grpc;
 
-import com.codahale.metrics.Timer;
 import de.cotto.lndmanagej.configuration.ConfigurationService;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -12,12 +11,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class GrpcBaseTest {
@@ -30,8 +25,6 @@ class GrpcBaseTest {
 
     @BeforeEach
     void setUp() throws IOException {
-        Timer timer = mock(Timer.class);
-        lenient().when(timer.timeSupplier(any())).then(invocation -> ((Supplier<?>) invocation.getArgument(0)).get());
         grpcBase = new TestableGrpcBase(configurationService, HOME_DIRECTORY);
     }
 
