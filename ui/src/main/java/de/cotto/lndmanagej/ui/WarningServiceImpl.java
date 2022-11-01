@@ -51,9 +51,7 @@ public class WarningServiceImpl extends WarningService {
         Map<LocalOpenChannel, ChannelWarnings> channelWarnings = channelWarningsService.getChannelWarnings();
         channelWarnings.entrySet().stream()
                 .sorted(Comparator.comparing(e -> e.getKey().getId()))
-                .forEach(entry -> {
-                    addChannelWarnings(dashboardWarnings, entry.getKey(), entry.getValue());
-                });
+                .forEach(entry -> addChannelWarnings(dashboardWarnings, entry.getKey(), entry.getValue()));
 
         return dashboardWarnings;
     }

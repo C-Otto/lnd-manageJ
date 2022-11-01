@@ -2,7 +2,6 @@ package de.cotto.lndmanagej.statistics;
 
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.Node;
-import de.cotto.lndmanagej.model.OnlineStatus;
 import de.cotto.lndmanagej.onlinepeers.OnlinePeersDao;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -38,10 +36,8 @@ public class OnlinePeersUpdater {
     }
 
     private boolean shouldUpdate(Node node) {
-        Optional<OnlineStatus> mostRecentOnlineStatus = dao.getMostRecentOnlineStatus(node.pubkey());
-        if (mostRecentOnlineStatus.isEmpty()) {
-            return true;
-        }
-        return mostRecentOnlineStatus.get().online() != node.online();
+        return dao.getMostRecentOnlineStatus(node.pubkey())
+                .map(onlineStatus -> onlineStatus.online() != node.online())
+                .orElse(true);
     }
 }
