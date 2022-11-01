@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.ui;
 
+import de.cotto.lndmanagej.ui.controller.param.SortBy;
 import de.cotto.lndmanagej.ui.controller.param.SortByConverter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -12,7 +13,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
 
     private final HandlerInterceptor interceptor;
-    private final Converter sortByConverter;
+    private final Converter<String, SortBy> sortByConverter;
 
     public WebConfig(HandlerInterceptor interceptor, SortByConverter sortByConverter) {
         this.interceptor = interceptor;
