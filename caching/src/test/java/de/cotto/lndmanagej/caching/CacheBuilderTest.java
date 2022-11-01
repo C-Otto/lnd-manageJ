@@ -2,8 +2,10 @@ package de.cotto.lndmanagej.caching;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -59,14 +61,23 @@ class CacheBuilderTest {
     }
 
     @Test
+    @Timeout(value = 900, unit = TimeUnit.MILLISECONDS)
     void withRefresh_returns_old_value() throws InterruptedException {
         LoadingCache<Object, Long> cache = new CacheBuilder()
                 .withRefresh(Duration.ofMillis(1))
-                .build(System::nanoTime);
+                .build(() -> {
+                    try {
+                        Thread.sleep(1_000);
+                    } catch (InterruptedException e) {
+                        // ignore
+                    }
+                    return System.nanoTime();
+                });
+        cache.put("", 0L);
         Long first = cache.get("");
         Thread.sleep(10);
         Long second = cache.get("");
-        assertThat(first).isEqualTo(second);
+        assertThat(first).isEqualTo(second).isEqualTo(0L);
     }
 
     @Test
