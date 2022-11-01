@@ -1,5 +1,5 @@
 checkstyle {
-    toolVersion '10.3.1'
+    toolVersion '10.4'
 }
 cpd {
     toolVersion = '6.51.0'
