@@ -9,7 +9,7 @@ javaPlatform {
 }
 
 dependencies {
-    api platform('org.springframework.cloud:spring-cloud-dependencies:2021.0.3')
+    api platform('org.springframework.cloud:spring-cloud-dependencies:2021.0.4')
 
     constraints {
         api 'com.adarshr:gradle-test-logger-plugin:3.2.0'
