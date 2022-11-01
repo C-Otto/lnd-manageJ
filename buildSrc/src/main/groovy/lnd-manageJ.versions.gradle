@@ -11,6 +11,6 @@ jacoco {
     toolVersion = '0.8.8'
 }
 pitest {
-    pitestVersion = '1.9.3'
+    pitestVersion = '1.9.9'
     junit5PluginVersion = '1.0.0'
 }
