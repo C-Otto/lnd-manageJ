@@ -21,7 +21,9 @@ dependencies {
 tasks.register('deleteCrashLogs') {
     delete fileTree(dir: project.projectDir, include: 'hs_err_pid*.log')
 }
-tasks.findByName('pitest').finalizedBy(deleteCrashLogs)
+tasks.named('pitest') {
+    finalizedBy(deleteCrashLogs)
+}
 
 pitest {
     testStrengthThreshold = 97
