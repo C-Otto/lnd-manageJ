@@ -1,5 +1,7 @@
 plugins {
     id 'lnd-manageJ.java-conventions'
+    id 'test-report-aggregation'
+    id 'jacoco-report-aggregation'
 }
 
 dependencies {
@@ -47,4 +49,9 @@ pitest {
 
 bootJar {
     requiresUnpack '**/ortools-darwin*.jar', '**/ortools-win32*.jar', '**/ortools-linux*.jar'
+}
+
+check {
+    dependsOn testAggregateTestReport
+    dependsOn testCodeCoverageReport
 }
