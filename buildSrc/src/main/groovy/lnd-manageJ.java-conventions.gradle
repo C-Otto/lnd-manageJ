@@ -36,7 +36,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.apache.commons:commons-lang3'
     implementation 'com.google.code.findbugs:jsr305'
-    implementation 'io.dropwizard.metrics:metrics-core'
     implementation 'com.ryantenney.metrics:metrics-spring'
     implementation 'com.google.guava:guava'
 }
