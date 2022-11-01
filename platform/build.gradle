@@ -38,7 +38,7 @@ dependencies {
         api 'nl.jqno.equalsverifier:equalsverifier:3.10.1'
         api 'org.apache.commons:commons-lang3:3.12.0'
         api 'org.awaitility:awaitility:4.2.0'
-        api 'org.eclipse.collections:eclipse-collections:11.0.0'
+        api 'org.eclipse.collections:eclipse-collections:11.1.0'
         api 'org.ini4j:ini4j:0.5.4'
         api 'org.springframework.boot:spring-boot-gradle-plugin:' + springBootVersion
         api 'org.webjars:bootstrap:5.2.0'
