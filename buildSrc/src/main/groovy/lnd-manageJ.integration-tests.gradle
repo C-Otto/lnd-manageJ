@@ -14,7 +14,7 @@ testing {
             }
 
             targets {
-                all {
+                configureEach {
                     testTask.configure {
                         shouldRunAfter(test)
                     }
