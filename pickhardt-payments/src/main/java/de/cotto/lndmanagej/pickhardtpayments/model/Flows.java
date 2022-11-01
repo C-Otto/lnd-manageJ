@@ -18,7 +18,6 @@ import java.util.Set;
 import static java.util.Objects.requireNonNull;
 
 public class Flows {
-    public static final Flows NONE = new Flows();
     private final Map<Pubkey, Map<Edge, Flow>> map;
 
     public Flows() {
