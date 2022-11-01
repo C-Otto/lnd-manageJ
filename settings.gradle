@@ -19,3 +19,7 @@ include 'ui-demo'
 include 'grpc-adapter'
 include 'grpc-client'
 include 'application'
+
+dependencyResolutionManagement {
+    includeBuild('platform/')
+}

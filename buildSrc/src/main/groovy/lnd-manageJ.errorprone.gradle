@@ -6,8 +6,9 @@ plugins {
 }
 
 dependencies {
-    errorprone 'com.google.errorprone:error_prone_core:2.14.0'
-    errorprone 'com.uber.nullaway:nullaway:0.9.8'
+    errorprone platform('de.cotto.lndmanagej:platform')
+    errorprone 'com.google.errorprone:error_prone_core'
+    errorprone 'com.uber.nullaway:nullaway'
 }
 
 nullaway {

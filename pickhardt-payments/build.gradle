@@ -8,10 +8,10 @@ dependencies {
     implementation project(':configuration')
     implementation project(':model')
     implementation project(':grpc-adapter')
-    implementation 'com.google.ortools:ortools-java:9.3.10497'
-    implementation 'org.eclipse.collections:eclipse-collections:11.0.0'
+    implementation 'com.google.ortools:ortools-java'
+    implementation 'org.eclipse.collections:eclipse-collections'
     testImplementation testFixtures(project(':model'))
-    testImplementation 'org.awaitility:awaitility:4.1.1'
+    testImplementation 'org.awaitility:awaitility'
     integrationTestImplementation project(':backend')
     integrationTestImplementation project(':grpc-adapter')
     integrationTestImplementation testFixtures(project(':model'))

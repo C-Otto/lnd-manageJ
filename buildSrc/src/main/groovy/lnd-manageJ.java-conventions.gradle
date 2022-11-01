@@ -12,6 +12,7 @@ plugins {
     id 'io.spring.dependency-management'
     id 'java-test-fixtures'
     id 'lnd-manageJ.spotbugs'
+    id 'lnd-manageJ.versions'
 }
 
 java {
@@ -31,10 +32,11 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 dependencies {
+    implementation platform('de.cotto.lndmanagej:platform')
     implementation 'org.springframework.boot:spring-boot-starter'
-    implementation 'org.apache.commons:commons-lang3:3.12.0'
-    implementation 'com.google.code.findbugs:jsr305:3.0.2'
-    implementation 'io.dropwizard.metrics:metrics-core:4.2.10'
-    implementation 'com.ryantenney.metrics:metrics-spring:3.1.3'
-    implementation 'com.google.guava:guava:31.1-jre'
+    implementation 'org.apache.commons:commons-lang3'
+    implementation 'com.google.code.findbugs:jsr305'
+    implementation 'io.dropwizard.metrics:metrics-core'
+    implementation 'com.ryantenney.metrics:metrics-spring'
+    implementation 'com.google.guava:guava'
 }

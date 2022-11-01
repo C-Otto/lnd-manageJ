@@ -5,6 +5,6 @@ plugins {
 dependencies {
     implementation project(':model')
     implementation project(':caching')
-    implementation 'org.ini4j:ini4j:0.5.4'
+    implementation 'org.ini4j:ini4j'
     testImplementation testFixtures(project(':model'))
 }

@@ -1,0 +1,16 @@
+checkstyle {
+    toolVersion '10.3.1'
+}
+cpd {
+    toolVersion = '6.51.0'
+}
+pmd {
+    toolVersion = '6.51.0'
+}
+jacoco {
+    toolVersion = '0.8.8'
+}
+pitest {
+    pitestVersion = '1.9.3'
+    junit5PluginVersion = '1.0.0'
+}

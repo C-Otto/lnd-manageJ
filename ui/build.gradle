@@ -5,8 +5,8 @@ plugins {
 dependencies {
     implementation('org.springframework.boot:spring-boot-starter-web')
     implementation('org.springframework.boot:spring-boot-starter-thymeleaf')
-    implementation 'org.webjars:webjars-locator:0.45'
-    implementation 'org.webjars:bootstrap:5.2.0'
+    implementation 'org.webjars:webjars-locator'
+    implementation 'org.webjars:bootstrap'
     implementation project(':backend')
     implementation project(':model')
     implementation project(':web')

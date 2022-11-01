@@ -1,3 +1,5 @@
+import info.solidsoft.gradle.pitest.PitestTask
+
 plugins {
     id 'lnd-manageJ.tests'
     id 'info.solidsoft.pitest'
@@ -5,8 +7,6 @@ plugins {
 
 pitest {
     targetClasses = ['de.cotto.*']
-    pitestVersion = '1.9.3'
-    junit5PluginVersion = '1.0.0'
     outputFormats = ['XML', 'HTML']
     timestampedReports = false
     failWhenNoMutations = false
@@ -15,6 +15,6 @@ pitest {
     testStrengthThreshold = 100
 }
 
-tasks.withType(info.solidsoft.gradle.pitest.PitestTask).configureEach {
+tasks.withType(PitestTask).configureEach {
     dependsOn test
 }
