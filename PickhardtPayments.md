@@ -105,7 +105,7 @@ The response shows a somewhat readable representation of the payment progress, i
 * HTTP `GET`: `/api/payments/top-up/{pubkey}/amount/{amount}`
   * Sends satoshis out via some channel and back to the own node through the specified peer so that the local balance
     to that peer is increased.
-  * The given amount is the the local balance you'd like to have *after* the payment is done.
+  * The given amount is the local balance you'd like to have *after* the payment is done.
   * If you have more than one channel to the peer, the target amount is the sum of the (available) local balances.
   * If the local balance to that peer is more than the given amount, nothing is done.
   * If the difference between the current local balance and the target amount is less than the configured threshold
