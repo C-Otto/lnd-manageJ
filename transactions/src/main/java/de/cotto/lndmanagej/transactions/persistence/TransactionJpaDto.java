@@ -26,7 +26,7 @@ class TransactionJpaDto {
 
     private int positionInBlock;
 
-    TransactionJpaDto() {
+    protected TransactionJpaDto() {
         // for JPA
     }
 
