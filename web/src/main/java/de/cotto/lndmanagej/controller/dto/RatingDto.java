@@ -13,14 +13,14 @@ public record RatingDto(long rating, String message, Map<String, String> details
 
     public static RatingDto fromModel(Rating rating) {
         if (rating.isEmpty()) {
-            return new RatingDto(rating.getRating(), "Unable to compute rating", Map.of());
+            return new RatingDto(-1, "Unable to compute rating", Map.of());
         }
-        return new RatingDto(rating.getRating(), "", toStringDetails(rating.details()));
+        return new RatingDto(rating.value(), "", toStringDetails(rating.descriptions()));
     }
 
-    private static Map<String, String> toStringDetails(Map<Object, Object> details) {
+    private static Map<String, String> toStringDetails(Map<String, Number> details) {
         return details.entrySet().stream().collect(toMap(
-                e -> String.valueOf(e.getKey()),
+                Map.Entry::getKey,
                 e -> String.valueOf(e.getValue())
         ));
     }

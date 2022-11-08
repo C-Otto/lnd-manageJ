@@ -20,9 +20,8 @@ class RatingDtoTest {
 
     @Test
     void fromModel_with_details() {
-        Map<Object, Object> details = Map.of("a", "b", "c", "d");
-        Map<String, String> expectedDetails = Map.of("a", "b", "c", "d");
-        Rating rating = new Rating(1, details);
+        Map<String, String> expectedDetails = Map.of("a", "1", "b", "2");
+        Rating rating = new Rating(1).withDescription("a", 1).withDescription("b", 2);
         assertThat(RatingDto.fromModel(rating)).isEqualTo(new RatingDto(1, "", expectedDetails));
     }
 }

@@ -84,7 +84,7 @@ public class UiDataServiceImpl extends UiDataService {
                 map(channelController.getBalance(channelId)),
                 localChannel.getCapacity().satoshis(),
                 localChannel.getStatus().privateChannel(),
-                ratingService.getRatingForChannel(channelId).orElse(Rating.EMPTY).getRating()
+                ratingService.getRatingForChannel(channelId).orElse(Rating.EMPTY).value()
         );
     }
 
@@ -115,7 +115,7 @@ public class UiDataServiceImpl extends UiDataService {
     public NodeDto getNode(Pubkey pubkey) {
         Node node = nodeService.getNode(pubkey);
         Rating rating = ratingService.getRatingForPeer(pubkey);
-        return new NodeDto(node.pubkey().toString(), node.alias(), node.online(), rating.getRating());
+        return new NodeDto(node.pubkey().toString(), node.alias(), node.online(), rating.value());
     }
 
     @Override

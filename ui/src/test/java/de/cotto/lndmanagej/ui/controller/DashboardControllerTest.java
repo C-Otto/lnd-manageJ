@@ -72,7 +72,7 @@ class DashboardControllerTest {
 
     @Test
     void nodes() {
-        NodeDto nodeDto = new NodeDto(PUBKEY.toString(), NODE_PEER.alias(), true, RATING.getRating());
+        NodeDto nodeDto = new NodeDto(PUBKEY.toString(), NODE_PEER.alias(), true, RATING.value());
         when(pageService.nodes(DEFAULT_SORT)).thenReturn(new NodesPage(List.of(nodeDto)));
         assertThat(dashboardController.nodes(model, DEFAULT_SORT)).isEqualTo(NODES_KEY);
         verify(model).addAllAttributes(Map.of(NODES_KEY, List.of(nodeDto)));

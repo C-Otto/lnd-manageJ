@@ -46,7 +46,7 @@ public class NodeRatingWarningsProvider implements NodeWarningsProvider {
             return Optional.empty();
         }
         long threshold = getThreshold();
-        long ratingValue = rating.getRating();
+        long ratingValue = rating.value();
         if (ratingValue < threshold) {
             return Optional.of(new NodeRatingWarning(ratingValue, threshold));
         }

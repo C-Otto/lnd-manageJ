@@ -3,27 +3,27 @@ package de.cotto.lndmanagej.model;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
-import java.util.Optional;
 
-import static java.util.Map.entry;
+import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RatingTest {
     @Test
     void empty() {
-        assertThat(Rating.EMPTY).isEqualTo(new Rating(Optional.empty(), Map.of()));
+        assertThat(Rating.EMPTY).isEqualTo(new Rating(0, Map.of()));
     }
 
     @Test
     void isEmpty() {
         assertThat(Rating.EMPTY.isEmpty()).isTrue();
-        assertThat(new Rating(1).isEmpty()).isFalse();
+        Rating ratingWithDescription = Rating.EMPTY.withDescription("a", 1);
+        assertThat(ratingWithDescription.isEmpty()).isFalse();
     }
 
     @Test
-    void getRating() {
-        assertThat(Rating.EMPTY.getRating()).isEqualTo(-1);
-        assertThat(new Rating(1).getRating()).isEqualTo(1);
+    void value() {
+        assertThat(Rating.EMPTY.value()).isEqualTo(0);
+        assertThat(new Rating(1).value()).isEqualTo(1);
     }
 
     @Test
@@ -50,69 +50,72 @@ class RatingTest {
     }
 
     @Test
-    void rating_with_detail_has_rating() {
-        Rating withDetails = new Rating(123, "a", "b");
-        assertThat(withDetails.rating()).contains(123L);
+    void rating_created_with_description_has_rating() {
+        Rating withDescription = new Rating(123, Map.of("a", 123));
+        assertThat(withDescription.value()).isEqualTo(123L);
     }
 
     @Test
-    void rating_with_details_has_rating() {
-        Rating withDetails = new Rating(123, Map.of("a", "b", "c", "d"));
-        assertThat(withDetails.rating()).contains(123L);
+    void rating_with_added_description_keeps_rating() {
+        Rating withDescription = new Rating(123).withDescription("a", 456);
+        assertThat(withDescription.value()).isEqualTo(123L);
     }
 
     @Test
-    void rating_with_detail_has_detail() {
-        Rating withDetails = new Rating(123, "a", "b");
-        assertThat(withDetails.details()).contains(entry("a", "b"));
+    void add_ratings_with_descriptions() {
+        Rating withDescriptions1 = new Rating(1).withDescription("a", 456).withDescription("c", 789);
+        Rating withDescriptions2 = new Rating(2).withDescription("e", 111).withDescription("g", 1.23);
+        assertThat(withDescriptions1.add(withDescriptions2).descriptions())
+                .isEqualTo(Map.of("a", 456, "c", 789, "e", 111, "g", 1.23));
     }
 
     @Test
-    void rating_with_details_has_details() {
-        Rating withDetails = new Rating(123, Map.of("a", "b"));
-        assertThat(withDetails.details()).contains(entry("a", "b"));
+    void addValueWithDescription_adds_value() {
+        Rating rating = new Rating(1).withDescription("a", 111);
+        assertThat(rating.addValueWithDescription(123, "c").value()).isEqualTo(124L);
     }
 
     @Test
-    void add_ratings_with_details() {
-        Rating withDetails1 = new Rating(1, Map.of("a", "b", "c", "d"));
-        Rating withDetails2 = new Rating(2, Map.of("e", "f", "g", "h"));
-        assertThat(withDetails1.add(withDetails2).details()).isEqualTo(Map.of("a", "b", "c", "d", "e", "f", "g", "h"));
+    void addValueWithDescription_has_descriptions() {
+        Rating rating = new Rating(1).withDescription("a", 111);
+        assertThat(rating.addValueWithDescription(123, "c").descriptions())
+                .isEqualTo(Map.of("a", 111, "c", 123L));
     }
 
     @Test
-    void addValueWithDetailKey_adds_value() {
-        Rating rating = new Rating(1, "a", "b");
-        assertThat(rating.addValueWithDetailKey(123, "c").rating()).contains(124L);
+    void withDescription_adds_description() {
+        Rating rating = new Rating(1).withDescription("a", 111);
+        assertThat(rating.withDescription("c", 222).descriptions())
+                .isEqualTo(Map.of("a", 111, "c", 222));
     }
 
     @Test
-    void addValueWithDetailKey_has_details() {
-        Rating rating = new Rating(1, "a", "b");
-        assertThat(rating.addValueWithDetailKey(123, "c").details()).isEqualTo(Map.of("a", "b", "c", 123L));
+    void forDays_scales_value() {
+        Rating rating = new Rating(100).withDescription("a", 111);
+        assertThat(rating.forDays(3, CHANNEL_ID).value())
+                .isEqualTo(33L);
     }
 
     @Test
-    void withDetail_keeps_value() {
-        Rating rating = new Rating(1, "a", "b");
-        assertThat(rating.withDetail("c", "d").rating()).contains(1L);
+    void forDays_adds_description() {
+        Rating rating = new Rating(100).withDescription("a", 111);
+        Map<String, Number> expectedDescriptions = Map.of("a", 111, CHANNEL_ID + " scaled by days", 1.0 / 3);
+        assertThat(rating.forDays(3, CHANNEL_ID).descriptions())
+                .isEqualTo(expectedDescriptions);
     }
 
     @Test
-    void withDetail_has_details() {
-        Rating rating = new Rating(1, "a", "b");
-        assertThat(rating.withDetail("c", "d").details()).isEqualTo(Map.of("a", "b", "c", "d"));
+    void forAverageLocalBalance_scales_value() {
+        Rating rating = new Rating(100).withDescription("a", 111);
+        assertThat(rating.forAverageLocalBalance(Coins.ofSatoshis(2_000_000), CHANNEL_ID).value())
+                .isEqualTo(50);
     }
 
     @Test
-    void scaleBy_scales_value() {
-        Rating rating = new Rating(100, "a", "b");
-        assertThat(rating.scaleBy(0.33, "c").rating()).contains(33L);
-    }
-
-    @Test
-    void scaleBy_has_details() {
-        Rating rating = new Rating(1, "a", "b");
-        assertThat(rating.scaleBy(0.33, "c").details()).isEqualTo(Map.of("a", "b", "c", 0.33));
+    void forAverageLocalBalance_adds_description() {
+        Rating rating = new Rating(100).withDescription("a", 111);
+        Map<String, Number> expectedDescriptions = Map.of("a", 111, CHANNEL_ID + " scaled by liquidity", 2.0);
+        assertThat(rating.forAverageLocalBalance(Coins.ofSatoshis(500_000), CHANNEL_ID).descriptions())
+                .isEqualTo(expectedDescriptions);
     }
 }

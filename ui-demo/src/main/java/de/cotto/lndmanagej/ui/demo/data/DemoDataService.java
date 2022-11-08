@@ -150,7 +150,7 @@ public class DemoDataService extends UiDataService {
         String alias = channels.stream().findFirst().orElseThrow().remoteAlias();
         boolean isOnline = isOnline(channels.stream().findFirst().orElseThrow().channelId());
         Rating rating = sumRatings(channels);
-        return new NodeDto(pubkey.toString(), alias, isOnline, rating.getRating());
+        return new NodeDto(pubkey.toString(), alias, isOnline, rating.value());
     }
 
     @Override

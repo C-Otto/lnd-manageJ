@@ -13,20 +13,20 @@ public class NodeDtoFixture {
             PUBKEY.toString(),
             NODE.alias(),
             true,
-            RATING.getRating()
+            RATING.value()
     );
 
     public static final NodeDto NODE_DTO_2 = new NodeDto(
             PUBKEY_2.toString(),
             NODE_2.alias(),
             true,
-            RATING.getRating()
+            RATING.value()
     );
 
     public static final NodeDto NODE_DTO_3 = new NodeDto(
             PUBKEY_3.toString(),
             NODE_3.alias(),
             true,
-            RATING.getRating()
+            RATING.value()
     );
 }

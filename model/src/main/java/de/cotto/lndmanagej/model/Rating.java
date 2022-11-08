@@ -2,58 +2,46 @@ package de.cotto.lndmanagej.model;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
 
-public record Rating(Optional<Long> rating, Map<Object, Object> details) {
-    public static final Rating EMPTY = new Rating(Optional.empty(), Map.of());
+public record Rating(long value, Map<String, Number> descriptions) {
+    public static final Rating EMPTY = new Rating(0, Map.of());
 
-    public Rating(long rating) {
-        this(rating, Map.of());
-    }
-
-    public Rating(long rating, Map<Object, Object> details) {
-        this(Optional.of(rating), details);
-    }
-
-    public Rating(long rating, Object key, Object value) {
-        this(Optional.of(rating), Map.of(key, value));
+    public Rating(long value) {
+        this(value, Map.of());
     }
 
     public Rating add(Rating other) {
-        Long thisRating = rating.orElse(null);
-        if (thisRating == null) {
-            return other;
-        }
-        Long otherRating = other.rating.orElse(null);
-        if (otherRating == null) {
-            return this;
-        }
-        Map<Object, Object> combinedDetails = new LinkedHashMap<>();
-        combinedDetails.putAll(details);
-        combinedDetails.putAll(other.details);
-        return new Rating(thisRating + otherRating, combinedDetails);
+        Map<String, Number> combinedDetails = new LinkedHashMap<>();
+        combinedDetails.putAll(descriptions);
+        combinedDetails.putAll(other.descriptions);
+        return new Rating(value + other.value, combinedDetails);
     }
 
-    public Rating addValueWithDetailKey(long value, Object key) {
-        Rating newRating = new Rating(value, key, value);
+    public Rating addValueWithDescription(long value, String description) {
+        Rating newRating = new Rating(value, Map.of(description, value));
         return add(newRating);
     }
 
-    public Rating withDetail(Object key, Object value) {
-        return this.add(new Rating(0L, key, value));
+    public Rating withDescription(String description, Number value) {
+        return add(new Rating(0, Map.of(description, value)));
     }
 
-    public Rating scaleBy(double factor, Object detailKey) {
-        Rating withDetail = withDetail(detailKey, factor);
-        long scaledValue = (long) (withDetail.getRating() * factor);
-        return new Rating(scaledValue, withDetail.details);
+    public Rating forDays(long days, ChannelId channelId) {
+        double factor = 1.0 / days;
+        long newValue = (long) (value * factor);
+        return new Rating(newValue, descriptions)
+                .withDescription(channelId + " scaled by days", factor);
+    }
+
+    public Rating forAverageLocalBalance(Coins averageLocalBalance, ChannelId channelId) {
+        double millionSatoshis = averageLocalBalance.milliSatoshis() / 1_000_000_000.0;
+        double factor = 1.0 / millionSatoshis;
+        long newValue = (long) (value * factor);
+        return new Rating(newValue, descriptions)
+                .withDescription(channelId + " scaled by liquidity", factor);
     }
 
     public boolean isEmpty() {
-        return rating.isEmpty();
-    }
-
-    public long getRating() {
-        return rating.orElse(-1L);
+        return equals(EMPTY);
     }
 }

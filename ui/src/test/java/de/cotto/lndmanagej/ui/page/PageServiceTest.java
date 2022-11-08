@@ -93,9 +93,9 @@ class PageServiceTest {
 
     @Test
     void dashboard_nodes_alphabeticalOrder() {
-        NodeDto bob = new NodeDto(PUBKEY.toString(), "Bob", true, RATING.getRating());
-        NodeDto alice = new NodeDto(PUBKEY_3.toString(), "Alice", true, RATING.getRating());
-        NodeDto charlie = new NodeDto(PUBKEY_2.toString(), "Charlie", true, RATING.getRating());
+        NodeDto bob = new NodeDto(PUBKEY.toString(), "Bob", true, RATING.value());
+        NodeDto alice = new NodeDto(PUBKEY_3.toString(), "Alice", true, RATING.value());
+        NodeDto charlie = new NodeDto(PUBKEY_2.toString(), "Charlie", true, RATING.value());
         List<NodeDto> nodesUnsorted = List.of(bob, charlie, alice);
         mockChannelsAndNodesAndWarnings(List.of(), nodesUnsorted, List.of());
 
@@ -105,9 +105,9 @@ class PageServiceTest {
 
     @Test
     void dashboard_nodes_grouped_offline_first() {
-        NodeDto offlineNode1 = new NodeDto(PUBKEY_3.toString(), "Offline-Node1", false, RATING.getRating());
-        NodeDto onlineNode = new NodeDto(PUBKEY.toString(), "Online-Node", true, RATING.getRating());
-        NodeDto offlineNode2 = new NodeDto(PUBKEY_2.toString(), "Offline-Node2", false, RATING.getRating());
+        NodeDto offlineNode1 = new NodeDto(PUBKEY_3.toString(), "Offline-Node1", false, RATING.value());
+        NodeDto onlineNode = new NodeDto(PUBKEY.toString(), "Online-Node", true, RATING.value());
+        NodeDto offlineNode2 = new NodeDto(PUBKEY_2.toString(), "Offline-Node2", false, RATING.value());
         List<NodeDto> nodesUnsorted = List.of(onlineNode, offlineNode2, offlineNode1);
         mockChannelsAndNodesAndWarnings(List.of(), nodesUnsorted, List.of());
 
@@ -155,9 +155,9 @@ class PageServiceTest {
 
     @Test
     void nodes_sorted() {
-        NodeDto bob = new NodeDto(PUBKEY.toString(), "Bob", true, RATING.getRating());
-        NodeDto alice = new NodeDto(PUBKEY_3.toString(), "alice", true, RATING.getRating());
-        NodeDto charlie = new NodeDto(PUBKEY_2.toString(), "Charlie", false, RATING.getRating());
+        NodeDto bob = new NodeDto(PUBKEY.toString(), "Bob", true, RATING.value());
+        NodeDto alice = new NodeDto(PUBKEY_3.toString(), "alice", true, RATING.value());
+        NodeDto charlie = new NodeDto(PUBKEY_2.toString(), "Charlie", false, RATING.value());
         List<NodeDto> nodesUnsorted = List.of(bob, charlie, alice);
         when(dataService.createNodeList()).thenReturn(nodesUnsorted);
 
@@ -167,7 +167,7 @@ class PageServiceTest {
 
     @Test
     void nodes_for_channels() {
-        NodeDto nodeDto = new NodeDto(PUBKEY.toString(), NODE.alias(), true, RATING.getRating());
+        NodeDto nodeDto = new NodeDto(PUBKEY.toString(), NODE.alias(), true, RATING.value());
         List<OpenChannelDto> channels = List.of(OPEN_CHANNEL_DTO);
         when(dataService.createNodeList(Set.of(PUBKEY))).thenReturn(List.of(nodeDto));
 
@@ -348,7 +348,7 @@ class PageServiceTest {
             return new OpenChannelDto(channelId, "mock-with-balance", PUBKEY,
                     PoliciesDto.createFromModel(UNKNOWN),
                     BalanceInformationModel.createFromModel(balance),
-                    CAPACITY_SAT, false, RATING.getRating()
+                    CAPACITY_SAT, false, RATING.value()
             );
         }
 
@@ -356,7 +356,7 @@ class PageServiceTest {
             return new OpenChannelDto(channelId, "mock-with-policies", PUBKEY,
                     policiesDto,
                     BalanceInformationModel.createFromModel(EMPTY),
-                    CAPACITY_SAT, false, RATING.getRating()
+                    CAPACITY_SAT, false, RATING.value()
             );
         }
 
@@ -364,7 +364,7 @@ class PageServiceTest {
             return new OpenChannelDto(channelId, alias, PUBKEY,
                     PoliciesDto.createFromModel(UNKNOWN),
                     BalanceInformationModel.createFromModel(EMPTY),
-                    CAPACITY_SAT, false, RATING.getRating()
+                    CAPACITY_SAT, false, RATING.value()
             );
         }
 
@@ -372,7 +372,7 @@ class PageServiceTest {
             return new OpenChannelDto(channelId, "mock-with-capacity", PUBKEY,
                     PoliciesDto.createFromModel(UNKNOWN),
                     BalanceInformationModel.createFromModel(EMPTY),
-                    capacity, false, RATING.getRating()
+                    capacity, false, RATING.value()
             );
         }
 
@@ -437,7 +437,7 @@ class PageServiceTest {
         }
 
         private NodeDto node(Pubkey pubkey, String alias, boolean online) {
-            return new NodeDto(pubkey.toString(), alias, online, RATING.getRating());
+            return new NodeDto(pubkey.toString(), alias, online, RATING.value());
         }
     }
 }

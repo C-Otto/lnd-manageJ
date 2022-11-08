@@ -4,38 +4,27 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.ChannelId;
-import de.cotto.lndmanagej.model.Coins;
-import de.cotto.lndmanagej.model.FeeReport;
-import de.cotto.lndmanagej.model.FlowReport;
 import de.cotto.lndmanagej.model.LocalChannel;
-import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.Rating;
-import de.cotto.lndmanagej.model.RebalanceReport;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
 
-import static de.cotto.lndmanagej.configuration.RatingConfigurationSettings.DAYS_FOR_ANALYSIS;
 import static de.cotto.lndmanagej.configuration.RatingConfigurationSettings.MIN_AGE_DAYS_FOR_ANALYSIS;
 
 @Component
 public class RatingService {
     private static final int DEFAULT_MIN_AGE_DAYS_FOR_ANALYSIS = 30;
-    private static final int DEFAULT_DAYS_FOR_ANALYSIS = 30;
     private static final Duration EXPIRY = Duration.ofHours(1);
     private static final Duration REFRESH = Duration.ofMillis(30);
 
     private final ChannelService channelService;
-    private final FeeService feeService;
-    private final RebalanceService rebalanceService;
-    private final PolicyService policyService;
     private final ConfigurationService configurationService;
-    private final BalanceService balanceService;
-    private final FlowService flowService;
     private final OverlappingChannelsService overlappingChannelsService;
+    private final RatingForChannelService ratingForChannelService;
     private final LoadingCache<Pubkey, Rating> peerCache = new CacheBuilder()
             .withExpiry(EXPIRY)
             .withRefresh(REFRESH)
@@ -51,22 +40,14 @@ public class RatingService {
 
     public RatingService(
             ChannelService channelService,
-            FeeService feeService,
-            RebalanceService rebalanceService,
-            PolicyService policyService,
             ConfigurationService configurationService,
-            BalanceService balanceService,
-            FlowService flowService,
-            OverlappingChannelsService overlappingChannelsService
+            OverlappingChannelsService overlappingChannelsService,
+            RatingForChannelService ratingForChannelService
     ) {
         this.channelService = channelService;
-        this.feeService = feeService;
-        this.rebalanceService = rebalanceService;
-        this.policyService = policyService;
         this.configurationService = configurationService;
-        this.balanceService = balanceService;
-        this.flowService = flowService;
         this.overlappingChannelsService = overlappingChannelsService;
+        this.ratingForChannelService = ratingForChannelService;
     }
 
     public Rating getRatingForPeer(Pubkey peer) {
@@ -81,57 +62,7 @@ public class RatingService {
         if (!eligibleChannels.contains(channelId)) {
             return Optional.empty();
         }
-        LocalChannel localChannel = channelService.getLocalChannel(channelId).orElse(null);
-        if (localChannel == null) {
-            return Optional.empty();
-        }
-        Duration durationForAnalysis = getDurationForAnalysis();
-        Optional<Coins> averageLocalBalanceOptional =
-                balanceService.getLocalBalanceAverage(channelId, (int) durationForAnalysis.toDays());
-        if (averageLocalBalanceOptional.isEmpty()) {
-            return Optional.empty();
-        }
-        FeeReport feeReport = feeService.getFeeReportForChannel(channelId, durationForAnalysis);
-        RebalanceReport rebalanceReport = rebalanceService.getReportForChannel(channelId, durationForAnalysis);
-        FlowReport flowReport = flowService.getFlowReportForChannel(channelId, durationForAnalysis);
-        long feeRate = policyService.getMinimumFeeRateTo(localChannel.getRemotePubkey()).orElse(0L);
-        long localAvailableMilliSat = getLocalAvailableMilliSat(localChannel);
-        double millionSat = 1.0 * localAvailableMilliSat / 1_000 / 1_000_000;
-        long averageSat = averageLocalBalanceOptional.get().satoshis();
-        if (averageSat == 0) {
-            averageSat = 1;
-        }
-
-        Rating rating = Rating.EMPTY;
-        rating = rating.addValueWithDetailKey(
-                feeReport.earned().milliSatoshis(),
-                channelId + " earned"
-        );
-        rating = rating.addValueWithDetailKey(
-                feeReport.sourced().milliSatoshis(),
-                channelId + " sourced"
-        );
-        rating = rating.addValueWithDetailKey(
-                flowReport.receivedViaPayments().milliSatoshis(),
-                channelId + " received via payments"
-        );
-        rating = rating.addValueWithDetailKey(
-                rebalanceReport.supportAsSourceAmount().milliSatoshis() / 10_000,
-                channelId + " support as source"
-        );
-        rating = rating.addValueWithDetailKey(
-                rebalanceReport.supportAsTargetAmount().milliSatoshis() / 10_000,
-                channelId + " support as target"
-        );
-        rating = rating.addValueWithDetailKey(
-                (long) (1.0 * feeRate * millionSat / 10),
-                channelId + " future earnings"
-        );
-
-        rating = rating.scaleBy(1_000_000.0 / averageSat, channelId + " scaled by liquidity");
-        rating = rating.scaleBy(1.0 / durationForAnalysis.toDays(), channelId + " scaled by days");
-
-        return Optional.of(rating.withDetail(channelId + " rating", rating.getRating()));
+        return ratingForChannelService.getRating(channelId);
     }
 
     private Set<ChannelId> getEligibleChannels(Pubkey peer) {
@@ -148,13 +79,6 @@ public class RatingService {
             return Set.of();
         }
         return candidates;
-    }
-
-    private long getLocalAvailableMilliSat(LocalChannel localChannel) {
-        if (localChannel instanceof LocalOpenChannel openChannel) {
-            return openChannel.getBalanceInformation().localAvailable().milliSatoshis();
-        }
-        return 0;
     }
 
     private Duration getMinAgeDaysForAnalysis() {
@@ -175,11 +99,5 @@ public class RatingService {
                 .map(channelId -> getRatingForChannel(channelId, eligibleChannels))
                 .flatMap(Optional::stream)
                 .reduce(Rating.EMPTY, Rating::add);
-    }
-
-    private Duration getDurationForAnalysis() {
-        return Duration.ofDays(
-                configurationService.getIntegerValue(DAYS_FOR_ANALYSIS).orElse(DEFAULT_DAYS_FOR_ANALYSIS)
-        );
     }
 }

@@ -11,7 +11,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Map;
 import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
@@ -39,15 +38,18 @@ class RatingControllerIT {
 
     @Test
     void getRatingForPeer() throws Exception {
-        when(ratingService.getRatingForPeer(PUBKEY)).thenReturn(new Rating(123, Map.of("a", "b", "c", "d")));
+        Rating rating = new Rating(123)
+                .withDescription("a", 456)
+                .withDescription("c", 789);
+        when(ratingService.getRatingForPeer(PUBKEY)).thenReturn(rating);
         mockMvc.perform(get(PREFIX + "/node/" + PUBKEY + RATING))
                 .andExpect(content().json("""
                         {
                           "rating": 123,
                           "message": "",
                           "details": {
-                            "a": "b",
-                            "c": "d"
+                            "a": "456",
+                            "c": "789"
                           }
                         }"""));
     }
@@ -61,14 +63,15 @@ class RatingControllerIT {
 
     @Test
     void getRatingForChannel() throws Exception {
-        when(ratingService.getRatingForChannel(CHANNEL_ID)).thenReturn(Optional.of(new Rating(123, Map.of("a", "b"))));
+        Rating rating = new Rating(123).withDescription("a", 456);
+        when(ratingService.getRatingForChannel(CHANNEL_ID)).thenReturn(Optional.of(rating));
         mockMvc.perform(get(PREFIX + "/channel/" + CHANNEL_ID + RATING))
                 .andExpect(content().json("""
                         {
                           "rating": 123,
                           "message": "",
                           "details": {
-                            "a": "b"
+                            "a": "456"
                           }
                         }"""));
     }
