@@ -1,4 +1,0 @@
-plugins {
-    id 'de.aaschmid.cpd'
-}
-check.dependsOn cpdCheck
