@@ -13,7 +13,7 @@ tasks.withType<JacocoReport>().configureEach {
 
 tasks.withType<JacocoCoverageVerification>().configureEach {
     dependsOn(tasks.withType<Test>())
-    dependsOn(tasks.named("jacocoTestReport"))
+    dependsOn(tasks.withType<JacocoReport>())
     executionData.setFrom(fileTree(buildDir).include("/jacoco/*.exec"))
 
     violationRules {
