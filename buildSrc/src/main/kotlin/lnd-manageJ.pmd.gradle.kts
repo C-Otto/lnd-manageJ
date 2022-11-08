@@ -19,3 +19,7 @@ tasks.withType<Test>().forEach { testTask ->
         }
     }
 }
+
+tasks.withType<Test>{
+    shouldRunAfter(tasks.withType<Pmd>())
+}
