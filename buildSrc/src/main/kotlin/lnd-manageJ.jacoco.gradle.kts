@@ -11,9 +11,27 @@ tasks.withType<JacocoReport>().configureEach {
     executionData.setFrom(fileTree(buildDir).include("/jacoco/*.exec"))
 }
 
+abstract class CheckForExecutionDataTask : DefaultTask() {
+    @InputFiles
+    val executionData = project.files()
+
+    @TaskAction
+    fun check() {
+        if (executionData.isEmpty) {
+            throw GradleException("No tests found for " + this.project)
+        }
+    }
+}
+
+tasks.register<CheckForExecutionDataTask>("checkForExecutionData") {
+    mustRunAfter(tasks.withType<Test>())
+    executionData.setFrom(fileTree(buildDir).include("/jacoco/*.exec"))
+}
+
 tasks.withType<JacocoCoverageVerification>().configureEach {
     dependsOn(tasks.withType<Test>())
     dependsOn(tasks.withType<JacocoReport>())
+    dependsOn(tasks.withType<CheckForExecutionDataTask>())
     executionData.setFrom(fileTree(buildDir).include("/jacoco/*.exec"))
 
     violationRules {
