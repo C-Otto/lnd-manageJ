@@ -3,7 +3,7 @@ package de.cotto.lndmanagej.service;
 import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ChannelRating;
-import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.CoinsAndDuration;
 import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.FlowReport;
 import de.cotto.lndmanagej.model.LocalChannel;
@@ -52,7 +52,7 @@ public class RatingForChannelService {
             return Optional.empty();
         }
         Duration durationForAnalysis = getDurationForAnalysis();
-        Optional<Coins> averageLocalBalanceOptional =
+        Optional<CoinsAndDuration> averageLocalBalanceOptional =
                 balanceService.getLocalBalanceAverage(channelId, (int) durationForAnalysis.toDays());
         if (averageLocalBalanceOptional.isEmpty()) {
             return Optional.empty();
@@ -78,7 +78,7 @@ public class RatingForChannelService {
         );
         rating = rating.addValueWithDescription((long) (1.0 * feeRate * millionSat / 10), "future earnings");
 
-        rating = rating.forAverageLocalBalance(averageLocalBalanceOptional.get());
+        rating = rating.forAverageLocalBalance(averageLocalBalanceOptional.get().coins());
         rating = rating.forDays(durationForAnalysis.toDays());
 
         return Optional.of(rating);

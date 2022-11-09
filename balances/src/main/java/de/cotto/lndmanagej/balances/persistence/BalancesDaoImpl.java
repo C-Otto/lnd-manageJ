@@ -5,6 +5,7 @@ import de.cotto.lndmanagej.balances.BalancesDao;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.CoinsAndDuration;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
@@ -59,16 +60,16 @@ class BalancesDaoImpl implements BalancesDao {
     }
 
     @Override
-    public Optional<Coins> getLocalBalanceAverageOpenChannel(ChannelId channelId, int days) {
+    public Optional<CoinsAndDuration> getLocalBalanceAverageOpenChannel(ChannelId channelId, int days) {
         return getLocalBalanceAverage(channelId, days, true);
     }
 
     @Override
-    public Optional<Coins> getLocalBalanceAverageClosedChannel(ChannelId channelId, int days) {
+    public Optional<CoinsAndDuration> getLocalBalanceAverageClosedChannel(ChannelId channelId, int days) {
         return getLocalBalanceAverage(channelId, days, false);
     }
 
-    private Optional<Coins> getLocalBalanceAverage(ChannelId channelId, int days, boolean open) {
+    private Optional<CoinsAndDuration> getLocalBalanceAverage(ChannelId channelId, int days, boolean open) {
         List<Balances> entries = getEntries(channelId, days);
         long totalSatoshis = 0;
         long totalMinutes = 0;
@@ -94,7 +95,7 @@ class BalancesDaoImpl implements BalancesDao {
             return Optional.empty();
         }
         Coins average = Coins.ofSatoshis(totalSatoshis / totalMinutes);
-        return Optional.of(average);
+        return Optional.of(new CoinsAndDuration(average, Duration.ofMinutes(totalMinutes)));
     }
 
     private List<Balances> getEntries(ChannelId channelId, int days) {

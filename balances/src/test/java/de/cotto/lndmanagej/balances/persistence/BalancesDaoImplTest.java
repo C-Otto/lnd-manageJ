@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.balances.persistence;
 import de.cotto.lndmanagej.balances.Balances;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.CoinsAndDuration;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Duration;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -130,7 +132,10 @@ class BalancesDaoImplTest {
         @Test
         void one_entry() {
             Balances balances = getWithLocalBalance(Coins.ofSatoshis(100), 10);
-            Coins expected = balances.balanceInformation().localBalance();
+            CoinsAndDuration expected = new CoinsAndDuration(
+                    balances.balanceInformation().localBalance(),
+                    Duration.ofMinutes(10)
+            );
             when(balancesRepository.findByChannelIdOrderByTimestampDesc(eq(CHANNEL_ID.getShortChannelId())))
                     .thenReturn(Stream.of(BalancesJpaDto.fromModel(balances)));
             assertThat(dao.getLocalBalanceAverageOpenChannel(CHANNEL_ID, DAYS)).contains(expected);
@@ -142,23 +147,30 @@ class BalancesDaoImplTest {
             Balances balances2 = getWithLocalBalance(Coins.ofSatoshis(300), 20);
             when(balancesRepository.findByChannelIdOrderByTimestampDesc(anyLong()))
                     .thenReturn(Stream.of(BalancesJpaDto.fromModel(balances1), BalancesJpaDto.fromModel(balances2)));
-            assertThat(dao.getLocalBalanceAverageOpenChannel(CHANNEL_ID, DAYS)).contains(Coins.ofSatoshis(200));
+            CoinsAndDuration expected = new CoinsAndDuration(Coins.ofSatoshis(200), Duration.ofMinutes(20));
+            assertThat(dao.getLocalBalanceAverageOpenChannel(CHANNEL_ID, DAYS)).contains(expected);
         }
 
         @Test
         void one_old_entry() {
-            Balances balances = getWithLocalBalance(Coins.ofSatoshis(300), 99 * 24 * 60);
+            Balances balances = getWithLocalBalance(Coins.ofSatoshis(300), DAYS + 85 * 24 * 60);
             when(balancesRepository.findByChannelIdOrderByTimestampDesc(anyLong()))
                     .thenReturn(Stream.of(BalancesJpaDto.fromModel(balances)));
-            assertThat(dao.getLocalBalanceAverageOpenChannel(CHANNEL_ID, DAYS))
-                    .contains(balances.balanceInformation().localBalance());
+            CoinsAndDuration expected = new CoinsAndDuration(
+                    balances.balanceInformation().localBalance(),
+                    Duration.ofMinutes(DAYS * 24 * 60 - 1)
+            );
+            assertThat(dao.getLocalBalanceAverageOpenChannel(CHANNEL_ID, DAYS)).contains(expected);
         }
 
         @Test
         void two_entries_one_very_old() {
             Balances balances1 = getWithLocalBalance(Coins.ofSatoshis(100), 7 * 24 * 60);
             Balances balances2 = getWithLocalBalance(Coins.ofSatoshis(300), 99 * 24 * 60);
-            Coins expected = Coins.ofSatoshis(199);
+            CoinsAndDuration expected = new CoinsAndDuration(
+                    Coins.ofSatoshis(199),
+                    Duration.ofMinutes(DAYS * 24 * 60 - 1)
+            );
             when(balancesRepository.findByChannelIdOrderByTimestampDesc(anyLong()))
                     .thenReturn(Stream.of(BalancesJpaDto.fromModel(balances1), BalancesJpaDto.fromModel(balances2)));
             assertThat(dao.getLocalBalanceAverageOpenChannel(CHANNEL_ID, DAYS)).contains(expected);
@@ -169,7 +181,10 @@ class BalancesDaoImplTest {
             Balances balances1 = getWithLocalBalance(Coins.ofSatoshis(1), 80);
             Balances balances2 = getWithLocalBalance(Coins.ofSatoshis(1_000_000), 90);
             Balances balances3 = getWithLocalBalance(Coins.ofSatoshis(2_000_000), 100);
-            Coins expected = Coins.ofSatoshis(1_500_000);
+            CoinsAndDuration expected = new CoinsAndDuration(
+                    Coins.ofSatoshis(1_500_000),
+                    Duration.ofMinutes(100 - 80)
+            );
             when(balancesRepository.findByChannelIdOrderByTimestampDesc(eq(CHANNEL_ID.getShortChannelId())))
                     .thenReturn(Stream.of(
                             BalancesJpaDto.fromModel(balances1),

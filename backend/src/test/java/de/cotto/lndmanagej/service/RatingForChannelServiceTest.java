@@ -4,6 +4,7 @@ import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelCoreInformation;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.CoinsAndDuration;
 import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.FlowReport;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
@@ -76,7 +77,7 @@ class RatingForChannelServiceTest {
         lenient().when(rebalanceService.getReportForChannel(any(), any())).thenReturn(RebalanceReport.EMPTY);
         lenient().when(configurationService.getIntegerValue(any())).thenReturn(Optional.empty());
         lenient().when(balanceService.getLocalBalanceAverage(any(), anyInt()))
-                .thenReturn(Optional.of(Coins.ofSatoshis(1_000_000)));
+                .thenReturn(Optional.of(new CoinsAndDuration(Coins.ofSatoshis(1_000_000), Duration.ZERO)));
         lenient().when(flowService.getFlowReportForChannel(any(), any())).thenReturn(FlowReport.EMPTY);
         ratingForChannelService = new RatingForChannelService(
                 channelService,
@@ -212,7 +213,7 @@ class RatingForChannelServiceTest {
     @Test
     void zero_balance_on_average() {
         when(balanceService.getLocalBalanceAverage(CHANNEL_ID, ANALYSIS_DAYS))
-                .thenReturn(Optional.of(Coins.NONE));
+                .thenReturn(Optional.of(new CoinsAndDuration(Coins.NONE, Duration.ZERO)));
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         long averageSat = ratingForChannelService.getRating(CHANNEL_ID).map(Rating::getValue).orElseThrow();
         assertThat(averageSat).isLessThan(Integer.MAX_VALUE);
@@ -268,7 +269,7 @@ class RatingForChannelServiceTest {
         LocalOpenChannel localOpenChannel = getLocalOpenChannel(localAvailable);
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(localOpenChannel));
         when(balanceService.getLocalBalanceAverage(CHANNEL_ID, ANALYSIS_DAYS))
-                .thenReturn(Optional.of(localAvailable));
+                .thenReturn(Optional.of(new CoinsAndDuration(localAvailable, Duration.ZERO)));
         when(feeService.getFeeReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
                 .thenReturn(new FeeReport(Coins.ofMilliSatoshis(100_000 * ANALYSIS_DAYS), Coins.NONE));
         assertThat(ratingForChannelService.getRating(CHANNEL_ID).orElseThrow().getValue()).isEqualTo(expectedRating);

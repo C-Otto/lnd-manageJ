@@ -4,12 +4,14 @@ import de.cotto.lndmanagej.balances.BalancesDao;
 import de.cotto.lndmanagej.grpc.GrpcChannels;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.CoinsAndDuration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
 
@@ -143,8 +145,9 @@ class BalanceServiceTest {
     void getLocalBalanceAverage() {
         int days = 14;
         Coins coins = Coins.ofSatoshis(456);
-        when(balancesDao.getLocalBalanceAverageOpenChannel(CHANNEL_ID, days)).thenReturn(Optional.of(coins));
-        assertThat(balanceService.getLocalBalanceAverage(CHANNEL_ID, days)).contains(coins);
+        CoinsAndDuration expected = new CoinsAndDuration(coins, Duration.ofMinutes(123));
+        when(balancesDao.getLocalBalanceAverageOpenChannel(CHANNEL_ID, days)).thenReturn(Optional.of(expected));
+        assertThat(balanceService.getLocalBalanceAverage(CHANNEL_ID, days)).contains(expected);
     }
 
     @Test
@@ -152,8 +155,9 @@ class BalanceServiceTest {
         int days = 14;
         Coins coins = Coins.ofSatoshis(456);
         when(channelService.isClosed(CHANNEL_ID)).thenReturn(true);
-        when(balancesDao.getLocalBalanceAverageClosedChannel(CHANNEL_ID, days)).thenReturn(Optional.of(coins));
-        assertThat(balanceService.getLocalBalanceAverage(CHANNEL_ID, days)).contains(coins);
+        CoinsAndDuration expected = new CoinsAndDuration(coins, Duration.ofMinutes(123));
+        when(balancesDao.getLocalBalanceAverageClosedChannel(CHANNEL_ID, days)).thenReturn(Optional.of(expected));
+        assertThat(balanceService.getLocalBalanceAverage(CHANNEL_ID, days)).contains(expected);
     }
 
     private void mockChannels() {

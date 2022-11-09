@@ -7,6 +7,7 @@ import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Channel;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
+import de.cotto.lndmanagej.model.CoinsAndDuration;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.Pubkey;
 import org.springframework.stereotype.Component;
@@ -85,7 +86,7 @@ public class BalanceService {
     }
 
     @Timed
-    public Optional<Coins> getLocalBalanceAverage(ChannelId channelId, int days) {
+    public Optional<CoinsAndDuration> getLocalBalanceAverage(ChannelId channelId, int days) {
         if (channelService.isClosed(channelId)) {
             return balancesDao.getLocalBalanceAverageClosedChannel(channelId, days);
         }
