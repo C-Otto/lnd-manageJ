@@ -258,7 +258,7 @@ class RatingForChannelServiceTest {
                 "712345x123x1 support as target", 0L,
                 "712345x123x1 future earnings", 0L,
                 "712345x123x1 scaled by days", 1.0 / 30,
-                "712345x123x1 scaled by liquidity (for 23 days)", 1.0d,
+                "712345x123x1 scaled by liquidity (1.0 million sats for 23 days)", 1.0d,
                 "712345x123x1 rating", 10_000L
         );
         assertThat(ratingForChannelService.getRating(CHANNEL_ID).map(Rating::getDescriptions).orElse(Map.of()))

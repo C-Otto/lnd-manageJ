@@ -50,7 +50,7 @@ public final class ChannelRating implements Rating {
         double factor = 1.0 / millionSatoshis;
         long newValue = (long) (value * factor);
         long days = averageLocalBalance.duration().toDays();
-        String description = "scaled by liquidity (for %s days)".formatted(days);
+        String description = "scaled by liquidity (%.1f million sats for %s days)".formatted(millionSatoshis, days);
         return new ChannelRating(channelId, newValue, descriptions)
                 .withDescription(description, factor);
     }

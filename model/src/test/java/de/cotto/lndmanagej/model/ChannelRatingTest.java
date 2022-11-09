@@ -154,7 +154,7 @@ class ChannelRatingTest {
             Map<String, Number> expectedDescriptions = Map.of(
                     CHANNEL_ID + " a", 100L,
                     RATING.formatted(CHANNEL_ID), 200L,
-                    CHANNEL_ID + " scaled by liquidity (for 123 days)", 2.0
+                    CHANNEL_ID + " scaled by liquidity (0.5 million sats for 123 days)", 2.0
             );
             CoinsAndDuration averageLocalBalance = new CoinsAndDuration(
                     Coins.ofSatoshis(500_000),
