@@ -86,6 +86,22 @@ class ChannelRatingTest {
                             RATING.formatted(CHANNEL_ID), 456L + 789 + 111 + 123
                     ));
         }
+
+        @Test
+        void with_average_local_balance_combined_with_instance_without() {
+            CoinsAndDuration expected = new CoinsAndDuration(Coins.ofSatoshis(1_000_000), Duration.ofDays(1));
+            ChannelRating with = ChannelRating.forChannel(CHANNEL_ID).forAverageLocalBalance(expected);
+            ChannelRating without = ChannelRating.forChannel(CHANNEL_ID);
+            assertThat(with.combine(without).getAverageLocalLiquidity()).isEqualTo(expected);
+        }
+
+        @Test
+        void without_average_local_balance_combined_with_instance_with() {
+            CoinsAndDuration expected = new CoinsAndDuration(Coins.ofSatoshis(1_000_000), Duration.ofDays(1));
+            ChannelRating with = ChannelRating.forChannel(CHANNEL_ID).forAverageLocalBalance(expected);
+            ChannelRating without = ChannelRating.forChannel(CHANNEL_ID);
+            assertThat(without.combine(with).getAverageLocalLiquidity()).isEqualTo(expected);
+        }
     }
 
     @Nested
