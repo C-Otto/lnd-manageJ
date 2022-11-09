@@ -5,16 +5,18 @@ import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.OpenInitiator;
 import de.cotto.lndmanagej.model.PoliciesForLocalChannel;
-import de.cotto.lndmanagej.model.Rating;
 import de.cotto.lndmanagej.model.RebalanceReport;
 import de.cotto.lndmanagej.model.warnings.ChannelWarnings;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.ChannelDetailsFixtures.CHANNEL_DETAILS;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
+import static de.cotto.lndmanagej.model.ChannelRatingFixtures.RATING;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
@@ -24,7 +26,6 @@ import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.OpenCloseStatus.OPEN;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES_FOR_LOCAL_CHANNEL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
-import static de.cotto.lndmanagej.model.RatingFixtures.RATING;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static de.cotto.lndmanagej.model.warnings.ChannelWarningsFixtures.CHANNEL_WARNINGS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,7 +46,7 @@ class ChannelDetailsDtoTest {
             FLOW_REPORT,
             REBALANCE_REPORT,
             CHANNEL_WARNINGS,
-            RATING
+            Optional.of(RATING)
     );
 
     @Test
@@ -60,7 +61,7 @@ class ChannelDetailsDtoTest {
                 FLOW_REPORT,
                 REBALANCE_REPORT,
                 CHANNEL_WARNINGS,
-                RATING
+                Optional.of(RATING)
         );
         assertThat(ChannelDetailsDto.createFromModel(CHANNEL_DETAILS)).isEqualTo(expected);
     }
@@ -122,7 +123,7 @@ class ChannelDetailsDtoTest {
                 FLOW_REPORT,
                 RebalanceReport.EMPTY,
                 ChannelWarnings.NONE,
-                Rating.EMPTY
+                Optional.empty()
         );
         ChannelStatusDto channelStatusDto =
                 ChannelStatusDto.createFromModel(new ChannelStatus(false, true, false, OPEN));

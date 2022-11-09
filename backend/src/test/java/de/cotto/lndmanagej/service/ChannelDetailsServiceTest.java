@@ -4,7 +4,6 @@ import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelDetails;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.PoliciesForLocalChannel;
-import de.cotto.lndmanagej.model.Rating;
 import de.cotto.lndmanagej.model.RebalanceReport;
 import de.cotto.lndmanagej.model.warnings.ChannelWarnings;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +17,7 @@ import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.ChannelDetailsFixtures.CHANNEL_DETAILS;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.ChannelRatingFixtures.RATING;
 import static de.cotto.lndmanagej.model.CoopClosedChannelFixtures.CLOSED_CHANNEL;
 import static de.cotto.lndmanagej.model.FeeReportFixtures.FEE_REPORT;
 import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT;
@@ -28,7 +28,6 @@ import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES_FOR_LOCAL_CHANNEL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
-import static de.cotto.lndmanagej.model.RatingFixtures.RATING;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static de.cotto.lndmanagej.model.WaitingCloseChannelFixtures.WAITING_CLOSE_CHANNEL;
 import static de.cotto.lndmanagej.model.warnings.ChannelWarningsFixtures.CHANNEL_WARNINGS;
@@ -76,7 +75,7 @@ class ChannelDetailsServiceTest {
         lenient().when(flowService.getFlowReportForChannel(CHANNEL_ID)).thenReturn(FLOW_REPORT);
         lenient().when(policyService.getPolicies(LOCAL_OPEN_CHANNEL)).thenReturn(POLICIES_FOR_LOCAL_CHANNEL);
         lenient().when(channelWarningsService.getChannelWarnings(CHANNEL_ID)).thenReturn(ChannelWarnings.NONE);
-        lenient().when(ratingService.getRatingForChannel(CHANNEL_ID)).thenReturn(Optional.of(Rating.EMPTY));
+        lenient().when(ratingService.getRatingForChannel(CHANNEL_ID)).thenReturn(Optional.empty());
     }
 
     @Test
@@ -103,7 +102,7 @@ class ChannelDetailsServiceTest {
                 FLOW_REPORT,
                 RebalanceReport.EMPTY,
                 ChannelWarnings.NONE,
-                Rating.EMPTY
+                Optional.empty()
         );
         when(nodeService.getAlias(PUBKEY_2)).thenReturn(ALIAS_2);
         when(balanceService.getBalanceInformation(CHANNEL_ID))
@@ -138,7 +137,7 @@ class ChannelDetailsServiceTest {
                 FLOW_REPORT,
                 RebalanceReport.EMPTY,
                 ChannelWarnings.NONE,
-                Rating.EMPTY
+                Optional.empty()
         );
     }
 }

@@ -1,7 +1,7 @@
 package de.cotto.lndmanagej.controller.dto;
 
+import de.cotto.lndmanagej.model.ChannelRatingFixtures;
 import de.cotto.lndmanagej.model.PubkeyFixtures;
-import de.cotto.lndmanagej.model.RatingFixtures;
 
 import java.util.List;
 
@@ -30,6 +30,6 @@ public class NodeDetailsDtoFixture {
             FlowReportDto.createFromModel(FLOW_REPORT),
             RebalanceReportDto.createFromModel(REBALANCE_REPORT),
             CHANNEL_WARNINGS.descriptions(),
-            RatingDto.fromModel(RatingFixtures.RATING)
+            RatingDto.fromModel(ChannelRatingFixtures.RATING)
     );
 }

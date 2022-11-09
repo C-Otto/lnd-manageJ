@@ -2,13 +2,13 @@ package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.ChannelRating;
 import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.ClosedChannelFixtures;
 import de.cotto.lndmanagej.model.CoopClosedChannel;
 import de.cotto.lndmanagej.model.CoopClosedChannelBuilder;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
-import de.cotto.lndmanagej.model.Rating;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import static de.cotto.lndmanagej.configuration.RatingConfigurationSettings.MIN_AGE_DAYS_FOR_ANALYSIS;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
+import static de.cotto.lndmanagej.model.ChannelRatingFixtures.ratingWithValue;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
@@ -57,7 +58,8 @@ class RatingServiceTest {
         int daysAhead = LOCAL_OPEN_CHANNEL_2.getId().getBlockHeight() + 100 * 24 * 60 / 10;
         lenient().when(ownNodeService.getBlockHeight()).thenReturn(daysAhead);
         lenient().when(configurationService.getIntegerValue(any())).thenReturn(Optional.empty());
-        Rating defaultRating = new Rating(10_000).withDescription("some description", 123);
+        ChannelRating defaultRating = ChannelRating.forChannel(CHANNEL_ID)
+                .addValueWithDescription(10_000, "some description");
         lenient().when(ratingForChannelService.getRating(any())).thenReturn(Optional.of(defaultRating));
         OverlappingChannelsService overlappingChannelsService = new OverlappingChannelsService(
                 channelService,
@@ -74,39 +76,40 @@ class RatingServiceTest {
     @Test
     void getRatingForPeer_no_channel() {
         mockChannels();
-        assertThat(ratingService.getRatingForPeer(PUBKEY)).isEqualTo(Rating.EMPTY);
+        assertThat(ratingService.getRatingForPeer(PUBKEY).isEmpty()).isTrue();
     }
 
     @Test
     void getRatingForPeer_channel_too_young() {
         when(ownNodeService.getBlockHeight()).thenReturn(LOCAL_OPEN_CHANNEL.getId().getBlockHeight() + 10);
         mockChannels(LOCAL_OPEN_CHANNEL);
-        assertThat(ratingService.getRatingForPeer(PUBKEY_2)).isEqualTo(Rating.EMPTY);
+        assertThat(ratingService.getRatingForPeer(PUBKEY_2).isEmpty()).isTrue();
     }
 
     @Test
     void getRatingForPeer_one_channel() {
         mockChannels(LOCAL_OPEN_CHANNEL);
-        assertThat(ratingService.getRatingForPeer(PUBKEY_2).getValue()).isEqualTo(10_000L);
+        assertThat(ratingService.getRatingForPeer(PUBKEY_2).orElseThrow().getValue()).isEqualTo(10_000L);
     }
 
     @Test
     void getRatingForPeer_includes_details() {
         mockChannels(LOCAL_OPEN_CHANNEL);
-        assertThat(ratingService.getRatingForPeer(PUBKEY_2).getDescriptions())
-                .containsEntry("some description", 123);
+        assertThat(ratingService.getRatingForPeer(PUBKEY_2).orElseThrow().getDescriptions())
+                .containsEntry(PUBKEY_2 + " rating", 10_000L)
+                .containsEntry(CHANNEL_ID + " rating", 10_000L);
     }
 
     @Test
     void getRatingForPeer_two_channels() {
         mockChannels(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2);
-        assertThat(ratingService.getRatingForPeer(PUBKEY_2).getValue()).isEqualTo(2 * 10_000L);
+        assertThat(ratingService.getRatingForPeer(PUBKEY_2).orElseThrow().getValue()).isEqualTo(2 * 10_000L);
     }
 
     @Test
     void getRatingForChannel() {
         mockChannels(LOCAL_OPEN_CHANNEL);
-        Rating expected = new Rating(123);
+        ChannelRating expected = ratingWithValue(123);
         when(ratingForChannelService.getRating(CHANNEL_ID)).thenReturn(Optional.of(expected));
         assertThat(ratingService.getRatingForChannel(CHANNEL_ID)).contains(expected);
     }
@@ -148,7 +151,7 @@ class RatingServiceTest {
 
         @Test
         void getRatingForPeer() {
-            assertThat(ratingService.getRatingForPeer(PUBKEY_2).getValue()).isEqualTo(20_000L);
+            assertThat(ratingService.getRatingForPeer(PUBKEY_2).orElseThrow().getValue()).isEqualTo(20_000L);
         }
     }
 
@@ -168,7 +171,7 @@ class RatingServiceTest {
         assumeThat(blockHeight - openHeightClosedChannelOld).isGreaterThanOrEqualTo(defaultMinAge * 24 * 60 / 10);
 
         mockChannels(LOCAL_OPEN_CHANNEL, closedChannelYoung, closedChannelOld);
-        assertThat(ratingService.getRatingForPeer(PUBKEY_2).getValue()).isEqualTo(30_000L);
+        assertThat(ratingService.getRatingForPeer(PUBKEY_2).orElseThrow().getValue()).isEqualTo(30_000L);
     }
 
     @Test
@@ -185,7 +188,7 @@ class RatingServiceTest {
         assumeThat(blockHeight - openHeightClosedChannel).isGreaterThanOrEqualTo(defaultMinAge * 24 * 60 / 10);
 
         mockChannels(LOCAL_OPEN_CHANNEL, closedChannelWithGap);
-        assertThat(ratingService.getRatingForPeer(PUBKEY_2)).isEqualTo(Rating.EMPTY);
+        assertThat(ratingService.getRatingForPeer(PUBKEY_2).isEmpty()).isTrue();
     }
 
     private void mockChannels(LocalChannel... localChannels) {

@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.model;
 import de.cotto.lndmanagej.model.warnings.NodeWarnings;
 
 import java.util.List;
+import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
@@ -15,8 +16,8 @@ import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT;
 import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT_OFFLINE;
+import static de.cotto.lndmanagej.model.PeerRatingFixtures.PEER_RATING;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
-import static de.cotto.lndmanagej.model.RatingFixtures.RATING;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static de.cotto.lndmanagej.model.warnings.NodeWarningsFixtures.NODE_WARNINGS;
 
@@ -35,7 +36,7 @@ public class NodeDetailsFixtures {
             FLOW_REPORT,
             REBALANCE_REPORT,
             NODE_WARNINGS,
-            RATING
+            Optional.of(PEER_RATING)
     );
     public static final NodeDetails NODE_DETAILS_EMPTY = new NodeDetails(
             PUBKEY,
@@ -51,6 +52,6 @@ public class NodeDetailsFixtures {
             FlowReport.EMPTY,
             RebalanceReport.EMPTY,
             NodeWarnings.NONE,
-            Rating.EMPTY
+            Optional.empty()
     );
 }

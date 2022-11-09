@@ -1,12 +1,12 @@
 package de.cotto.lndmanagej.ui.dto;
 
+import static de.cotto.lndmanagej.model.ChannelRatingFixtures.RATING;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_2;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_3;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
-import static de.cotto.lndmanagej.model.RatingFixtures.RATING;
 
 public class NodeDtoFixture {
     public static final NodeDto NODE_DTO = new NodeDto(

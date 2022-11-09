@@ -9,13 +9,14 @@ import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.NodeDetails;
 import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.model.OnlineReport;
+import de.cotto.lndmanagej.model.PeerRating;
 import de.cotto.lndmanagej.model.Pubkey;
-import de.cotto.lndmanagej.model.Rating;
 import de.cotto.lndmanagej.model.RebalanceReport;
 import de.cotto.lndmanagej.model.warnings.NodeWarnings;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -67,7 +68,7 @@ public class NodeDetailsService {
         CompletableFuture<FlowReport> flowReport = getFlowReport(pubkey);
         CompletableFuture<RebalanceReport> rebalanceReport = getRebalanceReport(pubkey);
         CompletableFuture<NodeWarnings> nodeWarnings = getNodeWarnings(pubkey);
-        CompletableFuture<Rating> rating = getRating(pubkey);
+        CompletableFuture<Optional<PeerRating>> rating = getRating(pubkey);
         List<ChannelId> openChannelIds =
                 getSortedChannelIds(channelService.getOpenChannelsWith(pubkey));
         List<ChannelId> closedChannelIds =
@@ -122,7 +123,7 @@ public class NodeDetailsService {
         return CompletableFuture.supplyAsync(() -> warningsService.getNodeWarnings(pubkey));
     }
 
-    private CompletableFuture<Rating> getRating(Pubkey pubkey) {
+    private CompletableFuture<Optional<PeerRating>> getRating(Pubkey pubkey) {
         return CompletableFuture.supplyAsync(() -> ratingService.getRatingForPeer(pubkey));
     }
 

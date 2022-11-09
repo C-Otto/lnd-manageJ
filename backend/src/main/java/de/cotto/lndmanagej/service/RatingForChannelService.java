@@ -2,12 +2,12 @@ package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.ChannelRating;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.FlowReport;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
-import de.cotto.lndmanagej.model.Rating;
 import de.cotto.lndmanagej.model.RebalanceReport;
 import org.springframework.stereotype.Component;
 
@@ -46,7 +46,7 @@ public class RatingForChannelService {
         this.configurationService = configurationService;
     }
 
-    public Optional<Rating> getRating(ChannelId channelId) {
+    public Optional<ChannelRating> getRating(ChannelId channelId) {
         LocalChannel localChannel = channelService.getLocalChannel(channelId).orElse(null);
         if (localChannel == null) {
             return Optional.empty();
@@ -64,36 +64,24 @@ public class RatingForChannelService {
         long localAvailableMilliSat = getLocalAvailableMilliSat(localChannel);
         double millionSat = 1.0 * localAvailableMilliSat / 1_000 / 1_000_000;
 
-        Rating rating = Rating.EMPTY;
+        ChannelRating rating = ChannelRating.forChannel(channelId);
+        rating = rating.addValueWithDescription(feeReport.earned().milliSatoshis(), "earned");
+        rating = rating.addValueWithDescription(feeReport.sourced().milliSatoshis(), "sourced");
         rating = rating.addValueWithDescription(
-                feeReport.earned().milliSatoshis(),
-                channelId + " earned"
+                flowReport.receivedViaPayments().milliSatoshis(), "received via payments"
         );
         rating = rating.addValueWithDescription(
-                feeReport.sourced().milliSatoshis(),
-                channelId + " sourced"
+                rebalanceReport.supportAsSourceAmount().milliSatoshis() / 10_000, "support as source"
         );
         rating = rating.addValueWithDescription(
-                flowReport.receivedViaPayments().milliSatoshis(),
-                channelId + " received via payments"
+                rebalanceReport.supportAsTargetAmount().milliSatoshis() / 10_000, "support as target"
         );
-        rating = rating.addValueWithDescription(
-                rebalanceReport.supportAsSourceAmount().milliSatoshis() / 10_000,
-                channelId + " support as source"
-        );
-        rating = rating.addValueWithDescription(
-                rebalanceReport.supportAsTargetAmount().milliSatoshis() / 10_000,
-                channelId + " support as target"
-        );
-        rating = rating.addValueWithDescription(
-                (long) (1.0 * feeRate * millionSat / 10),
-                channelId + " future earnings"
-        );
+        rating = rating.addValueWithDescription((long) (1.0 * feeRate * millionSat / 10), "future earnings");
 
-        rating = rating.forAverageLocalBalance(averageLocalBalanceOptional.get(), channelId);
-        rating = rating.forDays(durationForAnalysis.toDays(), channelId);
+        rating = rating.forAverageLocalBalance(averageLocalBalanceOptional.get());
+        rating = rating.forDays(durationForAnalysis.toDays());
 
-        return Optional.of(rating.withDescription(channelId + " rating", rating.getValue()));
+        return Optional.of(rating);
     }
 
     private long getLocalAvailableMilliSat(LocalChannel localChannel) {

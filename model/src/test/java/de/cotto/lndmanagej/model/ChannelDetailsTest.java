@@ -4,13 +4,13 @@ import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.ChannelDetailsFixtures.CHANNEL_DETAILS;
+import static de.cotto.lndmanagej.model.ChannelRatingFixtures.RATING;
 import static de.cotto.lndmanagej.model.FeeReportFixtures.FEE_REPORT;
 import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES_FOR_LOCAL_CHANNEL;
-import static de.cotto.lndmanagej.model.RatingFixtures.RATING;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static de.cotto.lndmanagej.model.warnings.ChannelWarningsFixtures.CHANNEL_WARNINGS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -63,6 +63,6 @@ class ChannelDetailsTest {
 
     @Test
     void rating() {
-        assertThat(CHANNEL_DETAILS.rating()).isEqualTo(RATING);
+        assertThat(CHANNEL_DETAILS.rating()).contains(RATING);
     }
 }

@@ -2,6 +2,8 @@ package de.cotto.lndmanagej.model;
 
 import de.cotto.lndmanagej.model.warnings.ChannelWarnings;
 
+import java.util.Optional;
+
 public record ChannelDetails(
         LocalChannel localChannel,
         String remoteAlias,
@@ -12,6 +14,6 @@ public record ChannelDetails(
         FlowReport flowReport,
         RebalanceReport rebalanceReport,
         ChannelWarnings warnings,
-        Rating rating
+        Optional<ChannelRating> rating
 ) {
 }

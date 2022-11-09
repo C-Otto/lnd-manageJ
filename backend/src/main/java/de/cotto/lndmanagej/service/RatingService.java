@@ -4,12 +4,14 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import de.cotto.lndmanagej.caching.CacheBuilder;
 import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.ChannelRating;
 import de.cotto.lndmanagej.model.LocalChannel;
+import de.cotto.lndmanagej.model.PeerRating;
 import de.cotto.lndmanagej.model.Pubkey;
-import de.cotto.lndmanagej.model.Rating;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -25,11 +27,11 @@ public class RatingService {
     private final ConfigurationService configurationService;
     private final OverlappingChannelsService overlappingChannelsService;
     private final RatingForChannelService ratingForChannelService;
-    private final LoadingCache<Pubkey, Rating> peerCache = new CacheBuilder()
+    private final LoadingCache<Pubkey, Optional<PeerRating>> peerCache = new CacheBuilder()
             .withExpiry(EXPIRY)
             .withRefresh(REFRESH)
             .build(this::getRatingForPeerWithoutCache);
-    private final LoadingCache<ChannelId, Optional<Rating>> channelCache = new CacheBuilder()
+    private final LoadingCache<ChannelId, Optional<ChannelRating>> channelCache = new CacheBuilder()
             .withExpiry(EXPIRY)
             .withRefresh(REFRESH)
             .build(this::getRatingForChannelWithoutCache);
@@ -50,15 +52,15 @@ public class RatingService {
         this.ratingForChannelService = ratingForChannelService;
     }
 
-    public Rating getRatingForPeer(Pubkey peer) {
+    public Optional<PeerRating> getRatingForPeer(Pubkey peer) {
         return peerCache.get(peer);
     }
 
-    public Optional<Rating> getRatingForChannel(ChannelId channelId) {
+    public Optional<ChannelRating> getRatingForChannel(ChannelId channelId) {
         return channelCache.get(channelId);
     }
 
-    private Optional<Rating> getRatingForChannel(ChannelId channelId, Set<ChannelId> eligibleChannels) {
+    private Optional<ChannelRating> getRatingForChannel(ChannelId channelId, Set<ChannelId> eligibleChannels) {
         if (!eligibleChannels.contains(channelId)) {
             return Optional.empty();
         }
@@ -87,17 +89,25 @@ public class RatingService {
         return Duration.ofDays(days);
     }
 
-    private Optional<Rating> getRatingForChannelWithoutCache(ChannelId channelId) {
+    private Optional<ChannelRating> getRatingForChannelWithoutCache(ChannelId channelId) {
         return channelService.getOpenChannel(channelId).map(LocalChannel::getRemotePubkey)
                 .map(this::getEligibleChannels)
                 .flatMap(eligibleChannels -> getRatingForChannel(channelId, eligibleChannels));
     }
 
-    private Rating getRatingForPeerWithoutCache(Pubkey peer) {
+    private Optional<PeerRating> getRatingForPeerWithoutCache(Pubkey peer) {
         Set<ChannelId> eligibleChannels = getEligibleChannels(peer);
-        return eligibleChannels.stream()
+        List<ChannelRating> channelRatings = eligibleChannels.stream()
                 .map(channelId -> getRatingForChannel(channelId, eligibleChannels))
                 .flatMap(Optional::stream)
-                .reduce(Rating.EMPTY, Rating::combine);
+                .toList();
+        if (channelRatings.isEmpty()) {
+            return Optional.empty();
+        }
+        PeerRating peerRating = PeerRating.forPeer(peer);
+        for (ChannelRating channelRating : channelRatings) {
+            peerRating = peerRating.withChannelRating(channelRating);
+        }
+        return Optional.of(peerRating);
     }
 }

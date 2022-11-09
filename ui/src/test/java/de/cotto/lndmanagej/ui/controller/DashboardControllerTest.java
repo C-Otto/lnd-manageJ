@@ -15,9 +15,9 @@ import org.springframework.ui.Model;
 import java.util.List;
 import java.util.Map;
 
+import static de.cotto.lndmanagej.model.ChannelRatingFixtures.RATING;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_PEER;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
-import static de.cotto.lndmanagej.model.RatingFixtures.RATING;
 import static de.cotto.lndmanagej.ui.controller.param.SortBy.DEFAULT_SORT;
 import static de.cotto.lndmanagej.ui.controller.param.SortBy.RATIO;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;

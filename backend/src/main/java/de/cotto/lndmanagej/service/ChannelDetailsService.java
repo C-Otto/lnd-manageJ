@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.service;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelDetails;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.ChannelRating;
 import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.FlowReport;
 import de.cotto.lndmanagej.model.LocalChannel;
@@ -10,11 +11,11 @@ import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.model.OpenCloseStatus;
 import de.cotto.lndmanagej.model.PoliciesForLocalChannel;
 import de.cotto.lndmanagej.model.Pubkey;
-import de.cotto.lndmanagej.model.Rating;
 import de.cotto.lndmanagej.model.RebalanceReport;
 import de.cotto.lndmanagej.model.warnings.ChannelWarnings;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -63,7 +64,7 @@ public class ChannelDetailsService {
         CompletableFuture<FlowReport> flowReport = getFlowReport(channelId);
         CompletableFuture<RebalanceReport> rebalanceReport = getRebalanceReport(localChannel);
         CompletableFuture<ChannelWarnings> channelWarnings = getChannelWarnings(localChannel);
-        CompletableFuture<Rating> rating = getRating(channelId);
+        CompletableFuture<Optional<ChannelRating>> rating = getRating(channelId);
         try {
             return new ChannelDetails(
                     localChannel,
@@ -86,8 +87,8 @@ public class ChannelDetailsService {
         return CompletableFuture.supplyAsync(() -> channelWarningsService.getChannelWarnings(localChannel.getId()));
     }
 
-    private CompletableFuture<Rating> getRating(ChannelId channelId) {
-        return CompletableFuture.supplyAsync(() -> ratingService.getRatingForChannel(channelId).orElse(Rating.EMPTY));
+    private CompletableFuture<Optional<ChannelRating>> getRating(ChannelId channelId) {
+        return CompletableFuture.supplyAsync(() -> ratingService.getRatingForChannel(channelId));
     }
 
     private CompletableFuture<RebalanceReport> getRebalanceReport(LocalChannel localChannel) {

@@ -19,8 +19,8 @@ import static de.cotto.lndmanagej.model.NodeDetailsFixtures.NODE_DETAILS;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT;
+import static de.cotto.lndmanagej.model.PeerRatingFixtures.PEER_RATING;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
-import static de.cotto.lndmanagej.model.RatingFixtures.RATING;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static de.cotto.lndmanagej.model.warnings.NodeWarningsFixtures.NODE_WARNINGS;
 import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixture.BALANCE_INFORMATION_MODEL_2;
@@ -44,7 +44,7 @@ class NodeDetailsDtoTest {
                 FlowReportDto.createFromModel(FLOW_REPORT),
                 RebalanceReportDto.createFromModel(REBALANCE_REPORT),
                 NODE_WARNINGS.descriptions(),
-                RatingDto.fromModel(RATING)
+                RatingDto.fromModel(PEER_RATING)
         );
         assertThat(NodeDetailsDto.create(NODE_DETAILS, List.of(CLOSED_CHANNEL_DTO))).isEqualTo(expected);
     }

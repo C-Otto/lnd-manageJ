@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.controller.dto;
 import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.ChannelDetails;
 import de.cotto.lndmanagej.model.ChannelPoint;
+import de.cotto.lndmanagej.model.ChannelRating;
 import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.FlowReport;
 import de.cotto.lndmanagej.model.LocalChannel;
@@ -10,13 +11,13 @@ import de.cotto.lndmanagej.model.OnChainCosts;
 import de.cotto.lndmanagej.model.OpenInitiator;
 import de.cotto.lndmanagej.model.PoliciesForLocalChannel;
 import de.cotto.lndmanagej.model.Pubkey;
-import de.cotto.lndmanagej.model.Rating;
 import de.cotto.lndmanagej.model.RebalanceReport;
 import de.cotto.lndmanagej.model.warnings.ChannelWarnings;
 
+import java.util.Optional;
 import java.util.Set;
 
-@SuppressWarnings("PMD.ExcessiveParameterList")
+@SuppressWarnings({"PMD.ExcessiveParameterList", "OptionalUsedAsFieldOrParameterType"})
 public record ChannelDetailsDto(
         String channelIdShort,
         String channelIdCompact,
@@ -51,7 +52,7 @@ public record ChannelDetailsDto(
             FlowReport flowReport,
             RebalanceReport rebalanceReport,
             ChannelWarnings channelWarnings,
-            Rating rating
+            Optional<ChannelRating> rating
     ) {
         this(
                 channelDto.channelIdShort(),
@@ -75,7 +76,7 @@ public record ChannelDetailsDto(
                 RebalanceReportDto.createFromModel(rebalanceReport),
                 channelDto.numUpdates(),
                 channelWarnings.descriptions(),
-                RatingDto.fromModel(rating)
+                rating.map(RatingDto::fromModel).orElse(RatingDto.EMPTY)
         );
     }
 
@@ -89,7 +90,7 @@ public record ChannelDetailsDto(
             FlowReport flowReport,
             RebalanceReport rebalanceReport,
             ChannelWarnings channelWarnings,
-            Rating rating
+            Optional<ChannelRating> rating
     ) {
         this(
                 new ChannelDto(localChannel),

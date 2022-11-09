@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.model;
 import de.cotto.lndmanagej.model.warnings.NodeWarnings;
 
 import java.util.List;
+import java.util.Optional;
 
 public record NodeDetails(
         Pubkey pubkey,
@@ -18,6 +19,6 @@ public record NodeDetails(
         FlowReport flowReport,
         RebalanceReport rebalanceReport,
         NodeWarnings warnings,
-        Rating rating
+        Optional<PeerRating> rating
 ) {
 }

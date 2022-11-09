@@ -7,6 +7,7 @@ import de.cotto.lndmanagej.controller.StatusController;
 import de.cotto.lndmanagej.controller.dto.BalanceInformationDto;
 import de.cotto.lndmanagej.controller.dto.ChannelsDto;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.ChannelRating;
 import de.cotto.lndmanagej.model.ClosedChannel;
 import de.cotto.lndmanagej.model.LocalChannel;
 import de.cotto.lndmanagej.model.Node;
@@ -76,6 +77,7 @@ public class UiDataServiceImpl extends UiDataService {
 
     private OpenChannelDto toOpenChannelDto(ChannelId channelId) {
         LocalChannel localChannel = channelService.getLocalChannel(channelId).orElseThrow();
+        long value = ratingService.getRatingForChannel(channelId).map(ChannelRating::getValue).orElse(0L);
         return new OpenChannelDto(
                 channelId,
                 nodeController.getAlias(localChannel.getRemotePubkey()),
@@ -84,7 +86,7 @@ public class UiDataServiceImpl extends UiDataService {
                 map(channelController.getBalance(channelId)),
                 localChannel.getCapacity().satoshis(),
                 localChannel.getStatus().privateChannel(),
-                ratingService.getRatingForChannel(channelId).orElse(Rating.EMPTY).getValue()
+                value
         );
     }
 
@@ -114,8 +116,8 @@ public class UiDataServiceImpl extends UiDataService {
     @Override
     public NodeDto getNode(Pubkey pubkey) {
         Node node = nodeService.getNode(pubkey);
-        Rating rating = ratingService.getRatingForPeer(pubkey);
-        return new NodeDto(node.pubkey().toString(), node.alias(), node.online(), rating.getValue());
+        long rating = ratingService.getRatingForPeer(pubkey).map(Rating::getValue).orElse(-1L);
+        return new NodeDto(node.pubkey().toString(), node.alias(), node.online(), rating);
     }
 
     @Override

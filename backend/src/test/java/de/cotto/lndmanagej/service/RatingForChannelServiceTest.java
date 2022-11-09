@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Duration;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -241,6 +242,26 @@ class RatingForChannelServiceTest {
                 .thenReturn(new FeeReport(Coins.ofMilliSatoshis(100_000), Coins.NONE));
         assertThat(ratingForChannelService.getRating(CHANNEL_ID).orElseThrow().getValue())
                 .isEqualTo(100_000L / daysForAnalysis);
+    }
+
+    @Test
+    void includes_descriptions() {
+        Coins feesEarned = Coins.ofMilliSatoshis(300_000L);
+        when(feeService.getFeeReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
+                .thenReturn(new FeeReport(feesEarned, Coins.NONE));
+        Map<String, Number> expectedDetails = Map.of(
+                "712345x123x1 earned", 300_000L,
+                "712345x123x1 sourced", 0L,
+                "712345x123x1 received via payments", 0L,
+                "712345x123x1 support as source", 0L,
+                "712345x123x1 support as target", 0L,
+                "712345x123x1 future earnings", 0L,
+                "712345x123x1 scaled by days", 1.0 / 30,
+                "712345x123x1 scaled by liquidity", 1.0d,
+                "712345x123x1 rating", 10_000L
+        );
+        assertThat(ratingForChannelService.getRating(CHANNEL_ID).map(Rating::getDescriptions).orElse(Map.of()))
+                .containsExactlyInAnyOrderEntriesOf(expectedDetails);
     }
 
     private void assertScaledRating(Coins localAvailable, long expectedRating) {

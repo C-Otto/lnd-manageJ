@@ -2,8 +2,8 @@ package de.cotto.lndmanagej.ui.dto;
 
 import org.junit.jupiter.api.Test;
 
+import static de.cotto.lndmanagej.model.ChannelRatingFixtures.RATING;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
-import static de.cotto.lndmanagej.model.RatingFixtures.RATING;
 import static de.cotto.lndmanagej.ui.dto.NodeDtoFixture.NODE_DTO;
 import static org.assertj.core.api.Assertions.assertThat;
 

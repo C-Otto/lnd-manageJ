@@ -1,7 +1,10 @@
 package de.cotto.lndmanagej.controller;
 
 import de.cotto.lndmanagej.controller.dto.RatingDto;
-import de.cotto.lndmanagej.model.Rating;
+import de.cotto.lndmanagej.model.ChannelRating;
+import de.cotto.lndmanagej.model.ChannelRatingFixtures;
+import de.cotto.lndmanagej.model.PeerRating;
+import de.cotto.lndmanagej.model.PeerRatingFixtures;
 import de.cotto.lndmanagej.service.RatingService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,14 +30,14 @@ class RatingControllerTest {
 
     @Test
     void getRatingForPeer_empty() {
-        when(ratingService.getRatingForPeer(PUBKEY)).thenReturn(Rating.EMPTY);
-        assertThat(ratingController.getRatingForPeer(PUBKEY)).isEqualTo(RatingDto.fromModel(Rating.EMPTY));
+        when(ratingService.getRatingForPeer(PUBKEY)).thenReturn(Optional.empty());
+        assertThatExceptionOfType(NotFoundException.class).isThrownBy(() -> ratingController.getRatingForPeer(PUBKEY));
     }
 
     @Test
-    void getRatingForPeer() {
-        Rating rating = new Rating(123);
-        when(ratingService.getRatingForPeer(PUBKEY)).thenReturn(rating);
+    void getRatingForPeer() throws NotFoundException {
+        PeerRating rating = PeerRatingFixtures.ratingWithValue(123);
+        when(ratingService.getRatingForPeer(PUBKEY)).thenReturn(Optional.of(rating));
         assertThat(ratingController.getRatingForPeer(PUBKEY)).isEqualTo(RatingDto.fromModel(rating));
     }
 
@@ -47,7 +50,8 @@ class RatingControllerTest {
 
     @Test
     void getRatingForChannel() throws Exception {
-        Rating rating = new Rating(1).withDescription("some description", 123L);
+        ChannelRating rating = ChannelRatingFixtures.ratingWithValue(1)
+                .addValueWithDescription(123L, "some description");
         when(ratingService.getRatingForChannel(CHANNEL_ID)).thenReturn(Optional.of(rating));
         assertThat(ratingController.getRatingForChannel(CHANNEL_ID)).isEqualTo(RatingDto.fromModel(rating));
     }

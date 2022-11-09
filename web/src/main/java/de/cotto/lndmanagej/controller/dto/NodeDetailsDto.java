@@ -38,7 +38,7 @@ public record NodeDetailsDto(
                 FlowReportDto.createFromModel(nodeDetails.flowReport()),
                 RebalanceReportDto.createFromModel(nodeDetails.rebalanceReport()),
                 nodeDetails.warnings().descriptions(),
-                RatingDto.fromModel(nodeDetails.rating())
+                nodeDetails.rating().map(RatingDto::fromModel).orElse(RatingDto.EMPTY)
         );
     }
 }

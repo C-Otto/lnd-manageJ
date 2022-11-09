@@ -1,6 +1,5 @@
 package de.cotto.lndmanagej.controller.dto;
 
-import de.cotto.lndmanagej.model.RatingFixtures;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -16,6 +15,7 @@ import static de.cotto.lndmanagej.model.NodeDetailsFixtures.NODE_DETAILS;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.OnlineReportFixtures.ONLINE_REPORT;
+import static de.cotto.lndmanagej.model.PeerRatingFixtures.PEER_RATING;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static de.cotto.lndmanagej.model.warnings.NodeWarningsFixtures.NODE_WARNINGS;
@@ -38,7 +38,7 @@ class NodeDetailsDtoTest {
                 FlowReportDto.createFromModel(FLOW_REPORT),
                 RebalanceReportDto.createFromModel(REBALANCE_REPORT),
                 NODE_WARNINGS.descriptions(),
-                RatingDto.fromModel(RatingFixtures.RATING)
+                RatingDto.fromModel(PEER_RATING)
         );
         assertThat(NodeDetailsDto.createFromModel(NODE_DETAILS)).isEqualTo(expected);
     }

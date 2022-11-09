@@ -1,7 +1,6 @@
 package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.configuration.ConfigurationService;
-import de.cotto.lndmanagej.model.Rating;
 import de.cotto.lndmanagej.model.warnings.NodeRatingWarning;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -16,6 +15,7 @@ import java.util.Set;
 
 import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.NODE_RATING_THRESHOLD;
 import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.NODE_RATING_WARNING_IGNORE_NODE;
+import static de.cotto.lndmanagej.model.PeerRatingFixtures.ratingWithValue;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
@@ -36,26 +36,26 @@ class NodeRatingWarningsProviderTest {
 
     @Test
     void no_rating() {
-        when(ratingService.getRatingForPeer(PUBKEY)).thenReturn(Rating.EMPTY);
+        when(ratingService.getRatingForPeer(PUBKEY)).thenReturn(Optional.empty());
         assertThat(nodeRatingWarningsProvider.getNodeWarnings(PUBKEY)).isEmpty();
     }
 
     @Test
     void high_rating() {
-        when(ratingService.getRatingForPeer(PUBKEY)).thenReturn(new Rating(10_000));
+        when(ratingService.getRatingForPeer(PUBKEY)).thenReturn(Optional.of(ratingWithValue(10_000)));
         assertThat(nodeRatingWarningsProvider.getNodeWarnings(PUBKEY)).isEmpty();
     }
 
     @Test
     void low_rating() {
-        when(ratingService.getRatingForPeer(PUBKEY)).thenReturn(new Rating(1));
+        when(ratingService.getRatingForPeer(PUBKEY)).thenReturn(Optional.of(ratingWithValue(1)));
         assertThat(nodeRatingWarningsProvider.getNodeWarnings(PUBKEY)).contains(new NodeRatingWarning(1, 1_000));
     }
 
     @Test
     void low_rating_with_configured_threshold() {
         when(configurationService.getIntegerValue(NODE_RATING_THRESHOLD)).thenReturn(Optional.of(1_002));
-        when(ratingService.getRatingForPeer(PUBKEY)).thenReturn(new Rating(1_001));
+        when(ratingService.getRatingForPeer(PUBKEY)).thenReturn(Optional.of(ratingWithValue(1_001)));
         assertThat(nodeRatingWarningsProvider.getNodeWarnings(PUBKEY)).contains(new NodeRatingWarning(1_001, 1_002));
     }
 
@@ -63,7 +63,7 @@ class NodeRatingWarningsProviderTest {
     class IgnoredWarnings {
         @BeforeEach
         void setUp() {
-            lenient().when(ratingService.getRatingForPeer(PUBKEY)).thenReturn(new Rating(1));
+            lenient().when(ratingService.getRatingForPeer(PUBKEY)).thenReturn(Optional.of(ratingWithValue(1)));
         }
 
         @Test

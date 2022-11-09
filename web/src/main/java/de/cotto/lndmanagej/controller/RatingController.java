@@ -4,14 +4,16 @@ import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.controller.dto.ObjectMapperConfiguration;
 import de.cotto.lndmanagej.controller.dto.RatingDto;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.PeerRating;
 import de.cotto.lndmanagej.model.Pubkey;
-import de.cotto.lndmanagej.model.Rating;
 import de.cotto.lndmanagej.service.RatingService;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Optional;
 
 @RestController
 @Import(ObjectMapperConfiguration.class)
@@ -25,9 +27,12 @@ public class RatingController {
 
     @Timed
     @GetMapping("/node/{peer}/rating")
-    public RatingDto getRatingForPeer(@PathVariable Pubkey peer) {
-        Rating rating = ratingService.getRatingForPeer(peer);
-        return RatingDto.fromModel(rating);
+    public RatingDto getRatingForPeer(@PathVariable Pubkey peer) throws NotFoundException {
+        Optional<PeerRating> rating = ratingService.getRatingForPeer(peer);
+        if (rating.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return RatingDto.fromModel(rating.get());
     }
 
     @Timed

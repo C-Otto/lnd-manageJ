@@ -6,10 +6,12 @@ import de.cotto.lndmanagej.controller.dto.OnlineReportDto;
 import de.cotto.lndmanagej.controller.dto.PoliciesDto;
 import de.cotto.lndmanagej.controller.dto.RatingDto;
 import de.cotto.lndmanagej.model.ChannelId;
+import de.cotto.lndmanagej.model.ChannelRating;
+import de.cotto.lndmanagej.model.ChannelRatingFixtures;
 import de.cotto.lndmanagej.model.ChannelStatus;
 import de.cotto.lndmanagej.model.OnlineReport;
+import de.cotto.lndmanagej.model.PeerRating;
 import de.cotto.lndmanagej.model.Pubkey;
-import de.cotto.lndmanagej.model.Rating;
 import de.cotto.lndmanagej.ui.UiDataService;
 import de.cotto.lndmanagej.ui.dto.BalanceInformationModel;
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
@@ -105,7 +107,7 @@ public class DemoDataService extends UiDataService {
             900_900);
 
     public static final ChannelId CLOSED_CHANNEL = ChannelId.fromCompactForm("712345x124x1");
-    public static final RatingDto RATING = RatingDto.fromModel(new Rating(700L));
+    public static final RatingDto RATING = RatingDto.fromModel(ChannelRatingFixtures.ratingWithValue(700));
 
     private final DemoWarningService warningService;
 
@@ -149,7 +151,7 @@ public class DemoDataService extends UiDataService {
                 .toList();
         String alias = channels.stream().findFirst().orElseThrow().remoteAlias();
         boolean isOnline = isOnline(channels.stream().findFirst().orElseThrow().channelId());
-        Rating rating = sumRatings(channels);
+        PeerRating rating = sumRatings(pubkey, channels);
         return new NodeDto(pubkey.toString(), alias, isOnline, rating.getValue());
     }
 
@@ -204,7 +206,7 @@ public class DemoDataService extends UiDataService {
                 deriveFlowReport(channel.channelId()),
                 deriveRebalanceReport(channel.channelId()),
                 warnings,
-                RatingDto.fromModel(new Rating(channel.rating())));
+                RatingDto.fromModel(ChannelRatingFixtures.ratingWithValue(channel.rating())));
     }
 
     private ChannelDetailsDto createClosedChannelDetails(Set<String> warnings) {
@@ -232,8 +234,9 @@ public class DemoDataService extends UiDataService {
             List<String> warnings) {
         OpenChannelDto firstChannel = channels.stream().findFirst().orElseThrow();
         OnlineReport onlineReport = node.online() ? ONLINE_REPORT : ONLINE_REPORT_OFFLINE;
+        Pubkey pubkey = Pubkey.create(node.pubkey());
         return new NodeDetailsDto(
-                Pubkey.create(node.pubkey()),
+                pubkey,
                 node.alias(),
                 channels.stream().map(OpenChannelDto::channelId).toList(),
                 closedChannels(),
@@ -246,7 +249,7 @@ public class DemoDataService extends UiDataService {
                 deriveFlowReport(firstChannel.channelId()),
                 deriveRebalanceReport(firstChannel.channelId()),
                 new HashSet<>(warnings),
-                RatingDto.fromModel(sumRatings(channels)));
+                RatingDto.fromModel(sumRatings(pubkey, channels)));
     }
 
     private static List<ChannelId> getPendingForceClosingChannels() {
@@ -266,9 +269,15 @@ public class DemoDataService extends UiDataService {
         );
     }
 
-    private static Rating sumRatings(List<OpenChannelDto> channels) {
-        long sum = channels.stream().mapToLong(OpenChannelDto::rating).sum();
-        return new Rating(sum);
+    private static PeerRating sumRatings(Pubkey peer, List<OpenChannelDto> channels) {
+        PeerRating peerRating = PeerRating.forPeer(peer);
+        List<ChannelRating> channelRatings = channels.stream().map(channel ->
+                ChannelRating.forChannel(channel.channelId()).addValueWithDescription(channel.rating(), "rating")
+        ).toList();
+        for (ChannelRating channelRating : channelRatings) {
+            peerRating = peerRating.withChannelRating(channelRating);
+        }
+        return peerRating;
     }
 }
 
