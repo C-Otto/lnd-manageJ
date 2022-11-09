@@ -10,7 +10,7 @@ public record Rating(long value, Map<String, Number> descriptions) {
         this(value, Map.of());
     }
 
-    public Rating add(Rating other) {
+    public Rating combine(Rating other) {
         Map<String, Number> combinedDetails = new LinkedHashMap<>();
         combinedDetails.putAll(descriptions);
         combinedDetails.putAll(other.descriptions);
@@ -19,11 +19,11 @@ public record Rating(long value, Map<String, Number> descriptions) {
 
     public Rating addValueWithDescription(long value, String description) {
         Rating newRating = new Rating(value, Map.of(description, value));
-        return add(newRating);
+        return combine(newRating);
     }
 
     public Rating withDescription(String description, Number value) {
-        return add(new Rating(0, Map.of(description, value)));
+        return combine(new Rating(0, Map.of(description, value)));
     }
 
     public Rating forDays(long days, ChannelId channelId) {

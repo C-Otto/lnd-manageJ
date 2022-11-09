@@ -98,6 +98,6 @@ public class RatingService {
         return eligibleChannels.stream()
                 .map(channelId -> getRatingForChannel(channelId, eligibleChannels))
                 .flatMap(Optional::stream)
-                .reduce(Rating.EMPTY, Rating::add);
+                .reduce(Rating.EMPTY, Rating::combine);
     }
 }

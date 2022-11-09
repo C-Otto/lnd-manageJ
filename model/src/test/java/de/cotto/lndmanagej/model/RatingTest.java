@@ -27,26 +27,26 @@ class RatingTest {
     }
 
     @Test
-    void add_empty_and_empty() {
-        assertThat(Rating.EMPTY.add(Rating.EMPTY)).isEqualTo(Rating.EMPTY);
+    void combine_empty_and_empty() {
+        assertThat(Rating.EMPTY.combine(Rating.EMPTY)).isEqualTo(Rating.EMPTY);
     }
 
     @Test
-    void add_empty_and_something() {
+    void combine_empty_and_something() {
         Rating something = new Rating(1);
-        assertThat(Rating.EMPTY.add(something)).isEqualTo(something);
+        assertThat(Rating.EMPTY.combine(something)).isEqualTo(something);
     }
 
     @Test
-    void add_something_and_empty() {
+    void combine_something_and_empty() {
         Rating something = new Rating(1);
-        assertThat(something.add(Rating.EMPTY)).isEqualTo(something);
+        assertThat(something.combine(Rating.EMPTY)).isEqualTo(something);
     }
 
     @Test
-    void add_something_and_something() {
+    void combine_something_and_something() {
         Rating something = new Rating(1);
-        assertThat(something.add(something)).isEqualTo(new Rating(2));
+        assertThat(something.combine(something)).isEqualTo(new Rating(2));
     }
 
     @Test
@@ -65,7 +65,7 @@ class RatingTest {
     void add_ratings_with_descriptions() {
         Rating withDescriptions1 = new Rating(1).withDescription("a", 456).withDescription("c", 789);
         Rating withDescriptions2 = new Rating(2).withDescription("e", 111).withDescription("g", 1.23);
-        assertThat(withDescriptions1.add(withDescriptions2).descriptions())
+        assertThat(withDescriptions1.combine(withDescriptions2).descriptions())
                 .isEqualTo(Map.of("a", 456, "c", 789, "e", 111, "g", 1.23));
     }
 
