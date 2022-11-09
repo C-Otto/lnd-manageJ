@@ -8,22 +8,22 @@ import java.util.Objects;
 public final class ChannelRating implements Rating {
     private final ChannelId channelId;
     private final long value;
-    private final CoinsAndDuration averageLocalLiquidity;
+    private final CoinsAndDuration averageLocalBalance;
     private final Map<String, Number> descriptions;
 
     public ChannelRating(ChannelId channelId) {
-        this(channelId, 0, new CoinsAndDuration(Coins.NONE, Duration.ZERO), Map.of());
+        this(channelId, 0, new CoinsAndDuration(Coins.ofSatoshis(1_000_000), Duration.ZERO), Map.of());
     }
 
     private ChannelRating(
             ChannelId channelId,
             long value,
-            CoinsAndDuration averageLocalLiquidity,
+            CoinsAndDuration averageLocalBalance,
             Map<String, Number> descriptions
     ) {
         this.channelId = channelId;
         this.value = value;
-        this.averageLocalLiquidity = averageLocalLiquidity;
+        this.averageLocalBalance = averageLocalBalance;
         this.descriptions = descriptions;
     }
 
@@ -38,20 +38,20 @@ public final class ChannelRating implements Rating {
         combinedDescriptions.putAll(descriptions);
         combinedDescriptions.putAll(other.descriptions);
         combinedDescriptions.put(channelId + " rating", newRating);
-        CoinsAndDuration combinedAverageLocalLiquidity;
-        if (averageLocalLiquidity.duration().compareTo(other.averageLocalLiquidity.duration()) > 0) {
-            combinedAverageLocalLiquidity = averageLocalLiquidity;
+        CoinsAndDuration combinedAverageLocalBalance;
+        if (averageLocalBalance.duration().compareTo(other.averageLocalBalance.duration()) > 0) {
+            combinedAverageLocalBalance = averageLocalBalance;
         } else {
-            combinedAverageLocalLiquidity = other.averageLocalLiquidity;
+            combinedAverageLocalBalance = other.averageLocalBalance;
         }
-        return new ChannelRating(channelId, newRating, combinedAverageLocalLiquidity, combinedDescriptions);
+        return new ChannelRating(channelId, newRating, combinedAverageLocalBalance, combinedDescriptions);
     }
 
     public ChannelRating addValueWithDescription(long value, String description) {
         ChannelRating newRating = new ChannelRating(
                 channelId,
                 value,
-                averageLocalLiquidity,
+                averageLocalBalance,
                 Map.of(channelId + " " + description, value)
         );
         return combine(newRating);
@@ -60,7 +60,7 @@ public final class ChannelRating implements Rating {
     public ChannelRating forDays(long days) {
         double factor = 1.0 / days;
         long newValue = (long) (value * factor);
-        return new ChannelRating(channelId, newValue, averageLocalLiquidity, descriptions)
+        return new ChannelRating(channelId, newValue, averageLocalBalance, descriptions)
                 .withDescription("scaled by days", factor);
     }
 
@@ -84,8 +84,8 @@ public final class ChannelRating implements Rating {
         return descriptions;
     }
 
-    public CoinsAndDuration getAverageLocalLiquidity() {
-        return averageLocalLiquidity;
+    public CoinsAndDuration getAverageLocalBalance() {
+        return averageLocalBalance;
     }
 
     @Override
@@ -99,13 +99,13 @@ public final class ChannelRating implements Rating {
         ChannelRating that = (ChannelRating) other;
         return value == that.value
                && Objects.equals(channelId, that.channelId)
-               && Objects.equals(averageLocalLiquidity, that.averageLocalLiquidity)
+               && Objects.equals(averageLocalBalance, that.averageLocalBalance)
                && Objects.equals(descriptions, that.descriptions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(channelId, value, averageLocalLiquidity, descriptions);
+        return Objects.hash(channelId, value, averageLocalBalance, descriptions);
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")
@@ -113,7 +113,7 @@ public final class ChannelRating implements Rating {
         ChannelRating update = new ChannelRating(
                 channelId,
                 0,
-                averageLocalLiquidity,
+                averageLocalBalance,
                 Map.of(channelId + " " + description, value)
         );
         return combine(update);

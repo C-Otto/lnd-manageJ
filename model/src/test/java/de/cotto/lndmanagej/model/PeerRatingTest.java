@@ -4,6 +4,7 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.Map;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
@@ -65,6 +66,63 @@ class PeerRatingTest {
                     .containsEntry(RATING.formatted(PUBKEY), 1023L)
                     .containsEntry(RATING.formatted(CHANNEL_ID), 123L)
                     .containsEntry(RATING.formatted(CHANNEL_ID_2), 900L);
+        }
+    }
+
+    @Nested
+    class LocalBalance {
+        @Test
+        void one_channel() {
+            PeerRating twoChannelsRating = peerRating
+                    .withChannelRating(create(CHANNEL_ID, 1, 30, 100));
+            assertThat(twoChannelsRating.getValue()).isEqualTo(100);
+        }
+
+        @Test
+        void two_identical_channels() {
+            PeerRating twoChannelsRating = peerRating
+                    .withChannelRating(create(CHANNEL_ID, 1, 30, 100))
+                    .withChannelRating(create(CHANNEL_ID_2, 1, 30, 100));
+            assertThat(twoChannelsRating.getValue()).isEqualTo(100);
+        }
+
+        @Test
+        void one_idle_channel_without_liquidity() {
+            PeerRating twoChannelsRating = peerRating
+                    .withChannelRating(create(CHANNEL_ID, 1, 30, 100))
+                    .withChannelRating(create(CHANNEL_ID_2, 0, 30, 0));
+            assertThat(twoChannelsRating.getValue()).isEqualTo(100);
+        }
+
+        @Test
+        void one_idle_channel_with_liquidity() {
+            PeerRating twoChannelsRating = peerRating
+                    .withChannelRating(create(CHANNEL_ID, 1, 30, 100))
+                    .withChannelRating(create(CHANNEL_ID_2, 1, 30, 0));
+            assertThat(twoChannelsRating.getValue()).isEqualTo(50);
+        }
+
+        @Test
+        void one_good_channel_one_idle_channel_with_liquidity_for_a_shorter_time() {
+            int balance1 = 2;
+            int balance2 = 4;
+            int days1 = 30;
+            int days2 = 15;
+            PeerRating twoChannelsRating = peerRating
+                    .withChannelRating(create(CHANNEL_ID, balance1, days1, 100))
+                    .withChannelRating(create(CHANNEL_ID_2, balance2, days2, 0));
+            long expected = (long) (100.0 / (days1 / 30.0 * balance1 + days2 / 30.0 * balance2));
+            assertThat(twoChannelsRating.getValue()).isEqualTo(expected);
+        }
+
+        private ChannelRating create(ChannelId channelId, long averageLocalBalance, int days, int unscaledRating) {
+            CoinsAndDuration coinsAndDuration = new CoinsAndDuration(
+                    Coins.ofSatoshis(averageLocalBalance * 1_000_000),
+                    Duration.ofDays(days)
+            );
+            return ChannelRating.forChannel(channelId)
+                    .addValueWithDescription(unscaledRating, "earned")
+                    .forAverageLocalBalance(coinsAndDuration);
         }
     }
 

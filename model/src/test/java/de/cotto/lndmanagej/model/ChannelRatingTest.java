@@ -92,7 +92,7 @@ class ChannelRatingTest {
             CoinsAndDuration expected = new CoinsAndDuration(Coins.ofSatoshis(1_000_000), Duration.ofDays(1));
             ChannelRating with = ChannelRating.forChannel(CHANNEL_ID).forAverageLocalBalance(expected);
             ChannelRating without = ChannelRating.forChannel(CHANNEL_ID);
-            assertThat(with.combine(without).getAverageLocalLiquidity()).isEqualTo(expected);
+            assertThat(with.combine(without).getAverageLocalBalance()).isEqualTo(expected);
         }
 
         @Test
@@ -100,7 +100,7 @@ class ChannelRatingTest {
             CoinsAndDuration expected = new CoinsAndDuration(Coins.ofSatoshis(1_000_000), Duration.ofDays(1));
             ChannelRating with = ChannelRating.forChannel(CHANNEL_ID).forAverageLocalBalance(expected);
             ChannelRating without = ChannelRating.forChannel(CHANNEL_ID);
-            assertThat(without.combine(with).getAverageLocalLiquidity()).isEqualTo(expected);
+            assertThat(without.combine(with).getAverageLocalBalance()).isEqualTo(expected);
         }
     }
 

@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.model;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -22,7 +23,31 @@ public final class PeerRating implements Rating {
 
     @Override
     public long getValue() {
-        return channelRatings.stream().mapToLong(ChannelRating::getValue).sum();
+        long totalUnscaledValue = channelRatings.stream()
+                .mapToLong(channelRating -> {
+                    double millionSatoshi = toMillionSatoshis(channelRating.getAverageLocalBalance().coins());
+                    return (long) (channelRating.getValue() * millionSatoshi);
+                }).sum();
+
+        long consideredMinutes = channelRatings.stream()
+                .map(ChannelRating::getAverageLocalBalance)
+                .map(CoinsAndDuration::duration)
+                .mapToLong(Duration::toMinutes)
+                .max()
+                .orElse(1);
+
+        double scaledAverageMillionSatoshis = channelRatings.stream()
+                .map(ChannelRating::getAverageLocalBalance)
+                .mapToDouble(coinsAndDuration -> {
+                    double millionSatoshis = toMillionSatoshis(coinsAndDuration.coins());
+                    double factor = 1.0 * coinsAndDuration.duration().toMinutes() / consideredMinutes;
+                    return millionSatoshis * factor;
+                }).sum();
+
+        if (Double.isNaN(scaledAverageMillionSatoshis)) {
+            return totalUnscaledValue;
+        }
+        return (long) (totalUnscaledValue / scaledAverageMillionSatoshis);
     }
 
     @Override
@@ -57,5 +82,9 @@ public final class PeerRating implements Rating {
     @Override
     public int hashCode() {
         return Objects.hash(pubkey, channelRatings);
+    }
+
+    private static double toMillionSatoshis(Coins coins) {
+        return coins.milliSatoshis() / 1_000_000_000.0;
     }
 }
