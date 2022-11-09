@@ -10,7 +10,6 @@ testing {
     suites {
         named("test") {
             dependencies {
-                implementation("nl.jqno.equalsverifier:equalsverifier")
                 implementation("uk.org.lidalia:slf4j-test")
                 configurations.named("testRuntimeOnly") {
                     exclude(group = "ch.qos.logback", module = "logback-classic")
