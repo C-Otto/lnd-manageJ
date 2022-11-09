@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.model;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -22,8 +23,8 @@ class RatingTest {
 
     @Test
     void value() {
-        assertThat(Rating.EMPTY.value()).isEqualTo(0);
-        assertThat(new Rating(1).value()).isEqualTo(1);
+        assertThat(Rating.EMPTY.getValue()).isEqualTo(0);
+        assertThat(new Rating(1).getValue()).isEqualTo(1);
     }
 
     @Test
@@ -52,47 +53,47 @@ class RatingTest {
     @Test
     void rating_created_with_description_has_rating() {
         Rating withDescription = new Rating(123, Map.of("a", 123));
-        assertThat(withDescription.value()).isEqualTo(123L);
+        assertThat(withDescription.getValue()).isEqualTo(123L);
     }
 
     @Test
     void rating_with_added_description_keeps_rating() {
         Rating withDescription = new Rating(123).withDescription("a", 456);
-        assertThat(withDescription.value()).isEqualTo(123L);
+        assertThat(withDescription.getValue()).isEqualTo(123L);
     }
 
     @Test
     void add_ratings_with_descriptions() {
         Rating withDescriptions1 = new Rating(1).withDescription("a", 456).withDescription("c", 789);
         Rating withDescriptions2 = new Rating(2).withDescription("e", 111).withDescription("g", 1.23);
-        assertThat(withDescriptions1.combine(withDescriptions2).descriptions())
+        assertThat(withDescriptions1.combine(withDescriptions2).getDescriptions())
                 .isEqualTo(Map.of("a", 456, "c", 789, "e", 111, "g", 1.23));
     }
 
     @Test
     void addValueWithDescription_adds_value() {
         Rating rating = new Rating(1).withDescription("a", 111);
-        assertThat(rating.addValueWithDescription(123, "c").value()).isEqualTo(124L);
+        assertThat(rating.addValueWithDescription(123, "c").getValue()).isEqualTo(124L);
     }
 
     @Test
     void addValueWithDescription_has_descriptions() {
         Rating rating = new Rating(1).withDescription("a", 111);
-        assertThat(rating.addValueWithDescription(123, "c").descriptions())
+        assertThat(rating.addValueWithDescription(123, "c").getDescriptions())
                 .isEqualTo(Map.of("a", 111, "c", 123L));
     }
 
     @Test
     void withDescription_adds_description() {
         Rating rating = new Rating(1).withDescription("a", 111);
-        assertThat(rating.withDescription("c", 222).descriptions())
+        assertThat(rating.withDescription("c", 222).getDescriptions())
                 .isEqualTo(Map.of("a", 111, "c", 222));
     }
 
     @Test
     void forDays_scales_value() {
         Rating rating = new Rating(100).withDescription("a", 111);
-        assertThat(rating.forDays(3, CHANNEL_ID).value())
+        assertThat(rating.forDays(3, CHANNEL_ID).getValue())
                 .isEqualTo(33L);
     }
 
@@ -100,14 +101,14 @@ class RatingTest {
     void forDays_adds_description() {
         Rating rating = new Rating(100).withDescription("a", 111);
         Map<String, Number> expectedDescriptions = Map.of("a", 111, CHANNEL_ID + " scaled by days", 1.0 / 3);
-        assertThat(rating.forDays(3, CHANNEL_ID).descriptions())
+        assertThat(rating.forDays(3, CHANNEL_ID).getDescriptions())
                 .isEqualTo(expectedDescriptions);
     }
 
     @Test
     void forAverageLocalBalance_scales_value() {
         Rating rating = new Rating(100).withDescription("a", 111);
-        assertThat(rating.forAverageLocalBalance(Coins.ofSatoshis(2_000_000), CHANNEL_ID).value())
+        assertThat(rating.forAverageLocalBalance(Coins.ofSatoshis(2_000_000), CHANNEL_ID).getValue())
                 .isEqualTo(50);
     }
 
@@ -115,7 +116,12 @@ class RatingTest {
     void forAverageLocalBalance_adds_description() {
         Rating rating = new Rating(100).withDescription("a", 111);
         Map<String, Number> expectedDescriptions = Map.of("a", 111, CHANNEL_ID + " scaled by liquidity", 2.0);
-        assertThat(rating.forAverageLocalBalance(Coins.ofSatoshis(500_000), CHANNEL_ID).descriptions())
+        assertThat(rating.forAverageLocalBalance(Coins.ofSatoshis(500_000), CHANNEL_ID).getDescriptions())
                 .isEqualTo(expectedDescriptions);
+    }
+
+    @Test
+    void testEquals() {
+        EqualsVerifier.forClass(Rating.class).verify();
     }
 }

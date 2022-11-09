@@ -2,9 +2,18 @@ package de.cotto.lndmanagej.model;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
-public record Rating(long value, Map<String, Number> descriptions) {
+public final class Rating {
     public static final Rating EMPTY = new Rating(0, Map.of());
+
+    private final long value;
+    private final Map<String, Number> descriptions;
+
+    public Rating(long value, Map<String, Number> descriptions) {
+        this.value = value;
+        this.descriptions = descriptions;
+    }
 
     public Rating(long value) {
         this(value, Map.of());
@@ -43,5 +52,31 @@ public record Rating(long value, Map<String, Number> descriptions) {
 
     public boolean isEmpty() {
         return equals(EMPTY);
+    }
+
+    public long getValue() {
+        return value;
+    }
+
+    public Map<String, Number> getDescriptions() {
+        return descriptions;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == this) {
+            return true;
+        }
+        if (other == null || other.getClass() != this.getClass()) {
+            return false;
+        }
+        var that = (Rating) other;
+        return this.value == that.value
+               && Objects.equals(this.descriptions, that.descriptions);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value, descriptions);
     }
 }

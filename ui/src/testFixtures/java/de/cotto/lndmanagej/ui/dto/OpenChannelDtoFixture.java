@@ -25,7 +25,7 @@ public class OpenChannelDtoFixture {
             BALANCE_INFORMATION_MODEL,
             CAPACITY_SAT,
             false,
-            RATING.value());
+            RATING.getValue());
 
     public static final OpenChannelDto OPEN_CHANNEL_DTO2 = new OpenChannelDto(
             CHANNEL_ID_2,
@@ -35,7 +35,7 @@ public class OpenChannelDtoFixture {
             BALANCE_INFORMATION_MODEL_2,
             CAPACITY_SAT,
             false,
-            RATING.value());
+            RATING.getValue());
 
     public static final OpenChannelDto UNANNOUNCED_CHANNEL = new OpenChannelDto(
             CHANNEL_ID_3,
@@ -45,6 +45,6 @@ public class OpenChannelDtoFixture {
             BALANCE_INFORMATION_MODEL_2,
             CAPACITY_SAT,
             true,
-            RATING.value());
+            RATING.getValue());
 
 }

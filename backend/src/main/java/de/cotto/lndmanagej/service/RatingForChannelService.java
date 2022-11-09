@@ -93,7 +93,7 @@ public class RatingForChannelService {
         rating = rating.forAverageLocalBalance(averageLocalBalanceOptional.get(), channelId);
         rating = rating.forDays(durationForAnalysis.toDays(), channelId);
 
-        return Optional.of(rating.withDescription(channelId + " rating", rating.value()));
+        return Optional.of(rating.withDescription(channelId + " rating", rating.getValue()));
     }
 
     private long getLocalAvailableMilliSat(LocalChannel localChannel) {

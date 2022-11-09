@@ -15,7 +15,7 @@ public record RatingDto(long rating, String message, Map<String, String> details
         if (rating.isEmpty()) {
             return new RatingDto(-1, "Unable to compute rating", Map.of());
         }
-        return new RatingDto(rating.value(), "", toStringDetails(rating.descriptions()));
+        return new RatingDto(rating.getValue(), "", toStringDetails(rating.getDescriptions()));
     }
 
     private static Map<String, String> toStringDetails(Map<String, Number> details) {

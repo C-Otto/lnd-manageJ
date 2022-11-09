@@ -106,12 +106,12 @@ class RatingForChannelServiceTest {
         Coins feesEarned = Coins.ofMilliSatoshis(123 * ANALYSIS_DAYS);
         when(feeService.getFeeReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
                 .thenReturn(new FeeReport(feesEarned, Coins.NONE));
-        assertThat(ratingForChannelService.getRating(CHANNEL_ID).map(Rating::value)).contains(123L);
+        assertThat(ratingForChannelService.getRating(CHANNEL_ID).map(Rating::getValue)).contains(123L);
     }
 
     @Test
     void idle() {
-        assertThat(ratingForChannelService.getRating(CHANNEL_ID).orElseThrow().value()).isEqualTo(0L);
+        assertThat(ratingForChannelService.getRating(CHANNEL_ID).orElseThrow().getValue()).isEqualTo(0L);
     }
 
     @Test
@@ -127,7 +127,7 @@ class RatingForChannelServiceTest {
         Coins feesEarned = Coins.ofMilliSatoshis(123 * ANALYSIS_DAYS);
         when(feeService.getFeeReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
                 .thenReturn(new FeeReport(feesEarned, Coins.NONE));
-        assertThat(ratingForChannelService.getRating(CHANNEL_ID).orElseThrow().value()).isEqualTo(123L);
+        assertThat(ratingForChannelService.getRating(CHANNEL_ID).orElseThrow().getValue()).isEqualTo(123L);
     }
 
     @Test
@@ -135,7 +135,7 @@ class RatingForChannelServiceTest {
         Coins feesSourced = Coins.ofMilliSatoshis(123 * ANALYSIS_DAYS);
         when(feeService.getFeeReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
                 .thenReturn(new FeeReport(Coins.NONE, feesSourced));
-        assertThat(ratingForChannelService.getRating(CHANNEL_ID).orElseThrow().value()).isEqualTo(123L);
+        assertThat(ratingForChannelService.getRating(CHANNEL_ID).orElseThrow().getValue()).isEqualTo(123L);
     }
 
     @Test
@@ -150,7 +150,7 @@ class RatingForChannelServiceTest {
         );
         lenient().when(rebalanceService.getReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
                 .thenReturn(rebalanceReport);
-        assertThat(ratingForChannelService.getRating(CHANNEL_ID).orElseThrow().value()).isEqualTo(123L);
+        assertThat(ratingForChannelService.getRating(CHANNEL_ID).orElseThrow().getValue()).isEqualTo(123L);
     }
 
     @Test
@@ -165,7 +165,7 @@ class RatingForChannelServiceTest {
         );
         lenient().when(rebalanceService.getReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
                 .thenReturn(rebalanceReport);
-        assertThat(ratingForChannelService.getRating(CHANNEL_ID).orElseThrow().value()).isEqualTo(123L);
+        assertThat(ratingForChannelService.getRating(CHANNEL_ID).orElseThrow().getValue()).isEqualTo(123L);
     }
 
     @Test
@@ -178,7 +178,7 @@ class RatingForChannelServiceTest {
         mockOutgoingFeeRate(feeRate);
         long maxEarnings = (long) (1.0 * feeRate * balanceMilliSat / 1_000 / 1_000_000.0);
         assumeThat(maxEarnings).isGreaterThanOrEqualTo(10 * ANALYSIS_DAYS);
-        assertThat(ratingForChannelService.getRating(CHANNEL_ID).orElseThrow().value())
+        assertThat(ratingForChannelService.getRating(CHANNEL_ID).orElseThrow().getValue())
                 .isEqualTo(maxEarnings / 10 / ANALYSIS_DAYS);
     }
 
@@ -198,7 +198,7 @@ class RatingForChannelServiceTest {
                 receivedViaPayments
         );
         when(flowService.getFlowReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS)).thenReturn(flowReport);
-        assertThat(ratingForChannelService.getRating(CHANNEL_ID).orElseThrow().value()).isEqualTo(123_456L);
+        assertThat(ratingForChannelService.getRating(CHANNEL_ID).orElseThrow().getValue()).isEqualTo(123_456L);
     }
 
     @Test
@@ -213,7 +213,7 @@ class RatingForChannelServiceTest {
         when(balanceService.getLocalBalanceAverage(CHANNEL_ID, ANALYSIS_DAYS))
                 .thenReturn(Optional.of(Coins.NONE));
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
-        long averageSat = ratingForChannelService.getRating(CHANNEL_ID).map(Rating::value).orElseThrow();
+        long averageSat = ratingForChannelService.getRating(CHANNEL_ID).map(Rating::getValue).orElseThrow();
         assertThat(averageSat).isLessThan(Integer.MAX_VALUE);
     }
 
@@ -239,7 +239,7 @@ class RatingForChannelServiceTest {
         when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         when(feeService.getFeeReportForChannel(CHANNEL_ID, Duration.ofDays(daysForAnalysis)))
                 .thenReturn(new FeeReport(Coins.ofMilliSatoshis(100_000), Coins.NONE));
-        assertThat(ratingForChannelService.getRating(CHANNEL_ID).orElseThrow().value())
+        assertThat(ratingForChannelService.getRating(CHANNEL_ID).orElseThrow().getValue())
                 .isEqualTo(100_000L / daysForAnalysis);
     }
 
@@ -250,7 +250,7 @@ class RatingForChannelServiceTest {
                 .thenReturn(Optional.of(localAvailable));
         when(feeService.getFeeReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
                 .thenReturn(new FeeReport(Coins.ofMilliSatoshis(100_000 * ANALYSIS_DAYS), Coins.NONE));
-        assertThat(ratingForChannelService.getRating(CHANNEL_ID).orElseThrow().value()).isEqualTo(expectedRating);
+        assertThat(ratingForChannelService.getRating(CHANNEL_ID).orElseThrow().getValue()).isEqualTo(expectedRating);
     }
 
     private LocalOpenChannel getLocalOpenChannel(Coins localAvailable) {

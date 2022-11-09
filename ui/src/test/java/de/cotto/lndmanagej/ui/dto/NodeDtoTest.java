@@ -26,6 +26,6 @@ class NodeDtoTest {
 
     @Test
     void rating() {
-        assertThat(NODE_DTO.rating()).isEqualTo(RATING.value());
+        assertThat(NODE_DTO.rating()).isEqualTo(RATING.getValue());
     }
 }

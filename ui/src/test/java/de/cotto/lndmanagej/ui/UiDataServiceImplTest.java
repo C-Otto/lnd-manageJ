@@ -112,7 +112,7 @@ class UiDataServiceImplTest {
                         BALANCE_INFORMATION_MODEL,
                         CAPACITY_SAT,
                         false,
-                        RATING.value())
+                        RATING.getValue())
         );
     }
 
@@ -155,7 +155,7 @@ class UiDataServiceImplTest {
         when(nodeService.getNode(PUBKEY)).thenReturn(NODE_PEER);
         when(ratingService.getRatingForPeer(PUBKEY)).thenReturn(RATING);
         assertThat(uiDataService.getNode(PUBKEY)).isEqualTo(
-                new NodeDto(PUBKEY.toString(), NODE_PEER.alias(), true, RATING.value())
+                new NodeDto(PUBKEY.toString(), NODE_PEER.alias(), true, RATING.getValue())
         );
     }
 
