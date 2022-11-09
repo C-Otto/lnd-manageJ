@@ -77,7 +77,7 @@ public class UiDataServiceImpl extends UiDataService {
 
     private OpenChannelDto toOpenChannelDto(ChannelId channelId) {
         LocalChannel localChannel = channelService.getLocalChannel(channelId).orElseThrow();
-        long value = ratingService.getRatingForChannel(channelId).map(ChannelRating::getValue).orElse(0L);
+        long value = ratingService.getRatingForChannel(channelId).map(ChannelRating::getValue).orElse(-1L);
         return new OpenChannelDto(
                 channelId,
                 nodeController.getAlias(localChannel.getRemotePubkey()),
