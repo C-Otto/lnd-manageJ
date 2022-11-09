@@ -45,12 +45,14 @@ public final class ChannelRating implements Rating {
                 .withDescription("scaled by days", factor);
     }
 
-    public ChannelRating forAverageLocalBalance(Coins averageLocalBalance) {
-        double millionSatoshis = averageLocalBalance.milliSatoshis() / 1_000_000_000.0;
+    public ChannelRating forAverageLocalBalance(CoinsAndDuration averageLocalBalance) {
+        double millionSatoshis = averageLocalBalance.coins().milliSatoshis() / 1_000_000_000.0;
         double factor = 1.0 / millionSatoshis;
         long newValue = (long) (value * factor);
+        long days = averageLocalBalance.duration().toDays();
+        String description = "scaled by liquidity (for %s days)".formatted(days);
         return new ChannelRating(channelId, newValue, descriptions)
-                .withDescription("scaled by liquidity", factor);
+                .withDescription(description, factor);
     }
 
     @Override

@@ -4,6 +4,7 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.Map;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
@@ -143,7 +144,8 @@ class ChannelRatingTest {
 
         @Test
         void scales_value() {
-            assertThat(rating.forAverageLocalBalance(Coins.ofSatoshis(2_000_000)).getValue())
+            CoinsAndDuration averageLocalBalance = new CoinsAndDuration(Coins.ofSatoshis(2_000_000), Duration.ZERO);
+            assertThat(rating.forAverageLocalBalance(averageLocalBalance).getValue())
                     .isEqualTo(50);
         }
 
@@ -152,9 +154,13 @@ class ChannelRatingTest {
             Map<String, Number> expectedDescriptions = Map.of(
                     CHANNEL_ID + " a", 100L,
                     RATING.formatted(CHANNEL_ID), 200L,
-                    CHANNEL_ID + " scaled by liquidity", 2.0
+                    CHANNEL_ID + " scaled by liquidity (for 123 days)", 2.0
             );
-            assertThat(rating.forAverageLocalBalance(Coins.ofSatoshis(500_000)).getDescriptions())
+            CoinsAndDuration averageLocalBalance = new CoinsAndDuration(
+                    Coins.ofSatoshis(500_000),
+                    Duration.ofDays(123)
+            );
+            assertThat(rating.forAverageLocalBalance(averageLocalBalance).getDescriptions())
                     .isEqualTo(expectedDescriptions);
         }
     }

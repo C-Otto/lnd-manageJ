@@ -78,7 +78,7 @@ public class RatingForChannelService {
         );
         rating = rating.addValueWithDescription((long) (1.0 * feeRate * millionSat / 10), "future earnings");
 
-        rating = rating.forAverageLocalBalance(averageLocalBalanceOptional.get().coins());
+        rating = rating.forAverageLocalBalance(averageLocalBalanceOptional.get());
         rating = rating.forDays(durationForAnalysis.toDays());
 
         return Optional.of(rating);
