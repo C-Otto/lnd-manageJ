@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.service;
 import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.ChannelRating;
+import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.CoinsAndDuration;
 import de.cotto.lndmanagej.model.FeeReport;
 import de.cotto.lndmanagej.model.FlowReport;
@@ -61,8 +62,8 @@ public class RatingForChannelService {
         RebalanceReport rebalanceReport = rebalanceService.getReportForChannel(channelId, durationForAnalysis);
         FlowReport flowReport = flowService.getFlowReportForChannel(channelId, durationForAnalysis);
         long feeRate = policyService.getMinimumFeeRateTo(localChannel.getRemotePubkey()).orElse(0L);
-        long localAvailableMilliSat = getLocalAvailableMilliSat(localChannel);
-        double millionSat = 1.0 * localAvailableMilliSat / 1_000 / 1_000_000;
+        Coins localAvailableBalance = getLocalAvailableBalance(localChannel);
+        double millionSat = localAvailableBalance.getMillionSatoshis();
 
         ChannelRating rating = ChannelRating.forChannel(channelId);
         rating = rating.addValueWithDescription(feeReport.earned().milliSatoshis(), "earned");
@@ -84,11 +85,11 @@ public class RatingForChannelService {
         return Optional.of(rating);
     }
 
-    private long getLocalAvailableMilliSat(LocalChannel localChannel) {
+    private Coins getLocalAvailableBalance(LocalChannel localChannel) {
         if (localChannel instanceof LocalOpenChannel openChannel) {
-            return openChannel.getBalanceInformation().localAvailable().milliSatoshis();
+            return openChannel.getBalanceInformation().localAvailable();
         }
-        return 0;
+        return Coins.NONE;
     }
 
     private Duration getDurationForAnalysis() {

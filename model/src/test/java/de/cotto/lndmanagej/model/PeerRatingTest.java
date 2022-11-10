@@ -16,6 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SuppressWarnings("ClassCanBeStatic")
 class PeerRatingTest {
     private static final String RATING = "%s rating";
+    private static final String RAW_RATING = "%s raw rating";
 
     private final PeerRating peerRating = PeerRating.forPeer(PUBKEY);
     private final PeerRating oneChannelRating = peerRating.withChannelRating(ratingWithValue(123));
@@ -45,7 +46,7 @@ class PeerRatingTest {
         void descriptions() {
             assertThat(oneChannelRating.getDescriptions())
                     .containsEntry(RATING.formatted(PUBKEY), 123L)
-                    .containsEntry(RATING.formatted(CHANNEL_ID), 123L);
+                    .containsEntry(RAW_RATING.formatted(CHANNEL_ID), 123L);
         }
     }
 
@@ -64,8 +65,8 @@ class PeerRatingTest {
         void descriptions() {
             assertThat(twoChannelsRating.getDescriptions())
                     .containsEntry(RATING.formatted(PUBKEY), 1023L)
-                    .containsEntry(RATING.formatted(CHANNEL_ID), 123L)
-                    .containsEntry(RATING.formatted(CHANNEL_ID_2), 900L);
+                    .containsEntry(RAW_RATING.formatted(CHANNEL_ID), 123L)
+                    .containsEntry(RAW_RATING.formatted(CHANNEL_ID_2), 900L);
         }
     }
 

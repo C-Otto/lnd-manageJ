@@ -23,11 +23,9 @@ public final class PeerRating implements Rating {
 
     @Override
     public long getValue() {
-        long totalUnscaledValue = channelRatings.stream()
-                .mapToLong(channelRating -> {
-                    double millionSatoshi = toMillionSatoshis(channelRating.getAverageLocalBalance().coins());
-                    return (long) (channelRating.getValue() * millionSatoshi);
-                }).sum();
+        long totalValueWithoutBalanceScaling = channelRatings.stream()
+                .mapToLong(ChannelRating::getValueWithoutBalanceScaling)
+                .sum();
 
         long consideredMinutes = channelRatings.stream()
                 .map(ChannelRating::getAverageLocalBalance)
@@ -37,17 +35,14 @@ public final class PeerRating implements Rating {
                 .orElse(1);
 
         double scaledAverageMillionSatoshis = channelRatings.stream()
-                .map(ChannelRating::getAverageLocalBalance)
-                .mapToDouble(coinsAndDuration -> {
-                    double millionSatoshis = toMillionSatoshis(coinsAndDuration.coins());
-                    double factor = 1.0 * coinsAndDuration.duration().toMinutes() / consideredMinutes;
-                    return millionSatoshis * factor;
-                }).sum();
+                .map(channelRating -> channelRating.getAverageLocalBalanceScaledToMinutes(consideredMinutes))
+                .mapToDouble(Coins::getMillionSatoshis)
+                .sum();
 
-        if (Double.isNaN(scaledAverageMillionSatoshis)) {
-            return totalUnscaledValue;
+        if (scaledAverageMillionSatoshis == 0) {
+            return totalValueWithoutBalanceScaling;
         }
-        return (long) (totalUnscaledValue / scaledAverageMillionSatoshis);
+        return (long) (totalValueWithoutBalanceScaling / scaledAverageMillionSatoshis);
     }
 
     @Override
@@ -82,9 +77,5 @@ public final class PeerRating implements Rating {
     @Override
     public int hashCode() {
         return Objects.hash(pubkey, channelRatings);
-    }
-
-    private static double toMillionSatoshis(Coins coins) {
-        return coins.milliSatoshis() / 1_000_000_000.0;
     }
 }

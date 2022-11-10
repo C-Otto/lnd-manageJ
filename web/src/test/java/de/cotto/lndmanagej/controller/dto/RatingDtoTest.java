@@ -19,7 +19,7 @@ class RatingDtoTest {
     @Test
     void fromModel() {
         Map<String, String> expectedDescriptions = Map.of(
-                CHANNEL_ID + " rating", "1",
+                CHANNEL_ID + " raw rating", "1",
                 CHANNEL_ID + " something", "1"
         );
         assertThat(RatingDto.fromModel(ChannelRatingFixtures.ratingWithValue(1)))
@@ -31,7 +31,7 @@ class RatingDtoTest {
         Map<String, String> expectedDescriptions = Map.of(
                 CHANNEL_ID + " a", "1",
                 CHANNEL_ID + " b", "2",
-                CHANNEL_ID + " rating", "4",
+                CHANNEL_ID + " raw rating", "4",
                 CHANNEL_ID + " something", "1"
         );
         Rating rating = ChannelRatingFixtures.ratingWithValue(1)

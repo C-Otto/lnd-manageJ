@@ -14,7 +14,9 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 
 @SuppressWarnings("ClassCanBeStatic")
 class ChannelRatingTest {
-    private static final String RATING = "%s rating";
+    private static final String RAW_RATING = "%s raw rating";
+    private static final String SCALED_RATING = "%s rating scaled by local balance";
+    private static final String AVERAGE_LOCAL_BALANCE = "%s average local balance (million sat) for %s days";
 
     @Test
     void initial_value_is_zero() {
@@ -32,7 +34,7 @@ class ChannelRatingTest {
 
         @Test
         void has_description_with_channel_id() {
-            assertThat(rating.getDescriptions()).containsEntry(RATING.formatted(CHANNEL_ID), 0L);
+            assertThat(rating.getDescriptions()).containsEntry(RAW_RATING.formatted(CHANNEL_ID), 0L);
         }
     }
 
@@ -70,10 +72,16 @@ class ChannelRatingTest {
         }
 
         @Test
-        void keeps_descriptions() {
+        void updates_descriptions() {
+            int days = 42;
+            double millionSat = 0.5;
             ChannelRating withDescriptions1 = ChannelRating.forChannel(CHANNEL_ID)
                     .addValueWithDescription(456, "a")
-                    .addValueWithDescription(789, "c");
+                    .addValueWithDescription(789, "c")
+                    .forAverageLocalBalance(new CoinsAndDuration(
+                            Coins.ofSatoshis((long) (millionSat * 1_000_000)),
+                            Duration.ofDays(days)
+                    ));
             ChannelRating withDescriptions2 = ChannelRating.forChannel(CHANNEL_ID)
                     .addValueWithDescription(111, "e")
                     .addValueWithDescription(123, "g");
@@ -83,7 +91,9 @@ class ChannelRatingTest {
                             CHANNEL_ID + " c", 789L,
                             CHANNEL_ID + " e", 111L,
                             CHANNEL_ID + " g", 123L,
-                            RATING.formatted(CHANNEL_ID), 456L + 789 + 111 + 123
+                            AVERAGE_LOCAL_BALANCE.formatted(CHANNEL_ID, days), millionSat,
+                            RAW_RATING.formatted(CHANNEL_ID), 456L + 789 + 111 + 123,
+                            SCALED_RATING.formatted(CHANNEL_ID), (long) ((456L + 789 + 111 + 123) / millionSat)
                     ));
         }
 
@@ -116,7 +126,7 @@ class ChannelRatingTest {
         void updates_rating_description() {
             ChannelRating rating = ChannelRating.forChannel(CHANNEL_ID);
             assertThat(rating.addValueWithDescription(123, "foo").getDescriptions())
-                    .containsEntry(RATING.formatted(CHANNEL_ID), 123L);
+                    .containsEntry(RAW_RATING.formatted(CHANNEL_ID), 123L);
         }
 
         @Test
@@ -125,7 +135,8 @@ class ChannelRatingTest {
             assertThat(rating.addValueWithDescription(123, "c").getDescriptions())
                     .isEqualTo(Map.of(
                             CHANNEL_ID + " a", 111L,
-                            CHANNEL_ID + " c", 123L, RATING.formatted(CHANNEL_ID), 234L
+                            CHANNEL_ID + " c", 123L,
+                            RAW_RATING.formatted(CHANNEL_ID), 234L
                     ));
         }
     }
@@ -145,7 +156,7 @@ class ChannelRatingTest {
         void extends_description() {
             Map<String, Number> expectedDescriptions = Map.of(
                     CHANNEL_ID + " a", 100L,
-                    RATING.formatted(CHANNEL_ID), 33L,
+                    RAW_RATING.formatted(CHANNEL_ID), 33L,
                     CHANNEL_ID + " scaled by days", 1.0 / 3
             );
             assertThat(rating.forDays(3).getDescriptions())
@@ -167,14 +178,16 @@ class ChannelRatingTest {
 
         @Test
         void extends_description() {
-            Map<String, Number> expectedDescriptions = Map.of(
-                    CHANNEL_ID + " a", 100L,
-                    RATING.formatted(CHANNEL_ID), 200L,
-                    CHANNEL_ID + " scaled by liquidity (0.5 million sats for 123 days)", 2.0
-            );
+            int days = 123;
             CoinsAndDuration averageLocalBalance = new CoinsAndDuration(
                     Coins.ofSatoshis(500_000),
-                    Duration.ofDays(123)
+                    Duration.ofDays(days)
+            );
+            Map<String, Number> expectedDescriptions = Map.of(
+                    CHANNEL_ID + " a", 100L,
+                    RAW_RATING.formatted(CHANNEL_ID), 100L,
+                    SCALED_RATING.formatted(CHANNEL_ID), 200L,
+                    AVERAGE_LOCAL_BALANCE.formatted(CHANNEL_ID, days), 0.5
             );
             assertThat(rating.forAverageLocalBalance(averageLocalBalance).getDescriptions())
                     .isEqualTo(expectedDescriptions);

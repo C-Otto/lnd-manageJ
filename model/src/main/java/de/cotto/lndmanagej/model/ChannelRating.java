@@ -12,7 +12,7 @@ public final class ChannelRating implements Rating {
     private final Map<String, Number> descriptions;
 
     public ChannelRating(ChannelId channelId) {
-        this(channelId, 0, new CoinsAndDuration(Coins.ofSatoshis(1_000_000), Duration.ZERO), Map.of());
+        this(channelId, 0, new CoinsAndDuration(Coins.NONE, Duration.ZERO), Map.of());
     }
 
     private ChannelRating(
@@ -28,7 +28,8 @@ public final class ChannelRating implements Rating {
     }
 
     public static ChannelRating forChannel(ChannelId channelId) {
-        return new ChannelRating(channelId).withDescription("rating", 0);
+        return new ChannelRating(channelId)
+                .withDescription("raw rating", 0);
     }
 
     public ChannelRating combine(ChannelRating other) {
@@ -37,12 +38,18 @@ public final class ChannelRating implements Rating {
         Map<String, Number> combinedDescriptions = new LinkedHashMap<>();
         combinedDescriptions.putAll(descriptions);
         combinedDescriptions.putAll(other.descriptions);
-        combinedDescriptions.put(channelId + " rating", newRating);
+        combinedDescriptions.put(channelId + " raw rating", newRating);
         CoinsAndDuration combinedAverageLocalBalance;
         if (averageLocalBalance.duration().compareTo(other.averageLocalBalance.duration()) > 0) {
             combinedAverageLocalBalance = averageLocalBalance;
         } else {
             combinedAverageLocalBalance = other.averageLocalBalance;
+        }
+        if (combinedAverageLocalBalance.duration().toMinutes() > 0) {
+            combinedDescriptions.put(
+                    channelId + " rating scaled by local balance",
+                    getValueWithBalanceScaling(newRating, combinedAverageLocalBalance)
+            );
         }
         return new ChannelRating(channelId, newRating, combinedAverageLocalBalance, combinedDescriptions);
     }
@@ -65,18 +72,33 @@ public final class ChannelRating implements Rating {
     }
 
     public ChannelRating forAverageLocalBalance(CoinsAndDuration averageLocalBalance) {
-        double millionSatoshis = averageLocalBalance.coins().milliSatoshis() / 1_000_000_000.0;
-        double factor = 1.0 / millionSatoshis;
-        long newValue = (long) (value * factor);
+        double millionSatoshis = averageLocalBalance.coins().getMillionSatoshis();
         long days = averageLocalBalance.duration().toDays();
-        String description = "scaled by liquidity (%.1f million sats for %s days)".formatted(millionSatoshis, days);
-        return new ChannelRating(channelId, newValue, averageLocalBalance, descriptions)
-                .withDescription(description, factor);
+        String description = "average local balance (million sat) for %s days".formatted(days);
+        return new ChannelRating(channelId, value, averageLocalBalance, descriptions)
+                .withDescription(description, millionSatoshis);
+    }
+
+    public long getValueWithoutBalanceScaling() {
+        return value;
     }
 
     @Override
     public long getValue() {
+        return getValueWithBalanceScaling(value, averageLocalBalance);
+    }
+
+    private static long getValueWithBalanceScaling(long value, CoinsAndDuration averageLocalBalance) {
+        if (averageLocalBalance.coins().isPositive()) {
+            return (long) (value / averageLocalBalance.coins().getMillionSatoshis());
+        }
         return value;
+    }
+
+    public Coins getAverageLocalBalanceScaledToMinutes(long minutes) {
+        double millionSatoshis = averageLocalBalance.coins().milliSatoshis();
+        double factor = 1.0 * averageLocalBalance.duration().toMinutes() / minutes;
+        return Coins.ofMilliSatoshis((long) (millionSatoshis * factor));
     }
 
     @Override

@@ -247,6 +247,8 @@ class RatingForChannelServiceTest {
 
     @Test
     void includes_descriptions() {
+        lenient().when(balanceService.getLocalBalanceAverage(any(), anyInt()))
+                .thenReturn(Optional.of(new CoinsAndDuration(Coins.ofSatoshis(2_000_000), Duration.ofDays(23))));
         Coins feesEarned = Coins.ofMilliSatoshis(300_000L);
         when(feeService.getFeeReportForChannel(CHANNEL_ID, DEFAULT_DURATION_FOR_ANALYSIS))
                 .thenReturn(new FeeReport(feesEarned, Coins.NONE));
@@ -258,8 +260,9 @@ class RatingForChannelServiceTest {
                 "712345x123x1 support as target", 0L,
                 "712345x123x1 future earnings", 0L,
                 "712345x123x1 scaled by days", 1.0 / 30,
-                "712345x123x1 scaled by liquidity (1.0 million sats for 23 days)", 1.0d,
-                "712345x123x1 rating", 10_000L
+                "712345x123x1 average local balance (million sat) for 23 days", 2.0d,
+                "712345x123x1 rating scaled by local balance", 5_000L,
+                "712345x123x1 raw rating", 10_000L
         );
         assertThat(ratingForChannelService.getRating(CHANNEL_ID).map(Rating::getDescriptions).orElse(Map.of()))
                 .containsExactlyInAnyOrderEntriesOf(expectedDetails);

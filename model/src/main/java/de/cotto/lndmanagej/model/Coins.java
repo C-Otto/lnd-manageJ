@@ -86,6 +86,10 @@ public record Coins(long milliSatoshis) implements Comparable<Coins> {
         return !isNegative();
     }
 
+    public double getMillionSatoshis() {
+        return 1.0 * milliSatoshis / 1_000 / 1_000_000;
+    }
+
     @Override
     public String toString() {
         double coins = BigDecimal.valueOf(milliSatoshis, SCALE).doubleValue();

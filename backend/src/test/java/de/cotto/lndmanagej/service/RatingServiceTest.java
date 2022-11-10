@@ -93,11 +93,11 @@ class RatingServiceTest {
     }
 
     @Test
-    void getRatingForPeer_includes_details() {
+    void getRatingForPeer_includes_descriptions() {
         mockChannels(LOCAL_OPEN_CHANNEL);
         assertThat(ratingService.getRatingForPeer(PUBKEY_2).orElseThrow().getDescriptions())
                 .containsEntry(PUBKEY_2 + " rating", 10_000L)
-                .containsEntry(CHANNEL_ID + " rating", 10_000L);
+                .containsEntry(CHANNEL_ID + " raw rating", 10_000L);
     }
 
     @Test

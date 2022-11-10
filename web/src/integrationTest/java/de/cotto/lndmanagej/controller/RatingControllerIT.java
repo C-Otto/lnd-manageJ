@@ -52,9 +52,9 @@ class RatingControllerIT {
                           "message": "",
                           "descriptions": {
                             "%s rating": "128",
-                            "%s rating": "123",
+                            "%s raw rating": "123",
                             "%s something": "123",
-                            "%s rating": "5",
+                            "%s raw rating": "5",
                             "%s something else": "5"
                           }
                         }""".formatted(PUBKEY, CHANNEL_ID, CHANNEL_ID, CHANNEL_ID_2, CHANNEL_ID_2)));
@@ -79,7 +79,7 @@ class RatingControllerIT {
                           "descriptions": {
                             "%s a": "456",
                             "%s something": "123",
-                            "%s rating": "579"
+                            "%s raw rating": "579"
                           }
                         }""".formatted(CHANNEL_ID, CHANNEL_ID, CHANNEL_ID)));
     }

@@ -126,6 +126,12 @@ class CoinsTest {
     }
 
     @Test
+    void getMillionSatoshis() {
+        assertThat(Coins.NONE.getMillionSatoshis()).isEqualTo(0d);
+        assertThat(Coins.ofSatoshis(1_500_000).getMillionSatoshis()).isEqualTo(1.5d);
+    }
+
+    @Test
     void none() {
         assertThat(Coins.NONE).isEqualTo(Coins.ofSatoshis(0));
     }
