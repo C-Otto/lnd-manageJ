@@ -2,7 +2,6 @@ package de.cotto.lndmanagej.model;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,12 +47,12 @@ public final class PeerRating implements Rating {
     @Override
     public Map<String, Number> getDescriptions() {
         if (channelRatings.isEmpty()) {
-            return Collections.emptyMap();
+            return Map.of();
         }
         Map<String, Number> descriptions = new LinkedHashMap<>();
         channelRatings.stream().map(ChannelRating::getDescriptions).forEach(descriptions::putAll);
         descriptions.put(pubkey + " rating", getValue());
-        return Collections.unmodifiableMap(descriptions);
+        return descriptions;
     }
 
     public PeerRating withChannelRating(ChannelRating channelRating) {
