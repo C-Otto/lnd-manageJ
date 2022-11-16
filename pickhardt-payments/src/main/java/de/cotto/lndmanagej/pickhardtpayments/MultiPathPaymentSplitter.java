@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.pickhardtpayments;
 
+import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.grpc.GrpcGetInfo;
 import de.cotto.lndmanagej.model.BasicRoute;
 import de.cotto.lndmanagej.model.ChannelId;
@@ -27,13 +28,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.MAX_CLTV_EXPIRY;
+
 @Component
 public class MultiPathPaymentSplitter {
+    private static final int DEFAULT_MAX_CLTV_EXPIRY = 2016;
     private final GrpcGetInfo grpcGetInfo;
     private final FlowComputation flowComputation;
     private final EdgeComputation edgeComputation;
     private final ChannelService channelService;
     private final PolicyService policyService;
+    private final ConfigurationService configurationService;
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     public MultiPathPaymentSplitter(
@@ -41,25 +46,33 @@ public class MultiPathPaymentSplitter {
             FlowComputation flowComputation,
             EdgeComputation edgeComputation,
             ChannelService channelService,
-            PolicyService policyService
+            PolicyService policyService,
+            ConfigurationService configurationService
     ) {
         this.flowComputation = flowComputation;
         this.grpcGetInfo = grpcGetInfo;
         this.edgeComputation = edgeComputation;
         this.channelService = channelService;
         this.policyService = policyService;
+        this.configurationService = configurationService;
     }
 
-    public MultiPathPayment getMultiPathPaymentTo(Pubkey target, Coins amount, PaymentOptions paymentOptions) {
+    public MultiPathPayment getMultiPathPaymentTo(
+            Pubkey target,
+            Coins amount,
+            PaymentOptions paymentOptions,
+            int finalCltvDelta
+    ) {
         Pubkey source = grpcGetInfo.getPubkey();
-        return getMultiPathPayment(source, target, amount, paymentOptions);
+        return getMultiPathPayment(source, target, amount, paymentOptions, finalCltvDelta);
     }
 
     public MultiPathPayment getMultiPathPayment(
             Pubkey source,
             Pubkey target,
             Coins amount,
-            PaymentOptions paymentOptions
+            PaymentOptions paymentOptions,
+            int finalCltvDelta
     ) {
         Pubkey intermediateTarget = paymentOptions.peer().orElse(target);
         Flows flows = flowComputation.getOptimalFlows(source, intermediateTarget, amount, paymentOptions);
@@ -76,6 +89,9 @@ public class MultiPathPaymentSplitter {
 
         if (isTooExpensive(paymentOptions, fixedRoutes)) {
             return MultiPathPayment.failure("At least one route is too expensive (fee rate limit)");
+        }
+        if (hasExpiryTooFarInTheFuture(fixedRoutes, finalCltvDelta)) {
+            return MultiPathPayment.failure("At least one route has a CLTV expiry that is too far in the future");
         }
         return new MultiPathPayment(fixedRoutes);
     }
@@ -100,7 +116,7 @@ public class MultiPathPaymentSplitter {
         if (policy == null) {
             logger.error(
                     "Unable to extend routes for channel with " + peer +
-                            " (no policy found for channel " + channelId + ")"
+                    " (no policy found for channel " + channelId + ")"
             );
             return List.of();
         }
@@ -126,6 +142,11 @@ public class MultiPathPaymentSplitter {
         return fixedRoutes.stream().anyMatch(route -> route.getFeeRateWithFirstHop() > feeRateLimit);
     }
 
+    private boolean hasExpiryTooFarInTheFuture(List<Route> fixedRoutes, int finalCltvDelta) {
+        int maximumCltvExpiry = getMaximumCltvExpiry();
+        return fixedRoutes.stream().anyMatch(route -> route.getTotalTimeLock(0, finalCltvDelta) > maximumCltvExpiry);
+    }
+
     private List<Route> getWithLiquidityInformation(List<BasicRoute> basicRoutes) {
         return basicRoutes.stream()
                 .map(this::getWithLiquidityInformation)
@@ -137,5 +158,9 @@ public class MultiPathPaymentSplitter {
                 .map(edgeComputation::getEdgeWithLiquidityInformation)
                 .toList();
         return new Route(edgesWithLiquidityInformation, basicRoute.amount());
+    }
+
+    private int getMaximumCltvExpiry() {
+        return configurationService.getIntegerValue(MAX_CLTV_EXPIRY).orElse(DEFAULT_MAX_CLTV_EXPIRY);
     }
 }

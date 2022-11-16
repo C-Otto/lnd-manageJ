@@ -53,6 +53,7 @@ class PaymentsControllerIT {
             false,
             Optional.empty()
     );
+    private static final int FINAL_CLTV_EXPIRY = 0;
     private static final String DTO_AS_STRING = "{" +
             "  \"feeRateWeight\": 123," +
             "  \"feeRateLimit\": 999," +
@@ -106,7 +107,7 @@ class PaymentsControllerIT {
         String feesAsString = String.valueOf(MULTI_PATH_PAYMENT.fees().milliSatoshis());
         String feesWithFirstHopAsString = String.valueOf(MULTI_PATH_PAYMENT.feesWithFirstHop().milliSatoshis());
         double expectedProbability = MULTI_PATH_PAYMENT.probability();
-        when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, amount, DEFAULT_PAYMENT_OPTIONS))
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, amount, DEFAULT_PAYMENT_OPTIONS, FINAL_CLTV_EXPIRY))
                 .thenReturn(MULTI_PATH_PAYMENT);
         mockMvc.perform(get("%s/to/%s/amount/%d".formatted(PREFIX, PUBKEY, amount.satoshis())))
                 .andExpect(jsonPath("$.probability", is(expectedProbability)))
@@ -137,7 +138,7 @@ class PaymentsControllerIT {
     @Test
     void sendTo_with_payment_options() throws Exception {
         Coins amount = MULTI_PATH_PAYMENT.amount();
-        when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, amount, PAYMENT_OPTIONS))
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, amount, PAYMENT_OPTIONS, FINAL_CLTV_EXPIRY))
                 .thenReturn(MULTI_PATH_PAYMENT);
         String url = "%s/to/%s/amount/%d".formatted(PREFIX, PUBKEY, amount.satoshis());
         mockMvc.perform(post(url).contentType(APPLICATION_JSON).content(DTO_AS_STRING))
@@ -150,13 +151,14 @@ class PaymentsControllerIT {
         String amountAsString = String.valueOf(amount.satoshis());
         String feesAsString = String.valueOf(MULTI_PATH_PAYMENT.fees().milliSatoshis());
         double expectedProbability = MULTI_PATH_PAYMENT.probability();
-        when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, amount, DEFAULT_PAYMENT_OPTIONS))
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, amount, DEFAULT_PAYMENT_OPTIONS, FINAL_CLTV_EXPIRY))
                 .thenReturn(MULTI_PATH_PAYMENT);
         when(multiPathPaymentSplitter.getMultiPathPayment(
                 PUBKEY,
                 PUBKEY_2,
                 Coins.ofSatoshis(1_234),
-                DEFAULT_PAYMENT_OPTIONS
+                DEFAULT_PAYMENT_OPTIONS,
+                FINAL_CLTV_EXPIRY
         )).thenReturn(MULTI_PATH_PAYMENT);
         mockMvc.perform(get("%s/from/%s/to/%s/amount/%d".formatted(PREFIX, PUBKEY, PUBKEY_2, 1_234)))
                 .andExpect(jsonPath("$.probability", is(expectedProbability)))
@@ -169,7 +171,7 @@ class PaymentsControllerIT {
     @Test
     void send_with_payment_options() throws Exception {
         Coins amount = MULTI_PATH_PAYMENT.amount();
-        when(multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_2, amount, PAYMENT_OPTIONS))
+        when(multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_2, amount, PAYMENT_OPTIONS, FINAL_CLTV_EXPIRY))
                 .thenReturn(MULTI_PATH_PAYMENT);
         String url = "%s/from/%s/to/%s/amount/%d".formatted(PREFIX, PUBKEY, PUBKEY_2, amount.satoshis());
         mockMvc.perform(post(url).contentType(APPLICATION_JSON).content(DTO_AS_STRING))

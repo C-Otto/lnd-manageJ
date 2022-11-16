@@ -83,8 +83,9 @@ public class PaymentsController {
     ) {
         Coins coins = Coins.ofSatoshis(amount);
         PaymentOptions paymentOptions = paymentOptionsDto.toModel();
+        int finalCltvDelta = 0;
         MultiPathPayment multiPathPaymentTo =
-                multiPathPaymentSplitter.getMultiPathPaymentTo(pubkey, coins, paymentOptions);
+                multiPathPaymentSplitter.getMultiPathPaymentTo(pubkey, coins, paymentOptions, finalCltvDelta);
         return MultiPathPaymentDto.fromModel(multiPathPaymentTo);
     }
 
@@ -108,8 +109,9 @@ public class PaymentsController {
     ) {
         Coins coins = Coins.ofSatoshis(amount);
         PaymentOptions paymentOptions = paymentOptionsDto.toModel();
+        int finalCltvDelta = 0;
         MultiPathPayment multiPathPayment =
-                multiPathPaymentSplitter.getMultiPathPayment(source, target, coins, paymentOptions);
+                multiPathPaymentSplitter.getMultiPathPayment(source, target, coins, paymentOptions, finalCltvDelta);
         return MultiPathPaymentDto.fromModel(multiPathPayment);
     }
 

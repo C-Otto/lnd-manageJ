@@ -39,6 +39,7 @@ class PaymentsControllerTest {
 
     private static final PaymentOptions PAYMENT_OPTIONS;
     private static final PaymentOptionsDto PAYMENT_OPTIONS_DTO;
+    private static final int FINAL_CLTV_EXPIRY = 0;
 
     static {
         PAYMENT_OPTIONS = new PaymentOptions(
@@ -98,8 +99,12 @@ class PaymentsControllerTest {
 
     @Test
     void sendTo() {
-        when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, Coins.ofSatoshis(456), DEFAULT_PAYMENT_OPTIONS))
-                .thenReturn(MULTI_PATH_PAYMENT);
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(
+                PUBKEY,
+                Coins.ofSatoshis(456),
+                DEFAULT_PAYMENT_OPTIONS,
+                FINAL_CLTV_EXPIRY
+        )).thenReturn(MULTI_PATH_PAYMENT);
         assertThat(controller.sendTo(PUBKEY, 456))
                 .isEqualTo(MultiPathPaymentDto.fromModel(MULTI_PATH_PAYMENT));
     }
@@ -108,8 +113,12 @@ class PaymentsControllerTest {
     void sendTo_with_payment_options() {
         int feeRateWeight = 10;
         PaymentOptions paymentOptions = PaymentOptions.forFeeRateWeight(feeRateWeight);
-        when(multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY, Coins.ofSatoshis(456), paymentOptions))
-                .thenReturn(MULTI_PATH_PAYMENT);
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(
+                PUBKEY,
+                Coins.ofSatoshis(456),
+                paymentOptions,
+                FINAL_CLTV_EXPIRY
+        )).thenReturn(MULTI_PATH_PAYMENT);
         assertThat(controller.sendTo(PUBKEY, 456, withFeeRateWeight(feeRateWeight)))
                 .isEqualTo(MultiPathPaymentDto.fromModel(MULTI_PATH_PAYMENT));
     }
@@ -120,8 +129,9 @@ class PaymentsControllerTest {
                 PUBKEY,
                 PUBKEY_2,
                 Coins.ofSatoshis(123),
-                DEFAULT_PAYMENT_OPTIONS
-        )).thenReturn(MULTI_PATH_PAYMENT);
+                DEFAULT_PAYMENT_OPTIONS,
+                0)
+        ).thenReturn(MULTI_PATH_PAYMENT);
         assertThat(controller.send(PUBKEY, PUBKEY_2, 123))
                 .isEqualTo(MultiPathPaymentDto.fromModel(MULTI_PATH_PAYMENT));
     }
@@ -132,7 +142,8 @@ class PaymentsControllerTest {
                 PUBKEY,
                 PUBKEY_2,
                 Coins.ofSatoshis(123),
-                PAYMENT_OPTIONS
+                PAYMENT_OPTIONS,
+                0
         )).thenReturn(MULTI_PATH_PAYMENT);
         assertThat(controller.send(PUBKEY, PUBKEY_2, 123, PAYMENT_OPTIONS_DTO))
                 .isEqualTo(MultiPathPaymentDto.fromModel(MULTI_PATH_PAYMENT));

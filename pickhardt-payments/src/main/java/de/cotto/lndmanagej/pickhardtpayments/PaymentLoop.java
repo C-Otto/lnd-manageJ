@@ -76,6 +76,7 @@ public class PaymentLoop {
         private final HexString paymentHash;
         private final Pubkey destination;
         private final Coins totalAmountToSend;
+        private final int finalCltvDelta;
         private Coins inFlight = Coins.NONE;
 
         public Instance(
@@ -89,6 +90,7 @@ public class PaymentLoop {
             paymentHash = decodedPaymentRequest.paymentHash();
             destination = decodedPaymentRequest.destination();
             totalAmountToSend = decodedPaymentRequest.amount();
+            finalCltvDelta = decodedPaymentRequest.cltvExpiry();
         }
 
         private void start() {
@@ -102,8 +104,12 @@ public class PaymentLoop {
                     return;
                 }
                 addLoopIterationInfo(loopIterationCounter, residualAmount);
-                MultiPathPayment multiPathPayment =
-                        multiPathPaymentSplitter.getMultiPathPaymentTo(destination, residualAmount, paymentOptions);
+                MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPaymentTo(
+                        destination,
+                        residualAmount,
+                        paymentOptions,
+                        finalCltvDelta
+                );
                 if (multiPathPayment.isFailure()) {
                     failureCounter++;
                     logFailureInformation(residualAmount, multiPathPayment);

@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.pickhardtpayments;
 
+import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.grpc.GrpcGetInfo;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Edge;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.MAX_CLTV_EXPIRY;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
@@ -48,6 +50,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class MultiPathPaymentSplitterTest {
     private static final Coins AMOUNT = Coins.ofSatoshis(1_234);
+    private static final int FINAL_CLTV_DELTA = 40;
+    private static final int DEFAULT_MAX_CLTV_EXPIRY = 2016;
 
     @InjectMocks
     private MultiPathPaymentSplitter multiPathPaymentSplitter;
@@ -67,6 +71,9 @@ class MultiPathPaymentSplitterTest {
     @Mock
     private PolicyService policyService;
 
+    @Mock
+    private ConfigurationService configurationService;
+
     @BeforeEach
     void setUp() {
         when(flowComputation.getOptimalFlows(any(), any(), any(), any())).thenReturn(new Flows());
@@ -76,7 +83,7 @@ class MultiPathPaymentSplitterTest {
     @Test
     void getMultiPathPaymentTo_uses_own_pubkey_as_source() {
         when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY_4);
-        multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY_2, AMOUNT, DEFAULT_PAYMENT_OPTIONS);
+        multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY_2, AMOUNT, DEFAULT_PAYMENT_OPTIONS, FINAL_CLTV_DELTA);
         verify(flowComputation).getOptimalFlows(PUBKEY_4, PUBKEY_2, AMOUNT, DEFAULT_PAYMENT_OPTIONS);
     }
 
@@ -86,7 +93,7 @@ class MultiPathPaymentSplitterTest {
         when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY_4);
         PaymentOptions paymentOptions = PaymentOptions.forFeeRateWeight(feeRateWeight);
         MultiPathPayment multiPathPayment =
-                multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY_2, AMOUNT, paymentOptions);
+                multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY_2, AMOUNT, paymentOptions, FINAL_CLTV_DELTA);
         assertThat(multiPathPayment.amount()).isEqualTo(Coins.NONE);
         verify(flowComputation).getOptimalFlows(PUBKEY_4, PUBKEY_2, AMOUNT, paymentOptions);
     }
@@ -97,8 +104,12 @@ class MultiPathPaymentSplitterTest {
                 .thenReturn(new Flows(FLOW));
         when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY);
 
-        MultiPathPayment multiPathPayment =
-                multiPathPaymentSplitter.getMultiPathPaymentTo(PUBKEY_2, AMOUNT, DEFAULT_PAYMENT_OPTIONS);
+        MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPaymentTo(
+                PUBKEY_2,
+                AMOUNT,
+                DEFAULT_PAYMENT_OPTIONS,
+                FINAL_CLTV_DELTA
+        );
 
         Route expectedRoute = new Route(List.of(noInformationFor(EDGE)), AMOUNT);
         MultiPathPayment expected = new MultiPathPayment(List.of(expectedRoute));
@@ -112,8 +123,13 @@ class MultiPathPaymentSplitterTest {
 
         @Test
         void failure() {
-            MultiPathPayment multiPathPayment =
-                    multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_2, AMOUNT, DEFAULT_PAYMENT_OPTIONS);
+            MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPayment(
+                    PUBKEY,
+                    PUBKEY_2,
+                    AMOUNT,
+                    DEFAULT_PAYMENT_OPTIONS,
+                    FINAL_CLTV_DELTA
+            );
             assertThat(multiPathPayment.isFailure()).isTrue();
         }
 
@@ -126,9 +142,59 @@ class MultiPathPaymentSplitterTest {
             PaymentOptions paymentOptions = PaymentOptions.forTopUp(feeRate - 1, 0, PUBKEY_2);
             mockFlow(amount, policy, paymentOptions);
 
-            MultiPathPayment multiPathPayment =
-                    multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_4, amount, paymentOptions);
+            MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPayment(
+                    PUBKEY,
+                    PUBKEY_4,
+                    amount,
+                    paymentOptions,
+                    FINAL_CLTV_DELTA
+            );
             assertThat(multiPathPayment.isFailure()).isTrue();
+        }
+
+        @Nested
+        class Expiry {
+            private final Coins amount = Coins.ofSatoshis(1_000_000);
+            private final Policy policy = policyFor(0);
+            private final PaymentOptions paymentOptions = PaymentOptions.forTopUp(100, 0, PUBKEY_2);
+
+            @BeforeEach
+            void setUp() {
+                // pubkey to pubkey2 has expiry delta of 40
+                mockFlow(amount, policy, paymentOptions);
+                mockExtensionEdge(PUBKEY_4, 0);
+            }
+
+            @Test
+            void one_flow_has_cltv_expiry_at_limit() {
+                MultiPathPayment multiPathPayment = getMultiPathPayment(DEFAULT_MAX_CLTV_EXPIRY - 40);
+                assertThat(multiPathPayment.isFailure()).isFalse();
+            }
+
+            @Test
+            void one_flow_has_cltv_expiry_above_limit() {
+                MultiPathPayment multiPathPayment = getMultiPathPayment(DEFAULT_MAX_CLTV_EXPIRY - 40 + 1);
+                assertThat(multiPathPayment.isFailure()).isTrue();
+            }
+
+            @Test
+            void one_flow_has_cltv_expiry_above_limit_with_configured_max_cltv_expiry() {
+                when(configurationService.getIntegerValue(MAX_CLTV_EXPIRY))
+                        .thenReturn(Optional.of(40 + FINAL_CLTV_DELTA - 1));
+
+                MultiPathPayment multiPathPayment = getMultiPathPayment(FINAL_CLTV_DELTA);
+                assertThat(multiPathPayment.isFailure()).isTrue();
+            }
+
+            private MultiPathPayment getMultiPathPayment(int finalCltvDelta) {
+                return multiPathPaymentSplitter.getMultiPathPayment(
+                        PUBKEY,
+                        PUBKEY_4,
+                        amount,
+                        paymentOptions,
+                        finalCltvDelta
+                );
+            }
         }
 
         @Test
@@ -140,8 +206,13 @@ class MultiPathPaymentSplitterTest {
             PaymentOptions paymentOptions = PaymentOptions.forTopUp(feeRate, 0, PUBKEY_2);
             mockFlow(amount, policy, paymentOptions);
 
-            MultiPathPayment multiPathPayment =
-                    multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_3, amount, paymentOptions);
+            MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPayment(
+                    PUBKEY,
+                    PUBKEY_3,
+                    amount,
+                    paymentOptions,
+                    FINAL_CLTV_DELTA
+            );
             assertThat(multiPathPayment.isFailure()).isFalse();
         }
 
@@ -154,8 +225,13 @@ class MultiPathPaymentSplitterTest {
             PaymentOptions paymentOptions = PaymentOptions.forTopUp(feeRate - 1, 0, PUBKEY_2);
             mockFlow(amount, policy, paymentOptions);
 
-            MultiPathPayment multiPathPayment =
-                    multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_3, amount, paymentOptions);
+            MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPayment(
+                    PUBKEY,
+                    PUBKEY_3,
+                    amount,
+                    paymentOptions,
+                    FINAL_CLTV_DELTA
+            );
             assertThat(multiPathPayment.isFailure()).isTrue();
         }
 
@@ -172,8 +248,13 @@ class MultiPathPaymentSplitterTest {
             when(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_3, amount, paymentOptions))
                     .thenReturn(new Flows(firstEdgeFlow, flow));
 
-            MultiPathPayment multiPathPayment =
-                    multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_3, amount, paymentOptions);
+            MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPayment(
+                    PUBKEY,
+                    PUBKEY_3,
+                    amount,
+                    paymentOptions,
+                    FINAL_CLTV_DELTA
+            );
             assertThat(multiPathPayment.isFailure()).isTrue();
         }
 
@@ -190,8 +271,13 @@ class MultiPathPaymentSplitterTest {
             when(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_4, amount, paymentOptions))
                     .thenReturn(new Flows(firstEdgeFlow, flow));
 
-            MultiPathPayment multiPathPayment =
-                    multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_4, amount, paymentOptions);
+            MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPayment(
+                    PUBKEY,
+                    PUBKEY_4,
+                    amount,
+                    paymentOptions,
+                    FINAL_CLTV_DELTA
+            );
             assertThat(multiPathPayment.isFailure()).isFalse();
         }
 
@@ -213,8 +299,13 @@ class MultiPathPaymentSplitterTest {
             when(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, amount, paymentOptions))
                     .thenReturn(new Flows(flow1, flow2));
 
-            MultiPathPayment multiPathPayment =
-                    multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_4, amount, paymentOptions);
+            MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPayment(
+                    PUBKEY,
+                    PUBKEY_4,
+                    amount,
+                    paymentOptions,
+                    FINAL_CLTV_DELTA
+            );
             assertThat(multiPathPayment.isFailure()).isTrue();
         }
 
@@ -234,8 +325,13 @@ class MultiPathPaymentSplitterTest {
             when(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_3, amount, paymentOptions))
                     .thenReturn(new Flows(firstEdgeFlow, flow1, flow2));
 
-            MultiPathPayment multiPathPayment =
-                    multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_3, amount, paymentOptions);
+            MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPayment(
+                    PUBKEY,
+                    PUBKEY_3,
+                    amount,
+                    paymentOptions,
+                    FINAL_CLTV_DELTA
+            );
             assertThat(multiPathPayment.isFailure()).isTrue();
         }
 
@@ -251,7 +347,8 @@ class MultiPathPaymentSplitterTest {
                     PUBKEY,
                     PUBKEY_2,
                     halfOfCapacity,
-                    DEFAULT_PAYMENT_OPTIONS
+                    DEFAULT_PAYMENT_OPTIONS,
+                    FINAL_CLTV_DELTA
             );
 
             assertThat(multiPathPayment.probability())
@@ -262,8 +359,13 @@ class MultiPathPaymentSplitterTest {
         void with_fee_rate_weight() {
             int feeRateWeight = 991;
             PaymentOptions paymentOptions = PaymentOptions.forFeeRateWeight(feeRateWeight);
-            MultiPathPayment multiPathPayment =
-                    multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_2, AMOUNT, paymentOptions);
+            MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPayment(
+                    PUBKEY,
+                    PUBKEY_2,
+                    AMOUNT,
+                    paymentOptions,
+                    FINAL_CLTV_DELTA
+            );
             assertThat(multiPathPayment.amount()).isEqualTo(Coins.NONE);
             verify(flowComputation).getOptimalFlows(PUBKEY, PUBKEY_2, AMOUNT, paymentOptions);
         }
@@ -286,7 +388,8 @@ class MultiPathPaymentSplitterTest {
                     PUBKEY,
                     PUBKEY_2,
                     totalAmount,
-                    DEFAULT_PAYMENT_OPTIONS
+                    DEFAULT_PAYMENT_OPTIONS,
+                    FINAL_CLTV_DELTA
             );
 
             double probabilityFlow1 = (1.0 * halfOfCapacity.satoshis() + 1) / (capacitySat + 1);
@@ -311,7 +414,8 @@ class MultiPathPaymentSplitterTest {
                     PUBKEY,
                     PUBKEY_2,
                     EDGE.capacity(),
-                    DEFAULT_PAYMENT_OPTIONS
+                    DEFAULT_PAYMENT_OPTIONS,
+                    FINAL_CLTV_DELTA
             );
 
             assertThat(multiPathPayment.probability()).isEqualTo(1.0 / (capacitySat + 1));
@@ -322,8 +426,13 @@ class MultiPathPaymentSplitterTest {
             when(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, AMOUNT, DEFAULT_PAYMENT_OPTIONS))
                     .thenReturn(new Flows(FLOW));
             assumeThat(FLOW.amount()).isLessThan(AMOUNT);
-            MultiPathPayment multiPathPayment =
-                    multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_2, AMOUNT, DEFAULT_PAYMENT_OPTIONS);
+            MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPayment(
+                    PUBKEY,
+                    PUBKEY_2,
+                    AMOUNT,
+                    DEFAULT_PAYMENT_OPTIONS,
+                    FINAL_CLTV_DELTA
+            );
             assertThat(multiPathPayment.routes().iterator().next().getAmount()).isEqualTo(AMOUNT);
         }
 
@@ -352,7 +461,13 @@ class MultiPathPaymentSplitterTest {
         private MultiPathPayment attemptTopUpPayment() {
             PaymentOptions paymentOptions = PaymentOptions.forTopUp(500, 123, PUBKEY_2);
             when(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, AMOUNT, paymentOptions)).thenReturn(new Flows(FLOW));
-            return multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_3, AMOUNT, paymentOptions);
+            return multiPathPaymentSplitter.getMultiPathPayment(
+                    PUBKEY,
+                    PUBKEY_3,
+                    AMOUNT,
+                    paymentOptions,
+                    FINAL_CLTV_DELTA
+            );
         }
 
         @Test
@@ -366,8 +481,13 @@ class MultiPathPaymentSplitterTest {
                     .thenReturn(new Flows(FLOW));
             Route expectedRoute = new Route(List.of(withLiquidityInformation), amount);
 
-            MultiPathPayment multiPathPayment =
-                    multiPathPaymentSplitter.getMultiPathPayment(PUBKEY, PUBKEY_2, amount, DEFAULT_PAYMENT_OPTIONS);
+            MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPayment(
+                    PUBKEY,
+                    PUBKEY_2,
+                    amount,
+                    DEFAULT_PAYMENT_OPTIONS,
+                    FINAL_CLTV_DELTA
+            );
             assertThat(multiPathPayment.routes()).containsExactly(expectedRoute);
         }
 
@@ -399,7 +519,8 @@ class MultiPathPaymentSplitterTest {
                     PUBKEY,
                     PUBKEY_2,
                     amount,
-                    DEFAULT_PAYMENT_OPTIONS
+                    DEFAULT_PAYMENT_OPTIONS,
+                    FINAL_CLTV_DELTA
             );
             Route route1 = new Route(List.of(liquidityInformationLarge), oneSat);
             Route route2 = new Route(List.of(liquidityInformationSmall), amount.subtract(oneSat));
