@@ -25,7 +25,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.annotation.Nullable;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +43,9 @@ import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_4;
+import static lnrpc.HTLCAttempt.HTLCStatus.FAILED;
+import static lnrpc.Payment.PaymentStatus.IN_FLIGHT;
+import static lnrpc.Payment.PaymentStatus.SUCCEEDED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -77,7 +82,7 @@ class GrpcPaymentsTest {
 
         @Test
         void with_payments() {
-            mockResponse(payment(PaymentStatus.SUCCEEDED, PAYMENT), payment(PaymentStatus.SUCCEEDED, PAYMENT_2));
+            mockResponse(payment(SUCCEEDED, PAYMENT), payment(SUCCEEDED, PAYMENT_2));
             assertThat(grpcPayments.getCompletePaymentsAfter(0L)).contains(
                     List.of(PAYMENT, PAYMENT_2)
             );
@@ -91,7 +96,7 @@ class GrpcPaymentsTest {
                     .setStatus(HTLCAttempt.HTLCStatus.IN_FLIGHT)
                     .build();
             lnrpc.Payment payment = lnrpc.Payment.newBuilder()
-                    .setStatus(PaymentStatus.SUCCEEDED)
+                    .setStatus(SUCCEEDED)
                     .addHtlcs(htlc)
                     .build();
 
@@ -117,7 +122,7 @@ class GrpcPaymentsTest {
 
         @Test
         void ignores_non_settled_payment() {
-            mockResponse(payment(PaymentStatus.IN_FLIGHT, null));
+            mockResponse(payment(IN_FLIGHT, null));
             assertThat(grpcPayments.getCompletePaymentsAfter(0L)).contains(List.of());
         }
 
@@ -156,7 +161,7 @@ class GrpcPaymentsTest {
                     .setRoute(route)
                     .build();
             lnrpc.Payment payment = lnrpc.Payment.newBuilder()
-                    .setStatus(PaymentStatus.SUCCEEDED)
+                    .setStatus(SUCCEEDED)
                     .setPaymentIndex(PAYMENT.index())
                     .setPaymentHash(PAYMENT.paymentHash())
                     .setValueMsat(PAYMENT.value().milliSatoshis())
@@ -184,7 +189,7 @@ class GrpcPaymentsTest {
 
         @Test
         void with_payments() {
-            mockResponse(payment(PaymentStatus.SUCCEEDED, PAYMENT), payment(PaymentStatus.SUCCEEDED, PAYMENT_2));
+            mockResponse(payment(SUCCEEDED, PAYMENT), payment(SUCCEEDED, PAYMENT_2));
             assertThat(grpcPayments.getCompleteAndPendingPaymentsAfter(0L)).contains(
                     List.of(Optional.of(PAYMENT), Optional.of(PAYMENT_2))
             );
@@ -192,7 +197,7 @@ class GrpcPaymentsTest {
 
         @Test
         void skips_failed_payment() {
-            mockResponse(payment(PaymentStatus.FAILED, PAYMENT), payment(PaymentStatus.SUCCEEDED, PAYMENT_2));
+            mockResponse(payment(PaymentStatus.FAILED, PAYMENT), payment(SUCCEEDED, PAYMENT_2));
             assertThat(grpcPayments.getCompleteAndPendingPaymentsAfter(0L)).contains(
                     List.of(Optional.of(PAYMENT_2))
             );
@@ -200,10 +205,26 @@ class GrpcPaymentsTest {
 
         @Test
         void with_in_flight_payment() {
-            mockResponse(payment(PaymentStatus.IN_FLIGHT, PAYMENT), payment(PaymentStatus.SUCCEEDED, PAYMENT_2));
+            mockResponse(payment(IN_FLIGHT, PAYMENT), payment(SUCCEEDED, PAYMENT_2));
             assertThat(grpcPayments.getCompleteAndPendingPaymentsAfter(0L)).contains(
                     List.of(Optional.empty(), Optional.of(PAYMENT_2))
             );
+        }
+
+        @Test
+        void with_recent_in_flight_payment_without_pending_htlc() {
+            Payment payment = paymentWithAge(Duration.ofHours(23));
+            mockResponse(payment(IN_FLIGHT, payment, FAILED));
+            assertThat(grpcPayments.getCompleteAndPendingPaymentsAfter(0L)).contains(
+                    List.of(Optional.empty())
+            );
+        }
+
+        @Test
+        void skips_old_in_flight_payment_without_pending_htlc() {
+            Payment payment = paymentWithAge(Duration.ofHours(24));
+            mockResponse(payment(IN_FLIGHT, payment, FAILED));
+            assertThat(grpcPayments.getCompleteAndPendingPaymentsAfter(0L)).contains(List.of());
         }
 
         @Test
@@ -223,6 +244,17 @@ class GrpcPaymentsTest {
             grpcPayments.getCompleteAndPendingPaymentsAfter(ADD_INDEX_OFFSET);
             verify(grpcService).getPayments(anyLong(), anyInt(), eq(true));
         }
+    }
+
+    private static Payment paymentWithAge(Duration age) {
+        return new Payment(
+                PAYMENT.index(),
+                PAYMENT.paymentHash(),
+                LocalDateTime.now(ZoneOffset.UTC).minus(age),
+                PAYMENT.value(),
+                PAYMENT.fees(),
+                PAYMENT.routes()
+        );
     }
 
     @Test
@@ -307,6 +339,14 @@ class GrpcPaymentsTest {
     }
 
     private lnrpc.Payment payment(PaymentStatus paymentStatus, @Nullable Payment payment) {
+        return payment(paymentStatus, payment, HTLCAttempt.HTLCStatus.SUCCEEDED);
+    }
+
+    private lnrpc.Payment payment(
+            PaymentStatus paymentStatus,
+            @Nullable Payment payment,
+            HTLCAttempt.HTLCStatus htlcStatus
+    ) {
         if (payment == null) {
             return lnrpc.Payment.newBuilder().setStatus(paymentStatus).build();
         }
@@ -317,7 +357,7 @@ class GrpcPaymentsTest {
             paymentRoute.firstHop().ifPresent(hop -> addHop(routeBuilder, hop));
             paymentRoute.lastHop().ifPresent(hop -> addHop(routeBuilder, hop));
             htlcBuilder.setRoute(routeBuilder.build());
-            htlcBuilder.setStatus(HTLCAttempt.HTLCStatus.SUCCEEDED);
+            htlcBuilder.setStatus(htlcStatus);
             htlcs.add(htlcBuilder.build());
         }
         lnrpc.Payment.Builder builder = lnrpc.Payment.newBuilder()
@@ -326,7 +366,7 @@ class GrpcPaymentsTest {
                 .setPaymentHash(payment.paymentHash())
                 .setValueMsat(payment.value().milliSatoshis())
                 .setFeeMsat(payment.fees().milliSatoshis())
-                .setCreationTimeNs(payment.creationDateTime().toInstant(ZoneOffset.UTC).toEpochMilli() * 1_000);
+                .setCreationTimeNs(payment.creationDateTime().toInstant(ZoneOffset.UTC).toEpochMilli() * 1_000_000);
         htlcs.forEach(builder::addHtlcs);
         return builder.build();
     }

@@ -20,6 +20,7 @@ import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -81,8 +82,28 @@ public class GrpcPayments {
             return Optional.empty();
         }
         return Optional.of(list.getPaymentsList().stream()
-                .filter(payment -> payment.getStatus() != FAILED)
+                .filter(this::isPendingOrSuccessful)
                 .map(this::toPayment));
+    }
+
+    @SuppressWarnings("PMD.UnnecessaryLocalBeforeReturn")
+    private boolean isPendingOrSuccessful(lnrpc.Payment payment) {
+        if (payment.getStatus() == FAILED) {
+            return false;
+        }
+        if (payment.getStatus() == lnrpc.Payment.PaymentStatus.IN_FLIGHT) {
+            Instant creationDate = Instant.ofEpochMilli(payment.getCreationTimeNs() / 1_000_000);
+            Instant oneDayAgo = Instant.now().minus(1, ChronoUnit.DAYS);
+            boolean isYoung = creationDate.isAfter(oneDayAgo);
+            if (isYoung) {
+                return true;
+            }
+            boolean allHtlcsFailed = payment.getHtlcsList().stream()
+                    .allMatch(htlc -> htlc.getStatus() == HTLCAttempt.HTLCStatus.FAILED);
+            return !allHtlcsFailed;
+        }
+
+        return true;
     }
 
     private Set<RouteHint> getRouteHints(Pubkey destination, List<lnrpc.RouteHint> routeHintsList) {
@@ -104,7 +125,7 @@ public class GrpcPayments {
         if (lndPayment.getStatus() != SUCCEEDED) {
             return Optional.empty();
         }
-        Instant timestamp = Instant.ofEpochMilli(lndPayment.getCreationTimeNs() / 1_000);
+        Instant timestamp = Instant.ofEpochMilli(lndPayment.getCreationTimeNs() / 1_000_000);
         String paymentHash = lndPayment.getPaymentHash();
         return Optional.of(new Payment(
                 lndPayment.getPaymentIndex(),
