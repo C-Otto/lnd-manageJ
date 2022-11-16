@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.configuration;
 import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.ENABLED;
+import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.MAX_CLTV_EXPIRY;
 import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.PIECEWISE_LINEAR_APPROXIMATIONS;
 import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.QUANTIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,5 +27,11 @@ class PickhardtPaymentsConfigurationSettingsTest {
     void enabled() {
         assertThat(ENABLED.getSection()).isEqualTo(SECTION_NAME);
         assertThat(ENABLED.getName()).isEqualTo("enabled");
+    }
+
+    @Test
+    void maxCltvExpiry() {
+        assertThat(MAX_CLTV_EXPIRY.getSection()).isEqualTo(SECTION_NAME);
+        assertThat(MAX_CLTV_EXPIRY.getName()).isEqualTo("max-cltv-expiry");
     }
 }

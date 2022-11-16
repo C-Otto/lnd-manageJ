@@ -5,7 +5,8 @@ public enum PickhardtPaymentsConfigurationSettings implements ConfigurationSetti
     USE_MISSION_CONTROL("use_mission_control"),
     QUANTIZATION("quantization"),
     PIECEWISE_LINEAR_APPROXIMATIONS("piecewise_linear_approximations"),
-    ENABLED("enabled");
+    ENABLED("enabled"),
+    MAX_CLTV_EXPIRY("max-cltv-expiry");
 
     private final String name;
 
