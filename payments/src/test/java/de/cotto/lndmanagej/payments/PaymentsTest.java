@@ -51,12 +51,12 @@ class PaymentsTest {
         @Test
         void uses_known_offset() {
             payments.loadNewSettledPayments();
-            verify(grpcPayments).getPaymentsAfter(INDEX_OFFSET);
+            verify(grpcPayments).getCompletePaymentsAfter(INDEX_OFFSET);
         }
 
         @Test
         void saves_payment() {
-            when(grpcPayments.getPaymentsAfter(INDEX_OFFSET)).thenReturn(
+            when(grpcPayments.getCompletePaymentsAfter(INDEX_OFFSET)).thenReturn(
                     Optional.of(List.of(PAYMENT, PAYMENT_2))
             ).thenReturn(Optional.of(List.of()));
             payments.loadNewSettledPayments();
@@ -65,7 +65,7 @@ class PaymentsTest {
 
         @Test
         void repeats_while_at_limit() {
-            when(grpcPayments.getPaymentsAfter(INDEX_OFFSET))
+            when(grpcPayments.getCompletePaymentsAfter(INDEX_OFFSET))
                     .thenReturn(Optional.of(List.of(PAYMENT)))
                     .thenReturn(Optional.of(List.of(PAYMENT_2)))
                     .thenReturn(Optional.of(List.of()));
@@ -80,19 +80,19 @@ class PaymentsTest {
         @Test
         void uses_known_offset() {
             payments.loadOldSettledPayments();
-            verify(grpcPayments).getAllPaymentsAfter(ALL_SETTLED_INDEX_OFFSET);
+            verify(grpcPayments).getCompleteAndPendingPaymentsAfter(ALL_SETTLED_INDEX_OFFSET);
         }
 
         @Test
         void does_nothing_if_indexes_are_identical() {
             when(dao.getAllSettledIndexOffset()).thenReturn(INDEX_OFFSET);
             payments.loadOldSettledPayments();
-            verify(grpcPayments, never()).getAllPaymentsAfter(anyLong());
+            verify(grpcPayments, never()).getCompleteAndPendingPaymentsAfter(anyLong());
         }
 
         @Test
         void saves_settled_payments() {
-            when(grpcPayments.getAllPaymentsAfter(ALL_SETTLED_INDEX_OFFSET)).thenReturn(
+            when(grpcPayments.getCompleteAndPendingPaymentsAfter(ALL_SETTLED_INDEX_OFFSET)).thenReturn(
                     Optional.of(List.of(Optional.of(PAYMENT), Optional.of(PAYMENT_3)))
             ).thenReturn(Optional.of(List.of()));
             payments.loadOldSettledPayments();
@@ -102,7 +102,7 @@ class PaymentsTest {
         @Test
         void advances_index_after_saving_if_all_payments_are_settled() {
             InOrder inOrder = inOrder(dao);
-            when(grpcPayments.getAllPaymentsAfter(ALL_SETTLED_INDEX_OFFSET)).thenReturn(
+            when(grpcPayments.getCompleteAndPendingPaymentsAfter(ALL_SETTLED_INDEX_OFFSET)).thenReturn(
                     Optional.of(List.of(Optional.of(PAYMENT), Optional.of(PAYMENT_2)))
             ).thenReturn(Optional.of(List.of()));
             payments.loadOldSettledPayments();
@@ -113,7 +113,7 @@ class PaymentsTest {
         @Test
         void advances_index_after_saving_if_some_payments_are_settled() {
             InOrder inOrder = inOrder(dao);
-            when(grpcPayments.getAllPaymentsAfter(ALL_SETTLED_INDEX_OFFSET)).thenReturn(
+            when(grpcPayments.getCompleteAndPendingPaymentsAfter(ALL_SETTLED_INDEX_OFFSET)).thenReturn(
                     Optional.of(List.of(Optional.of(PAYMENT), Optional.empty(), Optional.of(PAYMENT_3)))
             ).thenReturn(Optional.of(List.of()));
             payments.loadOldSettledPayments();
@@ -123,7 +123,7 @@ class PaymentsTest {
 
         @Test
         void keeps_index_after_saving_if_no_payments_are_settled() {
-            when(grpcPayments.getAllPaymentsAfter(ALL_SETTLED_INDEX_OFFSET)).thenReturn(
+            when(grpcPayments.getCompleteAndPendingPaymentsAfter(ALL_SETTLED_INDEX_OFFSET)).thenReturn(
                     Optional.of(List.of(Optional.empty(), Optional.empty(), Optional.empty()))
             ).thenReturn(Optional.of(List.of()));
             payments.loadOldSettledPayments();
@@ -132,7 +132,7 @@ class PaymentsTest {
 
         @Test
         void ignores_non_settled_payments() {
-            when(grpcPayments.getAllPaymentsAfter(ALL_SETTLED_INDEX_OFFSET)).thenReturn(
+            when(grpcPayments.getCompleteAndPendingPaymentsAfter(ALL_SETTLED_INDEX_OFFSET)).thenReturn(
                     Optional.of(List.of(Optional.empty(), Optional.of(PAYMENT_2)))
             ).thenReturn(Optional.of(List.of()));
             payments.loadOldSettledPayments();
@@ -141,7 +141,7 @@ class PaymentsTest {
 
         @Test
         void repeats_while_at_limit() {
-            when(grpcPayments.getAllPaymentsAfter(ALL_SETTLED_INDEX_OFFSET))
+            when(grpcPayments.getCompleteAndPendingPaymentsAfter(ALL_SETTLED_INDEX_OFFSET))
                     .thenReturn(Optional.of(List.of(Optional.of(PAYMENT))))
                     .thenReturn(Optional.of(List.of(Optional.of(PAYMENT_2))))
                     .thenReturn(Optional.of(List.of()));
@@ -152,7 +152,7 @@ class PaymentsTest {
 
         @Test
         void does_not_repeat_if_at_limit_but_without_settled_payment() {
-            when(grpcPayments.getAllPaymentsAfter(ALL_SETTLED_INDEX_OFFSET))
+            when(grpcPayments.getCompleteAndPendingPaymentsAfter(ALL_SETTLED_INDEX_OFFSET))
                     .thenReturn(Optional.of(List.of(Optional.empty())));
             payments.loadOldSettledPayments();
             verify(dao, times(1)).save(anyList());

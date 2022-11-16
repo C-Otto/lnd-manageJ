@@ -62,23 +62,23 @@ class GrpcPaymentsTest {
     private GrpcService grpcService;
 
     @Nested
-    class GetPaymentsAfter {
+    class GetCompletePaymentsAfter {
         @Test
         void empty_optional() {
             when(grpcService.getPayments(anyLong(), anyInt(), anyBoolean())).thenReturn(Optional.empty());
-            assertThat(grpcPayments.getPaymentsAfter(0L)).isEmpty();
+            assertThat(grpcPayments.getCompletePaymentsAfter(0L)).isEmpty();
         }
 
         @Test
         void no_payment() {
             mockResponse();
-            assertThat(grpcPayments.getPaymentsAfter(0L)).contains(List.of());
+            assertThat(grpcPayments.getCompletePaymentsAfter(0L)).contains(List.of());
         }
 
         @Test
         void with_payments() {
             mockResponse(payment(PaymentStatus.SUCCEEDED, PAYMENT), payment(PaymentStatus.SUCCEEDED, PAYMENT_2));
-            assertThat(grpcPayments.getPaymentsAfter(0L)).contains(
+            assertThat(grpcPayments.getCompletePaymentsAfter(0L)).contains(
                     List.of(PAYMENT, PAYMENT_2)
             );
         }
@@ -96,21 +96,21 @@ class GrpcPaymentsTest {
                     .build();
 
             mockResponse(payment);
-            assertThat(grpcPayments.getPaymentsAfter(0L).orElseThrow().stream().map(Payment::routes))
+            assertThat(grpcPayments.getCompletePaymentsAfter(0L).orElseThrow().stream().map(Payment::routes))
                     .contains(List.of());
         }
 
         @Test
         void payment_without_channel_id() {
             mockPaymentWithHop(0L);
-            assertThat(grpcPayments.getPaymentsAfter(0L).orElseThrow().get(0).routes()).hasSize(1);
+            assertThat(grpcPayments.getCompletePaymentsAfter(0L).orElseThrow().get(0).routes()).hasSize(1);
         }
 
         @Test
         void payment_with_very_large_channel_id() {
             ChannelId channelId = ChannelId.fromCompactForm("16735713:1045061:30574");
             mockPaymentWithHop(channelId.getShortChannelId());
-            List<PaymentRoute> routes = grpcPayments.getPaymentsAfter(0L).orElseThrow().get(0).routes();
+            List<PaymentRoute> routes = grpcPayments.getCompletePaymentsAfter(0L).orElseThrow().get(0).routes();
             assertThat(routes).hasSize(1);
             assertThat(routes.get(0).firstHop().orElseThrow().channelId()).isEqualTo(channelId);
         }
@@ -118,24 +118,30 @@ class GrpcPaymentsTest {
         @Test
         void ignores_non_settled_payment() {
             mockResponse(payment(PaymentStatus.IN_FLIGHT, null));
-            assertThat(grpcPayments.getPaymentsAfter(0L)).contains(List.of());
+            assertThat(grpcPayments.getCompletePaymentsAfter(0L)).contains(List.of());
+        }
+
+        @Test
+        void ignores_failed_payment() {
+            mockResponse(payment(PaymentStatus.FAILED, null));
+            assertThat(grpcPayments.getCompletePaymentsAfter(0L)).contains(List.of());
         }
 
         @Test
         void starts_at_the_beginning() {
-            grpcPayments.getPaymentsAfter(ADD_INDEX_OFFSET);
+            grpcPayments.getCompletePaymentsAfter(ADD_INDEX_OFFSET);
             verify(grpcService).getPayments(eq(ADD_INDEX_OFFSET), anyInt(), anyBoolean());
         }
 
         @Test
         void uses_limit() {
-            grpcPayments.getPaymentsAfter(ADD_INDEX_OFFSET);
+            grpcPayments.getCompletePaymentsAfter(ADD_INDEX_OFFSET);
             verify(grpcService).getPayments(eq(ADD_INDEX_OFFSET), eq(LIMIT), anyBoolean());
         }
 
         @Test
         void only_requests_settled_payment() {
-            grpcPayments.getPaymentsAfter(ADD_INDEX_OFFSET);
+            grpcPayments.getCompletePaymentsAfter(ADD_INDEX_OFFSET);
             verify(grpcService).getPayments(anyLong(), anyInt(), eq(false));
         }
 
@@ -163,58 +169,58 @@ class GrpcPaymentsTest {
     }
 
     @Nested
-    class GetAllPaymentsAfter {
+    class GetCompleteAndPendingPaymentsAfter {
         @Test
         void empty_optional() {
             when(grpcService.getPayments(anyLong(), anyInt(), anyBoolean())).thenReturn(Optional.empty());
-            assertThat(grpcPayments.getAllPaymentsAfter(0L)).isEmpty();
+            assertThat(grpcPayments.getCompleteAndPendingPaymentsAfter(0L)).isEmpty();
         }
 
         @Test
         void no_payment() {
             mockResponse();
-            assertThat(grpcPayments.getAllPaymentsAfter(0L)).contains(List.of());
+            assertThat(grpcPayments.getCompleteAndPendingPaymentsAfter(0L)).contains(List.of());
         }
 
         @Test
         void with_payments() {
             mockResponse(payment(PaymentStatus.SUCCEEDED, PAYMENT), payment(PaymentStatus.SUCCEEDED, PAYMENT_2));
-            assertThat(grpcPayments.getAllPaymentsAfter(0L)).contains(
+            assertThat(grpcPayments.getCompleteAndPendingPaymentsAfter(0L)).contains(
                     List.of(Optional.of(PAYMENT), Optional.of(PAYMENT_2))
             );
         }
 
         @Test
-        void with_failed_payment() {
+        void skips_failed_payment() {
             mockResponse(payment(PaymentStatus.FAILED, PAYMENT), payment(PaymentStatus.SUCCEEDED, PAYMENT_2));
-            assertThat(grpcPayments.getAllPaymentsAfter(0L)).contains(
-                    List.of(Optional.empty(), Optional.of(PAYMENT_2))
+            assertThat(grpcPayments.getCompleteAndPendingPaymentsAfter(0L)).contains(
+                    List.of(Optional.of(PAYMENT_2))
             );
         }
 
         @Test
         void with_in_flight_payment() {
             mockResponse(payment(PaymentStatus.IN_FLIGHT, PAYMENT), payment(PaymentStatus.SUCCEEDED, PAYMENT_2));
-            assertThat(grpcPayments.getAllPaymentsAfter(0L)).contains(
+            assertThat(grpcPayments.getCompleteAndPendingPaymentsAfter(0L)).contains(
                     List.of(Optional.empty(), Optional.of(PAYMENT_2))
             );
         }
 
         @Test
         void starts_at_the_beginning() {
-            grpcPayments.getAllPaymentsAfter(ADD_INDEX_OFFSET);
+            grpcPayments.getCompleteAndPendingPaymentsAfter(ADD_INDEX_OFFSET);
             verify(grpcService).getPayments(eq(ADD_INDEX_OFFSET), anyInt(), anyBoolean());
         }
 
         @Test
         void uses_limit() {
-            grpcPayments.getAllPaymentsAfter(ADD_INDEX_OFFSET);
+            grpcPayments.getCompleteAndPendingPaymentsAfter(ADD_INDEX_OFFSET);
             verify(grpcService).getPayments(eq(ADD_INDEX_OFFSET), eq(LIMIT), anyBoolean());
         }
 
         @Test
         void also_requests_non_settled_payment() {
-            grpcPayments.getAllPaymentsAfter(ADD_INDEX_OFFSET);
+            grpcPayments.getCompleteAndPendingPaymentsAfter(ADD_INDEX_OFFSET);
             verify(grpcService).getPayments(anyLong(), anyInt(), eq(true));
         }
     }

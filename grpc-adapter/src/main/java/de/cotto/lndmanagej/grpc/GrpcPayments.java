@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static lnrpc.Payment.PaymentStatus.FAILED;
 import static lnrpc.Payment.PaymentStatus.SUCCEEDED;
 
 @Component
@@ -43,12 +44,12 @@ public class GrpcPayments {
         return LIMIT;
     }
 
-    public Optional<List<Payment>> getPaymentsAfter(long offset) {
+    public Optional<List<Payment>> getCompletePaymentsAfter(long offset) {
         return getPaymentOptionals(offset, false)
                 .map(payments -> payments.flatMap(Optional::stream).toList());
     }
 
-    public Optional<List<Optional<Payment>>> getAllPaymentsAfter(long offset) {
+    public Optional<List<Optional<Payment>>> getCompleteAndPendingPaymentsAfter(long offset) {
         return getPaymentOptionals(offset, true)
                 .map(Stream::toList);
     }
@@ -79,7 +80,9 @@ public class GrpcPayments {
         if (list == null) {
             return Optional.empty();
         }
-        return Optional.of(list.getPaymentsList().stream().map(this::toPayment));
+        return Optional.of(list.getPaymentsList().stream()
+                .filter(payment -> payment.getStatus() != FAILED)
+                .map(this::toPayment));
     }
 
     private Set<RouteHint> getRouteHints(Pubkey destination, List<lnrpc.RouteHint> routeHintsList) {

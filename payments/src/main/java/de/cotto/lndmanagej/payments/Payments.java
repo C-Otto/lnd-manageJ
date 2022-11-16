@@ -24,7 +24,7 @@ public class Payments {
     public void loadNewSettledPayments() {
         List<Payment> payments;
         do {
-            payments = grpcPayments.getPaymentsAfter(dao.getIndexOffset()).orElse(List.of());
+            payments = grpcPayments.getCompletePaymentsAfter(dao.getIndexOffset()).orElse(List.of());
             dao.save(payments);
         } while (payments.size() == grpcPayments.getLimit());
     }
@@ -39,7 +39,7 @@ public class Payments {
             if (offsetKnownPayments == offsetSettledPayments) {
                 return;
             }
-            paymentOptionals = grpcPayments.getAllPaymentsAfter(offsetSettledPayments).orElse(List.of());
+            paymentOptionals = grpcPayments.getCompleteAndPendingPaymentsAfter(offsetSettledPayments).orElse(List.of());
             maxIndex = getMaxIndexAllSettled(paymentOptionals);
             dao.save(paymentOptionals.stream().flatMap(Optional::stream).toList());
             maxIndex.ifPresent(dao::setAllSettledIndexOffset);
