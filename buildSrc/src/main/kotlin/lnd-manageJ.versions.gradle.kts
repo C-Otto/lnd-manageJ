@@ -22,7 +22,7 @@ configure<JacocoPluginExtension> {
 }
 
 configure<PitestPluginExtension> {
-    pitestVersion.set("1.9.10")
+    pitestVersion.set("1.9.11")
     junit5PluginVersion.set("1.1.0")
 }
 
