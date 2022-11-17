@@ -54,6 +54,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class EdgeComputationTest {
+    private static final int MAX_TIME_LOCK_DELTA = 2016;
+
     @InjectMocks
     private EdgeComputation edgeComputation;
 
@@ -91,20 +93,30 @@ class EdgeComputationTest {
 
     @Test
     void no_graph() {
-        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges()).isEmpty();
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA).edges()).isEmpty();
     }
 
     @Test
     void middleware_not_connected() {
         when(grpcMiddlewareService.isConnected()).thenReturn(false);
-        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges()).isEmpty();
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA).edges()).isEmpty();
     }
 
     @Test
     void does_not_add_edge_for_disabled_channel() {
         DirectedChannelEdge edge = new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY, PUBKEY_2, POLICY_DISABLED);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));
-        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges()).isEmpty();
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA).edges()).isEmpty();
+    }
+
+    @Test
+    void does_not_add_edge_exceeding_maximum_time_lock_delta() {
+        int edgeDelta = 40;
+        int maximumTimeLockDelta = edgeDelta - 1;
+        Policy policy = new Policy(0, Coins.NONE, true, edgeDelta, Coins.ofSatoshis(10_000));
+        DirectedChannelEdge edge = new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY, PUBKEY_2, policy);
+        when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, maximumTimeLockDelta).edges()).isEmpty();
     }
 
     @Test
@@ -123,7 +135,8 @@ class EdgeComputationTest {
                 new DirectedChannelEdge(CHANNEL_ID_3, CAPACITY, PUBKEY, PUBKEY_2, policyOk);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edgeExpensive, edgeAtLimit, edgeOk)));
         assertThat(
-                edgeComputation.getEdges(paymentOptions).edges().stream().map(EdgeWithLiquidityInformation::channelId)
+                edgeComputation.getEdges(paymentOptions, MAX_TIME_LOCK_DELTA).edges().stream()
+                        .map(EdgeWithLiquidityInformation::channelId)
         ).containsExactly(CHANNEL_ID_3);
     }
 
@@ -147,7 +160,8 @@ class EdgeComputationTest {
                 new DirectedChannelEdge(CHANNEL_ID_3, CAPACITY, ownPubkey, PUBKEY_2, firstHopPolicyOk);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(lastHop, firstHopExpensive, firstHopOk)));
         assertThat(
-                edgeComputation.getEdges(paymentOptions).edges().stream().map(EdgeWithLiquidityInformation::channelId)
+                edgeComputation.getEdges(paymentOptions, MAX_TIME_LOCK_DELTA).edges().stream()
+                        .map(EdgeWithLiquidityInformation::channelId)
         ).containsExactlyInAnyOrder(CHANNEL_ID, CHANNEL_ID_3);
     }
 
@@ -163,7 +177,8 @@ class EdgeComputationTest {
                 new DirectedChannelEdge(CHANNEL_ID_2, CAPACITY, ownPubkey, PUBKEY_2, firstHopPolicyExpensive);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(firstHopExpensiveButOk)));
         assertThat(
-                edgeComputation.getEdges(paymentOptions).edges().stream().map(EdgeWithLiquidityInformation::channelId)
+                edgeComputation.getEdges(paymentOptions, MAX_TIME_LOCK_DELTA).edges().stream()
+                        .map(EdgeWithLiquidityInformation::channelId)
         ).containsExactlyInAnyOrder(CHANNEL_ID_2);
     }
 
@@ -172,7 +187,7 @@ class EdgeComputationTest {
         DirectedChannelEdge edge =
                 new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY, PUBKEY_2, POLICY_WITH_BASE_FEE);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));
-        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges()).isNotEmpty();
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA).edges()).isNotEmpty();
     }
 
     @Test
@@ -184,7 +199,7 @@ class EdgeComputationTest {
         Coins availableKnownLiquidity = getAvailableKnownLiquidity(knownLiquidity);
         when(balanceService.getAvailableLocalBalance(EDGE.channelId())).thenReturn(knownLiquidity);
 
-        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges())
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA).edges())
                 .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, availableKnownLiquidity));
     }
 
@@ -203,7 +218,7 @@ class EdgeComputationTest {
                         edge.policy()
                 )
         ));
-        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges())
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA).edges())
                 .contains(EdgeWithLiquidityInformation.forKnownLiquidity(edge, fiftyCoins));
     }
 
@@ -212,7 +227,7 @@ class EdgeComputationTest {
         mockEdge();
         when(grpcGetInfo.getPubkey()).thenReturn(EDGE.startNode());
 
-        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges())
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA).edges())
                 .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, Coins.NONE));
     }
 
@@ -222,7 +237,7 @@ class EdgeComputationTest {
         mockInactiveChannel();
         when(grpcGetInfo.getPubkey()).thenReturn(EDGE.startNode());
 
-        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges())
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA).edges())
                 .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, Coins.NONE));
         verify(balanceService, never()).getAvailableLocalBalance(EDGE.channelId());
     }
@@ -236,7 +251,7 @@ class EdgeComputationTest {
         Coins availableKnownLiquidity = getAvailableKnownLiquidity(knownLiquidity);
         when(balanceService.getAvailableRemoteBalance(EDGE.channelId())).thenReturn(knownLiquidity);
 
-        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges())
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA).edges())
                 .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, availableKnownLiquidity));
     }
 
@@ -245,7 +260,7 @@ class EdgeComputationTest {
         mockEdge();
         when(grpcGetInfo.getPubkey()).thenReturn(EDGE.endNode());
 
-        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges())
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA).edges())
                 .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, Coins.NONE));
     }
 
@@ -256,7 +271,7 @@ class EdgeComputationTest {
         mockInactiveChannel();
         when(grpcGetInfo.getPubkey()).thenReturn(EDGE.endNode());
 
-        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges())
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA).edges())
                 .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, Coins.NONE));
         verify(balanceService, never()).getAvailableLocalBalance(EDGE.channelId());
     }
@@ -267,14 +282,14 @@ class EdgeComputationTest {
         mockEdge();
         Coins upperBound = Coins.ofSatoshis(100);
         mockUpperBound(upperBound);
-        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges())
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA).edges())
                 .contains(EdgeWithLiquidityInformation.forUpperBound(EDGE, upperBound));
     }
 
     @Test
     void default_if_no_liquidity_information_is_known() {
         mockEdge();
-        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS).edges())
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA).edges())
                 .contains(EdgeWithLiquidityInformation.forUpperBound(EDGE, EDGE.capacity()));
     }
 

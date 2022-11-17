@@ -57,7 +57,7 @@ public class EdgeComputation {
         this.grpcMiddlewareService = grpcMiddlewareService;
     }
 
-    public EdgesWithLiquidityInformation getEdges(PaymentOptions paymentOptions) {
+    public EdgesWithLiquidityInformation getEdges(PaymentOptions paymentOptions, int maximumTimeLockDeltaPerEdge) {
         if (noMiddlewareSupport()) {
             logger.error("Middleware needs to be connected, see requirements section in PickhardtPayments.md");
             return EdgesWithLiquidityInformation.EMPTY;
@@ -71,7 +71,7 @@ public class EdgeComputation {
         Pubkey ownPubkey = grpcGetInfo.getPubkey();
         Set<DirectedChannelEdge> edgesFromPaymentHints = routeHintService.getEdgesFromPaymentHints();
         for (DirectedChannelEdge channelEdge : Sets.union(channelEdges, edgesFromPaymentHints)) {
-            if (shouldIgnore(channelEdge, paymentOptions, ownPubkey)) {
+            if (shouldIgnore(channelEdge, paymentOptions, ownPubkey, maximumTimeLockDeltaPerEdge)) {
                 continue;
             }
             ChannelId channelId = channelEdge.channelId();
@@ -111,9 +111,17 @@ public class EdgeComputation {
         return withFeeReserve.subtract(Coins.ofSatoshis(1_000)).maximum(Coins.NONE);
     }
 
-    private boolean shouldIgnore(DirectedChannelEdge channelEdge, PaymentOptions paymentOptions, Pubkey pubkey) {
+    private boolean shouldIgnore(
+            DirectedChannelEdge channelEdge,
+            PaymentOptions paymentOptions,
+            Pubkey pubkey,
+            int maximumTimeLockDeltaPerEdge
+    ) {
         Policy policy = channelEdge.policy();
         if (policy.disabled()) {
+            return true;
+        }
+        if (policy.timeLockDelta() > maximumTimeLockDeltaPerEdge) {
             return true;
         }
         Long feeRateLimit = paymentOptions.feeRateLimit().orElse(null);

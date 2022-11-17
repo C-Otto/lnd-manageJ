@@ -40,6 +40,7 @@ public class MultiPathPaymentSplitter {
     private final PolicyService policyService;
     private final ConfigurationService configurationService;
     private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final CltvService cltvService;
 
     public MultiPathPaymentSplitter(
             GrpcGetInfo grpcGetInfo,
@@ -47,7 +48,8 @@ public class MultiPathPaymentSplitter {
             EdgeComputation edgeComputation,
             ChannelService channelService,
             PolicyService policyService,
-            ConfigurationService configurationService
+            ConfigurationService configurationService,
+            CltvService cltvService
     ) {
         this.flowComputation = flowComputation;
         this.grpcGetInfo = grpcGetInfo;
@@ -55,6 +57,7 @@ public class MultiPathPaymentSplitter {
         this.channelService = channelService;
         this.policyService = policyService;
         this.configurationService = configurationService;
+        this.cltvService = cltvService;
     }
 
     public MultiPathPayment getMultiPathPaymentTo(
@@ -75,7 +78,19 @@ public class MultiPathPaymentSplitter {
             int finalCltvDelta
     ) {
         Pubkey intermediateTarget = paymentOptions.peer().orElse(target);
-        Flows flows = flowComputation.getOptimalFlows(source, intermediateTarget, amount, paymentOptions);
+        int maximumDeltaForEdges = cltvService.getMaximumDeltaForEdges(
+                getMaximumCltvExpiry(),
+                finalCltvDelta,
+                paymentOptions.peer(),
+                target
+        );
+        Flows flows = flowComputation.getOptimalFlows(
+                source,
+                intermediateTarget,
+                amount,
+                paymentOptions,
+                maximumDeltaForEdges
+        );
         if (flows.isEmpty()) {
             return MultiPathPayment.FAILURE;
         }

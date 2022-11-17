@@ -35,11 +35,17 @@ public class FlowComputation {
         this.configurationService = configurationService;
     }
 
-    public Flows getOptimalFlows(Pubkey source, Pubkey target, Coins amount, PaymentOptions paymentOptions) {
+    public Flows getOptimalFlows(
+            Pubkey source,
+            Pubkey target,
+            Coins amount,
+            PaymentOptions paymentOptions,
+            int maximumTimeLockDeltaPerEdge
+    ) {
         int quantization = getQuantization(amount);
         int piecewiseLinearApproximations = configurationService.getIntegerValue(PIECEWISE_LINEAR_APPROXIMATIONS)
                 .orElse(DEFAULT_PIECEWISE_LINEAR_APPROXIMATIONS);
-        EdgesWithLiquidityInformation edges = edgeComputation.getEdges(paymentOptions);
+        EdgesWithLiquidityInformation edges = edgeComputation.getEdges(paymentOptions, maximumTimeLockDeltaPerEdge);
         MinCostFlowSolver minCostFlowSolver = new MinCostFlowSolver(
                 edges,
                 Map.of(source, amount),

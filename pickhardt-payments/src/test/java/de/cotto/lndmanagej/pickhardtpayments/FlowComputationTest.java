@@ -39,6 +39,7 @@ import static org.mockito.Mockito.when;
 class FlowComputationTest {
     private static final Coins LARGE = Coins.ofSatoshis(10_000_000);
     private static final Coins SMALL = Coins.ofSatoshis(100);
+    private static final int MAX_TIME_LOCK_DELTA = 2016;
 
     private FlowComputation flowComputation;
 
@@ -61,27 +62,50 @@ class FlowComputationTest {
 
     @Test
     void solve_no_edge() {
-        when(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS)).thenReturn(EdgesWithLiquidityInformation.EMPTY);
-        assertThat(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, Coins.ofSatoshis(1), DEFAULT_PAYMENT_OPTIONS))
-                .isEqualTo(new Flows());
+        when(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA))
+                .thenReturn(EdgesWithLiquidityInformation.EMPTY);
+        assertThat(flowComputation.getOptimalFlows(
+                PUBKEY,
+                PUBKEY_2,
+                Coins.ofSatoshis(1),
+                DEFAULT_PAYMENT_OPTIONS,
+                MAX_TIME_LOCK_DELTA
+        )).isEqualTo(new Flows());
     }
 
     @Test
     void passes_fee_rate_limit_to_get_edges() {
         PaymentOptions paymentOptions = PaymentOptions.forFeeRateLimit(123);
-        when(edgeComputation.getEdges(paymentOptions)).thenReturn(EdgesWithLiquidityInformation.EMPTY);
-        flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, Coins.ofSatoshis(1), paymentOptions);
-        verify(edgeComputation).getEdges(paymentOptions);
+        when(edgeComputation.getEdges(paymentOptions, MAX_TIME_LOCK_DELTA))
+                .thenReturn(EdgesWithLiquidityInformation.EMPTY);
+        flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, Coins.ofSatoshis(1), paymentOptions, MAX_TIME_LOCK_DELTA);
+        verify(edgeComputation).getEdges(paymentOptions, MAX_TIME_LOCK_DELTA);
+    }
+
+    @Test
+    void passes_maximum_time_lock_delta_for_edge_computation() {
+        int maxTimeLockDelta = 1234;
+        PaymentOptions paymentOptions = PaymentOptions.forFeeRateLimit(123);
+        when(edgeComputation.getEdges(paymentOptions, maxTimeLockDelta))
+                .thenReturn(EdgesWithLiquidityInformation.EMPTY);
+        flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, Coins.ofSatoshis(1), paymentOptions, maxTimeLockDelta);
+        verify(edgeComputation).getEdges(paymentOptions, maxTimeLockDelta);
     }
 
     @Test
     void solve() {
         Coins amount = Coins.ofSatoshis(1);
         EdgeWithLiquidityInformation edge = EdgeWithLiquidityInformation.forUpperBound(EDGE, EDGE.capacity());
-        when(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS)).thenReturn(new EdgesWithLiquidityInformation(edge));
+        when(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA))
+                .thenReturn(new EdgesWithLiquidityInformation(edge));
         Flow expectedFlow = new Flow(EDGE, amount);
-        assertThat(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, amount, DEFAULT_PAYMENT_OPTIONS))
-                .isEqualTo(new Flows(expectedFlow));
+        assertThat(flowComputation.getOptimalFlows(
+                PUBKEY,
+                PUBKEY_2,
+                amount,
+                DEFAULT_PAYMENT_OPTIONS,
+                MAX_TIME_LOCK_DELTA
+        )).isEqualTo(new Flows(expectedFlow));
     }
 
     @Test
@@ -89,23 +113,36 @@ class FlowComputationTest {
         when(configurationService.getIntegerValue(QUANTIZATION)).thenReturn(Optional.of(10));
         Coins amount = Coins.ofSatoshis(9);
         EdgeWithLiquidityInformation edge = EdgeWithLiquidityInformation.forUpperBound(EDGE, EDGE.capacity());
-        when(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS)).thenReturn(new EdgesWithLiquidityInformation(edge));
-        assertThat(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, amount, DEFAULT_PAYMENT_OPTIONS))
-                .isEqualTo(new Flows(new Flow(EDGE, amount)));
+        when(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA))
+                .thenReturn(new EdgesWithLiquidityInformation(edge));
+        assertThat(flowComputation.getOptimalFlows(
+                PUBKEY,
+                PUBKEY_2,
+                amount,
+                DEFAULT_PAYMENT_OPTIONS,
+                MAX_TIME_LOCK_DELTA
+        )).isEqualTo(new Flows(new Flow(EDGE, amount)));
     }
 
     @Test
     void solve_avoids_sending_from_depleted_local_channel() {
         Edge edge1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, LARGE, POLICY_1);
         Edge edge2 = new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, SMALL, POLICY_2);
-        when(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS)).thenReturn(new EdgesWithLiquidityInformation(
+        when(
+                edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA)
+        ).thenReturn(new EdgesWithLiquidityInformation(
                 EdgeWithLiquidityInformation.forKnownLiquidity(edge1, Coins.NONE),
                 EdgeWithLiquidityInformation.forUpperBound(edge2, SMALL)
         ));
         Coins amount = Coins.ofSatoshis(100);
         Flow expectedFlow = new Flow(edge2, amount);
-        assertThat(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_2, amount, DEFAULT_PAYMENT_OPTIONS))
-                .isEqualTo(new Flows(expectedFlow));
+        assertThat(flowComputation.getOptimalFlows(
+                PUBKEY,
+                PUBKEY_2,
+                amount,
+                DEFAULT_PAYMENT_OPTIONS,
+                MAX_TIME_LOCK_DELTA
+        )).isEqualTo(new Flows(expectedFlow));
     }
 
     @Test
@@ -114,14 +151,21 @@ class FlowComputationTest {
         Edge edge1a = new Edge(CHANNEL_ID, PUBKEY_2, PUBKEY_3, LARGE, POLICY_1);
         Edge edge1b = new Edge(CHANNEL_ID_2, PUBKEY_3, PUBKEY_4, LARGE, POLICY_1);
         Edge edge2 = new Edge(CHANNEL_ID_3, PUBKEY_2, PUBKEY_4, SMALL, POLICY_2);
-        when(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS)).thenReturn(new EdgesWithLiquidityInformation(
+        when(
+                edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA)
+        ).thenReturn(new EdgesWithLiquidityInformation(
                 EdgeWithLiquidityInformation.forUpperBound(edge1a, amount),
                 EdgeWithLiquidityInformation.forUpperBound(edge1b, LARGE),
                 EdgeWithLiquidityInformation.forUpperBound(edge2, SMALL)
         ));
         Flow expectedFlow = new Flow(edge2, amount);
-        assertThat(flowComputation.getOptimalFlows(PUBKEY_2, PUBKEY_4, amount, DEFAULT_PAYMENT_OPTIONS))
-                .isEqualTo(new Flows(expectedFlow));
+        assertThat(flowComputation.getOptimalFlows(
+                PUBKEY_2,
+                PUBKEY_4,
+                amount,
+                DEFAULT_PAYMENT_OPTIONS,
+                MAX_TIME_LOCK_DELTA
+        )).isEqualTo(new Flows(expectedFlow));
     }
 
     @Test
@@ -130,15 +174,22 @@ class FlowComputationTest {
         Edge edge1a = new Edge(CHANNEL_ID, PUBKEY_3, PUBKEY_4, LARGE, POLICY_2);
         Edge edge1b = new Edge(CHANNEL_ID_2, PUBKEY_4, PUBKEY, LARGE, POLICY_2);
         Edge edge2 = new Edge(CHANNEL_ID_3, PUBKEY_3, PUBKEY, SMALL, POLICY_1);
-        when(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS)).thenReturn(new EdgesWithLiquidityInformation(
+        when(
+                edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA)
+        ).thenReturn(new EdgesWithLiquidityInformation(
                 EdgeWithLiquidityInformation.forUpperBound(edge1a, Coins.ofSatoshis(5_000_000)),
                 EdgeWithLiquidityInformation.forUpperBound(edge1b, LARGE),
                 EdgeWithLiquidityInformation.forUpperBound(edge2, SMALL)
         ));
         Flow expectedFlow1 = new Flow(edge1a, amount);
         Flow expectedFlow2 = new Flow(edge1b, amount);
-        assertThat(flowComputation.getOptimalFlows(PUBKEY_3, PUBKEY, amount, DEFAULT_PAYMENT_OPTIONS))
-                .isEqualTo(new Flows(expectedFlow1, expectedFlow2));
+        assertThat(flowComputation.getOptimalFlows(
+                PUBKEY_3,
+                PUBKEY,
+                amount,
+                DEFAULT_PAYMENT_OPTIONS,
+                MAX_TIME_LOCK_DELTA
+        )).isEqualTo(new Flows(expectedFlow1, expectedFlow2));
     }
 
 }
