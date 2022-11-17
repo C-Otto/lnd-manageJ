@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 public class Payments {
     private final GrpcPayments grpcPayments;
     private final PaymentsDao dao;
+    private static final Object SAVE_PAYMENTS_LOCK = new Object();
 
     public Payments(GrpcPayments grpcPayments, PaymentsDao dao) {
         this.grpcPayments = grpcPayments;
@@ -24,8 +25,10 @@ public class Payments {
     public void loadNewSettledPayments() {
         List<Payment> payments;
         do {
-            payments = grpcPayments.getCompletePaymentsAfter(dao.getIndexOffset()).orElse(List.of());
-            dao.save(payments);
+            synchronized (SAVE_PAYMENTS_LOCK) {
+                payments = grpcPayments.getCompletePaymentsAfter(dao.getIndexOffset()).orElse(List.of());
+                dao.save(payments);
+            }
         } while (payments.size() == grpcPayments.getLimit());
     }
 
@@ -34,17 +37,19 @@ public class Payments {
         List<Optional<Payment>> paymentOptionals;
         OptionalLong maxIndex;
         do {
-            long offsetSettledPayments = dao.getAllSettledIndexOffset();
-            long offsetKnownPayments = dao.getIndexOffset();
-            if (offsetKnownPayments == offsetSettledPayments) {
-                return;
+            synchronized (SAVE_PAYMENTS_LOCK) {
+                long offsetSettledPayments = dao.getAllSettledIndexOffset();
+                long offsetKnownPayments = dao.getIndexOffset();
+                if (offsetKnownPayments == offsetSettledPayments) {
+                    return;
+                }
+                paymentOptionals =
+                        grpcPayments.getCompleteAndPendingPaymentsAfter(offsetSettledPayments).orElse(List.of());
+                maxIndex = getMaxIndexAllSettled(paymentOptionals);
+                dao.save(paymentOptionals.stream().flatMap(Optional::stream).toList());
+                maxIndex.ifPresent(dao::setAllSettledIndexOffset);
             }
-            paymentOptionals = grpcPayments.getCompleteAndPendingPaymentsAfter(offsetSettledPayments).orElse(List.of());
-            maxIndex = getMaxIndexAllSettled(paymentOptionals);
-            dao.save(paymentOptionals.stream().flatMap(Optional::stream).toList());
-            maxIndex.ifPresent(dao::setAllSettledIndexOffset);
         } while (paymentOptionals.size() == grpcPayments.getLimit() && maxIndex.isPresent());
-
     }
 
     private static OptionalLong getMaxIndexAllSettled(List<Optional<Payment>> paymentOptionals) {
