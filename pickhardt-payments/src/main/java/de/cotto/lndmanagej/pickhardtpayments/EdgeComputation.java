@@ -29,6 +29,7 @@ import java.util.function.Function;
 
 @Component
 public class EdgeComputation {
+    private static final Coins REMOTE_BALANCE_REQUIRED_TO_SEND = Coins.ofSatoshis(400);
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final GrpcGraph grpcGraph;
@@ -150,6 +151,10 @@ public class EdgeComputation {
         Pubkey source = edge.startNode();
         ChannelId channelId = edge.channelId();
         if (ownPubKey.equals(source)) {
+            Coins availableRemote = getLocalChannelAvailableRemote(channelId).orElse(Coins.NONE);
+            if (availableRemote.subtract(REMOTE_BALANCE_REQUIRED_TO_SEND).isNonPositive()) {
+                return Optional.of(Coins.NONE);
+            }
             return getLocalChannelAvailableLocal(channelId);
         }
         Pubkey target = edge.endNode();

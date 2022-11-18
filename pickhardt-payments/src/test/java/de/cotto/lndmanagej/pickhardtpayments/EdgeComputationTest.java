@@ -4,6 +4,7 @@ import de.cotto.lndmanagej.grpc.GrpcGetInfo;
 import de.cotto.lndmanagej.grpc.GrpcGraph;
 import de.cotto.lndmanagej.grpc.middleware.GrpcMiddlewareService;
 import de.cotto.lndmanagej.model.ChannelCoreInformation;
+import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.DirectedChannelEdge;
 import de.cotto.lndmanagej.model.Edge;
@@ -198,9 +199,24 @@ class EdgeComputationTest {
         Coins knownLiquidity = Coins.ofSatoshis(4_567);
         Coins availableKnownLiquidity = getAvailableKnownLiquidity(knownLiquidity);
         when(balanceService.getAvailableLocalBalance(EDGE.channelId())).thenReturn(knownLiquidity);
+        when(balanceService.getAvailableRemoteBalance(EDGE.channelId())).thenReturn(Coins.ofSatoshis(401));
 
         assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA).edges())
                 .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, availableKnownLiquidity));
+    }
+
+    @Test
+    void ignores_local_channels_with_lots_of_local_liquidity_but_almost_nothing_on_remote_side() {
+        // https://github.com/lightningnetwork/lnd/issues/7108
+        mockEdge();
+        ChannelId channelId = EDGE.channelId();
+        when(grpcGetInfo.getPubkey()).thenReturn(EDGE.startNode());
+        when(channelService.getOpenChannel(channelId)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+        when(balanceService.getAvailableRemoteBalance(channelId)).thenReturn(Coins.ofSatoshis(400));
+        lenient().when(balanceService.getAvailableLocalBalance(channelId)).thenReturn(Coins.ofSatoshis(1_000_000));
+
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA).edges())
+                .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, Coins.NONE));
     }
 
     @Test
@@ -307,6 +323,7 @@ class EdgeComputationTest {
         Coins availableKnownLiquidity = getAvailableKnownLiquidity(knownLiquidity);
         when(channelService.getOpenChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         when(balanceService.getAvailableLocalBalance(EDGE.channelId())).thenReturn(knownLiquidity);
+        when(balanceService.getAvailableRemoteBalance(EDGE.channelId())).thenReturn(Coins.ofSatoshis(401));
         assertThat(edgeComputation.getEdgeWithLiquidityInformation(EDGE))
                 .isEqualTo(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, availableKnownLiquidity));
     }
