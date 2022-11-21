@@ -1,10 +1,14 @@
 package de.cotto.lndmanagej.grpc;
 
 import com.google.protobuf.ByteString;
+import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.DecodedPaymentRequest;
 import de.cotto.lndmanagej.model.Edge;
+import de.cotto.lndmanagej.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.model.HexString;
+import de.cotto.lndmanagej.model.Policy;
+import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.Route;
 import lnrpc.Hop;
 import lnrpc.MPPRecord;
@@ -40,6 +44,31 @@ public class GrpcSendToRoute {
                 buildLndRoute(route, blockHeight, decodedPaymentRequest)
         );
         grpcRouterService.sendToRoute(request, new ReportingStreamObserver(observer));
+    }
+
+    public void forceFailureForPayment(DecodedPaymentRequest decodedPaymentRequest) {
+        Route route = createLongRoute(decodedPaymentRequest);
+        SendToRouteRequest request = buildRequest(
+                decodedPaymentRequest.paymentHash(),
+                buildLndRoute(route, 0, decodedPaymentRequest)
+        );
+        grpcRouterService.sendToRoute(request, new ReportingStreamObserver(new NoopSendToRouteObserver()));
+    }
+
+    private static Route createLongRoute(DecodedPaymentRequest decodedPaymentRequest) {
+        ChannelId channelId = ChannelId.fromShortChannelId(111);
+        Pubkey pubkey = Pubkey.create("000000000000000000000000000000000000000000000000000000000000000000");
+        EdgeWithLiquidityInformation dummyEdge = new EdgeWithLiquidityInformation(
+                new Edge(channelId, pubkey, pubkey, Coins.NONE, Policy.UNKNOWN),
+                Coins.NONE,
+                Coins.NONE
+        );
+
+        List<EdgeWithLiquidityInformation> hops = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            hops.add(dummyEdge);
+        }
+        return new Route(hops, decodedPaymentRequest.amount());
     }
 
     private lnrpc.Route buildLndRoute(Route route, int blockHeight, DecodedPaymentRequest decodedPaymentRequest) {

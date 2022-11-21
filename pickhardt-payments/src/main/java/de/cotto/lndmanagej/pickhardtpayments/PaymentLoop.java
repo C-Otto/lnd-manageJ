@@ -67,6 +67,9 @@ public class PaymentLoop {
         if (paymentStatus.isFailure() && decodedPaymentRequest.destination().equals(ownPubkey)) {
             grpcInvoices.cancelPaymentRequest(decodedPaymentRequest);
         }
+        if (paymentStatus.isPending() || paymentStatus.isFailure()) {
+            grpcSendToRoute.forceFailureForPayment(decodedPaymentRequest);
+        }
     }
 
     private class Instance {

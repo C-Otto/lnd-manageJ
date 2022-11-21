@@ -9,6 +9,7 @@ import lnrpc.Hop;
 import lnrpc.MPPRecord;
 import lnrpc.Route;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -29,7 +30,9 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_4;
 import static de.cotto.lndmanagej.model.RouteFixtures.ROUTE;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -37,6 +40,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class GrpcSendToRouteTest {
     private static final int BLOCK_HEIGHT = 800_000;
+    private static final int MAXIMUM_NUMBER_OF_HOPS = 27;
     @InjectMocks
     private GrpcSendToRoute grpcSendToRoute;
 
@@ -54,7 +58,7 @@ class GrpcSendToRouteTest {
 
     @BeforeEach
     void setUp() {
-        when(grpcGetInfo.getBlockHeight()).thenReturn(Optional.of(BLOCK_HEIGHT));
+        lenient().when(grpcGetInfo.getBlockHeight()).thenReturn(Optional.of(BLOCK_HEIGHT));
     }
 
     @Test
@@ -120,6 +124,36 @@ class GrpcSendToRouteTest {
         HTLCAttempt value = htlcAttempt(preimage);
         captor.getValue().onNext(value);
         verify(observer).onValue(preimage, FailureCode.UNKNOWN_FAILURE);
+    }
+
+    @Nested
+    class ForceFailureForPayment {
+        // lnd does not fail payments that make use of setSkipTempErr.
+        // In order to ultimately fail the payment, we send out an invalid route
+        // which triggers ErrMaxRouteHopsExceeded in lnd, causing lnd to
+        // fail the payment.
+
+        @Test
+        void uses_correct_payment_hash() {
+            grpcSendToRoute.forceFailureForPayment(DECODED_PAYMENT_REQUEST);
+            verify(grpcRouterService).sendToRoute(
+                    argThat(request -> getPaymentHash(request).equals(DECODED_PAYMENT_REQUEST.paymentHash())),
+                    any()
+            );
+        }
+
+        @Test
+        void sends_route_that_has_too_many_hops() {
+            grpcSendToRoute.forceFailureForPayment(DECODED_PAYMENT_REQUEST);
+            verify(grpcRouterService).sendToRoute(
+                    argThat(request -> request.getRoute().getHopsCount() > MAXIMUM_NUMBER_OF_HOPS),
+                    any()
+            );
+        }
+
+        private HexString getPaymentHash(RouterOuterClass.SendToRouteRequest request) {
+            return new HexString(request.getPaymentHash().toByteArray());
+        }
     }
 
     private HTLCAttempt htlcAttempt(HexString hexString) {

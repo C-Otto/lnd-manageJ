@@ -103,7 +103,7 @@ class PaymentLoopTest {
         softly.assertThat(paymentStatus.getMessages().stream().map(InstantWithString::string))
                 .contains("Unable to find route (trying to send 123)");
         softly.assertAll();
-        verifyNoInteractions(grpcSendToRoute);
+        verify(grpcSendToRoute, never()).sendToRoute(any(), any(), any());
         verifyNoInteractions(grpcInvoices);
     }
 
@@ -119,6 +119,7 @@ class PaymentLoopTest {
         softly.assertThat(paymentStatus.getMessages().stream().map(InstantWithString::string))
                 .contains("Failing after 100 loop iterations.");
         softly.assertAll();
+        verify(grpcSendToRoute).forceFailureForPayment(DECODED_PAYMENT_REQUEST);
     }
 
     @Test
@@ -167,6 +168,7 @@ class PaymentLoopTest {
 
         assertThat(paymentStatus.isFailure()).isTrue();
         verify(multiPathPaymentSplitter, times(2)).getMultiPathPaymentTo(any(), any(), any(), anyInt());
+        verify(grpcSendToRoute).forceFailureForPayment(DECODED_PAYMENT_REQUEST);
     }
 
     @Test
@@ -178,7 +180,8 @@ class PaymentLoopTest {
         assertThat(paymentStatus.isFailure()).isTrue();
         assertThat(paymentStatus.getMessages().stream().map(InstantWithString::string))
                 .contains("Unable to find route (trying to send 123): something");
-        verifyNoInteractions(grpcSendToRoute);
+        verify(grpcSendToRoute, never()).sendToRoute(any(), any(), any());
+        verify(grpcSendToRoute).forceFailureForPayment(any());
     }
 
     @Test
@@ -198,6 +201,14 @@ class PaymentLoopTest {
         mockSuccessOnFirstAttempt();
         paymentLoop.start(DECODED_PAYMENT_REQUEST, PAYMENT_OPTIONS, paymentStatus);
         verify(grpcInvoices, never()).cancelPaymentRequest(DECODED_PAYMENT_REQUEST);
+    }
+
+    @Test
+    void does_not_fail_settled_payment() {
+        when(grpcGetInfo.getPubkey()).thenReturn(DECODED_PAYMENT_REQUEST.destination());
+        mockSuccessOnFirstAttempt();
+        paymentLoop.start(DECODED_PAYMENT_REQUEST, PAYMENT_OPTIONS, paymentStatus);
+        verify(grpcSendToRoute, never()).forceFailureForPayment(DECODED_PAYMENT_REQUEST);
     }
 
     @Test
@@ -236,6 +247,7 @@ class PaymentLoopTest {
         softly.assertThat(paymentStatus.isSuccess()).isFalse();
         softly.assertThat(paymentStatus.isFailure()).isFalse();
         softly.assertAll();
+        verify(grpcSendToRoute).forceFailureForPayment(DECODED_PAYMENT_REQUEST);
     }
 
     @Test
@@ -305,6 +317,7 @@ class PaymentLoopTest {
         assertThat(paymentStatus.getMessages().stream().map(InstantWithString::string))
                 .contains("Stopping payment loop, full amount is in-flight, but no failure/settle message received " +
                         "within timeout. The payment might settle/fail in the future.");
+        verify(grpcSendToRoute).forceFailureForPayment(DECODED_PAYMENT_REQUEST);
     }
 
     @Test
