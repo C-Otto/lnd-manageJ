@@ -7,7 +7,7 @@ testing {
         this.register("integrationTest", JvmTestSuite::class) {
             testType.set(TestSuiteType.INTEGRATION_TEST)
             dependencies {
-                implementation(project)
+                implementation(project())
                 implementation(project.dependencies.platform("de.cotto.lndmanagej:platform"))
                 implementation("com.tngtech.archunit:archunit")
                 implementation("org.awaitility:awaitility")
