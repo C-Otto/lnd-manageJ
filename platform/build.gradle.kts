@@ -28,7 +28,7 @@ dependencies {
         api("com.uber.nullaway:nullaway:0.10.3")
         api("commons-codec:commons-codec:1.15")
         api("de.aaschmid:gradle-cpd-plugin:3.3")
-        api("info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.9.0")
+        api("info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.9.11")
         api("io.github.resilience4j:resilience4j-spring-boot2:1.7.1")
         api("io.grpc:grpc-netty:$grpcVersion")
         api("io.grpc:grpc-protobuf:$grpcVersion")
