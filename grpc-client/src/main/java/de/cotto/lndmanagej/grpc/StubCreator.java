@@ -14,7 +14,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class StubCreator {
-    private static final int FIFTY_MEGA_BYTE = 50 * 1024 * 1024;
+    private static final int FIFTY_MEBIBYTE = 50 * 1024 * 1024;
 
     private final LightningGrpc.LightningBlockingStub stub;
     private final LightningGrpc.LightningStub nonBlockingStub;
@@ -72,35 +72,35 @@ public class StubCreator {
     private LightningGrpc.LightningBlockingStub createLightningStub() throws IOException {
         return LightningGrpc
                 .newBlockingStub(channel)
-                .withMaxInboundMessageSize(FIFTY_MEGA_BYTE)
+                .withMaxInboundMessageSize(FIFTY_MEBIBYTE)
                 .withCallCredentials(new MacaroonCallCredential(macaroonFile));
     }
 
     private LightningGrpc.LightningStub createNonBlockingLightningStub() throws IOException {
         return LightningGrpc
                 .newStub(channel)
-                .withMaxInboundMessageSize(FIFTY_MEGA_BYTE)
+                .withMaxInboundMessageSize(FIFTY_MEBIBYTE)
                 .withCallCredentials(new MacaroonCallCredential(macaroonFile));
     }
 
     private RouterGrpc.RouterBlockingStub createRouterStub() throws IOException {
         return RouterGrpc
                 .newBlockingStub(channel)
-                .withMaxInboundMessageSize(FIFTY_MEGA_BYTE)
+                .withMaxInboundMessageSize(FIFTY_MEBIBYTE)
                 .withCallCredentials(new MacaroonCallCredential(macaroonFile));
     }
 
     private RouterGrpc.RouterStub createNonBlockingRouterStub() throws IOException {
         return RouterGrpc
                 .newStub(channel)
-                .withMaxInboundMessageSize(FIFTY_MEGA_BYTE)
+                .withMaxInboundMessageSize(FIFTY_MEBIBYTE)
                 .withCallCredentials(new MacaroonCallCredential(macaroonFile));
     }
 
     private InvoicesBlockingStub createInvoicesStub() throws IOException {
         return InvoicesGrpc
                 .newBlockingStub(channel)
-                .withMaxInboundMessageSize(FIFTY_MEGA_BYTE)
+                .withMaxInboundMessageSize(FIFTY_MEBIBYTE)
                 .withCallCredentials(new MacaroonCallCredential(macaroonFile));
     }
 }
