@@ -1,7 +1,5 @@
 # #PickhardtPayments
 
-## Work in progress!
-
 See https://arxiv.org/abs/2107.05322.
 Please reach out to me on Twitter (https://twitter.com/c_otto83) to discuss more about this!
 
@@ -10,18 +8,15 @@ https://lists.linuxfoundation.org/pipermail/lightning-dev/2022-March/003510.html
 There is also a lightweight python package being developed which can be used for simulations or to do production tests at: https://github.com/renepickhardt/pickhardtpayments 
 
 # Requirements
-1. lnd v0.15.1-beta: Replacement shards may be sent once a shard of an active MPP fails. This is necessary to complete
-   MPPs that regularly run into temporary channel failures due to lack of funds. Support for this was added with
-   https://github.com/lightningnetwork/lnd/issues/5746, included in lnd v0.15.1-beta.
-2. The graph algorithm implementation used to do the heavy lifting currently is only supported for amd64 (x86_64) on
+1. The graph algorithm implementation used to do the heavy lifting currently is only supported for amd64 (x86_64) on
    Linux, Windows, and Mac systems. See https://github.com/C-Otto/lnd-manageJ/issues/13.
-3. You need to enable middleware support in lnd: add a section `[rpcmiddleware]` with `rpcmiddleware.enable=true` to 
+2. You need to enable middleware support in lnd: add a section `[rpcmiddleware]` with `rpcmiddleware.enable=true` to 
    your `lnd.conf` and restart lnd. Once enabled, lnd-manageJ will spy on every RPC request and
    response, without changing/blocking any of the data. However, despite the read-only configuration, requests may
    fail because of this if lnd-manageJ does not respond in time (crash, shutdown, ...).
    See https://github.com/lightningnetwork/lnd/issues/6409. To mitigate this risk, you can add
    `rpcmiddleware.intercepttimeout=10s` to the same section (the default is 2s).
-4. You need to enable the feature in your configuration file (see below).
+3. You need to enable the feature in your configuration file (see below).
 
 # Payment Options
 The following endpoints allow you to specify payment options that can be provided as the body of an HTTP `POST` request.
@@ -73,7 +68,10 @@ configuration file:
     sat with a quantization of 10k sat, either one shard worth 20k sat is attempted, or two shards worth 10k
   * when sending amounts lower than the configured quantization, the amount itself is used as the quantization
   * even if the amount you try to send is not divisible by the configured quantization, the resulting MPP still covers
-    the whole amount 
+    the whole amount
+  * To avoid issues due to rounding and fees, for each channel the known/assumed liquidity is reduced by the
+    quantization amount. Because of this, assuming you only have a single channel with a local balance of 20,000 sat,
+    only payments of up to 10,000 sat are attempted using the default quantization value of 10,000 sat. 
 * `piecewise_linear_approximations` (default: 5):
   * this corresponds to `N` in the paper
 

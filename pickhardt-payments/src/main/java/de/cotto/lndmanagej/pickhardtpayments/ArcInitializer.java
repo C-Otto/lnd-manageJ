@@ -57,16 +57,18 @@ class ArcInitializer {
         int startNode = pubkeyToIntegerMapping.getMappedInteger(edge.startNode());
         int endNode = pubkeyToIntegerMapping.getMappedInteger(edge.endNode());
 
-        long quantizedLowerBound = quantize(edgeWithLiquidityInformation.availableLiquidityLowerBound());
+        // always keep one unit as reserve (for fees, or if the amount needs to be rounded up)
+        long quantizedLowerBound =
+                Math.max(0, quantize(edgeWithLiquidityInformation.availableLiquidityLowerBound()) - 1);
         int remainingPieces = addArcForKnownLiquidity(edge, startNode, endNode, quantizedLowerBound);
         if (remainingPieces == 0) {
             return;
         }
 
         Coins upperBound = edgeWithLiquidityInformation.availableLiquidityUpperBound();
-        long quantizedUpperBound = quantize(upperBound);
+        long quantizedUpperBound = Math.max(0, quantize(upperBound) - 1);
         long uncertainButPossibleLiquidity = quantizedUpperBound - quantizedLowerBound;
-        if (uncertainButPossibleLiquidity == 0) {
+        if (uncertainButPossibleLiquidity <= 0) {
             return;
         }
         remainingPieces = (int) Math.min(remainingPieces, uncertainButPossibleLiquidity);

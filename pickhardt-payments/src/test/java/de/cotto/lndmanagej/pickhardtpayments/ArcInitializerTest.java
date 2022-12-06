@@ -63,26 +63,30 @@ class ArcInitializerTest {
     @Test
     void edge_with_capacity_equal_to_quantization_amount() {
         int quantization = 10_000;
-        ArcInitializer arcInitializer = new ArcInitializer(
-                minCostFlow,
-                integerMapping,
-                edgeMapping,
-                quantization,
-                PIECEWISE_LINEAR_APPROXIMATIONS,
-                FEE_RATE_WEIGHT,
-                PUBKEY,
-                true
-        );
+        ArcInitializer arcInitializer = getArcInitializerWithQuantization(quantization);
         EdgeWithLiquidityInformation edgeWithLiquidityInformation =
                 edge(EDGE, Coins.ofSatoshis(quantization));
         arcInitializer.addArcs(new EdgesWithLiquidityInformation(edgeWithLiquidityInformation));
-        assertThat(minCostFlow.getNumArcs()).isOne();
-        assertThat(minCostFlow.getCapacity(0)).isEqualTo(1);
+        // upper bound is reduced by one unit
+        assertThat(minCostFlow.getNumArcs()).isZero();
+    }
+
+    @Test
+    void edge_with_capacity_just_above_quantization_amount() {
+        int quantization = 10_000;
+        int capacity = 10_100;
+        ArcInitializer arcInitializer = getArcInitializerWithQuantization(quantization);
+        EdgeWithLiquidityInformation edgeWithLiquidityInformation =
+                edge(EDGE, Coins.ofSatoshis(capacity));
+        arcInitializer.addArcs(new EdgesWithLiquidityInformation(edgeWithLiquidityInformation));
+        // upper bound is reduced by one unit, and remainder is rounded down
+        assertThat(minCostFlow.getNumArcs()).isZero();
     }
 
     @Test
     void edge_with_capacity_more_than_quantization_amount() {
         int quantization = 5_000;
+        int capacity = 15_000;
         ArcInitializer arcInitializer = new ArcInitializer(
                 minCostFlow,
                 integerMapping,
@@ -94,7 +98,7 @@ class ArcInitializerTest {
                 true
         );
         EdgeWithLiquidityInformation edgeWithLiquidityInformation =
-                edge(EDGE, Coins.ofSatoshis(10_000));
+                edge(EDGE, Coins.ofSatoshis(capacity));
         arcInitializer.addArcs(new EdgesWithLiquidityInformation(edgeWithLiquidityInformation));
         assertThat(minCostFlow.getNumArcs()).isEqualTo(2);
         SoftAssertions softly = new SoftAssertions();
@@ -119,17 +123,17 @@ class ArcInitializerTest {
         EdgeWithLiquidityInformation edgeWithLiquidityInformation =
                 edge(EDGE, Coins.ofSatoshis(40_000));
         arcInitializer.addArcs(new EdgesWithLiquidityInformation(edgeWithLiquidityInformation));
-        assertThat(minCostFlow.getNumArcs()).isEqualTo(4);
+        assertThat(minCostFlow.getNumArcs()).isEqualTo(3);
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(minCostFlow.getCapacity(0)).isEqualTo(1);
         softly.assertThat(minCostFlow.getCapacity(1)).isEqualTo(1);
         softly.assertThat(minCostFlow.getCapacity(2)).isEqualTo(1);
-        softly.assertThat(minCostFlow.getCapacity(3)).isEqualTo(1);
         softly.assertAll();
     }
 
     @Nested
     class EdgeWithLowerAndUpperBound {
+
         private EdgeWithLiquidityInformation edgeWithLiquidityInformation;
 
         @BeforeEach
@@ -149,7 +153,7 @@ class ArcInitializerTest {
             assertThat(minCostFlow.getNumArcs()).isEqualTo(1);
             SoftAssertions softly = new SoftAssertions();
             softly.assertThat(minCostFlow.getUnitCost(0)).isEqualTo(0);
-            softly.assertThat(minCostFlow.getCapacity(0)).isEqualTo(25);
+            softly.assertThat(minCostFlow.getCapacity(0)).isEqualTo(24);
             softly.assertAll();
         }
 
@@ -199,21 +203,57 @@ class ArcInitializerTest {
                     true
             );
             arcInitializer.addArcs(new EdgesWithLiquidityInformation(edgeWithLiquidityInformation));
-            assertThat(minCostFlow.getUnitCost(0)).isEqualTo(0);
+            // lower bound is reduced by one unit, so there is no edge with unit cost 0
+            assertThat(minCostFlow.getUnitCost(0)).isPositive();
         }
 
         @Test
-        void known_amount_rounded_due_to_quantization() {
+        void known_amount_just_a_bit_more_than_quantization() {
+            long quantization = 1_000;
+            int lowerBound = 1_999;
+            EdgeWithLiquidityInformation edge =
+                    EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, Coins.ofSatoshis(lowerBound));
             ArcInitializer arcInitializer = new ArcInitializer(
                     minCostFlow,
                     integerMapping,
                     edgeMapping,
-                    20,
+                    quantization,
                     PIECEWISE_LINEAR_APPROXIMATIONS,
                     FEE_RATE_WEIGHT,
                     PUBKEY,
                     true
             );
+            arcInitializer.addArcs(new EdgesWithLiquidityInformation(edge));
+            assertThat(minCostFlow.getNumArcs()).isZero();
+        }
+
+        @Test
+        void known_amount_more_than_quantization() {
+            long quantization = 1_000;
+            int lowerBound = 2_123;
+            EdgeWithLiquidityInformation edge =
+                    EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, Coins.ofSatoshis(lowerBound));
+            ArcInitializer arcInitializer = new ArcInitializer(
+                    minCostFlow,
+                    integerMapping,
+                    edgeMapping,
+                    quantization,
+                    PIECEWISE_LINEAR_APPROXIMATIONS,
+                    FEE_RATE_WEIGHT,
+                    PUBKEY,
+                    true
+            );
+            arcInitializer.addArcs(new EdgesWithLiquidityInformation(edge));
+            SoftAssertions softly = new SoftAssertions();
+            softly.assertThat(minCostFlow.getNumArcs()).isOne();
+            softly.assertThat(minCostFlow.getUnitCost(0)).isEqualTo(0);
+            softly.assertThat(minCostFlow.getCapacity(0)).isEqualTo(1);
+            softly.assertAll();
+        }
+
+        @Test
+        void known_amount_reduced_and_rounded_due_to_quantization() {
+            ArcInitializer arcInitializer = getArcInitializerWithQuantization(10);
             arcInitializer.addArcs(new EdgesWithLiquidityInformation(edgeWithLiquidityInformation));
             assertThat(minCostFlow.getCapacity(0)).isEqualTo(1);
         }
@@ -231,7 +271,10 @@ class ArcInitializerTest {
                     true
             );
             arcInitializer.addArcs(new EdgesWithLiquidityInformation(edgeWithLiquidityInformation));
-            // one arc for the known liquidity (25 / 10 = 2), 100 / 10 - 2 = 8 remaining
+            // lower bound 25, reduced by one quantization unit: 15
+            // upper bound 100, reduced by one quantization unit: 90
+            // one arc for the adjusted lower bound: 15 / 10 = 1
+            // second arc for remaining liquidity: 90 / 10 - 1 = 8
             assertThat(minCostFlow.getCapacity(1)).isEqualTo(8);
         }
 
@@ -241,15 +284,27 @@ class ArcInitializerTest {
                     minCostFlow,
                     integerMapping,
                     edgeMapping,
-                    20,
-                    6,
+                    12,
+                    5,
                     FEE_RATE_WEIGHT,
                     PUBKEY,
                     true
             );
             arcInitializer.addArcs(new EdgesWithLiquidityInformation(edgeWithLiquidityInformation));
-            // one arc for the known liquidity (25 / 20 = 1), 100 / 20 - 1 = 4 remaining: 4
+            // lower bound 25, reduced by one quantization unit: 13
+            // upper bound 100, reduced by one quantization unit: 88
+            // one arc for the known liquidity, capacity: 13 / 12 = 1
+            // remaining capacity: 88 / 12 - 1 = 6
+            // four additional arcs with capacity 1, unused capacity: 6 - 4*1 = 2
             assertThat(minCostFlow.getNumArcs()).isEqualTo(5);
+            SoftAssertions softly = new SoftAssertions();
+            softly.assertThat(minCostFlow.getCapacity(0)).isEqualTo(1);
+            softly.assertThat(minCostFlow.getUnitCost(0)).isZero();
+            softly.assertThat(minCostFlow.getCapacity(1)).isEqualTo(1);
+            softly.assertThat(minCostFlow.getCapacity(2)).isEqualTo(1);
+            softly.assertThat(minCostFlow.getCapacity(3)).isEqualTo(1);
+            softly.assertThat(minCostFlow.getCapacity(4)).isEqualTo(1);
+            softly.assertAll();
         }
 
         @Test
@@ -333,16 +388,7 @@ class ArcInitializerTest {
     @Test
     void adds_arcs_for_edge_with_capacity_smaller_than_quantization_amount() {
         int quantization = 10_000;
-        ArcInitializer arcInitializer = new ArcInitializer(
-                minCostFlow,
-                integerMapping,
-                edgeMapping,
-                quantization,
-                PIECEWISE_LINEAR_APPROXIMATIONS,
-                FEE_RATE_WEIGHT,
-                PUBKEY,
-                true
-        );
+        ArcInitializer arcInitializer = getArcInitializerWithQuantization(quantization);
         EdgeWithLiquidityInformation edgeWithLiquidityInformation =
                 edge(EDGE, Coins.ofSatoshis(quantization - 1));
         arcInitializer.addArcs(new EdgesWithLiquidityInformation(edgeWithLiquidityInformation));
@@ -352,43 +398,31 @@ class ArcInitializerTest {
     @Test
     void uses_quantization_for_capacity() {
         int quantization = 100;
-        ArcInitializer arcInitializer = new ArcInitializer(
-                minCostFlow,
-                integerMapping,
-                edgeMapping,
-                quantization,
-                PIECEWISE_LINEAR_APPROXIMATIONS,
-                FEE_RATE_WEIGHT,
-                PUBKEY,
-                true
-        );
-        arcInitializer.addArcs(new EdgesWithLiquidityInformation(edge(EDGE, Coins.ofSatoshis(20_123))));
+        ArcInitializer arcInitializer = getArcInitializerWithQuantization(quantization);
+        arcInitializer.addArcs(new EdgesWithLiquidityInformation(edge(EDGE, Coins.ofSatoshis(20_223))));
         assertThat(minCostFlow.getCapacity(0)).isEqualTo(201);
     }
 
     @Test
     void uses_quantization_for_unit_cost() {
         int quantization = 100;
-        ArcInitializer arcInitializer = new ArcInitializer(
-                minCostFlow,
-                integerMapping,
-                edgeMapping,
-                quantization,
-                PIECEWISE_LINEAR_APPROXIMATIONS,
-                FEE_RATE_WEIGHT,
-                PUBKEY,
-                true
-        );
+        ArcInitializer arcInitializer = getArcInitializerWithQuantization(quantization);
         arcInitializer.addArcs(new EdgesWithLiquidityInformation(
-                edge(EDGE, Coins.ofSatoshis(20_123)),
+                edge(EDGE, Coins.ofSatoshis(20_223)),
                 edge(EDGE_3_4, Coins.ofSatoshis(1_000_000))
         ));
         assertThat(minCostFlow.getUnitCost(0)).isEqualTo(10 * 50_000_000L / 201);
     }
 
     @Test
-    void one_edge() {
+    void ignores_edge_with_capacity_matching_quantization() {
         arcInitializer.addArcs(new EdgesWithLiquidityInformation(edge(EDGE, Coins.ofSatoshis(1))));
+        assertThat(minCostFlow.getNumArcs()).isZero();
+    }
+
+    @Test
+    void one_edge() {
+        arcInitializer.addArcs(new EdgesWithLiquidityInformation(edge(EDGE, Coins.ofSatoshis(2))));
         assertThat(minCostFlow.getNumArcs()).isOne();
     }
 
@@ -406,8 +440,8 @@ class ArcInitializerTest {
                 true
         );
         arcInitializer.addArcs(new EdgesWithLiquidityInformation(
-                edge(EDGE, Coins.ofSatoshis(10_000)),
-                edge(EDGE_2_3, Coins.ofSatoshis(30_000))
+                edge(EDGE, Coins.ofSatoshis(10_001)),
+                edge(EDGE_2_3, Coins.ofSatoshis(30_001))
         ));
         assertThat(minCostFlow.getNumArcs()).isEqualTo(10);
         SoftAssertions softly = new SoftAssertions();
@@ -426,15 +460,15 @@ class ArcInitializerTest {
 
     @Test
     void two_edges() {
-        EdgeWithLiquidityInformation edge1 = edge(EDGE, Coins.ofSatoshis(1));
-        EdgeWithLiquidityInformation edge2 = edge(EDGE_1_3, Coins.ofSatoshis(2));
+        EdgeWithLiquidityInformation edge1 = edge(EDGE, Coins.ofSatoshis(2));
+        EdgeWithLiquidityInformation edge2 = edge(EDGE_1_3, Coins.ofSatoshis(3));
         arcInitializer.addArcs(new EdgesWithLiquidityInformation(edge1, edge2));
         assertThat(minCostFlow.getNumArcs()).isEqualTo(2);
     }
 
     @Test
     void parallel_edges_are_not_combined() {
-        EdgeWithLiquidityInformation edge = edge(EDGE, Coins.ofSatoshis(1));
+        EdgeWithLiquidityInformation edge = edge(EDGE, Coins.ofSatoshis(2));
         arcInitializer.addArcs(new EdgesWithLiquidityInformation(edge, edge));
         assertThat(minCostFlow.getNumArcs()).isEqualTo(2);
     }
@@ -607,5 +641,18 @@ class ArcInitializerTest {
     private EdgeWithLiquidityInformation edge(Edge edge, Coins capacity) {
         Edge edgeWithCapacity = edge.withCapacity(capacity);
         return EdgeWithLiquidityInformation.forUpperBound(edgeWithCapacity, capacity);
+    }
+
+    private ArcInitializer getArcInitializerWithQuantization(int quantization) {
+        return new ArcInitializer(
+                minCostFlow,
+                integerMapping,
+                edgeMapping,
+                quantization,
+                PIECEWISE_LINEAR_APPROXIMATIONS,
+                FEE_RATE_WEIGHT,
+                PUBKEY,
+                true
+        );
     }
 }

@@ -98,18 +98,12 @@ public class EdgeComputation {
 
     private EdgeWithLiquidityInformation getEdgeWithLiquidityInformation(Edge edge, Pubkey ownPubkey) {
         Coins knownLiquidity = getKnownLiquidity(edge, ownPubkey).orElse(null);
-        if (knownLiquidity == null) {
-            Coins lowerBound = liquidityBoundsService.getAssumedLiquidityLowerBound(edge);
-            Coins upperBound = getAvailableLiquidityUpperBound(edge, lowerBound);
-            return EdgeWithLiquidityInformation.forLowerAndUpperBound(edge, lowerBound, upperBound);
+        if (knownLiquidity != null) {
+            return EdgeWithLiquidityInformation.forKnownLiquidity(edge, knownLiquidity);
         }
-        Coins usableLiquidityFromKnownLiquidity = getUsableLiquidityFromKnownLiquidity(knownLiquidity);
-        return EdgeWithLiquidityInformation.forKnownLiquidity(edge, usableLiquidityFromKnownLiquidity);
-    }
-
-    private Coins getUsableLiquidityFromKnownLiquidity(Coins knownLiquidity) {
-        Coins withFeeReserve = Coins.ofMilliSatoshis((long) (knownLiquidity.milliSatoshis() * 0.99));
-        return withFeeReserve.subtract(Coins.ofSatoshis(1_000)).maximum(Coins.NONE);
+        Coins lowerBound = liquidityBoundsService.getAssumedLiquidityLowerBound(edge);
+        Coins upperBound = getAvailableLiquidityUpperBound(edge, lowerBound);
+        return EdgeWithLiquidityInformation.forLowerAndUpperBound(edge, lowerBound, upperBound);
     }
 
     private boolean shouldIgnore(

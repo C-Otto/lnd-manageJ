@@ -37,8 +37,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class FlowComputationTest {
-    private static final Coins LARGE = Coins.ofSatoshis(10_000_000);
-    private static final Coins SMALL = Coins.ofSatoshis(100);
+    private static final Coins LARGE = Coins.ofSatoshis(10_000_001);
+    private static final Coins SMALL = Coins.ofSatoshis(101);
     private static final int MAX_TIME_LOCK_DELTA = 2016;
 
     private FlowComputation flowComputation;

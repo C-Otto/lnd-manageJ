@@ -197,12 +197,11 @@ class EdgeComputationTest {
         when(grpcGetInfo.getPubkey()).thenReturn(EDGE.startNode());
         when(channelService.getOpenChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         Coins knownLiquidity = Coins.ofSatoshis(4_567);
-        Coins availableKnownLiquidity = getAvailableKnownLiquidity(knownLiquidity);
         when(balanceService.getAvailableLocalBalance(EDGE.channelId())).thenReturn(knownLiquidity);
         when(balanceService.getAvailableRemoteBalance(EDGE.channelId())).thenReturn(Coins.ofSatoshis(401));
 
         assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA).edges())
-                .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, availableKnownLiquidity));
+                .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, knownLiquidity));
     }
 
     @Test
@@ -264,11 +263,10 @@ class EdgeComputationTest {
         when(grpcGetInfo.getPubkey()).thenReturn(EDGE.endNode());
         when(channelService.getOpenChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         Coins knownLiquidity = Coins.ofSatoshis(4_567);
-        Coins availableKnownLiquidity = getAvailableKnownLiquidity(knownLiquidity);
         when(balanceService.getAvailableRemoteBalance(EDGE.channelId())).thenReturn(knownLiquidity);
 
         assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA).edges())
-                .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, availableKnownLiquidity));
+                .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, knownLiquidity));
     }
 
     @Test
@@ -320,12 +318,11 @@ class EdgeComputationTest {
     void getEdgeWithLiquidityInformation_first_node_is_own_node() {
         when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY);
         Coins knownLiquidity = Coins.ofSatoshis(4_567);
-        Coins availableKnownLiquidity = getAvailableKnownLiquidity(knownLiquidity);
         when(channelService.getOpenChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         when(balanceService.getAvailableLocalBalance(EDGE.channelId())).thenReturn(knownLiquidity);
         when(balanceService.getAvailableRemoteBalance(EDGE.channelId())).thenReturn(Coins.ofSatoshis(401));
         assertThat(edgeComputation.getEdgeWithLiquidityInformation(EDGE))
-                .isEqualTo(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, availableKnownLiquidity));
+                .isEqualTo(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, knownLiquidity));
     }
 
     @Test
@@ -340,11 +337,10 @@ class EdgeComputationTest {
     void getEdgeWithLiquidityInformation_second_node_is_own_node() {
         when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY_2);
         Coins knownLiquidity = Coins.ofSatoshis(4_567);
-        Coins availableKnownLiquidity = getAvailableKnownLiquidity(knownLiquidity);
         when(channelService.getOpenChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         when(balanceService.getAvailableRemoteBalance(EDGE.channelId())).thenReturn(knownLiquidity);
         assertThat(edgeComputation.getEdgeWithLiquidityInformation(EDGE))
-                .isEqualTo(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, availableKnownLiquidity));
+                .isEqualTo(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, knownLiquidity));
     }
 
     @Test
@@ -407,15 +403,6 @@ class EdgeComputationTest {
     private void mockEdge() {
         DirectedChannelEdge edge = new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY, PUBKEY_2, POLICY_1);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));
-    }
-
-    private Coins getAvailableKnownLiquidity(Coins coins) {
-        // 1% deducted to leave some room for fees
-        long milliSat = coins.milliSatoshis();
-        Coins withFeeReserve = Coins.ofMilliSatoshis((long) (milliSat * 0.99));
-        // reserve 1k sat for on-chain fees (something like having an additional HTLC, commit fee, ...)
-        Coins withOnChainReserve = withFeeReserve.subtract(Coins.ofSatoshis(1_000));
-        return withOnChainReserve.maximum(Coins.NONE);
     }
 
     private static Policy policy(int feeRate) {

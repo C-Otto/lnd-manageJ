@@ -28,7 +28,7 @@ class MinCostFlowSolverTest {
     private static final long QUANTIZATION = 1;
     private static final int PIECEWISE_LINEAR_APPROXIMATIONS = 1;
     private static final int FEE_RATE_WEIGHT = 0;
-    private static final Coins ONE_SAT = Coins.ofSatoshis(PIECEWISE_LINEAR_APPROXIMATIONS);
+    private static final Coins ONE_SAT = Coins.ofSatoshis(1);
     private static final Coins TWO_SATS = ONE_SAT.add(ONE_SAT);
     private static final Coins MANY_SATS = Coins.ofSatoshis(100_000_000);
 
@@ -142,7 +142,7 @@ class MinCostFlowSolverTest {
     void solve_simple() {
         Coins amount = Coins.ofSatoshis(PIECEWISE_LINEAR_APPROXIMATIONS);
         EdgesWithLiquidityInformation edgesWithLiquidityInformation = new EdgesWithLiquidityInformation(
-                EdgeWithLiquidityInformation.forUpperBound(EDGE_2_3, amount)
+                EdgeWithLiquidityInformation.forUpperBound(EDGE_2_3, amount.add(Coins.ofSatoshis(QUANTIZATION)))
         );
 
         Flows flows = solve(edgesWithLiquidityInformation, PUBKEY_2, PUBKEY_3, amount);
@@ -167,8 +167,9 @@ class MinCostFlowSolverTest {
     void solve_with_quantization() {
         int quantization = 10_000;
         Coins amount = Coins.ofSatoshis(100_000);
+        Coins upperBound = amount.add(Coins.ofSatoshis(quantization));
         EdgesWithLiquidityInformation edgesWithLiquidityInformation =
-                new EdgesWithLiquidityInformation(EdgeWithLiquidityInformation.forUpperBound(EDGE_2_3, amount));
+                new EdgesWithLiquidityInformation(EdgeWithLiquidityInformation.forUpperBound(EDGE_2_3, upperBound));
 
         Map<Pubkey, Coins> sources = Map.of(PUBKEY_2, amount);
         Map<Pubkey, Coins> sinks = Map.of(PUBKEY_3, amount);
@@ -237,8 +238,8 @@ class MinCostFlowSolverTest {
     void solve_two_sources_two_sinks() {
         Coins amount = Coins.ofSatoshis(PIECEWISE_LINEAR_APPROXIMATIONS);
         EdgesWithLiquidityInformation edgesWithLiquidityInformation = new EdgesWithLiquidityInformation(
-                EdgeWithLiquidityInformation.forUpperBound(EDGE, amount),
-                EdgeWithLiquidityInformation.forUpperBound(EDGE_3_4, amount)
+                EdgeWithLiquidityInformation.forUpperBound(EDGE, amount.add(Coins.ofSatoshis(QUANTIZATION))),
+                EdgeWithLiquidityInformation.forUpperBound(EDGE_3_4, amount.add(Coins.ofSatoshis(QUANTIZATION)))
         );
         Map<Pubkey, Coins> sources = Map.of(PUBKEY, amount, PUBKEY_3, amount);
         Map<Pubkey, Coins> sinks = Map.of(PUBKEY_2, amount, PUBKEY_4, amount);
@@ -259,8 +260,8 @@ class MinCostFlowSolverTest {
     @Test
     void solve_one_source_two_sinks() {
         EdgesWithLiquidityInformation edgesWithLiquidityInformation = new EdgesWithLiquidityInformation(
-                EdgeWithLiquidityInformation.forUpperBound(EDGE, ONE_SAT),
-                EdgeWithLiquidityInformation.forUpperBound(EDGE_1_3, ONE_SAT)
+                EdgeWithLiquidityInformation.forUpperBound(EDGE, ONE_SAT.add(Coins.ofSatoshis(QUANTIZATION))),
+                EdgeWithLiquidityInformation.forUpperBound(EDGE_1_3, ONE_SAT.add(Coins.ofSatoshis(QUANTIZATION)))
         );
         Map<Pubkey, Coins> sources = Map.of(PUBKEY, TWO_SATS);
         Map<Pubkey, Coins> sinks = Map.of(PUBKEY_2, ONE_SAT, PUBKEY_3, ONE_SAT);
@@ -281,9 +282,9 @@ class MinCostFlowSolverTest {
     @Test
     void solve_long_path() {
         EdgesWithLiquidityInformation edgesWithLiquidityInformation = new EdgesWithLiquidityInformation(
-                EdgeWithLiquidityInformation.forUpperBound(EDGE, ONE_SAT),
-                EdgeWithLiquidityInformation.forUpperBound(EDGE_2_3, MANY_SATS),
-                EdgeWithLiquidityInformation.forUpperBound(EDGE_3_4, ONE_SAT)
+                EdgeWithLiquidityInformation.forUpperBound(EDGE, ONE_SAT.add(Coins.ofSatoshis(QUANTIZATION))),
+                EdgeWithLiquidityInformation.forUpperBound(EDGE_2_3, MANY_SATS.add(Coins.ofSatoshis(QUANTIZATION))),
+                EdgeWithLiquidityInformation.forUpperBound(EDGE_3_4, ONE_SAT.add(Coins.ofSatoshis(QUANTIZATION)))
         );
         Flows flows = solve(edgesWithLiquidityInformation, PUBKEY, PUBKEY_4, ONE_SAT);
 
