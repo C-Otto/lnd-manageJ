@@ -8,8 +8,14 @@ https://lists.linuxfoundation.org/pipermail/lightning-dev/2022-March/003510.html
 There is also a lightweight python package being developed which can be used for simulations or to do production tests at: https://github.com/renepickhardt/pickhardtpayments 
 
 # Requirements
-1. The graph algorithm implementation used to do the heavy lifting currently is only supported for amd64 (x86_64) on
-   Linux, Windows, and Mac systems. See https://github.com/C-Otto/lnd-manageJ/issues/13.
+1. The graph algorithm implementation used to do the heavy lifting currently is only supported for the following systems:
+   * amd64 (x86_64), Linux
+   * amd64 (x86_64), Mac OS X
+   * amd64 (x86_64), Windows
+   * aarch64 (arm64), Linux
+   * aarch64 (arm64), Mac OS X
+   
+   See https://github.com/C-Otto/lnd-manageJ/issues/13.
 2. You need to enable middleware support in lnd: add a section `[rpcmiddleware]` with `rpcmiddleware.enable=true` to 
    your `lnd.conf` and restart lnd. Once enabled, lnd-manageJ will spy on every RPC request and
    response, without changing/blocking any of the data. However, despite the read-only configuration, requests may
