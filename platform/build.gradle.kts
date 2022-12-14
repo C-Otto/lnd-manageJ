@@ -29,7 +29,7 @@ dependencies {
         api("commons-codec:commons-codec:1.15")
         api("de.aaschmid:gradle-cpd-plugin:3.3")
         api("info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.9.11")
-        api("io.github.resilience4j:resilience4j-spring-boot2:1.7.1")
+        api("io.github.resilience4j:resilience4j-spring-boot2:2.0.2")
         api("io.grpc:grpc-netty:$grpcVersion")
         api("io.grpc:grpc-protobuf:$grpcVersion")
         api("io.grpc:grpc-stub:$grpcVersion")
