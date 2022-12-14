@@ -43,7 +43,7 @@ dependencies {
         api("org.ini4j:ini4j:0.5.4")
         api("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
         api("org.webjars:bootstrap:5.2.3")
-        api("org.webjars:webjars-locator:0.45")
+        api("org.webjars:webjars-locator:0.46")
         api("com.github.valfirst:slf4j-test:2.6.1")
     }
 }
