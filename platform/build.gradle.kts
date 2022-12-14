@@ -21,7 +21,7 @@ dependencies {
         api("com.google.code.findbugs:jsr305:3.0.2")
         api("com.google.errorprone:error_prone_core:2.16")
         api("com.google.guava:guava:31.1-jre")
-        api("com.google.ortools:ortools-java:9.4.1874")
+        api("com.google.ortools:ortools-java:9.5.2237")
         api("com.google.protobuf:protobuf-gradle-plugin:0.9.1")
         api("com.ryantenney.metrics:metrics-spring:3.1.3")
         api("com.tngtech.archunit:archunit:1.0.1")
