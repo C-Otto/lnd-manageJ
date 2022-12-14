@@ -9,9 +9,9 @@ javaPlatform {
 }
 
 dependencies {
-    val springBootVersion = "2.7.6"
+    val springBootVersion = "3.0.0"
     val grpcVersion = "1.50.2"
-    api(platform("org.springframework.cloud:spring-cloud-dependencies:2021.0.4"))
+    api(platform("org.springframework.cloud:spring-cloud-dependencies:2021.0.5"))
     api(platform("org.springframework.boot:spring-boot-dependencies:$springBootVersion"))
 
     constraints {
@@ -44,6 +44,6 @@ dependencies {
         api("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
         api("org.webjars:bootstrap:5.2.2")
         api("org.webjars:webjars-locator:0.45")
-        api("uk.org.lidalia:slf4j-test:1.2.0")
+        api("com.github.valfirst:slf4j-test:2.6.1")
     }
 }

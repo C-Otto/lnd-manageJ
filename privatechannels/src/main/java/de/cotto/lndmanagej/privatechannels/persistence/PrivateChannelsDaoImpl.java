@@ -2,9 +2,9 @@ package de.cotto.lndmanagej.privatechannels.persistence;
 
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.privatechannels.PrivateChannelsDao;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Component;
 
-import javax.transaction.Transactional;
 import java.util.Optional;
 
 @Component

@@ -2,13 +2,13 @@ package de.cotto.lndmanagej.onlinepeers.persistence;
 
 import de.cotto.lndmanagej.model.OnlineStatus;
 import de.cotto.lndmanagej.model.Pubkey;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
+import jakarta.persistence.Table;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.Table;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 

@@ -3,9 +3,9 @@ package de.cotto.lndmanagej.onlinepeers.persistence;
 import de.cotto.lndmanagej.model.OnlineStatus;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.onlinepeers.OnlinePeersDao;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Component;
 
-import javax.transaction.Transactional;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;

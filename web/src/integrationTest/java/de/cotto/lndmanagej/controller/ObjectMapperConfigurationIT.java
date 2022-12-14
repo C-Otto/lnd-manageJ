@@ -50,7 +50,7 @@ class ObjectMapperConfigurationIT {
                 {
                   "channels" : [ "712345x123x1" ]
                 }""";
-        mockMvc.perform(get(PREFIX + "/open-channels/"))
+        mockMvc.perform(get(PREFIX + "/open-channels"))
                 .andExpect(content().string(expectedString));
     }
 }

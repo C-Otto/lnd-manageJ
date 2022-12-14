@@ -7,10 +7,10 @@ import de.cotto.lndmanagej.model.HexString;
 import invoicesrpc.InvoicesGrpc;
 import invoicesrpc.InvoicesOuterClass;
 import invoicesrpc.InvoicesOuterClass.CancelInvoiceMsg;
+import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.util.Optional;
 

@@ -4,13 +4,13 @@ import com.google.common.annotations.VisibleForTesting;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.TransactionHash;
 import de.cotto.lndmanagej.transactions.model.Transaction;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import java.util.Optional;
 
 @Entity

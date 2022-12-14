@@ -2,16 +2,16 @@ package de.cotto.lndmanagej.payments.persistence;
 
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Payment;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderColumn;
+import jakarta.persistence.Table;
 
 import javax.annotation.Nullable;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderColumn;
-import javax.persistence.Table;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;

@@ -55,7 +55,7 @@ class ArchUnitIT {
         ArchRule rule = ArchRuleDefinition.classes().that()
                 .haveSimpleNameEndingWith("DaoImpl")
                 .should()
-                .beAnnotatedWith("javax.transaction.Transactional")
+                .beAnnotatedWith("jakarta.transaction.Transactional")
                 .orShould()
                 .beAnnotatedWith("org.springframework.transaction.annotation.Transactional");
         // https://stackoverflow.com/q/26387399/947526

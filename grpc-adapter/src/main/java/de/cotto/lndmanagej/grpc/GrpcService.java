@@ -9,6 +9,7 @@ import de.cotto.lndmanagej.model.Pubkey;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
+import jakarta.annotation.PreDestroy;
 import lnrpc.AddInvoiceResponse;
 import lnrpc.ChanInfoRequest;
 import lnrpc.Channel;
@@ -44,7 +45,6 @@ import lnrpc.Transaction;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Iterator;

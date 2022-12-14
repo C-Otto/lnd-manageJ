@@ -68,14 +68,14 @@ class DashboardControllerIT extends BaseControllerIT {
     @Test
     void channels_byRating_ok() throws Exception {
         when(pageService.channels(SortBy.RATING)).thenReturn(new ChannelsPage(List.of(OPEN_CHANNEL_DTO)));
-        mockMvc.perform(get("/channels/").param(SORT_PARAM_KEY, "rating"))
+        mockMvc.perform(get("/channels").param(SORT_PARAM_KEY, "rating"))
                 .andExpect(status().isOk());
     }
 
     @Test
     void nodes_byRating_ok() throws Exception {
         when(pageService.nodes(SortBy.NODE_RATING)).thenReturn(new NodesPage(List.of(NODE_DTO)));
-        mockMvc.perform(get("/nodes/").param(SORT_PARAM_KEY, "node-rating"))
+        mockMvc.perform(get("/nodes").param(SORT_PARAM_KEY, "node-rating"))
                 .andExpect(status().isOk());
     }
 }

@@ -47,7 +47,7 @@ class SelfPaymentsControllerIT {
     void getSelfPaymentsFromChannel() throws Exception {
         when(selfPaymentsService.getSelfPaymentsFromChannel(CHANNEL_ID))
                 .thenReturn(List.of(SELF_PAYMENT_2, SELF_PAYMENT));
-        mockMvc.perform(get(CHANNEL_PREFIX + "/self-payments-from-channel/"))
+        mockMvc.perform(get(CHANNEL_PREFIX + "/self-payments-from-channel"))
                 .andExpect(jsonPath("$.selfPayments[0].memo", is(SELF_PAYMENT_2.memo())))
                 .andExpect(jsonPath("$.selfPayments[1].memo", is(SELF_PAYMENT.memo())))
                 .andExpect(jsonPath("$.feesMilliSat", is("20")))
@@ -58,7 +58,7 @@ class SelfPaymentsControllerIT {
     void getSelfPaymentsFromPeer() throws Exception {
         when(selfPaymentsService.getSelfPaymentsFromPeer(PUBKEY))
                 .thenReturn(List.of(SELF_PAYMENT_2, SELF_PAYMENT));
-        mockMvc.perform(get(NODE_PREFIX + "/self-payments-from-peer/"))
+        mockMvc.perform(get(NODE_PREFIX + "/self-payments-from-peer"))
                 .andExpect(jsonPath("$.selfPayments[0].memo", is(SELF_PAYMENT_2.memo())))
                 .andExpect(jsonPath("$.selfPayments[1].memo", is(SELF_PAYMENT.memo())))
                 .andExpect(jsonPath("$.feesMilliSat", is("20")))
@@ -69,7 +69,7 @@ class SelfPaymentsControllerIT {
     void getSelfPaymentsToChannel() throws Exception {
         when(selfPaymentsService.getSelfPaymentsToChannel(CHANNEL_ID))
                 .thenReturn(List.of(SELF_PAYMENT, SELF_PAYMENT_4));
-        mockMvc.perform(get(CHANNEL_PREFIX + "/self-payments-to-channel/"))
+        mockMvc.perform(get(CHANNEL_PREFIX + "/self-payments-to-channel"))
                 .andExpect(jsonPath("$.selfPayments[0].memo", is(SELF_PAYMENT.memo())))
                 .andExpect(jsonPath("$.selfPayments[0].settleDate", is(SELF_PAYMENT.settleDate().toString())))
                 .andExpect(jsonPath("$.selfPayments[0].amountPaidMilliSat", is(msat(SELF_PAYMENT.amountPaid()))))
@@ -93,7 +93,7 @@ class SelfPaymentsControllerIT {
     void getSelfPaymentsToPeer() throws Exception {
         when(selfPaymentsService.getSelfPaymentsToPeer(PUBKEY))
                 .thenReturn(List.of(SELF_PAYMENT_2, SELF_PAYMENT));
-        mockMvc.perform(get(NODE_PREFIX + "/self-payments-to-peer/"))
+        mockMvc.perform(get(NODE_PREFIX + "/self-payments-to-peer"))
                 .andExpect(jsonPath("$.selfPayments[0].memo", is(SELF_PAYMENT_2.memo())))
                 .andExpect(jsonPath("$.selfPayments[1].memo", is(SELF_PAYMENT.memo())))
                 .andExpect(jsonPath("$.feesMilliSat", is("20")))

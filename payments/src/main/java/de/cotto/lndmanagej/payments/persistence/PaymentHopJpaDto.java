@@ -3,8 +3,7 @@ package de.cotto.lndmanagej.payments.persistence;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.PaymentHop;
-
-import javax.persistence.Embeddable;
+import jakarta.persistence.Embeddable;
 
 @Embeddable
 class PaymentHopJpaDto {

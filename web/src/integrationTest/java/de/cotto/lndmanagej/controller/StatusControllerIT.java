@@ -70,7 +70,7 @@ class StatusControllerIT {
                 LOCAL_OPEN_CHANNEL.getId().toString(),
                 LOCAL_OPEN_CHANNEL_TO_NODE_3.getId().toString()
         );
-        mockMvc.perform(get(PREFIX + "/open-channels/"))
+        mockMvc.perform(get(PREFIX + "/open-channels"))
                 .andExpect(jsonPath("$.channels", is(sortedChannelIds)));
     }
 
@@ -92,7 +92,7 @@ class StatusControllerIT {
                 CLOSED_CHANNEL.getId().toString(),
                 LOCAL_OPEN_CHANNEL_TO_NODE_3.getId().toString()
         );
-        mockMvc.perform(get(PREFIX + "/all-channels/"))
+        mockMvc.perform(get(PREFIX + "/all-channels"))
                 .andExpect(jsonPath("$.channels", is(sortedChannelIds)));
     }
 

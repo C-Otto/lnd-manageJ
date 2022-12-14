@@ -3,9 +3,9 @@ package de.cotto.lndmanagej.invoices.persistence;
 import de.cotto.lndmanagej.invoices.SettledInvoicesDao;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.SettledInvoice;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Component;
 
-import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;

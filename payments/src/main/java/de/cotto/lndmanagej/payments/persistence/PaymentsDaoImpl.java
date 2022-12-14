@@ -2,9 +2,9 @@ package de.cotto.lndmanagej.payments.persistence;
 
 import de.cotto.lndmanagej.model.Payment;
 import de.cotto.lndmanagej.payments.PaymentsDao;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Component;
 
-import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.List;
 

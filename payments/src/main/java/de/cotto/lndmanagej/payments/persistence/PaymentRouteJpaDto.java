@@ -2,15 +2,15 @@ package de.cotto.lndmanagej.payments.persistence;
 
 import de.cotto.lndmanagej.model.PaymentHop;
 import de.cotto.lndmanagej.model.PaymentRoute;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.CollectionTable;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;

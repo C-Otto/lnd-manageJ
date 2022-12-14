@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.grpc;
 import com.codahale.metrics.annotation.Timed;
 import de.cotto.lndmanagej.configuration.ConfigurationService;
 import io.grpc.stub.StreamObserver;
+import jakarta.annotation.PreDestroy;
 import lnrpc.HTLCAttempt;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -12,7 +13,6 @@ import routerrpc.RouterOuterClass.QueryMissionControlRequest;
 import routerrpc.RouterOuterClass.QueryMissionControlResponse;
 import routerrpc.RouterOuterClass.SubscribeHtlcEventsRequest;
 
-import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;

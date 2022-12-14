@@ -1,10 +1,9 @@
 package de.cotto.lndmanagej.privatechannels.persistence;
 
 import de.cotto.lndmanagej.model.ChannelId;
-
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "private_channels")

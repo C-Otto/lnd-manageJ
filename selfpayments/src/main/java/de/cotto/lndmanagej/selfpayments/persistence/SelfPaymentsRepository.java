@@ -1,11 +1,11 @@
 package de.cotto.lndmanagej.selfpayments.persistence;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import java.util.List;
 
 public interface SelfPaymentsRepository extends JpaRepository<SelfPaymentsRepository.DummyEntity, Long> {

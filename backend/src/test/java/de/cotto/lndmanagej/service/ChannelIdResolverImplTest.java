@@ -1,5 +1,7 @@
 package de.cotto.lndmanagej.service;
 
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.transactions.service.TransactionService;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,11 +10,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.org.lidalia.slf4jtest.TestLogger;
-import uk.org.lidalia.slf4jtest.TestLoggerFactory;
 
 import java.util.Optional;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.OUTPUT;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.TRANSACTION_HASH;
@@ -21,7 +22,6 @@ import static de.cotto.lndmanagej.transactions.model.TransactionFixtures.POSITIO
 import static de.cotto.lndmanagej.transactions.model.TransactionFixtures.TRANSACTION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
-import static uk.org.lidalia.slf4jtest.LoggingEvent.warn;
 
 @ExtendWith(MockitoExtension.class)
 class ChannelIdResolverImplTest {

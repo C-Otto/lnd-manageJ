@@ -3,9 +3,9 @@ package de.cotto.lndmanagej.transactions.persistence;
 import de.cotto.lndmanagej.model.TransactionHash;
 import de.cotto.lndmanagej.transactions.TransactionDao;
 import de.cotto.lndmanagej.transactions.model.Transaction;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Component;
 
-import javax.transaction.Transactional;
 import java.util.Optional;
 
 @Component

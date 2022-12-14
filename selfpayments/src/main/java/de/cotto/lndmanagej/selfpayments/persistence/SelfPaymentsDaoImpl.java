@@ -3,9 +3,9 @@ package de.cotto.lndmanagej.selfpayments.persistence;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.SelfPayment;
 import de.cotto.lndmanagej.selfpayments.SelfPaymentsDao;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Component;
 
-import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
