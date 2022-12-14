@@ -6,7 +6,7 @@ import org.gradle.api.plugins.quality.PmdExtension
 import org.gradle.testing.jacoco.plugins.JacocoPluginExtension
 
 configure<CheckstyleExtension> {
-    toolVersion = "10.4"
+    toolVersion = "10.5.0"
 }
 
 configure<CpdExtension> {
