@@ -18,5 +18,5 @@ dependencies {
 }
 
 pitest {
-    testStrengthThreshold.set(97)
+    testStrengthThreshold.set(98)
 }

@@ -20,10 +20,10 @@ tasks.jacocoTestCoverageVerification {
         rules.forEach {rule ->
             rule.limits.forEach {limit ->
                 if (limit.counter == "INSTRUCTION") {
-                    limit.minimum = 0.86.toBigDecimal()
+                    limit.minimum = 0.89.toBigDecimal()
                 }
                 if (limit.counter == "METHOD") {
-                    limit.minimum = 0.78.toBigDecimal()
+                    limit.minimum = 0.80.toBigDecimal()
                 }
                 if (limit.counter == "BRANCH") {
                     limit.minimum = 0.95.toBigDecimal()
