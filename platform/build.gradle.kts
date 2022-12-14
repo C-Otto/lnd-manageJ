@@ -25,7 +25,7 @@ dependencies {
         api("com.google.protobuf:protobuf-gradle-plugin:0.9.1")
         api("com.ryantenney.metrics:metrics-spring:3.1.3")
         api("com.tngtech.archunit:archunit:1.0.1")
-        api("com.uber.nullaway:nullaway:0.10.3")
+        api("com.uber.nullaway:nullaway:0.10.5")
         api("commons-codec:commons-codec:1.15")
         api("de.aaschmid:gradle-cpd-plugin:3.3")
         api("info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.9.11")
