@@ -36,7 +36,7 @@ dependencies {
         api("javax.annotation:javax.annotation-api:1.3.2")
         api("net.ltgt.gradle:gradle-errorprone-plugin:3.0.1")
         api("net.ltgt.gradle:gradle-nullaway-plugin:1.5.0")
-        api("nl.jqno.equalsverifier:equalsverifier:3.10.1")
+        api("nl.jqno.equalsverifier:equalsverifier:3.12.2")
         api("org.apache.commons:commons-lang3:3.12.0")
         api("org.awaitility:awaitility:4.2.0")
         api("org.eclipse.collections:eclipse-collections:11.1.0")
