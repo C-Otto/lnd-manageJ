@@ -11,7 +11,7 @@ javaPlatform {
 dependencies {
     val springBootVersion = "3.0.0"
     val grpcVersion = "1.51.1"
-    api(platform("org.springframework.cloud:spring-cloud-dependencies:2021.0.5"))
+    api(platform("org.springframework.cloud:spring-cloud-dependencies:2022.0.0-RC3"))
     api(platform("org.springframework.boot:spring-boot-dependencies:$springBootVersion"))
 
     constraints {
@@ -45,5 +45,6 @@ dependencies {
         api("org.webjars:bootstrap:5.2.3")
         api("org.webjars:webjars-locator:0.46")
         api("com.github.valfirst:slf4j-test:2.6.1")
+        api("io.vavr:vavr:0.10.4")
     }
 }

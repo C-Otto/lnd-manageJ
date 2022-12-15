@@ -11,6 +11,7 @@ dependencies {
     implementation(project(":model"))
     implementation(project(":caching"))
     implementation(project(":grpc-adapter"))
+    runtimeOnly("io.vavr:vavr")
     testFixturesApi(testFixtures(project(":model")))
 }
 
