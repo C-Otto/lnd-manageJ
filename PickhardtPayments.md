@@ -1,7 +1,7 @@
 # #PickhardtPayments
 
 See https://arxiv.org/abs/2107.05322.
-Please reach out to me on Twitter (https://twitter.com/c_otto83) to discuss more about this!
+Please reach out to me on Mastodon (https://toot.bike/@c_otto83) or Twitter (https://twitter.com/c_otto83) to discuss more about this!
 
 The implementation is based on the piecewise linearization approach:
 https://lists.linuxfoundation.org/pipermail/lightning-dev/2022-March/003510.html. 
