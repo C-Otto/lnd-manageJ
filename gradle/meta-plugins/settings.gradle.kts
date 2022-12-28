@@ -1,0 +1,3 @@
+dependencyResolutionManagement {
+    includeBuild("platform/")
+}

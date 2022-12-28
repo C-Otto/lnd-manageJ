@@ -21,5 +21,5 @@ include("grpc-client")
 include("application")
 
 dependencyResolutionManagement {
-    includeBuild("platform/")
+    includeBuild("gradle/meta-plugins")
 }
