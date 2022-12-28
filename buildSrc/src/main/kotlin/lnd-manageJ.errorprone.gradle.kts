@@ -24,7 +24,7 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 dependencies {
-    errorprone(platform("de.cotto.lndmanagej:platform"))
+    errorprone(platform("de.c-otto.lndmanagej:platform"))
     errorprone("com.google.errorprone:error_prone_core")
     errorprone("com.uber.nullaway:nullaway")
 }

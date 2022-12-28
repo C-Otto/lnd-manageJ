@@ -2,7 +2,7 @@ plugins {
     `java-platform`
 }
 
-group = "de.cotto.lndmanagej"
+group = "de.c-otto.lndmanagej"
 
 javaPlatform {
     allowDependencies()

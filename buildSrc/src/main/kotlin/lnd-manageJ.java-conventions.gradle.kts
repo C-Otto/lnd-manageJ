@@ -34,8 +34,8 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 dependencies {
-    implementation(platform("de.cotto.lndmanagej:platform"))
-    testFixturesImplementation(platform("de.cotto.lndmanagej:platform"))
+    implementation(platform("de.c-otto.lndmanagej:platform"))
+    testFixturesImplementation(platform("de.c-otto.lndmanagej:platform"))
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.apache.commons:commons-lang3")
     implementation("com.google.code.findbugs:jsr305")

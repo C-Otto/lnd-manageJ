@@ -8,7 +8,7 @@ testing {
             testType.set(TestSuiteType.INTEGRATION_TEST)
             dependencies {
                 implementation(project())
-                implementation(project.dependencies.platform("de.cotto.lndmanagej:platform"))
+                implementation(project.dependencies.platform("de.c-otto.lndmanagej:platform"))
                 implementation("com.tngtech.archunit:archunit")
                 implementation("org.awaitility:awaitility")
             }

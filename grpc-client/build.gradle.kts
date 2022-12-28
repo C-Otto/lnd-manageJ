@@ -6,8 +6,8 @@ plugins {
 }
 
 dependencies {
-    api(platform("de.cotto.lndmanagej:platform"))
-    protobuf(platform("de.cotto.lndmanagej:platform"))
+    api(platform("de.c-otto.lndmanagej:platform"))
+    protobuf(platform("de.c-otto.lndmanagej:platform"))
     api("io.grpc:grpc-stub")
     api("io.grpc:grpc-protobuf")
     implementation("io.grpc:grpc-netty")

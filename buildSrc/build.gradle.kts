@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    implementation(platform("de.cotto.lndmanagej:platform"))
+    implementation(platform("de.c-otto.lndmanagej:platform"))
     implementation("de.aaschmid:gradle-cpd-plugin")
     implementation("net.ltgt.gradle:gradle-errorprone-plugin")
     implementation("net.ltgt.gradle:gradle-nullaway-plugin")
