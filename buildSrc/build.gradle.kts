@@ -4,11 +4,6 @@ plugins {
 
 repositories {
     gradlePluginPortal()
-    repositories {
-        maven {
-            url = uri("https://repo.spring.io/milestone")
-        }
-    }
 }
 
 dependencies {
