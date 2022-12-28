@@ -11,7 +11,7 @@ javaPlatform {
 dependencies {
     val springBootVersion = "3.0.1"
     val grpcVersion = "1.51.1"
-    api(platform("org.springframework.cloud:spring-cloud-dependencies:2022.0.0-RC3"))
+    api(platform("org.springframework.cloud:spring-cloud-dependencies:2022.0.0"))
     api(platform("org.springframework.boot:spring-boot-dependencies:$springBootVersion"))
 
     constraints {
@@ -29,7 +29,7 @@ dependencies {
         api("commons-codec:commons-codec:1.15")
         api("de.aaschmid:gradle-cpd-plugin:3.3")
         api("info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.9.11")
-        api("io.github.resilience4j:resilience4j-spring-boot2:2.0.2")
+        api("io.github.resilience4j:resilience4j-spring-boot3:2.0.2")
         api("io.grpc:grpc-netty:$grpcVersion")
         api("io.grpc:grpc-protobuf:$grpcVersion")
         api("io.grpc:grpc-stub:$grpcVersion")
