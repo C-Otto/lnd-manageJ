@@ -74,7 +74,7 @@ class BalancesDaoImpl implements BalancesDao {
         long totalSatoshis = 0;
         long totalMinutes = 0;
         LocalDateTime previous = LocalDateTime.now(ZoneOffset.UTC);
-        LocalDateTime maxAge = LocalDateTime.now(ZoneOffset.UTC).minusDays(days);
+        LocalDateTime maxAge = previous.minusDays(days);
         boolean first = true;
         for (Balances balances : entries) {
             LocalDateTime timestamp = balances.timestamp();

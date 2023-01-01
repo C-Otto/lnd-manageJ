@@ -158,7 +158,7 @@ class BalancesDaoImplTest {
                     .thenReturn(Stream.of(BalancesJpaDto.fromModel(balances)));
             CoinsAndDuration expected = new CoinsAndDuration(
                     balances.balanceInformation().localBalance(),
-                    Duration.ofMinutes(DAYS * 24 * 60 - 1)
+                    Duration.ofMinutes(DAYS * 24 * 60)
             );
             assertThat(dao.getLocalBalanceAverageOpenChannel(CHANNEL_ID, DAYS)).contains(expected);
         }
