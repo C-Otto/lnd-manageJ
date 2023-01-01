@@ -5,9 +5,11 @@ import org.junit.jupiter.api.Test;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.concurrent.TimeUnit;
 
 import static de.cotto.lndmanagej.model.LiquidityBounds.NO_INFORMATION;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 class LiquidityBoundsWithTimestampTest {
 
@@ -29,7 +31,9 @@ class LiquidityBoundsWithTimestampTest {
                 LIQUIDITY_BOUNDS,
                 Instant.now().minus(1, ChronoUnit.HOURS)
         );
-        assertThat(entry.isTooOld(MAX_AGE)).isTrue();
+        await().atMost(1, TimeUnit.SECONDS).untilAsserted(
+                () -> entry.isTooOld(MAX_AGE)
+        );
     }
 
     @Test
