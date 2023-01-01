@@ -1,5 +1,7 @@
 package de.cotto.lndmanagej.controller.dto;
 
+import com.fasterxml.jackson.core.util.DefaultIndenter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -29,6 +31,11 @@ public class ObjectMapperConfiguration {
         module.addSerializer(ZonedDateTime.class, new ToStringSerializer());
         ObjectMapper objectMapper = new ObjectMapper().registerModule(module);
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        DefaultPrettyPrinter prettyPrinter =
+                new DefaultPrettyPrinter().withObjectIndenter(
+                        new DefaultIndenter().withLinefeed("\n")
+                );
+        objectMapper.setDefaultPrettyPrinter(prettyPrinter);
         return objectMapper;
     }
 }
