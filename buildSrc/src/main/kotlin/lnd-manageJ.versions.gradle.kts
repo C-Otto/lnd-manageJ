@@ -10,11 +10,11 @@ configure<CheckstyleExtension> {
 }
 
 configure<CpdExtension> {
-    toolVersion = "6.52.0"
+    toolVersion = "6.53.0"
 }
 
 configure<PmdExtension> {
-    toolVersion = "6.52.0"
+    toolVersion = "6.53.0"
 }
 
 configure<JacocoPluginExtension> {
