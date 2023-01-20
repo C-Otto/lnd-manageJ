@@ -10,7 +10,7 @@ javaPlatform {
 
 dependencies {
     val platformVersion = "2022.12.28_3"
-    val springBootVersion = "3.0.1"
+    val springBootVersion = "3.0.2"
     val grpcVersion = "1.51.1"
 
     api(platform("de.c-otto:java-platform:$platformVersion"))
