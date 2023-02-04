@@ -1,13 +1,15 @@
+import com.github.spotbugs.snom.SpotBugsTask
 import com.google.protobuf.gradle.id
+import de.aaschmid.gradle.plugins.cpd.Cpd
+import de.cotto.javaconventions.plugins.JacocoPlugin.CheckForExecutionDataTask
+import info.solidsoft.gradle.pitest.PitestTask
 
 plugins {
-    id("java-library")
+    id("lnd-manageJ.java-library-conventions")
     id("com.google.protobuf")
 }
 
 dependencies {
-    api(platform("de.c-otto.lndmanagej:platform"))
-    protobuf(platform("de.c-otto.lndmanagej:platform"))
     api("io.grpc:grpc-stub")
     api("io.grpc:grpc-protobuf")
     implementation("io.grpc:grpc-netty")
@@ -41,17 +43,21 @@ sourceSets {
     }
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-    consistentResolution {
-        useCompileClasspathVersions()
-    }
+tasks.withType<Checkstyle>().configureEach {
+    enabled = false
 }
-
-repositories {
-    mavenCentral()
-    maven {
-        url = uri("https://repo.spring.io/milestone/")
-    }
+tasks.withType<Cpd>().configureEach {
+    enabled = false
+}
+tasks.withType<Pmd>().configureEach {
+    enabled = false
+}
+tasks.withType<SpotBugsTask>().configureEach {
+    enabled = false
+}
+tasks.withType<CheckForExecutionDataTask>().configureEach {
+    enabled = false
+}
+tasks.withType<PitestTask>().configureEach {
+    enabled = false
 }

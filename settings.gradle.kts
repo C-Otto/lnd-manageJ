@@ -22,4 +22,7 @@ include("application")
 
 dependencyResolutionManagement {
     includeBuild("gradle/meta-plugins")
+    repositories {
+        mavenCentral()
+    }
 }

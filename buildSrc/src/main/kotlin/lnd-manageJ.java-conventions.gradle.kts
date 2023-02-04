@@ -1,37 +1,11 @@
 plugins {
-    id("java")
-    id("lnd-manageJ.cpd")
-    id("lnd-manageJ.errorprone")
-    id("lnd-manageJ.checkstyle")
+    id("de.c-otto.java-conventions")
     id("lnd-manageJ.tests")
-    id("lnd-manageJ.mutationtests")
     id("lnd-manageJ.integration-tests")
-    id("lnd-manageJ.pmd")
-    id("lnd-manageJ.jacoco")
     id("org.springframework.boot")
     id("java-test-fixtures")
-    id("lnd-manageJ.spotbugs")
-    id("lnd-manageJ.versions")
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-    consistentResolution {
-        useCompileClasspathVersions()
-    }
-}
-
-repositories {
-    mavenCentral()
-    maven {
-        url = uri("https://repo.spring.io/milestone/")
-    }
-}
-
-tasks.withType<JavaCompile>().configureEach {
-    options.compilerArgs.add("-Werror")
-}
 
 dependencies {
     implementation(platform("de.c-otto.lndmanagej:platform"))
