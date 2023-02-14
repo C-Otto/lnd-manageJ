@@ -17,17 +17,18 @@ public class CacheBuilder extends CacheBuilderBase<CacheBuilder> {
         return this;
     }
 
+    @SuppressWarnings("DataFlowIssue")
     public <I, O> LoadingCache<I, O> build(CacheLoader<I, O> function) {
         Caffeine<Object, Object> builder = Caffeine.newBuilder()
                 .expireAfterWrite(expiry);
         if (this.refresh != null) {
-            builder.refreshAfterWrite(refresh);
+            builder = builder.refreshAfterWrite(refresh);
         }
         if (this.maximumSize != null) {
-            builder.maximumSize(maximumSize);
+            builder = builder.maximumSize(maximumSize);
         }
         if (softValues) {
-            builder.softValues();
+            builder = builder.softValues();
         }
         return builder.build(function);
     }
