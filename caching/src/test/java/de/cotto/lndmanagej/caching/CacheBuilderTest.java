@@ -109,7 +109,7 @@ class CacheBuilderTest {
                 .withMaximumSize(1)
                 .build(System::nanoTime);
         Long first = cache.get("");
-        cache.get("a");
+        @SuppressWarnings("unused") var unused = cache.get("a");
         cache.cleanUp();
         Long third = cache.get("");
         assertThat(first).isNotEqualTo(third);
