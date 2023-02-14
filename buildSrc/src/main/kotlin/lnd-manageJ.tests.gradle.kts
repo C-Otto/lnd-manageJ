@@ -15,7 +15,7 @@ testing {
         }
         withType<JvmTestSuite>().configureEach {
             dependencies {
-                implementation(project.dependencies.platform("de.c-otto.lndmanagej:platform"));
+                implementation(project.dependencies.platform("de.c-otto.lndmanagej:platform"))
                 implementation("org.springframework.boot:spring-boot-starter-test")
             }
         }
