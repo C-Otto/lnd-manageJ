@@ -17,7 +17,7 @@ dependencies {
 
     constraints {
         api("com.google.ortools:ortools-java:9.5.2237")
-        api("com.google.protobuf:protobuf-gradle-plugin:0.9.1")
+        api("com.google.protobuf:protobuf-gradle-plugin:0.9.2")
         api("io.grpc:grpc-netty:$grpcVersion")
         api("io.grpc:grpc-protobuf:$grpcVersion")
         api("io.grpc:grpc-stub:$grpcVersion")
