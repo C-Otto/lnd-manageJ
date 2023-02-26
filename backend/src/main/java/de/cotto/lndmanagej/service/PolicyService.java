@@ -26,8 +26,8 @@ public class PolicyService {
     public PoliciesForLocalChannel getPolicies(LocalChannel localChannel) {
         ChannelId channelId = localChannel.getId();
         return new PoliciesForLocalChannel(
-                grpcChannelPolicy.getLocalPolicy(channelId).orElseThrow(IllegalStateException::new),
-                grpcChannelPolicy.getRemotePolicy(channelId).orElseThrow(IllegalStateException::new)
+                grpcChannelPolicy.getLocalPolicy(channelId).orElse(Policy.UNKNOWN),
+                grpcChannelPolicy.getRemotePolicy(channelId).orElse(Policy.UNKNOWN)
         );
     }
 

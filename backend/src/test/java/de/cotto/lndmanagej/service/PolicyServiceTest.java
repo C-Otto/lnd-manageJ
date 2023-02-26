@@ -23,7 +23,6 @@ import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_1;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,8 +49,11 @@ class PolicyServiceTest {
         }
 
         @Test
-        void getPolicies_not_found() {
-            assertThatIllegalStateException().isThrownBy(() -> policyService.getPolicies(LOCAL_OPEN_CHANNEL));
+        void getPolicies_uses_unknown_policy_if_policy_not_found() {
+            // https://github.com/lightningnetwork/lnd/issues/7261
+            PoliciesForLocalChannel policies = policyService.getPolicies(LOCAL_OPEN_CHANNEL);
+            assertThat(policies.local()).isEqualTo(Policy.UNKNOWN);
+            assertThat(policies.remote()).isEqualTo(Policy.UNKNOWN);
         }
     }
 
