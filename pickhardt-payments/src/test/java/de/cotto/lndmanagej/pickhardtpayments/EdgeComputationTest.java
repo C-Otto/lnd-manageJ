@@ -211,7 +211,10 @@ class EdgeComputationTest {
         ChannelId channelId = EDGE.channelId();
         when(grpcGetInfo.getPubkey()).thenReturn(EDGE.startNode());
         when(channelService.getOpenChannel(channelId)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
-        when(balanceService.getAvailableRemoteBalance(channelId)).thenReturn(Coins.ofSatoshis(400));
+        // as observed on 9 May 2023:
+        // Reducing local balance (from x mSAT to 353999 mSAT): remote side does not have enough
+        // funds (4222568 mSAT < 4223000 mSAT) to pay for non-dust HTLC in case of unilateral close.
+        when(balanceService.getAvailableRemoteBalance(channelId)).thenReturn(Coins.ofMilliSatoshis(4222999));
         lenient().when(balanceService.getAvailableLocalBalance(channelId)).thenReturn(Coins.ofSatoshis(1_000_000));
 
         assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA).edges())

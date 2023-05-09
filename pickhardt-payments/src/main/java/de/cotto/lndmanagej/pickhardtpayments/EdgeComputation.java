@@ -29,7 +29,7 @@ import java.util.function.Function;
 
 @Component
 public class EdgeComputation {
-    private static final Coins REMOTE_BALANCE_REQUIRED_TO_SEND = Coins.ofSatoshis(400);
+    private static final Coins REMOTE_BALANCE_REQUIRED_TO_SEND = Coins.ofSatoshis(4223);
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final GrpcGraph grpcGraph;
