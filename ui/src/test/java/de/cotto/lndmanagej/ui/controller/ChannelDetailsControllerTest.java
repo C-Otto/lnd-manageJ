@@ -33,7 +33,7 @@ class ChannelDetailsControllerTest {
     @Test
     void channelDetails() throws NotFoundException {
         when(pageService.channelDetails(CHANNEL_ID)).thenReturn(new ChannelDetailsPage(CHANNEL_DETAILS_DTO));
-        assertThat(channelDetailsController.channelDetails(CHANNEL_ID, model)).isEqualTo("channel-details");
+        assertThat(channelDetailsController.channelDetails(CHANNEL_ID, model)).isEqualTo("channel-details-page");
         verify(model).addAllAttributes(Map.of("channel", CHANNEL_DETAILS_DTO, "id", CHANNEL_ID));
     }
 
@@ -41,7 +41,7 @@ class ChannelDetailsControllerTest {
     void channelDetails_not_found() throws NotFoundException {
         when(pageService.channelDetails(CHANNEL_ID)).thenThrow(NotFoundException.class);
         when(pageService.error("Channel not found.")).thenReturn(new ErrorPage("x"));
-        assertThat(channelDetailsController.channelDetails(CHANNEL_ID, model)).isEqualTo("error");
+        assertThat(channelDetailsController.channelDetails(CHANNEL_ID, model)).isEqualTo("error-page");
         verify(model).addAllAttributes(Map.of("error", "x"));
     }
 }

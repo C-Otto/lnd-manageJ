@@ -13,6 +13,6 @@ public class ChannelDetailsPage extends ThymeleafPage {
 
     @Override
     public String getView() {
-        return "channel-details";
+        return "channel-details-page";
     }
 }

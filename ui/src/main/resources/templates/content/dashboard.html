@@ -1,0 +1,17 @@
+<!doctype html>
+
+<html xmlns:th="https://www.thymeleaf.org">
+
+<div th:fragment="body" class="row">
+
+    <th:block th:each="warning : ${warnings}" class="list-group-item">
+        <div th:replace="~{tiles/third/dashboard-warning :: tile(${warning})}"/>
+    </th:block>
+
+    <div th:replace="~{tiles/full/channels :: tile('Channels', ${channels})}"/>
+
+    <div th:replace="~{tiles/full/nodes :: tile('Nodes', ${nodes})}"/>
+
+</div>
+
+</html>

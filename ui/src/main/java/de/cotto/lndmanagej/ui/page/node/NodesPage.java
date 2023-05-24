@@ -17,7 +17,7 @@ public class NodesPage extends ThymeleafPage {
 
     @Override
     public String getView() {
-        return "nodes";
+        return "nodes-page";
     }
 
     public List<NodeDto> getNodes() {

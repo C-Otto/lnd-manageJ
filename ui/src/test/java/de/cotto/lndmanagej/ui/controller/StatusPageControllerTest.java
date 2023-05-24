@@ -28,7 +28,7 @@ class StatusPageControllerTest {
     @Test
     void status() {
         when(statusService.getStatus()).thenReturn(STATUS_MODEL);
-        assertThat(statusPageController.status(model)).isEqualTo("status");
+        assertThat(statusPageController.status(model)).isEqualTo("status-page");
         verify(model).addAttribute("status", STATUS_MODEL);
     }
 }

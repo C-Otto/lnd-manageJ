@@ -31,7 +31,7 @@ class PendingChannelsControllerTest {
     @Test
     void pendingChannels() {
         when(pageService.pendingChannels()).thenReturn(new PendingChannelsPage(List.of()));
-        assertThat(pendingChannelsController.pendingChannelsPage(model)).isEqualTo("pending-channels");
+        assertThat(pendingChannelsController.pendingChannelsPage(model)).isEqualTo("pending-channels-page");
         verify(model).addAllAttributes(Map.of("pendingOpenChannels", List.of()));
     }
 }

@@ -14,6 +14,6 @@ public class PendingChannelsPage extends ThymeleafPage {
 
     @Override
     public String getView() {
-        return "pending-channels";
+        return "pending-channels-page";
     }
 }

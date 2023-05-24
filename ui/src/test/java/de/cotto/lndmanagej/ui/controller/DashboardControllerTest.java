@@ -43,7 +43,7 @@ class DashboardControllerTest {
     @Test
     void dashboard() {
         when(pageService.dashboard(DEFAULT_SORT)).thenReturn(new DashboardPage(List.of(), List.of(), List.of()));
-        assertThat(dashboardController.dashboard(model, DEFAULT_SORT)).isEqualTo("dashboard");
+        assertThat(dashboardController.dashboard(model, DEFAULT_SORT)).isEqualTo("dashboard-page");
         verify(model).addAllAttributes(
                 Map.of(NODES_KEY, List.of(), CHANNELS_KEY, List.of(), "warnings", List.of())
         );
@@ -59,7 +59,7 @@ class DashboardControllerTest {
     @Test
     void channels() {
         when(pageService.channels(DEFAULT_SORT)).thenReturn(new ChannelsPage(List.of(OPEN_CHANNEL_DTO)));
-        assertThat(dashboardController.channels(model, DEFAULT_SORT)).isEqualTo(CHANNELS_KEY);
+        assertThat(dashboardController.channels(model, DEFAULT_SORT)).isEqualTo("channels-page");
         verify(model).addAllAttributes(Map.of(CHANNELS_KEY, List.of(OPEN_CHANNEL_DTO)));
     }
 
@@ -74,7 +74,7 @@ class DashboardControllerTest {
     void nodes() {
         NodeDto nodeDto = new NodeDto(PUBKEY.toString(), NODE_PEER.alias(), true, RATING.getValue());
         when(pageService.nodes(DEFAULT_SORT)).thenReturn(new NodesPage(List.of(nodeDto)));
-        assertThat(dashboardController.nodes(model, DEFAULT_SORT)).isEqualTo(NODES_KEY);
+        assertThat(dashboardController.nodes(model, DEFAULT_SORT)).isEqualTo("nodes-page");
         verify(model).addAllAttributes(Map.of(NODES_KEY, List.of(nodeDto)));
     }
 }

@@ -2,12 +2,12 @@
 
 <html xmlns:th="https://www.thymeleaf.org">
 
-<div th:fragment="tile" class="tile title-table col-sm-12">
+<div th:fragment="tile(title, nodes)" class="tile title-table col-sm-12">
     <div class="card border-secondary">
         <div class="card-header">
             <div class="fs-4 mb-0">
                 <div th:replace="~{fragments/icons :: cpu}"/>
-                Nodes
+                <span th:text="${title}"></span>
             </div>
         </div>
         <div class="card-body">

@@ -199,7 +199,7 @@ class PageServiceTest {
         assertThat(pageService.pendingChannels()).usingRecursiveComparison()
                 .isEqualTo(new PendingChannelsPage(channels));
         assertThat(pageService.pendingChannels().getView())
-                .isEqualTo("pending-channels");
+                .isEqualTo("pending-channels-page");
     }
 
     @Nested
