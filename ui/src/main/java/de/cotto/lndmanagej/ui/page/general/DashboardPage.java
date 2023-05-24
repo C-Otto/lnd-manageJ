@@ -34,6 +34,6 @@ public class DashboardPage extends ThymeleafPage {
 
     @Override
     public String getView() {
-        return "dashboard";
+        return "dashboard-page";
     }
 }

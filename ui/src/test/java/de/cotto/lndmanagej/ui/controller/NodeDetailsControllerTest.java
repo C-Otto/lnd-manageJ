@@ -33,7 +33,7 @@ class NodeDetailsControllerTest {
     @Test
     void nodeDetails() {
         when(pageService.nodeDetails(PUBKEY)).thenReturn(new NodeDetailsPage(NODE_DETAILS_MODEL));
-        assertThat(nodeDetailsController.nodeDetails(PUBKEY, model)).isEqualTo("node-details");
+        assertThat(nodeDetailsController.nodeDetails(PUBKEY, model)).isEqualTo("node-details-page");
         verify(model).addAllAttributes(Map.of("node", NODE_DETAILS_MODEL, "pubkey", PUBKEY));
     }
 
@@ -41,13 +41,13 @@ class NodeDetailsControllerTest {
     void nodeDetails_no_such_element() {
         when(pageService.nodeDetails(PUBKEY)).thenThrow(NoSuchElementException.class);
         when(pageService.error("Node not found.")).thenReturn(new ErrorPage("x"));
-        assertThat(nodeDetailsController.nodeDetails(PUBKEY, model)).isEqualTo("error");
+        assertThat(nodeDetailsController.nodeDetails(PUBKEY, model)).isEqualTo("error-page");
     }
 
     @Test
     void nodeDetails_illegal_argument() {
         when(pageService.nodeDetails(PUBKEY)).thenThrow(IllegalArgumentException.class);
         when(pageService.error("Invalid public key.")).thenReturn(new ErrorPage("x"));
-        assertThat(nodeDetailsController.nodeDetails(PUBKEY, model)).isEqualTo("error");
+        assertThat(nodeDetailsController.nodeDetails(PUBKEY, model)).isEqualTo("error-page");
     }
 }

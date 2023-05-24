@@ -50,7 +50,7 @@ class SearchControllerTest {
         when(dataService.getOpenChannels()).thenReturn(List.of(OPEN_CHANNEL_DTO));
         when(pageService.channelDetails(CHANNEL_ID)).thenReturn(new ChannelDetailsPage(CHANNEL_DETAILS_DTO));
         when(channelIdConverter.tryToConvert(query)).thenReturn(Optional.of(CHANNEL_ID));
-        assertThat(searchController.search(query, model)).isEqualTo("channel-details");
+        assertThat(searchController.search(query, model)).isEqualTo("channel-details-page");
     }
 
     @Test
@@ -60,7 +60,7 @@ class SearchControllerTest {
         when(channelIdConverter.tryToConvert(query)).thenReturn(Optional.of(CHANNEL_ID));
         when(pageService.channelDetails(CHANNEL_ID)).thenThrow(NotFoundException.class);
         when(pageService.error("Channel not found.")).thenReturn(new ErrorPage("x"));
-        assertThat(searchController.search(query, model)).isEqualTo("error");
+        assertThat(searchController.search(query, model)).isEqualTo("error-page");
     }
 
     @Test
@@ -84,7 +84,7 @@ class SearchControllerTest {
         List<OpenChannelDto> channels = List.of(OPEN_CHANNEL_DTO, OPEN_CHANNEL_DTO);
         when(dataService.getOpenChannels()).thenReturn(channels);
         when(pageService.nodes(channels, SortBy.DEFAULT_SORT)).thenReturn(new NodesPage(List.of(NODE_DTO)));
-        assertThat(searchController.search(query, model)).isEqualTo("nodes");
+        assertThat(searchController.search(query, model)).isEqualTo("nodes-page");
     }
 
     @Test
@@ -93,6 +93,6 @@ class SearchControllerTest {
         List<OpenChannelDto> channels = List.of(OPEN_CHANNEL_DTO);
         when(dataService.getOpenChannels()).thenReturn(channels);
         when(pageService.error("No search result.")).thenReturn(new ErrorPage("x"));
-        assertThat(searchController.search(query, model)).isEqualTo("error");
+        assertThat(searchController.search(query, model)).isEqualTo("error-page");
     }
 }

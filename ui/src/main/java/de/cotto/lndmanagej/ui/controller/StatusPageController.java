@@ -17,6 +17,6 @@ public class StatusPageController {
     @GetMapping("/status")
     public String status(Model model) {
         model.addAttribute("status", statusService.getStatus());
-        return "status";
+        return "status-page";
     }
 }

@@ -12,6 +12,6 @@ public class NodeDetailsPage extends ThymeleafPage {
 
     @Override
     public String getView() {
-        return "node-details";
+        return "node-details-page";
     }
 }

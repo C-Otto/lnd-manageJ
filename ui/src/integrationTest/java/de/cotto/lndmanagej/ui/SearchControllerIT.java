@@ -57,7 +57,7 @@ class SearchControllerIT extends BaseControllerIT {
         mockMvc.perform(MockMvcRequestBuilders.get("/search?q=" + CHANNEL_ID))
                 .andExpect(status().isOk())
                 .andExpect(model().attribute("error", "myErrorMessage"))
-                .andExpect(view().name("error"));
+                .andExpect(view().name("error-page"));
     }
 
     @Test
@@ -84,7 +84,7 @@ class SearchControllerIT extends BaseControllerIT {
         mockMvc.perform(MockMvcRequestBuilders.get("/search?q=" + query))
                 .andExpect(status().isOk())
                 .andExpect(model().attribute("id", is(CHANNEL_DETAILS_DTO.channelId())))
-                .andExpect(view().name("channel-details"));
+                .andExpect(view().name("channel-details-page"));
     }
 
     @Test
@@ -111,7 +111,7 @@ class SearchControllerIT extends BaseControllerIT {
         mockMvc.perform(MockMvcRequestBuilders.get("/search?q=alb"))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("nodes"))
-                .andExpect(view().name("nodes"));
+                .andExpect(view().name("nodes-page"));
     }
 
     private NodesPage nodesPage(OpenChannelDto... channels) {

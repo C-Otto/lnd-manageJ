@@ -9,6 +9,6 @@ public class ErrorPage extends ThymeleafPage {
 
     @Override
     public String getView() {
-        return "error";
+        return "error-page";
     }
 }
