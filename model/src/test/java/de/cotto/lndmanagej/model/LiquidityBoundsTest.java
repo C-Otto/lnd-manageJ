@@ -134,16 +134,16 @@ class LiquidityBoundsTest {
 
         @Test
         void updates_upper_bound_with_amount_below_old_upper_bound() {
-            Coins lowerBound = Coins.ofSatoshis(120);
-            LiquidityBounds initial = withUpperBound(lowerBound);
+            Coins upperBound = Coins.ofSatoshis(120);
+            LiquidityBounds initial = withUpperBound(upperBound);
             Coins amount = Coins.ofSatoshis(100);
             assertUpperBound(initial.withUnavailableCoins(amount), oneSatLessThan(amount));
         }
 
         @Test
         void ignores_update_with_amount_above_upper_bound() {
-            Coins lowerBound = Coins.ofSatoshis(100);
-            LiquidityBounds initial = withUpperBound(lowerBound);
+            Coins upperBound = Coins.ofSatoshis(100);
+            LiquidityBounds initial = withUpperBound(upperBound);
             assertThat(initial.withUnavailableCoins(Coins.ofSatoshis(120))).isEmpty();
         }
 
