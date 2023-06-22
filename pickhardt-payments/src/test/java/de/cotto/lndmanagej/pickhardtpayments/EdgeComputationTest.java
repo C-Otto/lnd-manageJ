@@ -198,7 +198,7 @@ class EdgeComputationTest {
         when(channelService.getOpenChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         Coins knownLiquidity = Coins.ofSatoshis(4_567);
         when(balanceService.getAvailableLocalBalance(EDGE.channelId())).thenReturn(knownLiquidity);
-        when(balanceService.getAvailableRemoteBalance(EDGE.channelId())).thenReturn(Coins.ofSatoshis(401));
+        when(balanceService.getAvailableRemoteBalance(EDGE.channelId())).thenReturn(Coins.ofSatoshis(5_000));
 
         assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA).edges())
                 .contains(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, knownLiquidity));
@@ -214,7 +214,7 @@ class EdgeComputationTest {
         // as observed on 9 May 2023:
         // Reducing local balance (from x mSAT to 353999 mSAT): remote side does not have enough
         // funds (4222568 mSAT < 4223000 mSAT) to pay for non-dust HTLC in case of unilateral close.
-        when(balanceService.getAvailableRemoteBalance(channelId)).thenReturn(Coins.ofMilliSatoshis(4222999));
+        when(balanceService.getAvailableRemoteBalance(channelId)).thenReturn(Coins.ofMilliSatoshis(4_222_999));
         lenient().when(balanceService.getAvailableLocalBalance(channelId)).thenReturn(Coins.ofSatoshis(1_000_000));
 
         assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA).edges())
@@ -323,7 +323,7 @@ class EdgeComputationTest {
         Coins knownLiquidity = Coins.ofSatoshis(4_567);
         when(channelService.getOpenChannel(EDGE.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
         when(balanceService.getAvailableLocalBalance(EDGE.channelId())).thenReturn(knownLiquidity);
-        when(balanceService.getAvailableRemoteBalance(EDGE.channelId())).thenReturn(Coins.ofSatoshis(401));
+        when(balanceService.getAvailableRemoteBalance(EDGE.channelId())).thenReturn(Coins.ofSatoshis(5_000));
         assertThat(edgeComputation.getEdgeWithLiquidityInformation(EDGE))
                 .isEqualTo(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, knownLiquidity));
     }
