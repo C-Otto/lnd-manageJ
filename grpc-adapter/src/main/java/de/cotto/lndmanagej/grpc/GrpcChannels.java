@@ -51,7 +51,7 @@ public class GrpcChannels extends GrpcChannelsBase {
     public Set<PendingOpenChannel> getPendingOpenChannels() {
         Pubkey ownPubkey = grpcGetInfo.getPubkey();
         return grpcService.getPendingOpenChannels().stream()
-                .map(pendingOpenChannel -> toPendingOpenChannel(ownPubkey, pendingOpenChannel.getChannel()))
+                .map(pendingOpenChannel -> toPendingOpenChannel(pendingOpenChannel.getChannel(), ownPubkey))
                 .collect(toSet());
     }
 
@@ -118,7 +118,7 @@ public class GrpcChannels extends GrpcChannelsBase {
                 .collect(toSet());
     }
 
-    private PendingOpenChannel toPendingOpenChannel(Pubkey ownPubkey, PendingChannel pendingChannel) {
+    private PendingOpenChannel toPendingOpenChannel(PendingChannel pendingChannel, Pubkey ownPubkey) {
         return new PendingOpenChannel(
                 ChannelPoint.create(pendingChannel.getChannelPoint()),
                 Coins.ofSatoshis(pendingChannel.getCapacity()),
