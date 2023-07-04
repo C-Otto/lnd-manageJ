@@ -82,7 +82,8 @@ public class UiDataServiceImpl extends UiDataService {
                 pendingOpenChannel.remotePubkey(),
                 pendingOpenChannel.capacity().satoshis(),
                 pendingOpenChannel.isPrivate(),
-                pendingOpenChannel.openInitiator());
+                pendingOpenChannel.openInitiator()
+        );
     }
 
     @Override

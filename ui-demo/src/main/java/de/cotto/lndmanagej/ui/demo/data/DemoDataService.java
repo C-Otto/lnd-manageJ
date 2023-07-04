@@ -58,69 +58,80 @@ public class DemoDataService extends UiDataService {
             "c-otto.de",
             "027ce055380348d7812d2ae7745701c9f93e70c1adeb2657f053f91df4f2843c71",
             1_500,
-            19_998_500);
+            19_998_500
+    );
     public static final OpenChannelDto ACINQ = createOpenChannel(
             "799999x456x2",
             "ACINQ",
             "03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f",
             500_100,
-            2_499_900);
+            2_499_900
+    );
     public static final OpenChannelDto TRY_BITCOIN = createOpenChannel(
             "799999x456x3",
             "try-bitcoin.com",
             "03de6bc7ed1badd0827b99c5b1ad2865322815e761572717a536f0a482864c4427",
             5_700_000,
-            14_300_000);
+            14_300_000
+    );
     public static final OpenChannelDto KRAKEN = createOpenChannel(
             "799999x456x4",
             "Kraken 🐙⚡",
             "02f1a8c87607f415c8f22c00593002775941dea48869ce23096af27b0cfdcc0b69",
             5_050_000,
-            8_450_000);
+            8_450_000
+    );
     public static final OpenChannelDto POCKET = createOpenChannel(
             "799999x456x5",
             "PocketBitcoin.com",
             "02765a281bd188e80a89e6ea5092dcb8ebaaa5c5da341e64327e3fadbadcbc686c",
             10_500_900,
-            11_499_100);
+            11_499_100
+    );
     public static final OpenChannelDto B_CASH_IS_TRASH = createOpenChannel(
             "799999x456x6",
             "BCash_Is_Trash",
             "0298f6074a454a1f5345cb2a7c6f9fce206cd0bf675d177cdbf0ca7508dd28852f",
             11_100_600,
-            8_899_400);
+            8_899_400
+    );
     public static final OpenChannelDto WOS = createOpenChannel(
             "799999x456x7",
             "WalletOfSatoshi.com",
             "035e4ff418fc8b5554c5d9eea66396c227bd429a3251c8cbc711002ba215bfc226",
             8_500_000,
-            3_500_000);
+            3_500_000
+    );
     public static final OpenChannelDto ACINQ2 = createOpenChannel(
             "799999x456x8",
             "ACINQ",
             "03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f",
             11_899_100,
-            1_600_900);
+            1_600_900
+    );
     public static final OpenChannelDto B_CASH_IS_TRASH2 = createOpenChannel(
             "799999x456x9",
             "BCash_Is_Trash",
             "0298f6074a454a1f5345cb2a7c6f9fce206cd0bf675d177cdbf0ca7508dd28852f",
             18_099_100,
-            900_900);
+            900_900
+    );
 
     public static final PendingOpenChannelDto PENDING_OPEN_CHANNEL = new PendingOpenChannelDto(
             TRY_BITCOIN.remoteAlias(),
             TRY_BITCOIN.remotePubkey(),
             1_000_000,
             false,
-            OpenInitiator.LOCAL);
+            OpenInitiator.LOCAL
+    );
 
     public static final PendingOpenChannelDto PENDING_OPEN_CHANNEL_2 = new PendingOpenChannelDto(
             C_OTTO.remoteAlias(),
             C_OTTO.remotePubkey(),
             2_000_000,
             true,
-            OpenInitiator.REMOTE);
+            OpenInitiator.REMOTE
+    );
 
     public static final ChannelId CLOSED_CHANNEL = ChannelId.fromCompactForm("712345x124x1");
     public static final RatingDto RATING = RatingDto.fromModel(ChannelRatingFixtures.ratingWithValue(700));

@@ -13,6 +13,7 @@ public class PendingOpenChannelDtoFixture {
             PUBKEY_2,
             CAPACITY_SAT,
             false,
-            OpenInitiator.LOCAL);
+            OpenInitiator.LOCAL
+    );
 
 }
