@@ -35,4 +35,15 @@ class DashboardWarningDtoTest {
     void getNumberOfWarnings() {
         assertThat(DASHBOARD_WARNING.numberOfWarningItems()).isEqualTo(2);
     }
+
+    @Test
+    void node_without_alias_is_shown_with_pubkey() {
+        var nodeWithoutAlias = new DashboardWarningDto(
+                "",
+                PUBKEY,
+                List.of("This is a node warning."),
+                List.of(CHANNEL_WARNING_DTO)
+        );
+        assertThat(nodeWithoutAlias.alias()).isEqualTo(PUBKEY.toString());
+    }
 }
