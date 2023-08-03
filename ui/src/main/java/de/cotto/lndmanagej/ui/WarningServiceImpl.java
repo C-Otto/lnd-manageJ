@@ -2,26 +2,19 @@ package de.cotto.lndmanagej.ui;
 
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
-import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.warnings.ChannelWarnings;
-import de.cotto.lndmanagej.model.warnings.NodeWarnings;
 import de.cotto.lndmanagej.service.ChannelWarningsService;
 import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.NodeWarningsService;
 import de.cotto.lndmanagej.ui.dto.warning.ChannelWarningDto;
 import de.cotto.lndmanagej.ui.dto.warning.DashboardWarningDto;
+import de.cotto.lndmanagej.ui.dto.warning.DashboardWarnings;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static java.util.Map.Entry.comparingByKey;
-import static java.util.stream.Collectors.toCollection;
 
 @Component
 public class WarningServiceImpl extends WarningService {
@@ -43,45 +36,37 @@ public class WarningServiceImpl extends WarningService {
 
     @Override
     public List<DashboardWarningDto> getWarnings() {
-        Map<Node, NodeWarnings> nodeWarnings = nodeWarningsService.getNodeWarnings();
-        List<DashboardWarningDto> dashboardWarnings = nodeWarnings.entrySet().stream()
-                .sorted(comparingByKey())
-                .map(entry -> createDashboardWarning(entry.getKey(), entry.getValue()))
-                .collect(toCollection(ArrayList::new));
-        Map<LocalOpenChannel, ChannelWarnings> channelWarnings = channelWarningsService.getChannelWarnings();
-        channelWarnings.entrySet().stream()
-                .sorted(Comparator.comparing(e -> e.getKey().getId()))
-                .forEach(entry -> addChannelWarnings(dashboardWarnings, entry.getKey(), entry.getValue()));
+        List<DashboardWarningDto> warnings = new ArrayList<>();
+        warnings.addAll(getNodeDashboardWarnings());
+        warnings.addAll(getChannelDashboardWarnings());
 
-        return dashboardWarnings;
+        return merge(warnings);
     }
 
-    private void addChannelWarnings(
-            List<DashboardWarningDto> dashboardWarnings,
-            LocalOpenChannel channel,
-            ChannelWarnings channelWarning) {
+    private List<DashboardWarningDto> getNodeDashboardWarnings() {
+        return nodeWarningsService.getNodeWarnings().entrySet().stream()
+                .map(entry -> DashboardWarningDto.forNodeWarnings(entry.getKey(), entry.getValue().descriptions()))
+                .toList();
+    }
+
+    private List<DashboardWarningDto> getChannelDashboardWarnings() {
+        return channelWarningsService.getChannelWarnings().entrySet().stream()
+                .map(entry -> createDashboardWarning(entry.getKey(), entry.getValue()))
+                .toList();
+    }
+
+    private DashboardWarningDto createDashboardWarning(LocalOpenChannel channel, ChannelWarnings channelWarning) {
         Pubkey pubkey = channel.getRemotePubkey();
         ChannelId channelId = channel.getId();
-        Optional<DashboardWarningDto> dashboardWarning = dashboardWarnings.stream()
-                .filter(warning -> warning.pubkey().equals(pubkey))
-                .findFirst();
         List<ChannelWarningDto> warnings = channelWarning.warnings().stream()
-                .map(description -> new ChannelWarningDto(channelId, description.description()))
+                .map(warning -> new ChannelWarningDto(channelId, warning.description()))
                 .collect(Collectors.toList());
-        if (dashboardWarning.isPresent()) {
-            dashboardWarning.get().channelWarnings().addAll(warnings);
-        } else {
-            dashboardWarnings.add(new DashboardWarningDto(
-                    nodeService.getAlias(pubkey), pubkey, new ArrayList<>(), warnings));
-        }
+        return DashboardWarningDto.forChannelWarnings(nodeService.getAlias(pubkey), pubkey, warnings);
     }
 
-    private DashboardWarningDto createDashboardWarning(Node node, NodeWarnings warnings) {
-        return new DashboardWarningDto(
-                node.alias(),
-                node.pubkey(),
-                new ArrayList<>(warnings.descriptions()),
-                new ArrayList<>()
-        );
+    private List<DashboardWarningDto> merge(List<DashboardWarningDto> warnings) {
+        DashboardWarnings dashboardWarnings = new DashboardWarnings();
+        warnings.forEach(dashboardWarnings::add);
+        return dashboardWarnings.getAsList();
     }
 }

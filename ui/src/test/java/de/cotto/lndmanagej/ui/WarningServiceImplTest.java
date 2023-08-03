@@ -107,6 +107,6 @@ class WarningServiceImplTest {
                 THREE_NODE_WARNINGS,
                 List.of(CHANNEL_WARNING_DTO)
         );
-        assertThat(warningService.getWarnings()).containsExactly(nodeWarning, anotherNodeWarning);
+        assertThat(warningService.getWarnings()).containsExactlyInAnyOrder(nodeWarning, anotherNodeWarning);
     }
 }
