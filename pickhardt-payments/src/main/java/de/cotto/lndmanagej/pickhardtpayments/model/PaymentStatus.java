@@ -5,16 +5,17 @@ import de.cotto.lndmanagej.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.model.FailureCode;
 import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.model.Route;
-import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import reactor.core.CoreSubscriber;
+import reactor.core.publisher.Flux;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public class PaymentStatus implements Publisher<InstantWithString> {
+public class PaymentStatus extends Flux<InstantWithString> {
     private boolean success;
     private boolean failure;
     private int numberOfAttemptedRoutes;
@@ -22,6 +23,7 @@ public class PaymentStatus implements Publisher<InstantWithString> {
     private final List<Subscriber<? super InstantWithString>> subscribers;
 
     public PaymentStatus() {
+        super();
         subscribers = Collections.synchronizedList(new ArrayList<>());
         messages = new ArrayList<>();
     }
@@ -127,7 +129,7 @@ public class PaymentStatus implements Publisher<InstantWithString> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super InstantWithString> subscriber) {
+    public void subscribe(CoreSubscriber<? super InstantWithString> subscriber) {
         subscriber.onSubscribe(new PaymentStatusSubscription(subscriber));
         synchronized (this) {
             messages.forEach(subscriber::onNext);

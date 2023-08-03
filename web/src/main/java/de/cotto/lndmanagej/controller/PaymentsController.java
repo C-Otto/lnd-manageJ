@@ -133,7 +133,7 @@ public class PaymentsController {
     private ResponseEntity<Flux<String>> toStream(PaymentStatus paymentStatus) {
         return ResponseEntity.ok()
                 .contentType(APPLICATION_NDJSON)
-                .body(Flux.from(paymentStatus).map(this::asString));
+                .body(paymentStatus.map(this::asString));
     }
 
     private String asString(InstantWithString instantWithString) {
