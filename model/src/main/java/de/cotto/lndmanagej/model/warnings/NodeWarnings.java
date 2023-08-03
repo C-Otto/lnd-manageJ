@@ -14,4 +14,8 @@ public record NodeWarnings(Set<NodeWarning> warnings) {
     public Set<String> descriptions() {
         return warnings.stream().map(NodeWarning::description).collect(Collectors.toSet());
     }
+
+    public boolean hasWarnings() {
+        return !warnings.isEmpty();
+    }
 }

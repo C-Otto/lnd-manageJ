@@ -45,12 +45,8 @@ public class NodeWarningsService {
                 .map(LocalChannel::getRemotePubkey)
                 .distinct()
                 .map(pubkey -> new AbstractMap.SimpleEntry<>(pubkey, getNodeWarnings(pubkey)))
-                .filter(this::hasWarnings)
+                .filter(entry -> entry.getValue().hasWarnings())
                 .map(entry -> new AbstractMap.SimpleEntry<>(nodeService.getNode(entry.getKey()), entry.getValue()))
                 .collect(toMap(Entry::getKey, Entry::getValue));
-    }
-
-    private boolean hasWarnings(Entry<?, NodeWarnings> entry) {
-        return !entry.getValue().warnings().isEmpty();
     }
 }

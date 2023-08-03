@@ -33,4 +33,14 @@ class NodeWarningsTest {
     void none() {
         assertThat(NodeWarnings.NONE).isEqualTo(new NodeWarnings(Set.of()));
     }
+
+    @Test
+    void hasWarnings_empty() {
+        assertThat(NodeWarnings.NONE.hasWarnings()).isFalse();
+    }
+
+    @Test
+    void hasWarnings_several_warnings() {
+        assertThat(NODE_WARNINGS.hasWarnings()).isTrue();
+    }
 }
