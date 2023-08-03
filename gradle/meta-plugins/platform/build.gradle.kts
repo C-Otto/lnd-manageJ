@@ -14,6 +14,7 @@ dependencies {
 
     api(platform("org.springframework.cloud:spring-cloud-dependencies:2022.0.3"))
     api(platform("org.springframework.boot:spring-boot-dependencies:$springBootVersion"))
+    api("io.projectreactor:reactor-core")
 
     constraints {
         api("com.google.ortools:ortools-java:9.6.2534")

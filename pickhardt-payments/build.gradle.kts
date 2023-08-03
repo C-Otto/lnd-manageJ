@@ -10,7 +10,6 @@ dependencies {
     implementation(project(":grpc-adapter"))
     implementation("com.google.ortools:ortools-java")
     implementation("org.eclipse.collections:eclipse-collections")
-    implementation("org.reactivestreams:reactive-streams")
     testImplementation(testFixtures(project(":model")))
     testImplementation("org.awaitility:awaitility")
     integrationTestImplementation(project(":backend"))
