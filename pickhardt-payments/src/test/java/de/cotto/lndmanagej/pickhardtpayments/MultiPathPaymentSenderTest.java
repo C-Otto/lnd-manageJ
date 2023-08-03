@@ -1,9 +1,9 @@
 package de.cotto.lndmanagej.pickhardtpayments;
 
 import de.cotto.lndmanagej.grpc.GrpcPayments;
+import de.cotto.lndmanagej.pickhardtpayments.model.InstantWithString;
 import de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions;
 import de.cotto.lndmanagej.pickhardtpayments.model.PaymentStatus;
-import de.cotto.lndmanagej.pickhardtpayments.model.PaymentStatus.InstantWithString;
 import de.cotto.lndmanagej.service.RouteHintService;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
@@ -14,6 +14,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
+import static de.cotto.lndmanagej.ReactiveStreamReader.readAll;
+import static de.cotto.lndmanagej.ReactiveStreamReader.readMessages;
 import static de.cotto.lndmanagej.model.DecodedPaymentRequestFixtures.DECODED_PAYMENT_REQUEST;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -39,7 +41,7 @@ class MultiPathPaymentSenderTest {
         PaymentStatus paymentStatus = multiPathPaymentSender.payPaymentRequest("foo", feeRateWeight(123));
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(paymentStatus.isFailure()).isTrue();
-        softly.assertThat(paymentStatus.getMessages().stream().map(InstantWithString::string))
+        softly.assertThat(readAll(paymentStatus)).map(InstantWithString::string)
                 .contains("Unable to decode payment request");
         softly.assertAll();
         verifyNoInteractions(paymentLoop);
@@ -67,7 +69,7 @@ class MultiPathPaymentSenderTest {
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(paymentStatus.isSuccess()).isFalse();
         softly.assertThat(paymentStatus.isFailure()).isFalse();
-        softly.assertThat(paymentStatus.getMessages().stream().map(InstantWithString::string))
+        softly.assertThat(readMessages(paymentStatus, 1)).map(InstantWithString::string)
                 .contains("Initializing payment " + DECODED_PAYMENT_REQUEST.paymentHash());
         softly.assertAll();
     }
@@ -83,7 +85,7 @@ class MultiPathPaymentSenderTest {
                 paymentOptions
         );
         verify(paymentLoop).start(DECODED_PAYMENT_REQUEST, paymentOptions, paymentStatus);
-        assertThat(paymentStatus.getMessages().stream().map(InstantWithString::string))
+        assertThat(readMessages(paymentStatus, 2)).map(InstantWithString::string)
                 .contains("Payment Options: " + paymentOptions);
     }
 

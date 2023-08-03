@@ -12,7 +12,10 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.Executors;
 
+import static de.cotto.lndmanagej.ReactiveStreamReader.readAll;
+import static de.cotto.lndmanagej.ReactiveStreamReader.readMessages;
 import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE;
 import static de.cotto.lndmanagej.model.RouteFixtures.ROUTE;
 import static de.cotto.lndmanagej.model.RouteFixtures.ROUTE_2;
@@ -21,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PaymentStatusTest {
     private static final HexString PAYMENT_HASH = new HexString("AABBCC001122");
     private static final String ROUTE_PREFIX = "Sending to route #1: 100: ";
-    private final PaymentStatus paymentStatus = new PaymentStatus(PAYMENT_HASH);
+    private final PaymentStatus paymentStatus = PaymentStatus.createFor(PAYMENT_HASH);
 
     @Nested
     class Initial {
@@ -41,8 +44,9 @@ class PaymentStatusTest {
         }
 
         @Test
-        void getMessages() {
-            assertThat(paymentStatus.getMessages().stream().map(PaymentStatus.InstantWithString::string))
+        void messages() {
+            assertThat(readMessages(paymentStatus, 1))
+                    .map(InstantWithString::string)
                     .containsExactly("Initializing payment " + PAYMENT_HASH);
         }
 
@@ -70,46 +74,47 @@ class PaymentStatusTest {
         @Test
         void adds_message() {
             paymentStatus.sending(ROUTE);
-            assertThat(paymentStatus.getMessages().stream().map(PaymentStatus.InstantWithString::string)).contains(
-                    ROUTE_PREFIX +
+            assertThat(readMessages(paymentStatus, 2))
+                    .map(InstantWithString::string)
+                    .contains(ROUTE_PREFIX +
                             "[712345x123x1 (cap 21,000,000), " +
                             "799999x456x3 (cap 21,000,000), " +
                             "799999x456x5 (cap 21,000,000)], " +
-                            "400ppm, 600ppm with first hop, probability 0.9999857143544217"
-            );
+                            "400ppm, 600ppm with first hop, probability 0.9999857143544217");
         }
 
         @Test
         void adds_message_with_min() {
             sendSingleEdge(EdgeWithLiquidityInformation.forLowerBound(EDGE, Coins.ofSatoshis(10)));
-            assertThat(paymentStatus.getMessages().stream().map(PaymentStatus.InstantWithString::string)).contains(
-                    ROUTE_PREFIX + "[712345x123x1 (min 10, cap 21,000,000)], " +
-                            "0ppm, 200ppm with first hop, probability 0.9999957142838776"
-            );
+            assertThat(readMessages(paymentStatus, 2))
+                    .map(InstantWithString::string)
+                    .contains(ROUTE_PREFIX + "[712345x123x1 (min 10, cap 21,000,000)], " +
+                            "0ppm, 200ppm with first hop, probability 0.9999957142838776");
         }
 
         @Test
         void adds_message_with_max() {
             sendSingleEdge(EdgeWithLiquidityInformation.forUpperBound(EDGE, Coins.ofSatoshis(11)));
-            assertThat(paymentStatus.getMessages().stream().map(PaymentStatus.InstantWithString::string)).contains(
-                    ROUTE_PREFIX + "[712345x123x1 (max 11, cap 21,000,000)], " +
-                            "0ppm, 200ppm with first hop, probability 0.0"
-            );
+            assertThat(readMessages(paymentStatus, 2))
+                    .map(InstantWithString::string)
+                    .contains(ROUTE_PREFIX + "[712345x123x1 (max 11, cap 21,000,000)], " +
+                            "0ppm, 200ppm with first hop, probability 0.0");
         }
 
         @Test
         void adds_message_with_known() {
             sendSingleEdge(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, Coins.ofSatoshis(12)));
-            assertThat(paymentStatus.getMessages().stream().map(PaymentStatus.InstantWithString::string)).contains(
-                    ROUTE_PREFIX + "[712345x123x1 (known 12)], 0ppm, 200ppm with first hop, probability 0.0"
-            );
+            assertThat(readMessages(paymentStatus, 2))
+                    .map(InstantWithString::string)
+                    .contains(ROUTE_PREFIX + "[712345x123x1 (known 12)], 0ppm, 200ppm with first hop, probability 0.0");
         }
 
         @Test
         void adds_message_for_second_route() {
             paymentStatus.sending(ROUTE);
             paymentStatus.sending(ROUTE_2);
-            assertThat(paymentStatus.getMessages().stream().map(PaymentStatus.InstantWithString::string))
+            assertThat(readMessages(paymentStatus, 3))
+                    .map(InstantWithString::string)
                     .contains("Sending to route #2: 200: " +
                             "[799999x456x2 (cap 21,000,000), " +
                             "799999x456x3 (cap 21,000,000)], " +
@@ -124,7 +129,8 @@ class PaymentStatusTest {
     @Test
     void info() {
         paymentStatus.info("hallo!");
-        assertThat(paymentStatus.getMessages().stream().map(PaymentStatus.InstantWithString::string))
+        assertThat(readMessages(paymentStatus, 2))
+                .map(InstantWithString::string)
                 .contains("hallo!");
     }
 
@@ -133,7 +139,8 @@ class PaymentStatusTest {
         @Test
         void adds_message() {
             paymentStatus.failed("hallo :(");
-            assertThat(paymentStatus.getMessages().stream().map(PaymentStatus.InstantWithString::string))
+            assertThat(readMessages(paymentStatus, 2))
+                    .map(InstantWithString::string)
                     .contains("hallo :(");
         }
 
@@ -146,7 +153,8 @@ class PaymentStatusTest {
         @Test
         void marks_as_failed_from_failure_code() {
             paymentStatus.failed(FailureCode.PERMANENT_CHANNEL_FAILURE);
-            assertThat(paymentStatus.getMessages().stream().map(PaymentStatus.InstantWithString::string))
+            assertThat(readMessages(paymentStatus, 2))
+                    .map(InstantWithString::string)
                     .contains("Failed with PERMANENT_CHANNEL_FAILURE");
         }
 
@@ -154,6 +162,20 @@ class PaymentStatusTest {
         void message_from_failure_code() {
             paymentStatus.failed(FailureCode.PERMANENT_CHANNEL_FAILURE);
             assertFailure();
+        }
+
+        @Test
+        @SuppressWarnings("FutureReturnValueIgnored")
+        void completes_stream_from_string() {
+            Executors.newFixedThreadPool(1).submit(() -> paymentStatus.failed("failure"));
+            assertThat(readAll(paymentStatus)).hasSize(2);
+        }
+
+        @Test
+        @SuppressWarnings("FutureReturnValueIgnored")
+        void completes_stream_from_code() {
+            Executors.newFixedThreadPool(1).submit(() -> paymentStatus.failed(FailureCode.PERMANENT_CHANNEL_FAILURE));
+            assertThat(readAll(paymentStatus)).hasSize(2);
         }
 
         private void assertFailure() {
@@ -170,7 +192,8 @@ class PaymentStatusTest {
         @Test
         void adds_message() {
             paymentStatus.settled();
-            assertThat(paymentStatus.getMessages().stream().map(PaymentStatus.InstantWithString::string))
+            assertThat(readMessages(paymentStatus, 2))
+                    .map(InstantWithString::string)
                     .contains("Settled");
         }
 
@@ -183,6 +206,13 @@ class PaymentStatusTest {
             softly.assertThat(paymentStatus.isPending()).isFalse();
             softly.assertAll();
         }
+
+        @Test
+        @SuppressWarnings("FutureReturnValueIgnored")
+        void completes_stream() {
+            Executors.newFixedThreadPool(1).submit(paymentStatus::settled);
+            assertThat(readAll(paymentStatus)).hasSize(2);
+        }
     }
 
     @Nested
@@ -190,13 +220,13 @@ class PaymentStatusTest {
     class InstantWithStringTest {
         @Test
         void string() {
-            PaymentStatus.InstantWithString instantWithString = new PaymentStatus.InstantWithString("x");
+            InstantWithString instantWithString = new InstantWithString("x");
             assertThat(instantWithString.string()).isEqualTo("x");
         }
 
         @Test
         void just_string_adds_timestamp() {
-            PaymentStatus.InstantWithString instantWithString = new PaymentStatus.InstantWithString("x");
+            InstantWithString instantWithString = new InstantWithString("x");
             assertThat(instantWithString.instant())
                     .isBetween(Instant.now().minusSeconds(1), Instant.now());
         }

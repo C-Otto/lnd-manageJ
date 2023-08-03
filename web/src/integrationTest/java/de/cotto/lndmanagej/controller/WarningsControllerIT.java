@@ -8,10 +8,10 @@ import de.cotto.lndmanagej.service.ChannelWarningsService;
 import de.cotto.lndmanagej.service.NodeWarningsService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.Map;
 
@@ -31,10 +31,8 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-@WebMvcTest(controllers = WarningsController.class)
+@WebFluxTest(WarningsController.class)
 @Import(ChannelIdParser.class)
 class WarningsControllerIT {
     private static final String NODE_PREFIX = "/api/node/" + PUBKEY;
@@ -43,7 +41,7 @@ class WarningsControllerIT {
     private static final String WARNINGS_PATH = "$.warnings";
 
     @Autowired
-    private MockMvc mockMvc;
+    private WebTestClient webTestClient;
 
     @MockBean
     @SuppressWarnings("unused")
@@ -56,70 +54,70 @@ class WarningsControllerIT {
     private ChannelWarningsService channelWarningsService;
 
     @Test
-    void getWarningsForNode() throws Exception {
+    void getWarningsForNode() {
         when(nodeWarningsService.getNodeWarnings(PUBKEY)).thenReturn(NODE_WARNINGS);
-        mockMvc.perform(get(NODE_PREFIX + WARNINGS))
-                .andExpect(jsonPath(WARNINGS_PATH, containsInAnyOrder(
+        webTestClient.get().uri(NODE_PREFIX + WARNINGS).exchange().expectBody()
+                .jsonPath(WARNINGS_PATH).value(containsInAnyOrder(
                         "No flow in the past 16 days",
                         "Node has been online 51% in the past 14 days",
                         "Node changed between online and offline 123 times in the past 7 days"
-                )));
+                ));
     }
 
     @Test
-    void getWarningsForNode_empty() throws Exception {
+    void getWarningsForNode_empty() {
         when(nodeWarningsService.getNodeWarnings(PUBKEY)).thenReturn(NodeWarnings.NONE);
-        mockMvc.perform(get(NODE_PREFIX + WARNINGS))
-                .andExpect(jsonPath(WARNINGS_PATH, hasSize(0)));
+        webTestClient.get().uri(NODE_PREFIX + WARNINGS).exchange().expectBody()
+                .jsonPath(WARNINGS_PATH).value(hasSize(0));
     }
 
     @Test
-    void getWarningsForChannel() throws Exception {
+    void getWarningsForChannel() {
         when(channelWarningsService.getChannelWarnings(CHANNEL_ID)).thenReturn(CHANNEL_WARNINGS);
-        mockMvc.perform(get(CHANNEL_PREFIX + WARNINGS))
-                .andExpect(jsonPath(WARNINGS_PATH, containsInAnyOrder(
+        webTestClient.get().uri(CHANNEL_PREFIX + WARNINGS).exchange().expectBody()
+                .jsonPath(WARNINGS_PATH).value(containsInAnyOrder(
                         "Channel has accumulated 101,000 updates"
-                )));
+                ));
     }
 
     @Test
-    void getWarningsForChannel_empty() throws Exception {
+    void getWarningsForChannel_empty() {
         when(channelWarningsService.getChannelWarnings(CHANNEL_ID)).thenReturn(ChannelWarnings.NONE);
-        mockMvc.perform(get(CHANNEL_PREFIX + WARNINGS))
-                .andExpect(jsonPath(WARNINGS_PATH, hasSize(0)));
+        webTestClient.get().uri(CHANNEL_PREFIX + WARNINGS).exchange().expectBody()
+                .jsonPath(WARNINGS_PATH).value(hasSize(0));
     }
 
     @Test
-    void getWarnings_empty() throws Exception {
+    void getWarnings_empty() {
         when(nodeWarningsService.getNodeWarnings()).thenReturn(Map.of());
-        mockMvc.perform(get("/api" + WARNINGS))
-                .andExpect(jsonPath("$.nodesWithWarnings", hasSize(0)))
-                .andExpect(jsonPath("$.channelsWithWarnings", hasSize(0)));
+        webTestClient.get().uri("/api" + WARNINGS).exchange().expectBody()
+                .jsonPath("$.nodesWithWarnings").value(hasSize(0))
+                .jsonPath("$.channelsWithWarnings").value(hasSize(0));
     }
 
     @Test
-    void getWarnings() throws Exception {
+    void getWarnings() {
         when(nodeWarningsService.getNodeWarnings())
                 .thenReturn(Map.of(NODE_2, NODE_WARNINGS, NODE_3, NODE_WARNINGS_2));
         when(channelWarningsService.getChannelWarnings())
                 .thenReturn(Map.of(LOCAL_OPEN_CHANNEL, CHANNEL_WARNINGS));
-        mockMvc.perform(get("/api" + WARNINGS))
-                .andExpect(jsonPath("$.nodesWithWarnings[0].alias", is(ALIAS_2)))
-                .andExpect(jsonPath("$.nodesWithWarnings[0].pubkey", is(PUBKEY_2.toString())))
-                .andExpect(jsonPath("$.nodesWithWarnings[0].warnings", containsInAnyOrder(
+        webTestClient.get().uri("/api" + WARNINGS).exchange().expectBody()
+                .jsonPath("$.nodesWithWarnings[0].alias").value(is(ALIAS_2))
+                .jsonPath("$.nodesWithWarnings[0].pubkey").value(is(PUBKEY_2.toString()))
+                .jsonPath("$.nodesWithWarnings[0].warnings").value(containsInAnyOrder(
                         "No flow in the past 16 days",
                         "Node has been online 51% in the past 14 days",
                         "Node changed between online and offline 123 times in the past 7 days"
-                )))
-                .andExpect(jsonPath("$.nodesWithWarnings[1].alias", is(ALIAS_3)))
-                .andExpect(jsonPath("$.nodesWithWarnings[1].pubkey", is(PUBKEY_3.toString())))
-                .andExpect(jsonPath("$.nodesWithWarnings[1].warnings", containsInAnyOrder(
+                ))
+                .jsonPath("$.nodesWithWarnings[1].alias").value(is(ALIAS_3))
+                .jsonPath("$.nodesWithWarnings[1].pubkey").value(is(PUBKEY_3.toString()))
+                .jsonPath("$.nodesWithWarnings[1].warnings").value(containsInAnyOrder(
                         "Node has been online 1% in the past 21 days",
                         "Node changed between online and offline 99 times in the past 14 days"
-                )))
-                .andExpect(jsonPath("$.channelsWithWarnings[0].channelId", is(CHANNEL_ID.toString())))
-                .andExpect(jsonPath("$.channelsWithWarnings[0].warnings", containsInAnyOrder(
+                ))
+                .jsonPath("$.channelsWithWarnings[0].channelId").value(is(CHANNEL_ID.toString()))
+                .jsonPath("$.channelsWithWarnings[0].warnings").value(containsInAnyOrder(
                         "Channel has accumulated 101,000 updates"
-                )));
+                ));
     }
 }

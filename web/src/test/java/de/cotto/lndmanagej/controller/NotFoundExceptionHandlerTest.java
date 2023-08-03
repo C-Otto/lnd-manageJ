@@ -17,7 +17,7 @@ class NotFoundExceptionHandlerTest {
 
     @Test
     void mapsToNotFound() {
-        assertThat(exceptionHandler.handleException(EXCEPTION).getStatusCode())
+        assertThat(exceptionHandler.notFoundException(EXCEPTION).getStatusCode())
                 .isEqualTo(HttpStatus.NOT_FOUND);
     }
 }

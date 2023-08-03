@@ -3,7 +3,6 @@ package de.cotto.lndmanagej.controller;
 import de.cotto.lndmanagej.controller.dto.MultiPathPaymentDto;
 import de.cotto.lndmanagej.controller.dto.PaymentOptionsDto;
 import de.cotto.lndmanagej.model.Coins;
-import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSender;
 import de.cotto.lndmanagej.pickhardtpayments.MultiPathPaymentSplitter;
 import de.cotto.lndmanagej.pickhardtpayments.TopUpService;
@@ -18,7 +17,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
@@ -27,7 +25,6 @@ import static de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPaymentFixtur
 import static de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions.DEFAULT_PAYMENT_OPTIONS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -65,20 +62,17 @@ class PaymentsControllerTest {
     private MultiPathPaymentSender multiPathPaymentSender;
 
     @Mock
-    private PaymentStatusStream paymentStatusStream;
-
-    @Mock
     private GraphService graphService;
 
     @Mock
     private TopUpService topUpService;
 
-    private final PaymentStatus paymentStatus = new PaymentStatus(HexString.EMPTY);
+    private final PaymentStatus paymentStatus = new PaymentStatus();
 
     @BeforeEach
     void setUp() {
-        lenient().when(paymentStatusStream.getFor(any()))
-                .thenReturn(outputStream -> outputStream.write(STREAM_RESPONSE.getBytes(StandardCharsets.UTF_8)));
+        paymentStatus.info(STREAM_RESPONSE);
+        paymentStatus.settled();
     }
 
     @Test
@@ -151,6 +145,7 @@ class PaymentsControllerTest {
 
     @Test
     void topUp() {
+        when(topUpService.topUp(any(), any(), any())).thenReturn(paymentStatus);
         PaymentOptions emptyPaymentOptions = new PaymentOptions(
                 Optional.empty(),
                 Optional.empty(),
@@ -164,6 +159,7 @@ class PaymentsControllerTest {
 
     @Test
     void topUp_with_payment_options() {
+        when(topUpService.topUp(any(), any(), any())).thenReturn(paymentStatus);
         assertThat(controller.topUp(PUBKEY, 123, PAYMENT_OPTIONS_DTO).getStatusCode()).isEqualTo(HttpStatus.OK);
         verify(topUpService).topUp(PUBKEY, Coins.ofSatoshis(123), PAYMENT_OPTIONS);
     }

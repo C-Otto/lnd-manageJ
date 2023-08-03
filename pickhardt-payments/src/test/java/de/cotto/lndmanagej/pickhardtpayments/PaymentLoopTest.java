@@ -9,10 +9,10 @@ import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.FailureCode;
 import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.model.Route;
+import de.cotto.lndmanagej.pickhardtpayments.model.InstantWithString;
 import de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPayment;
 import de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions;
 import de.cotto.lndmanagej.pickhardtpayments.model.PaymentStatus;
-import de.cotto.lndmanagej.pickhardtpayments.model.PaymentStatus.InstantWithString;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +25,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static de.cotto.lndmanagej.ReactiveStreamReader.readAll;
+import static de.cotto.lndmanagej.ReactiveStreamReader.readMessages;
 import static de.cotto.lndmanagej.configuration.TopUpConfigurationSettings.MAX_RETRIES_AFTER_FAILURE;
 import static de.cotto.lndmanagej.configuration.TopUpConfigurationSettings.SLEEP_AFTER_FAILURE_MILLISECONDS;
 import static de.cotto.lndmanagej.model.DecodedPaymentRequestFixtures.DECODED_PAYMENT_REQUEST;
@@ -89,7 +91,7 @@ class PaymentLoopTest {
         lenient().when(configurationService.getIntegerValue(MAX_RETRIES_AFTER_FAILURE))
                 .thenReturn(Optional.of(0));
         lenient().when(grpcGetInfo.getPubkey()).thenReturn(PUBKEY_4);
-        paymentStatus = new PaymentStatus(PAYMENT_HASH);
+        paymentStatus = PaymentStatus.createFor(PAYMENT_HASH);
     }
 
     @Test
@@ -100,7 +102,7 @@ class PaymentLoopTest {
 
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(paymentStatus.isFailure()).isTrue();
-        softly.assertThat(paymentStatus.getMessages().stream().map(InstantWithString::string))
+        softly.assertThat(readAll(paymentStatus)).map(InstantWithString::string)
                 .contains("Unable to find route (trying to send 123)");
         softly.assertAll();
         verify(grpcSendToRoute, never()).sendToRoute(any(), any(), any());
@@ -116,7 +118,7 @@ class PaymentLoopTest {
         verify(multiPathPaymentSplitter, times(100)).getMultiPathPaymentTo(any(), any(), any(), anyInt());
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(paymentStatus.isFailure()).isTrue();
-        softly.assertThat(paymentStatus.getMessages().stream().map(InstantWithString::string))
+        softly.assertThat(readAll(paymentStatus)).map(InstantWithString::string)
                 .contains("Failing after 100 loop iterations.");
         softly.assertAll();
         verify(grpcSendToRoute).forceFailureForPayment(DECODED_PAYMENT_REQUEST);
@@ -149,7 +151,7 @@ class PaymentLoopTest {
 
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(paymentStatus.isFailure()).isFalse();
-        softly.assertThat(paymentStatus.getMessages().stream().map(InstantWithString::string))
+        softly.assertThat(readAll(paymentStatus)).map(InstantWithString::string)
                 .contains("Trying again...");
         softly.assertAll();
     }
@@ -178,7 +180,7 @@ class PaymentLoopTest {
         paymentLoop.start(DECODED_PAYMENT_REQUEST, PAYMENT_OPTIONS, paymentStatus);
 
         assertThat(paymentStatus.isFailure()).isTrue();
-        assertThat(paymentStatus.getMessages().stream().map(InstantWithString::string))
+        assertThat(readAll(paymentStatus)).map(InstantWithString::string)
                 .contains("Unable to find route (trying to send 123): something");
         verify(grpcSendToRoute, never()).sendToRoute(any(), any(), any());
         verify(grpcSendToRoute).forceFailureForPayment(any());
@@ -221,7 +223,7 @@ class PaymentLoopTest {
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(paymentStatus.isSuccess()).isTrue();
         softly.assertThat(paymentStatus.getNumberOfAttemptedRoutes()).isEqualTo(MULTI_PATH_PAYMENT.routes().size());
-        softly.assertThat(paymentStatus.getMessages().stream().map(InstantWithString::string)).containsExactly(
+        softly.assertThat(readAll(paymentStatus)).map(InstantWithString::string).containsExactly(
                 "Initializing payment " + PAYMENT_HASH,
                 "#1: Sending 123 (0.0% = 0 in flight)",
                 "Sending to route #1: " + MPP_1_ROUTE_1,
@@ -285,7 +287,8 @@ class PaymentLoopTest {
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(paymentStatus.isSuccess()).isTrue();
         softly.assertThat(paymentStatus.getNumberOfAttemptedRoutes()).isEqualTo(numberOfRoutes);
-        softly.assertThat(paymentStatus.getMessages().stream().map(InstantWithString::string)).containsExactly(
+        softly.assertThat(readAll(paymentStatus)).map(InstantWithString::string)
+                .containsExactly(
                 "Initializing payment " + PAYMENT_HASH,
                 "#1: Sending 123 (0.0% = 0 in flight)",
                 "Sending to route #1: " + MPP_1_ROUTE_1,
@@ -314,7 +317,7 @@ class PaymentLoopTest {
 
         paymentLoop.start(DECODED_PAYMENT_REQUEST, PAYMENT_OPTIONS, paymentStatus);
         verify(multiPathPaymentObserver).waitForInFlightChange(any(), eq(PAYMENT_HASH), eq(totalAmountToSend));
-        assertThat(paymentStatus.getMessages().stream().map(InstantWithString::string))
+        assertThat(readMessages(paymentStatus, 8)).map(InstantWithString::string)
                 .contains("Stopping payment loop, full amount is in-flight, but no failure/settle message received " +
                         "within timeout. The payment might settle/fail in the future.");
         verify(grpcSendToRoute).forceFailureForPayment(DECODED_PAYMENT_REQUEST);

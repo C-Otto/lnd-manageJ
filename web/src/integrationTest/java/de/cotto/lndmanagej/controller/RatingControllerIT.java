@@ -9,10 +9,10 @@ import de.cotto.lndmanagej.model.PeerRatingFixtures;
 import de.cotto.lndmanagej.service.RatingService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.Optional;
 
@@ -20,18 +20,15 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = RatingController.class)
+@WebFluxTest(RatingController.class)
 @Import(ChannelIdParser.class)
 class RatingControllerIT {
     private static final String PREFIX = "/api/";
     private static final String RATING = "/rating";
 
     @Autowired
-    private MockMvc mockMvc;
+    private WebTestClient webTestClient;
 
     @MockBean
     @SuppressWarnings("unused")
@@ -41,12 +38,13 @@ class RatingControllerIT {
     private RatingService ratingService;
 
     @Test
-    void getRatingForPeer() throws Exception {
+    void getRatingForPeer() {
         PeerRating rating = PeerRatingFixtures.ratingWithValue(123)
                 .withChannelRating(ChannelRating.forChannel(CHANNEL_ID_2).addValueWithDescription(5, "something else"));
         when(ratingService.getRatingForPeer(PUBKEY)).thenReturn(Optional.of(rating));
-        mockMvc.perform(get(PREFIX + "/node/" + PUBKEY + RATING))
-                .andExpect(content().json("""
+        webTestClient.get().uri(PREFIX + "/node/" + PUBKEY + RATING).exchange()
+                .expectBody()
+                .json("""
                         {
                           "rating": 128,
                           "message": "",
@@ -57,22 +55,23 @@ class RatingControllerIT {
                             "%s raw rating": "5",
                             "%s something else": "5"
                           }
-                        }""".formatted(PUBKEY, CHANNEL_ID, CHANNEL_ID, CHANNEL_ID_2, CHANNEL_ID_2)));
+                        }""".formatted(PUBKEY, CHANNEL_ID, CHANNEL_ID, CHANNEL_ID_2, CHANNEL_ID_2));
     }
 
     @Test
-    void getRatingForPeer_no_rating() throws Exception {
+    void getRatingForPeer_no_rating() {
         when(ratingService.getRatingForPeer(PUBKEY)).thenReturn(Optional.empty());
-        mockMvc.perform(get(PREFIX + "/node/" + PUBKEY + RATING))
-                .andExpect(status().isNotFound());
+        webTestClient.get().uri(PREFIX + "/node/" + PUBKEY + RATING).exchange()
+                .expectStatus().isNotFound();
     }
 
     @Test
-    void getRatingForChannel() throws Exception {
+    void getRatingForChannel() {
         ChannelRating rating = ChannelRatingFixtures.ratingWithValue(123).addValueWithDescription(456, "a");
         when(ratingService.getRatingForChannel(CHANNEL_ID)).thenReturn(Optional.of(rating));
-        mockMvc.perform(get(PREFIX + "/channel/" + CHANNEL_ID + RATING))
-                .andExpect(content().json("""
+        webTestClient.get().uri(PREFIX + "/channel/" + CHANNEL_ID + RATING).exchange()
+                .expectBody()
+                .json("""
                         {
                           "rating": 579,
                           "message": "",
@@ -81,19 +80,19 @@ class RatingControllerIT {
                             "%s something": "123",
                             "%s raw rating": "579"
                           }
-                        }""".formatted(CHANNEL_ID, CHANNEL_ID, CHANNEL_ID)));
+                        }""".formatted(CHANNEL_ID, CHANNEL_ID, CHANNEL_ID));
     }
 
     @Test
-    void getRatingForChannel_not_found() throws Exception {
-        mockMvc.perform(get(PREFIX + "/channel/" + CHANNEL_ID + RATING))
-                .andExpect(status().isNotFound());
+    void getRatingForChannel_not_found() {
+        webTestClient.get().uri(PREFIX + "/channel/" + CHANNEL_ID + RATING).exchange()
+                .expectStatus().isNotFound();
     }
 
     @Test
-    void getRatingForChannel_empty() throws Exception {
+    void getRatingForChannel_empty() {
         when(ratingService.getRatingForChannel(CHANNEL_ID)).thenReturn(Optional.empty());
-        mockMvc.perform(get(PREFIX + "/channel/" + CHANNEL_ID + RATING))
-                .andExpect(status().isNotFound());
+        webTestClient.get().uri(PREFIX + "/channel/" + CHANNEL_ID + RATING).exchange()
+                .expectStatus().isNotFound();
     }
 }

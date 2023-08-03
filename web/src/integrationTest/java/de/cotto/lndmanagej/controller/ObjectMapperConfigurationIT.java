@@ -8,25 +8,23 @@ import de.cotto.lndmanagej.service.GraphService;
 import de.cotto.lndmanagej.service.OwnNodeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.Set;
 
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
-@WebMvcTest(controllers = StatusController.class)
+@WebFluxTest(StatusController.class)
 @Import({ObjectMapperConfiguration.class, ChannelIdParser.class})
 class ObjectMapperConfigurationIT {
     private static final String PREFIX = "/api/status/";
 
     @Autowired
-    private MockMvc mockMvc;
+    private WebTestClient webTestClient;
 
     @MockBean
     @SuppressWarnings("unused")
@@ -44,13 +42,13 @@ class ObjectMapperConfigurationIT {
     private GraphService graphService;
 
     @Test
-    void output_is_pretty_printed() throws Exception {
+    void output_is_pretty_printed() {
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL));
         String expectedString = """
                 {
                   "channels" : [ "712345x123x1" ]
                 }""";
-        mockMvc.perform(get(PREFIX + "/open-channels"))
-                .andExpect(content().string(expectedString));
+        webTestClient.get().uri(PREFIX + "/open-channels").exchange()
+                .expectBody(String.class).isEqualTo(expectedString);
     }
 }

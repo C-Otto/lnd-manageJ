@@ -1,50 +1,65 @@
 package de.cotto.lndmanagej.pickhardtpayments.model;
 
-import com.google.common.annotations.VisibleForTesting;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.model.FailureCode;
 import de.cotto.lndmanagej.model.HexString;
 import de.cotto.lndmanagej.model.Route;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 
-import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public class PaymentStatus {
+public class PaymentStatus implements Publisher<InstantWithString> {
     private boolean success;
     private boolean failure;
     private int numberOfAttemptedRoutes;
-    private final List<InstantWithString> messages = new ArrayList<>();
+    private final List<InstantWithString> messages;
+    private final List<Subscriber<? super InstantWithString>> subscribers;
 
-    @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
-    public PaymentStatus(HexString paymentHash) {
-        if (!paymentHash.equals(HexString.EMPTY)) {
-            info("Initializing payment " + paymentHash);
-        }
+    public PaymentStatus() {
+        subscribers = Collections.synchronizedList(new ArrayList<>());
+        messages = new ArrayList<>();
     }
 
     public static PaymentStatus createFailure(String reason) {
-        PaymentStatus paymentStatus = new PaymentStatus(HexString.EMPTY);
+        PaymentStatus paymentStatus = new PaymentStatus();
         paymentStatus.failed(reason);
         return paymentStatus;
     }
 
-    public void settled() {
-        success = true;
-        addMessage("Settled");
+    public static PaymentStatus createFor(HexString paymentHash) {
+        PaymentStatus paymentStatus = new PaymentStatus();
+        paymentStatus.info("Initializing payment " + paymentHash);
+        return paymentStatus;
+    }
 
+    public void settled() {
+        synchronized (this) {
+            addMessage("Settled");
+            success = true;
+            subscribers.forEach(Subscriber::onComplete);
+        }
     }
 
     public void failed(FailureCode failureCode) {
-        failure = true;
-        addMessage("Failed with " + failureCode.toString());
+        synchronized (this) {
+            addMessage("Failed with " + failureCode.toString());
+            failure = true;
+            subscribers.forEach(Subscriber::onComplete);
+        }
     }
 
     public void failed(String message) {
-        failure = true;
-        addMessage(message);
+        synchronized (this) {
+            addMessage(message);
+            failure = true;
+            subscribers.forEach(Subscriber::onComplete);
+        }
     }
 
     public void info(String message) {
@@ -73,12 +88,12 @@ public class PaymentStatus {
         return numberOfAttemptedRoutes;
     }
 
-    public List<InstantWithString> getMessages() {
-        return messages;
-    }
-
     private void addMessage(String message) {
-        messages.add(new InstantWithString(message));
+        InstantWithString messageWithTimestamp = new InstantWithString(message);
+        synchronized (this) {
+            messages.add(messageWithTimestamp);
+            subscribers.forEach(subscriber -> subscriber.onNext(messageWithTimestamp));
+        }
     }
 
     private String getFormattedRoute(Route route) {
@@ -86,9 +101,9 @@ public class PaymentStatus {
                 .map(this::getFormattedEdge)
                 .toList();
         return route.getAmount().toStringSat() + ": " + edgeInformation + ", "
-                + route.getFeeRate() + "ppm, "
-                + route.getFeeRateWithFirstHop() + "ppm with first hop, " +
-                "probability " + route.getProbability();
+               + route.getFeeRate() + "ppm, "
+               + route.getFeeRateWithFirstHop() + "ppm with first hop, " +
+               "probability " + route.getProbability();
     }
 
     private String getFormattedEdge(EdgeWithLiquidityInformation edge) {
@@ -111,10 +126,15 @@ public class PaymentStatus {
         return stringBuilder.toString();
     }
 
-    @VisibleForTesting
-    public record InstantWithString(Instant instant, String string) {
-        InstantWithString(String string) {
-            this(Instant.now(), string);
+    @Override
+    public void subscribe(Subscriber<? super InstantWithString> subscriber) {
+        subscriber.onSubscribe(new PaymentStatusSubscription(subscriber));
+        synchronized (this) {
+            messages.forEach(subscriber::onNext);
+            subscribers.add(subscriber);
+        }
+        if (isFailure() || isSuccess()) {
+            subscriber.onComplete();
         }
     }
 
@@ -128,13 +148,32 @@ public class PaymentStatus {
         }
         PaymentStatus that = (PaymentStatus) other;
         return success == that.success
-                && failure == that.failure
-                && numberOfAttemptedRoutes == that.numberOfAttemptedRoutes
-                && Objects.equals(messages, that.messages);
+               && failure == that.failure
+               && numberOfAttemptedRoutes == that.numberOfAttemptedRoutes
+               && Objects.equals(messages, that.messages)
+               && Objects.equals(subscribers, that.subscribers);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(success, failure, numberOfAttemptedRoutes, messages);
+        return Objects.hash(success, failure, numberOfAttemptedRoutes, messages, subscribers);
+    }
+
+    private class PaymentStatusSubscription implements Subscription {
+        private final Subscriber<? super InstantWithString> subscriber;
+
+        public PaymentStatusSubscription(Subscriber<? super InstantWithString> subscriber) {
+            this.subscriber = subscriber;
+        }
+
+        @Override
+        public void request(long numberOfMessages) {
+            // ignore
+        }
+
+        @Override
+        public void cancel() {
+            subscribers.remove(subscriber);
+        }
     }
 }

@@ -17,13 +17,13 @@ class CostExceptionHandlerTest {
 
     @Test
     void mapsToBadRequest() {
-        assertThat(costExceptionHandler.handleException(EXCEPTION).getStatusCode())
+        assertThat(costExceptionHandler.costException(EXCEPTION).getStatusCode())
                 .isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @Test
     void returnsMessageInBody() {
-        assertThat(costExceptionHandler.handleException(EXCEPTION).getBody())
+        assertThat(costExceptionHandler.costException(EXCEPTION).getBody())
                 .isEqualTo(EXCEPTION.getMessage());
     }
 }

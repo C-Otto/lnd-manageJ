@@ -81,7 +81,6 @@ class CacheBuilderTest {
     }
 
     @Test
-    @SuppressWarnings("FutureReturnValueIgnored")
     void withRefresh_returns_new_value_after_refresh() throws InterruptedException {
         LoadingCache<Object, Long> cache = new CacheBuilder()
                 .withRefresh(Duration.ofMillis(1))

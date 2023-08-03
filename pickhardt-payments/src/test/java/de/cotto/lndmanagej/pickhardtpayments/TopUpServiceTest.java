@@ -4,9 +4,9 @@ import de.cotto.lndmanagej.configuration.ConfigurationService;
 import de.cotto.lndmanagej.grpc.GrpcInvoices;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.HexString;
+import de.cotto.lndmanagej.pickhardtpayments.model.InstantWithString;
 import de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions;
 import de.cotto.lndmanagej.pickhardtpayments.model.PaymentStatus;
-import de.cotto.lndmanagej.pickhardtpayments.model.PaymentStatus.InstantWithString;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
 import de.cotto.lndmanagej.service.NodeService;
@@ -22,6 +22,7 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
 
+import static de.cotto.lndmanagej.ReactiveStreamReader.readAll;
 import static de.cotto.lndmanagej.configuration.TopUpConfigurationSettings.EXPIRY;
 import static de.cotto.lndmanagej.configuration.TopUpConfigurationSettings.THRESHOLD;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
@@ -79,7 +80,7 @@ class TopUpServiceTest {
         lenient().when(grpcInvoices.createPaymentRequest(any(), any(), any()))
                 .thenReturn(Optional.of(DECODED_PAYMENT_REQUEST));
         lenient().when(multiPathPaymentSender.payPaymentRequest(eq(DECODED_PAYMENT_REQUEST), any()))
-                .thenReturn(new PaymentStatus(new HexString("AA00")));
+                .thenReturn(PaymentStatus.createFor(new HexString("AA00")));
         lenient().when(balanceService.getAvailableRemoteBalanceForPeer(PUBKEY)).thenReturn(AMOUNT);
     }
 
@@ -357,7 +358,7 @@ class TopUpServiceTest {
     private void assertFailure(String reason) {
         PaymentStatus paymentStatus = topUpService.topUp(PUBKEY, AMOUNT, DEFAULT_PAYMENT_OPTIONS);
         assertThat(paymentStatus.isFailure()).isTrue();
-        assertThat(paymentStatus.getMessages().stream().map(InstantWithString::string)).containsExactly(reason);
+        assertThat(readAll(paymentStatus)).map(InstantWithString::string).containsExactly(reason);
         verifyNoInteractions(multiPathPaymentSender);
     }
 }

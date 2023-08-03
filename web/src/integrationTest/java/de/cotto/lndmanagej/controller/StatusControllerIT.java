@@ -8,10 +8,10 @@ import de.cotto.lndmanagej.service.GraphService;
 import de.cotto.lndmanagej.service.OwnNodeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.List;
 import java.util.Set;
@@ -24,17 +24,14 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-@WebMvcTest(controllers = StatusController.class)
+@WebFluxTest(StatusController.class)
 @Import(ChannelIdParser.class)
 class StatusControllerIT {
     private static final String PREFIX = "/api/status/";
 
     @Autowired
-    private MockMvc mockMvc;
+    private WebTestClient webTestClient;
 
     @MockBean
     @SuppressWarnings("unused")
@@ -50,80 +47,80 @@ class StatusControllerIT {
     private GraphService graphService;
 
     @Test
-    void isSyncedToChain() throws Exception {
+    void isSyncedToChain() {
         when(ownNodeService.isSyncedToChain()).thenReturn(true);
-        mockMvc.perform(get(PREFIX + "/synced-to-chain"))
-                .andExpect(content().string("true"));
+        webTestClient.get().uri(PREFIX + "/synced-to-chain").exchange()
+                .expectBody(String.class).isEqualTo("true");
     }
 
     @Test
-    void getBlockHeight() throws Exception {
+    void getBlockHeight() {
         when(ownNodeService.getBlockHeight()).thenReturn(123_456);
-        mockMvc.perform(get(PREFIX + "/block-height"))
-                .andExpect(content().string("123456"));
+        webTestClient.get().uri(PREFIX + "/block-height").exchange()
+                .expectBody(String.class).isEqualTo("123456");
     }
 
     @Test
-    void getOpenChannels() throws Exception {
+    void getOpenChannels() {
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL_TO_NODE_3, LOCAL_OPEN_CHANNEL));
         List<String> sortedChannelIds = List.of(
                 LOCAL_OPEN_CHANNEL.getId().toString(),
                 LOCAL_OPEN_CHANNEL_TO_NODE_3.getId().toString()
         );
-        mockMvc.perform(get(PREFIX + "/open-channels"))
-                .andExpect(jsonPath("$.channels", is(sortedChannelIds)));
+        webTestClient.get().uri(PREFIX + "/open-channels").exchange().expectBody()
+                .jsonPath("$.channels").value(is(sortedChannelIds));
     }
 
     @Test
-    void getPubkeysForOpenChannels() throws Exception {
+    void getPubkeysForOpenChannels() {
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL_TO_NODE_3, LOCAL_OPEN_CHANNEL));
         List<String> sortedPubkeys = List.of(
                 LOCAL_OPEN_CHANNEL.getRemotePubkey().toString(),
                 LOCAL_OPEN_CHANNEL_TO_NODE_3.getRemotePubkey().toString()
         );
-        mockMvc.perform(get(PREFIX + "/open-channels/pubkeys"))
-                .andExpect(jsonPath("$.pubkeys", is(sortedPubkeys)));
+        webTestClient.get().uri(PREFIX + "/open-channels/pubkeys").exchange().expectBody()
+                .jsonPath("$.pubkeys").value(is(sortedPubkeys));
     }
 
     @Test
-    void getAllChannels() throws Exception {
+    void getAllChannels() {
         when(channelService.getAllLocalChannels()).thenReturn(Stream.of(LOCAL_OPEN_CHANNEL_TO_NODE_3, CLOSED_CHANNEL));
         List<String> sortedChannelIds = List.of(
                 CLOSED_CHANNEL.getId().toString(),
                 LOCAL_OPEN_CHANNEL_TO_NODE_3.getId().toString()
         );
-        mockMvc.perform(get(PREFIX + "/all-channels"))
-                .andExpect(jsonPath("$.channels", is(sortedChannelIds)));
+        webTestClient.get().uri(PREFIX + "/all-channels").exchange().expectBody()
+                .jsonPath("$.channels").value(is(sortedChannelIds));
     }
 
     @Test
-    void getPubkeysForAllChannels() throws Exception {
+    void getPubkeysForAllChannels() {
         when(channelService.getAllLocalChannels()).thenReturn(Stream.of(LOCAL_OPEN_CHANNEL_TO_NODE_3, CLOSED_CHANNEL));
         List<String> sortedPubkeys = List.of(
                 CLOSED_CHANNEL.getRemotePubkey().toString(),
                 LOCAL_OPEN_CHANNEL_TO_NODE_3.getRemotePubkey().toString()
         );
-        mockMvc.perform(get(PREFIX + "/all-channels/pubkeys"))
-                .andExpect(jsonPath("$.pubkeys", is(sortedPubkeys)));
+        webTestClient.get().uri(PREFIX + "/all-channels/pubkeys").exchange().expectBody()
+                .jsonPath("$.pubkeys").value(is(sortedPubkeys));
     }
 
     @Test
-    void getKnownChannels() throws Exception {
+    void getKnownChannels() {
         when(graphService.getNumberOfChannels()).thenReturn(123);
-        mockMvc.perform(get(PREFIX + "/known-channels"))
-                .andExpect(jsonPath("$", is(123)));
+        webTestClient.get().uri(PREFIX + "/known-channels").exchange().expectBody()
+                .jsonPath("$").value(is(123));
     }
 
     @Test
-    void getNodesWithHighIncomingFeeRate() throws Exception {
+    void getNodesWithHighIncomingFeeRate() {
         when(graphService.getNodesWithHighFeeRate()).thenReturn(List.of(
                 new PubkeyAndFeeRate(PUBKEY, 123),
                 new PubkeyAndFeeRate(PUBKEY_2, 456)
         ));
-        mockMvc.perform(get(PREFIX + "/nodes-with-high-incoming-fee-rate"))
-                .andExpect(jsonPath("$.entries[0].pubkey", is(PUBKEY.toString())))
-                .andExpect(jsonPath("$.entries[0].feeRate", is(123)))
-                .andExpect(jsonPath("$.entries[1].pubkey", is(PUBKEY_2.toString())))
-                .andExpect(jsonPath("$.entries[1].feeRate", is(456)));
+        webTestClient.get().uri(PREFIX + "/nodes-with-high-incoming-fee-rate").exchange().expectBody()
+                .jsonPath("$.entries[0].pubkey").value(is(PUBKEY.toString()))
+                .jsonPath("$.entries[0].feeRate").value(is(123))
+                .jsonPath("$.entries[1].pubkey").value(is(PUBKEY_2.toString()))
+                .jsonPath("$.entries[1].feeRate").value(is(456));
     }
 }

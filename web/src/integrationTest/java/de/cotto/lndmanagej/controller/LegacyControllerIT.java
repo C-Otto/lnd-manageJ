@@ -7,24 +7,22 @@ import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.PolicyService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.Set;
 
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_3;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = LegacyController.class)
+@WebFluxTest(LegacyController.class)
 @Import(ChannelIdParser.class)
 class LegacyControllerIT {
     @Autowired
-    private MockMvc mockMvc;
+    private WebTestClient webTestClient;
 
     @MockBean
     @SuppressWarnings("unused")
@@ -42,9 +40,9 @@ class LegacyControllerIT {
     private ChannelService channelService;
 
     @Test
-    void getOpenChannelIdsPretty() throws Exception {
+    void getOpenChannelIdsPretty() {
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_3));
-        mockMvc.perform(get("/legacy/open-channels/pretty"))
-                .andExpect(status().isOk());
+        webTestClient.get().uri("/legacy/open-channels/pretty").exchange()
+                .expectStatus().isOk();
     }
 }

@@ -37,7 +37,7 @@ public class MultiPathPaymentSender {
     ) {
         routeHintService.addDecodedPaymentRequest(decodedPaymentRequest);
 
-        PaymentStatus paymentStatus = new PaymentStatus(decodedPaymentRequest.paymentHash());
+        PaymentStatus paymentStatus = PaymentStatus.createFor(decodedPaymentRequest.paymentHash());
         paymentStatus.info("Payment Options: " + paymentOptions);
         paymentLoop.start(decodedPaymentRequest, paymentOptions, paymentStatus);
         return paymentStatus;

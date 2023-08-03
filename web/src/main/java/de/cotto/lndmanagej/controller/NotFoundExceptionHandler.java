@@ -1,20 +1,17 @@
 package de.cotto.lndmanagej.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@ControllerAdvice
-public class NotFoundExceptionHandler extends ResponseEntityExceptionHandler {
+@RestControllerAdvice
+public class NotFoundExceptionHandler {
     public NotFoundExceptionHandler() {
-        super();
+        // default constructor
     }
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<String> handleException(@SuppressWarnings("unused") NotFoundException exception) {
-        return ResponseEntity
-                .notFound()
-                .build();
+    public ResponseEntity<Void> notFoundException(@SuppressWarnings("unused") Exception exception) {
+        return ResponseEntity.notFound().build();
     }
 }
