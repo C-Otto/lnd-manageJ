@@ -24,29 +24,29 @@ public class DemoWarningService extends WarningService {
     public static final DashboardWarningDto ACINQ_WARNING = new DashboardWarningDto(
             ACINQ.remoteAlias(),
             ACINQ.remotePubkey(),
-            List.of("Node has been online 86% in the past 14 days."),
-            List.of()
+            Set.of("Node has been online 86% in the past 14 days."),
+            Set.of()
     );
 
     public static final DashboardWarningDto POCKET_WARNING = new DashboardWarningDto(
             POCKET.remoteAlias(),
             POCKET.remotePubkey(),
-            List.of("Rating of 182 is below threshold of 1,000"),
-            List.of(new ChannelWarningDto(POCKET.channelId(), "Channel has accumulated 500,000 updates."))
+            Set.of("Rating of 182 is below threshold of 1,000"),
+            Set.of(new ChannelWarningDto(POCKET.channelId(), "Channel has accumulated 500,000 updates."))
     );
 
     public static final DashboardWarningDto BCASH_WARNING = new DashboardWarningDto(
             B_CASH_IS_TRASH.remoteAlias(),
             B_CASH_IS_TRASH.remotePubkey(),
-            List.of("Node has been online 66% in the past 14 days.", "No flow in the past 35 days."),
-            List.of()
+            Set.of("Node has been online 66% in the past 14 days.", "No flow in the past 35 days."),
+            Set.of()
     );
 
     public static final DashboardWarningDto TRY_BTC_WARNING = new DashboardWarningDto(
             TRY_BITCOIN.remoteAlias(),
             TRY_BITCOIN.remotePubkey(),
-            List.of(),
-            List.of(new ChannelWarningDto(
+            Set.of(),
+            Set.of(new ChannelWarningDto(
                     TRY_BITCOIN.channelId(), "Channel has accumulated 700,000 updates.")
             )
     );
@@ -67,10 +67,10 @@ public class DemoWarningService extends WarningService {
                 .collect(toSet());
     }
 
-    public List<String> getNodeWarnings(Pubkey pubkey) {
+    public Set<String> getNodeWarnings(Pubkey pubkey) {
         Optional<DashboardWarningDto> first = getWarnings().stream()
                 .filter(warning -> warning.pubkey().equals(pubkey))
                 .findFirst();
-        return first.isPresent() ? first.get().nodeWarnings() : List.of();
+        return first.isPresent() ? first.get().nodeWarnings() : Set.of();
     }
 }

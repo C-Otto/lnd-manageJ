@@ -3,7 +3,9 @@ package de.cotto.lndmanagej.ui.dto.warning;
 import de.cotto.lndmanagej.model.Pubkey;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class DashboardWarnings {
     private final List<DashboardWarningDto> warnings;
@@ -33,9 +35,9 @@ public class DashboardWarnings {
 
     private DashboardWarningDto combine(DashboardWarningDto warning1, DashboardWarningDto warning2) {
         Pubkey pubkey = warning1.pubkey();
-        List<String> combinedNodeWarnings = new ArrayList<>(warning2.nodeWarnings());
+        Set<String> combinedNodeWarnings = new LinkedHashSet<>(warning2.nodeWarnings());
         combinedNodeWarnings.addAll(warning1.nodeWarnings());
-        List<ChannelWarningDto> combinedChannelWarnings = new ArrayList<>(warning2.channelWarnings());
+        Set<ChannelWarningDto> combinedChannelWarnings = new LinkedHashSet<>(warning2.channelWarnings());
         combinedChannelWarnings.addAll(warning1.channelWarnings());
         return new DashboardWarningDto(warning2.alias(), pubkey, combinedNodeWarnings, combinedChannelWarnings);
     }

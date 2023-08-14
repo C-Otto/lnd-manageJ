@@ -23,6 +23,7 @@ import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
 import de.cotto.lndmanagej.ui.dto.PendingOpenChannelDto;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -262,8 +263,9 @@ public class DemoDataService extends UiDataService {
 
     private static NodeDetailsDto createNodeDetails(
             NodeDto node,
-            List<OpenChannelDto> channels,
-            List<String> warnings) {
+            Collection<OpenChannelDto> channels,
+            Collection<String> warnings
+    ) {
         OpenChannelDto firstChannel = channels.stream().findFirst().orElseThrow();
         OnlineReport onlineReport = node.online() ? ONLINE_REPORT : ONLINE_REPORT_OFFLINE;
         Pubkey pubkey = Pubkey.create(node.pubkey());
@@ -301,7 +303,7 @@ public class DemoDataService extends UiDataService {
         );
     }
 
-    private static PeerRating sumRatings(Pubkey peer, List<OpenChannelDto> channels) {
+    private static PeerRating sumRatings(Pubkey peer, Collection<OpenChannelDto> channels) {
         PeerRating peerRating = PeerRating.forPeer(peer);
         List<ChannelRating> channelRatings = channels.stream().map(channel ->
                 ChannelRating.forChannel(channel.channelId()).addValueWithDescription(channel.rating(), "rating")

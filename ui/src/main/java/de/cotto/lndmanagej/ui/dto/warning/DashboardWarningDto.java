@@ -3,15 +3,15 @@ package de.cotto.lndmanagej.ui.dto.warning;
 import de.cotto.lndmanagej.model.Node;
 import de.cotto.lndmanagej.model.Pubkey;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public record DashboardWarningDto(
         String alias,
         Pubkey pubkey,
-        List<String> nodeWarnings,
-        List<ChannelWarningDto> channelWarnings
+        Set<String> nodeWarnings,
+        Set<ChannelWarningDto> channelWarnings
 ) {
     public DashboardWarningDto {
         if (alias.isBlank()) {
@@ -20,7 +20,7 @@ public record DashboardWarningDto(
     }
 
     public static DashboardWarningDto forNodeWarnings(Node node, Collection<String> nodeWarnings) {
-        return new DashboardWarningDto(node.alias(), node.pubkey(), new ArrayList<>(nodeWarnings), List.of());
+        return new DashboardWarningDto(node.alias(), node.pubkey(), new LinkedHashSet<>(nodeWarnings), Set.of());
     }
 
     public static DashboardWarningDto forChannelWarnings(
@@ -28,7 +28,7 @@ public record DashboardWarningDto(
             Pubkey pubkey,
             Collection<ChannelWarningDto> channelWarnings
     ) {
-        return new DashboardWarningDto(alias, pubkey, List.of(), new ArrayList<>(channelWarnings));
+        return new DashboardWarningDto(alias, pubkey, Set.of(), new LinkedHashSet<>(channelWarnings));
     }
 
     public int numberOfWarningItems() {

@@ -2,7 +2,7 @@ package de.cotto.lndmanagej.ui.dto.warning;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
+import java.util.Set;
 
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.ui.dto.warning.ChannelWarningDtoFixture.CHANNEL_WARNING_DTO;
@@ -28,7 +28,7 @@ class DashboardWarningDtoTest {
 
     @Test
     void channelWarnings() {
-        assertThat(DASHBOARD_WARNING.channelWarnings()).isEqualTo(List.of(CHANNEL_WARNING_DTO));
+        assertThat(DASHBOARD_WARNING.channelWarnings()).isEqualTo(Set.of(CHANNEL_WARNING_DTO));
     }
 
     @Test
@@ -41,8 +41,8 @@ class DashboardWarningDtoTest {
         var nodeWithoutAlias = new DashboardWarningDto(
                 "",
                 PUBKEY,
-                List.of("This is a node warning."),
-                List.of(CHANNEL_WARNING_DTO)
+                Set.of("This is a node warning."),
+                Set.of(CHANNEL_WARNING_DTO)
         );
         assertThat(nodeWithoutAlias.alias()).isEqualTo(PUBKEY.toString());
     }

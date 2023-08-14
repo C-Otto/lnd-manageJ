@@ -12,8 +12,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
@@ -34,7 +34,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class WarningServiceImplTest {
 
-    public static final List<String> THREE_NODE_WARNINGS = List.of("No flow in the past 16 days",
+    public static final Set<String> THREE_NODE_WARNINGS = Set.of("No flow in the past 16 days",
             "Node changed between online and offline 123 times in the past 7 days",
             "Node has been online 51% in the past 14 days"
     );
@@ -71,7 +71,7 @@ class WarningServiceImplTest {
                 ALIAS_FOR_NODE,
                 PUBKEY,
                 THREE_NODE_WARNINGS,
-                List.of()
+                Set.of()
         ));
     }
 
@@ -85,8 +85,8 @@ class WarningServiceImplTest {
         assertThat(warningService.getWarnings()).containsExactly(new DashboardWarningDto(
                 ALIAS_FOR_PUBKEY_2,
                 PUBKEY_2,
-                List.of(),
-                List.of(CHANNEL_WARNING_DTO, CHANNEL_WARNING_DTO_2)
+                Set.of(),
+                Set.of(CHANNEL_WARNING_DTO, CHANNEL_WARNING_DTO_2)
         ));
     }
 
@@ -99,13 +99,13 @@ class WarningServiceImplTest {
                 ALIAS_FOR_NODE,
                 PUBKEY,
                 THREE_NODE_WARNINGS,
-                List.of()
+                Set.of()
         );
         DashboardWarningDto anotherNodeWarning = new DashboardWarningDto(
                 ALIAS_FOR_PUBKEY_2,
                 PUBKEY_2,
                 THREE_NODE_WARNINGS,
-                List.of(CHANNEL_WARNING_DTO)
+                Set.of(CHANNEL_WARNING_DTO)
         );
         assertThat(warningService.getWarnings()).containsExactlyInAnyOrder(nodeWarning, anotherNodeWarning);
     }
