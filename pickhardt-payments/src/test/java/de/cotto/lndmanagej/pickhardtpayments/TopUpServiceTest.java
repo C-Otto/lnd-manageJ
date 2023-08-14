@@ -178,6 +178,7 @@ class TopUpServiceTest {
                 Optional.of(feeRateLimit),
                 Optional.empty(),
                 true,
+                Optional.empty(),
                 Optional.empty()
         );
         PaymentOptions expected = new PaymentOptions(
@@ -185,7 +186,8 @@ class TopUpServiceTest {
                 Optional.of(feeRateLimit),
                 Optional.of(feeRateLimit - peerFeeRate),
                 false,
-                Optional.of(PUBKEY)
+                Optional.of(PUBKEY),
+                Optional.empty()
         );
         when(balanceService.getAvailableLocalBalanceForPeer(PUBKEY)).thenReturn(Coins.NONE);
         assertTopUp(AMOUNT, DEFAULT_EXPIRY, given, expected);
@@ -203,6 +205,7 @@ class TopUpServiceTest {
                 Optional.of(feeRateLimit),
                 Optional.empty(),
                 true,
+                Optional.empty(),
                 Optional.empty()
         );
         PaymentOptions expected = new PaymentOptions(
@@ -210,7 +213,8 @@ class TopUpServiceTest {
                 Optional.of(ourFeeRate),
                 Optional.of(ourFeeRate - peerFeeRate),
                 false,
-                Optional.of(PUBKEY)
+                Optional.of(PUBKEY),
+                Optional.empty()
         );
         when(balanceService.getAvailableLocalBalanceForPeer(PUBKEY)).thenReturn(Coins.NONE);
         assertTopUp(AMOUNT, DEFAULT_EXPIRY, given, expected);
@@ -228,6 +232,7 @@ class TopUpServiceTest {
                 Optional.of(feeRateLimit),
                 Optional.empty(),
                 true,
+                Optional.empty(),
                 Optional.empty()
         );
         PaymentOptions expected = new PaymentOptions(
@@ -235,7 +240,8 @@ class TopUpServiceTest {
                 Optional.of(feeRateLimit),
                 Optional.of(feeRateLimit - peerFeeRate),
                 false,
-                Optional.of(PUBKEY)
+                Optional.of(PUBKEY),
+                Optional.empty()
         );
         when(balanceService.getAvailableLocalBalanceForPeer(PUBKEY)).thenReturn(Coins.NONE);
         assertTopUp(AMOUNT, DEFAULT_EXPIRY, given, expected);
@@ -253,6 +259,7 @@ class TopUpServiceTest {
                 Optional.of(feeRateLimit),
                 Optional.empty(),
                 true,
+                Optional.empty(),
                 Optional.empty()
         );
         PaymentOptions expected = new PaymentOptions(
@@ -260,7 +267,8 @@ class TopUpServiceTest {
                 Optional.of(ourFeeRate),
                 Optional.of(ourFeeRate - peerFeeRate),
                 false,
-                Optional.of(PUBKEY)
+                Optional.of(PUBKEY),
+                Optional.empty()
         );
         when(balanceService.getAvailableLocalBalanceForPeer(PUBKEY)).thenReturn(Coins.NONE);
         assertTopUp(AMOUNT, DEFAULT_EXPIRY, given, expected);
@@ -278,6 +286,7 @@ class TopUpServiceTest {
                 Optional.of(feeRateLimit),
                 Optional.empty(),
                 true,
+                Optional.empty(),
                 Optional.empty()
         );
         PaymentOptions expected = new PaymentOptions(
@@ -285,7 +294,8 @@ class TopUpServiceTest {
                 Optional.of(feeRateLimit),
                 Optional.of(0L),
                 false,
-                Optional.of(PUBKEY)
+                Optional.of(PUBKEY),
+                Optional.empty()
         );
         when(balanceService.getAvailableLocalBalanceForPeer(PUBKEY)).thenReturn(Coins.NONE);
         assertTopUp(AMOUNT, DEFAULT_EXPIRY, given, expected);
@@ -299,6 +309,7 @@ class TopUpServiceTest {
                 Optional.empty(),
                 Optional.empty(),
                 true,
+                Optional.empty(),
                 Optional.empty()
         );
         PaymentOptions expected = new PaymentOptions(
@@ -306,7 +317,8 @@ class TopUpServiceTest {
                 Optional.of(OUR_FEE_RATE),
                 Optional.of(OUR_FEE_RATE - PEER_FEE_RATE),
                 false,
-                Optional.of(PUBKEY)
+                Optional.of(PUBKEY),
+                Optional.empty()
         );
         when(balanceService.getAvailableLocalBalanceForPeer(PUBKEY)).thenReturn(Coins.NONE);
         assertTopUp(AMOUNT, DEFAULT_EXPIRY, given, expected);
@@ -339,6 +351,7 @@ class TopUpServiceTest {
                 Optional.empty(),
                 Optional.empty(),
                 true,
+                Optional.empty(),
                 Optional.empty()
         );
         assertTopUp(expectedTopUpAmount, expiry, emptyPaymentOptions, paymentOptions);
@@ -350,14 +363,14 @@ class TopUpServiceTest {
             PaymentOptions givenPaymentOptions,
             PaymentOptions expectedPaymentOptions
     ) {
-        PaymentStatus paymentStatus = topUpService.topUp(PUBKEY, AMOUNT, givenPaymentOptions);
+        PaymentStatus paymentStatus = topUpService.topUp(PUBKEY, Optional.empty(), AMOUNT, givenPaymentOptions);
         verify(grpcInvoices).createPaymentRequest(expectedTopUpAmount, DESCRIPTION, expiry);
         verify(multiPathPaymentSender).payPaymentRequest(DECODED_PAYMENT_REQUEST, expectedPaymentOptions);
         assertThat(paymentStatus.isPending()).isTrue();
     }
 
     private void assertFailure(String reason) {
-        PaymentStatus paymentStatus = topUpService.topUp(PUBKEY, AMOUNT, DEFAULT_PAYMENT_OPTIONS);
+        PaymentStatus paymentStatus = topUpService.topUp(PUBKEY, Optional.empty(), AMOUNT, DEFAULT_PAYMENT_OPTIONS);
         assertThat(paymentStatus.isFailure()).isTrue();
         assertThat(readAll(paymentStatus)).map(InstantWithString::string).containsExactly(reason);
         verifyNoInteractions(multiPathPaymentSender);

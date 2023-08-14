@@ -122,10 +122,15 @@ The response shows a somewhat readable representation of the payment progress, i
       node Z and node A, the whole payment fails (it is not attempted).
   * Invoices (payment requests) created for top-up payments expiry after 30 minutes. This value can be configured as
     `expiry_seconds=`.
+* HTTP `GET`: `/api/payments/top-up/{pubkey}/amount/{amount}/via/{pubkey}`
+  * As before, but the pubkey specified after "via" is used for the first hop. As such, this can be used to reduce
+    outbound liquidity to the "via" peer.
 * HTTP `POST`: `/api/payments/top-up/{pubkey}/amount/{amount}`
   * allows you to lower the fee rate limit (values higher than the computed fee rate limit are ignored)
   * allows you to specify a different fee rate weight
   * The value provided as `ignoreFeesForOwnChannels` is ignored, for top-up such fees are never ignored
+* HTTP `POST`: `/api/payments/top-up/{pubkey}/amount/{amount}/via/{pubkey}`
+  * As above, see corresponding GET endpoint
 
 The threshold, i.e. the minimum difference between the current local balance and the requested amount, defaults to
 10,000sat. You can configure this value by setting `threshold_sat=` in the configuration file.

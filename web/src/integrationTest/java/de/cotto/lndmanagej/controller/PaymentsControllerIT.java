@@ -48,6 +48,7 @@ class PaymentsControllerIT {
             Optional.of(999L),
             Optional.empty(),
             false,
+            Optional.empty(),
             Optional.empty()
     );
     private static final int FINAL_CLTV_EXPIRY = 0;
@@ -181,29 +182,55 @@ class PaymentsControllerIT {
 
         @Test
         void topUp() {
-            when(topUpService.topUp(any(), any(), any())).thenReturn(paymentStatus);
+            when(topUpService.topUp(any(), any(), any(), any())).thenReturn(paymentStatus);
             PaymentOptions emptyPaymentOptions = new PaymentOptions(
                     Optional.empty(),
                     Optional.empty(),
                     Optional.empty(),
                     true,
+                    Optional.empty(),
                     Optional.empty()
             );
             webTestClient.get().uri(url).exchange().expectStatus().isOk();
-            verify(topUpService).topUp(PUBKEY, Coins.ofSatoshis(123), emptyPaymentOptions);
+            verify(topUpService).topUp(PUBKEY, Optional.empty(), Coins.ofSatoshis(123), emptyPaymentOptions);
+        }
+
+        @Test
+        void topUp_with_peer_for_first_hop() {
+            when(topUpService.topUp(any(), any(), any(), any())).thenReturn(paymentStatus);
+            PaymentOptions emptyPaymentOptions = new PaymentOptions(
+                    Optional.empty(),
+                    Optional.empty(),
+                    Optional.empty(),
+                    true,
+                    Optional.empty(),
+                    Optional.empty()
+            );
+            String uri = "%s/top-up/%s/amount/%s/via/%s".formatted(PREFIX, PUBKEY, "123", PUBKEY_2);
+            webTestClient.get().uri(uri).exchange().expectStatus().isOk();
+            verify(topUpService).topUp(PUBKEY, Optional.of(PUBKEY_2), Coins.ofSatoshis(123), emptyPaymentOptions);
         }
 
         @Test
         void with_payment_options() {
-            when(topUpService.topUp(any(), any(), any())).thenReturn(paymentStatus);
+            when(topUpService.topUp(any(), any(), any(), any())).thenReturn(paymentStatus);
             webTestClient.post().uri(url).contentType(APPLICATION_JSON).bodyValue(DTO_AS_STRING).exchange()
                     .expectStatus().isOk();
-            verify(topUpService).topUp(PUBKEY, Coins.ofSatoshis(123), PAYMENT_OPTIONS);
+            verify(topUpService).topUp(PUBKEY, Optional.empty(), Coins.ofSatoshis(123), PAYMENT_OPTIONS);
+        }
+
+        @Test
+        void with_peer_for_first_hop_and_payment_options() {
+            when(topUpService.topUp(any(), any(), any(), any())).thenReturn(paymentStatus);
+            String uri = "%s/top-up/%s/amount/%s/via/%s".formatted(PREFIX, PUBKEY, "123", PUBKEY_2);
+            webTestClient.post().uri(uri).contentType(APPLICATION_JSON).bodyValue(DTO_AS_STRING).exchange()
+                    .expectStatus().isOk();
+            verify(topUpService).topUp(PUBKEY, Optional.of(PUBKEY_2), Coins.ofSatoshis(123), PAYMENT_OPTIONS);
         }
 
         @Test
         void no_linebreaks_within_line() {
-            when(topUpService.topUp(any(), any(), any())).thenReturn(paymentStatus);
+            when(topUpService.topUp(any(), any(), any(), any())).thenReturn(paymentStatus);
             webTestClient.get().uri(url).exchange().expectBody(String.class).value(string ->
                     assertThat(string.substring(0, string.length() - 1)).doesNotContain("\n")
             );
@@ -211,7 +238,7 @@ class PaymentsControllerIT {
 
         @Test
         void linebreak_at_end_of_line() {
-            when(topUpService.topUp(any(), any(), any())).thenReturn(paymentStatus);
+            when(topUpService.topUp(any(), any(), any(), any())).thenReturn(paymentStatus);
             webTestClient.get().uri(url).exchange().expectBody(String.class).value(string ->
                     assertThat(string).endsWith("\n")
             );

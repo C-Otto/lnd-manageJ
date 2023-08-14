@@ -25,6 +25,7 @@ import static de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPaymentFixtur
 import static de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions.DEFAULT_PAYMENT_OPTIONS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -44,6 +45,7 @@ class PaymentsControllerTest {
                 Optional.of(999L),
                 Optional.empty(),
                 false,
+                Optional.empty(),
                 Optional.empty()
         );
         PAYMENT_OPTIONS_DTO = new PaymentOptionsDto();
@@ -145,23 +147,39 @@ class PaymentsControllerTest {
 
     @Test
     void topUp() {
-        when(topUpService.topUp(any(), any(), any())).thenReturn(paymentStatus);
+        when(topUpService.topUp(any(), any(), any(), any())).thenReturn(paymentStatus);
         PaymentOptions emptyPaymentOptions = new PaymentOptions(
                 Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
                 true,
+                Optional.empty(),
                 Optional.empty()
         );
         assertThat(controller.topUp(PUBKEY, 123).getStatusCode()).isEqualTo(HttpStatus.OK);
-        verify(topUpService).topUp(PUBKEY, Coins.ofSatoshis(123), emptyPaymentOptions);
+        verify(topUpService).topUp(PUBKEY, Optional.empty(), Coins.ofSatoshis(123), emptyPaymentOptions);
+    }
+
+    @Test
+    void topUp_with_peer_for_first_hop() {
+        when(topUpService.topUp(any(), any(), any(), any())).thenReturn(paymentStatus);
+        assertThat(controller.topUp(PUBKEY, 123, PUBKEY_2).getStatusCode()).isEqualTo(HttpStatus.OK);
+        verify(topUpService).topUp(any(), eq(Optional.of(PUBKEY_2)), any(), any());
     }
 
     @Test
     void topUp_with_payment_options() {
-        when(topUpService.topUp(any(), any(), any())).thenReturn(paymentStatus);
+        when(topUpService.topUp(any(), any(), any(), any())).thenReturn(paymentStatus);
         assertThat(controller.topUp(PUBKEY, 123, PAYMENT_OPTIONS_DTO).getStatusCode()).isEqualTo(HttpStatus.OK);
-        verify(topUpService).topUp(PUBKEY, Coins.ofSatoshis(123), PAYMENT_OPTIONS);
+        verify(topUpService).topUp(PUBKEY, Optional.empty(), Coins.ofSatoshis(123), PAYMENT_OPTIONS);
+    }
+
+    @Test
+    void topUp_with_peer_for_first_hop_and_payment_options() {
+        when(topUpService.topUp(any(), any(), any(), any())).thenReturn(paymentStatus);
+        assertThat(controller.topUp(PUBKEY, 123, PUBKEY_2, PAYMENT_OPTIONS_DTO).getStatusCode())
+                .isEqualTo(HttpStatus.OK);
+        verify(topUpService).topUp(PUBKEY, Optional.of(PUBKEY_2), Coins.ofSatoshis(123), PAYMENT_OPTIONS);
     }
 
     @Test

@@ -13,6 +13,7 @@ import de.cotto.lndmanagej.model.LocalOpenChannel;
 import de.cotto.lndmanagej.model.LocalOpenChannelFixtures;
 import de.cotto.lndmanagej.model.Policy;
 import de.cotto.lndmanagej.model.Pubkey;
+import de.cotto.lndmanagej.pickhardtpayments.model.EdgesWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions;
 import de.cotto.lndmanagej.service.BalanceService;
 import de.cotto.lndmanagej.service.ChannelService;
@@ -44,6 +45,7 @@ import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_DISABLED;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_WITH_BASE_FEE;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
+import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_4;
 import static de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions.DEFAULT_PAYMENT_OPTIONS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -310,6 +312,22 @@ class EdgeComputationTest {
         mockEdge();
         assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA).edges())
                 .contains(EdgeWithLiquidityInformation.forUpperBound(EDGE, EDGE.capacity()));
+    }
+
+    @Test
+    void ignores_other_peers_if_peer_for_first_hop_is_set() {
+        Pubkey ownNode = PUBKEY_4;
+        Pubkey peerForFirstHop = PUBKEY_3;
+
+        PaymentOptions paymentOptions =
+                PaymentOptions.forTopUp(FEE_RATE_WEIGHT, 999, 0, PUBKEY_2, peerForFirstHop);
+        DirectedChannelEdge edge1 = new DirectedChannelEdge(CHANNEL_ID, CAPACITY, ownNode, peerForFirstHop, POLICY_1);
+        DirectedChannelEdge edge2 = new DirectedChannelEdge(CHANNEL_ID, CAPACITY, ownNode, PUBKEY, POLICY_1);
+        when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge1, edge2)));
+
+        EdgesWithLiquidityInformation edges = edgeComputation.getEdges(paymentOptions, MAX_TIME_LOCK_DELTA);
+
+        assertThat(edges.edges().stream().map(EdgeWithLiquidityInformation::endNode)).containsExactly(peerForFirstHop);
     }
 
     @Test

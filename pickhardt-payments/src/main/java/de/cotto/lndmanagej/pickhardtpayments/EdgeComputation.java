@@ -127,6 +127,9 @@ public class EdgeComputation {
         if (feeRate >= feeRateLimit) {
             return true;
         }
+        if (isEdgeToUnwantedFirstHop(channelEdge, paymentOptions, pubkey)) {
+            return true;
+        }
         if (isIncomingEdge(channelEdge, pubkey)) {
             return false;
         }
@@ -135,6 +138,22 @@ public class EdgeComputation {
             return false;
         }
         return feeRate >= feeRateLimitFirstHops;
+    }
+
+    private boolean isEdgeToUnwantedFirstHop(
+            DirectedChannelEdge channelEdge,
+            PaymentOptions paymentOptions,
+            Pubkey pubkey
+    ) {
+        boolean isOutgoingEdge = pubkey.equals(channelEdge.source());
+        if (!isOutgoingEdge) {
+            return false;
+        }
+        Pubkey peerForFirstHop = paymentOptions.peerForFirstHop().orElse(null);
+        if (peerForFirstHop == null) {
+            return false;
+        }
+        return !peerForFirstHop.equals(channelEdge.target());
     }
 
     private boolean isIncomingEdge(DirectedChannelEdge channelEdge, Pubkey ownPubkey) {

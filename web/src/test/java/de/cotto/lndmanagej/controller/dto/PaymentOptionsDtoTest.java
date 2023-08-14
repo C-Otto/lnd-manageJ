@@ -31,6 +31,7 @@ class PaymentOptionsDtoTest {
                 Optional.of(feeRateLimit),
                 Optional.empty(),
                 DEFAULT_PAYMENT_OPTIONS.ignoreFeesForOwnChannels(),
+                Optional.empty(),
                 Optional.empty()
         );
         assertThat(dto.toModel()).isEqualTo(expected);
@@ -45,6 +46,7 @@ class PaymentOptionsDtoTest {
                 Optional.empty(),
                 Optional.empty(),
                 false,
+                Optional.empty(),
                 Optional.empty()
         );
         assertThat(dto.toModel()).isEqualTo(expected);

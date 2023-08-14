@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 
+import java.util.Optional;
+
 import static org.springframework.http.MediaType.APPLICATION_NDJSON;
 
 @RestController
@@ -120,13 +122,41 @@ public class PaymentsController {
     }
 
     @Timed
+    @GetMapping("/top-up/{pubkey}/amount/{amount}/via/{peerForFirstHop}")
+    public ResponseEntity<Flux<String>> topUp(
+            @PathVariable Pubkey pubkey,
+            @PathVariable long amount,
+            @PathVariable Pubkey peerForFirstHop
+    ) {
+        return topUp(pubkey, amount, peerForFirstHop, new PaymentOptionsDto());
+    }
+
+    @Timed
     @PostMapping("/top-up/{pubkey}/amount/{amount}")
     public ResponseEntity<Flux<String>> topUp(
             @PathVariable Pubkey pubkey,
             @PathVariable long amount,
             @RequestBody PaymentOptionsDto paymentOptionsDto
     ) {
-        PaymentStatus paymentStatus = topUpService.topUp(pubkey, Coins.ofSatoshis(amount), paymentOptionsDto.toModel());
+        PaymentStatus paymentStatus =
+                topUpService.topUp(pubkey, Optional.empty(), Coins.ofSatoshis(amount), paymentOptionsDto.toModel());
+        return toStream(paymentStatus);
+    }
+
+    @Timed
+    @PostMapping("/top-up/{pubkey}/amount/{amount}/via/{peerForFirstHop}")
+    public ResponseEntity<Flux<String>> topUp(
+            @PathVariable Pubkey pubkey,
+            @PathVariable long amount,
+            @PathVariable Pubkey peerForFirstHop,
+            @RequestBody PaymentOptionsDto paymentOptionsDto
+    ) {
+        PaymentStatus paymentStatus = topUpService.topUp(
+                pubkey,
+                Optional.of(peerForFirstHop),
+                Coins.ofSatoshis(amount),
+                paymentOptionsDto.toModel()
+        );
         return toStream(paymentStatus);
     }
 

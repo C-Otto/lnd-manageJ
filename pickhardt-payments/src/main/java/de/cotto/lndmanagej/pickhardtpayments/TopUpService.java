@@ -51,7 +51,12 @@ public class TopUpService {
         this.policyService = policyService;
     }
 
-    public PaymentStatus topUp(Pubkey pubkey, Coins amount, PaymentOptions paymentOptionsFromRequest) {
+    public PaymentStatus topUp(
+            Pubkey pubkey,
+            Optional<Pubkey> peerForFirstHop,
+            Coins amount,
+            PaymentOptions paymentOptionsFromRequest
+    ) {
         if (noChannelWith(pubkey)) {
             String alias = nodeService.getAlias(pubkey);
             return PaymentStatus.createFailure("No channel with %s (%s)".formatted(pubkey, alias));
@@ -71,10 +76,15 @@ public class TopUpService {
             return PaymentStatus.createFailure(reason);
         }
 
-        return sendPayment(pubkey, topUpAmount, paymentOptionsFromRequest);
+        return sendPayment(pubkey, peerForFirstHop, topUpAmount, paymentOptionsFromRequest);
     }
 
-    private PaymentStatus sendPayment(Pubkey pubkey, Coins topUpAmount, PaymentOptions paymentOptionsFromRequest) {
+    private PaymentStatus sendPayment(
+            Pubkey pubkey,
+            Optional<Pubkey> peerForFirstHop,
+            Coins topUpAmount,
+            PaymentOptions paymentOptions
+    ) {
         long ourFeeRate = policyService.getMinimumFeeRateTo(pubkey).orElse(0L);
         long peerFeeRate = policyService.getMinimumFeeRateFrom(pubkey).orElse(0L);
         if (peerFeeRate >= ourFeeRate) {
@@ -88,8 +98,10 @@ public class TopUpService {
             String alias = nodeService.getAlias(pubkey);
             return PaymentStatus.createFailure("Unable to create payment request (%s, %s)".formatted(pubkey, alias));
         }
-        PaymentOptions paymentOptions = getPaymentOptions(pubkey, ourFeeRate, peerFeeRate, paymentOptionsFromRequest);
-        return multiPathPaymentSender.payPaymentRequest(paymentRequest, paymentOptions);
+        return multiPathPaymentSender.payPaymentRequest(
+                paymentRequest,
+                getPaymentOptions(pubkey, peerForFirstHop, ourFeeRate, peerFeeRate, paymentOptions)
+        );
     }
 
     private Coins getThreshold() {
@@ -117,16 +129,25 @@ public class TopUpService {
 
     private PaymentOptions getPaymentOptions(
             Pubkey pubkey,
+            Optional<Pubkey> peerForFirstHop,
             long ourFeeRate,
             long peerFeeRate,
-            PaymentOptions paymentOptionsFromRequest
+            PaymentOptions paymentOptions
     ) {
-        long feeRateLimit = Math.min(ourFeeRate, paymentOptionsFromRequest.feeRateLimit().orElse(Long.MAX_VALUE));
-        return PaymentOptions.forTopUp(
-                paymentOptionsFromRequest.feeRateWeight().orElse(5),
+        int feeRateWeight = paymentOptions.feeRateWeight().orElse(5);
+        long feeRateLimit = Math.min(ourFeeRate, paymentOptions.feeRateLimit().orElse(Long.MAX_VALUE));
+
+        return peerForFirstHop.map(value -> PaymentOptions.forTopUp(
+                feeRateWeight,
+                feeRateLimit,
+                peerFeeRate,
+                pubkey,
+                value
+        )).orElseGet(() -> PaymentOptions.forTopUp(
+                feeRateWeight,
                 feeRateLimit,
                 peerFeeRate,
                 pubkey
-        );
+        ));
     }
 }

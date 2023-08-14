@@ -9,7 +9,8 @@ public record PaymentOptions(
         Optional<Long> feeRateLimit,
         Optional<Long> feeRateLimitExceptIncomingHops,
         boolean ignoreFeesForOwnChannels,
-        Optional<Pubkey> peer
+        Optional<Pubkey> peer,
+        Optional<Pubkey> peerForFirstHop
 ) {
     public static final PaymentOptions DEFAULT_PAYMENT_OPTIONS = forFeeRateWeight(0);
 
@@ -19,6 +20,7 @@ public record PaymentOptions(
                 Optional.empty(),
                 Optional.empty(),
                 true,
+                Optional.empty(),
                 Optional.empty()
         );
     }
@@ -29,6 +31,7 @@ public record PaymentOptions(
                 Optional.of(feeRateLimit),
                 Optional.empty(),
                 true,
+                Optional.empty(),
                 Optional.empty()
         );
     }
@@ -39,7 +42,25 @@ public record PaymentOptions(
                 Optional.of(feeRateLimit),
                 Optional.of(Math.max(0, feeRateLimit - peerFeeRate)),
                 false,
-                Optional.of(peer)
+                Optional.of(peer),
+                Optional.empty()
+        );
+    }
+
+    public static PaymentOptions forTopUp(
+            int feeRateWeight,
+            long feeRateLimit,
+            long peerFeeRate,
+            Pubkey peer,
+            Pubkey peerForFirstHop
+    ) {
+        return new PaymentOptions(
+                Optional.of(feeRateWeight),
+                Optional.of(feeRateLimit),
+                Optional.of(Math.max(0, feeRateLimit - peerFeeRate)),
+                false,
+                Optional.of(peer),
+                Optional.of(peerForFirstHop)
         );
     }
 }

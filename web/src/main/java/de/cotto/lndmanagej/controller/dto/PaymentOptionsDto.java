@@ -31,6 +31,7 @@ public class PaymentOptionsDto {
                 Optional.ofNullable(feeRateLimit),
                 Optional.empty(),
                 ignoreFeesForOwnChannels,
+                Optional.empty(),
                 Optional.empty()
         );
     }
