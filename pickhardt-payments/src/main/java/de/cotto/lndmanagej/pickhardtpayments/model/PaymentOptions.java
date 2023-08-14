@@ -33,11 +33,11 @@ public record PaymentOptions(
         );
     }
 
-    public static PaymentOptions forTopUp(long ourFeeRate, long peerFeeRate, Pubkey peer) {
+    public static PaymentOptions forTopUp(int feeRateWeight, long feeRateLimit, long peerFeeRate, Pubkey peer) {
         return new PaymentOptions(
-                Optional.of(5),
-                Optional.of(ourFeeRate),
-                Optional.of(ourFeeRate - peerFeeRate),
+                Optional.of(feeRateWeight),
+                Optional.of(feeRateLimit),
+                Optional.of(Math.max(0, feeRateLimit - peerFeeRate)),
                 false,
                 Optional.of(peer)
         );

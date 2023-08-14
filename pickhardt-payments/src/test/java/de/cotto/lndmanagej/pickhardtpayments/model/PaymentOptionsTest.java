@@ -9,6 +9,9 @@ import static de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions.DEFAULT
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PaymentOptionsTest {
+
+    private static final int FEE_RATE_WEIGHT = 42;
+
     @Test
     void forFeeRateWeight() {
         assertThat(PaymentOptions.forFeeRateWeight(12)).isEqualTo(new PaymentOptions(
@@ -33,8 +36,8 @@ class PaymentOptionsTest {
 
     @Test
     void forTopUp() {
-        assertThat(PaymentOptions.forTopUp(123, 100, PUBKEY)).isEqualTo(new PaymentOptions(
-                Optional.of(5),
+        assertThat(PaymentOptions.forTopUp(FEE_RATE_WEIGHT, 123, 100, PUBKEY)).isEqualTo(new PaymentOptions(
+                Optional.of(FEE_RATE_WEIGHT),
                 Optional.of(123L),
                 Optional.of(23L),
                 false,
@@ -44,7 +47,7 @@ class PaymentOptionsTest {
 
     @Test
     void feeRateLimitFirstHops() {
-        PaymentOptions paymentOptions = PaymentOptions.forTopUp(200, 30, PUBKEY);
+        PaymentOptions paymentOptions = PaymentOptions.forTopUp(FEE_RATE_WEIGHT, 200, 30, PUBKEY);
         assertThat(paymentOptions.feeRateLimitExceptIncomingHops()).contains(170L);
     }
 

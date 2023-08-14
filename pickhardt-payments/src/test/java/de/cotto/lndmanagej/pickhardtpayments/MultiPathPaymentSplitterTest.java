@@ -54,6 +54,7 @@ class MultiPathPaymentSplitterTest {
     private static final Coins AMOUNT = Coins.ofSatoshis(1_234);
     private static final int FINAL_CLTV_DELTA = 40;
     private static final int DEFAULT_MAX_CLTV_EXPIRY = 2016;
+    private static final int FEE_RATE_WEIGHT = 5;
 
     @InjectMocks
     private MultiPathPaymentSplitter multiPathPaymentSplitter;
@@ -156,7 +157,7 @@ class MultiPathPaymentSplitterTest {
             int feeRate = 200;
             Coins amount = Coins.ofSatoshis(1_000_000);
             Policy policy = policyFor(feeRate);
-            PaymentOptions paymentOptions = PaymentOptions.forTopUp(feeRate - 1, 0, PUBKEY_2);
+            PaymentOptions paymentOptions = PaymentOptions.forTopUp(FEE_RATE_WEIGHT, feeRate - 1, 0, PUBKEY_2);
             mockFlow(amount, policy, paymentOptions);
 
             MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPayment(
@@ -173,7 +174,7 @@ class MultiPathPaymentSplitterTest {
         class Expiry {
             private final Coins amount = Coins.ofSatoshis(1_000_000);
             private final Policy policy = policyFor(0);
-            private final PaymentOptions paymentOptions = PaymentOptions.forTopUp(100, 0, PUBKEY_2);
+            private final PaymentOptions paymentOptions = PaymentOptions.forTopUp(FEE_RATE_WEIGHT, 100, 0, PUBKEY_2);
 
             @BeforeEach
             void setUp() {
@@ -248,7 +249,7 @@ class MultiPathPaymentSplitterTest {
             int feeRate = 200;
             Coins amount = Coins.ofSatoshis(2_000_000);
             Policy policy = policyFor(feeRate);
-            PaymentOptions paymentOptions = PaymentOptions.forTopUp(feeRate, 0, PUBKEY_2);
+            PaymentOptions paymentOptions = PaymentOptions.forTopUp(FEE_RATE_WEIGHT, feeRate, 0, PUBKEY_2);
             mockFlow(amount, policy, paymentOptions);
 
             MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPayment(
@@ -267,7 +268,7 @@ class MultiPathPaymentSplitterTest {
             mockExtensionEdge(PUBKEY_3, feeRate);
             Coins amount = Coins.ofSatoshis(2_000_000);
             Policy policy = policyFor(0);
-            PaymentOptions paymentOptions = PaymentOptions.forTopUp(feeRate - 1, 0, PUBKEY_2);
+            PaymentOptions paymentOptions = PaymentOptions.forTopUp(FEE_RATE_WEIGHT, feeRate - 1, 0, PUBKEY_2);
             mockFlow(amount, policy, paymentOptions);
 
             MultiPathPayment multiPathPayment = multiPathPaymentSplitter.getMultiPathPayment(
@@ -334,7 +335,7 @@ class MultiPathPaymentSplitterTest {
             int feeRate = 200;
             Coins halfOfAmount = Coins.ofSatoshis(500_000);
             Coins amount = halfOfAmount.add(halfOfAmount);
-            PaymentOptions paymentOptions = PaymentOptions.forTopUp(feeRate - 1, 0, PUBKEY_2);
+            PaymentOptions paymentOptions = PaymentOptions.forTopUp(FEE_RATE_WEIGHT, feeRate - 1, 0, PUBKEY_2);
             Edge edge1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policyFor(0));
             Edge edge2 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policyFor(feeRate));
             Flow flow1 = new Flow(edge1, halfOfAmount);
@@ -520,7 +521,7 @@ class MultiPathPaymentSplitterTest {
         }
 
         private MultiPathPayment attemptTopUpPayment() {
-            PaymentOptions paymentOptions = PaymentOptions.forTopUp(500, 123, PUBKEY_2);
+            PaymentOptions paymentOptions = PaymentOptions.forTopUp(FEE_RATE_WEIGHT, 500, 123, PUBKEY_2);
             when(flowComputation.getOptimalFlows(
                     PUBKEY,
                     PUBKEY_2,

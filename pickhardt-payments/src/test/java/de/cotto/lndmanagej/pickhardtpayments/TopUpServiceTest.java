@@ -46,6 +46,7 @@ class TopUpServiceTest {
     private static final long OUR_FEE_RATE = 1234;
     private static final long PEER_FEE_RATE = 1233;
     private static final Duration DEFAULT_EXPIRY = Duration.ofMinutes(30);
+    private static final int FEE_RATE_WEIGHT = 5;
 
     @InjectMocks
     private TopUpService topUpService;
@@ -332,7 +333,7 @@ class TopUpServiceTest {
     }
 
     private void assertTopUp(Coins expectedTopUpAmount, Duration expiry) {
-        PaymentOptions paymentOptions = PaymentOptions.forTopUp(OUR_FEE_RATE, PEER_FEE_RATE, PUBKEY);
+        PaymentOptions paymentOptions = PaymentOptions.forTopUp(FEE_RATE_WEIGHT, OUR_FEE_RATE, PEER_FEE_RATE, PUBKEY);
         PaymentOptions emptyPaymentOptions = new PaymentOptions(
                 Optional.empty(),
                 Optional.empty(),

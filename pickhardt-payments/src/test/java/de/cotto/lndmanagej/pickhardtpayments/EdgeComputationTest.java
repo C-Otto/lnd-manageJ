@@ -56,6 +56,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class EdgeComputationTest {
     private static final int MAX_TIME_LOCK_DELTA = 2016;
+    private static final int FEE_RATE_WEIGHT = 5;
 
     @InjectMocks
     private EdgeComputation edgeComputation;
@@ -149,7 +150,8 @@ class EdgeComputationTest {
         int feeRateLimitForFirstHops = 100;
 
         when(grpcGetInfo.getPubkey()).thenReturn(ownPubkey);
-        PaymentOptions paymentOptions = PaymentOptions.forTopUp(feeRateLimit, feeRateLimitForFirstHops, topUpPeer);
+        PaymentOptions paymentOptions =
+                PaymentOptions.forTopUp(FEE_RATE_WEIGHT, feeRateLimit, feeRateLimitForFirstHops, topUpPeer);
         Policy lastHopPolicy = policy(199);
         Policy firstHopPolicyExpensive = policy(100);
         Policy firstHopPolicyOk = policy(99);
