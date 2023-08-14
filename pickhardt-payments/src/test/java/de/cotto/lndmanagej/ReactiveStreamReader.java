@@ -56,7 +56,7 @@ public class ReactiveStreamReader<T> implements Subscriber<T> {
     @Override
     public void onSubscribe(Subscription subscription) {
         this.subscription = subscription;
-        subscription.request(1);
+        subscription.request(Long.MAX_VALUE);
     }
 
     @Override

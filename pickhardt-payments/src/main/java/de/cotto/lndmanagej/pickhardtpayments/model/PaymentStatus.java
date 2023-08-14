@@ -10,6 +10,7 @@ import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Flux;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -19,13 +20,13 @@ public class PaymentStatus extends Flux<InstantWithString> {
     private boolean success;
     private boolean failure;
     private int numberOfAttemptedRoutes;
-    private final List<InstantWithString> messages;
-    private final List<Subscriber<? super InstantWithString>> subscribers;
+    private final List<InstantWithString> allMessages;
+    private final List<PaymentStatusSubscription> subscriptions;
 
     public PaymentStatus() {
         super();
-        subscribers = Collections.synchronizedList(new ArrayList<>());
-        messages = new ArrayList<>();
+        subscriptions = Collections.synchronizedList(new ArrayList<>());
+        allMessages = new ArrayList<>();
     }
 
     public static PaymentStatus createFailure(String reason) {
@@ -44,7 +45,7 @@ public class PaymentStatus extends Flux<InstantWithString> {
         synchronized (this) {
             addMessage("Settled");
             success = true;
-            subscribers.forEach(Subscriber::onComplete);
+            subscriptions.forEach(PaymentStatusSubscription::onComplete);
         }
     }
 
@@ -52,7 +53,7 @@ public class PaymentStatus extends Flux<InstantWithString> {
         synchronized (this) {
             addMessage("Failed with " + failureCode.toString());
             failure = true;
-            subscribers.forEach(Subscriber::onComplete);
+            subscriptions.forEach(PaymentStatusSubscription::onComplete);
         }
     }
 
@@ -60,7 +61,7 @@ public class PaymentStatus extends Flux<InstantWithString> {
         synchronized (this) {
             addMessage(message);
             failure = true;
-            subscribers.forEach(Subscriber::onComplete);
+            subscriptions.forEach(PaymentStatusSubscription::onComplete);
         }
     }
 
@@ -93,8 +94,8 @@ public class PaymentStatus extends Flux<InstantWithString> {
     private void addMessage(String message) {
         InstantWithString messageWithTimestamp = new InstantWithString(message);
         synchronized (this) {
-            messages.add(messageWithTimestamp);
-            subscribers.forEach(subscriber -> subscriber.onNext(messageWithTimestamp));
+            allMessages.add(messageWithTimestamp);
+            subscriptions.forEach(paymentStatusSubscription -> paymentStatusSubscription.onNext(messageWithTimestamp));
         }
     }
 
@@ -129,14 +130,15 @@ public class PaymentStatus extends Flux<InstantWithString> {
     }
 
     @Override
-    public void subscribe(CoreSubscriber<? super InstantWithString> subscriber) {
-        subscriber.onSubscribe(new PaymentStatusSubscription(subscriber));
+    public void subscribe(@Nonnull CoreSubscriber<? super InstantWithString> subscriber) {
+        PaymentStatusSubscription subscription =
+                new PaymentStatusSubscription(subscriber, new ArrayList<>(allMessages));
+        subscriber.onSubscribe(subscription);
         synchronized (this) {
-            messages.forEach(subscriber::onNext);
-            subscribers.add(subscriber);
+            subscriptions.add(subscription);
         }
         if (isFailure() || isSuccess()) {
-            subscriber.onComplete();
+            subscription.onComplete();
         }
     }
 
@@ -152,30 +154,58 @@ public class PaymentStatus extends Flux<InstantWithString> {
         return success == that.success
                && failure == that.failure
                && numberOfAttemptedRoutes == that.numberOfAttemptedRoutes
-               && Objects.equals(messages, that.messages)
-               && Objects.equals(subscribers, that.subscribers);
+               && Objects.equals(allMessages, that.allMessages)
+               && Objects.equals(subscriptions, that.subscriptions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(success, failure, numberOfAttemptedRoutes, messages, subscribers);
+        return Objects.hash(success, failure, numberOfAttemptedRoutes, allMessages, subscriptions);
     }
 
     private class PaymentStatusSubscription implements Subscription {
         private final Subscriber<? super InstantWithString> subscriber;
+        private final List<InstantWithString> messagesForSubscriber;
+        private long requested;
 
-        public PaymentStatusSubscription(Subscriber<? super InstantWithString> subscriber) {
+        public PaymentStatusSubscription(
+                Subscriber<? super InstantWithString> subscriber,
+                List<InstantWithString> messages
+        ) {
             this.subscriber = subscriber;
+            messagesForSubscriber = messages;
         }
 
         @Override
         public void request(long numberOfMessages) {
-            // ignore
+            synchronized (this) {
+                requested += numberOfMessages;
+                sendRequestedMessages();
+            }
         }
 
         @Override
         public void cancel() {
-            subscribers.remove(subscriber);
+            subscriptions.remove(this);
+        }
+
+        public void onComplete() {
+            subscriber.onComplete();
+        }
+
+        public void onNext(InstantWithString message) {
+            synchronized (this) {
+                messagesForSubscriber.add(message);
+                sendRequestedMessages();
+            }
+        }
+
+        private void sendRequestedMessages() {
+            while (requested > 0 && !messagesForSubscriber.isEmpty()) {
+                subscriber.onNext(messagesForSubscriber.get(0));
+                messagesForSubscriber.remove(0);
+                requested--;
+            }
         }
     }
 }
