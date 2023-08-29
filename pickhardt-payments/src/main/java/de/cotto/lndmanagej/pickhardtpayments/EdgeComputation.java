@@ -150,10 +150,15 @@ public class EdgeComputation {
             return false;
         }
         Pubkey peerForFirstHop = paymentOptions.peerForFirstHop().orElse(null);
-        if (peerForFirstHop == null) {
+        boolean firstHopIsUnexpected = peerForFirstHop != null && !peerForFirstHop.equals(channelEdge.target());
+        if (firstHopIsUnexpected) {
+            return true;
+        }
+        Pubkey peerForLastHop = paymentOptions.peer().orElse(null);
+        if (peerForLastHop == null) {
             return false;
         }
-        return !peerForFirstHop.equals(channelEdge.target());
+        return peerForLastHop.equals(channelEdge.target());
     }
 
     private boolean isIncomingEdge(DirectedChannelEdge channelEdge, Pubkey ownPubkey) {

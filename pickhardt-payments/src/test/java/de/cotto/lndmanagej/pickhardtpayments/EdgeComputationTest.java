@@ -319,15 +319,33 @@ class EdgeComputationTest {
         Pubkey ownNode = PUBKEY_4;
         Pubkey peerForFirstHop = PUBKEY_3;
 
+        DirectedChannelEdge edgeToFirstHop =
+                new DirectedChannelEdge(CHANNEL_ID, CAPACITY, ownNode, peerForFirstHop, POLICY_1);
+        DirectedChannelEdge otherEdge = new DirectedChannelEdge(CHANNEL_ID, CAPACITY, ownNode, PUBKEY, POLICY_1);
+        when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edgeToFirstHop, otherEdge)));
+
         PaymentOptions paymentOptions =
                 PaymentOptions.forTopUp(FEE_RATE_WEIGHT, 999, 0, PUBKEY_2, peerForFirstHop);
-        DirectedChannelEdge edge1 = new DirectedChannelEdge(CHANNEL_ID, CAPACITY, ownNode, peerForFirstHop, POLICY_1);
-        DirectedChannelEdge edge2 = new DirectedChannelEdge(CHANNEL_ID, CAPACITY, ownNode, PUBKEY, POLICY_1);
-        when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge1, edge2)));
-
         EdgesWithLiquidityInformation edges = edgeComputation.getEdges(paymentOptions, MAX_TIME_LOCK_DELTA);
 
         assertThat(edges.edges().stream().map(EdgeWithLiquidityInformation::endNode)).containsExactly(peerForFirstHop);
+    }
+
+    @Test
+    void ignores_edge_to_last_hop() {
+        Pubkey ownNode = PUBKEY_4;
+        Pubkey lastHopNode = PUBKEY_2;
+
+        DirectedChannelEdge edgeToLastHop =
+                new DirectedChannelEdge(CHANNEL_ID, CAPACITY, ownNode, lastHopNode, POLICY_1);
+        DirectedChannelEdge otherEdge = new DirectedChannelEdge(CHANNEL_ID, CAPACITY, ownNode, PUBKEY, POLICY_1);
+        when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edgeToLastHop, otherEdge)));
+
+        PaymentOptions paymentOptions =
+                PaymentOptions.forTopUp(FEE_RATE_WEIGHT, 999, 0, lastHopNode);
+        EdgesWithLiquidityInformation edges = edgeComputation.getEdges(paymentOptions, MAX_TIME_LOCK_DELTA);
+
+        assertThat(edges.edges().stream().map(EdgeWithLiquidityInformation::endNode)).containsExactly(PUBKEY);
     }
 
     @Test
