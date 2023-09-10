@@ -324,7 +324,7 @@ class ArcInitializerTest {
             ArcInitializer arcInitializer = getArcInitializer(quantization, feeRateWeight);
             addEdgeWithBaseFee(baseFee, quantization, arcInitializer);
 
-            long expectedFeeRate = (long) Math.ceil(200 + 10);
+            long expectedFeeRate = 210;
             assertThat(minCostFlow.getUnitCost(0)).isEqualTo(expectedFeeRate);
         }
 
@@ -337,12 +337,12 @@ class ArcInitializerTest {
             ArcInitializer arcInitializer = getArcInitializer(quantization, feeRateWeight);
             addEdgeWithBaseFee(baseFee, quantization, arcInitializer);
 
-            long expectedFeeRate = (long) Math.ceil(200 + 12);
+            long expectedFeeRate = 212;
             assertThat(minCostFlow.getUnitCost(0)).isEqualTo(expectedFeeRate);
         }
 
         private void addEdgeWithBaseFee(Coins baseFee, int quantization, ArcInitializer arcInitializer) {
-            Policy policy = new Policy(200, baseFee, true, 40, Coins.ofSatoshis(10_000));
+            Policy policy = new Policy(200, baseFee, true, 40, Coins.ofMilliSatoshis(1), Coins.ofSatoshis(10_000));
             EdgeWithLiquidityInformation edge = EdgeWithLiquidityInformation.forKnownLiquidity(
                     new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy),
                     Coins.ofSatoshis(30L * quantization)

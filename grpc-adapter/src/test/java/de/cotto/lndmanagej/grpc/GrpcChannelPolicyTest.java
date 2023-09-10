@@ -29,6 +29,7 @@ class GrpcChannelPolicyTest {
     private static final int FEE_RATE_FIRST = 123;
     private static final int FEE_RATE_SECOND = 456;
     private static final int TIME_LOCK_DELTA = 40;
+    private static final Coins MIN_HTLC = Coins.ofMilliSatoshis(159);
     private static final Coins MAX_HTLC = Coins.ofMilliSatoshis(5_432);
 
     @InjectMocks
@@ -53,14 +54,14 @@ class GrpcChannelPolicyTest {
     void getLocalPolicy_local_first() {
         when(grpcService.getChannelEdge(CHANNEL_ID)).thenReturn(Optional.of(channelEdge(PUBKEY, PUBKEY_2)));
         assertThat(grpcChannelPolicy.getLocalPolicy(CHANNEL_ID))
-                .contains(new Policy(FEE_RATE_FIRST, Coins.NONE, true, TIME_LOCK_DELTA, MAX_HTLC));
+                .contains(new Policy(FEE_RATE_FIRST, Coins.NONE, true, TIME_LOCK_DELTA, MIN_HTLC, MAX_HTLC));
     }
 
     @Test
     void getLocalPolicy_local_second() {
         when(grpcService.getChannelEdge(CHANNEL_ID)).thenReturn(Optional.of(channelEdge(PUBKEY_2, PUBKEY)));
         assertThat(grpcChannelPolicy.getLocalPolicy(CHANNEL_ID))
-                .contains(new Policy(FEE_RATE_SECOND, Coins.NONE, true, TIME_LOCK_DELTA, MAX_HTLC));
+                .contains(new Policy(FEE_RATE_SECOND, Coins.NONE, true, TIME_LOCK_DELTA, MIN_HTLC, MAX_HTLC));
     }
 
     @Test
@@ -78,14 +79,14 @@ class GrpcChannelPolicyTest {
     void getRemotePolicy_local_first() {
         when(grpcService.getChannelEdge(CHANNEL_ID)).thenReturn(Optional.of(channelEdge(PUBKEY, PUBKEY_2)));
         assertThat(grpcChannelPolicy.getRemotePolicy(CHANNEL_ID))
-                .contains(new Policy(FEE_RATE_SECOND, Coins.NONE, true, TIME_LOCK_DELTA, MAX_HTLC));
+                .contains(new Policy(FEE_RATE_SECOND, Coins.NONE, true, TIME_LOCK_DELTA, MIN_HTLC, MAX_HTLC));
     }
 
     @Test
     void getRemotePolicy_local_second() {
         when(grpcService.getChannelEdge(CHANNEL_ID)).thenReturn(Optional.of(channelEdge(PUBKEY_2, PUBKEY)));
         assertThat(grpcChannelPolicy.getRemotePolicy(CHANNEL_ID))
-                .contains(new Policy(FEE_RATE_FIRST, Coins.NONE, true, TIME_LOCK_DELTA, MAX_HTLC));
+                .contains(new Policy(FEE_RATE_FIRST, Coins.NONE, true, TIME_LOCK_DELTA, MIN_HTLC, MAX_HTLC));
     }
 
     @Test
@@ -98,14 +99,14 @@ class GrpcChannelPolicyTest {
     void getPolicyFrom_first() {
         when(grpcService.getChannelEdge(CHANNEL_ID)).thenReturn(Optional.of(channelEdge(PUBKEY_2, PUBKEY_3)));
         assertThat(grpcChannelPolicy.getPolicyFrom(CHANNEL_ID, PUBKEY_2))
-                .contains(new Policy(FEE_RATE_FIRST, Coins.NONE, true, TIME_LOCK_DELTA, MAX_HTLC));
+                .contains(new Policy(FEE_RATE_FIRST, Coins.NONE, true, TIME_LOCK_DELTA, MIN_HTLC, MAX_HTLC));
     }
 
     @Test
     void getPolicyFrom_second() {
         when(grpcService.getChannelEdge(CHANNEL_ID)).thenReturn(Optional.of(channelEdge(PUBKEY_2, PUBKEY_3)));
         assertThat(grpcChannelPolicy.getPolicyFrom(CHANNEL_ID, PUBKEY_3))
-                .contains(new Policy(FEE_RATE_SECOND, Coins.NONE, true, TIME_LOCK_DELTA, MAX_HTLC));
+                .contains(new Policy(FEE_RATE_SECOND, Coins.NONE, true, TIME_LOCK_DELTA, MIN_HTLC, MAX_HTLC));
     }
 
     @Test
@@ -118,14 +119,14 @@ class GrpcChannelPolicyTest {
     void getPolicyTo_first() {
         when(grpcService.getChannelEdge(CHANNEL_ID)).thenReturn(Optional.of(channelEdge(PUBKEY_2, PUBKEY_3)));
         assertThat(grpcChannelPolicy.getPolicyTo(CHANNEL_ID, PUBKEY_3))
-                .contains(new Policy(FEE_RATE_FIRST, Coins.NONE, true, TIME_LOCK_DELTA, MAX_HTLC));
+                .contains(new Policy(FEE_RATE_FIRST, Coins.NONE, true, TIME_LOCK_DELTA, MIN_HTLC, MAX_HTLC));
     }
 
     @Test
     void getPolicyTo_second() {
         when(grpcService.getChannelEdge(CHANNEL_ID)).thenReturn(Optional.of(channelEdge(PUBKEY_2, PUBKEY_3)));
         assertThat(grpcChannelPolicy.getPolicyTo(CHANNEL_ID, PUBKEY_2))
-                .contains(new Policy(FEE_RATE_SECOND, Coins.NONE, true, TIME_LOCK_DELTA, MAX_HTLC));
+                .contains(new Policy(FEE_RATE_SECOND, Coins.NONE, true, TIME_LOCK_DELTA, MIN_HTLC, MAX_HTLC));
     }
 
     @Test
@@ -175,7 +176,8 @@ class GrpcChannelPolicyTest {
         return RoutingPolicy.newBuilder()
                 .setFeeRateMilliMsat(feeRate)
                 .setTimeLockDelta(TIME_LOCK_DELTA)
-                .setMaxHtlcMsat(5_432)
+                .setMinHtlc(MIN_HTLC.milliSatoshis())
+                .setMaxHtlcMsat(MAX_HTLC.milliSatoshis())
                 .build();
     }
 }

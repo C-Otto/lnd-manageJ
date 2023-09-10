@@ -23,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 
 @ExtendWith(MockitoExtension.class)
 class RouteHintServiceTest {
+    private static final Coins ONE_MILLI_SATOSHI = Coins.ofMilliSatoshis(1);
     private static final Coins FIFTY_COINS = Coins.ofSatoshis(5_000_000_000L);
 
     @InjectMocks
@@ -36,8 +37,8 @@ class RouteHintServiceTest {
     @Test
     void get_after_adding_decoded_payment_request() {
         routeHintService.addDecodedPaymentRequest(DECODED_PAYMENT_REQUEST);
-        Policy policy1 = new Policy(123, Coins.NONE, true, 9, FIFTY_COINS);
-        Policy policy2 = new Policy(1234, Coins.ofMilliSatoshis(1), true, 40, FIFTY_COINS);
+        Policy policy1 = new Policy(123, Coins.NONE, true, 9, ONE_MILLI_SATOSHI, FIFTY_COINS);
+        Policy policy2 = new Policy(1234, ONE_MILLI_SATOSHI, true, 40, ONE_MILLI_SATOSHI, FIFTY_COINS);
         DirectedChannelEdge edge1 = new DirectedChannelEdge(CHANNEL_ID, FIFTY_COINS, PUBKEY, PUBKEY_4, policy1);
         DirectedChannelEdge edge2 = new DirectedChannelEdge(CHANNEL_ID_2, FIFTY_COINS, PUBKEY_3, PUBKEY_4, policy2);
         assertThat(routeHintService.getEdgesFromPaymentHints()).contains(edge1, edge2);

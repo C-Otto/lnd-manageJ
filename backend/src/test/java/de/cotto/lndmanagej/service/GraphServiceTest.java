@@ -77,7 +77,7 @@ class GraphServiceTest {
     @Test
     void getNodesWithHighFeeRate_ignores_disabled_channels() {
         Set<DirectedChannelEdge> edges = edges(9, 200, PUBKEY_2);
-        Policy policy = new Policy(2_000, Coins.NONE, false, 40, Coins.ofSatoshis(10_000));
+        Policy policy = new Policy(2_000, Coins.NONE, false, 40, Coins.ofMilliSatoshis(1), Coins.ofSatoshis(10_000));
         edges.add(edge(policy, Coins.ofSatoshis(10_000_000), PUBKEY_2));
         assertThat(graphService.getNodesWithHighFeeRate()).isEmpty();
     }
@@ -135,7 +135,7 @@ class GraphServiceTest {
     }
 
     private DirectedChannelEdge edge(long feeRate, long capacityMillionSat, Pubkey target) {
-        Policy policy = new Policy(feeRate, Coins.NONE, true, 40, Coins.ofSatoshis(10_000));
+        Policy policy = new Policy(feeRate, Coins.NONE, true, 40, Coins.ofMilliSatoshis(1), Coins.ofSatoshis(10_000));
         Coins capacity = Coins.ofSatoshis(capacityMillionSat * 1_000_000);
         return edge(policy, capacity, target);
     }

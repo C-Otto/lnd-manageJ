@@ -25,6 +25,7 @@ import static de.cotto.lndmanagej.model.OpenInitiator.REMOTE;
 @SuppressWarnings("PMD.TooManyMethods")
 public final class DeriveDataUtil {
 
+    private static final Coins MIN_HTLC = Coins.ofMilliSatoshis(1);
     private static final Coins MAX_HTLC = Coins.ofSatoshis(1_000_000);
 
     private DeriveDataUtil() {
@@ -98,7 +99,7 @@ public final class DeriveDataUtil {
         Coins baseFee = Coins.ofMilliSatoshis(rand.nextLong(2) * 1000);
         boolean enabled = rand.nextInt(10) != 0;
         int timeLockDelta = (rand.nextInt(5) + 1) * 10;
-        return new Policy(feeRate, baseFee, enabled, timeLockDelta, MAX_HTLC);
+        return new Policy(feeRate, baseFee, enabled, timeLockDelta, MIN_HTLC, MAX_HTLC);
     }
 
     static ChannelStatusDto deriveChannelStatus(ChannelId channelId) {

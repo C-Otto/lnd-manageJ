@@ -29,6 +29,7 @@ class RouteTest {
     private static final int ONE_MILLION = 1_000_000;
     private static final int TIME_LOCK_DELTA = 40;
     private static final int BLOCK_HEIGHT = 700_000;
+    private static final Coins MIN_HTLC = Coins.ofSatoshis(159);
     private static final Coins MAX_HTLC = Coins.ofSatoshis(12_345);
 
     @Test
@@ -495,12 +496,12 @@ class RouteTest {
 
     private List<Edge> edgesWithTimeLockDeltas(int... timeLockDeltas) {
         return Arrays.stream(timeLockDeltas)
-                .mapToObj(timeLockDelta -> new Policy(0, Coins.NONE, true, timeLockDelta, MAX_HTLC))
+                .mapToObj(timeLockDelta -> new Policy(0, Coins.NONE, true, timeLockDelta, MIN_HTLC, MAX_HTLC))
                 .map(policy -> new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy))
                 .toList();
     }
 
     private Policy policy(Coins baseFee, int ppm) {
-        return new Policy(ppm, baseFee, true, TIME_LOCK_DELTA, MAX_HTLC);
+        return new Policy(ppm, baseFee, true, TIME_LOCK_DELTA, MIN_HTLC, MAX_HTLC);
     }
 }

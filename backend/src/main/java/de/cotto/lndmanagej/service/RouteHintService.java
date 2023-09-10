@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class RouteHintService {
+    private static final Coins ONE_MILLI_SATOSHI = Coins.ofMilliSatoshis(1);
     private static final Coins FIFTY_COINS = Coins.ofSatoshis(5_000_000_000L);
 
     private static final Duration MAX_AGE = Duration.ofHours(1);
@@ -55,7 +56,14 @@ public class RouteHintService {
     }
 
     private Policy toPolicy(RouteHint routeHint) {
-        return new Policy(routeHint.feeRate(), routeHint.baseFee(), true, routeHint.cltvExpiryDelta(), FIFTY_COINS);
+        return new Policy(
+                routeHint.feeRate(),
+                routeHint.baseFee(),
+                true,
+                routeHint.cltvExpiryDelta(),
+                ONE_MILLI_SATOSHI,
+                FIFTY_COINS
+        );
     }
 
     @SuppressWarnings("UnusedVariable")

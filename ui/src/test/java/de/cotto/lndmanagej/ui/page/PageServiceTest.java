@@ -397,7 +397,7 @@ class PageServiceTest {
         }
 
         private static PolicyDto policy(int feeRate, int baseFee) {
-            return new PolicyDto(feeRate, String.valueOf(baseFee), true, 0, "0");
+            return new PolicyDto(feeRate, String.valueOf(baseFee), true, 0, "0", "0");
         }
 
         private BalanceInformation balanceWithRemoteSat(int satoshis) {

@@ -117,7 +117,7 @@ class EdgeComputationTest {
     void does_not_add_edge_exceeding_maximum_time_lock_delta() {
         int edgeDelta = 40;
         int maximumTimeLockDelta = edgeDelta - 1;
-        Policy policy = new Policy(0, Coins.NONE, true, edgeDelta, Coins.ofSatoshis(10_000));
+        Policy policy = new Policy(0, Coins.NONE, true, edgeDelta, Coins.ofMilliSatoshis(1), Coins.ofSatoshis(10_000));
         DirectedChannelEdge edge = new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY, PUBKEY_2, policy);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));
         assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, maximumTimeLockDelta).edges()).isEmpty();
@@ -228,8 +228,9 @@ class EdgeComputationTest {
     @Test
     void adds_edge_from_route_hint_service() {
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of()));
+        Coins oneMilliSatoshi = Coins.ofMilliSatoshis(1);
         Coins fiftyCoins = Coins.ofSatoshis(5_000_000_000L);
-        Policy policy = new Policy(200, Coins.NONE, true, 40, fiftyCoins);
+        Policy policy = new Policy(200, Coins.NONE, true, 40, oneMilliSatoshi, fiftyCoins);
         Edge edge = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, fiftyCoins, policy);
         when(routeHintService.getEdgesFromPaymentHints()).thenReturn(Set.of(
                 new DirectedChannelEdge(
@@ -447,7 +448,7 @@ class EdgeComputationTest {
     }
 
     private static Policy policy(int feeRate) {
-        return new Policy(feeRate, Coins.NONE, true, 40, Coins.ofSatoshis(0));
+        return new Policy(feeRate, Coins.NONE, true, 40, Coins.NONE, Coins.NONE);
     }
 
     private void mockInactiveChannel() {

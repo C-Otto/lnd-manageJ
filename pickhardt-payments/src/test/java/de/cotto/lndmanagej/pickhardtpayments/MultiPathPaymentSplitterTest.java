@@ -626,7 +626,7 @@ class MultiPathPaymentSplitterTest {
 
     private Edge mockExtensionEdge(Pubkey destination, int feeRate) {
         Policy policyExtension =
-                new Policy(feeRate, Coins.NONE, true, 40, Coins.ofSatoshis(10_000));
+                new Policy(feeRate, Coins.NONE, true, 40, Coins.ofMilliSatoshis(1), Coins.ofSatoshis(10_000));
         when(channelService.getOpenChannelsWith(PUBKEY_2)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL));
         when(policyService.getPolicyFrom(CHANNEL_ID, PUBKEY_2)).thenReturn(Optional.of(policyExtension));
         Edge extensionEdge =
@@ -637,7 +637,7 @@ class MultiPathPaymentSplitterTest {
     }
 
     private static Policy policyFor(int feeRate) {
-        return new Policy(feeRate, Coins.NONE, true, 40, Coins.ofSatoshis(10_000));
+        return new Policy(feeRate, Coins.NONE, true, 40, Coins.ofMilliSatoshis(1), Coins.ofSatoshis(10_000));
     }
 
     private EdgeWithLiquidityInformation noInformationFor(Edge edgeSmallCapacity) {

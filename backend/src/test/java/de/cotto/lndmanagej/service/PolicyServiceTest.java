@@ -108,8 +108,9 @@ class PolicyServiceTest {
         }
 
         private void mockPolicy(ChannelId channelId, int feeRate) {
+            Policy policy = new Policy(feeRate, Coins.NONE, false, 0, Coins.NONE, Coins.NONE);
             when(grpcChannelPolicy.getPolicyFrom(channelId, PUBKEY))
-                    .thenReturn(Optional.of(new Policy(feeRate, Coins.NONE, false, 0, Coins.NONE)));
+                    .thenReturn(Optional.of(policy));
         }
     }
 
@@ -137,8 +138,9 @@ class PolicyServiceTest {
         }
 
         private void mockPolicy(ChannelId channelId, int feeRate) {
+            Policy policy = new Policy(feeRate, Coins.NONE, false, 0, Coins.NONE, Coins.NONE);
             when(grpcChannelPolicy.getPolicyTo(channelId, PUBKEY))
-                    .thenReturn(Optional.of(new Policy(feeRate, Coins.NONE, false, 0, Coins.NONE)));
+                    .thenReturn(Optional.of(policy));
         }
     }
 }

@@ -17,6 +17,7 @@ public class GrpcPolicy {
                 Coins.ofMilliSatoshis(routingPolicy.getFeeBaseMsat()),
                 !routingPolicy.getDisabled(),
                 routingPolicy.getTimeLockDelta(),
+                Coins.ofMilliSatoshis(routingPolicy.getMinHtlc()),
                 Coins.ofMilliSatoshis(routingPolicy.getMaxHtlcMsat())
         );
     }

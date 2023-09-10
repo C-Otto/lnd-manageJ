@@ -7,6 +7,7 @@ public record PolicyDto(
         String baseFeeMilliSat,
         boolean enabled,
         int timeLockDelta,
+        String minHtlcMilliSat,
         String maxHtlcMilliSat
 ) {
     public static PolicyDto createFromModel(Policy policy) {
@@ -15,6 +16,7 @@ public record PolicyDto(
                 String.valueOf(policy.baseFee().milliSatoshis()),
                 policy.enabled(),
                 policy.timeLockDelta(),
+                String.valueOf(policy.minHtlc().milliSatoshis()),
                 String.valueOf(policy.maxHtlc().milliSatoshis())
         );
     }

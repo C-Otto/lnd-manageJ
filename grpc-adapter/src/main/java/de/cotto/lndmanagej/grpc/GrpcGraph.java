@@ -18,7 +18,7 @@ import java.util.Set;
 
 @Component
 public class GrpcGraph {
-    private static final Policy DEFAULT_DISABLED_POLICY = new Policy(0, Coins.NONE, false, 0, Coins.NONE);
+    private static final Policy DEFAULT_DISABLED_POLICY = new Policy(0, Coins.NONE, false, 0, Coins.NONE, Coins.NONE);
     private final GrpcService grpcService;
     private final LoadingCache<Object, Optional<Set<DirectedChannelEdge>>> channelEdgeCache;
     private final GrpcPolicy grpcPolicy;
