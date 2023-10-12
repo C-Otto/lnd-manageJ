@@ -26,9 +26,4 @@ public class MacaroonCallCredential extends CallCredentials {
             metadataApplier.apply(headers);
         });
     }
-
-    @Override
-    public void thisUsesUnstableApi() {
-        // nothing
-    }
 }
