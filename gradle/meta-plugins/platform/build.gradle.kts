@@ -17,7 +17,7 @@ dependencies {
     api("io.projectreactor:reactor-core")
 
     constraints {
-        api("com.google.ortools:ortools-java:9.6.2534")
+        api("com.google.ortools:ortools-java:9.7.2996")
         api("com.google.protobuf:protobuf-gradle-plugin:0.9.4")
         api("io.grpc:grpc-netty:$grpcVersion")
         api("io.grpc:grpc-protobuf:$grpcVersion")
