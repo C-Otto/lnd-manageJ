@@ -70,6 +70,16 @@ class StatusInterceptorTest {
     }
 
     @Test
+    void preHandle_api_noRedirect() throws Exception {
+        preHandleStatusNotSyncedExpectNoRedirect("/api/foo/bar");
+    }
+
+    @Test
+    void preHandle_legacy_api_noRedirect() throws Exception {
+        preHandleStatusNotSyncedExpectNoRedirect("/legacy/foo/bar");
+    }
+
+    @Test
     void preHandle_jsResource_noRedirect() throws Exception {
         preHandleStatusNotSyncedExpectNoRedirect("/js/main.js");
     }

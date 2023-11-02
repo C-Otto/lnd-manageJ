@@ -27,11 +27,18 @@ public class StatusInterceptor implements HandlerInterceptor {
     ) throws Exception {
         StatusModel status = statusService.getStatus();
         String path = request.getServletPath();
-        if (!status.synced() && !isResource(path) && !isStatusPage(path)) {
-            response.sendRedirect("/status");
-            return false;
+        if (disallowRedirect(status, path)) {
+            return true;
         }
-        return true;
+        response.sendRedirect("/status");
+        return false;
+    }
+
+    private boolean disallowRedirect(StatusModel status, String path) {
+        if (status.synced()) {
+            return true;
+        }
+        return isResource(path) || isStatusPage(path) || isApi(path);
     }
 
     boolean isStatusPage(@Nullable String path) {
@@ -40,6 +47,10 @@ public class StatusInterceptor implements HandlerInterceptor {
 
     boolean isResource(@Nullable String path) {
         return path != null && (path.contains("/css/") || path.contains("/js/") || path.contains("/images/"));
+    }
+
+    boolean isApi(@Nullable String path) {
+        return path != null && (path.contains("/api/") || path.contains("/legacy/"));
     }
 
     @Override
