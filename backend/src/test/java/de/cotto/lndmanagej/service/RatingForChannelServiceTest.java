@@ -295,7 +295,8 @@ class RatingForChannelServiceTest {
                 LocalOpenChannelFixtures.TOTAL_RECEIVED,
                 false,
                 true,
-                LocalOpenChannelFixtures.NUM_UPDATES
+                LocalOpenChannelFixtures.NUM_UPDATES,
+                Coins.ofMilliSatoshis(2)
         );
     }
 

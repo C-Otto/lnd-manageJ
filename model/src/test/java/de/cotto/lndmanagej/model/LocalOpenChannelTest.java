@@ -14,6 +14,7 @@ import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_PRIVATE;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.MIN_HTLC_CONSTRAINT;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.NUM_UPDATES;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_RECEIVED;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_SENT;
@@ -24,6 +25,7 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class LocalOpenChannelTest {
+
     @Test
     void getRemotePubkey() {
         assertThat(LOCAL_OPEN_CHANNEL.getRemotePubkey()).isEqualTo(PUBKEY_2);
@@ -41,7 +43,8 @@ class LocalOpenChannelTest {
                 TOTAL_RECEIVED,
                 false,
                 true,
-                NUM_UPDATES
+                NUM_UPDATES,
+                MIN_HTLC_CONSTRAINT
         );
         assertThat(localOpenChannel.getRemotePubkey()).isEqualTo(PUBKEY);
     }

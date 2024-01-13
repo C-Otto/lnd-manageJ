@@ -149,7 +149,8 @@ public class GrpcChannels extends GrpcChannelsBase {
                 Coins.ofSatoshis(lndChannel.getTotalSatoshisReceived()),
                 lndChannel.getPrivate(),
                 lndChannel.getActive(),
-                lndChannel.getNumUpdates()
+                lndChannel.getNumUpdates(),
+                Coins.ofMilliSatoshis(lndChannel.getLocalConstraints().getMinHtlcMsat())
         );
     }
 

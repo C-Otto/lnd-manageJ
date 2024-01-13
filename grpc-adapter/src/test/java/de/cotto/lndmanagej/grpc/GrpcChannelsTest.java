@@ -80,8 +80,24 @@ class GrpcChannelsTest {
     @Test
     void getChannels() {
         when(grpcService.getChannels()).thenReturn(List.of(
-                channel(CHANNEL_ID, true, false, true, TOTAL_SENT, TOTAL_RECEIVED),
-                channel(CHANNEL_ID_2, false, false, false, TOTAL_SENT_2, TOTAL_RECEIVED_2)
+                channel(
+                        CHANNEL_ID,
+                        true,
+                        false,
+                        true,
+                        TOTAL_SENT,
+                        TOTAL_RECEIVED,
+                        LOCAL_OPEN_CHANNEL.getMinHtlcConstraint()
+                ),
+                channel(
+                        CHANNEL_ID_2,
+                        false,
+                        false,
+                        false,
+                        TOTAL_SENT_2,
+                        TOTAL_RECEIVED_2,
+                        LOCAL_OPEN_CHANNEL_2.getMinHtlcConstraint()
+                )
         ));
         assertThat(grpcChannels.getChannels()).containsExactlyInAnyOrder(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_2);
     }
@@ -89,7 +105,15 @@ class GrpcChannelsTest {
     @Test
     void getChannels_private() {
         when(grpcService.getChannels()).thenReturn(List.of(
-                channel(CHANNEL_ID, true, true, true, TOTAL_SENT, TOTAL_RECEIVED)
+                channel(
+                        CHANNEL_ID,
+                        true,
+                        true,
+                        true,
+                        TOTAL_SENT,
+                        TOTAL_RECEIVED,
+                        LOCAL_OPEN_CHANNEL_PRIVATE.getMinHtlcConstraint()
+                )
         ));
         assertThat(grpcChannels.getChannels()).containsExactlyInAnyOrder(LOCAL_OPEN_CHANNEL_PRIVATE);
     }
@@ -170,8 +194,24 @@ class GrpcChannelsTest {
     @Test
     void getChannel() {
         when(grpcService.getChannels()).thenReturn(List.of(
-                channel(CHANNEL_ID_2, false, false, false, TOTAL_SENT_2, TOTAL_RECEIVED_2),
-                channel(CHANNEL_ID, true, false, true, TOTAL_SENT, TOTAL_RECEIVED)
+                channel(
+                        CHANNEL_ID_2,
+                        false,
+                        false,
+                        false,
+                        TOTAL_SENT_2,
+                        TOTAL_RECEIVED_2,
+                        Coins.ofMilliSatoshis(123)
+                ),
+                channel(
+                        CHANNEL_ID,
+                        true,
+                        false,
+                        true,
+                        TOTAL_SENT,
+                        TOTAL_RECEIVED,
+                        LOCAL_OPEN_CHANNEL.getMinHtlcConstraint()
+                )
         ));
         assertThat(grpcChannels.getChannel(CHANNEL_ID)).contains(LOCAL_OPEN_CHANNEL);
     }
@@ -187,10 +227,12 @@ class GrpcChannelsTest {
             boolean isPrivate,
             boolean isActive,
             Coins totalSent,
-            Coins totalReceived
+            Coins totalReceived,
+            Coins minHtlcConstraint
     ) {
         ChannelConstraints localConstraints = ChannelConstraints.newBuilder()
                 .setChanReserveSat(BALANCE_INFORMATION.localReserve().satoshis())
+                .setMinHtlcMsat(minHtlcConstraint.milliSatoshis())
                 .build();
         ChannelConstraints remoteConstraints = ChannelConstraints.newBuilder()
                 .setChanReserveSat(BALANCE_INFORMATION.remoteReserve().satoshis())

@@ -84,4 +84,10 @@ class ChannelDtoTest {
                 ChannelStatusDto.createFromModel(new ChannelStatus(false, true, false, OPEN));
         assertThat(dto.status()).isEqualTo(channelStatusDto);
     }
+
+    @Test
+    void minHtlcConstraintMsat() {
+        ChannelDto dto = new ChannelDto(LOCAL_OPEN_CHANNEL);
+        assertThat(dto.minHtlcConstraintMsat()).isEqualTo("2");
+    }
 }

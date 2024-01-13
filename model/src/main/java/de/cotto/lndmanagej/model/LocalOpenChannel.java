@@ -8,6 +8,7 @@ public class LocalOpenChannel extends LocalChannel {
     private final Coins totalReceived;
     private final boolean active;
     private final long numUpdates;
+    private final Coins minHtlcConstraint;
 
     @SuppressWarnings("PMD.ExcessiveParameterList")
     public LocalOpenChannel(
@@ -20,7 +21,8 @@ public class LocalOpenChannel extends LocalChannel {
             Coins totalReceived,
             boolean isPrivate,
             boolean active,
-            long numUpdates
+            long numUpdates,
+            Coins minHtlcConstraint
     ) {
         super(channelCoreInformation, ownPubkey, remotePubkey, openInitiator, isPrivate);
         this.balanceInformation = balanceInformation;
@@ -28,6 +30,7 @@ public class LocalOpenChannel extends LocalChannel {
         this.totalReceived = totalReceived;
         this.active = active;
         this.numUpdates = numUpdates;
+        this.minHtlcConstraint = minHtlcConstraint;
     }
 
     public BalanceInformation getBalanceInformation() {
@@ -36,6 +39,10 @@ public class LocalOpenChannel extends LocalChannel {
 
     public long getNumUpdates() {
         return numUpdates;
+    }
+
+    public Coins getMinHtlcConstraint() {
+        return minHtlcConstraint;
     }
 
     @Override
@@ -70,11 +77,20 @@ public class LocalOpenChannel extends LocalChannel {
                 && Objects.equals(balanceInformation, that.balanceInformation)
                 && Objects.equals(totalSent, that.totalSent)
                 && Objects.equals(totalReceived, that.totalReceived)
+                && Objects.equals(minHtlcConstraint, that.minHtlcConstraint)
                 && numUpdates == that.numUpdates;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), balanceInformation, totalSent, totalReceived, active, numUpdates);
+        return Objects.hash(
+                super.hashCode(),
+                balanceInformation,
+                totalSent,
+                totalReceived,
+                active,
+                minHtlcConstraint,
+                numUpdates
+        );
     }
 }

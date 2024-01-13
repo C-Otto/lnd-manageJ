@@ -10,7 +10,6 @@ import de.cotto.lndmanagej.model.DirectedChannelEdge;
 import de.cotto.lndmanagej.model.Edge;
 import de.cotto.lndmanagej.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
-import de.cotto.lndmanagej.model.LocalOpenChannelFixtures;
 import de.cotto.lndmanagej.model.Policy;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgesWithLiquidityInformation;
@@ -38,6 +37,10 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
 import static de.cotto.lndmanagej.model.EdgeFixtures.EDGE;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.MIN_HTLC_CONSTRAINT;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.NUM_UPDATES;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_RECEIVED;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_SENT;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_PEER;
 import static de.cotto.lndmanagej.model.OpenInitiator.LOCAL;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_1;
@@ -458,11 +461,12 @@ class EdgeComputationTest {
                 PUBKEY_2,
                 BALANCE_INFORMATION,
                 LOCAL,
-                LocalOpenChannelFixtures.TOTAL_SENT,
-                LocalOpenChannelFixtures.TOTAL_RECEIVED,
+                TOTAL_SENT,
+                TOTAL_RECEIVED,
                 false,
                 false,
-                LocalOpenChannelFixtures.NUM_UPDATES
+                NUM_UPDATES,
+                MIN_HTLC_CONSTRAINT
         );
         when(channelService.getOpenChannel(EDGE.channelId())).thenReturn(Optional.of(inactiveChannel));
     }

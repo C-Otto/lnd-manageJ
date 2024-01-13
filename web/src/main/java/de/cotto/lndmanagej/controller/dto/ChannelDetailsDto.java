@@ -39,6 +39,7 @@ public record ChannelDetailsDto(
         FlowReportDto flowReport,
         RebalanceReportDto rebalanceReport,
         long numUpdates,
+        String minHtlcConstraintMsat,
         Set<String> warnings,
         RatingDto rating
 ) {
@@ -75,6 +76,7 @@ public record ChannelDetailsDto(
                 FlowReportDto.createFromModel(flowReport),
                 RebalanceReportDto.createFromModel(rebalanceReport),
                 channelDto.numUpdates(),
+                channelDto.minHtlcConstraintMsat(),
                 channelWarnings.descriptions(),
                 rating.map(RatingDto::fromModel).orElse(RatingDto.EMPTY)
         );

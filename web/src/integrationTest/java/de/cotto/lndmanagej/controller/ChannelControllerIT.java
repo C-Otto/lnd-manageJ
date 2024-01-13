@@ -105,7 +105,8 @@ class ChannelControllerIT {
                 .jsonPath("$.status.active").value(is(false))
                 .jsonPath("$.status.closed").value(is(false))
                 .jsonPath("$.status.openClosed").value(is("OPEN"))
-                .jsonPath("$.numUpdates").value(is(NUM_UPDATES));
+                .jsonPath("$.numUpdates").value(is(NUM_UPDATES))
+                .jsonPath("$.minHtlcConstraintMsat").value(is("2"));
     }
 
     @Test
@@ -150,6 +151,7 @@ class ChannelControllerIT {
                 .jsonPath("$.status.active").value(is(true))
                 .jsonPath("$.status.closed").value(is(false))
                 .jsonPath("$.status.openClosed").value(is("OPEN"))
+                .jsonPath("$.minHtlcConstraintMsat").value(is("2"))
                 .jsonPath("$.numUpdates").value(is(NUM_UPDATES))
                 .jsonPath("$.onChainCosts.openCostsSat").value(is("1000"))
                 .jsonPath("$.onChainCosts.closeCostsSat").value(is("2000"))

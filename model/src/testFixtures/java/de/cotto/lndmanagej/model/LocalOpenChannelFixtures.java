@@ -23,6 +23,7 @@ public class LocalOpenChannelFixtures {
     public static final Coins TOTAL_SENT_2 = Coins.ofSatoshis(101);
     public static final Coins TOTAL_RECEIVED = Coins.ofSatoshis(2_002);
     public static final Coins TOTAL_RECEIVED_2 = Coins.ofSatoshis(202);
+    public static final Coins MIN_HTLC_CONSTRAINT = Coins.ofMilliSatoshis(2);
 
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL =
             new LocalOpenChannel(
@@ -35,7 +36,8 @@ public class LocalOpenChannelFixtures {
                     TOTAL_RECEIVED,
                     false,
                     true,
-                    NUM_UPDATES
+                    NUM_UPDATES,
+                    MIN_HTLC_CONSTRAINT
             );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_MORE_BALANCE =
             new LocalOpenChannel(
@@ -48,7 +50,8 @@ public class LocalOpenChannelFixtures {
                     TOTAL_RECEIVED,
                     false,
                     true,
-                    NUM_UPDATES
+                    NUM_UPDATES,
+                    MIN_HTLC_CONSTRAINT
             );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_PRIVATE =
             new LocalOpenChannel(
@@ -61,7 +64,8 @@ public class LocalOpenChannelFixtures {
                     TOTAL_RECEIVED,
                     true,
                     true,
-                    NUM_UPDATES
+                    NUM_UPDATES,
+                    MIN_HTLC_CONSTRAINT
             );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_2 =
             new LocalOpenChannel(
@@ -74,7 +78,8 @@ public class LocalOpenChannelFixtures {
                     TOTAL_RECEIVED_2,
                     false,
                     false,
-                    NUM_UPDATES
+                    NUM_UPDATES,
+                    MIN_HTLC_CONSTRAINT
             );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_MORE_BALANCE_2 =
             new LocalOpenChannel(
@@ -87,7 +92,8 @@ public class LocalOpenChannelFixtures {
                     TOTAL_RECEIVED,
                     false,
                     true,
-                    NUM_UPDATES
+                    NUM_UPDATES,
+                    MIN_HTLC_CONSTRAINT
             );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_3 =
             new LocalOpenChannel(
@@ -100,7 +106,8 @@ public class LocalOpenChannelFixtures {
                     TOTAL_RECEIVED,
                     false,
                     true,
-                    NUM_UPDATES
+                    NUM_UPDATES,
+                    MIN_HTLC_CONSTRAINT
             );
     public static final LocalOpenChannel LOCAL_OPEN_CHANNEL_TO_NODE_3 =
             new LocalOpenChannel(
@@ -113,6 +120,7 @@ public class LocalOpenChannelFixtures {
                     TOTAL_RECEIVED,
                     false,
                     true,
-                    NUM_UPDATES
+                    NUM_UPDATES,
+                    MIN_HTLC_CONSTRAINT
             );
 }

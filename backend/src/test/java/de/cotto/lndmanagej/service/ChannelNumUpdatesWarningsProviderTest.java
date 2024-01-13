@@ -24,6 +24,7 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.CHANNEL_POINT;
+import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.MIN_HTLC_CONSTRAINT;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_RECEIVED;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_SENT;
 import static de.cotto.lndmanagej.model.OpenInitiator.LOCAL;
@@ -114,7 +115,8 @@ class ChannelNumUpdatesWarningsProviderTest {
                 TOTAL_RECEIVED,
                 false,
                 true,
-                numUpdates
+                numUpdates,
+                MIN_HTLC_CONSTRAINT
         );
     }
 }
