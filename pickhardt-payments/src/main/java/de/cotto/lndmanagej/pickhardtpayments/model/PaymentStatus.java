@@ -167,6 +167,7 @@ public class PaymentStatus extends Flux<InstantWithString> {
         private final Subscriber<? super InstantWithString> subscriber;
         private final List<InstantWithString> messagesForSubscriber;
         private long requested;
+        private boolean completed;
 
         public PaymentStatusSubscription(
                 Subscriber<? super InstantWithString> subscriber,
@@ -190,7 +191,11 @@ public class PaymentStatus extends Flux<InstantWithString> {
         }
 
         public void onComplete() {
-            subscriber.onComplete();
+            if (messagesForSubscriber.isEmpty()) {
+                subscriber.onComplete();
+            } else {
+                completed = true;
+            }
         }
 
         public void onNext(InstantWithString message) {
@@ -205,6 +210,9 @@ public class PaymentStatus extends Flux<InstantWithString> {
                 subscriber.onNext(messagesForSubscriber.get(0));
                 messagesForSubscriber.remove(0);
                 requested--;
+            }
+            if (completed) {
+                subscriber.onComplete();
             }
         }
     }

@@ -20,17 +20,24 @@ public class ReactiveStreamReader<T> implements Subscriber<T> {
     private final Integer expectedMessages;
 
     private boolean done;
+    private final long messagesToRequest;
 
     @CheckForNull
     private Subscription subscription;
 
     public ReactiveStreamReader(int expectedMessages) {
+        this(expectedMessages, Long.MAX_VALUE);
+    }
+
+    public ReactiveStreamReader(int expectedMessages, long messagesToRequest) {
         this.expectedMessages = expectedMessages;
+        this.messagesToRequest = messagesToRequest;
     }
 
     @SuppressWarnings("PMD.NullAssignment")
     public ReactiveStreamReader() {
         this.expectedMessages = null;
+        messagesToRequest = Long.MAX_VALUE;
     }
 
     public static <T> List<T> readMessages(Publisher<T> publisher, int expectedMessages) {
@@ -45,7 +52,7 @@ public class ReactiveStreamReader<T> implements Subscriber<T> {
         return instance.getMessages();
     }
 
-    private List<T> getMessages() {
+    public List<T> getMessages() {
         await().atMost(2, SECONDS).until(() -> done);
         if (expectedMessages != null) {
             return messages.subList(0, expectedMessages);
@@ -56,7 +63,7 @@ public class ReactiveStreamReader<T> implements Subscriber<T> {
     @Override
     public void onSubscribe(Subscription subscription) {
         this.subscription = subscription;
-        subscription.request(Long.MAX_VALUE);
+        subscription.request(messagesToRequest);
     }
 
     @Override
@@ -64,8 +71,6 @@ public class ReactiveStreamReader<T> implements Subscriber<T> {
         messages.add(message);
         if (expectedMessages != null && messages.size() == expectedMessages) {
             done = true;
-        } else {
-            Objects.requireNonNull(subscription).request(1);
         }
     }
 
@@ -77,5 +82,9 @@ public class ReactiveStreamReader<T> implements Subscriber<T> {
     @Override
     public void onComplete() {
         done = true;
+    }
+
+    public void requestAnotherMessage() {
+        Objects.requireNonNull(subscription).request(1);
     }
 }

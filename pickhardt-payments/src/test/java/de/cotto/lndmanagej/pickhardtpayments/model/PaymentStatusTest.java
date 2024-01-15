@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.pickhardtpayments.model;
 
+import de.cotto.lndmanagej.ReactiveStreamReader;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.model.FailureCode;
@@ -132,6 +133,19 @@ class PaymentStatusTest {
         assertThat(readMessages(paymentStatus, 2))
                 .map(InstantWithString::string)
                 .contains("hallo!");
+    }
+
+    @Test
+    void last_message_requested_after_completion_triggered() {
+        PaymentStatus paymentStatus = PaymentStatus.createFor(PAYMENT_HASH);
+        paymentStatus.info("message");
+        ReactiveStreamReader<InstantWithString> instance = new ReactiveStreamReader<>(3, 2);
+        paymentStatus.subscribe(instance);
+        paymentStatus.failed("failed");
+        instance.requestAnotherMessage();
+        assertThat(instance.getMessages())
+                .map(InstantWithString::string)
+                .contains("failed");
     }
 
     @Nested
