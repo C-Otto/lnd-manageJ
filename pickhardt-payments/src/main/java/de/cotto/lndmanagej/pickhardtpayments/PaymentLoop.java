@@ -99,11 +99,15 @@ public class PaymentLoop {
         private void start() {
             int loopIterationCounter = 0;
             int failureCounter = 0;
-            while (shouldContinue(loopIterationCounter)) {
+            while (shouldContinue()) {
                 loopIterationCounter++;
                 Coins residualAmount = totalAmountToSend.subtract(inFlight);
                 if (Coins.NONE.equals(residualAmount)) {
                     paymentStatus.info(TIMEOUT_MESSAGE);
+                    return;
+                }
+                if (shouldAbort(loopIterationCounter)) {
+                    paymentStatus.failed("Failing after " + MAX_NUMBER_OF_LOOPS + " loop iterations.");
                     return;
                 }
                 addLoopIterationInfo(loopIterationCounter, residualAmount);
@@ -166,11 +170,7 @@ public class PaymentLoop {
             );
         }
 
-        private boolean shouldContinue(int loopIterationCounter) {
-            if (loopIterationCounter >= MAX_NUMBER_OF_LOOPS) {
-                paymentStatus.failed("Failing after " + MAX_NUMBER_OF_LOOPS + " loop iterations.");
-                return false;
-            }
+        private boolean shouldContinue() {
             updateInformation();
             if (!paymentStatus.isPending()) {
                 return false;
@@ -181,6 +181,10 @@ public class PaymentLoop {
                 updateInformation();
             }
             return paymentStatus.isPending();
+        }
+
+        private boolean shouldAbort(int loopIterationCounter) {
+            return paymentStatus.isPending() && loopIterationCounter > MAX_NUMBER_OF_LOOPS;
         }
 
         private void updateInformation() {

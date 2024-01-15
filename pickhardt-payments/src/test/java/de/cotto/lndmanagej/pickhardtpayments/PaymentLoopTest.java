@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.OngoingStubbing;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -122,6 +123,25 @@ class PaymentLoopTest {
                 .contains("Failing after 100 loop iterations.");
         softly.assertAll();
         verify(grpcSendToRoute).forceFailureForPayment(DECODED_PAYMENT_REQUEST);
+    }
+
+    @Test
+    void waits_for_last_iteration_to_succeed() {
+        when(multiPathPaymentSplitter.getMultiPathPaymentTo(any(), any(), any(), anyInt()))
+                .thenReturn(MULTI_PATH_PAYMENT);
+        OngoingStubbing<Boolean> stubbing = when(multiPathPaymentObserver.isSettled(PAYMENT_HASH));
+        for (int i = 0; i < 100; i++) {
+            stubbing = stubbing.thenReturn(false);
+        }
+        stubbing.thenReturn(true);
+        paymentLoop.start(DECODED_PAYMENT_REQUEST, PAYMENT_OPTIONS, paymentStatus);
+
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(paymentStatus.isSuccess()).isTrue();
+        softly.assertThat(readAll(paymentStatus)).map(InstantWithString::string)
+                .doesNotContain("Failing after 100 loop iterations.");
+        softly.assertAll();
+        verify(multiPathPaymentSplitter, times(100)).getMultiPathPaymentTo(any(), any(), any(), anyInt());
     }
 
     @Test
