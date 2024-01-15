@@ -133,8 +133,8 @@ public class PaymentStatus extends Flux<InstantWithString> {
     public void subscribe(@Nonnull CoreSubscriber<? super InstantWithString> subscriber) {
         PaymentStatusSubscription subscription =
                 new PaymentStatusSubscription(subscriber, new ArrayList<>(allMessages));
-        subscriber.onSubscribe(subscription);
         synchronized (this) {
+            subscriber.onSubscribe(subscription);
             subscriptions.add(subscription);
         }
         if (isFailure() || isSuccess()) {
