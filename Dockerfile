@@ -2,7 +2,7 @@ FROM gradle:latest
 RUN apt-get update
 RUN apt-get install postgresql sudo -y
 
-RUN git clone https://github.com/C-Otto/lnd-manageJ.git --branch fix-5746
+RUN git clone https://github.com/C-Otto/lnd-manageJ.git
 WORKDIR lnd-manageJ
 RUN gradle application:bootJar
 
