@@ -1,4 +1,4 @@
-FROM gradle:latest
+FROM gradle:8.5
 RUN apt-get update
 RUN apt-get install postgresql sudo -y
 
