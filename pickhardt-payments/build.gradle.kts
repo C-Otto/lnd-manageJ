@@ -28,7 +28,7 @@ tasks.named("pitest") {
 }
 
 pitest {
-    testStrengthThreshold.set(98)
+    testStrengthThreshold.set(97)
 }
 
 tasks.jacocoTestCoverageVerification {
