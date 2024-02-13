@@ -14,8 +14,8 @@ RUN echo "macaroon_file=/root/.lnd/data/chain/bitcoin/testnet/admin.macaroon" >>
 EXPOSE 8081
 RUN echo "server.address=0.0.0.0" >> /root/override.properties
 CMD /etc/init.d/postgresql start && \
-    sudo -u postgres psql -c "CREATE USER bitcoin WITH PASSWORD 'unset'" && \
-    sudo -u postgres createdb lndmanagej -O bitcoin && \
+    (sudo -u postgres psql -c "CREATE USER bitcoin WITH PASSWORD 'unset'" || true) && \
+    (sudo -u postgres createdb lndmanagej -O bitcoin || true) && \
     java -jar application/build/libs/application-boot.jar --spring.config.location=classpath:application.properties,/root/override.properties
 
 # docker build -t lnd-managej .
