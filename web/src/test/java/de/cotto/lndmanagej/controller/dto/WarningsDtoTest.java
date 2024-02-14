@@ -15,7 +15,7 @@ class WarningsDtoTest {
                 "No flow in the past 16 days",
                 "Node has been online 51% in the past 14 days",
                 "Node changed between online and offline 123 times in the past 7 days",
-                "Channel has accumulated 101,000 updates"
+                "Channel balance ranged from 2% to 97% in the past 7 days"
         )));
     }
 
@@ -31,7 +31,7 @@ class WarningsDtoTest {
     @Test
     void createFromModel_channel() {
         assertThat(WarningsDto.createFromModel(CHANNEL_WARNINGS)).isEqualTo(new WarningsDto(Set.of(
-                "Channel has accumulated 101,000 updates"
+                "Channel balance ranged from 2% to 97% in the past 7 days"
         )));
     }
 }

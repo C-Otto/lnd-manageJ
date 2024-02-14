@@ -52,7 +52,7 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
-import static de.cotto.lndmanagej.model.warnings.ChannelWarningFixtures.CHANNEL_NUM_UPDATES_WARNING;
+import static de.cotto.lndmanagej.model.warnings.ChannelWarningFixtures.CHANNEL_BALANCE_FLUCTUATION_WARNING;
 import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixture.BALANCE_INFORMATION_MODEL;
 import static de.cotto.lndmanagej.ui.dto.NodeDetailsDtoFixture.NODE_DETAILS_MODEL;
 import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.CAPACITY_SAT;
@@ -139,7 +139,7 @@ class UiDataServiceImplTest {
                         FeeReportDto.createFromModel(FEE_REPORT),
                         FlowReportDto.createFromModel(FLOW_REPORT),
                         RebalanceReportDto.createFromModel(REBALANCE_REPORT),
-                        Set.of(CHANNEL_NUM_UPDATES_WARNING.description()),
+                        Set.of(CHANNEL_BALANCE_FLUCTUATION_WARNING.description()),
                         RatingDto.fromModel(RATING)
                 )
         );

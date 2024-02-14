@@ -14,10 +14,7 @@ public enum WarningsConfigurationSettings implements ConfigurationSetting {
     NODE_FLOW_WARNING_IGNORE_NODE("node_flow_warning_ignore_node"),
 
     NODE_RATING_THRESHOLD("node_rating_threshold"),
-    NODE_RATING_WARNING_IGNORE_NODE("node_rating_warning_ignore_node"),
-
-    MAX_NUM_UPDATES("max_num_updates"),
-    MAX_NUM_UPDATES_IGNORE_CHANNEL("max_num_updates_warning_ignore_channel");
+    NODE_RATING_WARNING_IGNORE_NODE("node_rating_warning_ignore_node");
 
     private final String name;
 

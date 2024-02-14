@@ -41,7 +41,7 @@ import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES_FOR_LOCAL_CHANNEL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 
@@ -196,9 +196,7 @@ class ChannelControllerIT {
                 .jsonPath("$.flowReport.totalReceivedMilliSat").value(is("63021"))
                 .jsonPath("$.rating.rating").value(is(123))
                 .jsonPath("$.rating.message").value(is(""))
-                .jsonPath("$.warnings").value(containsInAnyOrder(
-                        "Channel has accumulated 101,000 updates"
-                ));
+                .jsonPath("$.warnings").value(contains("Channel balance ranged from 2% to 97% in the past 7 days"));
     }
 
     @Test

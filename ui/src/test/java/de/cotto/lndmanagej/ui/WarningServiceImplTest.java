@@ -16,16 +16,13 @@ import java.util.Map;
 import java.util.Set;
 
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
-import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_2;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE;
 import static de.cotto.lndmanagej.model.NodeFixtures.NODE_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.warnings.ChannelWarningFixtures.CHANNEL_BALANCE_FLUCTUATION_WARNING;
-import static de.cotto.lndmanagej.model.warnings.ChannelWarningFixtures.CHANNEL_NUM_UPDATES_WARNING;
 import static de.cotto.lndmanagej.model.warnings.ChannelWarningsFixtures.CHANNEL_WARNINGS;
 import static de.cotto.lndmanagej.model.warnings.NodeWarningsFixtures.NODE_WARNINGS;
-import static de.cotto.lndmanagej.ui.dto.warning.ChannelWarningDtoFixture.CHANNEL_WARNING_DTO;
 import static de.cotto.lndmanagej.ui.dto.warning.ChannelWarningDtoFixture.CHANNEL_WARNING_DTO_2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.lenient;
@@ -78,15 +75,14 @@ class WarningServiceImplTest {
     @Test
     void getWarnings_only_channel_warnings() {
         when(channelWarningsService.getChannelWarnings()).thenReturn(Map.of(
-                LOCAL_OPEN_CHANNEL, new ChannelWarnings(CHANNEL_NUM_UPDATES_WARNING),
-                LOCAL_OPEN_CHANNEL_2, new ChannelWarnings(CHANNEL_BALANCE_FLUCTUATION_WARNING))
+                LOCAL_OPEN_CHANNEL, new ChannelWarnings(CHANNEL_BALANCE_FLUCTUATION_WARNING))
         );
 
         assertThat(warningService.getWarnings()).containsExactly(new DashboardWarningDto(
                 ALIAS_FOR_PUBKEY_2,
                 PUBKEY_2,
                 Set.of(),
-                Set.of(CHANNEL_WARNING_DTO, CHANNEL_WARNING_DTO_2)
+                Set.of(CHANNEL_WARNING_DTO_2)
         ));
     }
 
@@ -105,7 +101,7 @@ class WarningServiceImplTest {
                 ALIAS_FOR_PUBKEY_2,
                 PUBKEY_2,
                 THREE_NODE_WARNINGS,
-                Set.of(CHANNEL_WARNING_DTO)
+                Set.of(CHANNEL_WARNING_DTO_2)
         );
         assertThat(warningService.getWarnings()).containsExactlyInAnyOrder(nodeWarning, anotherNodeWarning);
     }

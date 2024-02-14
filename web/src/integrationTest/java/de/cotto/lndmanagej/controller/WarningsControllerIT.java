@@ -27,6 +27,7 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static de.cotto.lndmanagej.model.warnings.ChannelWarningsFixtures.CHANNEL_WARNINGS;
 import static de.cotto.lndmanagej.model.warnings.NodeWarningsFixtures.NODE_WARNINGS;
 import static de.cotto.lndmanagej.model.warnings.NodeWarningsFixtures.NODE_WARNINGS_2;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -75,8 +76,8 @@ class WarningsControllerIT {
     void getWarningsForChannel() {
         when(channelWarningsService.getChannelWarnings(CHANNEL_ID)).thenReturn(CHANNEL_WARNINGS);
         webTestClient.get().uri(CHANNEL_PREFIX + WARNINGS).exchange().expectBody()
-                .jsonPath(WARNINGS_PATH).value(containsInAnyOrder(
-                        "Channel has accumulated 101,000 updates"
+                .jsonPath(WARNINGS_PATH).value(contains(
+                        "Channel balance ranged from 2% to 97% in the past 7 days"
                 ));
     }
 
@@ -116,8 +117,8 @@ class WarningsControllerIT {
                         "Node changed between online and offline 99 times in the past 14 days"
                 ))
                 .jsonPath("$.channelsWithWarnings[0].channelId").value(is(CHANNEL_ID.toString()))
-                .jsonPath("$.channelsWithWarnings[0].warnings").value(containsInAnyOrder(
-                        "Channel has accumulated 101,000 updates"
+                .jsonPath("$.channelsWithWarnings[0].warnings").value(contains(
+                        "Channel balance ranged from 2% to 97% in the past 7 days"
                 ));
     }
 }
