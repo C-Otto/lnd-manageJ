@@ -67,7 +67,7 @@ public class PaymentLoop {
         if (paymentStatus.isFailure() && decodedPaymentRequest.destination().equals(ownPubkey)) {
             grpcInvoices.cancelPaymentRequest(decodedPaymentRequest);
         }
-        if (paymentStatus.isPending() || paymentStatus.isFailure()) {
+        if (paymentStatus.isFailure()) {
             grpcSendToRoute.forceFailureForPayment(decodedPaymentRequest);
         }
     }
@@ -103,7 +103,7 @@ public class PaymentLoop {
                 loopIterationCounter++;
                 Coins residualAmount = totalAmountToSend.subtract(inFlight);
                 if (Coins.NONE.equals(residualAmount)) {
-                    paymentStatus.info(TIMEOUT_MESSAGE);
+                    paymentStatus.failed(TIMEOUT_MESSAGE);
                     return;
                 }
                 if (shouldAbort(loopIterationCounter)) {

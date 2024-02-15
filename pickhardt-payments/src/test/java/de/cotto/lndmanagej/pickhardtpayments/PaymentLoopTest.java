@@ -265,10 +265,8 @@ class PaymentLoopTest {
                 .thenReturn(Coins.NONE)
                 .thenReturn(DECODED_PAYMENT_REQUEST.amount());
         paymentLoop.start(DECODED_PAYMENT_REQUEST, PAYMENT_OPTIONS, paymentStatus);
-        SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(paymentStatus.isSuccess()).isFalse();
-        softly.assertThat(paymentStatus.isFailure()).isFalse();
-        softly.assertAll();
+        // it's not strictly a failure, but we need to complete the flux/stream (see #88)
+        assertThat(paymentStatus.isFailure()).isTrue();
         verify(grpcSendToRoute).forceFailureForPayment(DECODED_PAYMENT_REQUEST);
     }
 
