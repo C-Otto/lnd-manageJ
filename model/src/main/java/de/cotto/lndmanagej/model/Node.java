@@ -27,7 +27,7 @@ public record Node(
     }
 
     public static Node forPubkey(Pubkey pubkey) {
-        return Node.builder().withPubkey(pubkey).build();
+        return builder().withPubkey(pubkey).build();
     }
 
     @Override

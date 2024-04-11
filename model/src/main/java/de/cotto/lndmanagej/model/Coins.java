@@ -33,18 +33,18 @@ public record Coins(long milliSatoshis) implements Comparable<Coins> {
         if (this.milliSatoshis == 0) {
             return summand;
         }
-        return Coins.ofMilliSatoshis(milliSatoshis + summand.milliSatoshis);
+        return ofMilliSatoshis(milliSatoshis + summand.milliSatoshis);
     }
 
     public Coins subtract(Coins subtrahend) {
         if (subtrahend.milliSatoshis == 0) {
             return this;
         }
-        return Coins.ofMilliSatoshis(milliSatoshis - subtrahend.milliSatoshis);
+        return ofMilliSatoshis(milliSatoshis - subtrahend.milliSatoshis);
     }
 
     public Coins absolute() {
-        return Coins.ofMilliSatoshis(Math.abs(milliSatoshis));
+        return ofMilliSatoshis(Math.abs(milliSatoshis));
     }
 
     @Override
@@ -67,7 +67,7 @@ public record Coins(long milliSatoshis) implements Comparable<Coins> {
     }
 
     public Coins negate() {
-        return Coins.ofMilliSatoshis(-milliSatoshis);
+        return ofMilliSatoshis(-milliSatoshis);
     }
 
     public boolean isPositive() {

@@ -71,7 +71,7 @@ class ArchUnitIT {
         rule.check(importedClasses);
     }
 
-    private static class DoNotIncludeTestClasses implements ImportOption {
+    private static final class DoNotIncludeTestClasses implements ImportOption {
         private static final Pattern GRADLE_PATTERN = Pattern.compile(".*/build/classes/([^/]+/)?[a-zA-Z-]*[tT]est/.*");
 
         @Override

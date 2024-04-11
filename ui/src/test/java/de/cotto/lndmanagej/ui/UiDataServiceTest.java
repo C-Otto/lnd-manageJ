@@ -16,7 +16,7 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.ui.dto.ChannelDetailsDtoFixture.CHANNEL_DETAILS_DTO;
 import static de.cotto.lndmanagej.ui.dto.NodeDetailsDtoFixture.NODE_DETAILS_MODEL;
 import static de.cotto.lndmanagej.ui.dto.NodeDtoFixture.NODE_DTO;
-import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
+import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixtures.OPEN_CHANNEL_DTO;
 import static de.cotto.lndmanagej.ui.dto.PendingOpenChannelDtoFixture.PENDING_OPEN_CHANNEL_DTO;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -43,7 +43,7 @@ class UiDataServiceTest {
         assertThat(uiDataService.calculateDaysOfBlocks(123_456, 123_311)).isEqualTo(2);
     }
 
-    private static class TestableUiDataService extends UiDataService {
+    private static final class TestableUiDataService extends UiDataService {
 
         @Override
         public Set<Pubkey> getPubkeys() {

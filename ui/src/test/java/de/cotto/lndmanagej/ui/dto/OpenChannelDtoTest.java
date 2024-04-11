@@ -7,7 +7,7 @@ import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFOR
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES_FOR_LOCAL_CHANNEL;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
-import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
+import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixtures.OPEN_CHANNEL_DTO;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class OpenChannelDtoTest {

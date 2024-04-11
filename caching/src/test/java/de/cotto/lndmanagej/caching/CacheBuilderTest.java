@@ -46,7 +46,7 @@ class CacheBuilderTest {
                 .build(() -> {
                     try {
                         Thread.sleep(20);
-                    } catch (InterruptedException e) {
+                    } catch (InterruptedException ignored) {
                         // ignored
                     }
                     return System.nanoTime();
@@ -68,7 +68,7 @@ class CacheBuilderTest {
                 .build(() -> {
                     try {
                         Thread.sleep(1_000);
-                    } catch (InterruptedException e) {
+                    } catch (InterruptedException ignored) {
                         // ignore
                     }
                     return System.nanoTime();
@@ -108,7 +108,7 @@ class CacheBuilderTest {
                 .withMaximumSize(1)
                 .build(System::nanoTime);
         Long first = cache.get("");
-        @SuppressWarnings("unused") var unused = cache.get("a");
+        @SuppressWarnings("unused") Long unused = cache.get("a");
         cache.cleanUp();
         Long third = cache.get("");
         assertThat(first).isNotEqualTo(third);

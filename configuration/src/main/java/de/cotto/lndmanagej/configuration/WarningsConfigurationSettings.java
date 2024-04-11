@@ -7,7 +7,7 @@ public enum WarningsConfigurationSettings implements ConfigurationSetting {
 
     CHANNEL_FLUCTUATION_LOWER_THRESHOLD("channel_fluctuation_lower_threshold"),
     CHANNEL_FLUCTUATION_UPPER_THRESHOLD("channel_fluctuation_upper_threshold"),
-    CHANNEL_FLUCTUATION_WARNING_IGNORE_CHANNEL("channel_fluctuation_warning_ignore_channel"),
+    CHANNEL_FLUCTUATION_IGNORE_CHANNEL("channel_fluctuation_warning_ignore_channel"),
 
     NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER("node_flow_maximum_days_to_consider"),
     NODE_FLOW_MINIMUM_DAYS_FOR_WARNING("node_flow_minimum_days_for_warning"),

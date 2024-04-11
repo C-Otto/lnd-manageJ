@@ -49,7 +49,7 @@ class ReportingStreamObserverTest {
         assertThat(sendToRouteObserver.seenFailureCode).isEqualTo(FINAL_INCORRECT_HTLC_AMOUNT);
     }
 
-    private static class TestableSendToRouteObserver implements SendToRouteObserver {
+    private static final class TestableSendToRouteObserver implements SendToRouteObserver {
         @Nullable
         private Throwable seenThrowable;
 

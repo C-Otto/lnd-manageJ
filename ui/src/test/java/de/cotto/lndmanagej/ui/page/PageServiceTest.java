@@ -14,6 +14,7 @@ import de.cotto.lndmanagej.ui.dto.BalanceInformationModel;
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.ui.dto.NodeDto;
 import de.cotto.lndmanagej.ui.dto.OpenChannelDto;
+import de.cotto.lndmanagej.ui.dto.PendingOpenChannelDto;
 import de.cotto.lndmanagej.ui.dto.warning.DashboardWarningDto;
 import de.cotto.lndmanagej.ui.page.channel.ChannelDetailsPage;
 import de.cotto.lndmanagej.ui.page.channel.ChannelsPage;
@@ -47,10 +48,10 @@ import static de.cotto.lndmanagej.ui.dto.NodeDetailsDtoFixture.NODE_DETAILS_MODE
 import static de.cotto.lndmanagej.ui.dto.NodeDtoFixture.NODE_DTO;
 import static de.cotto.lndmanagej.ui.dto.NodeDtoFixture.NODE_DTO_2;
 import static de.cotto.lndmanagej.ui.dto.NodeDtoFixture.NODE_DTO_3;
-import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.CAPACITY_SAT;
-import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
-import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO2;
-import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.UNANNOUNCED_CHANNEL;
+import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixtures.CAPACITY_SAT;
+import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixtures.OPEN_CHANNEL_DTO;
+import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixtures.OPEN_CHANNEL_DTO2;
+import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixtures.UNANNOUNCED_CHANNEL;
 import static de.cotto.lndmanagej.ui.dto.PendingOpenChannelDtoFixture.PENDING_OPEN_CHANNEL_DTO;
 import static de.cotto.lndmanagej.ui.dto.warning.DashboardWarningsFixture.DASHBOARD_WARNING;
 import static de.cotto.lndmanagej.ui.dto.warning.DashboardWarningsFixture.DASHBOARD_WARNING_2;
@@ -194,7 +195,7 @@ class PageServiceTest {
 
     @Test
     void pendingChannels() {
-        var channels = List.of(PENDING_OPEN_CHANNEL_DTO);
+        List<PendingOpenChannelDto> channels = List.of(PENDING_OPEN_CHANNEL_DTO);
         when(dataService.getPendingOpenChannels()).thenReturn(channels);
         assertThat(pageService.pendingChannels()).usingRecursiveComparison()
                 .isEqualTo(new PendingChannelsPage(channels));

@@ -10,10 +10,10 @@ import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES_FOR_LOCAL_CHANNE
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
-import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixture.BALANCE_INFORMATION_MODEL;
-import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixture.BALANCE_INFORMATION_MODEL_2;
+import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixtures.BALANCE_INFORMATION_MODEL;
+import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixtures.BALANCE_INFORMATION_MODEL_2;
 
-public class OpenChannelDtoFixture {
+public class OpenChannelDtoFixtures {
 
     public static final long CAPACITY_SAT = 21_000_000;
 

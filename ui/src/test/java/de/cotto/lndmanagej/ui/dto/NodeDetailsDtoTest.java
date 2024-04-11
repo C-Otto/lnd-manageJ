@@ -23,7 +23,7 @@ import static de.cotto.lndmanagej.model.PeerRatingFixtures.PEER_RATING;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static de.cotto.lndmanagej.model.warnings.NodeWarningsFixtures.NODE_WARNINGS;
-import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixture.BALANCE_INFORMATION_MODEL_2;
+import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixtures.BALANCE_INFORMATION_MODEL_2;
 import static de.cotto.lndmanagej.ui.dto.ClosedChannelDtoFixture.CLOSED_CHANNEL_DTO;
 import static org.assertj.core.api.Assertions.assertThat;
 

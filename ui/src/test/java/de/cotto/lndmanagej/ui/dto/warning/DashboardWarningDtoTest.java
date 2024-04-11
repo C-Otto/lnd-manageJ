@@ -38,7 +38,7 @@ class DashboardWarningDtoTest {
 
     @Test
     void node_without_alias_is_shown_with_pubkey() {
-        var nodeWithoutAlias = new DashboardWarningDto(
+        DashboardWarningDto nodeWithoutAlias = new DashboardWarningDto(
                 "",
                 PUBKEY,
                 Set.of("This is a node warning."),

@@ -57,7 +57,7 @@ public class GrpcMiddlewareService implements ObserverIsDoneListener {
     private void sleep() {
         try {
             Thread.sleep(10_000);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException ignored) {
             // ignore
         }
     }

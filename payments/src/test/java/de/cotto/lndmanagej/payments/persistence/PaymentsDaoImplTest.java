@@ -108,6 +108,7 @@ class PaymentsDaoImplTest {
         }
 
         @Test
+        @SuppressWarnings("PMD.CompareObjectsWithEquals")
         void uses_existing_instance_for_update() {
             SettledPaymentIndexJpaDto existingInstance = new SettledPaymentIndexJpaDto();
             existingInstance.setAllSettledIndexOffset(23);

@@ -18,8 +18,8 @@ import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES_FOR_LOCAL_CHANNE
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.RebalanceReportFixtures.REBALANCE_REPORT;
 import static de.cotto.lndmanagej.model.warnings.ChannelWarningsFixtures.CHANNEL_WARNINGS;
-import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixture.BALANCE_INFORMATION_MODEL;
-import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.CAPACITY_SAT;
+import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixtures.BALANCE_INFORMATION_MODEL;
+import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixtures.CAPACITY_SAT;
 
 public class ChannelDetailsDtoFixture {
 

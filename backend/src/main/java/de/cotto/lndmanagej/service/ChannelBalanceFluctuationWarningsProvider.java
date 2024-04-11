@@ -13,9 +13,9 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.CHANNEL_FLUCTUATION_IGNORE_CHANNEL;
 import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.CHANNEL_FLUCTUATION_LOWER_THRESHOLD;
 import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.CHANNEL_FLUCTUATION_UPPER_THRESHOLD;
-import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.CHANNEL_FLUCTUATION_WARNING_IGNORE_CHANNEL;
 
 @Component
 public class ChannelBalanceFluctuationWarningsProvider implements ChannelWarningsProvider {
@@ -78,7 +78,7 @@ public class ChannelBalanceFluctuationWarningsProvider implements ChannelWarning
 
     private boolean ignoreWarning(ChannelId channelId) {
         return configurationService.getChannelIds(
-                CHANNEL_FLUCTUATION_WARNING_IGNORE_CHANNEL,
+                CHANNEL_FLUCTUATION_IGNORE_CHANNEL,
                 channelIdParser::parseFromString
         ).contains(channelId);
     }

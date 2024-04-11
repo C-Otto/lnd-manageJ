@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.USE_MISSION_CONTROL;
-import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.CHANNEL_FLUCTUATION_WARNING_IGNORE_CHANNEL;
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.CHANNEL_FLUCTUATION_IGNORE_CHANNEL;
 import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.ONLINE_CHANGES_THRESHOLD;
 import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.ONLINE_WARNING_IGNORE_NODE;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
@@ -132,7 +132,7 @@ class ConfigurationServiceTest {
     @Test
     void getChannelIds_not_known_empty() {
         Set<ChannelId> channelIds = configurationService.getChannelIds(
-                CHANNEL_FLUCTUATION_WARNING_IGNORE_CHANNEL, channelIdParser::parseFromString
+                CHANNEL_FLUCTUATION_IGNORE_CHANNEL, channelIdParser::parseFromString
         );
         assertThat(channelIds).isEmpty();
     }
@@ -144,7 +144,7 @@ class ConfigurationServiceTest {
         when(channelIdParser.parseFromString(String.valueOf(CHANNEL_ID_3.getShortChannelId())))
                 .thenReturn(CHANNEL_ID_3);
         when(channelIdParser.parseFromString(CHANNEL_POINT.toString())).thenReturn(CHANNEL_ID_4);
-        WarningsConfigurationSettings config = CHANNEL_FLUCTUATION_WARNING_IGNORE_CHANNEL;
+        WarningsConfigurationSettings config = CHANNEL_FLUCTUATION_IGNORE_CHANNEL;
         when(iniFileReader.getValues(config.getSection()))
                 .thenReturn(Map.of(config.getName(),
                         Set.of(
@@ -160,7 +160,7 @@ class ConfigurationServiceTest {
     @Test()
     void getChannelIds_forInvalidWarningConfig_error() {
         when(channelIdParser.parseFromString("invalid_chan")).thenThrow(new IllegalArgumentException());
-        WarningsConfigurationSettings config = CHANNEL_FLUCTUATION_WARNING_IGNORE_CHANNEL;
+        WarningsConfigurationSettings config = CHANNEL_FLUCTUATION_IGNORE_CHANNEL;
         when(iniFileReader.getValues(config.getSection())).thenReturn(Map.of(config.getName(), Set.of("invalid_chan")));
         assertThatIllegalArgumentException().isThrownBy(
                 () -> configurationService.getChannelIds(config, channelIdParser::parseFromString)

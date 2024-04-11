@@ -12,6 +12,7 @@ public record Resolution(Optional<TransactionHash> sweepTransaction, String reso
     private static final String ANCHOR = "ANCHOR";
     private static final String COMMIT = "COMMIT";
 
+    @SuppressWarnings("PMD.SimplifyBooleanReturns")
     public boolean sweepTransactionClaimsFunds() {
         if (OUTGOING_HTLC.equals(resolutionType) && TIMEOUT.equals(outcome)) {
             return true;

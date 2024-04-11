@@ -42,7 +42,7 @@ public class StatusInterceptor implements HandlerInterceptor {
     }
 
     boolean isStatusPage(@Nullable String path) {
-        return path != null && path.equals("/status");
+        return "/status".equals(path);
     }
 
     boolean isResource(@Nullable String path) {

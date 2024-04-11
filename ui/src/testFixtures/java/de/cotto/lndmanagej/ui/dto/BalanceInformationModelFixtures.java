@@ -1,6 +1,6 @@
 package de.cotto.lndmanagej.ui.dto;
 
-public class BalanceInformationModelFixture {
+public class BalanceInformationModelFixtures {
 
     public static final BalanceInformationModel BALANCE_INFORMATION_MODEL =
             new BalanceInformationModel(1_000, 100, 900, 123, 10, 113);

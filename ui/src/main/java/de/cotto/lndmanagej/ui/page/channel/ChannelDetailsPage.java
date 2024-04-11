@@ -3,7 +3,7 @@ package de.cotto.lndmanagej.ui.page.channel;
 import de.cotto.lndmanagej.ui.dto.ChannelDetailsDto;
 import de.cotto.lndmanagej.ui.page.general.ThymeleafPage;
 
-public class ChannelDetailsPage extends ThymeleafPage {
+public final class ChannelDetailsPage extends ThymeleafPage {
 
     public ChannelDetailsPage(ChannelDetailsDto channel) {
         super();

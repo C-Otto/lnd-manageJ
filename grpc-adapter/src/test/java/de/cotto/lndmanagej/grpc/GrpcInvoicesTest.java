@@ -121,7 +121,7 @@ class GrpcInvoicesTest {
 
         @Test
         void with_keysend_message_just_preimage() {
-            LinkedHashMap<Long, ByteString> customRecords = new LinkedHashMap<>();
+            Map<Long, ByteString> customRecords = new LinkedHashMap<>();
             customRecords.put(5_482_373_484L, ByteString.copyFromUtf8("000"));
             mockResponse(invoice(SETTLED, SETTLED_INVOICE_KEYSEND, customRecords, List.of()));
             assertThat(grpcInvoices.getSettledInvoicesAfter(0L)).contains(
@@ -131,7 +131,7 @@ class GrpcInvoicesTest {
 
         @Test
         void with_keysend_message_without_preimage() {
-            LinkedHashMap<Long, ByteString> customRecords = new LinkedHashMap<>();
+            Map<Long, ByteString> customRecords = new LinkedHashMap<>();
             customRecords.put(7_629_168L, ByteString.copyFromUtf8(KEYSEND_MESSAGE));
             mockResponse(invoice(SETTLED, SETTLED_INVOICE_KEYSEND, customRecords, List.of()));
             assertThat(grpcInvoices.getSettledInvoicesAfter(0L)).contains(
@@ -311,14 +311,14 @@ class GrpcInvoicesTest {
     }
 
     private Invoice keysendInvoice() {
-        LinkedHashMap<Long, ByteString> customRecords = new LinkedHashMap<>();
+        Map<Long, ByteString> customRecords = new LinkedHashMap<>();
         customRecords.put(5_482_373_484L, ByteString.copyFromUtf8("000"));
         customRecords.put(7_629_168L, ByteString.copyFromUtf8(KEYSEND_MESSAGE));
         return invoice(SETTLED, SETTLED_INVOICE_KEYSEND, customRecords, List.of());
     }
 
     private Invoice keysendInvoiceV2() {
-        LinkedHashMap<Long, ByteString> customRecords = new LinkedHashMap<>();
+        Map<Long, ByteString> customRecords = new LinkedHashMap<>();
         customRecords.put(5_482_373_484L, ByteString.copyFromUtf8("000"));
         customRecords.put(34_349_334L, ByteString.copyFromUtf8(KEYSEND_MESSAGE));
         return invoice(SETTLED, SETTLED_INVOICE_KEYSEND, customRecords, List.of());

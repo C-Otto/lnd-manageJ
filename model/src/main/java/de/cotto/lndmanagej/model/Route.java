@@ -60,7 +60,7 @@ public class Route {
         if (amountSat > upperBoundSat) {
             return 0.0;
         }
-        return (1.0 * (upperBoundSat + 1 - amountSat)) / (upperBoundSat + 1 - lowerBoundSat);
+        return 1.0 * (upperBoundSat + 1 - amountSat) / (upperBoundSat + 1 - lowerBoundSat);
     }
 
     public Coins getFees() {

@@ -40,7 +40,7 @@ public class IniFileReader {
     }
 
     private Map<String, Set<String>> toMultiValueMap(Profile.Section section) {
-        LinkedHashMap<String, Set<String>> result = new LinkedHashMap<>();
+        Map<String, Set<String>> result = new LinkedHashMap<>();
         for (String key : section.keySet()) {
             result.put(key, new HashSet<>(section.getAll(key)));
         }

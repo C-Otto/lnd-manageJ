@@ -106,6 +106,7 @@ public class EdgeComputation {
         return EdgeWithLiquidityInformation.forLowerAndUpperBound(edge, lowerBound, upperBound);
     }
 
+    @SuppressWarnings("PMD.SimplifyBooleanReturns")
     private boolean shouldIgnore(
             DirectedChannelEdge channelEdge,
             PaymentOptions paymentOptions,
@@ -140,6 +141,7 @@ public class EdgeComputation {
         return feeRate >= feeRateLimitFirstHops;
     }
 
+    @SuppressWarnings("PMD.SimplifyBooleanReturns")
     private boolean isEdgeToUnwantedFirstHop(
             DirectedChannelEdge channelEdge,
             PaymentOptions paymentOptions,

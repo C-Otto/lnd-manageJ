@@ -4,9 +4,9 @@ import de.cotto.lndmanagej.model.BalanceInformation;
 import de.cotto.lndmanagej.model.Coins;
 import org.junit.jupiter.api.Test;
 
-import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixture.BALANCE_INFORMATION_MODEL;
-import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixture.LOW_LOCAL_MODEL;
-import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixture.LOW_REMOTE_MODEL;
+import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixtures.BALANCE_INFORMATION_MODEL;
+import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixtures.LOW_LOCAL_MODEL;
+import static de.cotto.lndmanagej.ui.dto.BalanceInformationModelFixtures.LOW_REMOTE_MODEL;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class BalanceInformationModelTest {

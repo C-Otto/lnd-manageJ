@@ -2,9 +2,9 @@ package de.cotto.lndmanagej.configuration;
 
 import org.junit.jupiter.api.Test;
 
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.CHANNEL_FLUCTUATION_IGNORE_CHANNEL;
 import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.CHANNEL_FLUCTUATION_LOWER_THRESHOLD;
 import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.CHANNEL_FLUCTUATION_UPPER_THRESHOLD;
-import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.CHANNEL_FLUCTUATION_WARNING_IGNORE_CHANNEL;
 import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.NODE_FLOW_MAXIMUM_DAYS_TO_CONSIDER;
 import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.NODE_FLOW_MINIMUM_DAYS_FOR_WARNING;
 import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.NODE_FLOW_WARNING_IGNORE_NODE;
@@ -32,8 +32,8 @@ class WarningsConfigurationSettingsTest {
 
     @Test
     void channelFluctuationIgnoreWarning() {
-        assertThat(CHANNEL_FLUCTUATION_WARNING_IGNORE_CHANNEL.getSection()).isEqualTo(SECTION_NAME);
-        assertThat(CHANNEL_FLUCTUATION_WARNING_IGNORE_CHANNEL.getName())
+        assertThat(CHANNEL_FLUCTUATION_IGNORE_CHANNEL.getSection()).isEqualTo(SECTION_NAME);
+        assertThat(CHANNEL_FLUCTUATION_IGNORE_CHANNEL.getName())
                 .isEqualTo("channel_fluctuation_warning_ignore_channel");
     }
 

@@ -5,7 +5,7 @@ import de.cotto.lndmanagej.ui.page.general.ThymeleafPage;
 
 import java.util.List;
 
-public class NodesPage extends ThymeleafPage {
+public final class NodesPage extends ThymeleafPage {
 
     private final List<NodeDto> nodes;
 

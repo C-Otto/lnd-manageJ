@@ -70,7 +70,7 @@ class MultiPathPaymentObserverIT {
     private void unlockAfterSomeMilliSeconds(SendToRouteObserver sendToRouteObserver) {
         try {
             Thread.sleep(100);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException ignored) {
             // ignore
         }
         sendToRouteObserver.onError(new NullPointerException());

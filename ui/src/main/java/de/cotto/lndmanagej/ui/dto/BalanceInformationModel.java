@@ -31,7 +31,7 @@ public record BalanceInformationModel(
     public double getOutboundPercentage() {
         long outbound = localBalanceSat();
         long routableCapacity = outbound + remoteBalanceSat();
-        return (1.0 * outbound / routableCapacity) * 100;
+        return 1.0 * outbound / routableCapacity * 100;
     }
 
     public long getRoutableCapacity() {

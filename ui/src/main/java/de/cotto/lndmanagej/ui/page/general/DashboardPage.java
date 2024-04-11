@@ -6,7 +6,7 @@ import de.cotto.lndmanagej.ui.dto.warning.DashboardWarningDto;
 
 import java.util.List;
 
-public class DashboardPage extends ThymeleafPage {
+public final class DashboardPage extends ThymeleafPage {
 
     private final List<NodeDto> nodes;
     private final List<OpenChannelDto> channels;

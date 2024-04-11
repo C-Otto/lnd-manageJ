@@ -18,7 +18,7 @@ import java.util.List;
 
 import static de.cotto.lndmanagej.ui.controller.param.SortBy.SORT_PARAM_KEY;
 import static de.cotto.lndmanagej.ui.dto.NodeDtoFixture.NODE_DTO;
-import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixture.OPEN_CHANNEL_DTO;
+import static de.cotto.lndmanagej.ui.dto.OpenChannelDtoFixtures.OPEN_CHANNEL_DTO;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;

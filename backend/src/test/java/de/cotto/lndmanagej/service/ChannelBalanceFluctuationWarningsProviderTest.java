@@ -16,9 +16,9 @@ import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.Set;
 
+import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.CHANNEL_FLUCTUATION_IGNORE_CHANNEL;
 import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.CHANNEL_FLUCTUATION_LOWER_THRESHOLD;
 import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.CHANNEL_FLUCTUATION_UPPER_THRESHOLD;
-import static de.cotto.lndmanagej.configuration.WarningsConfigurationSettings.CHANNEL_FLUCTUATION_WARNING_IGNORE_CHANNEL;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
@@ -132,14 +132,14 @@ class ChannelBalanceFluctuationWarningsProviderTest {
 
         @Test
         void no_warning_for_ignored_channel() {
-            when(configurationService.getChannelIds(eq(CHANNEL_FLUCTUATION_WARNING_IGNORE_CHANNEL), any()))
+            when(configurationService.getChannelIds(eq(CHANNEL_FLUCTUATION_IGNORE_CHANNEL), any()))
                     .thenReturn(Set.of(CHANNEL_ID_3, CHANNEL_ID));
             assertThat(warningsProvider.getChannelWarnings(CHANNEL_ID)).isEmpty();
         }
 
         @Test
         void warning_if_other_channel_is_ignored() {
-            when(configurationService.getChannelIds(eq(CHANNEL_FLUCTUATION_WARNING_IGNORE_CHANNEL), any()))
+            when(configurationService.getChannelIds(eq(CHANNEL_FLUCTUATION_IGNORE_CHANNEL), any()))
                     .thenReturn(Set.of(CHANNEL_ID_2, CHANNEL_ID_3));
             assertThat(warningsProvider.getChannelWarnings(CHANNEL_ID)).isNotEmpty();
         }
