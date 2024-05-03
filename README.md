@@ -61,7 +61,7 @@ Channel specific: `/api/channel/{ID}/` (where `{ID}` is the channel ID) followed
  * (nothing): basic channel information (open height, remote pubkey, capacity, status, ...)
    * For closed private channels the `private` field is only set to `true` if this information could be collected before the channel was closed (it is only available while the channel is still open)
  * `balance`: the channel balance (for local/remote each: balance, available, reserve)
- * `policies`: local and remote fee rate, base fee, and enabled boolean
+ * `policies`: local and remote fee rate, base fee, inbound fee rate, inbound base fee, and enabled boolean
  * `close-details` (only for closed channels): close initiator, close height, force boolean, breach boolean
  * `fee-report`: milli-satoshis earned by forwarding payments leaving out through the channel (`earnedMilliSat`) or coming in from the channel (`sourcedMilliSat`)
  * `flow-report`: amounts flowing through the channel, broken down into different categories
