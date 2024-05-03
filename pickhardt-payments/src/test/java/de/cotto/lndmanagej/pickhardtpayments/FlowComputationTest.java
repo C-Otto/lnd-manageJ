@@ -5,6 +5,7 @@ import de.cotto.lndmanagej.grpc.GrpcGetInfo;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Edge;
 import de.cotto.lndmanagej.model.EdgeWithLiquidityInformation;
+import de.cotto.lndmanagej.model.Policy;
 import de.cotto.lndmanagej.pickhardtpayments.model.EdgesWithLiquidityInformation;
 import de.cotto.lndmanagej.pickhardtpayments.model.Flow;
 import de.cotto.lndmanagej.pickhardtpayments.model.Flows;
@@ -126,8 +127,8 @@ class FlowComputationTest {
 
     @Test
     void solve_avoids_sending_from_depleted_local_channel() {
-        Edge edge1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, LARGE, POLICY_1);
-        Edge edge2 = new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, SMALL, POLICY_2);
+        Edge edge1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, LARGE, POLICY_1, Policy.UNKNOWN);
+        Edge edge2 = new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, SMALL, POLICY_2, Policy.UNKNOWN);
         when(
                 edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA)
         ).thenReturn(new EdgesWithLiquidityInformation(
@@ -148,9 +149,9 @@ class FlowComputationTest {
     @Test
     void solve_with_channel_with_small_liquidity_upper_bound() {
         Coins amount = Coins.ofSatoshis(100);
-        Edge edge1a = new Edge(CHANNEL_ID, PUBKEY_2, PUBKEY_3, LARGE, POLICY_1);
-        Edge edge1b = new Edge(CHANNEL_ID_2, PUBKEY_3, PUBKEY_4, LARGE, POLICY_1);
-        Edge edge2 = new Edge(CHANNEL_ID_3, PUBKEY_2, PUBKEY_4, SMALL, POLICY_2);
+        Edge edge1a = new Edge(CHANNEL_ID, PUBKEY_2, PUBKEY_3, LARGE, POLICY_1, Policy.UNKNOWN);
+        Edge edge1b = new Edge(CHANNEL_ID_2, PUBKEY_3, PUBKEY_4, LARGE, POLICY_1, Policy.UNKNOWN);
+        Edge edge2 = new Edge(CHANNEL_ID_3, PUBKEY_2, PUBKEY_4, SMALL, POLICY_2, Policy.UNKNOWN);
         when(
                 edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA)
         ).thenReturn(new EdgesWithLiquidityInformation(
@@ -171,9 +172,9 @@ class FlowComputationTest {
     @Test
     void solve_with_channel_with_large_liquidity_upper_bound() {
         Coins amount = Coins.ofSatoshis(100);
-        Edge edge1a = new Edge(CHANNEL_ID, PUBKEY_3, PUBKEY_4, LARGE, POLICY_2);
-        Edge edge1b = new Edge(CHANNEL_ID_2, PUBKEY_4, PUBKEY, LARGE, POLICY_2);
-        Edge edge2 = new Edge(CHANNEL_ID_3, PUBKEY_3, PUBKEY, SMALL, POLICY_1);
+        Edge edge1a = new Edge(CHANNEL_ID, PUBKEY_3, PUBKEY_4, LARGE, POLICY_2, Policy.UNKNOWN);
+        Edge edge1b = new Edge(CHANNEL_ID_2, PUBKEY_4, PUBKEY, LARGE, POLICY_2, Policy.UNKNOWN);
+        Edge edge2 = new Edge(CHANNEL_ID_3, PUBKEY_3, PUBKEY, SMALL, POLICY_1, Policy.UNKNOWN);
         when(
                 edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA)
         ).thenReturn(new EdgesWithLiquidityInformation(

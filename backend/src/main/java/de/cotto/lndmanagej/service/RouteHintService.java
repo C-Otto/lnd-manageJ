@@ -51,7 +51,8 @@ public class RouteHintService {
                 FIFTY_COINS,
                 routeHint.sourceNode(),
                 routeHint.endNode(),
-                toPolicy(routeHint)
+                toPolicy(routeHint),
+                Policy.UNKNOWN
         );
     }
 

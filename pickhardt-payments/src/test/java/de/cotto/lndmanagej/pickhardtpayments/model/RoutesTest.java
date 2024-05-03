@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.pickhardtpayments.model;
 import de.cotto.lndmanagej.model.BasicRoute;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Edge;
+import de.cotto.lndmanagej.model.Policy;
 import de.cotto.lndmanagej.model.Route;
 import org.junit.jupiter.api.Test;
 
@@ -31,9 +32,9 @@ class RoutesTest {
 
     @Test
     void getFixedWithTotalAmount_adds_to_route_with_highest_probability() {
-        Edge edge1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1);
-        Edge edge2 = new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1);
-        Edge edge3 = new Edge(CHANNEL_ID_3, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1);
+        Edge edge1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1, Policy.UNKNOWN);
+        Edge edge2 = new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1, Policy.UNKNOWN);
+        Edge edge3 = new Edge(CHANNEL_ID_3, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1, Policy.UNKNOWN);
 
         List<BasicRoute> basicRoutes = List.of(
                 new BasicRoute(List.of(edge1), Coins.ofSatoshis(2)),

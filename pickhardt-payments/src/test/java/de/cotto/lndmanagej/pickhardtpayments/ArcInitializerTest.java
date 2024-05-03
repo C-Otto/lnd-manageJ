@@ -344,7 +344,7 @@ class ArcInitializerTest {
         private void addEdgeWithBaseFee(Coins baseFee, int quantization, ArcInitializer arcInitializer) {
             Policy policy = new Policy(200, baseFee, true, 40, Coins.ofMilliSatoshis(1), Coins.ofSatoshis(10_000));
             EdgeWithLiquidityInformation edge = EdgeWithLiquidityInformation.forKnownLiquidity(
-                    new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy),
+                    new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy, Policy.UNKNOWN),
                     Coins.ofSatoshis(30L * quantization)
             );
             arcInitializer.addArcs(new EdgesWithLiquidityInformation(edge));

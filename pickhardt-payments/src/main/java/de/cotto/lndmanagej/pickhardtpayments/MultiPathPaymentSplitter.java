@@ -136,7 +136,7 @@ public class MultiPathPaymentSplitter {
             return List.of();
         }
         Coins capacity = localChannel.getCapacity();
-        Edge extensionEdge = new Edge(channelId, peer, originalTarget, capacity, policy);
+        Edge extensionEdge = new Edge(channelId, peer, originalTarget, capacity, policy, Policy.UNKNOWN);
         return basicRoutes.stream().map(basicRoute -> {
             List<Edge> edges = new ArrayList<>(basicRoute.edges());
             edges.add(extensionEdge);

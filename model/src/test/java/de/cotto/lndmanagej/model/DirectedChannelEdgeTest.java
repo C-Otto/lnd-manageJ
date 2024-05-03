@@ -6,6 +6,7 @@ import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.DirectedChannelEdgeFixtures.CHANNEL_EDGE_WITH_POLICY;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_1;
+import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,5 +35,10 @@ class DirectedChannelEdgeTest {
     @Test
     void policy() {
         assertThat(CHANNEL_EDGE_WITH_POLICY.policy()).isEqualTo(POLICY_1);
+    }
+
+    @Test
+    void reversePolicy() {
+        assertThat(CHANNEL_EDGE_WITH_POLICY.reversePolicy()).isEqualTo(POLICY_2);
     }
 }

@@ -59,19 +59,19 @@ class RouteTest {
 
     @Test
     void default_liquidity_information() {
-        Edge edge1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, Coins.ofSatoshis(99), POLICY_1);
-        Edge edge2 = new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, Coins.ofSatoshis(199), POLICY_1);
+        Edge edge1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, Coins.ofSatoshis(99), POLICY_1, Policy.UNKNOWN);
+        Edge edge2 = new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, Coins.ofSatoshis(199), POLICY_1, Policy.UNKNOWN);
         Route route = new Route(new BasicRoute(List.of(edge1, edge2), Coins.ofSatoshis(1)));
         assertThat(route.getProbability()).isEqualTo(0.99 * 0.995);
     }
 
     @Test
     void explicit_liquidity_information() {
-        Edge edge1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, Coins.ofSatoshis(99), POLICY_1);
-        Edge edge2 = new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, Coins.ofSatoshis(199), POLICY_1);
+        Edge edge1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, Coins.ofSatoshis(500), POLICY_1, Policy.UNKNOWN);
+        Edge edge2 = new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, Coins.ofSatoshis(199), POLICY_1, Policy.UNKNOWN);
         BasicRoute basicRoute = new BasicRoute(List.of(edge1, edge2), Coins.ofSatoshis(1));
         Route route = new Route(List.of(
-                EdgeWithLiquidityInformation.forKnownLiquidity(edge1, Coins.ofSatoshis(99)),
+                EdgeWithLiquidityInformation.forKnownLiquidity(edge1, Coins.ofSatoshis(500)),
                 EdgeWithLiquidityInformation.forUpperBound(edge2, Coins.ofSatoshis(199))
         ), basicRoute.amount());
         assertThat(route.getProbability()).isEqualTo(1 * 0.995);
@@ -87,7 +87,7 @@ class RouteTest {
         long availableLiquiditySat = 100;
         Coins capacity = Coins.ofSatoshis(200);
         Coins amount = Coins.ofSatoshis(99);
-        Edge edge = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, capacity, POLICY_1);
+        Edge edge = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, capacity, POLICY_1, Policy.UNKNOWN);
         BasicRoute basicRoute = new BasicRoute(List.of(edge), amount);
         EdgeWithLiquidityInformation edgeWithLiquidityInformation =
                 EdgeWithLiquidityInformation.forKnownLiquidity(edge, Coins.ofSatoshis(availableLiquiditySat));
@@ -106,7 +106,7 @@ class RouteTest {
     void getProbability_below_lower_bound() {
         Coins capacity = Coins.ofSatoshis(400);
         Coins amount = Coins.ofSatoshis(100);
-        Edge edge = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, capacity, POLICY_1);
+        Edge edge = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, capacity, POLICY_1, Policy.UNKNOWN);
         EdgeWithLiquidityInformation edgeWithLiquidityInformation =
                 EdgeWithLiquidityInformation.forLowerBound(edge, Coins.ofSatoshis(200));
         Route route = new Route(List.of(edgeWithLiquidityInformation), amount);
@@ -133,7 +133,7 @@ class RouteTest {
         long lowerBoundSat = 100;
         long capacitySat = 200;
         int amountSat = 150;
-        Edge edge = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, Coins.ofSatoshis(capacitySat), POLICY_1);
+        Edge edge = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, Coins.ofSatoshis(capacitySat), POLICY_1, Policy.UNKNOWN);
         BasicRoute basicRoute = new BasicRoute(List.of(edge), Coins.ofSatoshis(amountSat));
         EdgeWithLiquidityInformation edgeWithLiquidityInformation =
                 EdgeWithLiquidityInformation.forLowerBound(edge, Coins.ofSatoshis(lowerBoundSat));
@@ -147,7 +147,7 @@ class RouteTest {
         long upperBoundSat = 100;
         Coins capacity = Coins.ofSatoshis(200);
         Coins amount = Coins.ofSatoshis(80);
-        Edge edge = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, capacity, POLICY_1);
+        Edge edge = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, capacity, POLICY_1, Policy.UNKNOWN);
         BasicRoute basicRoute = new BasicRoute(List.of(edge), amount);
         EdgeWithLiquidityInformation edgeWithLiquidityInformation =
                 EdgeWithLiquidityInformation.forUpperBound(edge, Coins.ofSatoshis(upperBoundSat));
@@ -167,9 +167,9 @@ class RouteTest {
                 Coins.ofMilliSatoshis((long) (amount.milliSatoshis() * 1.0 * ppm2 / ONE_MILLION))
                         .add(baseFee2);
         Policy policy1 = policy(baseFee1, ppm1);
-        Edge hop1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy1);
+        Edge hop1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy1, Policy.UNKNOWN);
         Policy policy2 = policy(baseFee2, ppm2);
-        Edge hop2 = new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_3, CAPACITY, policy2);
+        Edge hop2 = new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_3, CAPACITY, policy2, Policy.UNKNOWN);
         BasicRoute basicRoute = new BasicRoute(List.of(hop1, hop2), amount);
         Route route = new Route(basicRoute);
         assertThat(route.getFees()).isEqualTo(expectedFees);
@@ -181,7 +181,7 @@ class RouteTest {
         Coins baseFee = Coins.ofMilliSatoshis(10);
         int ppm = 100;
         BasicRoute basicRoute = new BasicRoute(List.of(
-                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy(baseFee, ppm))
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy(baseFee, ppm), Policy.UNKNOWN)
         ), amount);
         Route route = new Route(basicRoute);
         assertThat(route.getFees()).isEqualTo(Coins.NONE);
@@ -200,8 +200,8 @@ class RouteTest {
         Coins expectedFees1 = Coins.NONE;
         Coins expectedFees = expectedFees1.add(expectedFees2);
         BasicRoute basicRoute = new BasicRoute(List.of(
-                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy(baseFee1, ppm1)),
-                new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, CAPACITY, policy(baseFee2, ppm2))
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy(baseFee1, ppm1), Policy.UNKNOWN),
+                new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, CAPACITY, policy(baseFee2, ppm2), Policy.UNKNOWN)
         ), amount);
         Route route = new Route(basicRoute);
         assertThat(route.getFees()).isEqualTo(expectedFees);
@@ -226,9 +226,9 @@ class RouteTest {
         ).add(baseFee2);
         Coins expectedFees = expectedFees1.add(expectedFees2).add(expectedFees3);
         BasicRoute basicRoute = new BasicRoute(List.of(
-                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy(baseFee1, ppm1)),
-                new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_3, CAPACITY, policy(baseFee2, ppm2)),
-                new Edge(CHANNEL_ID_3, PUBKEY_3, PUBKEY_4, CAPACITY, policy(baseFee3, ppm3))
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy(baseFee1, ppm1), Policy.UNKNOWN),
+                new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_3, CAPACITY, policy(baseFee2, ppm2), Policy.UNKNOWN),
+                new Edge(CHANNEL_ID_3, PUBKEY_3, PUBKEY_4, CAPACITY, policy(baseFee3, ppm3), Policy.UNKNOWN)
         ), amount);
         Route route = new Route(basicRoute);
         assertThat(route.getFees()).isEqualTo(expectedFees);
@@ -248,7 +248,7 @@ class RouteTest {
         int ppm = 100;
         Coins expectedFees = Coins.ofMilliSatoshis(amount.milliSatoshis() * ppm / ONE_MILLION).add(baseFee);
         BasicRoute basicRoute = new BasicRoute(List.of(
-                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy(baseFee, ppm))
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy(baseFee, ppm), Policy.UNKNOWN)
         ), amount);
         Route route = new Route(basicRoute);
         assertThat(route.getFeesWithFirstHop()).isEqualTo(expectedFees);
@@ -271,9 +271,9 @@ class RouteTest {
                 Coins.ofMilliSatoshis(amountForFirstHop.milliSatoshis() * ppm1 / ONE_MILLION).add(baseFee1);
         Coins expectedFees = feesForFirstHop.add(feesForSecondHop).add(feesForThirdHop);
         BasicRoute basicRoute = new BasicRoute(List.of(
-                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy(baseFee1, ppm1)),
-                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy(baseFee2, ppm2)),
-                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy(baseFee3, ppm3))
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy(baseFee1, ppm1), Policy.UNKNOWN),
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy(baseFee2, ppm2), Policy.UNKNOWN),
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy(baseFee3, ppm3), Policy.UNKNOWN)
         ), amount);
         Route route = new Route(basicRoute);
         assertThat(route.getFeesWithFirstHop()).isEqualTo(expectedFees);
@@ -404,8 +404,8 @@ class RouteTest {
         Policy policy1 = policy(Coins.ofSatoshis(100_000), feeRate1);
         Policy policy2 = policy(Coins.ofSatoshis(10_000), feeRate2);
         Coins amount = Coins.ofSatoshis(1_234_567);
-        Edge hop1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy1);
-        Edge hop2 = new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_3, CAPACITY, policy2);
+        Edge hop1 = new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_4, CAPACITY, policy1, Policy.UNKNOWN);
+        Edge hop2 = new Edge(CHANNEL_ID, PUBKEY_2, PUBKEY_3, CAPACITY, policy2, Policy.UNKNOWN);
         BasicRoute basicRoute = new BasicRoute(List.of(hop1, hop2), amount);
         Route route = new Route(basicRoute);
         assertThat(route.getFeeRate()).isEqualTo(9087);
@@ -480,7 +480,7 @@ class RouteTest {
     private Route routeForAmountAndCapacityAndKnownLiquidity(int amountSat, int capacitySat, int knownLiquiditySat) {
         Coins capacity = Coins.ofSatoshis(capacitySat);
         Coins amount = Coins.ofSatoshis(amountSat);
-        Edge edge = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, capacity, POLICY_1);
+        Edge edge = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, capacity, POLICY_1, Policy.UNKNOWN);
         EdgeWithLiquidityInformation edgeWithLiquidityInformation =
                 EdgeWithLiquidityInformation.forKnownLiquidity(edge, Coins.ofSatoshis(knownLiquiditySat));
         return new Route(List.of(edgeWithLiquidityInformation), amount);
@@ -489,7 +489,7 @@ class RouteTest {
     private Route createRoute(Coins amount, int... feeRates) {
         List<Edge> edges = Arrays.stream(feeRates)
                 .mapToObj(ppm -> policy(Coins.NONE, ppm))
-                .map(policy -> new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy))
+                .map(policy -> new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy, Policy.UNKNOWN))
                 .toList();
         return new Route(new BasicRoute(edges, amount));
     }
@@ -497,7 +497,7 @@ class RouteTest {
     private List<Edge> edgesWithTimeLockDeltas(int... timeLockDeltas) {
         return Arrays.stream(timeLockDeltas)
                 .mapToObj(timeLockDelta -> new Policy(0, Coins.NONE, true, timeLockDelta, MIN_HTLC, MAX_HTLC))
-                .map(policy -> new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy))
+                .map(policy -> new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy, Policy.UNKNOWN))
                 .toList();
     }
 

@@ -59,7 +59,7 @@ public class GrpcSendToRoute {
         ChannelId channelId = ChannelId.fromShortChannelId(111);
         Pubkey pubkey = Pubkey.create("000000000000000000000000000000000000000000000000000000000000000000");
         EdgeWithLiquidityInformation dummyEdge = new EdgeWithLiquidityInformation(
-                new Edge(channelId, pubkey, pubkey, Coins.NONE, Policy.UNKNOWN),
+                new Edge(channelId, pubkey, pubkey, Coins.NONE, Policy.UNKNOWN, Policy.UNKNOWN),
                 Coins.NONE,
                 Coins.NONE
         );

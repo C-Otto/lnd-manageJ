@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.pickhardtpayments.model;
 
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Edge;
+import de.cotto.lndmanagej.model.Policy;
 import org.junit.jupiter.api.Test;
 
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
@@ -30,8 +31,9 @@ class FlowTest {
 
     @Test
     void source_and_target_must_be_different() {
+        Edge edge = new Edge(CHANNEL_ID, PUBKEY, PUBKEY, CAPACITY, POLICY_1, Policy.UNKNOWN);
         assertThatIllegalArgumentException().isThrownBy(
-                () -> new Flow(new Edge(CHANNEL_ID, PUBKEY, PUBKEY, CAPACITY, POLICY_1), Coins.ofSatoshis(1))
+                () -> new Flow(edge, Coins.ofSatoshis(1))
         ).withMessage("Source and target must be different");
     }
 

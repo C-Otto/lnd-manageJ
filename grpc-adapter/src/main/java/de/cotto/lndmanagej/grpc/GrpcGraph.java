@@ -52,19 +52,23 @@ public class GrpcGraph {
             Coins capacity = Coins.ofSatoshis(channelEdge.getCapacity());
             Pubkey node1Pubkey = Pubkey.create(channelEdge.getNode1Pub());
             Pubkey node2Pubkey = Pubkey.create(channelEdge.getNode2Pub());
+            Policy node1Policy = getNode1Policy(channelEdge);
+            Policy node2Policy = getNode2Policy(channelEdge);
             DirectedChannelEdge directedChannelEdge1 = new DirectedChannelEdge(
                     channelId,
                     capacity,
                     node1Pubkey,
                     node2Pubkey,
-                    getNode1Policy(channelEdge)
+                    node1Policy,
+                    node2Policy
             );
             DirectedChannelEdge directedChannelEdge2 = new DirectedChannelEdge(
                     channelId,
                     capacity,
                     node2Pubkey,
                     node1Pubkey,
-                    getNode2Policy(channelEdge)
+                    node2Policy,
+                    node1Policy
             );
             channelEdges.add(directedChannelEdge1);
             channelEdges.add(directedChannelEdge2);

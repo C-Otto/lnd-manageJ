@@ -72,19 +72,23 @@ class GrpcGraphTest {
                 .setNode1Policy(policy(0, 0, true, 40))
                 .setNode2Policy(policy(1, 0, false, 144))
                 .build();
+        Policy policy1 = new Policy(0, Coins.NONE, false, 40, MIN_HTLC, MAX_HTLC);
+        Policy policy2 = new Policy(1, Coins.NONE, true, 144, MIN_HTLC, MAX_HTLC);
         DirectedChannelEdge expectedEdge1 = new DirectedChannelEdge(
                 CHANNEL_ID,
                 CAPACITY,
                 PUBKEY,
                 PUBKEY_2,
-                new Policy(0, Coins.NONE, false, 40, MIN_HTLC, MAX_HTLC)
+                policy1,
+                policy2
         );
         DirectedChannelEdge expectedEdge2 = new DirectedChannelEdge(
                 CHANNEL_ID,
                 CAPACITY,
                 PUBKEY_2,
                 PUBKEY,
-                new Policy(1, Coins.NONE, true, 144, MIN_HTLC, MAX_HTLC)
+                policy2,
+                policy1
         );
         ChannelEdge edge2 = ChannelEdge.newBuilder()
                 .setChannelId(CHANNEL_ID_2.getShortChannelId())
@@ -94,19 +98,23 @@ class GrpcGraphTest {
                 .setNode1Policy(policy(456, 0, false, 123))
                 .setNode2Policy(policy(123, 1, false, 456))
                 .build();
+        Policy policy3 = new Policy(456, Coins.NONE, true, 123, MIN_HTLC, MAX_HTLC);
+        Policy policy4 = new Policy(123, Coins.ofMilliSatoshis(1), true, 456, MIN_HTLC, MAX_HTLC);
         DirectedChannelEdge expectedEdge3 = new DirectedChannelEdge(
                 CHANNEL_ID_2,
                 CAPACITY_2,
                 PUBKEY_3,
                 PUBKEY_4,
-                new Policy(456, Coins.NONE, true, 123, MIN_HTLC, MAX_HTLC)
+                policy3,
+                policy4
         );
         DirectedChannelEdge expectedEdge4 = new DirectedChannelEdge(
                 CHANNEL_ID_2,
                 CAPACITY_2,
                 PUBKEY_4,
                 PUBKEY_3,
-                new Policy(123, Coins.ofMilliSatoshis(1), true, 456, MIN_HTLC, MAX_HTLC)
+                policy4,
+                policy3
         );
         ChannelGraph channelGraph = ChannelGraph.newBuilder()
                 .addEdges(edge1)
@@ -131,14 +139,16 @@ class GrpcGraphTest {
                 CAPACITY,
                 PUBKEY,
                 PUBKEY_2,
-                new Policy(0, Coins.NONE, false, 0, Coins.NONE, Coins.NONE)
+                Policy.UNKNOWN,
+                Policy.UNKNOWN
         );
         DirectedChannelEdge expectedPolicyForNode2 = new DirectedChannelEdge(
                 CHANNEL_ID,
                 CAPACITY,
                 PUBKEY_2,
                 PUBKEY,
-                new Policy(0, Coins.NONE, false, 0, Coins.NONE, Coins.NONE)
+                Policy.UNKNOWN,
+                Policy.UNKNOWN
         );
         ChannelGraph channelGraph = ChannelGraph.newBuilder().addEdges(edgeWithMissingPolicy).build();
         when(grpcService.describeGraph()).thenReturn(Optional.of(channelGraph));

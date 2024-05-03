@@ -2,6 +2,7 @@ package de.cotto.lndmanagej.pickhardtpayments.model;
 
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Edge;
+import de.cotto.lndmanagej.model.Policy;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
@@ -139,11 +140,11 @@ class FlowsTest {
     @Test
     void getShortestPath_complex() {
         Coins coins = Coins.ofSatoshis(1);
-        Edge edge1to2 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1);
-        Edge edge2to3 = new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_3, CAPACITY, POLICY_1);
-        Edge edge2to1 = new Edge(CHANNEL_ID_3, PUBKEY_2, PUBKEY, CAPACITY, POLICY_1);
-        Edge edge1to3 = new Edge(CHANNEL_ID_4, PUBKEY, PUBKEY_3, CAPACITY, POLICY_1);
-        Edge edge3to4 = new Edge(CHANNEL_ID_5, PUBKEY_3, PUBKEY_4, CAPACITY, POLICY_1);
+        Edge edge1to2 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1, Policy.UNKNOWN);
+        Edge edge2to3 = new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_3, CAPACITY, POLICY_1, Policy.UNKNOWN);
+        Edge edge2to1 = new Edge(CHANNEL_ID_3, PUBKEY_2, PUBKEY, CAPACITY, POLICY_1, Policy.UNKNOWN);
+        Edge edge1to3 = new Edge(CHANNEL_ID_4, PUBKEY, PUBKEY_3, CAPACITY, POLICY_1, Policy.UNKNOWN);
+        Edge edge3to4 = new Edge(CHANNEL_ID_5, PUBKEY_3, PUBKEY_4, CAPACITY, POLICY_1, Policy.UNKNOWN);
         Flows flows = new Flows(
                 new Flow(edge1to2, coins),
                 new Flow(edge2to3, coins),

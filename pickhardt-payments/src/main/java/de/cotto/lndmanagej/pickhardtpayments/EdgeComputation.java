@@ -78,7 +78,14 @@ public class EdgeComputation {
             ChannelId channelId = channelEdge.channelId();
             Pubkey pubkey1 = channelEdge.source();
             Pubkey pubkey2 = channelEdge.target();
-            Edge edge = new Edge(channelId, pubkey1, pubkey2, channelEdge.capacity(), channelEdge.policy());
+            Edge edge = new Edge(
+                    channelId,
+                    pubkey1,
+                    pubkey2,
+                    channelEdge.capacity(),
+                    channelEdge.policy(),
+                    channelEdge.reversePolicy()
+            );
             if (edgesFromPaymentHints.contains(channelEdge)) {
                 edgesWithLiquidityInformation.add(
                         EdgeWithLiquidityInformation.forLowerAndUpperBound(edge, edge.capacity(), edge.capacity())

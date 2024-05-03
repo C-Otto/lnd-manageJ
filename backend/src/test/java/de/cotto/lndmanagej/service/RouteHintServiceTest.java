@@ -39,8 +39,10 @@ class RouteHintServiceTest {
         routeHintService.addDecodedPaymentRequest(DECODED_PAYMENT_REQUEST);
         Policy policy1 = new Policy(123, Coins.NONE, true, 9, ONE_MILLI_SATOSHI, FIFTY_COINS);
         Policy policy2 = new Policy(1234, ONE_MILLI_SATOSHI, true, 40, ONE_MILLI_SATOSHI, FIFTY_COINS);
-        DirectedChannelEdge edge1 = new DirectedChannelEdge(CHANNEL_ID, FIFTY_COINS, PUBKEY, PUBKEY_4, policy1);
-        DirectedChannelEdge edge2 = new DirectedChannelEdge(CHANNEL_ID_2, FIFTY_COINS, PUBKEY_3, PUBKEY_4, policy2);
+        DirectedChannelEdge edge1 =
+                new DirectedChannelEdge(CHANNEL_ID, FIFTY_COINS, PUBKEY, PUBKEY_4, policy1, Policy.UNKNOWN);
+        DirectedChannelEdge edge2 =
+                new DirectedChannelEdge(CHANNEL_ID_2, FIFTY_COINS, PUBKEY_3, PUBKEY_4, policy2, Policy.UNKNOWN);
         assertThat(routeHintService.getEdgesFromPaymentHints()).contains(edge1, edge2);
     }
 

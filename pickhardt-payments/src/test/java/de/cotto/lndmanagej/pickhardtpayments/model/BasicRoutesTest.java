@@ -4,6 +4,7 @@ import de.cotto.lndmanagej.model.BasicRoute;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.Edge;
+import de.cotto.lndmanagej.model.Policy;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -67,7 +68,7 @@ class BasicRoutesTest {
     void fromFlows_two_channels_joining() {
         Edge edge1a = createEdgeWithChannelId(CHANNEL_ID);
         Edge edge1b = createEdgeWithChannelId(CHANNEL_ID_2);
-        Edge edge2 = new Edge(CHANNEL_ID, PUBKEY_2, PUBKEY_3, CAPACITY, POLICY_1);
+        Edge edge2 = new Edge(CHANNEL_ID, PUBKEY_2, PUBKEY_3, CAPACITY, POLICY_1, Policy.UNKNOWN);
         flows.add(edge1a, Coins.ofSatoshis(10));
         flows.add(edge1b, Coins.ofSatoshis(10));
         flows.add(edge2, Coins.ofSatoshis(20));
@@ -78,7 +79,7 @@ class BasicRoutesTest {
     }
 
     private Edge createEdgeWithChannelId(ChannelId channelId) {
-        return new Edge(channelId, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1);
+        return new Edge(channelId, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1, Policy.UNKNOWN);
     }
 
 }

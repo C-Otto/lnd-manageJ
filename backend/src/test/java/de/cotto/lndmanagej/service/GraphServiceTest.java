@@ -146,7 +146,8 @@ class GraphServiceTest {
                 capacity,
                 PUBKEY,
                 target,
-                policy
+                policy,
+                Policy.UNKNOWN
         );
     }
 }

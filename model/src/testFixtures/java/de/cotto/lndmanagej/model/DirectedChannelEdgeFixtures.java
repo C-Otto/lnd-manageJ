@@ -3,6 +3,7 @@ package de.cotto.lndmanagej.model;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_1;
+import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 
@@ -12,6 +13,7 @@ public class DirectedChannelEdgeFixtures {
             CAPACITY,
             PUBKEY,
             PUBKEY_2,
-            POLICY_1
+            POLICY_1,
+            POLICY_2
     );
 }

@@ -137,7 +137,7 @@ class MultiPathPaymentSplitterTest {
     @Nested
     class GetMultiPathPayment {
 
-        private final Edge firstEdge = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1);
+        private final Edge firstEdge = EDGE;
 
         @Test
         void failure() {
@@ -288,7 +288,7 @@ class MultiPathPaymentSplitterTest {
             Policy policy = policyFor(feeRate);
             PaymentOptions paymentOptions = PaymentOptions.forFeeRateLimit(feeRate - 1);
             Flow firstEdgeFlow = new Flow(firstEdge, amount);
-            Edge edge = new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_3, CAPACITY, policy);
+            Edge edge = new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_3, CAPACITY, policy, Policy.UNKNOWN);
             Flow flow = new Flow(edge, amount);
             addEdgeWithoutInformation(edge);
             when(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_3, amount, paymentOptions, DEFAULT_MAX_CLTV_EXPIRY))
@@ -311,7 +311,7 @@ class MultiPathPaymentSplitterTest {
             Policy policy = policyFor(feeRate);
             PaymentOptions paymentOptions = PaymentOptions.forFeeRateLimit(feeRate);
             Flow firstEdgeFlow = new Flow(firstEdge, amount);
-            Edge edge = new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_4, CAPACITY, policy);
+            Edge edge = new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_4, CAPACITY, policy, Policy.UNKNOWN);
             Flow flow = new Flow(edge, amount);
             addEdgeWithoutInformation(edge);
             when(flowComputation.getOptimalFlows(PUBKEY, PUBKEY_4, amount, paymentOptions, DEFAULT_MAX_CLTV_EXPIRY))
@@ -336,8 +336,8 @@ class MultiPathPaymentSplitterTest {
             Coins halfOfAmount = Coins.ofSatoshis(500_000);
             Coins amount = halfOfAmount.add(halfOfAmount);
             PaymentOptions paymentOptions = PaymentOptions.forTopUp(FEE_RATE_WEIGHT, feeRate - 1, 0, PUBKEY_2);
-            Edge edge1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policyFor(0));
-            Edge edge2 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policyFor(feeRate));
+            Edge edge1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policyFor(0), Policy.UNKNOWN);
+            Edge edge2 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policyFor(feeRate), Policy.UNKNOWN);
             Flow flow1 = new Flow(edge1, halfOfAmount);
             Flow flow2 = new Flow(edge2, halfOfAmount);
             addEdgeWithoutInformation(edge1);
@@ -362,8 +362,8 @@ class MultiPathPaymentSplitterTest {
             Coins amount = halfOfAmount.add(halfOfAmount);
             PaymentOptions paymentOptions = PaymentOptions.forFeeRateLimit(feeRate - 1);
             Flow firstEdgeFlow = new Flow(firstEdge, amount);
-            Edge edge1 = new Edge(CHANNEL_ID, PUBKEY_2, PUBKEY_3, CAPACITY, policyFor(feeRate));
-            Edge edge2 = new Edge(CHANNEL_ID, PUBKEY_2, PUBKEY_3, CAPACITY, policyFor(0));
+            Edge edge1 = new Edge(CHANNEL_ID, PUBKEY_2, PUBKEY_3, CAPACITY, policyFor(feeRate), Policy.UNKNOWN);
+            Edge edge2 = new Edge(CHANNEL_ID, PUBKEY_2, PUBKEY_3, CAPACITY, policyFor(0), Policy.UNKNOWN);
             Flow flow1 = new Flow(edge1, halfOfAmount);
             Flow flow2 = new Flow(edge2, halfOfAmount);
             addEdgeWithoutInformation(edge1);
@@ -425,8 +425,8 @@ class MultiPathPaymentSplitterTest {
         void two_flows_probability() {
             long capacitySat = CAPACITY.satoshis();
             Coins halfOfCapacity = Coins.ofSatoshis(capacitySat / 2);
-            Edge edge1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1);
-            Edge edge2 = new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, CAPACITY_2, POLICY_1);
+            Edge edge1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1, Policy.UNKNOWN);
+            Edge edge2 = new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, CAPACITY_2, POLICY_1, Policy.UNKNOWN);
             Flow flow1 = new Flow(edge1, halfOfCapacity);
             Flow flow2 = new Flow(edge2, CAPACITY_2);
             addEdgeWithoutInformation(edge1);
@@ -571,8 +571,8 @@ class MultiPathPaymentSplitterTest {
             Coins largeCapacity = Coins.ofSatoshis(10);
             Coins smallCapacity = Coins.ofSatoshis(5);
 
-            Edge edgeLargeCapacity = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, largeCapacity, POLICY_1);
-            Edge edgeSmallCapacity = new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, smallCapacity, POLICY_1);
+            Edge edgeLargeCapacity = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, largeCapacity, POLICY_1, Policy.UNKNOWN);
+            Edge edgeSmallCapacity = new Edge(CHANNEL_ID_2, PUBKEY, PUBKEY_2, smallCapacity, POLICY_1, Policy.UNKNOWN);
 
             EdgeWithLiquidityInformation liquidityInformationLarge =
                     EdgeWithLiquidityInformation.forUpperBound(edgeLargeCapacity, Coins.ofSatoshis(2));
@@ -606,7 +606,7 @@ class MultiPathPaymentSplitterTest {
         }
 
         private void mockFlow(Coins amount, Policy policy, PaymentOptions paymentOptions) {
-            Edge edge = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy);
+            Edge edge = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy, Policy.UNKNOWN);
             Flow flow = new Flow(edge, amount);
             addEdgeWithoutInformation(edge);
             Flows value = new Flows(flow);
@@ -629,8 +629,14 @@ class MultiPathPaymentSplitterTest {
                 new Policy(feeRate, Coins.NONE, true, 40, Coins.ofMilliSatoshis(1), Coins.ofSatoshis(10_000));
         when(channelService.getOpenChannelsWith(PUBKEY_2)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL));
         when(policyService.getPolicyFrom(CHANNEL_ID, PUBKEY_2)).thenReturn(Optional.of(policyExtension));
-        Edge extensionEdge =
-                new Edge(CHANNEL_ID, PUBKEY_2, destination, LOCAL_OPEN_CHANNEL.getCapacity(), policyExtension);
+        Edge extensionEdge = new Edge(
+                CHANNEL_ID,
+                PUBKEY_2,
+                destination,
+                LOCAL_OPEN_CHANNEL.getCapacity(),
+                policyExtension,
+                Policy.UNKNOWN
+        );
         when(edgeComputation.getEdgeWithLiquidityInformation(extensionEdge))
                 .thenReturn(noInformationFor(extensionEdge));
         return extensionEdge;
