@@ -1,5 +1,6 @@
 package de.cotto.lndmanagej.model;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -43,7 +44,9 @@ public class Route {
             return Coins.NONE;
         }
         Coins forwardAmountForFirstHop = getFees().add(amount);
-        return getFees().add(getFeesForEdgeAndAmount(forwardAmountForFirstHop, edgesWithLiquidityInformation.get(0)));
+        return getFees().add(
+                getFeesForEdgeAndAmount(forwardAmountForFirstHop, null, edgesWithLiquidityInformation.get(0))
+        );
     }
 
     public double getProbability() {
@@ -139,7 +142,9 @@ public class Route {
         List<Coins> feesForHops = new ArrayList<>();
         feesForHops.add(Coins.NONE);
         for (int i = edges.size() - 1; i > 0; i--) {
-            Coins feesForHop = getFeesForEdgeAndAmount(amountWithFees, edges.get(i));
+            EdgeWithLiquidityInformation edge = edges.get(i);
+            EdgeWithLiquidityInformation previousEdge = edges.get(i - 1);
+            Coins feesForHop = getFeesForEdgeAndAmount(amountWithFees, previousEdge, edge);
             amountWithFees = amountWithFees.add(feesForHop);
             fees = fees.add(feesForHop);
             feesForHops.add(0, feesForHop);
@@ -147,10 +152,37 @@ public class Route {
         return feesForHops;
     }
 
-    private static Coins getFeesForEdgeAndAmount(Coins amountWithFees, EdgeWithLiquidityInformation edge) {
+    private static Coins getFeesForEdgeAndAmount(
+            Coins amountWithFees,
+            @Nullable EdgeWithLiquidityInformation previousEdge,
+            EdgeWithLiquidityInformation edge
+    ) {
         long feeRate = edge.policy().feeRate();
+        Coins relativeFees = getRelativeFees(amountWithFees, feeRate);
         Coins baseFeeForHop = edge.policy().baseFee();
-        Coins relativeFees = Coins.ofMilliSatoshis(feeRate * amountWithFees.milliSatoshis() / 1_000_000);
-        return baseFeeForHop.add(relativeFees);
+        Coins outboundFees = baseFeeForHop.add(relativeFees);
+
+        Coins inboundFees = getInboundFees(amountWithFees.add(outboundFees), previousEdge);
+        Coins combinedFees = outboundFees.add(inboundFees);
+        if (combinedFees.isNegative()) {
+            return Coins.NONE;
+        }
+        return combinedFees;
+    }
+
+    private static Coins getInboundFees(Coins amountWithFees, @Nullable EdgeWithLiquidityInformation previousEdge) {
+        if (previousEdge == null) {
+            return Coins.NONE;
+        }
+        Policy policyForInboundFees = previousEdge.edge().reversePolicy();
+
+        Coins inboundBaseFeeForHop = policyForInboundFees.inboundBaseFee();
+        long inboundFeeRate = policyForInboundFees.inboundFeeRate();
+        Coins inboundRelativeFees = getRelativeFees(amountWithFees, inboundFeeRate);
+        return inboundBaseFeeForHop.add(inboundRelativeFees);
+    }
+
+    private static Coins getRelativeFees(Coins amount, long feeRate) {
+        return Coins.ofMilliSatoshis(feeRate * amount.milliSatoshis() / 1_000_000);
     }
 }

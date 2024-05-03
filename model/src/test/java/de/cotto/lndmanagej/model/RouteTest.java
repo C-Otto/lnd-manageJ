@@ -164,8 +164,7 @@ class RouteTest {
         Coins baseFee1 = Coins.ofMilliSatoshis(15);
         Coins baseFee2 = Coins.ofMilliSatoshis(10);
         Coins expectedFees =
-                Coins.ofMilliSatoshis((long) (amount.milliSatoshis() * 1.0 * ppm2 / ONE_MILLION))
-                        .add(baseFee2);
+                totalFeesFor(amount, ppm2, baseFee2);
         Policy policy1 = policy(baseFee1, ppm1);
         Edge hop1 = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy1, Policy.UNKNOWN);
         Policy policy2 = policy(baseFee2, ppm2);
@@ -195,8 +194,7 @@ class RouteTest {
         int ppm1 = 100;
         int ppm2 = 200;
         Coins expectedFees2 =
-                Coins.ofMilliSatoshis((long) (amount.milliSatoshis() * 1.0 * ppm2 / ONE_MILLION))
-                        .add(baseFee2);
+                totalFeesFor(amount, ppm2, baseFee2);
         Coins expectedFees1 = Coins.NONE;
         Coins expectedFees = expectedFees1.add(expectedFees2);
         BasicRoute basicRoute = new BasicRoute(List.of(
@@ -218,8 +216,7 @@ class RouteTest {
         int ppm3 = 300;
         Coins expectedFees3 = Coins.NONE;
         Coins expectedFees2 =
-                Coins.ofMilliSatoshis((long) (amount.milliSatoshis() * 1.0 * ppm3 / ONE_MILLION))
-                        .add(baseFee3);
+                totalFeesFor(amount, ppm3, baseFee3);
         long amountWithFeesLastHop = amount.add(expectedFees2).milliSatoshis();
         Coins expectedFees1 = Coins.ofMilliSatoshis(
                 (long) (amountWithFeesLastHop * 1.0 * ppm2 / ONE_MILLION)
@@ -232,6 +229,71 @@ class RouteTest {
         ), amount);
         Route route = new Route(basicRoute);
         assertThat(route.getFees()).isEqualTo(expectedFees);
+    }
+
+    @Test
+    void fees_two_hops_with_negative_inbound_fees() {
+        Coins amount = Coins.ofSatoshis(2_500_000);
+        Coins baseFee1 = Coins.ofMilliSatoshis(20);
+        Coins inboundBaseFee1 = Coins.ofMilliSatoshis(-3);
+        Coins baseFee2 = Coins.ofMilliSatoshis(6);
+        int ppm1 = 100;
+        int inboundPpm1 = -30;
+        int ppm2 = 200;
+        Coins expectedOutboundFees = totalFeesFor(amount, ppm2, baseFee2);
+        Coins expectedInboundFees = totalFeesFor(amount.add(expectedOutboundFees), inboundPpm1, inboundBaseFee1);
+        Coins expectedFees = expectedOutboundFees.add(expectedInboundFees);
+        BasicRoute basicRoute = new BasicRoute(List.of(
+                new Edge(
+                        CHANNEL_ID,
+                        PUBKEY,
+                        PUBKEY_3,
+                        CAPACITY,
+                        policy(baseFee1, ppm1),
+                        inboundPolicy(inboundBaseFee1, inboundPpm1)
+                ),
+                new Edge(
+                        CHANNEL_ID_2,
+                        PUBKEY_3,
+                        PUBKEY_4,
+                        CAPACITY,
+                        policy(baseFee2, ppm2),
+                        inboundPolicy(Coins.NONE, 0)
+                )
+        ), amount);
+        Route route = new Route(basicRoute);
+        assertThat(route.getFees()).isEqualTo(expectedFees);
+    }
+
+    @Test
+    void fees_two_hops_with_very_negative_inbound_fees() {
+        Coins amount = Coins.ofSatoshis(1_500_000);
+        Coins baseFee1 = Coins.ofMilliSatoshis(10);
+        Coins inboundBaseFee1 = Coins.ofMilliSatoshis(-15);
+        Coins baseFee2 = Coins.ofMilliSatoshis(6);
+        int ppm1 = 100;
+        int inboundPpm1 = -300;
+        int ppm2 = 200;
+        BasicRoute basicRoute = new BasicRoute(List.of(
+                new Edge(
+                        CHANNEL_ID,
+                        PUBKEY,
+                        PUBKEY_2,
+                        CAPACITY,
+                        policy(baseFee1, ppm1),
+                        inboundPolicy(inboundBaseFee1, inboundPpm1)
+                ),
+                new Edge(
+                        CHANNEL_ID_2,
+                        PUBKEY,
+                        PUBKEY_2,
+                        CAPACITY,
+                        policy(baseFee2, ppm2),
+                        inboundPolicy(Coins.NONE, 0)
+                )
+        ), amount);
+        Route route = new Route(basicRoute);
+        assertThat(route.getFees()).isEqualTo(Coins.NONE);
     }
 
     @Test
@@ -503,5 +565,13 @@ class RouteTest {
 
     private Policy policy(Coins baseFee, int ppm) {
         return new Policy(ppm, baseFee, true, TIME_LOCK_DELTA, MIN_HTLC, MAX_HTLC);
+    }
+
+    private Policy inboundPolicy(Coins inboundBaseFee, int inboundPpm) {
+        return new Policy(0, Coins.NONE, inboundPpm, inboundBaseFee, true, TIME_LOCK_DELTA, MIN_HTLC, MAX_HTLC);
+    }
+
+    private Coins totalFeesFor(Coins amount, int ppm, Coins baseFee) {
+        return Coins.ofMilliSatoshis((long) (amount.milliSatoshis() * 1.0 * ppm / ONE_MILLION)).add(baseFee);
     }
 }
