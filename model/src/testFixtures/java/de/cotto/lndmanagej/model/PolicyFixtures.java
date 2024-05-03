@@ -9,7 +9,11 @@ public class PolicyFixtures {
             new Policy(200, Coins.NONE, false, 40, Coins.NONE, Coins.NONE);
     public static final Policy POLICY_2 =
             new Policy(300, Coins.ofMilliSatoshis(0), true, 144, Coins.ofSatoshis(159), Coins.ofSatoshis(22_222));
+    public static final Policy POLICY_WITH_NEGATIVE_INBOUND_FEES =
+            new Policy(0, Coins.ofMilliSatoshis(0), -100, Coins.ofMilliSatoshis(-1), true, 0, Coins.NONE, Coins.NONE);
 
     public static final PoliciesForLocalChannel POLICIES_FOR_LOCAL_CHANNEL =
             new PoliciesForLocalChannel(POLICY_DISABLED, POLICY_2);
+    public static final PoliciesForLocalChannel POLICIES_WITH_NEGATIVE_INBOUND_FEES =
+            new PoliciesForLocalChannel(POLICY_DISABLED, POLICY_WITH_NEGATIVE_INBOUND_FEES);
 }

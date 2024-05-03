@@ -102,8 +102,10 @@ service Lightning {
     rpc SignMessage (SignMessageRequest) returns (SignMessageResponse);
 
     /* lncli: `verifymessage`
-    VerifyMessage verifies a signature over a msg. The signature must be
-    zbase32 encoded and signed by an active node in the resident node's
+    VerifyMessage verifies a signature over a message and recovers the signer's
+    public key. The signature is only deemed valid if the recovered public key
+    corresponds to a node key in the public Lightning network. The signature
+    must be zbase32 encoded and signed by an active node in the resident node's
     channel database. In addition to returning the validity of the signature,
     VerifyMessage also returns the recovered pubkey from the signature.
     */
@@ -141,6 +143,13 @@ service Lightning {
     concerning the number of open+pending channels.
     */
     rpc GetInfo (GetInfoRequest) returns (GetInfoResponse);
+
+    /* lncli: 'getdebuginfo'
+    GetDebugInfo returns debug information concerning the state of the daemon
+    and its subsystems. This includes the full configuration and the latest log
+    entries from the log file.
+    */
+    rpc GetDebugInfo (GetDebugInfoRequest) returns (GetDebugInfoResponse);
 
     /** lncli: `getrecoveryinfo`
     GetRecoveryInfo returns information concerning the recovery mode including
@@ -321,7 +330,7 @@ service Lightning {
     optionally specify the add_index and/or the settle_index. If the add_index
     is specified, then we'll first start by sending add invoice events for all
     invoices with an add_index greater than the specified value. If the
-    settle_index is specified, the next, we'll send out all settle events for
+    settle_index is specified, then next, we'll send out all settle events for
     invoices with a settle_index greater than the specified value. One or both
     of these fields can be set. If no fields are set, then we'll only send out
     the latest add/settle events.
@@ -340,13 +349,13 @@ service Lightning {
     */
     rpc ListPayments (ListPaymentsRequest) returns (ListPaymentsResponse);
 
-    /*
+    /* lncli: `deletepayments`
     DeletePayment deletes an outgoing payment from DB. Note that it will not
     attempt to delete an In-Flight payment, since that would be unsafe.
     */
     rpc DeletePayment (DeletePaymentRequest) returns (DeletePaymentResponse);
 
-    /*
+    /* lncli: `deletepayments --all`
     DeleteAllPayments deletes all outgoing payments from DB. Note that it will
     not attempt to delete In-Flight payments, since that would be unsafe.
     */
@@ -478,7 +487,7 @@ service Lightning {
     rpc ExportAllChannelBackups (ChanBackupExportRequest)
         returns (ChanBackupSnapshot);
 
-    /*
+    /* lncli: `verifychanbackup`
     VerifyChanBackup allows a caller to verify the integrity of a channel backup
     snapshot. This method will accept either a packed Single or a packed Multi.
     Specifying both will result in an error.
@@ -568,9 +577,42 @@ service Lightning {
     /* lncli: `subscribecustom`
     SubscribeCustomMessages subscribes to a stream of incoming custom peer
     messages.
+
+    To include messages with type outside of the custom range (>= 32768) lnd
+    needs to be compiled with  the `dev` build tag, and the message type to
+    override should be specified in lnd's experimental protocol configuration.
     */
     rpc SubscribeCustomMessages (SubscribeCustomMessagesRequest)
         returns (stream CustomMessage);
+
+    /* lncli: `listaliases`
+    ListAliases returns the set of all aliases that have ever existed with
+    their confirmed SCID (if it exists) and/or the base SCID (in the case of
+    zero conf).
+    */
+    rpc ListAliases (ListAliasesRequest) returns (ListAliasesResponse);
+
+    /*
+    LookupHtlcResolution retrieves a final htlc resolution from the database.
+    If the htlc has no final resolution yet, a NotFound grpc status code is
+    returned.
+    */
+    rpc LookupHtlcResolution (LookupHtlcResolutionRequest)
+        returns (LookupHtlcResolutionResponse);
+}
+
+message LookupHtlcResolutionRequest {
+    uint64 chan_id = 1;
+
+    uint64 htlc_index = 2;
+}
+
+message LookupHtlcResolutionResponse {
+    // Settled is true is the htlc was settled. If false, the htlc was failed.
+    bool settled = 1;
+
+    // Offchain indicates whether the htlc was resolved off-chain or on-chain.
+    bool offchain = 2;
 }
 
 message SubscribeCustomMessagesRequest {
@@ -592,6 +634,9 @@ message SendCustomMessageRequest {
     bytes peer = 1;
 
     // Message type. This value needs to be in the custom range (>= 32768).
+    // To send a type < custom range, lnd needs to be compiled with the `dev`
+    // build tag, and the message type to override should be specified in lnd's
+    // experimental protocol configuration.
     uint32 type = 2;
 
     // Raw message data.
@@ -631,6 +676,7 @@ enum OutputScriptType {
     SCRIPT_TYPE_NULLDATA = 6;
     SCRIPT_TYPE_NON_STANDARD = 7;
     SCRIPT_TYPE_WITNESS_UNKNOWN = 8;
+    SCRIPT_TYPE_WITNESS_V1_TAPROOT = 9;
 }
 
 message OutputDetail {
@@ -687,7 +733,11 @@ message Transaction {
 
     // A label that was optionally set on transaction broadcast.
     string label = 10;
+
+    // PreviousOutpoints/Inputs of this transaction.
+    repeated PreviousOutPoint previous_outpoints = 12;
 }
+
 message GetTransactionsRequest {
     /*
     The height from which to list transactions, inclusive. If this value is
@@ -835,7 +885,8 @@ message SendRequest {
     repeated FeatureBit dest_features = 15;
 
     /*
-    The payment address of the generated invoice.
+    The payment address of the generated invoice.  This is also called
+    payment secret in specifications (e.g. BOLT 11).
     */
     bytes payment_addr = 16;
 }
@@ -916,6 +967,14 @@ message ChannelAcceptRequest {
 
     // The commitment type the initiator wishes to use for the proposed channel.
     CommitmentType commitment_type = 14;
+
+    // Whether the initiator wants to open a zero-conf channel via the channel
+    // type.
+    bool wants_zero_conf = 15;
+
+    // Whether the initiator wants to use the scid-alias channel type. This is
+    // separate from the feature bit.
+    bool wants_scid_alias = 16;
 }
 
 message ChannelAcceptResponse {
@@ -976,6 +1035,13 @@ message ChannelAcceptResponse {
     The number of confirmations we require before we consider the channel open.
     */
     uint32 min_accept_depth = 10;
+
+    /*
+    Whether the responder wants this to be a zero-conf channel. This will fail
+    if either side does not have the scid-alias feature bit set. The minimum
+    depth field must be zero if this is true.
+    */
+    bool zero_conf = 11;
 }
 
 message ChannelPoint {
@@ -1008,13 +1074,34 @@ message OutPoint {
     uint32 output_index = 3;
 }
 
+message PreviousOutPoint {
+    // The outpoint in format txid:n.
+    string outpoint = 1;
+
+    // Denotes if the outpoint is controlled by the internal wallet.
+    // The flag will only detect p2wkh, np2wkh and p2tr inputs as its own.
+    bool is_our_output = 2;
+}
+
 message LightningAddress {
-    // The identity pubkey of the Lightning node
+    // The identity pubkey of the Lightning node.
     string pubkey = 1;
 
     // The network location of the lightning node, e.g. `69.69.69.69:1337` or
-    // `localhost:10011`
+    // `localhost:10011`.
     string host = 2;
+}
+
+enum CoinSelectionStrategy {
+    // Use the coin selection strategy defined in the global configuration
+    // (lnd.conf).
+    STRATEGY_USE_GLOBAL_CONFIG = 0;
+
+    // Select the largest available coins first during coin selection.
+    STRATEGY_LARGEST = 1;
+
+    // Randomly select the available coins during coin selection.
+    STRATEGY_RANDOM = 2;
 }
 
 message EstimateFeeRequest {
@@ -1031,6 +1118,9 @@ message EstimateFeeRequest {
 
     // Whether unconfirmed outputs should be used as inputs for the transaction.
     bool spend_unconfirmed = 4;
+
+    // The strategy to use for selecting coins during fees estimation.
+    CoinSelectionStrategy coin_selection_strategy = 5;
 }
 
 message EstimateFeeResponse {
@@ -1071,6 +1161,9 @@ message SendManyRequest {
 
     // Whether unconfirmed outputs should be used as inputs for the transaction.
     bool spend_unconfirmed = 8;
+
+    // The strategy to use for selecting coins during sending many requests.
+    CoinSelectionStrategy coin_selection_strategy = 9;
 }
 message SendManyResponse {
     // The id of the transaction
@@ -1113,6 +1206,9 @@ message SendCoinsRequest {
 
     // Whether unconfirmed outputs should be used as inputs for the transaction.
     bool spend_unconfirmed = 9;
+
+    // The strategy to use for selecting coins.
+    CoinSelectionStrategy coin_selection_strategy = 10;
 }
 message SendCoinsResponse {
     // The transaction ID of the transaction
@@ -1202,11 +1298,15 @@ message VerifyMessageResponse {
 }
 
 message ConnectPeerRequest {
-    // Lightning address of the peer, in the format `<pubkey>@host`
+    /*
+    Lightning address of the peer to connect to.
+    */
     LightningAddress addr = 1;
 
-    /* If set, the daemon will attempt to persistently connect to the target
-     * peer. Otherwise, the call will be synchronous. */
+    /*
+    If set, the daemon will attempt to persistently connect to the target
+    peer. Otherwise, the call will be synchronous.
+    */
     bool perm = 2;
 
     /*
@@ -1282,6 +1382,13 @@ enum CommitmentType {
     channel before its maturity date.
     */
     SCRIPT_ENFORCED_LEASE = 4;
+
+    /*
+    A channel that uses musig2 for the funding output, and the new tapscript
+    features where relevant.
+    */
+    // TODO(roasbeef): need script enforce mirror type for the above as well?
+    SIMPLE_TAPROOT = 5;
 }
 
 message ChannelConstraints {
@@ -1459,6 +1566,31 @@ message Channel {
 
     // List constraints for the remote node.
     ChannelConstraints remote_constraints = 30;
+
+    /*
+    This lists out the set of alias short channel ids that exist for a channel.
+    This may be empty.
+    */
+    repeated uint64 alias_scids = 31;
+
+    // Whether or not this is a zero-conf channel.
+    bool zero_conf = 32;
+
+    // This is the confirmed / on-chain zero-conf SCID.
+    uint64 zero_conf_confirmed_scid = 33;
+
+    // The configured alias name of our peer.
+    string peer_alias = 34;
+
+    // This is the peer SCID alias.
+    uint64 peer_scid_alias = 35 [jstype = JS_STRING];
+
+    /*
+    An optional note-to-self to go along with the channel containing some
+    useful information. This is only ever stored locally and in no way impacts
+    the channel's operation.
+    */
+    string memo = 36;
 }
 
 message ListChannelsRequest {
@@ -1472,10 +1604,31 @@ message ListChannelsRequest {
     empty, all channels will be returned.
     */
     bytes peer = 5;
+
+    // Informs the server if the peer alias lookup per channel should be
+    // enabled. It is turned off by default in order to avoid degradation of
+    // performance for existing clients.
+    bool peer_alias_lookup = 6;
 }
 message ListChannelsResponse {
     // The list of active channels
     repeated Channel channels = 11;
+}
+
+message AliasMap {
+    /*
+    For non-zero-conf channels, this is the confirmed SCID. Otherwise, this is
+    the first assigned "base" alias.
+    */
+    uint64 base_scid = 1;
+
+    // The set of all aliases stored for the base SCID.
+    repeated uint64 aliases = 2;
+}
+message ListAliasesRequest {
+}
+message ListAliasesResponse {
+    repeated AliasMap alias_maps = 1;
 }
 
 enum Initiator {
@@ -1542,6 +1695,15 @@ message ChannelCloseSummary {
     Initiator close_initiator = 12;
 
     repeated Resolution resolutions = 13;
+
+    /*
+    This lists out the set of alias short channel ids that existed for the
+    closed channel. This may be empty.
+    */
+    repeated uint64 alias_scids = 14;
+
+    //  The confirmed SCID for a zero-conf channel.
+    uint64 zero_conf_confirmed_scid = 15 [jstype = JS_STRING];
 }
 
 enum ResolutionType {
@@ -1794,12 +1956,16 @@ message GetInfoResponse {
     /*
     Whether the current node is connected to testnet. This field is
     deprecated and the network field should be used instead
-    **/
+    */
     bool testnet = 10 [deprecated = true];
 
     reserved 11;
 
-    // A list of active chains the node is connected to
+    /*
+    A list of active chains the node is connected to. This will only
+    ever contain a single entry since LND will only ever have a single
+    chain backend during its lifetime.
+    */
     repeated Chain chains = 16;
 
     // The URIs of the current node.
@@ -1810,6 +1976,22 @@ message GetInfoResponse {
     announcements and invoices.
     */
     map<uint32, Feature> features = 19;
+
+    /*
+    Indicates whether the HTLC interceptor API is in always-on mode.
+    */
+    bool require_htlc_interceptor = 21;
+
+    // Indicates whether final htlc resolutions are stored on disk.
+    bool store_final_htlc_resolutions = 22;
+}
+
+message GetDebugInfoRequest {
+}
+
+message GetDebugInfoResponse {
+    map<string, string> config = 1;
+    repeated string log = 2;
 }
 
 message GetRecoveryInfoRequest {
@@ -1826,8 +2008,9 @@ message GetRecoveryInfoResponse {
 }
 
 message Chain {
-    // The blockchain the node is on (eg bitcoin, litecoin)
-    string chain = 1;
+    // Deprecated. The chain is now always assumed to be bitcoin.
+    // The blockchain the node is on (must be bitcoin)
+    string chain = 1 [deprecated = true];
 
     // The network the node is on (eg regtest, testnet, mainnet)
     string network = 2;
@@ -1882,18 +2065,32 @@ message CloseChannelRequest {
     // A manual fee rate set in sat/vbyte that should be used when crafting the
     // closure transaction.
     uint64 sat_per_vbyte = 6;
+
+    // The maximum fee rate the closer is willing to pay.
+    //
+    // NOTE: This field is only respected if we're the initiator of the channel.
+    uint64 max_fee_per_vbyte = 7;
+
+    // If true, then the rpc call will not block while it awaits a closing txid.
+    // Consequently this RPC call will not return a closing txid if this value
+    // is set.
+    bool no_wait = 8;
 }
 
 message CloseStatusUpdate {
     oneof update {
         PendingUpdate close_pending = 1;
         ChannelCloseUpdate chan_close = 3;
+        InstantUpdate close_instant = 4;
     }
 }
 
 message PendingUpdate {
     bytes txid = 1;
     uint32 output_index = 2;
+}
+
+message InstantUpdate {
 }
 
 message ReadyForPsbtFunding {
@@ -1940,6 +2137,9 @@ message BatchOpenChannelRequest {
 
     // An optional label for the batch transaction, limited to 500 characters.
     string label = 6;
+
+    // The strategy to use for selecting coins during batch opening channels.
+    CoinSelectionStrategy coin_selection_strategy = 7;
 }
 
 message BatchOpenChannel {
@@ -1990,6 +2190,76 @@ message BatchOpenChannel {
     the remote peer supports explicit channel negotiation.
     */
     CommitmentType commitment_type = 9;
+
+    /*
+    The maximum amount of coins in millisatoshi that can be pending within
+    the channel. It only applies to the remote party.
+    */
+    uint64 remote_max_value_in_flight_msat = 10;
+
+    /*
+    The maximum number of concurrent HTLCs we will allow the remote party to add
+    to the commitment transaction.
+    */
+    uint32 remote_max_htlcs = 11;
+
+    /*
+    Max local csv is the maximum csv delay we will allow for our own commitment
+    transaction.
+    */
+    uint32 max_local_csv = 12;
+
+    /*
+    If this is true, then a zero-conf channel open will be attempted.
+    */
+    bool zero_conf = 13;
+
+    /*
+    If this is true, then an option-scid-alias channel-type open will be
+    attempted.
+    */
+    bool scid_alias = 14;
+
+    /*
+    The base fee charged regardless of the number of milli-satoshis sent.
+    */
+    uint64 base_fee = 15;
+
+    /*
+    The fee rate in ppm (parts per million) that will be charged in
+    proportion of the value of each forwarded HTLC.
+    */
+    uint64 fee_rate = 16;
+
+    /*
+    If use_base_fee is true the open channel announcement will update the
+    channel base fee with the value specified in base_fee. In the case of
+    a base_fee of 0 use_base_fee is needed downstream to distinguish whether
+    to use the default base fee value specified in the config or 0.
+    */
+    bool use_base_fee = 17;
+
+    /*
+    If use_fee_rate is true the open channel announcement will update the
+    channel fee rate with the value specified in fee_rate. In the case of
+    a fee_rate of 0 use_fee_rate is needed downstream to distinguish whether
+    to use the default fee rate value specified in the config or 0.
+    */
+    bool use_fee_rate = 18;
+
+    /*
+    The number of satoshis we require the remote peer to reserve. This value,
+    if specified, must be above the dust limit and below 20% of the channel
+    capacity.
+    */
+    uint64 remote_chan_reserve_sat = 19;
+
+    /*
+    An optional note-to-self to go along with the channel containing some
+    useful information. This is only ever stored locally and in no way impacts
+    the channel's operation.
+    */
+    string memo = 20;
 }
 
 message BatchOpenChannelResponse {
@@ -2093,6 +2363,70 @@ message OpenChannelRequest {
     the remote peer supports explicit channel negotiation.
     */
     CommitmentType commitment_type = 18;
+
+    /*
+    If this is true, then a zero-conf channel open will be attempted.
+    */
+    bool zero_conf = 19;
+
+    /*
+    If this is true, then an option-scid-alias channel-type open will be
+    attempted.
+    */
+    bool scid_alias = 20;
+
+    /*
+    The base fee charged regardless of the number of milli-satoshis sent.
+    */
+    uint64 base_fee = 21;
+
+    /*
+    The fee rate in ppm (parts per million) that will be charged in
+    proportion of the value of each forwarded HTLC.
+    */
+    uint64 fee_rate = 22;
+
+    /*
+    If use_base_fee is true the open channel announcement will update the
+    channel base fee with the value specified in base_fee. In the case of
+    a base_fee of 0 use_base_fee is needed downstream to distinguish whether
+    to use the default base fee value specified in the config or 0.
+    */
+    bool use_base_fee = 23;
+
+    /*
+    If use_fee_rate is true the open channel announcement will update the
+    channel fee rate with the value specified in fee_rate. In the case of
+    a fee_rate of 0 use_fee_rate is needed downstream to distinguish whether
+    to use the default fee rate value specified in the config or 0.
+    */
+    bool use_fee_rate = 24;
+
+    /*
+    The number of satoshis we require the remote peer to reserve. This value,
+    if specified, must be above the dust limit and below 20% of the channel
+    capacity.
+    */
+    uint64 remote_chan_reserve_sat = 25;
+
+    /*
+    If set, then lnd will attempt to commit all the coins under control of the
+    internal wallet to open the channel, and the LocalFundingAmount field must
+    be zero and is ignored.
+    */
+    bool fund_max = 26;
+
+    /*
+    An optional note-to-self to go along with the channel containing some
+    useful information. This is only ever stored locally and in no way impacts
+    the channel's operation.
+    */
+    string memo = 27;
+
+    /*
+    A list of selected outpoints that are allocated for channel funding.
+    */
+    repeated OutPoint outpoints = 28;
 }
 message OpenStatusUpdate {
     oneof update {
@@ -2174,6 +2508,11 @@ message ChanPointShim {
     the value is less than 500,000, or as an absolute height otherwise.
     */
     uint32 thaw_height = 6;
+
+    /*
+    Indicates that the funding output is using a MuSig2 multi-sig output.
+    */
+    bool musig2 = 7;
 }
 
 message PsbtShim {
@@ -2324,6 +2663,9 @@ message PendingHTLC {
 }
 
 message PendingChannelsRequest {
+    // Indicates whether to include the raw transaction hex for
+    // waiting_close_channels.
+    bool include_raw_tx = 1;
 }
 message PendingChannelsResponse {
     message PendingChannel {
@@ -2359,14 +2701,18 @@ message PendingChannelsResponse {
 
         // Whether this channel is advertised to the network or not.
         bool private = 12;
+
+        /*
+        An optional note-to-self to go along with the channel containing some
+        useful information. This is only ever stored locally and in no way
+        impacts the channel's operation.
+        */
+        string memo = 13;
     }
 
     message PendingOpenChannel {
         // The pending channel
         PendingChannel channel = 1;
-
-        // The height at which this channel will be confirmed
-        uint32 confirmation_height = 2;
 
         /*
         The amount calculated to be paid in fees for the current set of
@@ -2386,6 +2732,20 @@ message PendingChannelsResponse {
         transaction. This value can later be updated once the channel is open.
         */
         int64 fee_per_kw = 6;
+
+        // Previously used for confirmation_height. Do not reuse.
+        reserved 2;
+
+        // The number of blocks until the funding transaction is considered
+        // expired. If this value gets close to zero, there is a risk that the
+        // channel funding will be canceled by the channel responder. The
+        // channel should be fee bumped using CPFP (see walletrpc.BumpFee) to
+        // ensure that the channel confirms in time. Otherwise a force-close
+        // will be necessary if the channel confirms after the funding
+        // transaction expires. A negative value means the channel responder has
+        // very likely canceled the funding and the channel will never become
+        // fully operational.
+        int32 funding_expiry_blocks = 3;
     }
 
     message WaitingCloseChannel {
@@ -2403,6 +2763,10 @@ message PendingChannelsResponse {
 
         // The transaction id of the closing transaction
         string closing_txid = 4;
+
+        // The raw hex encoded bytes of the closing transaction. Included if
+        // include_raw_tx in the request is true.
+        string closing_tx_hex = 5;
     }
 
     message Commitments {
@@ -2467,9 +2831,17 @@ message PendingChannelsResponse {
 
         repeated PendingHTLC pending_htlcs = 8;
 
+        /*
+          There are three resolution states for the anchor:
+          limbo, lost and recovered. Derive the current state
+          from the limbo and recovered balances.
+        */
         enum AnchorState {
+            // The recovered_balance is zero and limbo_balance is non-zero.
             LIMBO = 0;
+            // The recovered_balance is non-zero.
             RECOVERED = 1;
+            // A state that is neither LIMBO nor RECOVERED.
             LOST = 2;
         }
 
@@ -2530,6 +2902,14 @@ message WalletAccountBalance {
 }
 
 message WalletBalanceRequest {
+    // The wallet account the balance is shown for.
+    // If this is not specified, the balance of the "default" account is shown.
+    string account = 1;
+
+    // The minimum number of confirmations each one of your outputs used for the
+    // funding transaction must satisfy. If this is not specified, the default
+    // value of 1 is used.
+    int32 min_confs = 2;
 }
 
 message WalletBalanceResponse {
@@ -2545,6 +2925,9 @@ message WalletBalanceResponse {
     // The total amount of wallet UTXOs held in outputs that are locked for
     // other usage.
     int64 locked_balance = 5;
+
+    // The amount of reserve required.
+    int64 reserved_balance_anchor_chan = 6;
 
     // A mapping of each wallet account's name to its balance.
     map<string, WalletAccountBalance> account_balance = 4;
@@ -2612,6 +2995,9 @@ message QueryRoutesRequest {
     not add any additional block padding on top of final_ctlv_delta. This
     padding of a few blocks needs to be added manually or otherwise failures may
     happen when a block comes in while the payment is in flight.
+
+    Note: must not be set if making a payment to a blinded path (delta is
+    set by the aggregate parameters provided by blinded_payment_paths)
     */
     int32 final_cltv_delta = 4;
 
@@ -2686,13 +3072,28 @@ message QueryRoutesRequest {
     repeated lnrpc.RouteHint route_hints = 16;
 
     /*
+    An optional blinded path(s) to reach the destination. Note that the
+    introduction node must be provided as the first hop in the route.
+    */
+    repeated BlindedPaymentPath blinded_payment_paths = 19;
+
+    /*
     Features assumed to be supported by the final node. All transitive feature
     dependencies must also be set properly. For a given feature bit pair, either
     optional or remote may be set, but not both. If this field is nil or empty,
     the router will try to load destination features from the graph as a
     fallback.
+
+    Note: must not be set if making a payment to a blinded route (features
+    are provided in blinded_payment_paths).
     */
     repeated lnrpc.FeatureBit dest_features = 17;
+
+    /*
+    The time preference for this payment. Set to -1 to optimize for fees
+    only, to 1 to optimize for reliability only or a value inbetween for a mix.
+    */
+    double time_pref = 18;
 }
 
 message NodePair {
@@ -2761,7 +3162,7 @@ message Hop {
     TLV format. Note that if any custom tlv_records below are specified, then
     this field MUST be set to true for them to be encoded properly.
     */
-    bool tlv_payload = 9;
+    bool tlv_payload = 9 [deprecated = true];
 
     /*
     An optional TLV record that signals the use of an MPP payment. If present,
@@ -2787,6 +3188,35 @@ message Hop {
     to drop off at each hop within the onion.
     */
     map<uint64, bytes> custom_records = 11;
+
+    // The payment metadata to send along with the payment to the payee.
+    bytes metadata = 13;
+
+    /*
+    Blinding point is an optional blinding point included for introduction
+    nodes in blinded paths. This field is mandatory for hops that represents
+    the introduction point in a blinded path.
+    */
+    bytes blinding_point = 14;
+
+    /*
+    Encrypted data is a receiver-produced blob of data that provides hops
+    in a blinded route with forwarding data. As this data is encrypted by
+    the recipient, we will not be able to parse it - it is essentially an
+    arbitrary blob of data from our node's perspective. This field is
+    mandatory for all hops in a blinded path, including the introduction
+    node.
+    */
+    bytes encrypted_data = 15;
+
+    /*
+    The total amount that is sent to the recipient (possibly across multiple
+    HTLCs), as specified by the sender when making a payment to a blinded path.
+    This value is only set in the final hop payload of a blinded payment. This
+    value is analogous to the MPPRecord that is used for regular (non-blinded)
+    MPP payments.
+    */
+    uint64 total_amt_msat = 16;
 }
 
 message MPPRecord {
@@ -2794,7 +3224,8 @@ message MPPRecord {
     A unique, random identifier used to authenticate the sender as the intended
     payer of a multi-path payment. The payment_addr must be the same for all
     subpayments, and match the payment_addr provided in the receiver's invoice.
-    The same payment_addr must be used on all subpayments.
+    The same payment_addr must be used on all subpayments. This is also called
+    payment secret in specifications (e.g. BOLT 11).
     */
     bytes payment_addr = 11;
 
@@ -2903,6 +3334,9 @@ message LightningNode {
     repeated NodeAddress addresses = 4;
     string color = 5;
     map<uint32, Feature> features = 6;
+
+    // Custom node announcement tlv records.
+    map<uint64, bytes> custom_records = 7;
 }
 
 message NodeAddress {
@@ -2918,6 +3352,12 @@ message RoutingPolicy {
     bool disabled = 5;
     uint64 max_htlc_msat = 6;
     uint32 last_update = 7;
+
+    // Custom channel update tlv records.
+    map<uint64, bytes> custom_records = 8;
+
+    int32 inbound_fee_base_msat = 9;
+    int32 inbound_fee_rate_milli_msat = 10;
 }
 
 /*
@@ -2945,6 +3385,9 @@ message ChannelEdge {
 
     RoutingPolicy node1_policy = 7;
     RoutingPolicy node2_policy = 8;
+
+    // Custom channel announcement tlv records.
+    map<uint64, bytes> custom_records = 9;
 }
 
 message ChannelGraphRequest {
@@ -3123,6 +3566,64 @@ message RouteHint {
     repeated HopHint hop_hints = 1;
 }
 
+message BlindedPaymentPath {
+    // The blinded path to send the payment to.
+    BlindedPath blinded_path = 1;
+
+    // The base fee for the blinded path provided, expressed in msat.
+    uint64 base_fee_msat = 2;
+
+    /*
+    The proportional fee for the blinded path provided, expressed in parts
+    per million.
+    */
+    uint32 proportional_fee_rate = 3;
+
+    /*
+    The total CLTV delta for the blinded path provided, including the
+    final CLTV delta for the receiving node.
+    */
+    uint32 total_cltv_delta = 4;
+
+    /*
+    The minimum hltc size that may be sent over the blinded path, expressed
+    in msat.
+    */
+    uint64 htlc_min_msat = 5;
+
+    /*
+    The maximum htlc size that may be sent over the blinded path, expressed
+    in msat.
+    */
+    uint64 htlc_max_msat = 6;
+
+    // The feature bits for the route.
+    repeated FeatureBit features = 7;
+}
+
+message BlindedPath {
+    // The unblinded pubkey of the introduction node for the route.
+    bytes introduction_node = 1;
+
+    // The ephemeral pubkey used by nodes in the blinded route.
+    bytes blinding_point = 2;
+
+    /*
+    A set of blinded node keys and data blobs for the blinded portion of the
+    route. Note that the first hop is expected to be the introduction node,
+    so the route is always expected to have at least one hop.
+    */
+    repeated BlindedHop blinded_hops = 3;
+}
+
+message BlindedHop {
+    // The blinded public key of the node.
+    bytes blinded_node = 1;
+
+    // An encrypted blob of data provided to the blinded node.
+    bytes encrypted_data = 2;
+}
+
 message AMPInvoiceState {
     // The state the HTLCs associated with this setID are in.
     InvoiceHTLCState state = 1;
@@ -3158,6 +3659,7 @@ message Invoice {
     /*
     The hash of the preimage. When using REST, this field must be encoded as
     base64.
+    Note: Output only, don't specify for creating an invoice.
     */
     bytes r_hash = 4;
 
@@ -3175,19 +3677,32 @@ message Invoice {
     */
     int64 value_msat = 23;
 
-    // Whether this invoice has been fulfilled
+    /*
+    Whether this invoice has been fulfilled.
+
+    The field is deprecated. Use the state field instead (compare to SETTLED).
+    */
     bool settled = 6 [deprecated = true];
 
-    // When this invoice was created
+    /*
+    When this invoice was created.
+    Measured in seconds since the unix epoch.
+    Note: Output only, don't specify for creating an invoice.
+    */
     int64 creation_date = 7;
 
-    // When this invoice was settled
+    /*
+    When this invoice was settled.
+    Measured in seconds since the unix epoch.
+    Note: Output only, don't specify for creating an invoice.
+    */
     int64 settle_date = 8;
 
     /*
     A bare-bones invoice for a payment within the Lightning Network. With the
     details of the invoice, the sender has all the data necessary to send a
     payment to the recipient.
+    Note: Output only, don't specify for creating an invoice.
     */
     string payment_request = 9;
 
@@ -3199,7 +3714,7 @@ message Invoice {
     */
     bytes description_hash = 10;
 
-    // Payment request expiry time in seconds. Default is 3600 (1 hour).
+    // Payment request expiry time in seconds. Default is 86400 (24 hours).
     int64 expiry = 11;
 
     // Fallback on-chain address.
@@ -3215,6 +3730,8 @@ message Invoice {
     repeated RouteHint route_hints = 14;
 
     // Whether this invoice should include routing hints for private channels.
+    // Note: When enabled, if value and value_msat are zero, a large number of
+    // hints with these channels can be included, which might not be desirable.
     bool private = 15;
 
     /*
@@ -3222,6 +3739,7 @@ message Invoice {
     this index making it monotonically increasing. Callers to the
     SubscribeInvoices call can use this to instantly get notified of all added
     invoices with an add_index greater than this one.
+    Note: Output only, don't specify for creating an invoice.
     */
     uint64 add_index = 16;
 
@@ -3230,6 +3748,7 @@ message Invoice {
     increment this index making it monotonically increasing. Callers to the
     SubscribeInvoices call can use this to instantly get notified of all
     settled invoices with an settle_index greater than this one.
+    Note: Output only, don't specify for creating an invoice.
     */
     uint64 settle_index = 17;
 
@@ -3238,21 +3757,23 @@ message Invoice {
 
     /*
     The amount that was accepted for this invoice, in satoshis. This will ONLY
-    be set if this invoice has been settled. We provide this field as if the
-    invoice was created with a zero value, then we need to record what amount
-    was ultimately accepted. Additionally, it's possible that the sender paid
-    MORE that was specified in the original invoice. So we'll record that here
-    as well.
+    be set if this invoice has been settled or accepted. We provide this field
+    as if the invoice was created with a zero value, then we need to record what
+    amount was ultimately accepted. Additionally, it's possible that the sender
+    paid MORE that was specified in the original invoice. So we'll record that
+    here as well.
+    Note: Output only, don't specify for creating an invoice.
     */
     int64 amt_paid_sat = 19;
 
     /*
     The amount that was accepted for this invoice, in millisatoshis. This will
-    ONLY be set if this invoice has been settled. We provide this field as if
-    the invoice was created with a zero value, then we need to record what
-    amount was ultimately accepted. Additionally, it's possible that the sender
-    paid MORE that was specified in the original invoice. So we'll record that
-    here as well.
+    ONLY be set if this invoice has been settled or accepted. We provide this
+    field as if the invoice was created with a zero value, then we need to
+    record what amount was ultimately accepted. Additionally, it's possible that
+    the sender paid MORE that was specified in the original invoice. So we'll
+    record that here as well.
+    Note: Output only, don't specify for creating an invoice.
     */
     int64 amt_paid_msat = 20;
 
@@ -3265,25 +3786,35 @@ message Invoice {
 
     /*
     The state the invoice is in.
+    Note: Output only, don't specify for creating an invoice.
     */
     InvoiceState state = 21;
 
-    // List of HTLCs paying to this invoice [EXPERIMENTAL].
+    /*
+    List of HTLCs paying to this invoice [EXPERIMENTAL].
+    Note: Output only, don't specify for creating an invoice.
+    */
     repeated InvoiceHTLC htlcs = 22;
 
-    // List of features advertised on the invoice.
+    /*
+    List of features advertised on the invoice.
+    Note: Output only, don't specify for creating an invoice.
+    */
     map<uint32, Feature> features = 24;
 
     /*
     Indicates if this invoice was a spontaneous payment that arrived via keysend
     [EXPERIMENTAL].
+    Note: Output only, don't specify for creating an invoice.
     */
     bool is_keysend = 25;
 
     /*
-    The payment address of this invoice. This value will be used in MPP
-    payments, and also for newer invoices that always require the MPP payload
-    for added end-to-end security.
+    The payment address of this invoice. This is also called payment secret in
+    specifications (e.g. BOLT 11). This value will be used in MPP payments, and
+    also for newer invoices that always require the MPP payload for added
+    end-to-end security.
+    Note: Output only, don't specify for creating an invoice.
     */
     bytes payment_addr = 26;
 
@@ -3299,6 +3830,7 @@ message Invoice {
     given set ID. This field is always populated for AMP invoices, and can be
     used along side LookupInvoice to obtain the HTLC information related to a
     given sub-invoice.
+    Note: Output only, don't specify for creating an invoice.
     */
     map<string, AMPInvoiceState> amp_invoice_state = 28;
 }
@@ -3386,9 +3918,9 @@ message AddInvoiceResponse {
     uint64 add_index = 16;
 
     /*
-    The payment address of the generated invoice. This value should be used
-    in all payments for this invoice as we require it for end to end
-    security.
+    The payment address of the generated invoice. This is also called
+    payment secret in specifications (e.g. BOLT 11). This value should be used
+    in all payments for this invoice as we require it for end to end security.
     */
     bytes payment_addr = 17;
 }
@@ -3429,7 +3961,16 @@ message ListInvoiceRequest {
     specified index offset. This can be used to paginate backwards.
     */
     bool reversed = 6;
+
+    // If set, returns all invoices with a creation date greater than or equal
+    // to it. Measured in seconds since the unix epoch.
+    uint64 creation_date_start = 7;
+
+    // If set, returns all invoices with a creation date less than or equal to
+    // it. Measured in seconds since the unix epoch.
+    uint64 creation_date_end = 8;
 }
+
 message ListInvoiceResponse {
     /*
     A list of invoices from the time slice of the time series specified in the
@@ -3530,10 +4071,20 @@ message Payment {
     string payment_request = 9;
 
     enum PaymentStatus {
-        UNKNOWN = 0;
+        // Deprecated. This status will never be returned.
+        UNKNOWN = 0 [deprecated = true];
+
+        // Payment has inflight HTLCs.
         IN_FLIGHT = 1;
+
+        // Payment is settled.
         SUCCEEDED = 2;
+
+        // Payment is failed.
         FAILED = 3;
+
+        // Payment is created and has not attempted any HTLCs.
+        INITIATED = 4;
     }
 
     // The status of the payment.
@@ -3620,6 +4171,22 @@ message ListPaymentsRequest {
     of the returned payments is always oldest first (ascending index order).
     */
     bool reversed = 4;
+
+    /*
+    If set, all payments (complete and incomplete, independent of the
+    max_payments parameter) will be counted. Note that setting this to true will
+    increase the run time of the call significantly on systems that have a lot
+    of payments, as all of them have to be iterated through to be counted.
+    */
+    bool count_total_payments = 5;
+
+    // If set, returns all payments with a creation date greater than or equal
+    // to it. Measured in seconds since the unix epoch.
+    uint64 creation_date_start = 6;
+
+    // If set, returns all payments with a creation date less than or equal to
+    // it. Measured in seconds since the unix epoch.
+    uint64 creation_date_end = 7;
 }
 
 message ListPaymentsResponse {
@@ -3637,6 +4204,14 @@ message ListPaymentsResponse {
     as the index_offset to continue seeking forwards in the next request.
     */
     uint64 last_index_offset = 3;
+
+    /*
+    Will only be set if count_total_payments in the request was set. Represents
+    the total number of payments (complete and incomplete, independent of the
+    number of payments requested in the query) currently present in the payments
+    database.
+    */
+    uint64 total_num_payments = 4;
 }
 
 message DeletePaymentRequest {
@@ -3657,6 +4232,10 @@ message DeleteAllPaymentsRequest {
     Only delete failed HTLCs from payments, not the payment itself.
     */
     bool failed_htlcs_only = 2;
+
+    // Delete all payments. NOTE: Using this option requires careful
+    // consideration as it is a destructive operation.
+    bool all_payments = 3;
 }
 
 message DeletePaymentResponse {
@@ -3733,6 +4312,8 @@ enum FeatureBit {
     ANCHORS_OPT = 21;
     ANCHORS_ZERO_FEE_HTLC_REQ = 22;
     ANCHORS_ZERO_FEE_HTLC_OPT = 23;
+    ROUTE_BLINDING_REQUIRED = 24;
+    ROUTE_BLINDING_OPTIONAL = 25;
     AMP_REQ = 30;
     AMP_OPT = 31;
 }
@@ -3762,7 +4343,15 @@ message ChannelFeeReport {
     // The effective fee rate in milli-satoshis. Computed by dividing the
     // fee_per_mil value by 1 million.
     double fee_rate = 4;
+
+    // The base fee charged regardless of the number of milli-satoshis sent.
+    int32 inbound_base_fee_msat = 6;
+
+    // The amount charged per milli-satoshis transferred expressed in
+    // millionths of a satoshi.
+    int32 inbound_fee_per_mil = 7;
 }
+
 message FeeReportResponse {
     // An array of channel fee reports which describes the current fee schedule
     // for each channel.
@@ -3813,7 +4402,11 @@ message PolicyUpdateRequest {
 
     // If true, min_htlc_msat is applied.
     bool min_htlc_msat_specified = 8;
+
+    int32 inbound_base_fee_msat = 10;
+    int32 inbound_fee_rate_ppm = 11;
 }
+
 enum UpdateFailure {
     UPDATE_FAILURE_UNKNOWN = 0;
     UPDATE_FAILURE_PENDING = 1;
@@ -3856,6 +4449,10 @@ message ForwardingHistoryRequest {
 
     // The max number of events to return in the response to this query.
     uint32 num_max_events = 4;
+
+    // Informs the server if the peer alias should be looked up for each
+    // forwarding event.
+    bool peer_alias_lookup = 5;
 }
 message ForwardingEvent {
     // Timestamp is the time (unix epoch offset) that this circuit was
@@ -3894,6 +4491,12 @@ message ForwardingEvent {
     // The number of nanoseconds elapsed since January 1, 1970 UTC when this
     // circuit was completed.
     uint64 timestamp_ns = 11;
+
+    // The peer alias of the incoming channel.
+    string peer_alias_in = 12;
+
+    // The peer alias of the outgoing channel.
+    string peer_alias_out = 13;
 
     // TODO(roasbeef): add settlement latency?
     //  * use FPE on the chan id?
@@ -4079,6 +4682,7 @@ message Failure {
         EXPIRY_TOO_FAR = 22;
         MPP_TIMEOUT = 23;
         INVALID_ONION_PAYLOAD = 24;
+        INVALID_ONION_BLINDING = 25;
 
         /*
         An internal error occurred.
@@ -4290,6 +4894,14 @@ message RPCMiddlewareRequest {
         the same type, or replaced by an error message.
         */
         RPCMessage response = 6;
+
+        /*
+        This is used to indicate to the client that the server has successfully
+        registered the interceptor. This is only used in the very first message
+        that the server sends to the client after the client sends the server
+        the middleware registration message.
+        */
+        bool reg_complete = 8;
     }
 
     /*
@@ -4327,7 +4939,8 @@ message RPCMessage {
 
     /*
     The full canonical gRPC name of the message type (in the format
-    <rpcpackage>.TypeName, for example lnrpc.GetInfoRequest).
+    <rpcpackage>.TypeName, for example lnrpc.GetInfoRequest). In case of an
+    error being returned from lnd, this simply contains the string "error".
     */
     string type_name = 3;
 
@@ -4336,6 +4949,13 @@ message RPCMessage {
     format.
     */
     bytes serialized = 4;
+
+    /*
+    Indicates that the response from lnd was an error, not a gRPC response. If
+    this is set to true then the type_name contains the string "error" and
+    serialized contains the error string.
+    */
+    bool is_error = 5;
 }
 
 message RPCMiddlewareResponse {
@@ -4412,18 +5032,16 @@ message InterceptFeedback {
     string error = 1;
 
     /*
-    A boolean indicating that the gRPC response should be replaced/overwritten.
-    As its name suggests, this can only be used as a feedback to an intercepted
-    response RPC message and is ignored for feedback on any other message. This
-    boolean is needed because in protobuf an empty message is serialized as a
-    0-length or nil byte slice and we wouldn't be able to distinguish between
+    A boolean indicating that the gRPC message should be replaced/overwritten.
+    This boolean is needed because in protobuf an empty message is serialized as
+    a 0-length or nil byte slice and we wouldn't be able to distinguish between
     an empty replacement message and the "don't replace anything" case.
     */
     bool replace_response = 2;
 
     /*
     If the replace_response field is set to true, this field must contain the
-    binary serialized gRPC response message in the protobuf format.
+    binary serialized gRPC message in the protobuf format.
     */
     bytes replacement_serialized = 3;
 }

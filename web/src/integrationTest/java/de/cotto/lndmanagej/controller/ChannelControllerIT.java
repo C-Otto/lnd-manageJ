@@ -40,6 +40,7 @@ import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.TOTAL_SENT_2;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES_FOR_LOCAL_CHANNEL;
+import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES_WITH_NEGATIVE_INBOUND_FEES;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.core.Is.is;
@@ -256,7 +257,22 @@ class ChannelControllerIT {
                 .jsonPath("$.remote.feeRatePpm").value(is(300))
                 .jsonPath("$.remote.baseFeeMilliSat").value(is("0"))
                 .jsonPath("$.local.enabled").value(is(false))
-                .jsonPath("$.remote.enabled").value(is(true));
+                .jsonPath("$.remote.enabled").value(is(true))
+                .jsonPath("$.local.inboundFeeRatePpm").value(is(0))
+                .jsonPath("$.remote.inboundFeeRatePpm").value(is(0))
+                .jsonPath("$.local.inboundBaseFeeMilliSat").value(is("0"))
+                .jsonPath("$.remote.inboundBaseFeeMilliSat").value(is("0"));
+    }
+
+    @Test
+    void getPolicies_with_negative_inbound_fees() {
+        when(channelService.getLocalChannel(CHANNEL_ID)).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+        when(policyService.getPolicies(LOCAL_OPEN_CHANNEL)).thenReturn(POLICIES_WITH_NEGATIVE_INBOUND_FEES);
+        webTestClient.get().uri(CHANNEL_PREFIX + "/policies")
+                .exchange()
+                .expectBody()
+                .jsonPath("$.remote.inboundFeeRatePpm").value(is(-100))
+                .jsonPath("$.remote.inboundBaseFeeMilliSat").value(is("-1"));
     }
 
     // CPD-OFF

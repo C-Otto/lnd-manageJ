@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_1;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_DISABLED;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_WITH_BASE_FEE;
+import static de.cotto.lndmanagej.model.PolicyFixtures.POLICY_WITH_NEGATIVE_INBOUND_FEES;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PolicyTest {
@@ -16,6 +17,16 @@ class PolicyTest {
     @Test
     void baseFee() {
         assertThat(POLICY_WITH_BASE_FEE.baseFee()).isEqualTo(Coins.ofMilliSatoshis(10));
+    }
+
+    @Test
+    void inboundFeeRate() {
+        assertThat(POLICY_WITH_NEGATIVE_INBOUND_FEES.inboundFeeRate()).isEqualTo(-100L);
+    }
+
+    @Test
+    void inboundBaseFee() {
+        assertThat(POLICY_WITH_NEGATIVE_INBOUND_FEES.inboundBaseFee()).isEqualTo(Coins.ofMilliSatoshis(-1));
     }
 
     @Test
