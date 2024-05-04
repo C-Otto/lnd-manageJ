@@ -80,7 +80,6 @@ Channel specific: `/api/channel/{ID}/` (where `{ID}` is the channel ID) followed
  * `self-payments-to-channel`: a list of all self-payments putting funds into the channel (including payment details and a summary)
  * `warnings`: shows the following warnings, if applicable
    * "Channel balance ranged from `X`% to `Y`% in the past 14 days" (if `X` < 10 and `Y` > 90)
-   * "Channel has accumulated `X` updates" (if `X` > 100,000)
  * `details`: all of the above
 
 **Note**: the channel ID can be supplied in any of the following formats:
