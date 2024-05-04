@@ -76,11 +76,11 @@ Channel specific: `/api/channel/{ID}/` (where `{ID}` is the channel ID) followed
  * `rebalance-target-amount`: the amount of funds you put into the channel as part of rebalancing (in milli-satoshis)
  * `rebalance-support-as-source-amount`: the amount of funds you took out of the channel as part of rebalancing another channel (in milli-satoshis)
  * `rebalance-support-as-target-amount`: the amount of funds you put into the channel as part of rebalancing another channel (in milli-satoshis)
- * `self-payments-from-channel`: a list of all self-payments taking funds out of the channel (including payment details and a summary)
- * `self-payments-to-channel`: a list of all self-payments putting funds into the channel (including payment details and a summary)
  * `warnings`: shows the following warnings, if applicable
    * "Channel balance ranged from `X`% to `Y`% in the past 14 days" (if `X` < 10 and `Y` > 90)
  * `details`: all of the above
+ * `self-payments-from-channel`: a list of all self-payments taking funds out of the channel (including payment details and a summary)
+ * `self-payments-to-channel`: a list of all self-payments putting funds into the channel (including payment details and a summary)
 
 **Note**: the channel ID can be supplied in any of the following formats:
  - `123456:123:1` (lnd specific compact format)
