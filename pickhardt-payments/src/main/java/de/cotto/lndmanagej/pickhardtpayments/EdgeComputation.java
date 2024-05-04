@@ -132,7 +132,9 @@ public class EdgeComputation {
             return false;
         }
         long feeRate = policy.feeRate();
-        if (feeRate >= feeRateLimit) {
+        boolean hopIsRelevantForFeeCheck =
+                !pubkey.equals(channelEdge.source()) || !paymentOptions.ignoreFeesForOwnChannels();
+        if (feeRate >= feeRateLimit && hopIsRelevantForFeeCheck) {
             return true;
         }
         if (isEdgeToUnwantedFirstHop(channelEdge, paymentOptions, pubkey)) {

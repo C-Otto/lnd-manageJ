@@ -152,6 +152,33 @@ class EdgeComputationTest {
     }
 
     @Test
+    void adds_edge_with_fee_rate_at_limit_if_first_hop_and_fee_is_ignored() {
+        int feeRateLimit = 1000;
+        PaymentOptions paymentOptions = PaymentOptions.forFeeRateLimit(feeRateLimit);
+        DirectedChannelEdge edge =
+                new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY_4, PUBKEY_2, policy(feeRateLimit), Policy.UNKNOWN);
+        when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));
+        assertThat(edgeComputation.getEdges(paymentOptions, MAX_TIME_LOCK_DELTA).edges()).isNotEmpty();
+    }
+
+    @Test
+    void does_not_add_edge_with_fee_rate_at_limit_if_first_hop_and_fee_is_not_ignored() {
+        long feeRateLimit = 2000L;
+        PaymentOptions paymentOptions = new PaymentOptions(
+                Optional.of(0),
+                Optional.of(feeRateLimit),
+                Optional.empty(),
+                false,
+                Optional.empty(),
+                Optional.empty()
+        );
+        DirectedChannelEdge edge =
+                new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY_4, PUBKEY, policy(feeRateLimit), Policy.UNKNOWN);
+        when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));
+        assertThat(edgeComputation.getEdges(paymentOptions, MAX_TIME_LOCK_DELTA).edges()).isEmpty();
+    }
+
+    @Test
     void does_not_add_first_hop_edge_with_fee_rate_at_or_above_limit_for_first_hops() {
         Pubkey ownPubkey = EDGE.startNode();
         Pubkey topUpPeer = PUBKEY_4;
@@ -482,7 +509,7 @@ class EdgeComputationTest {
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));
     }
 
-    private static Policy policy(int feeRate) {
+    private static Policy policy(long feeRate) {
         return new Policy(feeRate, Coins.NONE, true, 40, Coins.NONE, Coins.NONE);
     }
 
