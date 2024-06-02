@@ -14,13 +14,12 @@ import java.time.ZoneOffset;
 @Entity
 @Table(
         name = "forwarding_events",
-        indexes = {@Index(
-                name = "idxf6mchjaiqb65pytncc9l5fiw0",
-                columnList = "channelIncoming,timestamp"
-        ), @Index(
-                name = "idx7ki7iilyupdjktdx80pd347au",
-                columnList = "channelOutgoing,timestamp"
-        )}
+        indexes = {
+            @Index(name = "idxf6mchjaiqb65pytncc9l5fiw0",
+                   columnList = "channelIncoming,timestamp"),
+            @Index(name = "idx7ki7iilyupdjktdx80pd347au",
+                   columnList = "channelOutgoing,timestamp")
+        }
 )
 class ForwardingEventJpaDto {
     @Id
