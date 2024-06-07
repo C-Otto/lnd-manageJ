@@ -13,7 +13,7 @@ dependencies {
     runtimeOnly(project(":statistics"))
     runtimeOnly(project(":selfpayments"))
     runtimeOnly("org.postgresql:postgresql")
-    runtimeOnly("org.flywaydb:flyway-core")
+    runtimeOnly("org.flywaydb:flyway-database-postgresql")
     runtimeOnly("com.h2database:h2")
     integrationTestImplementation("com.ryantenney.metrics:metrics-spring")
     integrationTestImplementation("io.grpc:grpc-stub")
