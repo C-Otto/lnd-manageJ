@@ -14,7 +14,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class SettledSettledInvoiceJpaDtoTest {
     @Test
-    @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
     void createFromModel() {
         SettledInvoiceJpaDto jpaDto = SettledInvoiceJpaDto.createFromModel(SETTLED_INVOICE);
         assertThat(jpaDto.getAddIndex()).isEqualTo(SETTLED_INVOICE.addIndex());

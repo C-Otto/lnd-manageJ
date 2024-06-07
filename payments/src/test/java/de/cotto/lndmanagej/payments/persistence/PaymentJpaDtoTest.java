@@ -14,7 +14,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class PaymentJpaDtoTest {
     @Test
-    @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
     void createFromModel() {
         PaymentJpaDto jpaDto = PaymentJpaDto.createFromModel(PAYMENT);
         assertThat(jpaDto.getPaymentIndex()).isEqualTo(PAYMENT_INDEX);

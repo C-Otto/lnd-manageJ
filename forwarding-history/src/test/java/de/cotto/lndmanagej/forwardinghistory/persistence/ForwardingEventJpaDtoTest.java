@@ -9,7 +9,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ForwardingEventJpaDtoTest {
     @Test
-    @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
     void createFromModel() {
         ForwardingEventJpaDto jpaDto = ForwardingEventJpaDto.createFromModel(FORWARDING_EVENT);
         assertThat(jpaDto.getIndex()).isEqualTo(FORWARDING_EVENT.index());

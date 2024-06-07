@@ -98,7 +98,6 @@ class CoinsTest {
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
     void isNonPositive() {
         assertThat(Coins.ofSatoshis(-100).isNonPositive()).isTrue();
         assertThat(Coins.ofSatoshis(0).isNonPositive()).isTrue();
@@ -112,7 +111,6 @@ class CoinsTest {
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
     void isNonNegative() {
         assertThat(Coins.ofSatoshis(-100).isNonNegative()).isFalse();
         assertThat(Coins.ofSatoshis(0).isNonNegative()).isTrue();

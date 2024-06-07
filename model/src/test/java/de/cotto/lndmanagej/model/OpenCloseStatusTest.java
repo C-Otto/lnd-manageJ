@@ -10,7 +10,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class OpenCloseStatusTest {
     @Test
-    @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
     void testToString() {
         assertThat(OPEN).hasToString("OPEN");
         assertThat(WAITING_CLOSE).hasToString("WAITING_CLOSE");
