@@ -10,7 +10,7 @@ javaPlatform {
 
 dependencies {
     val springBootVersion = "3.2.2"
-    val grpcVersion = "1.61.1"
+    val grpcVersion = "1.64.0"
 
     api(platform("org.springframework.cloud:spring-cloud-dependencies:2023.0.0"))
     api(platform("org.springframework.boot:spring-boot-dependencies:$springBootVersion"))
