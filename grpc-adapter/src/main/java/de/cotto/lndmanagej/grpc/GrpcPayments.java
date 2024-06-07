@@ -32,7 +32,7 @@ import static lnrpc.Payment.PaymentStatus.SUCCEEDED;
 
 @Component
 public class GrpcPayments {
-    private static final int LIMIT = 1_000;
+    private static final int LIMIT = 5_000;
 
     private final GrpcService grpcService;
     private final Logger logger = LoggerFactory.getLogger(getClass());

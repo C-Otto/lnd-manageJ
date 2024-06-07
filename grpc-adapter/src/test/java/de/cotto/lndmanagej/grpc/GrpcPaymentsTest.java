@@ -57,7 +57,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class GrpcPaymentsTest {
     private static final long ADD_INDEX_OFFSET = 123;
-    private static final int LIMIT = 1_000;
+    private static final int LIMIT = 5_000;
     private static final String PAYMENT_REQUEST = "abc";
 
     @InjectMocks
