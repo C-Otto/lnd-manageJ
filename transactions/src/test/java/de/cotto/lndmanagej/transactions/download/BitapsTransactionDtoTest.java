@@ -16,14 +16,14 @@ class BitapsTransactionDtoTest {
     @Test
     void deserialization() throws Exception {
         String json = """
-                {
-                  "data": {
-                    "txId": "%s",
-                    "blockIndex": %d,
-                    "fee": %d,
-                    "blockHeight": %d
-                  }
-                }
+                {\
+                  "data": {\
+                    "txId": "%s",\
+                    "blockIndex": %d,\
+                    "fee": %d,\
+                    "blockHeight": %d\
+                  }\
+                }\
                 """.formatted(
                 TRANSACTION_HASH, POSITION_IN_BLOCK, FEES.satoshis(), BLOCK_HEIGHT
         );

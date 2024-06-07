@@ -167,7 +167,7 @@ public class PaymentsController {
     }
 
     private String asString(InstantWithString instantWithString) {
-        return "{\"timestamp\":\"%s\",\"message\":\"%s\"}\n"
+        return "{\"timestamp\":\"%s\",\"message\":\"%s\"}%n"
                 .formatted(instantWithString.instant(), instantWithString.string());
     }
 

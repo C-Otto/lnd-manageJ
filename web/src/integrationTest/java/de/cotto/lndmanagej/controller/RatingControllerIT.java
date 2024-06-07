@@ -45,16 +45,16 @@ class RatingControllerIT {
         webTestClient.get().uri(PREFIX + "/node/" + PUBKEY + RATING).exchange()
                 .expectBody()
                 .json("""
-                        {
-                          "rating": 128,
-                          "message": "",
-                          "descriptions": {
-                            "%s rating": "128",
-                            "%s raw rating": "123",
-                            "%s something": "123",
-                            "%s raw rating": "5",
-                            "%s something else": "5"
-                          }
+                        {\
+                          "rating": 128,\
+                          "message": "",\
+                          "descriptions": {\
+                            "%s rating": "128",\
+                            "%s raw rating": "123",\
+                            "%s something": "123",\
+                            "%s raw rating": "5",\
+                            "%s something else": "5"\
+                          }\
                         }""".formatted(PUBKEY, CHANNEL_ID, CHANNEL_ID, CHANNEL_ID_2, CHANNEL_ID_2));
     }
 
@@ -72,14 +72,14 @@ class RatingControllerIT {
         webTestClient.get().uri(PREFIX + "/channel/" + CHANNEL_ID + RATING).exchange()
                 .expectBody()
                 .json("""
-                        {
-                          "rating": 579,
-                          "message": "",
-                          "descriptions": {
-                            "%s a": "456",
-                            "%s something": "123",
-                            "%s raw rating": "579"
-                          }
+                        {\
+                          "rating": 579,\
+                          "message": "",\
+                          "descriptions": {\
+                            "%s a": "456",\
+                            "%s something": "123",\
+                            "%s raw rating": "579"\
+                          }\
                         }""".formatted(CHANNEL_ID, CHANNEL_ID, CHANNEL_ID));
     }
 

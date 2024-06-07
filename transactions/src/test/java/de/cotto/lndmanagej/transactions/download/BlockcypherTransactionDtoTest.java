@@ -16,41 +16,41 @@ class BlockcypherTransactionDtoTest {
     @Test
     void deserialization() throws Exception {
         String json = """
-                {
-                  "block_height": %d,
-                  "hash": "%s",
-                  "fees": %d,
-                  "confirmed": "2019-10-26T20:06:35Z",
-                  "received": "2019-10-26T20:06:34Z",
-                  "block_index": %d,
-                  "inputs": [
-                    {
-                      "output_value": 100,
-                      "addresses": [
-                        "aaa"
-                      ]
-                    },
-                    {
-                      "output_value": 200,
-                      "addresses": [
-                        "bbb"
-                      ]
-                    }
-                  ],
-                  "outputs": [
-                    {
-                      "value": 123,
-                      "addresses": [
-                        "abc"
-                      ]
-                    },
-                    {
-                      "value": 456,
-                      "addresses": [
-                        "def"
-                      ]
-                    }
-                  ]
+                {\
+                  "block_height": %d,\
+                  "hash": "%s",\
+                  "fees": %d,\
+                  "confirmed": "2019-10-26T20:06:35Z",\
+                  "received": "2019-10-26T20:06:34Z",\
+                  "block_index": %d,\
+                  "inputs": [\
+                    {\
+                      "output_value": 100,\
+                      "addresses": [\
+                        "aaa"\
+                      ]\
+                    },\
+                    {\
+                      "output_value": 200,\
+                      "addresses": [\
+                        "bbb"\
+                      ]\
+                    }\
+                  ],\
+                  "outputs": [\
+                    {\
+                      "value": 123,\
+                      "addresses": [\
+                        "abc"\
+                      ]\
+                    },\
+                    {\
+                      "value": 456,\
+                      "addresses": [\
+                        "def"\
+                      ]\
+                    }\
+                  ]\
                 }""".formatted(
                 BLOCK_HEIGHT, TRANSACTION_HASH, FEES.satoshis(), POSITION_IN_BLOCK
         );

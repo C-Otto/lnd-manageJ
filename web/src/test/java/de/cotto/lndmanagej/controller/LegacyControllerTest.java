@@ -56,7 +56,7 @@ class LegacyControllerTest {
         when(nodeService.getAlias(PUBKEY_3)).thenReturn(ALIAS_3);
         when(channelService.getOpenChannels()).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, LOCAL_OPEN_CHANNEL_TO_NODE_3));
         assertThat(legacyController.getOpenChannelIdsPretty())
-                .isEqualTo("%s\t%s %s %s %s %s\n%s\t%s %s %s %s %s".formatted(
+                .isEqualTo("%s\t%s %s %s %s %s%n%s\t%s %s %s %s %s".formatted(
                         CHANNEL_ID_COMPACT, PUBKEY_2, padded(CAPACITY), padded(balance1), padded(ppm1), ALIAS_2,
                         CHANNEL_ID_COMPACT_4, PUBKEY_3, padded(CAPACITY_2), padded(balance2), padded(ppm2), ALIAS_3
                 ));
