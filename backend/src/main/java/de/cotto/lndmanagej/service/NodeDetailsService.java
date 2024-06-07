@@ -78,6 +78,17 @@ public class NodeDetailsService {
         List<ChannelId> forceClosingChannelIds =
                 getSortedChannelIds(channelService.getForceClosingChannelsWith(pubkey));
         try {
+            CompletableFuture.allOf(
+                    node,
+                    onlineReport,
+                    onChainCosts,
+                    balanceInformation,
+                    feeReport,
+                    flowReport,
+                    rebalanceReport,
+                    nodeWarnings,
+                    rating
+            ).join();
             return new NodeDetails(
                     pubkey,
                     node.get().alias(),

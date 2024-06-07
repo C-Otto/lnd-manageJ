@@ -66,6 +66,18 @@ public class ChannelDetailsService {
         CompletableFuture<ChannelWarnings> channelWarnings = getChannelWarnings(localChannel);
         CompletableFuture<Optional<ChannelRating>> rating = getRating(channelId);
         try {
+            CompletableFuture.allOf(
+                    remoteAlias,
+                    balanceInformation,
+                    onChainCosts,
+                    policies,
+                    feeReport,
+                    flowReport,
+                    rebalanceReport,
+                    channelWarnings,
+                    rating
+            ).join();
+
             return new ChannelDetails(
                     localChannel,
                     remoteAlias.get(),
