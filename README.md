@@ -160,14 +160,14 @@ The service is intended to run 24/7 to collect statistics about your node.
 You may restart both the service and lnd at any time.
 
 ### Using H2
-Install Java 17 and run `./start-h2.sh`.
+Install Java 21 and run `./start-h2.sh`.
 
 ### Using PostgreSQL (recommended)
 Install PostgreSQL (Debian: `apt install postgresql`) and create a database named `lndmanagej` and a user `bitcoin`.
 You can tweak these settings in `application/src/main/resources/application.properties`.
 Configure the database so that the user `bitcoin` can access `lndmanagej` without a password at `jdbc:postgresql://localhost:5432/lndmanagej` (`pg_hba.conf`: `local lndmanagej bitcoin trust`).
 
-Install Java 17 and run `./start.sh`.
+Install Java 21 and run `./start.sh`.
 
 ## Disclaimer
 This project is not related to bitromortac's Python based [lndmanage](https://github.com/bitromortac/lndmanage).
