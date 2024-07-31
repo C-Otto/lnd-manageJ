@@ -165,7 +165,7 @@ Install Java 21 and run `./start-h2.sh`.
 ### Using PostgreSQL (recommended)
 Install PostgreSQL (Debian: `apt install postgresql`) and create a database named `lndmanagej` and a user `bitcoin`.
 You can tweak these settings in `application/src/main/resources/application.properties`.
-Configure the database so that the user `bitcoin` can access `lndmanagej` without a password at `jdbc:postgresql://localhost:5432/lndmanagej` (`pg_hba.conf`: `local lndmanagej bitcoin trust`).
+Configure the database so that the user `bitcoin` can access `lndmanagej` without a password at `jdbc:postgresql://localhost:5432/lndmanagej` (`pg_hba.conf`: `host lndmanagej bitcoin 127.0.0.1/32 trust`).
 
 Install Java 21 and run `./start.sh`.
 
