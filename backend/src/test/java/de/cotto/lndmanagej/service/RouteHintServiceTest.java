@@ -2,7 +2,7 @@ package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.DecodedPaymentRequest;
-import de.cotto.lndmanagej.model.DirectedChannelEdge;
+import de.cotto.lndmanagej.model.Edge;
 import de.cotto.lndmanagej.model.Policy;
 import de.cotto.lndmanagej.model.RouteHint;
 import org.junit.jupiter.api.Test;
@@ -39,10 +39,10 @@ class RouteHintServiceTest {
         routeHintService.addDecodedPaymentRequest(DECODED_PAYMENT_REQUEST);
         Policy policy1 = new Policy(123, Coins.NONE, true, 9, ONE_MILLI_SATOSHI, FIFTY_COINS);
         Policy policy2 = new Policy(1234, ONE_MILLI_SATOSHI, true, 40, ONE_MILLI_SATOSHI, FIFTY_COINS);
-        DirectedChannelEdge edge1 =
-                new DirectedChannelEdge(CHANNEL_ID, FIFTY_COINS, PUBKEY, PUBKEY_4, policy1, Policy.UNKNOWN);
-        DirectedChannelEdge edge2 =
-                new DirectedChannelEdge(CHANNEL_ID_2, FIFTY_COINS, PUBKEY_3, PUBKEY_4, policy2, Policy.UNKNOWN);
+        Edge edge1 =
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_4, FIFTY_COINS, policy1, Policy.UNKNOWN);
+        Edge edge2 =
+                new Edge(CHANNEL_ID_2, PUBKEY_3, PUBKEY_4, FIFTY_COINS, policy2, Policy.UNKNOWN);
         assertThat(routeHintService.getEdgesFromPaymentHints()).contains(edge1, edge2);
     }
 

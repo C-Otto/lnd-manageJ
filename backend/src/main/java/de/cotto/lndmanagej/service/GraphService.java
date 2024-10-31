@@ -2,7 +2,7 @@ package de.cotto.lndmanagej.service;
 
 import de.cotto.lndmanagej.grpc.GrpcGraph;
 import de.cotto.lndmanagej.model.Coins;
-import de.cotto.lndmanagej.model.DirectedChannelEdge;
+import de.cotto.lndmanagej.model.Edge;
 import de.cotto.lndmanagej.model.Pubkey;
 import de.cotto.lndmanagej.model.PubkeyAndFeeRate;
 import org.springframework.stereotype.Service;
@@ -35,19 +35,19 @@ public class GraphService {
     }
 
     public List<PubkeyAndFeeRate> getNodesWithHighFeeRate() {
-        Set<DirectedChannelEdge> edges = grpcGraph.getChannelEdges().orElse(null);
+        Set<Edge> edges = grpcGraph.getChannelEdges().orElse(null);
         if (edges == null) {
             return List.of();
         }
-        Map<Pubkey, Set<DirectedChannelEdge>> candidates = getCandidateEdges(edges);
+        Map<Pubkey, Set<Edge>> candidates = getCandidateEdges(edges);
         return candidates.entrySet().parallelStream()
                 .map(this::withAverageFeeRate)
                 .sorted(Comparator.comparing(PubkeyAndFeeRate::feeRate).reversed())
                 .toList();
     }
 
-    private Map<Pubkey, Set<DirectedChannelEdge>> getCandidateEdges(Set<DirectedChannelEdge> edges) {
-        Map<Pubkey, Set<DirectedChannelEdge>> candidates = edges.parallelStream()
+    private Map<Pubkey, Set<Edge>> getCandidateEdges(Set<Edge> edges) {
+        Map<Pubkey, Set<Edge>> candidates = edges.parallelStream()
                 .filter(e -> e.policy().enabled())
                 .filter(e -> e.policy().feeRate() <= MAX_FEE_RATE)
                 .filter(e -> e.policy().feeRate() > 0)
@@ -58,17 +58,17 @@ public class GraphService {
     }
 
     private void combine(
-            Map<Pubkey, Set<DirectedChannelEdge>> first,
-            Map<Pubkey, Set<DirectedChannelEdge>> second
+            Map<Pubkey, Set<Edge>> first,
+            Map<Pubkey, Set<Edge>> second
     ) {
-        for (Map.Entry<Pubkey, Set<DirectedChannelEdge>> entry : second.entrySet()) {
+        for (Map.Entry<Pubkey, Set<Edge>> entry : second.entrySet()) {
             Pubkey pubkey = entry.getKey();
             first.computeIfAbsent(pubkey, k -> new LinkedHashSet<>()).addAll(entry.getValue());
         }
     }
 
-    private void add(Map<Pubkey, Set<DirectedChannelEdge>> map, DirectedChannelEdge edge) {
-        map.compute(edge.target(), (p, s) -> {
+    private void add(Map<Pubkey, Set<Edge>> map, Edge edge) {
+        map.compute(edge.endNode(), (p, s) -> {
             if (s == null) {
                 s = new LinkedHashSet<>();
             }
@@ -77,7 +77,7 @@ public class GraphService {
         });
     }
 
-    private PubkeyAndFeeRate withAverageFeeRate(Map.Entry<Pubkey, Set<DirectedChannelEdge>> entry) {
+    private PubkeyAndFeeRate withAverageFeeRate(Map.Entry<Pubkey, Set<Edge>> entry) {
         Pubkey pubkey = entry.getKey();
         long feeRateSum = entry.getValue().stream().mapToLong(e -> e.policy().feeRate()).sum();
         int average = (int) (feeRateSum / entry.getValue().size());

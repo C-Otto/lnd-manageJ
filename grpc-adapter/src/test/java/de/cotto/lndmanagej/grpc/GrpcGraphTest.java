@@ -1,7 +1,7 @@
 package de.cotto.lndmanagej.grpc;
 
 import de.cotto.lndmanagej.model.Coins;
-import de.cotto.lndmanagej.model.DirectedChannelEdge;
+import de.cotto.lndmanagej.model.Edge;
 import de.cotto.lndmanagej.model.Policy;
 import lnrpc.ChannelEdge;
 import lnrpc.ChannelGraph;
@@ -74,19 +74,19 @@ class GrpcGraphTest {
                 .build();
         Policy policy1 = new Policy(0, Coins.NONE, false, 40, MIN_HTLC, MAX_HTLC);
         Policy policy2 = new Policy(1, Coins.NONE, true, 144, MIN_HTLC, MAX_HTLC);
-        DirectedChannelEdge expectedEdge1 = new DirectedChannelEdge(
+        Edge expectedEdge1 = new Edge(
                 CHANNEL_ID,
-                CAPACITY,
                 PUBKEY,
                 PUBKEY_2,
+                CAPACITY,
                 policy1,
                 policy2
         );
-        DirectedChannelEdge expectedEdge2 = new DirectedChannelEdge(
+        Edge expectedEdge2 = new Edge(
                 CHANNEL_ID,
-                CAPACITY,
                 PUBKEY_2,
                 PUBKEY,
+                CAPACITY,
                 policy2,
                 policy1
         );
@@ -100,19 +100,19 @@ class GrpcGraphTest {
                 .build();
         Policy policy3 = new Policy(456, Coins.NONE, true, 123, MIN_HTLC, MAX_HTLC);
         Policy policy4 = new Policy(123, Coins.ofMilliSatoshis(1), true, 456, MIN_HTLC, MAX_HTLC);
-        DirectedChannelEdge expectedEdge3 = new DirectedChannelEdge(
+        Edge expectedEdge3 = new Edge(
                 CHANNEL_ID_2,
-                CAPACITY_2,
                 PUBKEY_3,
                 PUBKEY_4,
+                CAPACITY_2,
                 policy3,
                 policy4
         );
-        DirectedChannelEdge expectedEdge4 = new DirectedChannelEdge(
+        Edge expectedEdge4 = new Edge(
                 CHANNEL_ID_2,
-                CAPACITY_2,
                 PUBKEY_4,
                 PUBKEY_3,
+                CAPACITY_2,
                 policy4,
                 policy3
         );
@@ -134,19 +134,19 @@ class GrpcGraphTest {
                 .setNode1Pub(PUBKEY.toString())
                 .setNode2Pub(PUBKEY_2.toString())
                 .build();
-        DirectedChannelEdge expectedPolicyForNode1 = new DirectedChannelEdge(
+        Edge expectedPolicyForNode1 = new Edge(
                 CHANNEL_ID,
-                CAPACITY,
                 PUBKEY,
                 PUBKEY_2,
+                CAPACITY,
                 Policy.UNKNOWN,
                 Policy.UNKNOWN
         );
-        DirectedChannelEdge expectedPolicyForNode2 = new DirectedChannelEdge(
+        Edge expectedPolicyForNode2 = new Edge(
                 CHANNEL_ID,
-                CAPACITY,
                 PUBKEY_2,
                 PUBKEY,
+                CAPACITY,
                 Policy.UNKNOWN,
                 Policy.UNKNOWN
         );

@@ -6,7 +6,6 @@ import de.cotto.lndmanagej.grpc.GrpcGraph;
 import de.cotto.lndmanagej.grpc.middleware.GrpcMiddlewareService;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
-import de.cotto.lndmanagej.model.DirectedChannelEdge;
 import de.cotto.lndmanagej.model.Edge;
 import de.cotto.lndmanagej.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
@@ -63,30 +62,19 @@ public class EdgeComputation {
             logger.error("Middleware needs to be connected, see requirements section in PickhardtPayments.md");
             return EdgesWithLiquidityInformation.EMPTY;
         }
-        Set<DirectedChannelEdge> channelEdges = grpcGraph.getChannelEdges().orElse(null);
+        Set<Edge> channelEdges = grpcGraph.getChannelEdges().orElse(null);
         if (channelEdges == null) {
             logger.error("Unable to get graph");
             return EdgesWithLiquidityInformation.EMPTY;
         }
         Set<EdgeWithLiquidityInformation> edgesWithLiquidityInformation = new LinkedHashSet<>();
         Pubkey ownPubkey = grpcGetInfo.getPubkey();
-        Set<DirectedChannelEdge> edgesFromPaymentHints = routeHintService.getEdgesFromPaymentHints();
-        for (DirectedChannelEdge channelEdge : Sets.union(channelEdges, edgesFromPaymentHints)) {
-            if (shouldIgnore(channelEdge, paymentOptions, ownPubkey, maximumTimeLockDeltaPerEdge)) {
+        Set<Edge> edgesFromPaymentHints = routeHintService.getEdgesFromPaymentHints();
+        for (Edge edge : Sets.union(channelEdges, edgesFromPaymentHints)) {
+            if (shouldIgnore(edge, paymentOptions, ownPubkey, maximumTimeLockDeltaPerEdge)) {
                 continue;
             }
-            ChannelId channelId = channelEdge.channelId();
-            Pubkey pubkey1 = channelEdge.source();
-            Pubkey pubkey2 = channelEdge.target();
-            Edge edge = new Edge(
-                    channelId,
-                    pubkey1,
-                    pubkey2,
-                    channelEdge.capacity(),
-                    channelEdge.policy(),
-                    channelEdge.reversePolicy()
-            );
-            if (edgesFromPaymentHints.contains(channelEdge)) {
+            if (edgesFromPaymentHints.contains(edge)) {
                 edgesWithLiquidityInformation.add(
                         EdgeWithLiquidityInformation.forLowerAndUpperBound(edge, edge.capacity(), edge.capacity())
                 );
@@ -115,7 +103,7 @@ public class EdgeComputation {
 
     @SuppressWarnings("PMD.SimplifyBooleanReturns")
     private boolean shouldIgnore(
-            DirectedChannelEdge channelEdge,
+            Edge channelEdge,
             PaymentOptions paymentOptions,
             Pubkey pubkey,
             int maximumTimeLockDeltaPerEdge
@@ -133,7 +121,7 @@ public class EdgeComputation {
         }
         long feeRate = policy.feeRate();
         boolean hopIsRelevantForFeeCheck =
-                !pubkey.equals(channelEdge.source()) || !paymentOptions.ignoreFeesForOwnChannels();
+                !pubkey.equals(channelEdge.startNode()) || !paymentOptions.ignoreFeesForOwnChannels();
         if (feeRate >= feeRateLimit && hopIsRelevantForFeeCheck) {
             return true;
         }
@@ -152,16 +140,16 @@ public class EdgeComputation {
 
     @SuppressWarnings("PMD.SimplifyBooleanReturns")
     private boolean isEdgeToUnwantedFirstHop(
-            DirectedChannelEdge channelEdge,
+            Edge channelEdge,
             PaymentOptions paymentOptions,
             Pubkey pubkey
     ) {
-        boolean isOutgoingEdge = pubkey.equals(channelEdge.source());
+        boolean isOutgoingEdge = pubkey.equals(channelEdge.startNode());
         if (!isOutgoingEdge) {
             return false;
         }
         Pubkey peerForFirstHop = paymentOptions.peerForFirstHop().orElse(null);
-        boolean firstHopIsUnexpected = peerForFirstHop != null && !peerForFirstHop.equals(channelEdge.target());
+        boolean firstHopIsUnexpected = peerForFirstHop != null && !peerForFirstHop.equals(channelEdge.endNode());
         if (firstHopIsUnexpected) {
             return true;
         }
@@ -169,11 +157,11 @@ public class EdgeComputation {
         if (peerForLastHop == null) {
             return false;
         }
-        return peerForLastHop.equals(channelEdge.target());
+        return peerForLastHop.equals(channelEdge.endNode());
     }
 
-    private boolean isIncomingEdge(DirectedChannelEdge channelEdge, Pubkey ownPubkey) {
-        return ownPubkey.equals(channelEdge.target());
+    private boolean isIncomingEdge(Edge channelEdge, Pubkey ownPubkey) {
+        return ownPubkey.equals(channelEdge.endNode());
     }
 
     private Optional<Coins> getKnownLiquidity(Edge edge, Pubkey ownPubKey) {

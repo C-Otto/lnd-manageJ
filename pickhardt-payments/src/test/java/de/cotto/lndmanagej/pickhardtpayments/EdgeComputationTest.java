@@ -6,7 +6,6 @@ import de.cotto.lndmanagej.grpc.middleware.GrpcMiddlewareService;
 import de.cotto.lndmanagej.model.ChannelCoreInformation;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
-import de.cotto.lndmanagej.model.DirectedChannelEdge;
 import de.cotto.lndmanagej.model.Edge;
 import de.cotto.lndmanagej.model.EdgeWithLiquidityInformation;
 import de.cotto.lndmanagej.model.LocalOpenChannel;
@@ -112,8 +111,8 @@ class EdgeComputationTest {
 
     @Test
     void does_not_add_edge_for_disabled_channel() {
-        DirectedChannelEdge edge =
-                new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY, PUBKEY_2, POLICY_DISABLED, Policy.UNKNOWN);
+        Edge edge =
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, POLICY_DISABLED, Policy.UNKNOWN);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));
         assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA).edges()).isEmpty();
     }
@@ -124,8 +123,8 @@ class EdgeComputationTest {
         int maximumTimeLockDelta = edgeDelta - 1;
         Policy policy =
                 new Policy(0, Coins.NONE, true, edgeDelta, Coins.ofMilliSatoshis(1), Coins.ofSatoshis(10_000));
-        DirectedChannelEdge edge =
-                new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY, PUBKEY_2, policy, Policy.UNKNOWN);
+        Edge edge =
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policy, Policy.UNKNOWN);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));
         assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, maximumTimeLockDelta).edges()).isEmpty();
     }
@@ -138,12 +137,12 @@ class EdgeComputationTest {
         // needs to be excluded to avoid sending top-up payments in a tiny loop: S-X-S
         Policy policyAtLimit = policy(199);
         Policy policyOk = policy(198);
-        DirectedChannelEdge edgeExpensive =
-                new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY, PUBKEY_2, policyExpensive, Policy.UNKNOWN);
-        DirectedChannelEdge edgeAtLimit =
-                new DirectedChannelEdge(CHANNEL_ID_2, CAPACITY, PUBKEY, PUBKEY_2, policyAtLimit, Policy.UNKNOWN);
-        DirectedChannelEdge edgeOk =
-                new DirectedChannelEdge(CHANNEL_ID_3, CAPACITY, PUBKEY, PUBKEY_2, policyOk, Policy.UNKNOWN);
+        Edge edgeExpensive =
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policyExpensive, Policy.UNKNOWN);
+        Edge edgeAtLimit =
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, policyAtLimit, Policy.UNKNOWN);
+        Edge edgeOk =
+                new Edge(CHANNEL_ID_3, PUBKEY, PUBKEY_2, CAPACITY, policyOk, Policy.UNKNOWN);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edgeExpensive, edgeAtLimit, edgeOk)));
         assertThat(
                 edgeComputation.getEdges(paymentOptions, MAX_TIME_LOCK_DELTA).edges().stream()
@@ -155,8 +154,8 @@ class EdgeComputationTest {
     void adds_edge_with_fee_rate_at_limit_if_first_hop_and_fee_is_ignored() {
         int feeRateLimit = 1000;
         PaymentOptions paymentOptions = PaymentOptions.forFeeRateLimit(feeRateLimit);
-        DirectedChannelEdge edge =
-                new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY_4, PUBKEY_2, policy(feeRateLimit), Policy.UNKNOWN);
+        Edge edge =
+                new Edge(CHANNEL_ID, PUBKEY_4, PUBKEY_2, CAPACITY, policy(feeRateLimit), Policy.UNKNOWN);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));
         assertThat(edgeComputation.getEdges(paymentOptions, MAX_TIME_LOCK_DELTA).edges()).isNotEmpty();
     }
@@ -172,8 +171,8 @@ class EdgeComputationTest {
                 Optional.empty(),
                 Optional.empty()
         );
-        DirectedChannelEdge edge =
-                new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY_4, PUBKEY, policy(feeRateLimit), Policy.UNKNOWN);
+        Edge edge =
+                new Edge(CHANNEL_ID, PUBKEY_4, PUBKEY, CAPACITY, policy(feeRateLimit), Policy.UNKNOWN);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));
         assertThat(edgeComputation.getEdges(paymentOptions, MAX_TIME_LOCK_DELTA).edges()).isEmpty();
     }
@@ -191,27 +190,27 @@ class EdgeComputationTest {
         Policy lastHopPolicy = policy(199);
         Policy firstHopPolicyExpensive = policy(100);
         Policy firstHopPolicyOk = policy(99);
-        DirectedChannelEdge lastHop = new DirectedChannelEdge(
+        Edge lastHop = new Edge(
                 CHANNEL_ID,
-                CAPACITY,
                 topUpPeer,
                 ownPubkey,
+                CAPACITY,
                 lastHopPolicy,
                 Policy.UNKNOWN
         );
-        DirectedChannelEdge firstHopExpensive = new DirectedChannelEdge(
+        Edge firstHopExpensive = new Edge(
                 CHANNEL_ID_2,
-                CAPACITY,
                 ownPubkey,
                 PUBKEY_2,
+                CAPACITY,
                 firstHopPolicyExpensive,
                 Policy.UNKNOWN
         );
-        DirectedChannelEdge firstHopOk = new DirectedChannelEdge(
+        Edge firstHopOk = new Edge(
                 CHANNEL_ID_3,
-                CAPACITY,
                 ownPubkey,
                 PUBKEY_2,
+                CAPACITY,
                 firstHopPolicyOk,
                 Policy.UNKNOWN
         );
@@ -230,11 +229,11 @@ class EdgeComputationTest {
         when(grpcGetInfo.getPubkey()).thenReturn(ownPubkey);
         PaymentOptions paymentOptions = PaymentOptions.forFeeRateLimit(feeRateLimit);
         Policy firstHopPolicyExpensive = policy(100);
-        DirectedChannelEdge firstHopExpensiveButOk = new DirectedChannelEdge(
+        Edge firstHopExpensiveButOk = new Edge(
                 CHANNEL_ID_2,
-                CAPACITY,
                 ownPubkey,
                 PUBKEY_2,
+                CAPACITY,
                 firstHopPolicyExpensive,
                 Policy.UNKNOWN
         );
@@ -247,8 +246,8 @@ class EdgeComputationTest {
 
     @Test
     void adds_edge_for_channel_with_base_fee() {
-        DirectedChannelEdge edge =
-                new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY, PUBKEY_2, POLICY_WITH_BASE_FEE, Policy.UNKNOWN);
+        Edge edge =
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, POLICY_WITH_BASE_FEE, Policy.UNKNOWN);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));
         assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA).edges()).isNotEmpty();
     }
@@ -291,11 +290,11 @@ class EdgeComputationTest {
         Policy policy = new Policy(200, Coins.NONE, true, 40, oneMilliSatoshi, fiftyCoins);
         Edge edge = new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, fiftyCoins, policy, Policy.UNKNOWN);
         when(routeHintService.getEdgesFromPaymentHints()).thenReturn(Set.of(
-                new DirectedChannelEdge(
+                new Edge(
                         edge.channelId(),
-                        edge.capacity(),
                         edge.startNode(),
                         edge.endNode(),
+                        edge.capacity(),
                         edge.policy(),
                         edge.reversePolicy()
                 )
@@ -379,10 +378,10 @@ class EdgeComputationTest {
         Pubkey ownNode = PUBKEY_4;
         Pubkey peerForFirstHop = PUBKEY_3;
 
-        DirectedChannelEdge edgeToFirstHop =
-                new DirectedChannelEdge(CHANNEL_ID, CAPACITY, ownNode, peerForFirstHop, POLICY_1, Policy.UNKNOWN);
-        DirectedChannelEdge otherEdge =
-                new DirectedChannelEdge(CHANNEL_ID, CAPACITY, ownNode, PUBKEY, POLICY_1, Policy.UNKNOWN);
+        Edge edgeToFirstHop =
+                new Edge(CHANNEL_ID, ownNode, peerForFirstHop, CAPACITY, POLICY_1, Policy.UNKNOWN);
+        Edge otherEdge =
+                new Edge(CHANNEL_ID, ownNode, PUBKEY, CAPACITY, POLICY_1, Policy.UNKNOWN);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edgeToFirstHop, otherEdge)));
 
         PaymentOptions paymentOptions =
@@ -397,10 +396,10 @@ class EdgeComputationTest {
         Pubkey ownNode = PUBKEY_4;
         Pubkey lastHopNode = PUBKEY_2;
 
-        DirectedChannelEdge edgeToLastHop =
-                new DirectedChannelEdge(CHANNEL_ID, CAPACITY, ownNode, lastHopNode, POLICY_1, Policy.UNKNOWN);
-        DirectedChannelEdge otherEdge =
-                new DirectedChannelEdge(CHANNEL_ID, CAPACITY, ownNode, PUBKEY, POLICY_1, Policy.UNKNOWN);
+        Edge edgeToLastHop =
+                new Edge(CHANNEL_ID, ownNode, lastHopNode, CAPACITY, POLICY_1, Policy.UNKNOWN);
+        Edge otherEdge =
+                new Edge(CHANNEL_ID, ownNode, PUBKEY, CAPACITY, POLICY_1, Policy.UNKNOWN);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edgeToLastHop, otherEdge)));
 
         PaymentOptions paymentOptions =
@@ -504,8 +503,8 @@ class EdgeComputationTest {
     }
 
     private void mockEdge() {
-        DirectedChannelEdge edge =
-                new DirectedChannelEdge(CHANNEL_ID, CAPACITY, PUBKEY, PUBKEY_2, POLICY_1, POLICY_2);
+        Edge edge =
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, POLICY_1, POLICY_2);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));
     }
 

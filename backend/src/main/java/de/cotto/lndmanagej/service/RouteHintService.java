@@ -3,7 +3,7 @@ package de.cotto.lndmanagej.service;
 import de.cotto.lndmanagej.model.ChannelId;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.DecodedPaymentRequest;
-import de.cotto.lndmanagej.model.DirectedChannelEdge;
+import de.cotto.lndmanagej.model.Edge;
 import de.cotto.lndmanagej.model.Policy;
 import de.cotto.lndmanagej.model.RouteHint;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -31,11 +31,11 @@ public class RouteHintService {
 
     public void addDecodedPaymentRequest(DecodedPaymentRequest decodedPaymentRequest) {
         decodedPaymentRequest.routeHints().stream()
-                .map(this::toDirectedChannelEdge)
+                .map(this::toEdge)
                 .forEach(edge -> edges.put(edge.channelId(), new EdgeWithInstant(edge)));
     }
 
-    public Set<DirectedChannelEdge> getEdgesFromPaymentHints() {
+    public Set<Edge> getEdgesFromPaymentHints() {
         return edges.values().stream().map(EdgeWithInstant::edge).collect(Collectors.toSet());
     }
 
@@ -45,12 +45,12 @@ public class RouteHintService {
         edges.values().removeIf(edgeWithInstant -> edgeWithInstant.instant().isBefore(cutoff));
     }
 
-    private DirectedChannelEdge toDirectedChannelEdge(RouteHint routeHint) {
-        return new DirectedChannelEdge(
+    private Edge toEdge(RouteHint routeHint) {
+        return new Edge(
                 routeHint.channelId(),
-                FIFTY_COINS,
                 routeHint.sourceNode(),
                 routeHint.endNode(),
+                FIFTY_COINS,
                 toPolicy(routeHint),
                 Policy.UNKNOWN
         );
@@ -68,8 +68,8 @@ public class RouteHintService {
     }
 
     @SuppressWarnings("UnusedVariable")
-    private record EdgeWithInstant(DirectedChannelEdge edge, Instant instant) {
-        private EdgeWithInstant(DirectedChannelEdge edge) {
+    private record EdgeWithInstant(Edge edge, Instant instant) {
+        private EdgeWithInstant(Edge edge) {
             this(edge, Instant.now());
         }
     }
