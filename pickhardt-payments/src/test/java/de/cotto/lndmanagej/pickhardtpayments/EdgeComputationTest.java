@@ -266,6 +266,53 @@ class EdgeComputationTest {
     }
 
     @Test
+    void considers_max_htlc_policy_for_local_channel() {
+        Coins maxHtlc = Coins.ofSatoshis(1_234_567);
+        Policy localPolicy = new Policy(
+                200,
+                Coins.NONE,
+                true,
+                40,
+                Coins.ofSatoshis(159),
+                maxHtlc
+        );
+        Edge edge =
+                new Edge(CHANNEL_ID, PUBKEY, PUBKEY_2, CAPACITY, localPolicy, POLICY_2);
+        when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));
+        when(grpcGetInfo.getPubkey()).thenReturn(edge.startNode());
+        when(channelService.getOpenChannel(edge.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+        Coins knownLiquidity = maxHtlc.add(Coins.ofSatoshis(5_000_000));
+        when(balanceService.getAvailableLocalBalance(edge.channelId())).thenReturn(knownLiquidity);
+        when(balanceService.getAvailableRemoteBalance(edge.channelId())).thenReturn(Coins.ofSatoshis(5_000));
+
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA).edges())
+                .contains(EdgeWithLiquidityInformation.forKnownLiquidity(edge, maxHtlc));
+    }
+
+    @Test
+    void considers_max_htlc_policy_for_remote_channel() {
+        Coins maxHtlc = Coins.ofSatoshis(1_234_567);
+        Policy remotePolicy = new Policy(
+                200,
+                Coins.NONE,
+                true,
+                40,
+                Coins.ofSatoshis(159),
+                maxHtlc
+        );
+        Edge edge =
+                new Edge(CHANNEL_ID, PUBKEY_2, PUBKEY, CAPACITY, remotePolicy, POLICY_2);
+        when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));
+        when(grpcGetInfo.getPubkey()).thenReturn(edge.endNode());
+        when(channelService.getOpenChannel(edge.channelId())).thenReturn(Optional.of(LOCAL_OPEN_CHANNEL));
+        Coins knownLiquidity = maxHtlc.add(Coins.ofSatoshis(5_000_000));
+        when(balanceService.getAvailableRemoteBalance(edge.channelId())).thenReturn(knownLiquidity);
+
+        assertThat(edgeComputation.getEdges(DEFAULT_PAYMENT_OPTIONS, MAX_TIME_LOCK_DELTA).edges())
+                .contains(EdgeWithLiquidityInformation.forKnownLiquidity(edge, maxHtlc));
+    }
+
+    @Test
     void ignores_local_channels_with_lots_of_local_liquidity_but_almost_nothing_on_remote_side() {
         // https://github.com/lightningnetwork/lnd/issues/7108
         mockEdge();

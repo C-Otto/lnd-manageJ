@@ -168,34 +168,39 @@ public class EdgeComputation {
         Pubkey source = edge.startNode();
         ChannelId channelId = edge.channelId();
         if (ownPubKey.equals(source)) {
-            Coins availableRemote = getLocalChannelAvailableRemote(channelId).orElse(Coins.NONE);
+            Coins availableRemote = getLocalChannelAvailableRemote(channelId, edge.reversePolicy()).orElse(Coins.NONE);
             if (availableRemote.subtract(REMOTE_BALANCE_REQUIRED_TO_SEND).isNonPositive()) {
                 return Optional.of(Coins.NONE);
             }
-            return getLocalChannelAvailableLocal(channelId);
+            return getLocalChannelAvailableLocal(channelId, edge.policy());
         }
         Pubkey target = edge.endNode();
         if (ownPubKey.equals(target)) {
-            return getLocalChannelAvailableRemote(channelId);
+            return getLocalChannelAvailableRemote(channelId, edge.policy());
         }
         return Optional.empty();
     }
 
-    private Optional<Coins> getLocalChannelAvailableLocal(ChannelId channelId) {
-        return getLocalChannelAvailable(channelId, balanceService::getAvailableLocalBalance);
+    private Optional<Coins> getLocalChannelAvailableLocal(ChannelId channelId, Policy policy) {
+        return getLocalChannelAvailable(channelId, balanceService::getAvailableLocalBalance, policy);
     }
 
-    private Optional<Coins> getLocalChannelAvailableRemote(ChannelId channelId) {
-        return getLocalChannelAvailable(channelId, balanceService::getAvailableRemoteBalance);
+    private Optional<Coins> getLocalChannelAvailableRemote(ChannelId channelId, Policy policy) {
+        return getLocalChannelAvailable(channelId, balanceService::getAvailableRemoteBalance, policy);
     }
 
-    private Optional<Coins> getLocalChannelAvailable(ChannelId channelId, Function<ChannelId, Coins> balanceProvider) {
+    private Optional<Coins> getLocalChannelAvailable(
+            ChannelId channelId,
+            Function<ChannelId, Coins> balanceProvider,
+            Policy policy
+    ) {
         LocalOpenChannel localChannel = channelService.getOpenChannel(channelId).orElse(null);
         if (localChannel == null) {
             return Optional.of(Coins.NONE);
         }
         if (localChannel.getStatus().active()) {
-            return Optional.of(balanceProvider.apply(channelId));
+            Coins coinsAvailable = balanceProvider.apply(channelId);
+            return Optional.of(coinsAvailable.minimum(policy.maxHtlc()));
         }
         return Optional.of(Coins.NONE);
     }
