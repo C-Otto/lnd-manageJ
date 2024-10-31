@@ -30,6 +30,7 @@ import java.util.Set;
 
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY;
+import static de.cotto.lndmanagej.model.ChannelFixtures.CAPACITY_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
@@ -172,7 +173,7 @@ class EdgeComputationTest {
                 Optional.empty()
         );
         Edge edge =
-                new Edge(CHANNEL_ID, PUBKEY_4, PUBKEY, CAPACITY, policy(feeRateLimit), Policy.UNKNOWN);
+                new Edge(CHANNEL_ID, PUBKEY_4, PUBKEY, CAPACITY_2, policy(feeRateLimit), Policy.UNKNOWN);
         when(grpcGraph.getChannelEdges()).thenReturn(Optional.of(Set.of(edge)));
         assertThat(edgeComputation.getEdges(paymentOptions, MAX_TIME_LOCK_DELTA).edges()).isEmpty();
     }
