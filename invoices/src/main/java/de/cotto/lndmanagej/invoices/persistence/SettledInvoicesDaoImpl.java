@@ -76,6 +76,6 @@ public class SettledInvoicesDaoImpl implements SettledInvoicesDao {
     }
 
     private long getAfterEpochSeconds(Duration maxAge) {
-        return Instant.now().toEpochMilli() / 1_000 - maxAge.getSeconds();
+        return Instant.now().toEpochMilli() / 1_000 - maxAge.toSeconds();
     }
 }

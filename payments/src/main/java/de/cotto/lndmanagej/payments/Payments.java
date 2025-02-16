@@ -9,12 +9,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Component
 public class Payments {
     private final GrpcPayments grpcPayments;
     private final PaymentsDao dao;
-    private static final Object SAVE_PAYMENTS_LOCK = new Object();
+    private static final ReentrantLock SAVE_PAYMENTS_LOCK = new ReentrantLock();
 
     public Payments(GrpcPayments grpcPayments, PaymentsDao dao) {
         this.grpcPayments = grpcPayments;
@@ -25,9 +26,12 @@ public class Payments {
     public void loadNewSettledPayments() {
         List<Payment> payments;
         do {
-            synchronized (SAVE_PAYMENTS_LOCK) {
+            SAVE_PAYMENTS_LOCK.lock();
+            try {
                 payments = grpcPayments.getCompletePaymentsAfter(dao.getIndexOffset()).orElse(List.of());
                 dao.save(payments);
+            } finally {
+                SAVE_PAYMENTS_LOCK.unlock();
             }
         } while (payments.size() == grpcPayments.getLimit());
     }
@@ -37,7 +41,8 @@ public class Payments {
         List<Optional<Payment>> paymentOptionals;
         OptionalLong maxIndex;
         do {
-            synchronized (SAVE_PAYMENTS_LOCK) {
+            SAVE_PAYMENTS_LOCK.lock();
+            try {
                 long offsetSettledPayments = dao.getAllSettledIndexOffset();
                 long offsetKnownPayments = dao.getIndexOffset();
                 if (offsetKnownPayments == offsetSettledPayments) {
@@ -48,6 +53,8 @@ public class Payments {
                 maxIndex = getMaxIndexAllSettled(paymentOptionals);
                 dao.save(paymentOptionals.stream().flatMap(Optional::stream).toList());
                 maxIndex.ifPresent(dao::setAllSettledIndexOffset);
+            } finally {
+                SAVE_PAYMENTS_LOCK.unlock();
             }
         } while (paymentOptionals.size() == grpcPayments.getLimit() && maxIndex.isPresent());
     }

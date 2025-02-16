@@ -122,7 +122,7 @@ public class OnlinePeersService {
     }
 
     private int getRoundedPercentage(Duration total, Duration offline) {
-        return (int) (offline.getSeconds() * 100.0 / total.getSeconds());
+        return (int) (offline.toSeconds() * 100.0 / total.toSeconds());
     }
 
     private int getChangesWithoutCache(Pubkey pubkey) {

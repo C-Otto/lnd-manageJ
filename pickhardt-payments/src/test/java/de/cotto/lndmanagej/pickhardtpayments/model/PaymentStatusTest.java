@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.Executors;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static de.cotto.lndmanagej.ReactiveStreamReader.readAll;
 import static de.cotto.lndmanagej.ReactiveStreamReader.readMessages;
@@ -248,6 +249,10 @@ class PaymentStatusTest {
 
     @Test
     void testEquals() {
-        EqualsVerifier.simple().forClass(PaymentStatus.class).verify();
+        EqualsVerifier.simple()
+                .forClass(PaymentStatus.class)
+                .withPrefabValues(ReentrantLock.class, new ReentrantLock(), new ReentrantLock())
+                .withIgnoredFields("lock")
+                .verify();
     }
 }

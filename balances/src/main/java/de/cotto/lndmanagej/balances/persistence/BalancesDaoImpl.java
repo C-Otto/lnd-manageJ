@@ -84,7 +84,7 @@ class BalancesDaoImpl implements BalancesDao {
             if (!first || open) {
                 long satoshis = balances.balanceInformation().localBalance().satoshis();
                 Duration duration = Duration.between(timestamp, previous);
-                long minutes = duration.getSeconds() / 60;
+                long minutes = duration.toSeconds() / 60;
                 totalSatoshis += satoshis * minutes;
                 totalMinutes += minutes;
             }

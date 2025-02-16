@@ -24,5 +24,6 @@ dependencies {
         api("io.grpc:grpc-stub:$grpcVersion")
         api("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
         api("io.vavr:vavr:0.10.4")
+	api("javax.annotation:javax.annotation-api:1.3.2")
     }
 }

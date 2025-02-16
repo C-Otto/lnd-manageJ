@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
 
 import static de.cotto.lndmanagej.configuration.PickhardtPaymentsConfigurationSettings.LIQUIDITY_INFORMATION_MAX_AGE;
@@ -34,6 +35,7 @@ public class LiquidityBoundsService {
     private static final Duration DEFAULT_MAX_AGE = Duration.of(10, ChronoUnit.MINUTES);
     private final MissionControlService missionControlService;
     private final Map<TwoPubkeys, LiquidityBoundsWithTimestamp> entries;
+    private final ReentrantLock entriesLock = new ReentrantLock();
     private final ConfigurationService configurationService;
     private final LoadingCache<Object, Duration> maxAgeCache = new CacheBuilder()
             .withRefresh(Duration.ofSeconds(5))
@@ -107,9 +109,12 @@ public class LiquidityBoundsService {
             BiFunction<LiquidityBounds, Coins, Optional<LiquidityBounds>> function
     ) {
         TwoPubkeys twoPubkeys = new TwoPubkeys(source, target);
-        synchronized (this.entries) {
+        entriesLock.lock();
+        try {
             Optional<LiquidityBounds> updated = function.apply(getInfo(twoPubkeys), amount);
             updated.ifPresent(liquidityBounds -> setInfo(twoPubkeys, liquidityBounds));
+        } finally {
+            entriesLock.unlock();
         }
     }
 

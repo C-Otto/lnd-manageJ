@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class PaymentStatus extends Flux<InstantWithString> {
     private boolean success;
@@ -22,6 +23,7 @@ public class PaymentStatus extends Flux<InstantWithString> {
     private int numberOfAttemptedRoutes;
     private final List<InstantWithString> allMessages;
     private final List<PaymentStatusSubscription> subscriptions;
+    private final ReentrantLock lock = new ReentrantLock();
 
     public PaymentStatus() {
         super();
@@ -42,26 +44,35 @@ public class PaymentStatus extends Flux<InstantWithString> {
     }
 
     public void settled() {
-        synchronized (this) {
+        lock.lock();
+        try {
             addMessage("Settled");
             success = true;
             subscriptions.forEach(PaymentStatusSubscription::onComplete);
+        } finally {
+            lock.unlock();
         }
     }
 
     public void failed(FailureCode failureCode) {
-        synchronized (this) {
+        lock.lock();
+        try {
             addMessage("Failed with " + failureCode.toString());
             failure = true;
             subscriptions.forEach(PaymentStatusSubscription::onComplete);
+        } finally {
+            lock.unlock();
         }
     }
 
     public void failed(String message) {
-        synchronized (this) {
+        lock.lock();
+        try {
             addMessage(message);
             failure = true;
             subscriptions.forEach(PaymentStatusSubscription::onComplete);
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -93,9 +104,12 @@ public class PaymentStatus extends Flux<InstantWithString> {
 
     private void addMessage(String message) {
         InstantWithString messageWithTimestamp = new InstantWithString(message);
-        synchronized (this) {
+        lock.lock();
+        try {
             allMessages.add(messageWithTimestamp);
             subscriptions.forEach(paymentStatusSubscription -> paymentStatusSubscription.onNext(messageWithTimestamp));
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -133,9 +147,12 @@ public class PaymentStatus extends Flux<InstantWithString> {
     public void subscribe(@Nonnull CoreSubscriber<? super InstantWithString> subscriber) {
         PaymentStatusSubscription subscription =
                 new PaymentStatusSubscription(subscriber, new ArrayList<>(allMessages));
-        synchronized (this) {
+        lock.lock();
+        try {
             subscriber.onSubscribe(subscription);
             subscriptions.add(subscription);
+        } finally {
+            lock.unlock();
         }
         if (isFailure() || isSuccess()) {
             subscription.onComplete();
@@ -164,6 +181,7 @@ public class PaymentStatus extends Flux<InstantWithString> {
     }
 
     private class PaymentStatusSubscription implements Subscription {
+        private final ReentrantLock lock = new ReentrantLock();
         private final Subscriber<? super InstantWithString> subscriber;
         private final List<InstantWithString> messagesForSubscriber;
         private long requested;
@@ -179,9 +197,12 @@ public class PaymentStatus extends Flux<InstantWithString> {
 
         @Override
         public void request(long numberOfMessages) {
-            synchronized (this) {
+            lock.lock();
+            try {
                 requested += numberOfMessages;
                 sendRequestedMessages();
+            } finally {
+                lock.unlock();
             }
         }
 
@@ -199,9 +220,12 @@ public class PaymentStatus extends Flux<InstantWithString> {
         }
 
         public void onNext(InstantWithString message) {
-            synchronized (this) {
+            lock.lock();
+            try {
                 messagesForSubscriber.add(message);
                 sendRequestedMessages();
+            } finally {
+                lock.unlock();
             }
         }
 

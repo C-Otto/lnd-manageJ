@@ -54,6 +54,6 @@ public class ForwardingEventsDaoImpl implements ForwardingEventsDao {
     }
 
     private long getAfterEpochMilliSeconds(Duration maxAge) {
-        return Instant.now().toEpochMilli() - maxAge.getSeconds() * 1_000;
+        return Instant.now().toEpochMilli() - maxAge.toSeconds() * 1_000;
     }
 }
