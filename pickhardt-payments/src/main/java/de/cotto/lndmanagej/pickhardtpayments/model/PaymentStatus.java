@@ -119,8 +119,7 @@ public class PaymentStatus extends Flux<InstantWithString> {
                 .toList();
         return route.getAmount().toStringSat() + ": " + edgeInformation + ", "
                + route.getFeeRate() + "ppm, "
-               + route.getFeeRateWithFirstHop() + "ppm with first hop, " +
-               "probability " + route.getProbability();
+               + route.getFeeRateWithFirstHop() + "ppm with first hop";
     }
 
     private String getFormattedEdge(EdgeWithLiquidityInformation edge) {

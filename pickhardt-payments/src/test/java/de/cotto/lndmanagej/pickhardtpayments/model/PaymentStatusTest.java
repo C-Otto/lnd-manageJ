@@ -82,7 +82,7 @@ class PaymentStatusTest {
                             "[712345x123x1 (cap 21,000,000), " +
                             "799999x456x3 (cap 21,000,000), " +
                             "799999x456x5 (cap 21,000,000)], " +
-                            "400ppm, 600ppm with first hop, probability 0.9999857143544217");
+                            "400ppm, 600ppm with first hop");
         }
 
         @Test
@@ -91,7 +91,7 @@ class PaymentStatusTest {
             assertThat(readMessages(paymentStatus, 2))
                     .map(InstantWithString::string)
                     .contains(ROUTE_PREFIX + "[712345x123x1 (min 10, cap 21,000,000)], " +
-                            "0ppm, 200ppm with first hop, probability 0.9999957142838776");
+                            "0ppm, 200ppm with first hop");
         }
 
         @Test
@@ -100,7 +100,7 @@ class PaymentStatusTest {
             assertThat(readMessages(paymentStatus, 2))
                     .map(InstantWithString::string)
                     .contains(ROUTE_PREFIX + "[712345x123x1 (max 11, cap 21,000,000)], " +
-                            "0ppm, 200ppm with first hop, probability 0.0");
+                            "0ppm, 200ppm with first hop");
         }
 
         @Test
@@ -108,7 +108,7 @@ class PaymentStatusTest {
             sendSingleEdge(EdgeWithLiquidityInformation.forKnownLiquidity(EDGE, Coins.ofSatoshis(12)));
             assertThat(readMessages(paymentStatus, 2))
                     .map(InstantWithString::string)
-                    .contains(ROUTE_PREFIX + "[712345x123x1 (known 12)], 0ppm, 200ppm with first hop, probability 0.0");
+                    .contains(ROUTE_PREFIX + "[712345x123x1 (known 12)], 0ppm, 200ppm with first hop");
         }
 
         @Test
@@ -120,7 +120,7 @@ class PaymentStatusTest {
                     .contains("Sending to route #2: 200: " +
                             "[799999x456x2 (cap 21,000,000), " +
                             "799999x456x3 (cap 21,000,000)], " +
-                            "200ppm, 400ppm with first hop, probability 0.9999809524725624");
+                            "200ppm, 400ppm with first hop");
         }
 
         private void sendSingleEdge(EdgeWithLiquidityInformation edge) {

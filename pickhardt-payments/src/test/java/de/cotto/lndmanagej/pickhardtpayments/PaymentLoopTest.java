@@ -53,13 +53,13 @@ class PaymentLoopTest {
     private static final PaymentOptions PAYMENT_OPTIONS = PaymentOptions.forFeeRateWeight(123);
     private static final String MPP_1_ROUTE_1 =
             "100: [712345x123x1 (cap 21,000,000), 799999x456x3 (cap 21,000,000), 799999x456x5 (cap 21,000,000)], " +
-                    "400ppm, 600ppm with first hop, probability 0.9999857143544217";
+                    "400ppm, 600ppm with first hop";
     private static final String MPP_1_ROUTE_2 =
             "200: [799999x456x2 (cap 21,000,000), 799999x456x3 (cap 21,000,000)], " +
-                    "200ppm, 400ppm with first hop, probability 0.9999809524725624";
+                    "200ppm, 400ppm with first hop";
     private static final String MPP_2_ROUTE_1 =
             "50: [799999x456x3 (cap 21,000,000), 799999x456x5 (cap 21,000,000)], " +
-                    "200ppm, 400ppm with first hop, probability 0.9999952381011338";
+                    "200ppm, 400ppm with first hop";
 
     @InjectMocks
     private PaymentLoop paymentLoop;
