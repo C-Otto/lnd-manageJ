@@ -1,7 +1,7 @@
 # Rating
 
 The rating given for an individual channel or peer is designed to help compare a channel/node with respect to the
-other channels/nodes on your peer.
+other channels/nodes on your node.
 
 ## Computation
 The higher the rating, the better the channel/peer. The following values are taken into account to compute the final
