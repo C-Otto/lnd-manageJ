@@ -72,7 +72,7 @@ public class MultiPathPaymentObserver {
         });
     }
 
-    private List<PaymentAttemptHop> topPaymentAttemptHops(Route route) {
+    private List<PaymentAttemptHop> toPaymentAttemptHops(Route route) {
         List<Edge> edges = route.getEdges();
         List<PaymentAttemptHop> result = new ArrayList<>();
         for (int i = 0; i < edges.size(); i++) {
@@ -118,7 +118,7 @@ public class MultiPathPaymentObserver {
 
         @Override
         public void onError(Throwable throwable) {
-            liquidityInformationUpdater.removeInFlight(topPaymentAttemptHops(route));
+            liquidityInformationUpdater.removeInFlight(toPaymentAttemptHops(route));
             addInFlight(paymentHash, route.getAmount().negate());
         }
 
