@@ -23,7 +23,6 @@ public class OnlinePeerJpaDto {
     private String pubkey;
 
     @Id
-    @SuppressWarnings({"PMD.SingularField", "unused"})
     private long timestamp;
 
     private boolean online;

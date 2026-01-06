@@ -23,7 +23,7 @@ import java.util.Optional;
 class BalancesDaoImpl implements BalancesDao {
     private final BalancesRepository balancesRepository;
 
-    public BalancesDaoImpl(BalancesRepository balancesRepository) {
+    BalancesDaoImpl(BalancesRepository balancesRepository) {
         this.balancesRepository = balancesRepository;
     }
 

@@ -6,9 +6,9 @@ import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.service.RebalanceService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
@@ -24,11 +24,11 @@ class RebalancesControllerIT {
     @Autowired
     private WebTestClient webTestClient;
 
-    @MockBean
+    @MockitoBean
     @SuppressWarnings("unused")
     private ChannelIdResolver channelIdResolver;
 
-    @MockBean
+    @MockitoBean
     private RebalanceService rebalanceService;
 
     @Test

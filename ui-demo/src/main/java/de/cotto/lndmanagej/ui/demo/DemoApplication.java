@@ -8,9 +8,9 @@ import de.cotto.lndmanagej.ui.UiDataServiceImpl;
 import de.cotto.lndmanagej.ui.WarningServiceImpl;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
+import org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
@@ -40,7 +40,7 @@ public class DemoApplication {
         // default constructor
     }
 
-    public static void main(String[] arguments) {
+    static void main(String[] arguments) {
         SpringApplication.run(DemoApplication.class, arguments);
     }
 }

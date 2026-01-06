@@ -21,7 +21,6 @@ public class ChannelIdConverter implements Converter<String, ChannelId> {
         return channelIdParser.parseFromString(source);
     }
 
-    @SuppressWarnings("PMD.EmptyCatchBlock")
     public Optional<ChannelId> tryToConvert(String source) {
         try {
             return Optional.ofNullable(convert(source));

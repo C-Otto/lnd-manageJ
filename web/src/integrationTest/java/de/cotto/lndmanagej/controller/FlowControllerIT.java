@@ -5,9 +5,9 @@ import de.cotto.lndmanagej.model.ChannelIdResolver;
 import de.cotto.lndmanagej.service.FlowService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.time.Duration;
@@ -16,7 +16,7 @@ import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT;
 import static de.cotto.lndmanagej.model.FlowReportFixtures.FLOW_REPORT_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(FlowController.class)
@@ -28,10 +28,10 @@ class FlowControllerIT {
     @Autowired
     private WebTestClient webTestClient;
 
-    @MockBean
+    @MockitoBean
     private FlowService flowService;
 
-    @MockBean
+    @MockitoBean
     @SuppressWarnings("unused")
     private ChannelIdResolver channelIdResolver;
 
@@ -40,18 +40,18 @@ class FlowControllerIT {
         when(flowService.getFlowReportForChannel(CHANNEL_ID)).thenReturn(FLOW_REPORT_2);
         webTestClient.get().uri(CHANNEL_PREFIX + "/flow-report").exchange()
                 .expectBody()
-                .jsonPath("$.forwardedSentMilliSat").value(is("1000"))
-                .jsonPath("$.forwardedReceivedMilliSat").value(is("2000"))
-                .jsonPath("$.forwardingFeesReceivedMilliSat").value(is("10"))
-                .jsonPath("$.rebalanceSentMilliSat").value(is("60000"))
-                .jsonPath("$.rebalanceFeesSentMilliSat").value(is("4"))
-                .jsonPath("$.rebalanceReceivedMilliSat").value(is("61000"))
-                .jsonPath("$.rebalanceSupportSentMilliSat").value(is("9000"))
-                .jsonPath("$.rebalanceSupportFeesSentMilliSat").value(is("2"))
-                .jsonPath("$.rebalanceSupportReceivedMilliSat").value(is("10"))
-                .jsonPath("$.receivedViaPaymentsMilliSat").value(is("1"))
-                .jsonPath("$.totalSentMilliSat").value(is("70006"))
-                .jsonPath("$.totalReceivedMilliSat").value(is("63021"));
+                .jsonPath("$.forwardedSentMilliSat").value(v -> assertThat(v).isEqualTo("1000"))
+                .jsonPath("$.forwardedReceivedMilliSat").value(v -> assertThat(v).isEqualTo("2000"))
+                .jsonPath("$.forwardingFeesReceivedMilliSat").value(v -> assertThat(v).isEqualTo("10"))
+                .jsonPath("$.rebalanceSentMilliSat").value(v -> assertThat(v).isEqualTo("60000"))
+                .jsonPath("$.rebalanceFeesSentMilliSat").value(v -> assertThat(v).isEqualTo("4"))
+                .jsonPath("$.rebalanceReceivedMilliSat").value(v -> assertThat(v).isEqualTo("61000"))
+                .jsonPath("$.rebalanceSupportSentMilliSat").value(v -> assertThat(v).isEqualTo("9000"))
+                .jsonPath("$.rebalanceSupportFeesSentMilliSat").value(v -> assertThat(v).isEqualTo("2"))
+                .jsonPath("$.rebalanceSupportReceivedMilliSat").value(v -> assertThat(v).isEqualTo("10"))
+                .jsonPath("$.receivedViaPaymentsMilliSat").value(v -> assertThat(v).isEqualTo("1"))
+                .jsonPath("$.totalSentMilliSat").value(v -> assertThat(v).isEqualTo("70006"))
+                .jsonPath("$.totalReceivedMilliSat").value(v -> assertThat(v).isEqualTo("63021"));
     }
 
     @Test
@@ -66,18 +66,18 @@ class FlowControllerIT {
         when(flowService.getFlowReportForPeer(PUBKEY)).thenReturn(FLOW_REPORT);
         webTestClient.get().uri(NODE_PREFIX + "/flow-report").exchange()
                 .expectBody()
-                .jsonPath("$.forwardedSentMilliSat").value(is("1050000"))
-                .jsonPath("$.forwardedReceivedMilliSat").value(is("9001000"))
-                .jsonPath("$.forwardingFeesReceivedMilliSat").value(is("1"))
-                .jsonPath("$.rebalanceSentMilliSat").value(is("50000"))
-                .jsonPath("$.rebalanceFeesSentMilliSat").value(is("5"))
-                .jsonPath("$.rebalanceReceivedMilliSat").value(is("51000"))
-                .jsonPath("$.rebalanceSupportSentMilliSat").value(is("123"))
-                .jsonPath("$.rebalanceSupportFeesSentMilliSat").value(is("1"))
-                .jsonPath("$.rebalanceSupportReceivedMilliSat").value(is("456"))
-                .jsonPath("$.receivedViaPaymentsMilliSat").value(is("1500"))
-                .jsonPath("$.totalSentMilliSat").value(is("1100129"))
-                .jsonPath("$.totalReceivedMilliSat").value(is("9053957"));
+                .jsonPath("$.forwardedSentMilliSat").value(v -> assertThat(v).isEqualTo("1050000"))
+                .jsonPath("$.forwardedReceivedMilliSat").value(v -> assertThat(v).isEqualTo("9001000"))
+                .jsonPath("$.forwardingFeesReceivedMilliSat").value(v -> assertThat(v).isEqualTo("1"))
+                .jsonPath("$.rebalanceSentMilliSat").value(v -> assertThat(v).isEqualTo("50000"))
+                .jsonPath("$.rebalanceFeesSentMilliSat").value(v -> assertThat(v).isEqualTo("5"))
+                .jsonPath("$.rebalanceReceivedMilliSat").value(v -> assertThat(v).isEqualTo("51000"))
+                .jsonPath("$.rebalanceSupportSentMilliSat").value(v -> assertThat(v).isEqualTo("123"))
+                .jsonPath("$.rebalanceSupportFeesSentMilliSat").value(v -> assertThat(v).isEqualTo("1"))
+                .jsonPath("$.rebalanceSupportReceivedMilliSat").value(v -> assertThat(v).isEqualTo("456"))
+                .jsonPath("$.receivedViaPaymentsMilliSat").value(v -> assertThat(v).isEqualTo("1500"))
+                .jsonPath("$.totalSentMilliSat").value(v -> assertThat(v).isEqualTo("1100129"))
+                .jsonPath("$.totalReceivedMilliSat").value(v -> assertThat(v).isEqualTo("9053957"));
     }
 
     @Test

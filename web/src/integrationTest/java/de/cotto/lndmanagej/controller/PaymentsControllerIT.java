@@ -13,13 +13,14 @@ import de.cotto.lndmanagej.service.GraphService;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.Optional;
 
+import static de.cotto.lndmanagej.controller.AssertUtil.is;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_5;
@@ -28,10 +29,8 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
 import static de.cotto.lndmanagej.model.RouteFixtures.ROUTE;
 import static de.cotto.lndmanagej.pickhardtpayments.model.MultiPathPaymentFixtures.MULTI_PATH_PAYMENT;
 import static de.cotto.lndmanagej.pickhardtpayments.model.PaymentOptions.DEFAULT_PAYMENT_OPTIONS;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -61,20 +60,20 @@ class PaymentsControllerIT {
     @Autowired
     private WebTestClient webTestClient;
 
-    @MockBean
+    @MockitoBean
     private MultiPathPaymentSplitter multiPathPaymentSplitter;
 
-    @MockBean
+    @MockitoBean
     private MultiPathPaymentSender multiPathPaymentSender;
 
-    @MockBean
+    @MockitoBean
     private TopUpService topUpService;
 
-    @MockBean
+    @MockitoBean
     @SuppressWarnings("unused")
     private GraphService graphService;
 
-    @MockBean
+    @MockitoBean
     @SuppressWarnings("unused")
     private ChannelIdResolver channelIdResolver;
 
@@ -115,9 +114,9 @@ class PaymentsControllerIT {
                 .jsonPath("$.feesWithFirstHopMilliSat").value(is(feesWithFirstHopAsString))
                 .jsonPath("$.feeRate").value(is(266))
                 .jsonPath("$.feeRateWithFirstHop").value(is(466))
-                .jsonPath("$.routes").value(hasSize(2))
+                .jsonPath("$.routes").value(v -> assertThatJson(v).isArray().hasSize(2))
                 .jsonPath("$.routes[0].amountSat").value(is(route1AmountAsString))
-                .jsonPath("$.routes[0].channelIds").value(contains(
+                .jsonPath("$.routes[0].channelIds").value(v -> assertThatJson(v).isArray().containsExactlyInAnyOrder(
                         CHANNEL_ID.toString(),
                         CHANNEL_ID_3.toString(),
                         CHANNEL_ID_5.toString()
@@ -163,7 +162,7 @@ class PaymentsControllerIT {
                 .jsonPath("$.amountSat").value(is(amountAsString))
                 .jsonPath("$.feesMilliSat").value(is(feesAsString))
                 .jsonPath("$.feeRate").value(is(266))
-                .jsonPath("$.routes").value(hasSize(2));
+                .jsonPath("$.routes").value(v -> assertThatJson(v).isArray().hasSize(2));
     }
 
     @Test
@@ -231,9 +230,10 @@ class PaymentsControllerIT {
         @Test
         void no_linebreaks_within_line() {
             when(topUpService.topUp(any(), any(), any(), any())).thenReturn(paymentStatus);
-            webTestClient.get().uri(url).exchange().expectBody(String.class).value(string ->
-                    assertThat(string.substring(0, string.length() - 1)).doesNotContain("\n")
-            );
+            webTestClient.get().uri(url).exchange().expectBody(String.class).value(string -> {
+                assertThat(string).isNotNull();
+                assertThat(string.substring(0, string.length() - 1)).doesNotContain("\n");
+            });
         }
 
         @Test

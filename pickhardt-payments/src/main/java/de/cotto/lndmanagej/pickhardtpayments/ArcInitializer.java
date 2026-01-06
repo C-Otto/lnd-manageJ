@@ -25,7 +25,7 @@ class ArcInitializer {
     private final boolean ignoreFeesForOwnChannels;
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    public ArcInitializer(
+    ArcInitializer(
             MinCostFlow minCostFlow,
             IntegerMapping<Pubkey> integerMapping,
             IntObjectHashMap<Edge> edgeMapping,
@@ -45,7 +45,7 @@ class ArcInitializer {
         this.ignoreFeesForOwnChannels = ignoreFeesForOwnChannels;
     }
 
-    public void addArcs(EdgesWithLiquidityInformation edgesWithLiquidityInformation) {
+    void addArcs(EdgesWithLiquidityInformation edgesWithLiquidityInformation) {
         Coins maximumCapacity = edgesWithLiquidityInformation.maximumCapacity().maximum(ASSUMED_MAXIMUM);
         for (EdgeWithLiquidityInformation edgeWithLiquidityInformation : edgesWithLiquidityInformation.edges()) {
             addArcs(edgeWithLiquidityInformation, maximumCapacity);

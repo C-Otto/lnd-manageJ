@@ -80,9 +80,9 @@ public class GrpcClosedChannels extends GrpcChannelsBase {
         ClosureType closureType = channelCloseSummary.getCloseType();
         CloseInitiator closeInitiator = getCloseInitiator(channelCloseSummary);
         ClosedChannelBuilder<? extends ClosedChannel> builder;
-        if (closureType.equals(ClosureType.COOPERATIVE_CLOSE)) {
+        if (closureType == ClosureType.COOPERATIVE_CLOSE) {
             builder = new CoopClosedChannelBuilder().withCloseInitiator(closeInitiator);
-        } else if (closureType.equals(ClosureType.BREACH_CLOSE)) {
+        } else if (closureType == ClosureType.BREACH_CLOSE) {
             builder = new BreachForceClosedChannelBuilder();
         } else {
             builder = new ForceClosedChannelBuilder().withCloseInitiator(closeInitiator);
@@ -129,7 +129,7 @@ public class GrpcClosedChannels extends GrpcChannelsBase {
 
     private OpenInitiator getOpenInitiator(Initiator initiator, TransactionHash transactionHash) {
         OpenInitiator openInitiator = getOpenInitiator(initiator);
-        if (openInitiator.equals(OpenInitiator.UNKNOWN)) {
+        if (openInitiator == OpenInitiator.UNKNOWN) {
             return openInitiatorResolver.resolveFromOpenTransactionHash(transactionHash);
         }
         return openInitiator;
@@ -138,11 +138,11 @@ public class GrpcClosedChannels extends GrpcChannelsBase {
     private CloseInitiator getCloseInitiator(ChannelCloseSummary channelCloseSummary) {
         Initiator closeInitiator = channelCloseSummary.getCloseInitiator();
         ChannelCloseSummary.ClosureType closureType = channelCloseSummary.getCloseType();
-        if (closeInitiator.equals(INITIATOR_LOCAL) || closureType.equals(LOCAL_FORCE_CLOSE)) {
+        if (closeInitiator == INITIATOR_LOCAL || closureType == LOCAL_FORCE_CLOSE) {
             return CloseInitiator.LOCAL;
-        } else if (closeInitiator.equals(INITIATOR_REMOTE) || closureType.equals(REMOTE_FORCE_CLOSE)) {
+        } else if (closeInitiator == INITIATOR_REMOTE || closureType == REMOTE_FORCE_CLOSE) {
             return CloseInitiator.REMOTE;
-        } else if (closeInitiator.equals(INITIATOR_UNKNOWN)) {
+        } else if (closeInitiator == INITIATOR_UNKNOWN) {
             return CloseInitiator.UNKNOWN;
         }
         throw new IllegalStateException("unexpected close initiator: " + closeInitiator);

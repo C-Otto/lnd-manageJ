@@ -11,15 +11,16 @@ import de.cotto.lndmanagej.service.NodeDetailsService;
 import de.cotto.lndmanagej.service.NodeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 
+import static de.cotto.lndmanagej.controller.AssertUtil.is;
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
@@ -32,8 +33,8 @@ import static de.cotto.lndmanagej.model.NodeDetailsFixtures.NODE_DETAILS;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.core.Is.is;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(NodeController.class)
@@ -45,23 +46,23 @@ class NodeControllerIT {
     @Autowired
     private WebTestClient webTestClient;
 
-    @MockBean
+    @MockitoBean
     private NodeService nodeService;
 
-    @MockBean
+    @MockitoBean
     private ChannelService channelService;
 
-    @MockBean
+    @MockitoBean
     @SuppressWarnings("unused")
     private ChannelIdResolver channelIdResolver;
 
-    @MockBean
+    @MockitoBean
     private BalanceService balanceService;
 
-    @MockBean
+    @MockitoBean
     private FeeService feeService;
 
-    @MockBean
+    @MockitoBean
     private NodeDetailsService nodeDetailsService;
 
     @Test
@@ -111,7 +112,7 @@ class NodeControllerIT {
                 .jsonPath("$.balance.remoteAvailableSat").value(is("203"))
                 .jsonPath("$.feeReport.earnedMilliSat").value(is("1234"))
                 .jsonPath("$.feeReport.sourcedMilliSat").value(is("567"))
-                .jsonPath("$.warnings").value(containsInAnyOrder(
+                .jsonPath("$.warnings").value(v -> assertThatJson(v).isArray().containsExactlyInAnyOrder(
                         "Node has been online 51% in the past 14 days",
                         "Node changed between online and offline 123 times in the past 7 days",
                         "No flow in the past 16 days"
@@ -143,8 +144,8 @@ class NodeControllerIT {
         when(channelService.getAllChannelsWith(PUBKEY)).thenReturn(Set.of(LOCAL_OPEN_CHANNEL, CLOSED_CHANNEL_3));
         List<String> channelIds = List.of(CHANNEL_ID.toString(), CHANNEL_ID_3.toString());
         webTestClient.get().uri(NODE_PREFIX + "/all-channels").exchange().expectBody()
-                .jsonPath("$.node").value(is(PUBKEY.toString()))
-                .jsonPath("$.channels").value(is(channelIds));
+                .jsonPath("$.node").value(v -> assertThat(v).isEqualTo(PUBKEY.toString()))
+                .jsonPath("$.channels").value(v -> assertThat(v).isEqualTo(channelIds));
     }
 
     @Test

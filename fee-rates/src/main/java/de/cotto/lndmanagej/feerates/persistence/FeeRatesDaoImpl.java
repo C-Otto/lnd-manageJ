@@ -13,7 +13,7 @@ import java.util.Optional;
 class FeeRatesDaoImpl implements FeeRatesDao {
     private final FeeRatesRepository feeRatesRepository;
 
-    public FeeRatesDaoImpl(FeeRatesRepository feeRatesRepository) {
+    FeeRatesDaoImpl(FeeRatesRepository feeRatesRepository) {
         this.feeRatesRepository = feeRatesRepository;
     }
 

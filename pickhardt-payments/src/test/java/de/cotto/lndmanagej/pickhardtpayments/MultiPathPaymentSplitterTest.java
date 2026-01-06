@@ -137,7 +137,7 @@ class MultiPathPaymentSplitterTest {
     @Nested
     class GetMultiPathPayment {
 
-        private final Edge firstEdge = EDGE;
+        private static final Edge FIRST_EDGE = EDGE;
 
         @Test
         void failure() {
@@ -287,7 +287,7 @@ class MultiPathPaymentSplitterTest {
             Coins amount = Coins.ofSatoshis(1_000_000);
             Policy policy = policyFor(feeRate);
             PaymentOptions paymentOptions = PaymentOptions.forFeeRateLimit(feeRate - 1);
-            Flow firstEdgeFlow = new Flow(firstEdge, amount);
+            Flow firstEdgeFlow = new Flow(FIRST_EDGE, amount);
             Edge edge = new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_3, CAPACITY, policy, Policy.UNKNOWN);
             Flow flow = new Flow(edge, amount);
             addEdgeWithoutInformation(edge);
@@ -310,7 +310,7 @@ class MultiPathPaymentSplitterTest {
             Coins amount = Coins.ofSatoshis(3_000_000);
             Policy policy = policyFor(feeRate);
             PaymentOptions paymentOptions = PaymentOptions.forFeeRateLimit(feeRate);
-            Flow firstEdgeFlow = new Flow(firstEdge, amount);
+            Flow firstEdgeFlow = new Flow(FIRST_EDGE, amount);
             Edge edge = new Edge(CHANNEL_ID_2, PUBKEY_2, PUBKEY_4, CAPACITY, policy, Policy.UNKNOWN);
             Flow flow = new Flow(edge, amount);
             addEdgeWithoutInformation(edge);
@@ -361,7 +361,7 @@ class MultiPathPaymentSplitterTest {
             Coins halfOfAmount = Coins.ofSatoshis(500_000);
             Coins amount = halfOfAmount.add(halfOfAmount);
             PaymentOptions paymentOptions = PaymentOptions.forFeeRateLimit(feeRate - 1);
-            Flow firstEdgeFlow = new Flow(firstEdge, amount);
+            Flow firstEdgeFlow = new Flow(FIRST_EDGE, amount);
             Edge edge1 = new Edge(CHANNEL_ID, PUBKEY_2, PUBKEY_3, CAPACITY, policyFor(feeRate), Policy.UNKNOWN);
             Edge edge2 = new Edge(CHANNEL_ID, PUBKEY_2, PUBKEY_3, CAPACITY, policyFor(0), Policy.UNKNOWN);
             Flow flow1 = new Flow(edge1, halfOfAmount);
@@ -495,14 +495,14 @@ class MultiPathPaymentSplitterTest {
                     DEFAULT_PAYMENT_OPTIONS,
                     FINAL_CLTV_DELTA
             );
-            assertThat(multiPathPayment.routes().iterator().next().getAmount()).isEqualTo(AMOUNT);
+            assertThat(multiPathPayment.routes().getFirst().getAmount()).isEqualTo(AMOUNT);
         }
 
         @Test
         void adds_hop_if_peer_is_specified_in_payment_options() {
             Edge extensionEdge = mockExtensionEdge(PUBKEY_3, 0);
             MultiPathPayment multiPathPayment = attemptTopUpPayment();
-            assertThat(multiPathPayment.routes().iterator().next().getEdges()).contains(extensionEdge);
+            assertThat(multiPathPayment.routes().getFirst().getEdges()).contains(extensionEdge);
         }
 
         @Test

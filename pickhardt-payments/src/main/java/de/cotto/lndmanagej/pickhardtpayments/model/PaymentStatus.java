@@ -15,12 +15,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class PaymentStatus extends Flux<InstantWithString> {
     private boolean success;
     private boolean failure;
-    private int numberOfAttemptedRoutes;
+    private final AtomicInteger numberOfAttemptedRoutes;
     private final List<InstantWithString> allMessages;
     private final List<PaymentStatusSubscription> subscriptions;
     private final ReentrantLock lock = new ReentrantLock();
@@ -29,6 +30,7 @@ public class PaymentStatus extends Flux<InstantWithString> {
         super();
         subscriptions = Collections.synchronizedList(new ArrayList<>());
         allMessages = new ArrayList<>();
+        numberOfAttemptedRoutes = new AtomicInteger();
     }
 
     public static PaymentStatus createFailure(String reason) {
@@ -81,9 +83,9 @@ public class PaymentStatus extends Flux<InstantWithString> {
     }
 
     public void sending(Route route) {
-        numberOfAttemptedRoutes++;
+        numberOfAttemptedRoutes.incrementAndGet();
         String formattedRoute = getFormattedRoute(route);
-        addMessage("Sending to route #%d: %s".formatted(numberOfAttemptedRoutes, formattedRoute));
+        addMessage("Sending to route #%d: %s".formatted(numberOfAttemptedRoutes.get(), formattedRoute));
     }
 
     public boolean isSuccess() {
@@ -99,7 +101,7 @@ public class PaymentStatus extends Flux<InstantWithString> {
     }
 
     public int getNumberOfAttemptedRoutes() {
-        return numberOfAttemptedRoutes;
+        return numberOfAttemptedRoutes.get();
     }
 
     private void addMessage(String message) {
@@ -169,7 +171,7 @@ public class PaymentStatus extends Flux<InstantWithString> {
         PaymentStatus that = (PaymentStatus) other;
         return success == that.success
                && failure == that.failure
-               && numberOfAttemptedRoutes == that.numberOfAttemptedRoutes
+               && numberOfAttemptedRoutes.get() == that.numberOfAttemptedRoutes.get()
                && Objects.equals(allMessages, that.allMessages)
                && Objects.equals(subscriptions, that.subscriptions);
     }
@@ -179,14 +181,14 @@ public class PaymentStatus extends Flux<InstantWithString> {
         return Objects.hash(success, failure, numberOfAttemptedRoutes, allMessages, subscriptions);
     }
 
-    private class PaymentStatusSubscription implements Subscription {
+    private final class PaymentStatusSubscription implements Subscription {
         private final ReentrantLock lock = new ReentrantLock();
         private final Subscriber<? super InstantWithString> subscriber;
         private final List<InstantWithString> messagesForSubscriber;
         private long requested;
         private boolean completed;
 
-        public PaymentStatusSubscription(
+        private PaymentStatusSubscription(
                 Subscriber<? super InstantWithString> subscriber,
                 List<InstantWithString> messages
         ) {
@@ -210,7 +212,7 @@ public class PaymentStatus extends Flux<InstantWithString> {
             subscriptions.remove(this);
         }
 
-        public void onComplete() {
+        private void onComplete() {
             if (messagesForSubscriber.isEmpty()) {
                 subscriber.onComplete();
             } else {
@@ -218,7 +220,7 @@ public class PaymentStatus extends Flux<InstantWithString> {
             }
         }
 
-        public void onNext(InstantWithString message) {
+        private void onNext(InstantWithString message) {
             lock.lock();
             try {
                 messagesForSubscriber.add(message);
@@ -230,8 +232,8 @@ public class PaymentStatus extends Flux<InstantWithString> {
 
         private void sendRequestedMessages() {
             while (requested > 0 && !messagesForSubscriber.isEmpty()) {
-                subscriber.onNext(messagesForSubscriber.get(0));
-                messagesForSubscriber.remove(0);
+                subscriber.onNext(messagesForSubscriber.getFirst());
+                messagesForSubscriber.removeFirst();
                 requested--;
             }
             if (completed) {

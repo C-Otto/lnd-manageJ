@@ -8,9 +8,9 @@ import de.cotto.lndmanagej.service.GraphService;
 import de.cotto.lndmanagej.service.OwnNodeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.Set;
@@ -26,18 +26,18 @@ class ObjectMapperConfigurationIT {
     @Autowired
     private WebTestClient webTestClient;
 
-    @MockBean
+    @MockitoBean
     @SuppressWarnings("unused")
     private ChannelIdResolver channelIdResolver;
 
-    @MockBean
+    @MockitoBean
     private ChannelService channelService;
 
-    @MockBean
+    @MockitoBean
     @SuppressWarnings("unused")
     private OwnNodeService ownNodeService;
 
-    @MockBean
+    @MockitoBean
     @SuppressWarnings("unused")
     private GraphService graphService;
 

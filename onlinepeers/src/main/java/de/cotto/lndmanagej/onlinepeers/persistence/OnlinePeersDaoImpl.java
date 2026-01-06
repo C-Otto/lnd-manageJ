@@ -18,7 +18,7 @@ import java.util.Optional;
 class OnlinePeersDaoImpl implements OnlinePeersDao {
     private final OnlinePeersRepository repository;
 
-    public OnlinePeersDaoImpl(OnlinePeersRepository repository) {
+    OnlinePeersDaoImpl(OnlinePeersRepository repository) {
         this.repository = repository;
     }
 

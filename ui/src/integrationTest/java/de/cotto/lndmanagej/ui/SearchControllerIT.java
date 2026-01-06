@@ -12,9 +12,9 @@ import de.cotto.lndmanagej.ui.page.node.NodeDetailsPage;
 import de.cotto.lndmanagej.ui.page.node.NodesPage;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -44,10 +44,10 @@ class SearchControllerIT extends BaseControllerIT {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private UiDataService dataService;
 
-    @MockBean
+    @MockitoBean
     private PageService pageService;
 
     @Test
@@ -72,7 +72,8 @@ class SearchControllerIT extends BaseControllerIT {
 
     @Test
     void searchForChannelId_viaChannelPoint_found() throws Exception {
-        when(getChannelIdResolverMockBean().resolveFromChannelPoint(CHANNEL_POINT)).thenReturn(Optional.of(CHANNEL_ID));
+        when(getChannelIdResolverMockitoBean().resolveFromChannelPoint(CHANNEL_POINT))
+                .thenReturn(Optional.of(CHANNEL_ID));
         searchForChannelId(CHANNEL_POINT.toString());
     }
 
@@ -118,7 +119,7 @@ class SearchControllerIT extends BaseControllerIT {
         return new NodesPage(Arrays.stream(channels).map(this::nodeDto).toList());
     }
 
-    public OpenChannelDto openChannelDto(ChannelDetailsDto channelDetails) {
+    OpenChannelDto openChannelDto(ChannelDetailsDto channelDetails) {
         return new OpenChannelDto(
                 channelDetails.channelId(),
                 channelDetails.remoteAlias(),
@@ -130,7 +131,7 @@ class SearchControllerIT extends BaseControllerIT {
                 1234);
     }
 
-    public NodeDto nodeDto(OpenChannelDto channel) {
+    NodeDto nodeDto(OpenChannelDto channel) {
         return new NodeDto(channel.remotePubkey().toString(), channel.remoteAlias(), true, 1234);
     }
 

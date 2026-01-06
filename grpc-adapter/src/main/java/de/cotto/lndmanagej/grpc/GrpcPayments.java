@@ -86,7 +86,6 @@ public class GrpcPayments {
                 .map(this::toPayment));
     }
 
-    @SuppressWarnings("PMD.UnnecessaryLocalBeforeReturn")
     private boolean isPendingOrSuccessful(lnrpc.Payment payment) {
         if (payment.getStatus() == FAILED) {
             return false;
@@ -141,8 +140,8 @@ public class GrpcPayments {
 
     private PaymentRoute toPaymentRoute(HTLCAttempt htlcAttempt, String paymentHash) {
         List<Hop> hopsList = htlcAttempt.getRoute().getHopsList();
-        Optional<PaymentHop> first = toHop(hopsList.get(0), paymentHash, true);
-        Optional<PaymentHop> last = toHop(hopsList.get(hopsList.size() - 1), paymentHash, false);
+        Optional<PaymentHop> first = toHop(hopsList.getFirst(), paymentHash, true);
+        Optional<PaymentHop> last = toHop(hopsList.getLast(), paymentHash, false);
         return new PaymentRoute(first, last);
     }
 

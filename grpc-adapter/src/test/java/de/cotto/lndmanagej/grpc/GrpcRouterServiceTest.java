@@ -31,8 +31,8 @@ class GrpcRouterServiceTest {
         verify(stubCreator).shutdown();
     }
 
-    public class TestableGrpcRouterService extends GrpcRouterService {
-        public TestableGrpcRouterService(
+    class TestableGrpcRouterService extends GrpcRouterService {
+        TestableGrpcRouterService(
                 ConfigurationService configurationService,
                 String homeDirectory
         ) throws IOException {

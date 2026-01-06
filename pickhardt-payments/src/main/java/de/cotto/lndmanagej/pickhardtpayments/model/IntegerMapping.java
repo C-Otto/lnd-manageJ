@@ -17,9 +17,10 @@ public class IntegerMapping<K> {
 
     public int getMappedInteger(K key) {
         return mapping.getIfAbsentPut(key, () -> {
-            int value = counter++;
-            reverseMapping.put(value, key);
-            return value;
+            int oldValue = counter;
+            reverseMapping.put(oldValue, key);
+            counter++;
+            return oldValue;
         });
     }
 

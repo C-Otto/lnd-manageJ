@@ -20,7 +20,7 @@ import java.util.Objects;
 
 import static com.google.ortools.graph.MinCostFlowBase.Status.OPTIMAL;
 
-@SuppressWarnings({"PMD.AvoidCatchingNPE", "PMD.AvoidCatchingGenericException"})
+@SuppressWarnings("PMD.AvoidCatchingGenericException")
 class MinCostFlowSolver {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     @Nullable
@@ -42,7 +42,7 @@ class MinCostFlowSolver {
         UNABLE_TO_LOAD_LIBRARY = !loaded;
     }
 
-    public MinCostFlowSolver(
+    MinCostFlowSolver(
             EdgesWithLiquidityInformation edgesWithLiquidityInformation,
             Map<Pubkey, Coins> sources,
             Map<Pubkey, Coins> sinks,
@@ -75,7 +75,7 @@ class MinCostFlowSolver {
         setSupply(sources, sinks);
     }
 
-    public Flows solve() {
+    Flows solve() {
         if (minCostFlow == null) {
             return new Flows();
         }

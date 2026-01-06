@@ -25,7 +25,6 @@ import java.util.Set;
 import static de.cotto.lndmanagej.ui.controller.param.SortBy.NODE_ALIAS;
 import static java.util.stream.Collectors.toSet;
 
-@SuppressWarnings("PMD.TooManyMethods")
 @Component
 public class PageService {
 

@@ -12,13 +12,15 @@ import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.PolicyService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.Optional;
 
+import static de.cotto.lndmanagej.controller.AssertUtil.containsExactlyInAnyOrder;
+import static de.cotto.lndmanagej.controller.AssertUtil.is;
 import static de.cotto.lndmanagej.model.BalanceInformationFixtures.BALANCE_INFORMATION_2;
 import static de.cotto.lndmanagej.model.ChannelDetailsFixtures.CHANNEL_DETAILS_2;
 import static de.cotto.lndmanagej.model.ChannelDetailsFixtures.CHANNEL_DETAILS_CLOSED;
@@ -42,8 +44,6 @@ import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES_FOR_LOCAL_CHANNEL;
 import static de.cotto.lndmanagej.model.PolicyFixtures.POLICIES_WITH_NEGATIVE_INBOUND_FEES;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -57,26 +57,26 @@ class ChannelControllerIT {
     @Autowired
     private WebTestClient webTestClient;
 
-    @MockBean
+    @MockitoBean
     private ChannelService channelService;
 
-    @MockBean
+    @MockitoBean
     private NodeService nodeService;
 
-    @MockBean
+    @MockitoBean
     @SuppressWarnings("unused")
     private ChannelIdResolver channelIdResolver;
 
-    @MockBean
+    @MockitoBean
     private BalanceService balanceService;
 
-    @MockBean
+    @MockitoBean
     private PolicyService policyService;
 
-    @MockBean
+    @MockitoBean
     private FeeService feeService;
 
-    @MockBean
+    @MockitoBean
     private ChannelDetailsService channelDetailsService;
 
     @Test
@@ -197,7 +197,9 @@ class ChannelControllerIT {
                 .jsonPath("$.flowReport.totalReceivedMilliSat").value(is("63021"))
                 .jsonPath("$.rating.rating").value(is(123))
                 .jsonPath("$.rating.message").value(is(""))
-                .jsonPath("$.warnings").value(contains("Channel balance ranged from 2% to 97% in the past 7 days"));
+                .jsonPath("$.warnings").value(containsExactlyInAnyOrder(
+                        "Channel balance ranged from 2% to 97% in the past 7 days"
+                ));
     }
 
     @Test

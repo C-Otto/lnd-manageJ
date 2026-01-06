@@ -22,7 +22,6 @@ import static de.cotto.lndmanagej.model.OpenCloseStatus.OPEN;
 import static de.cotto.lndmanagej.model.OpenInitiator.LOCAL;
 import static de.cotto.lndmanagej.model.OpenInitiator.REMOTE;
 
-@SuppressWarnings("PMD.TooManyMethods")
 public final class DeriveDataUtil {
 
     private static final Coins MIN_HTLC = Coins.ofMilliSatoshis(1);

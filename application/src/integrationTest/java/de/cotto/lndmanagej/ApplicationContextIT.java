@@ -8,7 +8,7 @@ import de.cotto.lndmanagej.service.ChannelService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,16 +18,16 @@ class ApplicationContextIT {
     @Autowired
     private ChannelService channelService;
 
-    @MockBean
+    @MockitoBean
     private GrpcService grpcService;
 
-    @MockBean
+    @MockitoBean
     private GrpcMiddlewareService grpcMiddlewareService;
 
-    @MockBean
+    @MockitoBean
     private GrpcRouterService grpcRouterService;
 
-    @MockBean
+    @MockitoBean
     private GrpcInvoicesService grpcInvoicesService;
 
     @Test

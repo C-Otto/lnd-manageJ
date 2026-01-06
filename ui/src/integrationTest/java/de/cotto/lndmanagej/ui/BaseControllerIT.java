@@ -2,17 +2,17 @@ package de.cotto.lndmanagej.ui;
 
 import de.cotto.lndmanagej.model.ChannelIdResolver;
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import static de.cotto.lndmanagej.ui.dto.StatusModelFixture.STATUS_MODEL;
 import static org.mockito.Mockito.when;
 
 public class BaseControllerIT {
 
-    @MockBean
+    @MockitoBean
     private ChannelIdResolver channelIdResolver;
 
-    @MockBean
+    @MockitoBean
     private StatusService statusService;
 
     @BeforeEach
@@ -20,7 +20,7 @@ public class BaseControllerIT {
         when(statusService.getStatus()).thenReturn(STATUS_MODEL);
     }
 
-    public ChannelIdResolver getChannelIdResolverMockBean() {
+    public ChannelIdResolver getChannelIdResolverMockitoBean() {
         return channelIdResolver;
     }
 }

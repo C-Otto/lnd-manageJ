@@ -32,12 +32,12 @@ class AbstractResponseListenerTest {
         assertThat(messageListener.requestId).isZero();
     }
 
-    private static class TestableAbstractResponseListener extends AbstractResponseListener<String> {
+    private static final class TestableAbstractResponseListener extends AbstractResponseListener<String> {
         @Nullable
         private String response;
         private long requestId;
 
-        public TestableAbstractResponseListener() {
+        private TestableAbstractResponseListener() {
             super(RESPONSE_TYPE, TestableAbstractResponseListener::parser);
         }
 

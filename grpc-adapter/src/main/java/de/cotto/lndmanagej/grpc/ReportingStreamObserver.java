@@ -8,7 +8,7 @@ import lnrpc.HTLCAttempt;
 class ReportingStreamObserver implements StreamObserver<HTLCAttempt> {
     private final SendToRouteObserver sendToRouteObserver;
 
-    public ReportingStreamObserver(SendToRouteObserver sendToRouteObserver) {
+    ReportingStreamObserver(SendToRouteObserver sendToRouteObserver) {
         this.sendToRouteObserver = sendToRouteObserver;
     }
 

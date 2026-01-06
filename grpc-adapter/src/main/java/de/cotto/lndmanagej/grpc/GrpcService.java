@@ -115,7 +115,7 @@ public class GrpcService extends GrpcBase {
             try {
                 return lightningStub.getNodeInfo(NodeInfoRequest.newBuilder().setPubKey(pubkey.toString()).build());
             } catch (StatusRuntimeException exception) {
-                if (Status.Code.NOT_FOUND.equals(exception.getStatus().getCode())) {
+                if (Status.Code.NOT_FOUND == exception.getStatus().getCode()) {
                     // ignore
                     return null;
                 }

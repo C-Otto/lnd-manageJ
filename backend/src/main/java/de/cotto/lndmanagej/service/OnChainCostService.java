@@ -61,7 +61,7 @@ public class OnChainCostService {
 
     @Timed
     public Optional<Coins> getOpenCostsForChannel(LocalChannel localChannel) {
-        if (localChannel.getOpenInitiator().equals(OpenInitiator.LOCAL)) {
+        if (localChannel.getOpenInitiator() == OpenInitiator.LOCAL) {
             TransactionHash openTransactionHash = localChannel.getChannelPoint().getTransactionHash();
             return transactionService.getTransaction(openTransactionHash)
                     .map(Transaction::fees)
@@ -71,7 +71,7 @@ public class OnChainCostService {
                         return Coins.ofSatoshis(sat / channels);
                     });
         }
-        if (localChannel.getOpenInitiator().equals(OpenInitiator.REMOTE)) {
+        if (localChannel.getOpenInitiator() == OpenInitiator.REMOTE) {
             return Optional.of(Coins.NONE);
         }
         return Optional.empty();
@@ -87,11 +87,11 @@ public class OnChainCostService {
 
     @Timed
     public Optional<Coins> getCloseCostsForChannel(ClosedChannel closedChannel) {
-        if (closedChannel.getOpenInitiator().equals(OpenInitiator.LOCAL)) {
+        if (closedChannel.getOpenInitiator() == OpenInitiator.LOCAL) {
             return transactionService.getTransaction(closedChannel.getCloseTransactionHash())
                     .map(Transaction::fees);
         }
-        if (closedChannel.getOpenInitiator().equals(OpenInitiator.REMOTE)) {
+        if (closedChannel.getOpenInitiator() == OpenInitiator.REMOTE) {
             return Optional.of(Coins.NONE);
         }
         return Optional.empty();
@@ -125,7 +125,7 @@ public class OnChainCostService {
         if (resolutions.stream().noneMatch(Resolution::isClaimedAnchor)) {
             return Coins.NONE;
         }
-        boolean initiatedByPeer = forceClosedChannel.getOpenInitiator().equals(OpenInitiator.REMOTE);
+        boolean initiatedByPeer = forceClosedChannel.getOpenInitiator() == OpenInitiator.REMOTE;
         if (initiatedByPeer) {
             // peer pays for our anchor
             return Coins.NONE.subtract(ANCHOR);

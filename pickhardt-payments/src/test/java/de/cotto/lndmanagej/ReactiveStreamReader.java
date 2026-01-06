@@ -34,7 +34,6 @@ public class ReactiveStreamReader<T> implements Subscriber<T> {
         this.messagesToRequest = messagesToRequest;
     }
 
-    @SuppressWarnings("PMD.NullAssignment")
     public ReactiveStreamReader() {
         this.expectedMessages = null;
         messagesToRequest = Long.MAX_VALUE;

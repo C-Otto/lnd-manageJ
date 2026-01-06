@@ -12,7 +12,7 @@ import java.util.Optional;
 class PrivateChannelsDaoImpl implements PrivateChannelsDao {
     private final PrivateChannelsRepository privateChannelsRepository;
 
-    public PrivateChannelsDaoImpl(PrivateChannelsRepository privateChannelsRepository) {
+    PrivateChannelsDaoImpl(PrivateChannelsRepository privateChannelsRepository) {
         this.privateChannelsRepository = privateChannelsRepository;
     }
 

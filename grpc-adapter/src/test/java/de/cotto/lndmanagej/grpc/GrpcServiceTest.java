@@ -31,8 +31,8 @@ class GrpcServiceTest {
         verify(stubCreator).shutdown();
     }
 
-    public class TestableGrpcService extends GrpcService {
-        public TestableGrpcService(ConfigurationService configurationService, String homeDirectory) throws IOException {
+    class TestableGrpcService extends GrpcService {
+        TestableGrpcService(ConfigurationService configurationService, String homeDirectory) throws IOException {
             super(configurationService, homeDirectory);
         }
 

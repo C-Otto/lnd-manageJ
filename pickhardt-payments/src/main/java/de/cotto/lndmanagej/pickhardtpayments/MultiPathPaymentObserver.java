@@ -49,7 +49,7 @@ public class MultiPathPaymentObserver {
 
     private void addInFlight(HexString paymentHash, Coins amount) {
         update(paymentHash, value -> value.withAdditionalInFlight(amount));
-        latches.compute(paymentHash, (key, value) -> {
+        latches.compute(paymentHash, (_, value) -> {
             if (value == null) {
                 return null;
             }
@@ -63,7 +63,7 @@ public class MultiPathPaymentObserver {
     }
 
     private void update(HexString paymentHash, Function<PaymentInformation, PaymentInformation> updater) {
-        map.compute(paymentHash, (key, value) -> {
+        map.compute(paymentHash, (_, value) -> {
             PaymentInformation newValue = updater.apply(value == null ? PaymentInformation.DEFAULT : value);
             if (PaymentInformation.DEFAULT.equals(newValue)) {
                 return null;
@@ -103,14 +103,14 @@ public class MultiPathPaymentObserver {
     }
 
     private CountDownLatch getLatch(HexString paymentHash) {
-        return latches.compute(paymentHash, (key, value) -> value == null ? new CountDownLatch(1) : value);
+        return latches.compute(paymentHash, (_, value) -> value == null ? new CountDownLatch(1) : value);
     }
 
-    private class SendToRouteObserverImpl implements SendToRouteObserver {
+    private final class SendToRouteObserverImpl implements SendToRouteObserver {
         private final Route route;
         private final HexString paymentHash;
 
-        public SendToRouteObserverImpl(Route route, HexString paymentHash) {
+        private SendToRouteObserverImpl(Route route, HexString paymentHash) {
             this.route = route;
             this.paymentHash = paymentHash;
             addInFlight(paymentHash, route.getAmount());

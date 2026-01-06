@@ -8,13 +8,15 @@ import de.cotto.lndmanagej.service.ChannelWarningsService;
 import de.cotto.lndmanagej.service.NodeWarningsService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.Map;
 
+import static de.cotto.lndmanagej.controller.AssertUtil.containsExactlyInAnyOrder;
+import static de.cotto.lndmanagej.controller.AssertUtil.is;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL;
 import static de.cotto.lndmanagej.model.NodeFixtures.ALIAS_2;
@@ -27,10 +29,7 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_3;
 import static de.cotto.lndmanagej.model.warnings.ChannelWarningsFixtures.CHANNEL_WARNINGS;
 import static de.cotto.lndmanagej.model.warnings.NodeWarningsFixtures.NODE_WARNINGS;
 import static de.cotto.lndmanagej.model.warnings.NodeWarningsFixtures.NODE_WARNINGS_2;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(WarningsController.class)
@@ -44,21 +43,21 @@ class WarningsControllerIT {
     @Autowired
     private WebTestClient webTestClient;
 
-    @MockBean
+    @MockitoBean
     @SuppressWarnings("unused")
     private ChannelIdResolver channelIdResolver;
 
-    @MockBean
+    @MockitoBean
     private NodeWarningsService nodeWarningsService;
 
-    @MockBean
+    @MockitoBean
     private ChannelWarningsService channelWarningsService;
 
     @Test
     void getWarningsForNode() {
         when(nodeWarningsService.getNodeWarnings(PUBKEY)).thenReturn(NODE_WARNINGS);
         webTestClient.get().uri(NODE_PREFIX + WARNINGS).exchange().expectBody()
-                .jsonPath(WARNINGS_PATH).value(containsInAnyOrder(
+                .jsonPath(WARNINGS_PATH).value(v -> assertThatJson(v).isArray().containsExactlyInAnyOrder(
                         "No flow in the past 16 days",
                         "Node has been online 51% in the past 14 days",
                         "Node changed between online and offline 123 times in the past 7 days"
@@ -69,14 +68,14 @@ class WarningsControllerIT {
     void getWarningsForNode_empty() {
         when(nodeWarningsService.getNodeWarnings(PUBKEY)).thenReturn(NodeWarnings.NONE);
         webTestClient.get().uri(NODE_PREFIX + WARNINGS).exchange().expectBody()
-                .jsonPath(WARNINGS_PATH).value(hasSize(0));
+                .jsonPath(WARNINGS_PATH).value(v -> assertThatJson(v).isArray().isEmpty());
     }
 
     @Test
     void getWarningsForChannel() {
         when(channelWarningsService.getChannelWarnings(CHANNEL_ID)).thenReturn(CHANNEL_WARNINGS);
         webTestClient.get().uri(CHANNEL_PREFIX + WARNINGS).exchange().expectBody()
-                .jsonPath(WARNINGS_PATH).value(contains(
+                .jsonPath(WARNINGS_PATH).value(v -> assertThatJson(v).isArray().containsExactly(
                         "Channel balance ranged from 2% to 97% in the past 7 days"
                 ));
     }
@@ -85,15 +84,15 @@ class WarningsControllerIT {
     void getWarningsForChannel_empty() {
         when(channelWarningsService.getChannelWarnings(CHANNEL_ID)).thenReturn(ChannelWarnings.NONE);
         webTestClient.get().uri(CHANNEL_PREFIX + WARNINGS).exchange().expectBody()
-                .jsonPath(WARNINGS_PATH).value(hasSize(0));
+                .jsonPath(WARNINGS_PATH).value(v -> assertThatJson(v).isArray().isEmpty());
     }
 
     @Test
     void getWarnings_empty() {
         when(nodeWarningsService.getNodeWarnings()).thenReturn(Map.of());
         webTestClient.get().uri("/api" + WARNINGS).exchange().expectBody()
-                .jsonPath("$.nodesWithWarnings").value(hasSize(0))
-                .jsonPath("$.channelsWithWarnings").value(hasSize(0));
+                .jsonPath("$.nodesWithWarnings").value(v -> assertThatJson(v).isArray().isEmpty())
+                .jsonPath("$.channelsWithWarnings").value(v -> assertThatJson(v).isArray().isEmpty());
     }
 
     @Test
@@ -105,19 +104,19 @@ class WarningsControllerIT {
         webTestClient.get().uri("/api" + WARNINGS).exchange().expectBody()
                 .jsonPath("$.nodesWithWarnings[0].alias").value(is(ALIAS_2))
                 .jsonPath("$.nodesWithWarnings[0].pubkey").value(is(PUBKEY_2.toString()))
-                .jsonPath("$.nodesWithWarnings[0].warnings").value(containsInAnyOrder(
+                .jsonPath("$.nodesWithWarnings[0].warnings").value(containsExactlyInAnyOrder(
                         "No flow in the past 16 days",
                         "Node has been online 51% in the past 14 days",
                         "Node changed between online and offline 123 times in the past 7 days"
                 ))
                 .jsonPath("$.nodesWithWarnings[1].alias").value(is(ALIAS_3))
                 .jsonPath("$.nodesWithWarnings[1].pubkey").value(is(PUBKEY_3.toString()))
-                .jsonPath("$.nodesWithWarnings[1].warnings").value(containsInAnyOrder(
+                .jsonPath("$.nodesWithWarnings[1].warnings").value(containsExactlyInAnyOrder(
                         "Node has been online 1% in the past 21 days",
                         "Node changed between online and offline 99 times in the past 14 days"
                 ))
                 .jsonPath("$.channelsWithWarnings[0].channelId").value(is(CHANNEL_ID.toString()))
-                .jsonPath("$.channelsWithWarnings[0].warnings").value(contains(
+                .jsonPath("$.channelsWithWarnings[0].warnings").value(containsExactlyInAnyOrder(
                         "Channel balance ranged from 2% to 97% in the past 7 days"
                 ));
     }

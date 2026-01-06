@@ -1,6 +1,7 @@
 package de.cotto.lndmanagej.caching;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -102,13 +103,14 @@ class CacheBuilderTest {
     }
 
     @Test
+    @SuppressFBWarnings("DLS_DEAD_LOCAL_STORE")
     void withMaximumSize() {
         LoadingCache<Object, Long> cache = new CacheBuilder()
                 .withExpiry(Duration.ofMinutes(1))
                 .withMaximumSize(1)
                 .build(System::nanoTime);
         Long first = cache.get("");
-        @SuppressWarnings("unused") Long unused = cache.get("a");
+        @SuppressWarnings("unused") Long _ = cache.get("a");
         cache.cleanUp();
         Long third = cache.get("");
         assertThat(first).isNotEqualTo(third);

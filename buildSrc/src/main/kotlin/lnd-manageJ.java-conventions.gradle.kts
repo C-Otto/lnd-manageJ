@@ -12,7 +12,7 @@ dependencies {
     testFixturesImplementation(platform("de.c-otto.lndmanagej:platform"))
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.apache.commons:commons-lang3")
-    implementation("com.google.code.findbugs:jsr305")
+    implementation("com.github.spotbugs:spotbugs-annotations")
     implementation("com.ryantenney.metrics:metrics-spring")
     implementation("com.google.guava:guava")
 }

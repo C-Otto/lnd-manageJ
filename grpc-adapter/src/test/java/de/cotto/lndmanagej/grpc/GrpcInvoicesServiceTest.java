@@ -32,8 +32,8 @@ class GrpcInvoicesServiceTest {
         verify(stubCreator).shutdown();
     }
 
-    public class TestableGrpcInvoicesService extends GrpcInvoicesService {
-        public TestableGrpcInvoicesService(
+    class TestableGrpcInvoicesService extends GrpcInvoicesService {
+        TestableGrpcInvoicesService(
                 ConfigurationService configurationService,
                 String homeDirectory
         ) throws IOException {

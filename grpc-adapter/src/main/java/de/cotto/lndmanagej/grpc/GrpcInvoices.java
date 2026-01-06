@@ -116,7 +116,7 @@ public class GrpcInvoices {
 
     private Map<ChannelId, Coins> getReceivedVia(Invoice lndInvoice) {
         return lndInvoice.getHtlcsList().stream()
-                .filter(invoiceHTLC -> invoiceHTLC.getState().equals(InvoiceHTLCState.SETTLED))
+                .filter(invoiceHTLC -> invoiceHTLC.getState() == InvoiceHTLCState.SETTLED)
                 .collect(toMap(
                         invoiceHTLC -> ChannelId.fromShortChannelId(invoiceHTLC.getChanId()),
                         invoiceHTLC -> Coins.ofMilliSatoshis(invoiceHTLC.getAmtMsat()),

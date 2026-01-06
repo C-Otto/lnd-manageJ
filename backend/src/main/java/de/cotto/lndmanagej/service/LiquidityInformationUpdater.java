@@ -59,12 +59,12 @@ public class LiquidityInformationUpdater implements PaymentListener {
     @Override
     public void failure(List<PaymentAttemptHop> paymentAttemptHops, FailureCode failureCode, int failureSourceIndex) {
         removeInFlight(paymentAttemptHops);
-        if (TEMPORARY_CHANNEL_FAILURE.equals(failureCode)) {
+        if (TEMPORARY_CHANNEL_FAILURE == failureCode) {
             markAvailableAndUnavailable(paymentAttemptHops, failureSourceIndex, PaymentAttemptHop::amount);
         } else if (failureCode.isErrorFromFinalNode()) {
             markAllAvailable(paymentAttemptHops, failureSourceIndex);
         } else {
-            markAvailableAndUnavailable(paymentAttemptHops, failureSourceIndex, hop -> Coins.ofSatoshis(2));
+            markAvailableAndUnavailable(paymentAttemptHops, failureSourceIndex, _ -> Coins.ofSatoshis(2));
         }
     }
 

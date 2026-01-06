@@ -12,7 +12,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class FeeRatesJpaDtoTest {
     @Test
-    @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
     void fromModel() {
         FeeRatesJpaDto jpaDto = FeeRatesJpaDto.fromModel(FEE_RATES);
         assertThat(jpaDto.getTimestamp()).isEqualTo(TIMESTAMP.toEpochSecond(ZoneOffset.UTC));

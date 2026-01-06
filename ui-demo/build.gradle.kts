@@ -3,6 +3,7 @@ plugins {
 }
 
 dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation(project(":ui"))
     implementation(project(":model"))
     implementation(project(":web"))

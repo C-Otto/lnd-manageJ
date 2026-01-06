@@ -7,12 +7,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
-public abstract class AbstractResponseListener<ResponseType> implements ResponseListener<ResponseType> {
+public abstract class AbstractResponseListener<RESPONSE> implements ResponseListener<RESPONSE> {
     private final String responseType;
-    private final Parser<ResponseType> responseParser;
+    private final Parser<RESPONSE> responseParser;
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    public AbstractResponseListener(String responseType, Parser<ResponseType> responseParser) {
+    public AbstractResponseListener(String responseType, Parser<RESPONSE> responseParser) {
         this.responseType = responseType;
         this.responseParser = responseParser;
     }

@@ -34,11 +34,11 @@ class RequestAndResponseStreamObserver implements StreamObserver<RPCMiddlewareRe
     private final ExecutorService executorService = Executors.newCachedThreadPool();
     private boolean isDone;
 
-    public RequestAndResponseStreamObserver() {
+    RequestAndResponseStreamObserver() {
         // default constructor
     }
 
-    public void initialize(
+    void initialize(
             StreamObserver<RPCMiddlewareResponse> responseObserver,
             ObserverIsDoneListener observerIsDoneListener
     ) {
@@ -103,11 +103,11 @@ class RequestAndResponseStreamObserver implements StreamObserver<RPCMiddlewareRe
         Objects.requireNonNull(responseObserver).onNext(createDoNotReplaceMessage(messageId));
     }
 
-    public void addRequestListener(RequestListener<?> listener) {
+    void addRequestListener(RequestListener<?> listener) {
         requestListeners.put(listener.getRequestType(), listener);
     }
 
-    public void addResponseListener(ResponseListener<?> listener) {
+    void addResponseListener(ResponseListener<?> listener) {
         responseListeners.put(listener.getResponseType(), listener);
     }
 

@@ -13,7 +13,6 @@ public class LiquidityBounds {
 
     public static final LiquidityBounds NO_INFORMATION = new LiquidityBounds();
 
-    @SuppressWarnings("PMD.NullAssignment")
     public LiquidityBounds() {
         this.lowerBound = Coins.NONE;
         this.upperBound = null;

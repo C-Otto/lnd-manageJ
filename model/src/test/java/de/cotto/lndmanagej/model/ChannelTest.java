@@ -53,8 +53,8 @@ class ChannelTest {
         assertThat(CHANNEL).isEqualTo(channel2);
     }
 
-    private static class TestableChannel extends Channel {
-        public TestableChannel(
+    private static final class TestableChannel extends Channel {
+        private TestableChannel(
                 ChannelId channelId,
                 Coins capacity,
                 ChannelPoint channelPoint,

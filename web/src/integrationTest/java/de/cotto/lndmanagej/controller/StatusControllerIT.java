@@ -8,9 +8,9 @@ import de.cotto.lndmanagej.service.GraphService;
 import de.cotto.lndmanagej.service.OwnNodeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.List;
@@ -22,7 +22,7 @@ import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHAN
 import static de.cotto.lndmanagej.model.LocalOpenChannelFixtures.LOCAL_OPEN_CHANNEL_TO_NODE_3;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY_2;
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(StatusController.class)
@@ -33,17 +33,17 @@ class StatusControllerIT {
     @Autowired
     private WebTestClient webTestClient;
 
-    @MockBean
+    @MockitoBean
     @SuppressWarnings("unused")
     private ChannelIdResolver channelIdResolver;
 
-    @MockBean
+    @MockitoBean
     private ChannelService channelService;
 
-    @MockBean
+    @MockitoBean
     private OwnNodeService ownNodeService;
 
-    @MockBean
+    @MockitoBean
     private GraphService graphService;
 
     @Test
@@ -68,7 +68,7 @@ class StatusControllerIT {
                 LOCAL_OPEN_CHANNEL_TO_NODE_3.getId().toString()
         );
         webTestClient.get().uri(PREFIX + "/open-channels").exchange().expectBody()
-                .jsonPath("$.channels").value(is(sortedChannelIds));
+                .jsonPath("$.channels").value(v -> assertThat(v).isEqualTo(sortedChannelIds));
     }
 
     @Test
@@ -79,7 +79,7 @@ class StatusControllerIT {
                 LOCAL_OPEN_CHANNEL_TO_NODE_3.getRemotePubkey().toString()
         );
         webTestClient.get().uri(PREFIX + "/open-channels/pubkeys").exchange().expectBody()
-                .jsonPath("$.pubkeys").value(is(sortedPubkeys));
+                .jsonPath("$.pubkeys").value(v -> assertThat(v).isEqualTo(sortedPubkeys));
     }
 
     @Test
@@ -90,7 +90,7 @@ class StatusControllerIT {
                 LOCAL_OPEN_CHANNEL_TO_NODE_3.getId().toString()
         );
         webTestClient.get().uri(PREFIX + "/all-channels").exchange().expectBody()
-                .jsonPath("$.channels").value(is(sortedChannelIds));
+                .jsonPath("$.channels").value(v -> assertThat(v).isEqualTo(sortedChannelIds));
     }
 
     @Test
@@ -101,14 +101,14 @@ class StatusControllerIT {
                 LOCAL_OPEN_CHANNEL_TO_NODE_3.getRemotePubkey().toString()
         );
         webTestClient.get().uri(PREFIX + "/all-channels/pubkeys").exchange().expectBody()
-                .jsonPath("$.pubkeys").value(is(sortedPubkeys));
+                .jsonPath("$.pubkeys").value(v -> assertThat(v).isEqualTo(sortedPubkeys));
     }
 
     @Test
     void getKnownChannels() {
         when(graphService.getNumberOfChannels()).thenReturn(123);
         webTestClient.get().uri(PREFIX + "/known-channels").exchange().expectBody()
-                .jsonPath("$").value(is(123));
+                .jsonPath("$").value(v -> assertThat(v).isEqualTo(123));
     }
 
     @Test
@@ -118,9 +118,9 @@ class StatusControllerIT {
                 new PubkeyAndFeeRate(PUBKEY_2, 456)
         ));
         webTestClient.get().uri(PREFIX + "/nodes-with-high-incoming-fee-rate").exchange().expectBody()
-                .jsonPath("$.entries[0].pubkey").value(is(PUBKEY.toString()))
-                .jsonPath("$.entries[0].feeRate").value(is(123))
-                .jsonPath("$.entries[1].pubkey").value(is(PUBKEY_2.toString()))
-                .jsonPath("$.entries[1].feeRate").value(is(456));
+                .jsonPath("$.entries[0].pubkey").value(v -> assertThat(v).isEqualTo(PUBKEY.toString()))
+                .jsonPath("$.entries[0].feeRate").value(v -> assertThat(v).isEqualTo(123))
+                .jsonPath("$.entries[1].pubkey").value(v -> assertThat(v).isEqualTo(PUBKEY_2.toString()))
+                .jsonPath("$.entries[1].feeRate").value(v -> assertThat(v).isEqualTo(456));
     }
 }

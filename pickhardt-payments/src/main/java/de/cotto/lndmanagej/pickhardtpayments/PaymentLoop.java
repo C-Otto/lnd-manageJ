@@ -72,7 +72,7 @@ public class PaymentLoop {
         }
     }
 
-    private class Instance {
+    private final class Instance {
         private final DecodedPaymentRequest decodedPaymentRequest;
         private final PaymentOptions paymentOptions;
         private final PaymentStatus paymentStatus;
@@ -82,7 +82,7 @@ public class PaymentLoop {
         private final int finalCltvDelta;
         private Coins inFlight = Coins.NONE;
 
-        public Instance(
+        private Instance(
                 DecodedPaymentRequest decodedPaymentRequest,
                 PaymentOptions paymentOptions,
                 PaymentStatus paymentStatus

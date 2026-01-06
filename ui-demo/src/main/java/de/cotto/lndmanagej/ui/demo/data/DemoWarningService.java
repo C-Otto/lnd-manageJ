@@ -17,7 +17,6 @@ import static de.cotto.lndmanagej.ui.demo.data.DemoDataService.POCKET;
 import static de.cotto.lndmanagej.ui.demo.data.DemoDataService.TRY_BITCOIN;
 import static java.util.stream.Collectors.toSet;
 
-@SuppressWarnings("PMD.ExcessiveImports")
 @Component
 public class DemoWarningService extends WarningService {
 

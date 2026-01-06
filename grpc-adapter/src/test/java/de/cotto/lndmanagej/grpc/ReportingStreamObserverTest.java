@@ -43,7 +43,7 @@ class ReportingStreamObserverTest {
     @Test
     void onNext_forwards_failure_code() {
         HTLCAttempt htlcAttempt = HTLCAttempt.newBuilder()
-                .setFailure(Failure.newBuilder().setCodeValue(4).build())
+                .setFailure(Failure.newBuilder().setCode(Failure.FailureCode.FINAL_INCORRECT_HTLC_AMOUNT).build())
                 .build();
         assertThatCode(() -> reportingStreamObserver.onNext(htlcAttempt)).doesNotThrowAnyException();
         assertThat(sendToRouteObserver.seenFailureCode).isEqualTo(FINAL_INCORRECT_HTLC_AMOUNT);

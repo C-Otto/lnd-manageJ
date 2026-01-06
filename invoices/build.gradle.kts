@@ -12,7 +12,7 @@ dependencies {
     testFixturesApi(testFixtures(project(":model")))
     integrationTestRuntimeOnly("com.h2database:h2")
     integrationTestImplementation(project(":payments"))
-    integrationTestImplementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    integrationTestImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
     integrationTestImplementation(testFixtures(project(":model")))
 }
 

@@ -2,17 +2,17 @@ package de.cotto.lndmanagej.grpc.middleware;
 
 import com.google.protobuf.ByteString;
 
-public abstract class RequestResponseListener<RequestType, ResponseType>
-        extends AbstractResponseListener<ResponseType>
-        implements RequestListener<RequestType> {
+public abstract class RequestResponseListener<REQUEST, RESPONSE>
+        extends AbstractResponseListener<RESPONSE>
+        implements RequestListener<REQUEST> {
     private final String requestType;
-    private final Parser<RequestType> requestParser;
+    private final Parser<REQUEST> requestParser;
 
     public RequestResponseListener(
             String requestType,
-            Parser<RequestType> requestParser,
+            Parser<REQUEST> requestParser,
             String responseType,
-            Parser<ResponseType> responseParser
+            Parser<RESPONSE> responseParser
     ) {
         super(responseType, responseParser);
         this.requestType = requestType;

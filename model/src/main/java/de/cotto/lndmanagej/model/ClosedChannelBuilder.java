@@ -7,7 +7,6 @@ import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 
-@SuppressWarnings("PMD.TooManyMethods")
 public abstract class ClosedChannelBuilder<T extends ClosedChannel> {
     @Nullable
     private ChannelId channelId;

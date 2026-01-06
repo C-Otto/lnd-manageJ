@@ -6,13 +6,14 @@ import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.service.SelfPaymentsService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.List;
 
+import static de.cotto.lndmanagej.controller.AssertUtil.is;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_2;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID_3;
@@ -21,7 +22,6 @@ import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
 import static de.cotto.lndmanagej.model.SelfPaymentFixtures.SELF_PAYMENT;
 import static de.cotto.lndmanagej.model.SelfPaymentFixtures.SELF_PAYMENT_2;
 import static de.cotto.lndmanagej.model.SelfPaymentFixtures.SELF_PAYMENT_4;
-import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"CPD-START", "PMD.AvoidDuplicateLiterals"})
@@ -34,11 +34,11 @@ class SelfPaymentsControllerIT {
     @Autowired
     private WebTestClient webTestClient;
 
-    @MockBean
+    @MockitoBean
     @SuppressWarnings("unused")
     private ChannelIdResolver channelIdResolver;
 
-    @MockBean
+    @MockitoBean
     private SelfPaymentsService selfPaymentsService;
 
     @Test

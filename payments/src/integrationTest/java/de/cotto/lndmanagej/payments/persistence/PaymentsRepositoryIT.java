@@ -4,7 +4,7 @@ import de.cotto.lndmanagej.model.Payment;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 
 import static de.cotto.lndmanagej.model.PaymentFixtures.PAYMENT;
 import static org.assertj.core.api.Assertions.assertThat;

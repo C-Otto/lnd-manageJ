@@ -47,14 +47,14 @@ class RequestResponseListenerTest {
     }
     // CPD-ON
 
-    private static class TestableRequestResponseListener extends RequestResponseListener<String, String> {
+    private static final class TestableRequestResponseListener extends RequestResponseListener<String, String> {
         @Nullable
         private String request;
         @Nullable
         private String response;
         private long requestId;
 
-        public TestableRequestResponseListener() {
+        private TestableRequestResponseListener() {
             super(
                     REQUEST_TYPE,
                     TestableRequestResponseListener::parser,

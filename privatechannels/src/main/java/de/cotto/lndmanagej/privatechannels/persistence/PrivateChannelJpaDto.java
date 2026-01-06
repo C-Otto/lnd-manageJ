@@ -9,7 +9,6 @@ import jakarta.persistence.Table;
 @Table(name = "private_channels")
 public class PrivateChannelJpaDto {
     @Id
-    @SuppressWarnings({"unused", "PMD.SingularField"})
     private long channelId;
 
     @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")

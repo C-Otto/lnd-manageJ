@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -182,14 +183,18 @@ class PaymentStatusTest {
         @Test
         @SuppressWarnings("FutureReturnValueIgnored")
         void completes_stream_from_string() {
-            Executors.newFixedThreadPool(1).submit(() -> paymentStatus.failed("failure"));
+            try (ExecutorService executor = Executors.newFixedThreadPool(1)) {
+                executor.submit(() -> paymentStatus.failed("failure"));
+            }
             assertThat(readAll(paymentStatus)).hasSize(2);
         }
 
         @Test
         @SuppressWarnings("FutureReturnValueIgnored")
         void completes_stream_from_code() {
-            Executors.newFixedThreadPool(1).submit(() -> paymentStatus.failed(FailureCode.PERMANENT_CHANNEL_FAILURE));
+            try (ExecutorService executor = Executors.newFixedThreadPool(1)) {
+                executor.submit(() -> paymentStatus.failed(FailureCode.PERMANENT_CHANNEL_FAILURE));
+            }
             assertThat(readAll(paymentStatus)).hasSize(2);
         }
 
@@ -225,7 +230,9 @@ class PaymentStatusTest {
         @Test
         @SuppressWarnings("FutureReturnValueIgnored")
         void completes_stream() {
-            Executors.newFixedThreadPool(1).submit(paymentStatus::settled);
+            try (ExecutorService executor = Executors.newFixedThreadPool(1)) {
+                executor.submit(paymentStatus::settled);
+            }
             assertThat(readAll(paymentStatus)).hasSize(2);
         }
     }
@@ -251,6 +258,7 @@ class PaymentStatusTest {
     void testEquals() {
         EqualsVerifier.simple()
                 .forClass(PaymentStatus.class)
+                .withNonnullFields("numberOfAttemptedRoutes")
                 .withPrefabValues(ReentrantLock.class, new ReentrantLock(), new ReentrantLock())
                 .withIgnoredFields("lock")
                 .verify();

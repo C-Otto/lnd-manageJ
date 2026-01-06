@@ -17,7 +17,6 @@ public class GrpcGetInfo {
     private static final String TESTNET = "testnet";
     private static final String MAINNET = "mainnet";
     private static final String REGTEST = "regtest";
-    private static final String BITCOIN = "bitcoin";
     private final GrpcService grpcService;
 
     @Nullable
@@ -84,15 +83,12 @@ public class GrpcGetInfo {
         return grpcService.getInfo().map(GetInfoResponse::getSyncedToGraph);
     }
 
-    @SuppressWarnings("PMD.LinguisticNaming")
     public Optional<Network> getNetwork() {
         GetInfoResponse info = grpcService.getInfo().orElse(null);
         if (info == null) {
             return Optional.empty();
         }
-        List<Chain> bitcoinChains = info.getChainsList().stream()
-                .filter(chain -> BITCOIN.equals(chain.getChain()))
-                .toList();
+        List<Chain> bitcoinChains = info.getChainsList();
         int expectedNumberOfBitcoinChains = 1;
         if (bitcoinChains.size() != expectedNumberOfBitcoinChains) {
             return Optional.empty();

@@ -7,9 +7,9 @@ import de.cotto.lndmanagej.service.NodeService;
 import de.cotto.lndmanagej.service.PolicyService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.Set;
@@ -24,19 +24,19 @@ class LegacyControllerIT {
     @Autowired
     private WebTestClient webTestClient;
 
-    @MockBean
+    @MockitoBean
     @SuppressWarnings("unused")
     private ChannelIdResolver channelIdResolver;
 
-    @MockBean
+    @MockitoBean
     @SuppressWarnings("unused")
     private NodeService nodeService;
 
-    @MockBean
+    @MockitoBean
     @SuppressWarnings("unused")
     private PolicyService policyService;
 
-    @MockBean
+    @MockitoBean
     private ChannelService channelService;
 
     @Test

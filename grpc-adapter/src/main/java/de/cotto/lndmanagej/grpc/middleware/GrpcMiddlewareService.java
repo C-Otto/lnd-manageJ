@@ -62,7 +62,6 @@ public class GrpcMiddlewareService implements ObserverIsDoneListener {
         }
     }
 
-    @SuppressWarnings("PMD.UnnecessaryLocalBeforeReturn")
     private boolean isDisabledInConfiguration() {
         boolean isEnabled = configurationService.getBooleanValue(PickhardtPaymentsConfigurationSettings.ENABLED)
                 .orElse(false);

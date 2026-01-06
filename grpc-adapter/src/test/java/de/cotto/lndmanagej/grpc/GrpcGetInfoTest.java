@@ -19,8 +19,6 @@ class GrpcGetInfoTest {
     private static final String VERSION = "version";
     private static final String COMMIT_HASH = "commit";
     private static final String BLOCK_HASH = "block";
-    private static final String BITCOIN = "bitcoin";
-    private static final String LITECOIN = "litecoin";
     private static final String MAINNET = "mainnet";
     private static final String TESTNET = "testnet";
     private static final String REGTEST = "regtest";
@@ -57,7 +55,7 @@ class GrpcGetInfoTest {
                 .setBlockHeight(BLOCK_HEIGHT)
                 .setSyncedToChain(syncedToChain)
                 .setSyncedToGraph(syncedToGraph)
-                .addChains(Chain.newBuilder().setChain(BITCOIN).setNetwork(MAINNET).build())
+                .addChains(Chain.newBuilder().setNetwork(MAINNET).build())
                 .build();
     }
 
@@ -150,7 +148,7 @@ class GrpcGetInfoTest {
     @Test
     void getNetwork_testnet() {
         when(grpcService.getInfo()).thenReturn(Optional.of(GetInfoResponse.newBuilder()
-                .addChains(Chain.newBuilder().setChain(BITCOIN).setNetwork(TESTNET).build())
+                .addChains(Chain.newBuilder().setNetwork(TESTNET).build())
                 .build()));
         assertThat(grpcGetInfo.getNetwork()).contains(Network.TESTNET);
     }
@@ -158,7 +156,7 @@ class GrpcGetInfoTest {
     @Test
     void getNetwork_regtest() {
         when(grpcService.getInfo()).thenReturn(Optional.of(GetInfoResponse.newBuilder()
-                .addChains(Chain.newBuilder().setChain(BITCOIN).setNetwork(REGTEST).build())
+                .addChains(Chain.newBuilder().setNetwork(REGTEST).build())
                 .build()));
         assertThat(grpcGetInfo.getNetwork()).contains(Network.REGTEST);
     }
@@ -166,16 +164,8 @@ class GrpcGetInfoTest {
     @Test
     void getNetwork_testnet_and_mainnet() {
         when(grpcService.getInfo()).thenReturn(Optional.of(GetInfoResponse.newBuilder()
-                .addChains(Chain.newBuilder().setChain(BITCOIN).setNetwork(TESTNET).build())
-                .addChains(Chain.newBuilder().setChain(BITCOIN).setNetwork(MAINNET).build())
-                .build()));
-        assertThat(grpcGetInfo.getNetwork()).isEmpty();
-    }
-
-    @Test
-    void getNetwork_mainnet_in_litecoin() {
-        when(grpcService.getInfo()).thenReturn(Optional.of(GetInfoResponse.newBuilder()
-                .addChains(Chain.newBuilder().setChain(LITECOIN).setNetwork(MAINNET).build())
+                .addChains(Chain.newBuilder().setNetwork(TESTNET).build())
+                .addChains(Chain.newBuilder().setNetwork(MAINNET).build())
                 .build()));
         assertThat(grpcGetInfo.getNetwork()).isEmpty();
     }

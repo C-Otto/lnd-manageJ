@@ -21,7 +21,7 @@ import java.time.ZoneOffset;
                    columnList = "channelOutgoing,timestamp")
         }
 )
-class ForwardingEventJpaDto {
+public class ForwardingEventJpaDto {
     @Id
     private int eventIndex;
 
@@ -35,7 +35,7 @@ class ForwardingEventJpaDto {
         // for JPA
     }
 
-    public static ForwardingEventJpaDto createFromModel(ForwardingEvent forwardingEvent) {
+    static ForwardingEventJpaDto createFromModel(ForwardingEvent forwardingEvent) {
         ForwardingEventJpaDto jpaDto = new ForwardingEventJpaDto();
         jpaDto.eventIndex = forwardingEvent.index();
         jpaDto.amountIncoming = forwardingEvent.amountIn().milliSatoshis();
@@ -46,7 +46,7 @@ class ForwardingEventJpaDto {
         return jpaDto;
     }
 
-    public ForwardingEvent toModel() {
+    ForwardingEvent toModel() {
         long epochSecond = timestamp / 1_000;
         int milliseconds = (int) (timestamp % 1_000);
         int nanoseconds = milliseconds * 1_000_000;
@@ -60,27 +60,27 @@ class ForwardingEventJpaDto {
         );
     }
 
-    public int getIndex() {
+    int getIndex() {
         return eventIndex;
     }
 
-    public long getAmountIncoming() {
+    long getAmountIncoming() {
         return amountIncoming;
     }
 
-    public long getAmountOutgoing() {
+    long getAmountOutgoing() {
         return amountOutgoing;
     }
 
-    public long getChannelIncoming() {
+    long getChannelIncoming() {
         return channelIncoming;
     }
 
-    public long getChannelOutgoing() {
+    long getChannelOutgoing() {
         return channelOutgoing;
     }
 
-    public long getTimestamp() {
+    long getTimestamp() {
         return timestamp;
     }
 }

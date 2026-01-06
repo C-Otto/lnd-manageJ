@@ -157,7 +157,7 @@ class ConfigurationServiceTest {
                 .containsExactlyInAnyOrder(CHANNEL_ID, CHANNEL_ID_2, CHANNEL_ID_3, CHANNEL_ID_4);
     }
 
-    @Test()
+    @Test
     void getChannelIds_forInvalidWarningConfig_error() {
         when(channelIdParser.parseFromString("invalid_chan")).thenThrow(new IllegalArgumentException());
         WarningsConfigurationSettings config = CHANNEL_FLUCTUATION_IGNORE_CHANNEL;

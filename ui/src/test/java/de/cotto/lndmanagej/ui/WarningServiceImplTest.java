@@ -31,7 +31,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class WarningServiceImplTest {
 
-    public static final Set<String> THREE_NODE_WARNINGS = Set.of("No flow in the past 16 days",
+    static final Set<String> THREE_NODE_WARNINGS = Set.of("No flow in the past 16 days",
             "Node changed between online and offline 123 times in the past 7 days",
             "Node has been online 51% in the past 14 days"
     );

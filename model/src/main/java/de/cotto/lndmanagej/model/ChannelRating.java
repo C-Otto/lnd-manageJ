@@ -130,7 +130,6 @@ public final class ChannelRating implements Rating {
         return Objects.hash(channelId, value, averageLocalBalance, descriptions);
     }
 
-    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private ChannelRating withDescription(String description, Number value) {
         ChannelRating update = new ChannelRating(
                 channelId,

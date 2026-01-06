@@ -38,7 +38,10 @@ class NodeServiceTest {
 
     @Test
     void getNodeWithOnl_updates_alias_cache() {
-        when(grpcNodeInfo.getNodeWithOnlineStatus(PUBKEY)).thenReturn(NODE_WITHOUT_ALIAS).thenReturn(NODE).thenThrow();
+        when(grpcNodeInfo.getNodeWithOnlineStatus(PUBKEY))
+                .thenReturn(NODE_WITHOUT_ALIAS)
+                .thenReturn(NODE)
+                .thenThrow(IllegalStateException.class);
         assertThat(nodeService.getNode(PUBKEY)).isEqualTo(NODE_WITHOUT_ALIAS);
         String alias = nodeService.getAlias(PUBKEY);
         assertThat(alias).isEqualTo(NODE_WITHOUT_ALIAS.alias());

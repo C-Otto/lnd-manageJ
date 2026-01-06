@@ -6,9 +6,9 @@ import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.service.OnChainCostService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.Optional;
@@ -16,7 +16,7 @@ import java.util.Optional;
 import static de.cotto.lndmanagej.model.ChannelIdFixtures.CHANNEL_ID;
 import static de.cotto.lndmanagej.model.OnChainCostsFixtures.ON_CHAIN_COSTS;
 import static de.cotto.lndmanagej.model.PubkeyFixtures.PUBKEY;
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(OnChainCostsController.class)
@@ -28,20 +28,20 @@ class OnChainCostsControllerIT {
     @Autowired
     private WebTestClient webTestClient;
 
-    @MockBean
+    @MockitoBean
     @SuppressWarnings("unused")
     private ChannelIdResolver channelIdResolver;
 
-    @MockBean
+    @MockitoBean
     private OnChainCostService onChainCostService;
 
     @Test
     void on_chain_costs_for_peer() {
         when(onChainCostService.getOnChainCostsForPeer(PUBKEY)).thenReturn(ON_CHAIN_COSTS);
         webTestClient.get().uri(PEER_PREFIX + "/on-chain-costs").exchange().expectBody()
-                .jsonPath("$.openCostsSat").value(is("1000"))
-                .jsonPath("$.closeCostsSat").value(is("2000"))
-                .jsonPath("$.sweepCostsSat").value(is("3000"));
+                .jsonPath("$.openCostsSat").value(v -> assertThat(v).isEqualTo("1000"))
+                .jsonPath("$.closeCostsSat").value(v -> assertThat(v).isEqualTo("2000"))
+                .jsonPath("$.sweepCostsSat").value(v -> assertThat(v).isEqualTo("3000"));
     }
 
     @Test

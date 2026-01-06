@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Import(ObjectMapperConfiguration.class)
-@SuppressWarnings("PMD.ExcessiveImports")
 @RequestMapping("/api/channel/{channelId}")
 public class ChannelController {
     private final ChannelService channelService;

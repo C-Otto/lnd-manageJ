@@ -4,7 +4,7 @@ import de.cotto.lndmanagej.model.FailureCode;
 import de.cotto.lndmanagej.model.HexString;
 
 class NoopSendToRouteObserver implements SendToRouteObserver {
-    public NoopSendToRouteObserver() {
+    NoopSendToRouteObserver() {
         // default constructor
     }
 

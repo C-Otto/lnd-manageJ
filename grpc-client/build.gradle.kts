@@ -14,16 +14,15 @@ dependencies {
     api("io.grpc:grpc-protobuf")
     implementation("io.grpc:grpc-netty")
     implementation("commons-codec:commons-codec")
-    implementation("javax.annotation:javax.annotation-api")
 }
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:3.25.3"
+        artifact = "com.google.protobuf:protoc:3.25.9"
     }
     plugins {
         id("grpc") {
-            artifact = "io.grpc:protoc-gen-grpc-java:1.64.0"
+            artifact = "io.grpc:protoc-gen-grpc-java:1.81.0"
         }
     }
     generateProtoTasks {
