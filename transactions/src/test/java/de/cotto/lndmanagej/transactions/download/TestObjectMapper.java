@@ -1,12 +1,10 @@
 package de.cotto.lndmanagej.transactions.download;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
-public class TestObjectMapper extends ObjectMapper {
-    @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
+public class TestObjectMapper extends JsonMapper {
     public TestObjectMapper() {
-        super();
-        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        super(JsonMapper.builder().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false));
     }
 }

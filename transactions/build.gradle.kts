@@ -7,7 +7,7 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("io.github.resilience4j:resilience4j-spring-boot3")
-    implementation("com.fasterxml.jackson.core:jackson-databind")
+    implementation("org.springframework.boot:spring-boot-starter-jackson")
     implementation(project(":model"))
     implementation(project(":caching"))
     implementation(project(":grpc-adapter"))

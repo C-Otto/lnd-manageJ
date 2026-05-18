@@ -1,7 +1,7 @@
 package de.cotto.lndmanagej.transactions.download;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.json.JsonMapper;
 
 import static de.cotto.lndmanagej.model.ChannelPointFixtures.TRANSACTION_HASH;
 import static de.cotto.lndmanagej.transactions.model.TransactionFixtures.BLOCK_HEIGHT;
@@ -11,10 +11,10 @@ import static de.cotto.lndmanagej.transactions.model.TransactionFixtures.TRANSAC
 import static org.assertj.core.api.Assertions.assertThat;
 
 class BitapsTransactionDtoTest {
-    private final ObjectMapper objectMapper = new TestObjectMapper();
+    private final JsonMapper objectMapper = new TestObjectMapper();
 
     @Test
-    void deserialization() throws Exception {
+    void deserialization() {
         String json = """
                 {\
                   "data": {\

@@ -1,14 +1,12 @@
 package de.cotto.lndmanagej.transactions.download;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import de.cotto.lndmanagej.model.Coins;
 import de.cotto.lndmanagej.model.TransactionHash;
-
-import java.io.IOException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(using = BitapsTransactionDto.Deserializer.class)
 public class BitapsTransactionDto extends TransactionDto {
@@ -16,14 +14,14 @@ public class BitapsTransactionDto extends TransactionDto {
         super(hash, blockHeight, positionInBlock, fees);
     }
 
-    static class Deserializer extends JsonDeserializer<BitapsTransactionDto> {
+    static class Deserializer extends ValueDeserializer<BitapsTransactionDto> {
         @Override
         public BitapsTransactionDto deserialize(
                 JsonParser jsonParser,
-                DeserializationContext deserializationContext
-        ) throws IOException {
-            JsonNode transactionDetailsNode = jsonParser.getCodec().<JsonNode>readTree(jsonParser).get("data");
-            TransactionHash hash = TransactionHash.create(transactionDetailsNode.get("txId").textValue());
+                DeserializationContext ctxt
+        ) {
+            JsonNode transactionDetailsNode = jsonParser.objectReadContext().<JsonNode>readTree(jsonParser).get("data");
+            TransactionHash hash = TransactionHash.create(transactionDetailsNode.get("txId").asString());
             int blockHeight = transactionDetailsNode.get("blockHeight").asInt();
             Coins fees = Coins.ofSatoshis(transactionDetailsNode.get("fee").asLong());
             int positionInBlock = transactionDetailsNode.get("blockIndex").asInt();
